@@ -103,7 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityMetadataCollectionAllOf" /> class.
         /// </summary>
-        /// <param name="items">TBD (required).</param>
+        /// <param name="items">items (required).</param>
         public EntityMetadataCollectionAllOf(List<EntityMetadataItem> items = default(List<EntityMetadataItem>))
         {
             // to ensure "items" is required (not null)
@@ -115,9 +115,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// TBD
+        /// Gets or Sets Items
         /// </summary>
-        /// <value>TBD</value>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
         public List<EntityMetadataItem> Items { get; set; }
 

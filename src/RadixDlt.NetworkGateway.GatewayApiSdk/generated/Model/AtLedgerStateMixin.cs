@@ -90,52 +90,25 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Allows a client to request a response referencing an earlier (&#x60;at_*&#x60; properties) or later (&#x60;from_*&#x60; properties) ledger state.
+    /// AtLedgerStateMixin
     /// </summary>
-    [DataContract(Name = "PartialLedgerStateIdentifier")]
-    public partial class PartialLedgerStateIdentifier : IEquatable<PartialLedgerStateIdentifier>
+    [DataContract(Name = "AtLedgerStateMixin")]
+    public partial class AtLedgerStateMixin : IEquatable<AtLedgerStateMixin>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PartialLedgerStateIdentifier" /> class.
+        /// Initializes a new instance of the <see cref="AtLedgerStateMixin" /> class.
         /// </summary>
-        /// <param name="stateVersion">If the version is provided, the latest ledger state &lt;&#x3D; the given version is returned..</param>
-        /// <param name="timestamp">If a timestamp is provided, the latest ledger state &lt;&#x3D; the given timestamp is returned..</param>
-        /// <param name="epoch">If an epoch is provided, the ledger state at the given epoch &lt;&#x3D; the given round (else round 0) is returned..</param>
-        /// <param name="round">round.</param>
-        public PartialLedgerStateIdentifier(long? stateVersion = default(long?), DateTime? timestamp = default(DateTime?), long? epoch = default(long?), long? round = default(long?))
+        /// <param name="atLedgerState">atLedgerState.</param>
+        public AtLedgerStateMixin(LedgerStateSelector atLedgerState = default(LedgerStateSelector))
         {
-            this.StateVersion = stateVersion;
-            this.Timestamp = timestamp;
-            this.Epoch = epoch;
-            this.Round = round;
+            this.AtLedgerState = atLedgerState;
         }
 
         /// <summary>
-        /// If the version is provided, the latest ledger state &lt;&#x3D; the given version is returned.
+        /// Gets or Sets AtLedgerState
         /// </summary>
-        /// <value>If the version is provided, the latest ledger state &lt;&#x3D; the given version is returned.</value>
-        [DataMember(Name = "state_version", EmitDefaultValue = true)]
-        public long? StateVersion { get; set; }
-
-        /// <summary>
-        /// If a timestamp is provided, the latest ledger state &lt;&#x3D; the given timestamp is returned.
-        /// </summary>
-        /// <value>If a timestamp is provided, the latest ledger state &lt;&#x3D; the given timestamp is returned.</value>
-        [DataMember(Name = "timestamp", EmitDefaultValue = true)]
-        public DateTime? Timestamp { get; set; }
-
-        /// <summary>
-        /// If an epoch is provided, the ledger state at the given epoch &lt;&#x3D; the given round (else round 0) is returned.
-        /// </summary>
-        /// <value>If an epoch is provided, the ledger state at the given epoch &lt;&#x3D; the given round (else round 0) is returned.</value>
-        [DataMember(Name = "epoch", EmitDefaultValue = true)]
-        public long? Epoch { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Round
-        /// </summary>
-        [DataMember(Name = "round", EmitDefaultValue = true)]
-        public long? Round { get; set; }
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,11 +117,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PartialLedgerStateIdentifier {\n");
-            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
-            sb.Append("  Timestamp: ").Append(Timestamp).Append("\n");
-            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
-            sb.Append("  Round: ").Append(Round).Append("\n");
+            sb.Append("class AtLedgerStateMixin {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,15 +139,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PartialLedgerStateIdentifier);
+            return this.Equals(input as AtLedgerStateMixin);
         }
 
         /// <summary>
-        /// Returns true if PartialLedgerStateIdentifier instances are equal
+        /// Returns true if AtLedgerStateMixin instances are equal
         /// </summary>
-        /// <param name="input">Instance of PartialLedgerStateIdentifier to be compared</param>
+        /// <param name="input">Instance of AtLedgerStateMixin to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PartialLedgerStateIdentifier input)
+        public bool Equals(AtLedgerStateMixin input)
         {
             if (input == null)
             {
@@ -185,24 +155,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.StateVersion == input.StateVersion ||
-                    (this.StateVersion != null &&
-                    this.StateVersion.Equals(input.StateVersion))
-                ) && 
-                (
-                    this.Timestamp == input.Timestamp ||
-                    (this.Timestamp != null &&
-                    this.Timestamp.Equals(input.Timestamp))
-                ) && 
-                (
-                    this.Epoch == input.Epoch ||
-                    (this.Epoch != null &&
-                    this.Epoch.Equals(input.Epoch))
-                ) && 
-                (
-                    this.Round == input.Round ||
-                    (this.Round != null &&
-                    this.Round.Equals(input.Round))
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
                 );
         }
 
@@ -215,21 +170,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.StateVersion != null)
+                if (this.AtLedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
-                }
-                if (this.Timestamp != null)
-                {
-                    hashCode = (hashCode * 59) + this.Timestamp.GetHashCode();
-                }
-                if (this.Epoch != null)
-                {
-                    hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
-                }
-                if (this.Round != null)
-                {
-                    hashCode = (hashCode * 59) + this.Round.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
                 }
                 return hashCode;
             }

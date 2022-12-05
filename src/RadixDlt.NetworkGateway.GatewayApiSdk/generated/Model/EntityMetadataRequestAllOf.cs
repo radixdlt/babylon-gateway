@@ -90,33 +90,54 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionStatusRequest
+    /// EntityMetadataRequestAllOf
     /// </summary>
-    [DataContract(Name = "TransactionStatusRequest")]
-    public partial class TransactionStatusRequest : IEquatable<TransactionStatusRequest>
+    [DataContract(Name = "EntityMetadataRequest_allOf")]
+    public partial class EntityMetadataRequestAllOf : IEquatable<EntityMetadataRequestAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionStatusRequest" /> class.
+        /// Initializes a new instance of the <see cref="EntityMetadataRequestAllOf" /> class.
         /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="intentHashHex">intentHashHex.</param>
-        public TransactionStatusRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string intentHashHex = default(string))
+        [JsonConstructorAttribute]
+        protected EntityMetadataRequestAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityMetadataRequestAllOf" /> class.
+        /// </summary>
+        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
+        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
+        /// <param name="limit">The page size requested..</param>
+        public EntityMetadataRequestAllOf(string address = default(string), string cursor = default(string), int? limit = default(int?))
         {
-            this.AtLedgerState = atLedgerState;
-            this.IntentHashHex = intentHashHex;
+            // to ensure "address" is required (not null)
+            if (address == null)
+            {
+                throw new ArgumentNullException("address is a required property for EntityMetadataRequestAllOf and cannot be null");
+            }
+            this.Address = address;
+            this.Cursor = cursor;
+            this.Limit = limit;
         }
 
         /// <summary>
-        /// Gets or Sets AtLedgerState
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
         /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
-        /// Gets or Sets IntentHashHex
+        /// This cursor allows forward pagination, by providing the cursor from the previous request.
         /// </summary>
-        [DataMember(Name = "intent_hash_hex", EmitDefaultValue = true)]
-        public string IntentHashHex { get; set; }
+        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
+        [DataMember(Name = "cursor", EmitDefaultValue = true)]
+        public string Cursor { get; set; }
+
+        /// <summary>
+        /// The page size requested.
+        /// </summary>
+        /// <value>The page size requested.</value>
+        [DataMember(Name = "limit", EmitDefaultValue = true)]
+        public int? Limit { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -125,9 +146,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionStatusRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
+            sb.Append("class EntityMetadataRequestAllOf {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
+            sb.Append("  Limit: ").Append(Limit).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -148,15 +170,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionStatusRequest);
+            return this.Equals(input as EntityMetadataRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if TransactionStatusRequest instances are equal
+        /// Returns true if EntityMetadataRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionStatusRequest to be compared</param>
+        /// <param name="input">Instance of EntityMetadataRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionStatusRequest input)
+        public bool Equals(EntityMetadataRequestAllOf input)
         {
             if (input == null)
             {
@@ -164,14 +186,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.IntentHashHex == input.IntentHashHex ||
-                    (this.IntentHashHex != null &&
-                    this.IntentHashHex.Equals(input.IntentHashHex))
+                    this.Cursor == input.Cursor ||
+                    (this.Cursor != null &&
+                    this.Cursor.Equals(input.Cursor))
+                ) && 
+                (
+                    this.Limit == input.Limit ||
+                    (this.Limit != null &&
+                    this.Limit.Equals(input.Limit))
                 );
         }
 
@@ -184,13 +211,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtLedgerState != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.IntentHashHex != null)
+                if (this.Cursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
+                }
+                if (this.Limit != null)
+                {
+                    hashCode = (hashCode * 59) + this.Limit.GetHashCode();
                 }
                 return hashCode;
             }

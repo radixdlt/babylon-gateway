@@ -90,36 +90,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityNotFoundErrorAllOf
+    /// EntityOverviewRequestAllOf
     /// </summary>
-    [DataContract(Name = "EntityNotFoundError_allOf")]
-    public partial class EntityNotFoundErrorAllOf : IEquatable<EntityNotFoundErrorAllOf>
+    [DataContract(Name = "EntityOverviewRequest_allOf")]
+    public partial class EntityOverviewRequestAllOf : IEquatable<EntityOverviewRequestAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityNotFoundErrorAllOf" /> class.
+        /// Initializes a new instance of the <see cref="EntityOverviewRequestAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityNotFoundErrorAllOf() { }
+        protected EntityOverviewRequestAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityNotFoundErrorAllOf" /> class.
+        /// Initializes a new instance of the <see cref="EntityOverviewRequestAllOf" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        public EntityNotFoundErrorAllOf(string address = default(string))
+        /// <param name="addresses">addresses (required).</param>
+        public EntityOverviewRequestAllOf(List<string> addresses = default(List<string>))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "addresses" is required (not null)
+            if (addresses == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityNotFoundErrorAllOf and cannot be null");
+                throw new ArgumentNullException("addresses is a required property for EntityOverviewRequestAllOf and cannot be null");
             }
-            this.Address = address;
+            this.Addresses = addresses;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// Gets or Sets Addresses
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        [DataMember(Name = "addresses", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> Addresses { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityNotFoundErrorAllOf {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("class EntityOverviewRequestAllOf {\n");
+            sb.Append("  Addresses: ").Append(Addresses).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityNotFoundErrorAllOf);
+            return this.Equals(input as EntityOverviewRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityNotFoundErrorAllOf instances are equal
+        /// Returns true if EntityOverviewRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityNotFoundErrorAllOf to be compared</param>
+        /// <param name="input">Instance of EntityOverviewRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityNotFoundErrorAllOf input)
+        public bool Equals(EntityOverviewRequestAllOf input)
         {
             if (input == null)
             {
@@ -166,9 +165,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.Addresses == input.Addresses ||
+                    this.Addresses != null &&
+                    input.Addresses != null &&
+                    this.Addresses.SequenceEqual(input.Addresses)
                 );
         }
 
@@ -181,9 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                if (this.Addresses != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Addresses.GetHashCode();
                 }
                 return hashCode;
             }

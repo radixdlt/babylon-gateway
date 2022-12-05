@@ -87,7 +87,7 @@ internal class DefaultEntityHandler : IEntityHandler
     public async Task<GatewayModel.EntityResourcesResponse?> Resources(GatewayModel.EntityResourcesRequest request, CancellationToken token = default)
     {
         var address = RadixAddressCodec.Decode(request.Address);
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
         return await _entityStateQuerier.EntityResourcesSnapshot(address, ledgerState, token);
     }
@@ -95,7 +95,7 @@ internal class DefaultEntityHandler : IEntityHandler
     public async Task<GatewayModel.EntityDetailsResponse?> Details(GatewayModel.EntityDetailsRequest request, CancellationToken token = default)
     {
         var address = RadixAddressCodec.Decode(request.Address);
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
         return await _entityStateQuerier.EntityDetailsSnapshot(address, ledgerState, token);
     }
@@ -103,7 +103,7 @@ internal class DefaultEntityHandler : IEntityHandler
     public async Task<GatewayModel.EntityOverviewResponse> Overview(GatewayModel.EntityOverviewRequest request, CancellationToken token = default)
     {
         var addresses = request.Addresses.Select(RadixAddressCodec.Decode).ToArray();
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
         return await _entityStateQuerier.EntityOverview(addresses, ledgerState, token);
     }
@@ -111,7 +111,7 @@ internal class DefaultEntityHandler : IEntityHandler
     public async Task<GatewayModel.EntityMetadataResponse?> Metadata(GatewayModel.EntityMetadataRequest request, CancellationToken token = default)
     {
         var address = RadixAddressCodec.Decode(request.Address);
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: address,
@@ -125,7 +125,7 @@ internal class DefaultEntityHandler : IEntityHandler
     public async Task<GatewayModel.EntityFungiblesResponse?> Fungibles(GatewayModel.EntityFungiblesRequest request, CancellationToken token = default)
     {
         var address = RadixAddressCodec.Decode(request.Address);
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: address,
@@ -139,7 +139,7 @@ internal class DefaultEntityHandler : IEntityHandler
     public async Task<GatewayModel.EntityNonFungiblesResponse?> NonFungibles(GatewayModel.EntityNonFungiblesRequest request, CancellationToken token = default)
     {
         var address = RadixAddressCodec.Decode(request.Address);
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: address,
@@ -154,7 +154,7 @@ internal class DefaultEntityHandler : IEntityHandler
     {
         var entityAddress = RadixAddressCodec.Decode(request.Address);
         var resourceAddress = RadixAddressCodec.Decode(request.ResourceAddress);
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: entityAddress,

@@ -138,7 +138,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         );
     }
 
-    public async Task<GatewayModel.LedgerState> GetValidLedgerStateForReadRequest(GatewayModel.PartialLedgerStateIdentifier? atLedgerStateIdentifier, CancellationToken token = default)
+    public async Task<GatewayModel.LedgerState> GetValidLedgerStateForReadRequest(GatewayModel.LedgerStateSelector? atLedgerStateIdentifier, CancellationToken token = default)
     {
         var ledgerStateReport = await GetLedgerState(atLedgerStateIdentifier, token);
         var ledgerState = ledgerStateReport.LedgerState;
@@ -175,7 +175,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    public async Task<GatewayModel.LedgerState?> GetValidLedgerStateForReadForwardRequest(GatewayModel.PartialLedgerStateIdentifier? fromLedgerStateIdentifier, CancellationToken token = default)
+    public async Task<GatewayModel.LedgerState?> GetValidLedgerStateForReadForwardRequest(GatewayModel.LedgerStateSelector? fromLedgerStateIdentifier, CancellationToken token = default)
     {
         LedgerStateReport? ledgerStateReport = null;
 
@@ -195,7 +195,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerStateReport?.LedgerState;
     }
 
-    public async Task<GatewayModel.LedgerState> GetValidLedgerStateForConstructionRequest(GatewayModel.PartialLedgerStateIdentifier? atLedgerStateIdentifier, CancellationToken token = default)
+    public async Task<GatewayModel.LedgerState> GetValidLedgerStateForConstructionRequest(GatewayModel.LedgerStateSelector? atLedgerStateIdentifier, CancellationToken token = default)
     {
         var ledgerStateReport = await GetLedgerState(atLedgerStateIdentifier, token);
         var ledgerState = ledgerStateReport.LedgerState;
@@ -255,7 +255,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
     private record LedgerStateReport(GatewayModel.LedgerState LedgerState, DateTime RoundTimestamp, bool TopOfLedgerResolved);
 
-    private async Task<LedgerStateReport> GetLedgerState(GatewayModel.PartialLedgerStateIdentifier? at = null, CancellationToken token = default)
+    private async Task<LedgerStateReport> GetLedgerState(GatewayModel.LedgerStateSelector? at = null, CancellationToken token = default)
     {
         LedgerStateReport result;
 

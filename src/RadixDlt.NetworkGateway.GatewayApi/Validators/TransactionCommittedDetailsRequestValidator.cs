@@ -71,13 +71,13 @@ internal class TransactionCommittedDetailsRequestValidator : AbstractValidator<G
 {
     public TransactionCommittedDetailsRequestValidator(
         TransactionCommittedDetailsRequestIdentifierValidator transactionCommittedDetailsRequestIdentifierValidator,
-        PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
+        LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
         RuleFor(x => x.TransactionIdentifier)
             .NotNull()
             .SetValidator(transactionCommittedDetailsRequestIdentifierValidator);
 
-        RuleFor(x => x.AtStateIdentifier)
-            .SetValidator(partialLedgerStateIdentifierValidator);
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
     }
 }

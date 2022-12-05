@@ -90,33 +90,36 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionStatusRequest
+    /// EntityResourcesRequestAllOf
     /// </summary>
-    [DataContract(Name = "TransactionStatusRequest")]
-    public partial class TransactionStatusRequest : IEquatable<TransactionStatusRequest>
+    [DataContract(Name = "EntityResourcesRequest_allOf")]
+    public partial class EntityResourcesRequestAllOf : IEquatable<EntityResourcesRequestAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionStatusRequest" /> class.
+        /// Initializes a new instance of the <see cref="EntityResourcesRequestAllOf" /> class.
         /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="intentHashHex">intentHashHex.</param>
-        public TransactionStatusRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string intentHashHex = default(string))
+        [JsonConstructorAttribute]
+        protected EntityResourcesRequestAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityResourcesRequestAllOf" /> class.
+        /// </summary>
+        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
+        public EntityResourcesRequestAllOf(string address = default(string))
         {
-            this.AtLedgerState = atLedgerState;
-            this.IntentHashHex = intentHashHex;
+            // to ensure "address" is required (not null)
+            if (address == null)
+            {
+                throw new ArgumentNullException("address is a required property for EntityResourcesRequestAllOf and cannot be null");
+            }
+            this.Address = address;
         }
 
         /// <summary>
-        /// Gets or Sets AtLedgerState
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
         /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
-
-        /// <summary>
-        /// Gets or Sets IntentHashHex
-        /// </summary>
-        [DataMember(Name = "intent_hash_hex", EmitDefaultValue = true)]
-        public string IntentHashHex { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -125,9 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionStatusRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
+            sb.Append("class EntityResourcesRequestAllOf {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -148,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionStatusRequest);
+            return this.Equals(input as EntityResourcesRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if TransactionStatusRequest instances are equal
+        /// Returns true if EntityResourcesRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionStatusRequest to be compared</param>
+        /// <param name="input">Instance of EntityResourcesRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionStatusRequest input)
+        public bool Equals(EntityResourcesRequestAllOf input)
         {
             if (input == null)
             {
@@ -164,14 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
-                ) && 
-                (
-                    this.IntentHashHex == input.IntentHashHex ||
-                    (this.IntentHashHex != null &&
-                    this.IntentHashHex.Equals(input.IntentHashHex))
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
                 );
         }
 
@@ -184,13 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtLedgerState != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
-                }
-                if (this.IntentHashHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
                 return hashCode;
             }

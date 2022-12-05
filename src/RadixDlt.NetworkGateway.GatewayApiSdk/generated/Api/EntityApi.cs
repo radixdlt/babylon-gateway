@@ -94,9 +94,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <summary>
         /// Returns detailed information for a given entity.
         /// </summary>
-        /// <remarks>
-        /// TBD 
-        /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
         /// <returns>EntityDetailsResponse</returns>
@@ -106,7 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns detailed information for a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
@@ -115,9 +112,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <summary>
         /// Iterates through all fungible resources associated with a given entity.
         /// </summary>
-        /// <remarks>
-        /// TBD 
-        /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityFungiblesRequest"></param>
         /// <returns>EntityFungiblesResponse</returns>
@@ -127,7 +121,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Iterates through all fungible resources associated with a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityFungiblesRequest"></param>
@@ -136,9 +130,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <summary>
         /// Iterates through all metadata associated with a given entity.
         /// </summary>
-        /// <remarks>
-        /// TBD 
-        /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityMetadataRequest"></param>
         /// <returns>EntityMetadataResponse</returns>
@@ -148,7 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Iterates through all metadata associated with a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityMetadataRequest"></param>
@@ -157,9 +148,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <summary>
         /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity.
         /// </summary>
-        /// <remarks>
-        /// TBD 
-        /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungibleIdsRequest"></param>
         /// <returns>EntityNonFungibleIdsResponse</returns>
@@ -169,7 +157,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungibleIdsRequest"></param>
@@ -178,9 +166,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <summary>
         /// Iterates through all non-fungible resources associated with a given entity.
         /// </summary>
-        /// <remarks>
-        /// TBD 
-        /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungiblesRequest"></param>
         /// <returns>EntityNonFungiblesResponse</returns>
@@ -190,7 +175,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Iterates through all non-fungible resources associated with a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungiblesRequest"></param>
@@ -199,9 +184,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <summary>
         /// Returns incomplete collection of basic information for a given collection of entities.
         /// </summary>
-        /// <remarks>
-        /// TBD 
-        /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityOverviewRequest"></param>
         /// <returns>EntityOverviewResponse</returns>
@@ -211,7 +193,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns incomplete collection of basic information for a given collection of entities.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityOverviewRequest"></param>
@@ -220,9 +202,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <summary>
         /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity.
         /// </summary>
-        /// <remarks>
-        /// TBD 
-        /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>
         /// <returns>EntityResourcesResponse</returns>
@@ -232,7 +211,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>
@@ -251,7 +230,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns detailed information for a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
@@ -263,7 +242,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns detailed information for a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
@@ -274,7 +253,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Iterates through all fungible resources associated with a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityFungiblesRequest"></param>
@@ -286,7 +265,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Iterates through all fungible resources associated with a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityFungiblesRequest"></param>
@@ -297,7 +276,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Iterates through all metadata associated with a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityMetadataRequest"></param>
@@ -309,7 +288,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Iterates through all metadata associated with a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityMetadataRequest"></param>
@@ -320,7 +299,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungibleIdsRequest"></param>
@@ -332,7 +311,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungibleIdsRequest"></param>
@@ -343,7 +322,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Iterates through all non-fungible resources associated with a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungiblesRequest"></param>
@@ -355,7 +334,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Iterates through all non-fungible resources associated with a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungiblesRequest"></param>
@@ -366,7 +345,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns incomplete collection of basic information for a given collection of entities.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityOverviewRequest"></param>
@@ -378,7 +357,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns incomplete collection of basic information for a given collection of entities.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityOverviewRequest"></param>
@@ -389,7 +368,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>
@@ -401,7 +380,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>
@@ -622,7 +601,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns detailed information for a given entity. TBD 
+        /// Returns detailed information for a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
@@ -634,7 +613,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns detailed information for a given entity. TBD 
+        /// Returns detailed information for a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
@@ -678,7 +657,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns detailed information for a given entity. TBD 
+        /// Returns detailed information for a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
@@ -691,7 +670,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns detailed information for a given entity. TBD 
+        /// Returns detailed information for a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
@@ -739,7 +718,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all fungible resources associated with a given entity. TBD 
+        /// Iterates through all fungible resources associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityFungiblesRequest"></param>
@@ -751,7 +730,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all fungible resources associated with a given entity. TBD 
+        /// Iterates through all fungible resources associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityFungiblesRequest"></param>
@@ -795,7 +774,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all fungible resources associated with a given entity. TBD 
+        /// Iterates through all fungible resources associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityFungiblesRequest"></param>
@@ -808,7 +787,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all fungible resources associated with a given entity. TBD 
+        /// Iterates through all fungible resources associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityFungiblesRequest"></param>
@@ -856,7 +835,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all metadata associated with a given entity. TBD 
+        /// Iterates through all metadata associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityMetadataRequest"></param>
@@ -868,7 +847,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all metadata associated with a given entity. TBD 
+        /// Iterates through all metadata associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityMetadataRequest"></param>
@@ -912,7 +891,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all metadata associated with a given entity. TBD 
+        /// Iterates through all metadata associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityMetadataRequest"></param>
@@ -925,7 +904,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all metadata associated with a given entity. TBD 
+        /// Iterates through all metadata associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityMetadataRequest"></param>
@@ -973,7 +952,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity. TBD 
+        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungibleIdsRequest"></param>
@@ -985,7 +964,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity. TBD 
+        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungibleIdsRequest"></param>
@@ -1029,7 +1008,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity. TBD 
+        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungibleIdsRequest"></param>
@@ -1042,7 +1021,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity. TBD 
+        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungibleIdsRequest"></param>
@@ -1090,7 +1069,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all non-fungible resources associated with a given entity. TBD 
+        /// Iterates through all non-fungible resources associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungiblesRequest"></param>
@@ -1102,7 +1081,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all non-fungible resources associated with a given entity. TBD 
+        /// Iterates through all non-fungible resources associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungiblesRequest"></param>
@@ -1146,7 +1125,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all non-fungible resources associated with a given entity. TBD 
+        /// Iterates through all non-fungible resources associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungiblesRequest"></param>
@@ -1159,7 +1138,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all non-fungible resources associated with a given entity. TBD 
+        /// Iterates through all non-fungible resources associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityNonFungiblesRequest"></param>
@@ -1207,7 +1186,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns incomplete collection of basic information for a given collection of entities. TBD 
+        /// Returns incomplete collection of basic information for a given collection of entities. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityOverviewRequest"></param>
@@ -1219,7 +1198,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns incomplete collection of basic information for a given collection of entities. TBD 
+        /// Returns incomplete collection of basic information for a given collection of entities. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityOverviewRequest"></param>
@@ -1263,7 +1242,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns incomplete collection of basic information for a given collection of entities. TBD 
+        /// Returns incomplete collection of basic information for a given collection of entities. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityOverviewRequest"></param>
@@ -1276,7 +1255,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns incomplete collection of basic information for a given collection of entities. TBD 
+        /// Returns incomplete collection of basic information for a given collection of entities. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityOverviewRequest"></param>
@@ -1324,7 +1303,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity. TBD 
+        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>
@@ -1336,7 +1315,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity. TBD 
+        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>
@@ -1380,7 +1359,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity. TBD 
+        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>
@@ -1393,7 +1372,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity. TBD 
+        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>

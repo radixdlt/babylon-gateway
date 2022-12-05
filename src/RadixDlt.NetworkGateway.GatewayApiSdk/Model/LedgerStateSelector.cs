@@ -67,7 +67,7 @@ using System.Runtime.Serialization;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public partial class PartialLedgerStateIdentifier
+public partial class LedgerStateSelector
 {
     [IgnoreDataMember]
     [MemberNotNullWhen(true, nameof(StateVersion))]

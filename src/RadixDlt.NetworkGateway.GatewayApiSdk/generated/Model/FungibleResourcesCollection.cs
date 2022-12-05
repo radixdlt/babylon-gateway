@@ -103,9 +103,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="FungibleResourcesCollection" /> class.
         /// </summary>
-        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?).</param>
-        /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
-        /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        /// <param name="totalCount">totalCount.</param>
+        /// <param name="previousCursor">previousCursor.</param>
+        /// <param name="nextCursor">nextCursor.</param>
         /// <param name="items">items (required).</param>
         public FungibleResourcesCollection(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<FungibleResourcesCollectionItem> items = default(List<FungibleResourcesCollectionItem>))
         {
@@ -121,23 +121,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
+        /// Gets or Sets TotalCount
         /// </summary>
-        /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
         [DataMember(Name = "total_count", EmitDefaultValue = true)]
         public long? TotalCount { get; set; }
 
         /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
+        /// Gets or Sets PreviousCursor
         /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
         [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
         public string PreviousCursor { get; set; }
 
         /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
+        /// Gets or Sets NextCursor
         /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
         [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
         public string NextCursor { get; set; }
 

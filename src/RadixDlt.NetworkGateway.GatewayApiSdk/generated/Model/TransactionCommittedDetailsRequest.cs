@@ -103,9 +103,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionCommittedDetailsRequest" /> class.
         /// </summary>
+        /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="transactionIdentifier">transactionIdentifier (required).</param>
-        /// <param name="atStateIdentifier">atStateIdentifier.</param>
-        public TransactionCommittedDetailsRequest(TransactionCommittedDetailsRequestIdentifier transactionIdentifier = default(TransactionCommittedDetailsRequestIdentifier), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
+        public TransactionCommittedDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), TransactionCommittedDetailsRequestIdentifier transactionIdentifier = default(TransactionCommittedDetailsRequestIdentifier))
         {
             // to ensure "transactionIdentifier" is required (not null)
             if (transactionIdentifier == null)
@@ -113,20 +113,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("transactionIdentifier is a required property for TransactionCommittedDetailsRequest and cannot be null");
             }
             this.TransactionIdentifier = transactionIdentifier;
-            this.AtStateIdentifier = atStateIdentifier;
+            this.AtLedgerState = atLedgerState;
         }
+
+        /// <summary>
+        /// Gets or Sets AtLedgerState
+        /// </summary>
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
         /// Gets or Sets TransactionIdentifier
         /// </summary>
         [DataMember(Name = "transaction_identifier", IsRequired = true, EmitDefaultValue = true)]
         public TransactionCommittedDetailsRequestIdentifier TransactionIdentifier { get; set; }
-
-        /// <summary>
-        /// Gets or Sets AtStateIdentifier
-        /// </summary>
-        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
-        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -136,8 +136,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionCommittedDetailsRequest {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  TransactionIdentifier: ").Append(TransactionIdentifier).Append("\n");
-            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,14 +174,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
+                (
                     this.TransactionIdentifier == input.TransactionIdentifier ||
                     (this.TransactionIdentifier != null &&
                     this.TransactionIdentifier.Equals(input.TransactionIdentifier))
-                ) && 
-                (
-                    this.AtStateIdentifier == input.AtStateIdentifier ||
-                    (this.AtStateIdentifier != null &&
-                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
                 );
         }
 
@@ -194,13 +194,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
                 if (this.TransactionIdentifier != null)
                 {
                     hashCode = (hashCode * 59) + this.TransactionIdentifier.GetHashCode();
-                }
-                if (this.AtStateIdentifier != null)
-                {
-                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
                 }
                 return hashCode;
             }

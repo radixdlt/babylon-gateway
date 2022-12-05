@@ -63,20 +63,19 @@
  */
 
 using FluentValidation;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-
 internal class EntityResourcesRequestValidator : AbstractValidator<GatewayModel.EntityResourcesRequest>
 {
-    public EntityResourcesRequestValidator(PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
+    public EntityResourcesRequestValidator(LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
         RuleFor(x => x.Address)
             .NotEmpty()
             .RadixAddress();
 
-        RuleFor(x => x.AtStateIdentifier)
-            .SetValidator(partialLedgerStateIdentifierValidator);
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
     }
 }

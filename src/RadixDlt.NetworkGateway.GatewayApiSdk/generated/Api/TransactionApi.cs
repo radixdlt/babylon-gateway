@@ -113,20 +113,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of TransactionCommittedDetailsResponse</returns>
         ApiResponse<TransactionCommittedDetailsResponse> TransactionCommittedDetailsWithHttpInfo(TransactionCommittedDetailsRequest transactionCommittedDetailsRequest);
         /// <summary>
-        /// TBD
+        /// 
         /// </summary>
-        /// <remarks>
-        /// TBD 
-        /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>TransactionConstructionResponse</returns>
         TransactionConstructionResponse TransactionConstruction();
 
         /// <summary>
-        /// TBD
+        /// 
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>ApiResponse of TransactionConstructionResponse</returns>
@@ -156,7 +153,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Recent Transactions
         /// </summary>
         /// <remarks>
-        /// Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
+        /// Returns user-initiated transactions which have been successfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionRecentRequest"></param>
@@ -167,7 +164,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Recent Transactions
         /// </summary>
         /// <remarks>
-        /// Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
+        /// Returns user-initiated transactions which have been successfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionRecentRequest"></param>
@@ -176,9 +173,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <summary>
         /// Transaction Status
         /// </summary>
-        /// <remarks>
-        /// TBD 
-        /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>
         /// <returns>TransactionStatusResponse</returns>
@@ -188,7 +182,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Transaction Status
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>
@@ -248,10 +242,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>Task of ApiResponse (TransactionCommittedDetailsResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<TransactionCommittedDetailsResponse>> TransactionCommittedDetailsWithHttpInfoAsync(TransactionCommittedDetailsRequest transactionCommittedDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
-        /// TBD
+        /// 
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
@@ -259,10 +253,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         System.Threading.Tasks.Task<TransactionConstructionResponse> TransactionConstructionAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// TBD
+        /// 
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
@@ -295,7 +289,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Recent Transactions
         /// </summary>
         /// <remarks>
-        /// Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
+        /// Returns user-initiated transactions which have been successfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionRecentRequest"></param>
@@ -307,7 +301,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Recent Transactions
         /// </summary>
         /// <remarks>
-        /// Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
+        /// Returns user-initiated transactions which have been successfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionRecentRequest"></param>
@@ -318,7 +312,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Transaction Status
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>
@@ -330,7 +324,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Transaction Status
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>
@@ -691,7 +685,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// TBD TBD 
+        ///  
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>TransactionConstructionResponse</returns>
@@ -702,7 +696,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// TBD TBD 
+        ///  
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>ApiResponse of TransactionConstructionResponse</returns>
@@ -739,7 +733,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// TBD TBD 
+        ///  
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
@@ -751,7 +745,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// TBD TBD 
+        ///  
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
@@ -909,7 +903,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Recent Transactions Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
+        /// Get Recent Transactions Returns user-initiated transactions which have been successfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionRecentRequest"></param>
@@ -921,7 +915,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Recent Transactions Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
+        /// Get Recent Transactions Returns user-initiated transactions which have been successfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionRecentRequest"></param>
@@ -965,7 +959,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Recent Transactions Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
+        /// Get Recent Transactions Returns user-initiated transactions which have been successfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionRecentRequest"></param>
@@ -978,7 +972,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Recent Transactions Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
+        /// Get Recent Transactions Returns user-initiated transactions which have been successfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionRecentRequest"></param>
@@ -1026,7 +1020,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Transaction Status TBD 
+        /// Transaction Status 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>
@@ -1038,7 +1032,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Transaction Status TBD 
+        /// Transaction Status 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>
@@ -1082,7 +1076,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Transaction Status TBD 
+        /// Transaction Status 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>
@@ -1095,7 +1089,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Transaction Status TBD 
+        /// Transaction Status 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>

@@ -65,22 +65,20 @@
 using FluentValidation;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-
 internal class EntityMetadataRequestValidator : AbstractValidator<GatewayModel.EntityMetadataRequest>
 {
-    public EntityMetadataRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
+    public EntityMetadataRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
         RuleFor(x => x.Address)
             .NotEmpty()
             .RadixAddress();
 
-        RuleFor(x => x.AtStateIdentifier)
-            .SetValidator(partialLedgerStateIdentifierValidator);
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
 
         RuleFor(x => x.Cursor);
 

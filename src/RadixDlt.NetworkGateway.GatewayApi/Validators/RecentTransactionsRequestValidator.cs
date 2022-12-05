@@ -71,13 +71,13 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class RecentTransactionsRequestValidator : AbstractValidator<GatewayModel.TransactionRecentRequest>
 {
-    public RecentTransactionsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
+    public RecentTransactionsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
-        RuleFor(x => x.AtStateIdentifier)
-            .SetValidator(partialLedgerStateIdentifierValidator);
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
 
-        RuleFor(x => x.FromStateIdentifier)
-            .SetValidator(partialLedgerStateIdentifierValidator);
+        RuleFor(x => x.FromLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
 
         RuleFor(x => x.Cursor);
 

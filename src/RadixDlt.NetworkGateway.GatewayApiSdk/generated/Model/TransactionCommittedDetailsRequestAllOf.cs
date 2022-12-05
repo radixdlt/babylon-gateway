@@ -90,33 +90,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionStatusRequest
+    /// TransactionCommittedDetailsRequestAllOf
     /// </summary>
-    [DataContract(Name = "TransactionStatusRequest")]
-    public partial class TransactionStatusRequest : IEquatable<TransactionStatusRequest>
+    [DataContract(Name = "TransactionCommittedDetailsRequest_allOf")]
+    public partial class TransactionCommittedDetailsRequestAllOf : IEquatable<TransactionCommittedDetailsRequestAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionStatusRequest" /> class.
+        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsRequestAllOf" /> class.
         /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="intentHashHex">intentHashHex.</param>
-        public TransactionStatusRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string intentHashHex = default(string))
+        [JsonConstructorAttribute]
+        protected TransactionCommittedDetailsRequestAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsRequestAllOf" /> class.
+        /// </summary>
+        /// <param name="transactionIdentifier">transactionIdentifier (required).</param>
+        public TransactionCommittedDetailsRequestAllOf(TransactionCommittedDetailsRequestIdentifier transactionIdentifier = default(TransactionCommittedDetailsRequestIdentifier))
         {
-            this.AtLedgerState = atLedgerState;
-            this.IntentHashHex = intentHashHex;
+            // to ensure "transactionIdentifier" is required (not null)
+            if (transactionIdentifier == null)
+            {
+                throw new ArgumentNullException("transactionIdentifier is a required property for TransactionCommittedDetailsRequestAllOf and cannot be null");
+            }
+            this.TransactionIdentifier = transactionIdentifier;
         }
 
         /// <summary>
-        /// Gets or Sets AtLedgerState
+        /// Gets or Sets TransactionIdentifier
         /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
-
-        /// <summary>
-        /// Gets or Sets IntentHashHex
-        /// </summary>
-        [DataMember(Name = "intent_hash_hex", EmitDefaultValue = true)]
-        public string IntentHashHex { get; set; }
+        [DataMember(Name = "transaction_identifier", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionCommittedDetailsRequestIdentifier TransactionIdentifier { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -125,9 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionStatusRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
+            sb.Append("class TransactionCommittedDetailsRequestAllOf {\n");
+            sb.Append("  TransactionIdentifier: ").Append(TransactionIdentifier).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -148,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionStatusRequest);
+            return this.Equals(input as TransactionCommittedDetailsRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if TransactionStatusRequest instances are equal
+        /// Returns true if TransactionCommittedDetailsRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionStatusRequest to be compared</param>
+        /// <param name="input">Instance of TransactionCommittedDetailsRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionStatusRequest input)
+        public bool Equals(TransactionCommittedDetailsRequestAllOf input)
         {
             if (input == null)
             {
@@ -164,14 +165,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
-                ) && 
-                (
-                    this.IntentHashHex == input.IntentHashHex ||
-                    (this.IntentHashHex != null &&
-                    this.IntentHashHex.Equals(input.IntentHashHex))
+                    this.TransactionIdentifier == input.TransactionIdentifier ||
+                    (this.TransactionIdentifier != null &&
+                    this.TransactionIdentifier.Equals(input.TransactionIdentifier))
                 );
         }
 
@@ -184,13 +180,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtLedgerState != null)
+                if (this.TransactionIdentifier != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
-                }
-                if (this.IntentHashHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TransactionIdentifier.GetHashCode();
                 }
                 return hashCode;
             }

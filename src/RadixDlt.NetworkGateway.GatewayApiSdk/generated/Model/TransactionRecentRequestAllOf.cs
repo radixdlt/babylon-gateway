@@ -90,33 +90,43 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionStatusRequest
+    /// TransactionRecentRequestAllOf
     /// </summary>
-    [DataContract(Name = "TransactionStatusRequest")]
-    public partial class TransactionStatusRequest : IEquatable<TransactionStatusRequest>
+    [DataContract(Name = "TransactionRecentRequest_allOf")]
+    public partial class TransactionRecentRequestAllOf : IEquatable<TransactionRecentRequestAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionStatusRequest" /> class.
+        /// Initializes a new instance of the <see cref="TransactionRecentRequestAllOf" /> class.
         /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="intentHashHex">intentHashHex.</param>
-        public TransactionStatusRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string intentHashHex = default(string))
+        /// <param name="fromLedgerState">fromLedgerState.</param>
+        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
+        /// <param name="limit">The page size requested..</param>
+        public TransactionRecentRequestAllOf(LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limit = default(int?))
         {
-            this.AtLedgerState = atLedgerState;
-            this.IntentHashHex = intentHashHex;
+            this.FromLedgerState = fromLedgerState;
+            this.Cursor = cursor;
+            this.Limit = limit;
         }
 
         /// <summary>
-        /// Gets or Sets AtLedgerState
+        /// Gets or Sets FromLedgerState
         /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
+        [DataMember(Name = "from_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector FromLedgerState { get; set; }
 
         /// <summary>
-        /// Gets or Sets IntentHashHex
+        /// This cursor allows forward pagination, by providing the cursor from the previous request.
         /// </summary>
-        [DataMember(Name = "intent_hash_hex", EmitDefaultValue = true)]
-        public string IntentHashHex { get; set; }
+        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
+        [DataMember(Name = "cursor", EmitDefaultValue = true)]
+        public string Cursor { get; set; }
+
+        /// <summary>
+        /// The page size requested.
+        /// </summary>
+        /// <value>The page size requested.</value>
+        [DataMember(Name = "limit", EmitDefaultValue = true)]
+        public int? Limit { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -125,9 +135,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionStatusRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
+            sb.Append("class TransactionRecentRequestAllOf {\n");
+            sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
+            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
+            sb.Append("  Limit: ").Append(Limit).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -148,15 +159,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionStatusRequest);
+            return this.Equals(input as TransactionRecentRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if TransactionStatusRequest instances are equal
+        /// Returns true if TransactionRecentRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionStatusRequest to be compared</param>
+        /// <param name="input">Instance of TransactionRecentRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionStatusRequest input)
+        public bool Equals(TransactionRecentRequestAllOf input)
         {
             if (input == null)
             {
@@ -164,14 +175,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
+                    this.FromLedgerState == input.FromLedgerState ||
+                    (this.FromLedgerState != null &&
+                    this.FromLedgerState.Equals(input.FromLedgerState))
                 ) && 
                 (
-                    this.IntentHashHex == input.IntentHashHex ||
-                    (this.IntentHashHex != null &&
-                    this.IntentHashHex.Equals(input.IntentHashHex))
+                    this.Cursor == input.Cursor ||
+                    (this.Cursor != null &&
+                    this.Cursor.Equals(input.Cursor))
+                ) && 
+                (
+                    this.Limit == input.Limit ||
+                    (this.Limit != null &&
+                    this.Limit.Equals(input.Limit))
                 );
         }
 
@@ -184,13 +200,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtLedgerState != null)
+                if (this.FromLedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
                 }
-                if (this.IntentHashHex != null)
+                if (this.Cursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
+                }
+                if (this.Limit != null)
+                {
+                    hashCode = (hashCode * 59) + this.Limit.GetHashCode();
                 }
                 return hashCode;
             }
