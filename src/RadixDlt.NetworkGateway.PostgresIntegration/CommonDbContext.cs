@@ -102,11 +102,9 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<NonFungibleIdStoreHistory> NonFungibleIdStoreHistory => Set<NonFungibleIdStoreHistory>();
 
-    public DbSet<ResourceManagerEntityAuthRulesHistory> ResourceManagerEntityAuthRulesHistory => Set<ResourceManagerEntityAuthRulesHistory>();
-
     public DbSet<ComponentEntityStateHistory> ComponentEntityStateHistory => Set<ComponentEntityStateHistory>();
 
-    public DbSet<ComponentEntityAccessRulesLayersHistory> ComponentEntityAccessRulesLayersHistory => Set<ComponentEntityAccessRulesLayersHistory>();
+    public DbSet<EntityAccessRulesChainHistory> EntityAccessRulesLayersHistory => Set<EntityAccessRulesChainHistory>();
 
     public CommonDbContext(DbContextOptions options)
         : base(options)
@@ -142,6 +140,12 @@ internal abstract class CommonDbContext : DbContext
 
         configurationBuilder.Properties<LedgerTransactionStatus>()
             .HaveConversion<LedgerTransactionStatusValueConverter>();
+
+        configurationBuilder.Properties<NonFungibleIdType>()
+            .HaveConversion<NonFungibleIdTypeValueConverter>();
+
+        configurationBuilder.Properties<AccessRulesChainSubtype>()
+            .HaveConversion<AccessRulesChainSubtypeValueConverter>();
     }
 
     private static void HookupSingleEntries(ModelBuilder modelBuilder)
@@ -223,7 +227,8 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<PackageEntity>("package")
             .HasValue<KeyValueStoreEntity>("key_value_store")
             .HasValue<VaultEntity>("vault")
-            .HasValue<NonFungibleStoreEntity>("non_fungible_store");
+            .HasValue<NonFungibleStoreEntity>("non_fungible_store")
+            .HasValue<ClockEntity>("clock");
 
         modelBuilder.Entity<Entity>()
             .HasIndex(e => e.Address)
@@ -242,7 +247,7 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityResourceAggregateHistory>()
-            .HasIndex(e => new { e.IsMostRecent, EntityId = e.EntityId })
+            .HasIndex(e => new { e.IsMostRecent, e.EntityId })
             .HasFilter("is_most_recent IS TRUE");
 
         modelBuilder.Entity<EntityResourceAggregateHistory>()
@@ -274,13 +279,10 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<NonFungibleIdStoreHistory>()
             .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<ResourceManagerEntityAuthRulesHistory>()
-            .HasIndex(e => new { e.ResourceManagerEntityId, e.FromStateVersion });
-
         modelBuilder.Entity<ComponentEntityStateHistory>()
             .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<ComponentEntityAccessRulesLayersHistory>()
-            .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
+        modelBuilder.Entity<EntityAccessRulesChainHistory>()
+            .HasIndex(e => new { e.EntityId, e.Subtype, e.FromStateVersion });
     }
 }

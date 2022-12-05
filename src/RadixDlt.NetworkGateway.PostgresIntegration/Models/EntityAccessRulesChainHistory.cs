@@ -62,13 +62,14 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("component_entity_access_rules_layers_history")]
-internal class ComponentEntityAccessRulesLayersHistory
+[Table("entity_access_rules_chain_history")]
+internal class EntityAccessRulesChainHistory
 {
     [Key]
     [Column("id")]
@@ -77,9 +78,12 @@ internal class ComponentEntityAccessRulesLayersHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("component_entity_id")]
-    public long ComponentEntityId { get; set; }
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 
-    [Column("access_rules_layers", TypeName = "jsonb")]
-    public string AccessRulesLayers { get; set; }
+    [Column("subtype")]
+    public AccessRulesChainSubtype Subtype { get; set; }
+
+    [Column("access_rules_chain", TypeName = "jsonb")]
+    public string AccessRulesChain { get; set; }
 }

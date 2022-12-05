@@ -616,6 +616,15 @@ components:
         address:
           $ref: "#/components/schemas/ResourceAddress"
 
+    NonFungibleIdType:
+      type: string
+      enum:
+        - string
+        - u32
+        - u64
+        - bytes
+        - uuid
+
     #
     # Mixins
     #
@@ -946,7 +955,8 @@ components:
       type: object
       required:
         - discriminator
-        - auth_rules
+        - access_rules_chain
+        - vault_access_rules_chain
         - divisibility
         - total_supply
         - total_minted
@@ -954,7 +964,9 @@ components:
       properties:
         discriminator:
           $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
-        auth_rules:
+        access_rules_chain:
+          type: object
+        vault_access_rules_chain:
           type: object
         divisibility:
           type: integer
@@ -969,14 +981,20 @@ components:
       type: object
       required:
         - discriminator
-        - auth_rules
-        - ids
+        - access_rules_chain
+        - vault_access_rules_chain
+        - non_fungible_id_type
+        - non_fungible_ids
       properties:
         discriminator:
           $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
-        auth_rules:
+        access_rules_chain:
           type: object
-        ids:
+        vault_access_rules_chain:
+          type: object
+        non_fungible_id_type:
+          $ref: "#/components/schemas/NonFungibleIdType"
+        non_fungible_ids:
           $ref: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetailsIds"
     EntityDetailsResponseNonFungibleResourceDetailsIds:
       allOf:
@@ -994,7 +1012,9 @@ components:
       required:
         - id
       properties:
-        id_hex:
+        non_fungible_id_type:
+          $ref: "#/components/schemas/NonFungibleIdType"
+        non_fungible_id:
           type: string
         immutable_data_hex:
           type: string
@@ -1017,7 +1037,7 @@ components:
         - package_address
         - blueprint_name
         - state
-        - access_rules_layers
+        - access_rules_chain
       properties:
         discriminator:
           $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
@@ -1027,7 +1047,7 @@ components:
           type: string
         state:
           type: object
-        access_rules_layers:
+        access_rules_chain:
           type: object
 
     EntityOverviewRequest:
@@ -1236,11 +1256,14 @@ components:
       type: object
       required:
         - address
-        - non_fungible_id_hex
+        - non_fungible_id_type
+        - non_fungible_id
       properties:
         address:
           $ref: "#/components/schemas/EntityAddress"
-        non_fungible_id_hex:
+        non_fungible_id_type:
+          $ref: "#/components/schemas/NonFungibleIdType"
+        non_fungible_id:
           type: string
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
@@ -1254,20 +1277,24 @@ components:
           nullable: true
       example:
         address: "<non-fungible-entity-address>"
-        non_fungible_id_hex: "0a0100000000"
+        non_fungible_id_type: "bytes"
+        non_fungible_id: "0a0100000000"
     NonFungibleDataResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
         - type: object
           required:
             - address
-            - non_fungible_id_hex
+            - non_fungible_id_type
+            - non_fungible_id
             - mutable_data_hex
             - immutable_data_hex
           properties:
             address:
               $ref: "#/components/schemas/ResourceAddress"
-            non_fungible_id_hex:
+            non_fungible_id_type:
+              $ref: "#/components/schemas/NonFungibleIdType"
+            non_fungible_id:
               type: string
             mutable_data_hex:
               type: string

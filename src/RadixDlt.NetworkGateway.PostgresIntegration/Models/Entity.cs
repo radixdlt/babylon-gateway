@@ -64,6 +64,7 @@
 
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -135,6 +136,8 @@ internal class FungibleResourceManagerEntity : ResourceManagerEntity
 
 internal class NonFungibleResourceManagerEntity : ResourceManagerEntity
 {
+    [Column("non_fungible_id_type")]
+    public NonFungibleIdType NonFungibleIdType { get; set; }
 }
 
 internal abstract class ComponentEntity : Entity
@@ -173,5 +176,9 @@ internal class VaultEntity : Entity
 }
 
 internal class NonFungibleStoreEntity : Entity
+{
+}
+
+internal class ClockEntity : Entity
 {
 }

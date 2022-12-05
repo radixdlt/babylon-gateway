@@ -62,36 +62,13 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
-
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-
-internal class NonFungibleDataRequestValidator : AbstractValidator<GatewayModel.NonFungibleDataRequest>
+public enum NonFungibleIdType
 {
-    public NonFungibleDataRequestValidator(PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
-    {
-        RuleFor(x => x.Address)
-            .NotEmpty()
-            .RadixAddress();
-
-        RuleFor(x => x.NonFungibleIdType)
-            .NotEmpty()
-            .IsInEnum();
-
-        RuleFor(x => x.NonFungibleId) // TODO NFID TYPE!
-            .NotEmpty()
-            .Hex();
-
-        RuleFor(x => x.AtStateIdentifier)
-            .SetValidator(partialLedgerStateIdentifierValidator);
-
-        RuleFor(x => x.Cursor);
-
-        RuleFor(x => x.Limit)
-            .GreaterThan(0);
-        // TODO .LessThanOrEqualTo(endpointOptions.MaxPageSize);
-    }
+    String,
+    U32,
+    U64,
+    Bytes,
+    UUID,
 }

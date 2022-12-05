@@ -95,6 +95,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [DataContract(Name = "NonFungibleDataRequest")]
     public partial class NonFungibleDataRequest : IEquatable<NonFungibleDataRequest>
     {
+
+        /// <summary>
+        /// Gets or Sets NonFungibleIdType
+        /// </summary>
+        [DataMember(Name = "non_fungible_id_type", IsRequired = true, EmitDefaultValue = true)]
+        public NonFungibleIdType NonFungibleIdType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleDataRequest" /> class.
         /// </summary>
@@ -104,11 +110,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="NonFungibleDataRequest" /> class.
         /// </summary>
         /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="nonFungibleIdHex">nonFungibleIdHex (required).</param>
+        /// <param name="nonFungibleIdType">nonFungibleIdType (required).</param>
+        /// <param name="nonFungibleId">nonFungibleId (required).</param>
         /// <param name="atStateIdentifier">atStateIdentifier.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limit">The page size requested..</param>
-        public NonFungibleDataRequest(string address = default(string), string nonFungibleIdHex = default(string), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier), string cursor = default(string), int? limit = default(int?))
+        public NonFungibleDataRequest(string address = default(string), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), string nonFungibleId = default(string), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier), string cursor = default(string), int? limit = default(int?))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -116,12 +123,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("address is a required property for NonFungibleDataRequest and cannot be null");
             }
             this.Address = address;
-            // to ensure "nonFungibleIdHex" is required (not null)
-            if (nonFungibleIdHex == null)
+            this.NonFungibleIdType = nonFungibleIdType;
+            // to ensure "nonFungibleId" is required (not null)
+            if (nonFungibleId == null)
             {
-                throw new ArgumentNullException("nonFungibleIdHex is a required property for NonFungibleDataRequest and cannot be null");
+                throw new ArgumentNullException("nonFungibleId is a required property for NonFungibleDataRequest and cannot be null");
             }
-            this.NonFungibleIdHex = nonFungibleIdHex;
+            this.NonFungibleId = nonFungibleId;
             this.AtStateIdentifier = atStateIdentifier;
             this.Cursor = cursor;
             this.Limit = limit;
@@ -135,10 +143,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Address { get; set; }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIdHex
+        /// Gets or Sets NonFungibleId
         /// </summary>
-        [DataMember(Name = "non_fungible_id_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string NonFungibleIdHex { get; set; }
+        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
+        public string NonFungibleId { get; set; }
 
         /// <summary>
         /// Gets or Sets AtStateIdentifier
@@ -169,7 +177,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleDataRequest {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  NonFungibleIdHex: ").Append(NonFungibleIdHex).Append("\n");
+            sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
+            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
             sb.Append("  Limit: ").Append(Limit).Append("\n");
@@ -214,9 +223,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.NonFungibleIdHex == input.NonFungibleIdHex ||
-                    (this.NonFungibleIdHex != null &&
-                    this.NonFungibleIdHex.Equals(input.NonFungibleIdHex))
+                    this.NonFungibleIdType == input.NonFungibleIdType ||
+                    this.NonFungibleIdType.Equals(input.NonFungibleIdType)
+                ) && 
+                (
+                    this.NonFungibleId == input.NonFungibleId ||
+                    (this.NonFungibleId != null &&
+                    this.NonFungibleId.Equals(input.NonFungibleId))
                 ) && 
                 (
                     this.AtStateIdentifier == input.AtStateIdentifier ||
@@ -248,9 +261,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.NonFungibleIdHex != null)
+                hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
+                if (this.NonFungibleId != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleIdHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
                 }
                 if (this.AtStateIdentifier != null)
                 {

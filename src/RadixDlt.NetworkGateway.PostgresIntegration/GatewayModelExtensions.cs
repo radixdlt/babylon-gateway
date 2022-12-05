@@ -62,24 +62,39 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using System;
+using System.Text;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-[Table("resource_manager_entity_auth_rules_history")]
-internal class ResourceManagerEntityAuthRulesHistory
+internal static class GatewayModelExtensions
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    public static GatewayModel.NonFungibleIdType ToGatewayModel(this NonFungibleIdType input)
+    {
+        return input switch
+        {
+            NonFungibleIdType.String => GatewayModel.NonFungibleIdType.String,
+            NonFungibleIdType.U32 => GatewayModel.NonFungibleIdType.U32,
+            NonFungibleIdType.U64 => GatewayModel.NonFungibleIdType.U64,
+            NonFungibleIdType.Bytes => GatewayModel.NonFungibleIdType.Bytes,
+            NonFungibleIdType.UUID => GatewayModel.NonFungibleIdType.Uuid,
+            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null)
+        };
+    }
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("resource_manager_entity_id")]
-    public long ResourceManagerEntityId { get; set; }
-
-    [Column("auth_rules", TypeName = "jsonb")]
-    public string AuthRules { get; set; }
+    public static string ToGatewayModel(this byte[] input, NonFungibleIdType type)
+    {
+        return type switch
+        {
+            NonFungibleIdType.String => Encoding.UTF8.GetString(input),
+            NonFungibleIdType.U32 => BitConverter.ToUInt32(input).ToString(),
+            NonFungibleIdType.U64 => BitConverter.ToUInt64(input).ToString(),
+            NonFungibleIdType.Bytes => input.ToHex(),
+            NonFungibleIdType.UUID => new Guid(input).ToString(),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
 }

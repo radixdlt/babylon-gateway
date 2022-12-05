@@ -110,20 +110,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityDetailsResponseFungibleResourceDetails" /> class.
         /// </summary>
         /// <param name="discriminator">discriminator (required).</param>
-        /// <param name="authRules">authRules (required).</param>
+        /// <param name="accessRulesChain">accessRulesChain (required).</param>
+        /// <param name="vaultAccessRulesChain">vaultAccessRulesChain (required).</param>
         /// <param name="divisibility">divisibility (required).</param>
         /// <param name="totalSupply">totalSupply (required).</param>
         /// <param name="totalMinted">totalMinted (required).</param>
         /// <param name="totalBurnt">totalBurnt (required).</param>
-        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), Object authRules = default(Object), int divisibility = default(int), TokenAmount totalSupply = default(TokenAmount), TokenAmount totalMinted = default(TokenAmount), TokenAmount totalBurnt = default(TokenAmount))
+        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), Object accessRulesChain = default(Object), Object vaultAccessRulesChain = default(Object), int divisibility = default(int), TokenAmount totalSupply = default(TokenAmount), TokenAmount totalMinted = default(TokenAmount), TokenAmount totalBurnt = default(TokenAmount))
         {
             this.Discriminator = discriminator;
-            // to ensure "authRules" is required (not null)
-            if (authRules == null)
+            // to ensure "accessRulesChain" is required (not null)
+            if (accessRulesChain == null)
             {
-                throw new ArgumentNullException("authRules is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
+                throw new ArgumentNullException("accessRulesChain is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
             }
-            this.AuthRules = authRules;
+            this.AccessRulesChain = accessRulesChain;
+            // to ensure "vaultAccessRulesChain" is required (not null)
+            if (vaultAccessRulesChain == null)
+            {
+                throw new ArgumentNullException("vaultAccessRulesChain is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
+            }
+            this.VaultAccessRulesChain = vaultAccessRulesChain;
             this.Divisibility = divisibility;
             // to ensure "totalSupply" is required (not null)
             if (totalSupply == null)
@@ -146,10 +153,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets AuthRules
+        /// Gets or Sets AccessRulesChain
         /// </summary>
-        [DataMember(Name = "auth_rules", IsRequired = true, EmitDefaultValue = true)]
-        public Object AuthRules { get; set; }
+        [DataMember(Name = "access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
+        public Object AccessRulesChain { get; set; }
+
+        /// <summary>
+        /// Gets or Sets VaultAccessRulesChain
+        /// </summary>
+        [DataMember(Name = "vault_access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
+        public Object VaultAccessRulesChain { get; set; }
 
         /// <summary>
         /// Gets or Sets Divisibility
@@ -184,7 +197,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityDetailsResponseFungibleResourceDetails {\n");
             sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
-            sb.Append("  AuthRules: ").Append(AuthRules).Append("\n");
+            sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
+            sb.Append("  VaultAccessRulesChain: ").Append(VaultAccessRulesChain).Append("\n");
             sb.Append("  Divisibility: ").Append(Divisibility).Append("\n");
             sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
             sb.Append("  TotalMinted: ").Append(TotalMinted).Append("\n");
@@ -229,9 +243,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Discriminator.Equals(input.Discriminator)
                 ) && 
                 (
-                    this.AuthRules == input.AuthRules ||
-                    (this.AuthRules != null &&
-                    this.AuthRules.Equals(input.AuthRules))
+                    this.AccessRulesChain == input.AccessRulesChain ||
+                    (this.AccessRulesChain != null &&
+                    this.AccessRulesChain.Equals(input.AccessRulesChain))
+                ) && 
+                (
+                    this.VaultAccessRulesChain == input.VaultAccessRulesChain ||
+                    (this.VaultAccessRulesChain != null &&
+                    this.VaultAccessRulesChain.Equals(input.VaultAccessRulesChain))
                 ) && 
                 (
                     this.Divisibility == input.Divisibility ||
@@ -264,9 +283,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
-                if (this.AuthRules != null)
+                if (this.AccessRulesChain != null)
                 {
-                    hashCode = (hashCode * 59) + this.AuthRules.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccessRulesChain.GetHashCode();
+                }
+                if (this.VaultAccessRulesChain != null)
+                {
+                    hashCode = (hashCode * 59) + this.VaultAccessRulesChain.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.Divisibility.GetHashCode();
                 if (this.TotalSupply != null)

@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
@@ -199,6 +200,8 @@ internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, Referen
 internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, byte[] NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
 
 internal record NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, long StateVersion);
+
+internal record AccessRulesChainLookup(string EntityIdHex, AccessRulesChainSubtype Subtype);
 
 internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
 
@@ -355,6 +358,8 @@ internal class SequencesHolder
 
     public long EntitySequence { get; set; }
 
+    public long EntityAccessRulesChainHistorySequence { get; set; }
+
     public long EntityMetadataHistorySequence { get; set; }
 
     public long EntityResourceAggregateHistorySequence { get; set; }
@@ -369,13 +374,11 @@ internal class SequencesHolder
 
     public long NonFungibleIdStoreHistorySequence { get; set; }
 
-    public long ResourceManagerEntityAuthRulesHistorySequence { get; set; }
-
-    public long ComponentEntityAccessRulesLayersHistorySequence { get; set; }
-
     public long NextComponentEntityStateHistory => ComponentEntityStateHistorySequence++;
 
     public long NextEntity => EntitySequence++;
+
+    public long NextEntityAccessRulesChainHistory => EntityAccessRulesChainHistorySequence++;
 
     public long NextEntityMetadataHistory => EntityMetadataHistorySequence++;
 
@@ -390,8 +393,4 @@ internal class SequencesHolder
     public long NextNonFungibleIdMutableDataHistory => NonFungibleIdMutableDataHistorySequence++;
 
     public long NextNonFungibleIdStoreHistory => NonFungibleIdStoreHistorySequence++;
-
-    public long NextResourceManagerEntityAuthRulesHistory => ResourceManagerEntityAuthRulesHistorySequence++;
-
-    public long NextComponentEntityAccessRulesLayersHistory => ComponentEntityAccessRulesLayersHistorySequence++;
 }

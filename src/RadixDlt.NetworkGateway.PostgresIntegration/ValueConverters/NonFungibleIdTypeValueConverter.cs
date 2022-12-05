@@ -62,36 +62,24 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-
-internal class NonFungibleDataRequestValidator : AbstractValidator<GatewayModel.NonFungibleDataRequest>
+internal class NonFungibleIdTypeValueConverter : EnumTypeValueConverterBase<NonFungibleIdType>
 {
-    public NonFungibleDataRequestValidator(PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
+    private static readonly Dictionary<NonFungibleIdType, string> _conversion = new()
     {
-        RuleFor(x => x.Address)
-            .NotEmpty()
-            .RadixAddress();
+        { NonFungibleIdType.String, "STRING" },
+        { NonFungibleIdType.U32, "U32" },
+        { NonFungibleIdType.U64, "U64" },
+        { NonFungibleIdType.Bytes, "BYTES" },
+        { NonFungibleIdType.UUID, "UUID" },
+    };
 
-        RuleFor(x => x.NonFungibleIdType)
-            .NotEmpty()
-            .IsInEnum();
-
-        RuleFor(x => x.NonFungibleId) // TODO NFID TYPE!
-            .NotEmpty()
-            .Hex();
-
-        RuleFor(x => x.AtStateIdentifier)
-            .SetValidator(partialLedgerStateIdentifierValidator);
-
-        RuleFor(x => x.Cursor);
-
-        RuleFor(x => x.Limit)
-            .GreaterThan(0);
-        // TODO .LessThanOrEqualTo(endpointOptions.MaxPageSize);
+    public NonFungibleIdTypeValueConverter()
+        : base(_conversion, Invert(_conversion))
+    {
     }
 }

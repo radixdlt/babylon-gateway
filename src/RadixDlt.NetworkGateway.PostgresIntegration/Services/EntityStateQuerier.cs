@@ -67,6 +67,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -131,8 +132,13 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
-                var authRules = await _dbContext.ResourceManagerEntityAuthRulesHistory
-                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ResourceManagerEntityId == frme.Id)
+                var accessRulesChain = await _dbContext.EntityAccessRulesLayersHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == frme.Id && e.Subtype == AccessRulesChainSubtype.None)
+                    .OrderByDescending(e => e.FromStateVersion)
+                    .FirstAsync(token);
+
+                var vaultAccessRulesChain = await _dbContext.EntityAccessRulesLayersHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == frme.Id && e.Subtype == AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
@@ -140,7 +146,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseFungibleResourceDetails(
                     discriminator: GatewayModel.EntityDetailsResponseDetailsType.FungibleResource,
-                    authRules: new JRaw(authRules.AuthRules),
+                    accessRulesChain: new JRaw(accessRulesChain.AccessRulesChain),
+                    vaultAccessRulesChain: new JRaw(vaultAccessRulesChain.AccessRulesChain),
                     divisibility: frme.Divisibility,
                     totalSupply: new GatewayModel.TokenAmount(supplyHistory.TotalSupply.ToString(), tokenAddress),
                     totalMinted: new GatewayModel.TokenAmount(supplyHistory.TotalMinted.ToString(), tokenAddress),
@@ -178,19 +185,27 @@ OFFSET @offset LIMIT @limit",
                     },
                     cancellationToken: token));
 
-                var authRules = await _dbContext.ResourceManagerEntityAuthRulesHistory
-                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ResourceManagerEntityId == nfrme.Id)
+                var accessRulesChain = await _dbContext.EntityAccessRulesLayersHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == nfrme.Id && e.Subtype == AccessRulesChainSubtype.None)
+                    .OrderByDescending(e => e.FromStateVersion)
+                    .FirstAsync(token);
+
+                var vaultAccessRulesChain = await _dbContext.EntityAccessRulesLayersHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == nfrme.Id && e.Subtype == AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseNonFungibleResourceDetails(
                     discriminator: GatewayModel.EntityDetailsResponseDetailsType.NonFungibleResource,
-                    authRules: new JRaw(authRules.AuthRules),
-                    ids: new GatewayModel.EntityDetailsResponseNonFungibleResourceDetailsIds(
+                    accessRulesChain: new JRaw(accessRulesChain.AccessRulesChain),
+                    vaultAccessRulesChain: new JRaw(vaultAccessRulesChain.AccessRulesChain),
+                    nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel(),
+                    nonFungibleIds: new GatewayModel.EntityDetailsResponseNonFungibleResourceDetailsIds(
                         nextCursor: "TBD (currently first 10 NFIDs are returned)",
                         items: nonFungibleIds
                             .Select(nfid => new GatewayModel.EntityDetailsResponseNonFungibleResourceDetailsIdsItem(
-                                idHex: nfid.NonFungibleId.ToHex(),
+                                nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel(),
+                                nonFungibleId: nfid.NonFungibleId.ToGatewayModel(nfrme.NonFungibleIdType),
                                 immutableDataHex: nfid.ImmutableData.ToHex(),
                                 mutableDataHex: nfid.MutableData.ToHex()))
                             .ToList())));
@@ -212,8 +227,8 @@ OFFSET @offset LIMIT @limit",
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
-                var accessRulesLayers = await _dbContext.ComponentEntityAccessRulesLayersHistory
-                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ComponentEntityId == ce.Id)
+                var accessRulesLayers = await _dbContext.EntityAccessRulesLayersHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == ce.Id)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
@@ -222,7 +237,7 @@ OFFSET @offset LIMIT @limit",
                     packageAddress: package.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()),
                     blueprintName: ce.BlueprintName,
                     state: new JRaw(state.State),
-                    accessRulesLayers: new JRaw(accessRulesLayers.AccessRulesLayers)));
+                    accessRulesChain: new JRaw(accessRulesLayers.AccessRulesChain)));
                 break;
 
             default:

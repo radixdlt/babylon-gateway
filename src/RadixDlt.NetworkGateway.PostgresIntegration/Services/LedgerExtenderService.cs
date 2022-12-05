@@ -243,9 +243,9 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var childToParentEntities = new Dictionary<string, string>();
         var componentToGlobalPackage = new Dictionary<string, (string PackageAddress, string BlueprintName)>();
         var fungibleResourceManagerDivisibility = new Dictionary<string, int>();
+        var nonFungibleResourceManagerNonFungibleIdType = new Dictionary<string, NonFungibleIdType>();
         var packageCode = new Dictionary<string, byte[]>();
-        var resourceManagerEntityRawAuthRules = new Dictionary<string, string>();
-        var componentEntityRawAccessRulesLayers = new Dictionary<string, string>();
+        var entityRawAccessRulesChain = new Dictionary<AccessRulesChainLookup, string>();
         var componentEntityRawState = new Dictionary<string, string>();
 
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
@@ -354,16 +354,15 @@ internal class LedgerExtenderService : ILedgerExtenderService
                 @"
 SELECT
     nextval('component_entity_state_history_id_seq') AS ComponentEntityStateHistorySequence,
-    nextval('component_entity_access_rules_layers_history_id_seq') AS ComponentEntityAccessRulesLayersHistorySequence,
     nextval('entities_id_seq') AS EntitySequence,
+    nextval('entity_access_rules_chain_history_id_seq') AS EntityAccessRulesChainHistorySequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
     nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
     nextval('entity_resource_history_id_seq') AS EntityResourceHistorySequence,
     nextval('fungible_resource_supply_history_id_seq') AS FungibleResourceSupplyHistorySequence,
     nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
     nextval('non_fungible_id_mutable_data_history_id_seq') AS NonFungibleIdMutableDataHistorySequence,
-    nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence,
-    nextval('resource_manager_entity_auth_rules_history_id_seq') AS ResourceManagerEntityAuthRulesHistorySequence");
+    nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence");
 
             dbReadDuration += sw.Elapsed;
         }
@@ -469,8 +468,38 @@ SELECT
                             fungibleResourceManagerDivisibility[sid.EntityIdHex] = resourceManager.FungibleDivisibility;
                         }
 
-                        // TODO went missing?
-                        // resourceManagerEntityRawAuthRules[sid.EntityIdHex] = resourceManager.AuthRules.ToJson();
+                        if (resourceManager.ResourceType == CoreModel.ResourceType.NonFungible)
+                        {
+                            var type = resourceManager.NonFungibleIdType ?? throw new InvalidOperationException("NonFungibleIdType must be set.");
+
+                            nonFungibleResourceManagerNonFungibleIdType[sid.EntityIdHex] = type switch
+                            {
+                                CoreModel.NonFungibleIdType.String => NonFungibleIdType.String,
+                                CoreModel.NonFungibleIdType.U32 => NonFungibleIdType.U32,
+                                CoreModel.NonFungibleIdType.U64 => NonFungibleIdType.U64,
+                                CoreModel.NonFungibleIdType.Bytes => NonFungibleIdType.Bytes,
+                                CoreModel.NonFungibleIdType.UUID => NonFungibleIdType.UUID,
+                                _ => throw new ArgumentOutOfRangeException(),
+                            };
+                        }
+                    }
+
+                    if (sd is CoreModel.AccessRulesChainSubstate accessRulesChain)
+                    {
+                        var serialized = JsonConvert.SerializeObject(accessRulesChain.Chain);
+
+                        if (sid.SubstateKeyType == CoreModel.SubstateKeyType.AccessRulesChain)
+                        {
+                            entityRawAccessRulesChain[new AccessRulesChainLookup(sid.EntityIdHex, AccessRulesChainSubtype.None)] = serialized;
+                        }
+                        else if (sid.SubstateKeyType == CoreModel.SubstateKeyType.ResourceManagerVaultAccessRulesChain)
+                        {
+                            entityRawAccessRulesChain[new AccessRulesChainLookup(sid.EntityIdHex, AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain)] = serialized;
+                        }
+                        else
+                        {
+                            throw new UnreachableException();
+                        }
                     }
 
                     if (sd is CoreModel.ComponentInfoSubstate componentInfo)
@@ -482,11 +511,6 @@ SELECT
                     if (sd is CoreModel.ComponentStateSubstate componentState)
                     {
                         componentEntityRawState[sid.EntityIdHex] = componentState.DataStruct.StructData.ToJson();
-                    }
-
-                    if (sd is CoreModel.AccessRulesChainSubstate accessRulesChain)
-                    {
-                        componentEntityRawAccessRulesLayers[sid.EntityIdHex] = JsonConvert.SerializeObject(accessRulesChain.Chain);
                     }
 
                     if (sd is CoreModel.PackageInfoSubstate packageInfo)
@@ -569,6 +593,7 @@ WHERE id IN(
                     KeyValueStoreEntity => CoreModel.EntityType.KeyValueStore,
                     VaultEntity => CoreModel.EntityType.Vault,
                     NonFungibleStoreEntity => CoreModel.EntityType.NonFungibleStore,
+                    ClockEntity => CoreModel.EntityType.Clock,
                     _ => throw new ArgumentOutOfRangeException(nameof(knownDbEntity), knownDbEntity.GetType().Name),
                 };
 
@@ -596,6 +621,7 @@ WHERE id IN(
                     CoreModel.EntityType.KeyValueStore => new KeyValueStoreEntity(),
                     CoreModel.EntityType.Global => throw new ArgumentOutOfRangeException(nameof(re.Type), re.Type, "Global entities should be filtered out"),
                     CoreModel.EntityType.NonFungibleStore => new NonFungibleStoreEntity(),
+                    CoreModel.EntityType.Clock => new ClockEntity(),
                     _ => throw new ArgumentOutOfRangeException(nameof(re.Type), re.Type, null),
                 };
 
@@ -676,6 +702,11 @@ WHERE id IN(
                 referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((FungibleResourceManagerEntity dbe) => dbe.Divisibility = divisibility);
             }
 
+            foreach (var (entityAddress, nonFungibleIdType) in nonFungibleResourceManagerNonFungibleIdType)
+            {
+                referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((NonFungibleResourceManagerEntity dbe) => dbe.NonFungibleIdType = nonFungibleIdType);
+            }
+
             foreach (var (entityAddress, code) in packageCode)
             {
                 referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((PackageEntity pe) => pe.Code = code);
@@ -683,8 +714,10 @@ WHERE id IN(
 
             sw = Stopwatch.StartNew();
 
-            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, blueprint_name, divisibility, code) FROM STDIN (FORMAT BINARY)", token))
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, blueprint_name, divisibility, non_fungible_id_type, code) FROM STDIN (FORMAT BINARY)", token))
             {
+                var nonFungibleIdTypeConverter = new NonFungibleIdTypeValueConverter().ConvertToProvider;
+
                 foreach (var dbEntity in dbEntities)
                 {
                     if (dbContext.Model.FindEntityType(dbEntity.GetType())?.GetDiscriminatorValue() is not string discriminator)
@@ -705,6 +738,7 @@ WHERE id IN(
                     await writer.WriteNullableAsync(dbEntity is ComponentEntity ce1 ? ce1.PackageId : null, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(dbEntity is ComponentEntity ce2 ? ce2.BlueprintName : null, NpgsqlDbType.Text, token);
                     await writer.WriteNullableAsync(dbEntity is FungibleResourceManagerEntity frme ? frme.Divisibility : null, NpgsqlDbType.Integer, token);
+                    await writer.WriteAsync(dbEntity is NonFungibleResourceManagerEntity nfrme ? nonFungibleIdTypeConverter(nfrme.NonFungibleIdType) : null, NpgsqlDbType.Text, token);
                     await writer.WriteNullableAsync(dbEntity is PackageEntity pe ? pe.Code : null, NpgsqlDbType.Bytea, token);
                 }
 
@@ -768,37 +802,22 @@ WHERE id IN(
                 await writer.CompleteAsync(token);
             }
 
-            if (resourceManagerEntityRawAuthRules.Any())
+            if (entityRawAccessRulesChain.Any())
             {
-                await using var writer = await dbConn.BeginBinaryImportAsync("COPY resource_manager_entity_auth_rules_history (id, from_state_version, resource_manager_entity_id, auth_rules) FROM STDIN (FORMAT BINARY)", token);
+                await using var writer = await dbConn.BeginBinaryImportAsync("COPY entity_access_rules_chain_history (id, from_state_version, entity_id, subtype, access_rules_chain) FROM STDIN (FORMAT BINARY)", token);
 
-                foreach (var (entityAddress, authRule) in resourceManagerEntityRawAuthRules)
+                var subtypeConverter = new AccessRulesChainSubtypeValueConverter().ConvertToProvider;
+
+                foreach (var (lookup, accessRulesChain) in entityRawAccessRulesChain)
                 {
-                    var re = referencedEntities.Get(entityAddress);
+                    var re = referencedEntities.Get(lookup.EntityIdHex);
 
                     await writer.StartRowAsync(token);
-                    await writer.WriteAsync(sequences.NextResourceManagerEntityAuthRulesHistory, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(sequences.NextEntityAccessRulesChainHistory, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(re.StateVersion, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(re.DatabaseId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(authRule, NpgsqlDbType.Jsonb, token);
-                }
-
-                await writer.CompleteAsync(token);
-            }
-
-            if (componentEntityRawAccessRulesLayers.Any())
-            {
-                await using var writer = await dbConn.BeginBinaryImportAsync("COPY component_entity_access_rules_layers_history (id, from_state_version, component_entity_id, access_rules_layers) FROM STDIN (FORMAT BINARY)", token);
-
-                foreach (var (entityAddress, accessRulesLayers) in componentEntityRawAccessRulesLayers)
-                {
-                    var re = referencedEntities.Get(entityAddress);
-
-                    await writer.StartRowAsync(token);
-                    await writer.WriteAsync(sequences.NextComponentEntityAccessRulesLayersHistory, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(re.StateVersion, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(re.DatabaseId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(accessRulesLayers, NpgsqlDbType.Jsonb, token);
+                    await writer.WriteAsync(subtypeConverter(lookup.Subtype), NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(accessRulesChain, NpgsqlDbType.Jsonb, token);
                 }
 
                 await writer.CompleteAsync(token);
@@ -822,7 +841,7 @@ WHERE id IN(
                 await writer.CompleteAsync(token);
             }
 
-            rowsInserted += dbEntities.Count + ledgerTransactions.Count + resourceManagerEntityRawAuthRules.Count + componentEntityRawState.Count;
+            rowsInserted += dbEntities.Count + ledgerTransactions.Count + entityRawAccessRulesChain.Count + componentEntityRawState.Count;
             dbWriteDuration += sw.Elapsed;
         }
 
@@ -1293,21 +1312,20 @@ INNER JOIN LATERAL (
                 @"
 SELECT
     setval('component_entity_state_history_id_seq', @componentEntityStateHistorySequence),
-    setval('component_entity_access_rules_layers_history_id_seq', @componentEntityAccessRulesLayersHistorySequence),
     setval('entities_id_seq', @entitySequence),
+    setval('entity_access_rules_chain_history_id_seq', @entityAccessRulesChainHistorySequence),
     setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
     setval('entity_resource_aggregate_history_id_seq', @entityResourceAggregateHistorySequence),
     setval('entity_resource_history_id_seq', @entityResourceHistorySequence),
     setval('fungible_resource_supply_history_id_seq', @fungibleResourceSupplyHistorySequence),
     setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
     setval('non_fungible_id_mutable_data_history_id_seq', @nonFungibleIdMutableDataHistorySequence),
-    setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence),
-    setval('resource_manager_entity_auth_rules_history_id_seq', @resourceManagerEntityAuthRulesHistorySequence)",
+    setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence)",
                 new
                 {
                     componentEntityStateHistorySequence = sequences.ComponentEntityStateHistorySequence,
-                    componentEntityAccessRulesLayersHistorySequence = sequences.ComponentEntityAccessRulesLayersHistorySequence,
                     entitySequence = sequences.EntitySequence,
+                    entityAccessRulesChainHistorySequence = sequences.EntityAccessRulesChainHistorySequence,
                     entityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,
                     entityResourceAggregateHistorySequence = sequences.EntityResourceAggregateHistorySequence,
                     entityResourceHistorySequence = sequences.EntityResourceHistorySequence,
@@ -1315,7 +1333,6 @@ SELECT
                     nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
                     nonFungibleIdMutableDataHistorySequence = sequences.NonFungibleIdMutableDataHistorySequence,
                     nonFungibleIdStoreHistorySequence = sequences.NonFungibleIdStoreHistorySequence,
-                    resourceManagerEntityAuthRulesHistorySequence = sequences.ResourceManagerEntityAuthRulesHistorySequence,
                 });
 
             dbWriteDuration += sw.Elapsed;

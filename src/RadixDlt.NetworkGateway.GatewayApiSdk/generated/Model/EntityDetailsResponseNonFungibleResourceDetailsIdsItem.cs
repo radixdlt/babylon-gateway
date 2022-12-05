@@ -95,24 +95,32 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [DataContract(Name = "EntityDetailsResponseNonFungibleResourceDetailsIdsItem")]
     public partial class EntityDetailsResponseNonFungibleResourceDetailsIdsItem : IEquatable<EntityDetailsResponseNonFungibleResourceDetailsIdsItem>
     {
+
+        /// <summary>
+        /// Gets or Sets NonFungibleIdType
+        /// </summary>
+        [DataMember(Name = "non_fungible_id_type", EmitDefaultValue = true)]
+        public NonFungibleIdType? NonFungibleIdType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityDetailsResponseNonFungibleResourceDetailsIdsItem" /> class.
         /// </summary>
-        /// <param name="idHex">idHex.</param>
+        /// <param name="nonFungibleIdType">nonFungibleIdType.</param>
+        /// <param name="nonFungibleId">nonFungibleId.</param>
         /// <param name="immutableDataHex">immutableDataHex.</param>
         /// <param name="mutableDataHex">mutableDataHex.</param>
-        public EntityDetailsResponseNonFungibleResourceDetailsIdsItem(string idHex = default(string), string immutableDataHex = default(string), string mutableDataHex = default(string))
+        public EntityDetailsResponseNonFungibleResourceDetailsIdsItem(NonFungibleIdType? nonFungibleIdType = default(NonFungibleIdType?), string nonFungibleId = default(string), string immutableDataHex = default(string), string mutableDataHex = default(string))
         {
-            this.IdHex = idHex;
+            this.NonFungibleIdType = nonFungibleIdType;
+            this.NonFungibleId = nonFungibleId;
             this.ImmutableDataHex = immutableDataHex;
             this.MutableDataHex = mutableDataHex;
         }
 
         /// <summary>
-        /// Gets or Sets IdHex
+        /// Gets or Sets NonFungibleId
         /// </summary>
-        [DataMember(Name = "id_hex", EmitDefaultValue = true)]
-        public string IdHex { get; set; }
+        [DataMember(Name = "non_fungible_id", EmitDefaultValue = true)]
+        public string NonFungibleId { get; set; }
 
         /// <summary>
         /// Gets or Sets ImmutableDataHex
@@ -134,7 +142,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityDetailsResponseNonFungibleResourceDetailsIdsItem {\n");
-            sb.Append("  IdHex: ").Append(IdHex).Append("\n");
+            sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
+            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("  ImmutableDataHex: ").Append(ImmutableDataHex).Append("\n");
             sb.Append("  MutableDataHex: ").Append(MutableDataHex).Append("\n");
             sb.Append("}\n");
@@ -173,9 +182,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.IdHex == input.IdHex ||
-                    (this.IdHex != null &&
-                    this.IdHex.Equals(input.IdHex))
+                    this.NonFungibleIdType == input.NonFungibleIdType ||
+                    this.NonFungibleIdType.Equals(input.NonFungibleIdType)
+                ) && 
+                (
+                    this.NonFungibleId == input.NonFungibleId ||
+                    (this.NonFungibleId != null &&
+                    this.NonFungibleId.Equals(input.NonFungibleId))
                 ) && 
                 (
                     this.ImmutableDataHex == input.ImmutableDataHex ||
@@ -198,9 +211,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.IdHex != null)
+                hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
+                if (this.NonFungibleId != null)
                 {
-                    hashCode = (hashCode * 59) + this.IdHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
                 }
                 if (this.ImmutableDataHex != null)
                 {

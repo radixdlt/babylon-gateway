@@ -113,8 +113,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="packageAddress">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="blueprintName">blueprintName (required).</param>
         /// <param name="state">state (required).</param>
-        /// <param name="accessRulesLayers">accessRulesLayers (required).</param>
-        public EntityDetailsResponseComponentDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), Object accessRulesLayers = default(Object))
+        /// <param name="accessRulesChain">accessRulesChain (required).</param>
+        public EntityDetailsResponseComponentDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), Object accessRulesChain = default(Object))
         {
             this.Discriminator = discriminator;
             // to ensure "packageAddress" is required (not null)
@@ -135,12 +135,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("state is a required property for EntityDetailsResponseComponentDetails and cannot be null");
             }
             this.State = state;
-            // to ensure "accessRulesLayers" is required (not null)
-            if (accessRulesLayers == null)
+            // to ensure "accessRulesChain" is required (not null)
+            if (accessRulesChain == null)
             {
-                throw new ArgumentNullException("accessRulesLayers is a required property for EntityDetailsResponseComponentDetails and cannot be null");
+                throw new ArgumentNullException("accessRulesChain is a required property for EntityDetailsResponseComponentDetails and cannot be null");
             }
-            this.AccessRulesLayers = accessRulesLayers;
+            this.AccessRulesChain = accessRulesChain;
         }
 
         /// <summary>
@@ -163,10 +163,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public Object State { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccessRulesLayers
+        /// Gets or Sets AccessRulesChain
         /// </summary>
-        [DataMember(Name = "access_rules_layers", IsRequired = true, EmitDefaultValue = true)]
-        public Object AccessRulesLayers { get; set; }
+        [DataMember(Name = "access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
+        public Object AccessRulesChain { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -180,7 +180,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
-            sb.Append("  AccessRulesLayers: ").Append(AccessRulesLayers).Append("\n");
+            sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -236,9 +236,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.State.Equals(input.State))
                 ) && 
                 (
-                    this.AccessRulesLayers == input.AccessRulesLayers ||
-                    (this.AccessRulesLayers != null &&
-                    this.AccessRulesLayers.Equals(input.AccessRulesLayers))
+                    this.AccessRulesChain == input.AccessRulesChain ||
+                    (this.AccessRulesChain != null &&
+                    this.AccessRulesChain.Equals(input.AccessRulesChain))
                 );
         }
 
@@ -264,9 +264,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.State.GetHashCode();
                 }
-                if (this.AccessRulesLayers != null)
+                if (this.AccessRulesChain != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRulesLayers.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccessRulesChain.GetHashCode();
                 }
                 return hashCode;
             }

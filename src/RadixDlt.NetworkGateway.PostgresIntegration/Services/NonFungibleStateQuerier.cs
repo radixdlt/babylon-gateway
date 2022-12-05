@@ -187,7 +187,8 @@ LIMIT 1
         return new GatewayModel.NonFungibleDataResponse(
             ledgerState: ledgerState,
             address: address.ToString(),
-            nonFungibleIdHex: data.NonFungibleId.ToHex(),
+            nonFungibleIdType: entity.NonFungibleIdType.ToGatewayModel(),
+            nonFungibleId: data.NonFungibleId.ToGatewayModel(entity.NonFungibleIdType),
             mutableDataHex: data.MutableData.ToHex(),
             immutableDataHex: data.ImmutableData.ToHex());
     }
