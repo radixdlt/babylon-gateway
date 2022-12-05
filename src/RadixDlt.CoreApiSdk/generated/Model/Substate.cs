@@ -101,10 +101,10 @@ namespace RadixDlt.CoreApiSdk.Model
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="EpochManagerSubstate" /> class
+        /// with the <see cref="MetadataSubstate" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of EpochManagerSubstate.</param>
-        public Substate(EpochManagerSubstate actualInstance)
+        /// <param name="actualInstance">An instance of MetadataSubstate.</param>
+        public Substate(MetadataSubstate actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -113,10 +113,22 @@ namespace RadixDlt.CoreApiSdk.Model
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="ResourceManagerSubstate" /> class
+        /// with the <see cref="AccessRulesChainSubstate" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of ResourceManagerSubstate.</param>
-        public Substate(ResourceManagerSubstate actualInstance)
+        /// <param name="actualInstance">An instance of AccessRulesChainSubstate.</param>
+        public Substate(AccessRulesChainSubstate actualInstance)
+        {
+            this.IsNullable = false;
+            this.SchemaType= "oneOf";
+            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Substate" /> class
+        /// with the <see cref="GlobalAddressSubstate" /> class
+        /// </summary>
+        /// <param name="actualInstance">An instance of GlobalAddressSubstate.</param>
+        public Substate(GlobalAddressSubstate actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -149,10 +161,10 @@ namespace RadixDlt.CoreApiSdk.Model
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="PackageSubstate" /> class
+        /// with the <see cref="ComponentRoyaltyConfigSubstate" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of PackageSubstate.</param>
-        public Substate(PackageSubstate actualInstance)
+        /// <param name="actualInstance">An instance of ComponentRoyaltyConfigSubstate.</param>
+        public Substate(ComponentRoyaltyConfigSubstate actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -161,10 +173,10 @@ namespace RadixDlt.CoreApiSdk.Model
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="VaultSubstate" /> class
+        /// with the <see cref="ComponentRoyaltyAccumulatorSubstate" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of VaultSubstate.</param>
-        public Substate(VaultSubstate actualInstance)
+        /// <param name="actualInstance">An instance of ComponentRoyaltyAccumulatorSubstate.</param>
+        public Substate(ComponentRoyaltyAccumulatorSubstate actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -173,10 +185,70 @@ namespace RadixDlt.CoreApiSdk.Model
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="NonFungibleSubstate" /> class
+        /// with the <see cref="PackageInfoSubstate" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of NonFungibleSubstate.</param>
-        public Substate(NonFungibleSubstate actualInstance)
+        /// <param name="actualInstance">An instance of PackageInfoSubstate.</param>
+        public Substate(PackageInfoSubstate actualInstance)
+        {
+            this.IsNullable = false;
+            this.SchemaType= "oneOf";
+            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Substate" /> class
+        /// with the <see cref="PackageRoyaltyConfigSubstate" /> class
+        /// </summary>
+        /// <param name="actualInstance">An instance of PackageRoyaltyConfigSubstate.</param>
+        public Substate(PackageRoyaltyConfigSubstate actualInstance)
+        {
+            this.IsNullable = false;
+            this.SchemaType= "oneOf";
+            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Substate" /> class
+        /// with the <see cref="PackageRoyaltyAccumulatorSubstate" /> class
+        /// </summary>
+        /// <param name="actualInstance">An instance of PackageRoyaltyAccumulatorSubstate.</param>
+        public Substate(PackageRoyaltyAccumulatorSubstate actualInstance)
+        {
+            this.IsNullable = false;
+            this.SchemaType= "oneOf";
+            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Substate" /> class
+        /// with the <see cref="ResourceManagerSubstate" /> class
+        /// </summary>
+        /// <param name="actualInstance">An instance of ResourceManagerSubstate.</param>
+        public Substate(ResourceManagerSubstate actualInstance)
+        {
+            this.IsNullable = false;
+            this.SchemaType= "oneOf";
+            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Substate" /> class
+        /// with the <see cref="EpochManagerSubstate" /> class
+        /// </summary>
+        /// <param name="actualInstance">An instance of EpochManagerSubstate.</param>
+        public Substate(EpochManagerSubstate actualInstance)
+        {
+            this.IsNullable = false;
+            this.SchemaType= "oneOf";
+            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Substate" /> class
+        /// with the <see cref="ClockCurrentMinuteSubstate" /> class
+        /// </summary>
+        /// <param name="actualInstance">An instance of ClockCurrentMinuteSubstate.</param>
+        public Substate(ClockCurrentMinuteSubstate actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -197,10 +269,22 @@ namespace RadixDlt.CoreApiSdk.Model
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="GlobalSubstate" /> class
+        /// with the <see cref="VaultSubstate" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of GlobalSubstate.</param>
-        public Substate(GlobalSubstate actualInstance)
+        /// <param name="actualInstance">An instance of VaultSubstate.</param>
+        public Substate(VaultSubstate actualInstance)
+        {
+            this.IsNullable = false;
+            this.SchemaType= "oneOf";
+            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Substate" /> class
+        /// with the <see cref="NonFungibleStoreEntrySubstate" /> class
+        /// </summary>
+        /// <param name="actualInstance">An instance of NonFungibleStoreEntrySubstate.</param>
+        public Substate(NonFungibleStoreEntrySubstate actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -221,7 +305,23 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             set
             {
-                if (value.GetType() == typeof(ComponentInfoSubstate))
+                if (value.GetType() == typeof(AccessRulesChainSubstate))
+                {
+                    this._actualInstance = value;
+                }
+                else if (value.GetType() == typeof(ClockCurrentMinuteSubstate))
+                {
+                    this._actualInstance = value;
+                }
+                else if (value.GetType() == typeof(ComponentInfoSubstate))
+                {
+                    this._actualInstance = value;
+                }
+                else if (value.GetType() == typeof(ComponentRoyaltyAccumulatorSubstate))
+                {
+                    this._actualInstance = value;
+                }
+                else if (value.GetType() == typeof(ComponentRoyaltyConfigSubstate))
                 {
                     this._actualInstance = value;
                 }
@@ -233,7 +333,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     this._actualInstance = value;
                 }
-                else if (value.GetType() == typeof(GlobalSubstate))
+                else if (value.GetType() == typeof(GlobalAddressSubstate))
                 {
                     this._actualInstance = value;
                 }
@@ -241,11 +341,23 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     this._actualInstance = value;
                 }
-                else if (value.GetType() == typeof(NonFungibleSubstate))
+                else if (value.GetType() == typeof(MetadataSubstate))
                 {
                     this._actualInstance = value;
                 }
-                else if (value.GetType() == typeof(PackageSubstate))
+                else if (value.GetType() == typeof(NonFungibleStoreEntrySubstate))
+                {
+                    this._actualInstance = value;
+                }
+                else if (value.GetType() == typeof(PackageInfoSubstate))
+                {
+                    this._actualInstance = value;
+                }
+                else if (value.GetType() == typeof(PackageRoyaltyAccumulatorSubstate))
+                {
+                    this._actualInstance = value;
+                }
+                else if (value.GetType() == typeof(PackageRoyaltyConfigSubstate))
                 {
                     this._actualInstance = value;
                 }
@@ -259,29 +371,39 @@ namespace RadixDlt.CoreApiSdk.Model
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid instance found. Must be the following types: ComponentInfoSubstate, ComponentStateSubstate, EpochManagerSubstate, GlobalSubstate, KeyValueStoreEntrySubstate, NonFungibleSubstate, PackageSubstate, ResourceManagerSubstate, VaultSubstate");
+                    throw new ArgumentException("Invalid instance found. Must be the following types: AccessRulesChainSubstate, ClockCurrentMinuteSubstate, ComponentInfoSubstate, ComponentRoyaltyAccumulatorSubstate, ComponentRoyaltyConfigSubstate, ComponentStateSubstate, EpochManagerSubstate, GlobalAddressSubstate, KeyValueStoreEntrySubstate, MetadataSubstate, NonFungibleStoreEntrySubstate, PackageInfoSubstate, PackageRoyaltyAccumulatorSubstate, PackageRoyaltyConfigSubstate, ResourceManagerSubstate, VaultSubstate");
                 }
             }
         }
 
         /// <summary>
-        /// Get the actual instance of `EpochManagerSubstate`. If the actual instance is not `EpochManagerSubstate`,
+        /// Get the actual instance of `MetadataSubstate`. If the actual instance is not `MetadataSubstate`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of EpochManagerSubstate</returns>
-        public EpochManagerSubstate GetEpochManagerSubstate()
+        /// <returns>An instance of MetadataSubstate</returns>
+        public MetadataSubstate GetMetadataSubstate()
         {
-            return (EpochManagerSubstate)this.ActualInstance;
+            return (MetadataSubstate)this.ActualInstance;
         }
 
         /// <summary>
-        /// Get the actual instance of `ResourceManagerSubstate`. If the actual instance is not `ResourceManagerSubstate`,
+        /// Get the actual instance of `AccessRulesChainSubstate`. If the actual instance is not `AccessRulesChainSubstate`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of ResourceManagerSubstate</returns>
-        public ResourceManagerSubstate GetResourceManagerSubstate()
+        /// <returns>An instance of AccessRulesChainSubstate</returns>
+        public AccessRulesChainSubstate GetAccessRulesChainSubstate()
         {
-            return (ResourceManagerSubstate)this.ActualInstance;
+            return (AccessRulesChainSubstate)this.ActualInstance;
+        }
+
+        /// <summary>
+        /// Get the actual instance of `GlobalAddressSubstate`. If the actual instance is not `GlobalAddressSubstate`,
+        /// the InvalidClassException will be thrown
+        /// </summary>
+        /// <returns>An instance of GlobalAddressSubstate</returns>
+        public GlobalAddressSubstate GetGlobalAddressSubstate()
+        {
+            return (GlobalAddressSubstate)this.ActualInstance;
         }
 
         /// <summary>
@@ -305,33 +427,83 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// Get the actual instance of `PackageSubstate`. If the actual instance is not `PackageSubstate`,
+        /// Get the actual instance of `ComponentRoyaltyConfigSubstate`. If the actual instance is not `ComponentRoyaltyConfigSubstate`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of PackageSubstate</returns>
-        public PackageSubstate GetPackageSubstate()
+        /// <returns>An instance of ComponentRoyaltyConfigSubstate</returns>
+        public ComponentRoyaltyConfigSubstate GetComponentRoyaltyConfigSubstate()
         {
-            return (PackageSubstate)this.ActualInstance;
+            return (ComponentRoyaltyConfigSubstate)this.ActualInstance;
         }
 
         /// <summary>
-        /// Get the actual instance of `VaultSubstate`. If the actual instance is not `VaultSubstate`,
+        /// Get the actual instance of `ComponentRoyaltyAccumulatorSubstate`. If the actual instance is not `ComponentRoyaltyAccumulatorSubstate`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of VaultSubstate</returns>
-        public VaultSubstate GetVaultSubstate()
+        /// <returns>An instance of ComponentRoyaltyAccumulatorSubstate</returns>
+        public ComponentRoyaltyAccumulatorSubstate GetComponentRoyaltyAccumulatorSubstate()
         {
-            return (VaultSubstate)this.ActualInstance;
+            return (ComponentRoyaltyAccumulatorSubstate)this.ActualInstance;
         }
 
         /// <summary>
-        /// Get the actual instance of `NonFungibleSubstate`. If the actual instance is not `NonFungibleSubstate`,
+        /// Get the actual instance of `PackageInfoSubstate`. If the actual instance is not `PackageInfoSubstate`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of NonFungibleSubstate</returns>
-        public NonFungibleSubstate GetNonFungibleSubstate()
+        /// <returns>An instance of PackageInfoSubstate</returns>
+        public PackageInfoSubstate GetPackageInfoSubstate()
         {
-            return (NonFungibleSubstate)this.ActualInstance;
+            return (PackageInfoSubstate)this.ActualInstance;
+        }
+
+        /// <summary>
+        /// Get the actual instance of `PackageRoyaltyConfigSubstate`. If the actual instance is not `PackageRoyaltyConfigSubstate`,
+        /// the InvalidClassException will be thrown
+        /// </summary>
+        /// <returns>An instance of PackageRoyaltyConfigSubstate</returns>
+        public PackageRoyaltyConfigSubstate GetPackageRoyaltyConfigSubstate()
+        {
+            return (PackageRoyaltyConfigSubstate)this.ActualInstance;
+        }
+
+        /// <summary>
+        /// Get the actual instance of `PackageRoyaltyAccumulatorSubstate`. If the actual instance is not `PackageRoyaltyAccumulatorSubstate`,
+        /// the InvalidClassException will be thrown
+        /// </summary>
+        /// <returns>An instance of PackageRoyaltyAccumulatorSubstate</returns>
+        public PackageRoyaltyAccumulatorSubstate GetPackageRoyaltyAccumulatorSubstate()
+        {
+            return (PackageRoyaltyAccumulatorSubstate)this.ActualInstance;
+        }
+
+        /// <summary>
+        /// Get the actual instance of `ResourceManagerSubstate`. If the actual instance is not `ResourceManagerSubstate`,
+        /// the InvalidClassException will be thrown
+        /// </summary>
+        /// <returns>An instance of ResourceManagerSubstate</returns>
+        public ResourceManagerSubstate GetResourceManagerSubstate()
+        {
+            return (ResourceManagerSubstate)this.ActualInstance;
+        }
+
+        /// <summary>
+        /// Get the actual instance of `EpochManagerSubstate`. If the actual instance is not `EpochManagerSubstate`,
+        /// the InvalidClassException will be thrown
+        /// </summary>
+        /// <returns>An instance of EpochManagerSubstate</returns>
+        public EpochManagerSubstate GetEpochManagerSubstate()
+        {
+            return (EpochManagerSubstate)this.ActualInstance;
+        }
+
+        /// <summary>
+        /// Get the actual instance of `ClockCurrentMinuteSubstate`. If the actual instance is not `ClockCurrentMinuteSubstate`,
+        /// the InvalidClassException will be thrown
+        /// </summary>
+        /// <returns>An instance of ClockCurrentMinuteSubstate</returns>
+        public ClockCurrentMinuteSubstate GetClockCurrentMinuteSubstate()
+        {
+            return (ClockCurrentMinuteSubstate)this.ActualInstance;
         }
 
         /// <summary>
@@ -345,13 +517,23 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// Get the actual instance of `GlobalSubstate`. If the actual instance is not `GlobalSubstate`,
+        /// Get the actual instance of `VaultSubstate`. If the actual instance is not `VaultSubstate`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of GlobalSubstate</returns>
-        public GlobalSubstate GetGlobalSubstate()
+        /// <returns>An instance of VaultSubstate</returns>
+        public VaultSubstate GetVaultSubstate()
         {
-            return (GlobalSubstate)this.ActualInstance;
+            return (VaultSubstate)this.ActualInstance;
+        }
+
+        /// <summary>
+        /// Get the actual instance of `NonFungibleStoreEntrySubstate`. If the actual instance is not `NonFungibleStoreEntrySubstate`,
+        /// the InvalidClassException will be thrown
+        /// </summary>
+        /// <returns>An instance of NonFungibleStoreEntrySubstate</returns>
+        public NonFungibleStoreEntrySubstate GetNonFungibleStoreEntrySubstate()
+        {
+            return (NonFungibleStoreEntrySubstate)this.ActualInstance;
         }
 
         /// <summary>
@@ -396,11 +578,35 @@ namespace RadixDlt.CoreApiSdk.Model
                 string discriminatorValue =  discriminatorObj == null ?string.Empty :discriminatorObj.ToString();
                 switch (discriminatorValue)
                 {
+                    case "AccessRulesChain":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<AccessRulesChainSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "AccessRulesChainSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<AccessRulesChainSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "ClockCurrentMinute":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<ClockCurrentMinuteSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "ClockCurrentMinuteSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<ClockCurrentMinuteSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
                     case "ComponentInfo":
                         newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentInfoSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
                     case "ComponentInfoSubstate":
                         newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentInfoSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "ComponentRoyaltyAccumulator":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyAccumulatorSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "ComponentRoyaltyAccumulatorSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyAccumulatorSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "ComponentRoyaltyConfig":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyConfigSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "ComponentRoyaltyConfigSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyConfigSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
                     case "ComponentState":
                         newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentStateSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
@@ -414,11 +620,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     case "EpochManagerSubstate":
                         newSubstate = new Substate(JsonConvert.DeserializeObject<EpochManagerSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
-                    case "Global":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                    case "GlobalAddress":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalAddressSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
-                    case "GlobalSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                    case "GlobalAddressSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalAddressSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
                     case "KeyValueStoreEntry":
                         newSubstate = new Substate(JsonConvert.DeserializeObject<KeyValueStoreEntrySubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
@@ -426,17 +632,35 @@ namespace RadixDlt.CoreApiSdk.Model
                     case "KeyValueStoreEntrySubstate":
                         newSubstate = new Substate(JsonConvert.DeserializeObject<KeyValueStoreEntrySubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
-                    case "NonFungible":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<NonFungibleSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                    case "Metadata":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<MetadataSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
-                    case "NonFungibleSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<NonFungibleSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                    case "MetadataSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<MetadataSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
-                    case "Package":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                    case "NonFungibleStoreEntry":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<NonFungibleStoreEntrySubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
-                    case "PackageSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                    case "NonFungibleStoreEntrySubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<NonFungibleStoreEntrySubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "PackageInfo":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageInfoSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "PackageInfoSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageInfoSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "PackageRoyaltyAccumulator":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyAccumulatorSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "PackageRoyaltyAccumulatorSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyAccumulatorSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "PackageRoyaltyConfig":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyConfigSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "PackageRoyaltyConfigSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyConfigSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
                     case "ResourceManager":
                         newSubstate = new Substate(JsonConvert.DeserializeObject<ResourceManagerSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
@@ -451,7 +675,7 @@ namespace RadixDlt.CoreApiSdk.Model
                         newSubstate = new Substate(JsonConvert.DeserializeObject<VaultSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
                     default:
-                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for Substate. Possible values: ComponentInfo ComponentInfoSubstate ComponentState ComponentStateSubstate EpochManager EpochManagerSubstate Global GlobalSubstate KeyValueStoreEntry KeyValueStoreEntrySubstate NonFungible NonFungibleSubstate Package PackageSubstate ResourceManager ResourceManagerSubstate Vault VaultSubstate", discriminatorValue));
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for Substate. Possible values: AccessRulesChain AccessRulesChainSubstate ClockCurrentMinute ClockCurrentMinuteSubstate ComponentInfo ComponentInfoSubstate ComponentRoyaltyAccumulator ComponentRoyaltyAccumulatorSubstate ComponentRoyaltyConfig ComponentRoyaltyConfigSubstate ComponentState ComponentStateSubstate EpochManager EpochManagerSubstate GlobalAddress GlobalAddressSubstate KeyValueStoreEntry KeyValueStoreEntrySubstate Metadata MetadataSubstate NonFungibleStoreEntry NonFungibleStoreEntrySubstate PackageInfo PackageInfoSubstate PackageRoyaltyAccumulator PackageRoyaltyAccumulatorSubstate PackageRoyaltyConfig PackageRoyaltyConfigSubstate ResourceManager ResourceManagerSubstate Vault VaultSubstate", discriminatorValue));
                         break;
                 }
             }
@@ -462,6 +686,46 @@ namespace RadixDlt.CoreApiSdk.Model
 
             int match = 0;
             List<string> matchedTypes = new List<string>();
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(AccessRulesChainSubstate).GetProperty("AdditionalProperties") == null)
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<AccessRulesChainSubstate>(jsonString, Substate.SerializerSettings));
+                }
+                else
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<AccessRulesChainSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("AccessRulesChainSubstate");
+                match++;
+            }
+            catch (Exception exception)
+            {
+                // deserialization failed, try the next one
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into AccessRulesChainSubstate: {1}", jsonString, exception.ToString()));
+            }
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(ClockCurrentMinuteSubstate).GetProperty("AdditionalProperties") == null)
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<ClockCurrentMinuteSubstate>(jsonString, Substate.SerializerSettings));
+                }
+                else
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<ClockCurrentMinuteSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("ClockCurrentMinuteSubstate");
+                match++;
+            }
+            catch (Exception exception)
+            {
+                // deserialization failed, try the next one
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ClockCurrentMinuteSubstate: {1}", jsonString, exception.ToString()));
+            }
 
             try
             {
@@ -481,6 +745,46 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 // deserialization failed, try the next one
                 System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ComponentInfoSubstate: {1}", jsonString, exception.ToString()));
+            }
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(ComponentRoyaltyAccumulatorSubstate).GetProperty("AdditionalProperties") == null)
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyAccumulatorSubstate>(jsonString, Substate.SerializerSettings));
+                }
+                else
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyAccumulatorSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("ComponentRoyaltyAccumulatorSubstate");
+                match++;
+            }
+            catch (Exception exception)
+            {
+                // deserialization failed, try the next one
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ComponentRoyaltyAccumulatorSubstate: {1}", jsonString, exception.ToString()));
+            }
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(ComponentRoyaltyConfigSubstate).GetProperty("AdditionalProperties") == null)
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyConfigSubstate>(jsonString, Substate.SerializerSettings));
+                }
+                else
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyConfigSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("ComponentRoyaltyConfigSubstate");
+                match++;
+            }
+            catch (Exception exception)
+            {
+                // deserialization failed, try the next one
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ComponentRoyaltyConfigSubstate: {1}", jsonString, exception.ToString()));
             }
 
             try
@@ -526,21 +830,21 @@ namespace RadixDlt.CoreApiSdk.Model
             try
             {
                 // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(GlobalSubstate).GetProperty("AdditionalProperties") == null)
+                if (typeof(GlobalAddressSubstate).GetProperty("AdditionalProperties") == null)
                 {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalSubstate>(jsonString, Substate.SerializerSettings));
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalAddressSubstate>(jsonString, Substate.SerializerSettings));
                 }
                 else
                 {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalAddressSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                 }
-                matchedTypes.Add("GlobalSubstate");
+                matchedTypes.Add("GlobalAddressSubstate");
                 match++;
             }
             catch (Exception exception)
             {
                 // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into GlobalSubstate: {1}", jsonString, exception.ToString()));
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into GlobalAddressSubstate: {1}", jsonString, exception.ToString()));
             }
 
             try
@@ -566,41 +870,101 @@ namespace RadixDlt.CoreApiSdk.Model
             try
             {
                 // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(NonFungibleSubstate).GetProperty("AdditionalProperties") == null)
+                if (typeof(MetadataSubstate).GetProperty("AdditionalProperties") == null)
                 {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<NonFungibleSubstate>(jsonString, Substate.SerializerSettings));
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<MetadataSubstate>(jsonString, Substate.SerializerSettings));
                 }
                 else
                 {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<NonFungibleSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<MetadataSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                 }
-                matchedTypes.Add("NonFungibleSubstate");
+                matchedTypes.Add("MetadataSubstate");
                 match++;
             }
             catch (Exception exception)
             {
                 // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into NonFungibleSubstate: {1}", jsonString, exception.ToString()));
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into MetadataSubstate: {1}", jsonString, exception.ToString()));
             }
 
             try
             {
                 // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(PackageSubstate).GetProperty("AdditionalProperties") == null)
+                if (typeof(NonFungibleStoreEntrySubstate).GetProperty("AdditionalProperties") == null)
                 {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<PackageSubstate>(jsonString, Substate.SerializerSettings));
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<NonFungibleStoreEntrySubstate>(jsonString, Substate.SerializerSettings));
                 }
                 else
                 {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<PackageSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<NonFungibleStoreEntrySubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                 }
-                matchedTypes.Add("PackageSubstate");
+                matchedTypes.Add("NonFungibleStoreEntrySubstate");
                 match++;
             }
             catch (Exception exception)
             {
                 // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into PackageSubstate: {1}", jsonString, exception.ToString()));
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into NonFungibleStoreEntrySubstate: {1}", jsonString, exception.ToString()));
+            }
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(PackageInfoSubstate).GetProperty("AdditionalProperties") == null)
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<PackageInfoSubstate>(jsonString, Substate.SerializerSettings));
+                }
+                else
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<PackageInfoSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("PackageInfoSubstate");
+                match++;
+            }
+            catch (Exception exception)
+            {
+                // deserialization failed, try the next one
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into PackageInfoSubstate: {1}", jsonString, exception.ToString()));
+            }
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(PackageRoyaltyAccumulatorSubstate).GetProperty("AdditionalProperties") == null)
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyAccumulatorSubstate>(jsonString, Substate.SerializerSettings));
+                }
+                else
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyAccumulatorSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("PackageRoyaltyAccumulatorSubstate");
+                match++;
+            }
+            catch (Exception exception)
+            {
+                // deserialization failed, try the next one
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into PackageRoyaltyAccumulatorSubstate: {1}", jsonString, exception.ToString()));
+            }
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(PackageRoyaltyConfigSubstate).GetProperty("AdditionalProperties") == null)
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyConfigSubstate>(jsonString, Substate.SerializerSettings));
+                }
+                else
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyConfigSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("PackageRoyaltyConfigSubstate");
+                match++;
+            }
+            catch (Exception exception)
+            {
+                // deserialization failed, try the next one
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into PackageRoyaltyConfigSubstate: {1}", jsonString, exception.ToString()));
             }
 
             try

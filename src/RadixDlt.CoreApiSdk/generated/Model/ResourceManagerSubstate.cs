@@ -98,12 +98,6 @@ namespace RadixDlt.CoreApiSdk.Model
     {
 
         /// <summary>
-        /// Gets or Sets EntityType
-        /// </summary>
-        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
-        public EntityType EntityType { get; set; }
-
-        /// <summary>
         /// Gets or Sets SubstateType
         /// </summary>
         [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
@@ -114,6 +108,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
         public ResourceType ResourceType { get; set; }
+
+        /// <summary>
+        /// Gets or Sets NonFungibleIdType
+        /// </summary>
+        [DataMember(Name = "non_fungible_id_type", EmitDefaultValue = true)]
+        public NonFungibleIdType? NonFungibleIdType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceManagerSubstate" /> class.
         /// </summary>
@@ -122,38 +122,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceManagerSubstate" /> class.
         /// </summary>
-        /// <param name="entityType">entityType (required).</param>
         /// <param name="substateType">substateType (required).</param>
         /// <param name="resourceType">resourceType (required).</param>
         /// <param name="fungibleDivisibility">fungibleDivisibility.</param>
-        /// <param name="metadata">metadata (required).</param>
+        /// <param name="nonFungibleIdType">nonFungibleIdType.</param>
         /// <param name="totalSupply">The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
         /// <param name="ownedNonFungibleStore">ownedNonFungibleStore.</param>
-        /// <param name="authRules">authRules (required).</param>
-        public ResourceManagerSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), ResourceType resourceType = default(ResourceType), int fungibleDivisibility = default(int), List<ResourceManagerSubstateAllOfMetadata> metadata = default(List<ResourceManagerSubstateAllOfMetadata>), string totalSupply = default(string), EntityReference ownedNonFungibleStore = default(EntityReference), ResourceManagerSubstateAllOfAuthRules authRules = default(ResourceManagerSubstateAllOfAuthRules))
+        public ResourceManagerSubstate(SubstateType substateType = default(SubstateType), ResourceType resourceType = default(ResourceType), int fungibleDivisibility = default(int), NonFungibleIdType? nonFungibleIdType = default(NonFungibleIdType?), string totalSupply = default(string), EntityReference ownedNonFungibleStore = default(EntityReference))
         {
-            this.EntityType = entityType;
             this.SubstateType = substateType;
             this.ResourceType = resourceType;
-            // to ensure "metadata" is required (not null)
-            if (metadata == null)
-            {
-                throw new ArgumentNullException("metadata is a required property for ResourceManagerSubstate and cannot be null");
-            }
-            this.Metadata = metadata;
             // to ensure "totalSupply" is required (not null)
             if (totalSupply == null)
             {
                 throw new ArgumentNullException("totalSupply is a required property for ResourceManagerSubstate and cannot be null");
             }
             this.TotalSupply = totalSupply;
-            // to ensure "authRules" is required (not null)
-            if (authRules == null)
-            {
-                throw new ArgumentNullException("authRules is a required property for ResourceManagerSubstate and cannot be null");
-            }
-            this.AuthRules = authRules;
             this.FungibleDivisibility = fungibleDivisibility;
+            this.NonFungibleIdType = nonFungibleIdType;
             this.OwnedNonFungibleStore = ownedNonFungibleStore;
         }
 
@@ -162,12 +148,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "fungible_divisibility", EmitDefaultValue = true)]
         public int FungibleDivisibility { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Metadata
-        /// </summary>
-        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public List<ResourceManagerSubstateAllOfMetadata> Metadata { get; set; }
 
         /// <summary>
         /// The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
@@ -183,12 +163,6 @@ namespace RadixDlt.CoreApiSdk.Model
         public EntityReference OwnedNonFungibleStore { get; set; }
 
         /// <summary>
-        /// Gets or Sets AuthRules
-        /// </summary>
-        [DataMember(Name = "auth_rules", IsRequired = true, EmitDefaultValue = true)]
-        public ResourceManagerSubstateAllOfAuthRules AuthRules { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -196,14 +170,12 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ResourceManagerSubstate {\n");
-            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
             sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
             sb.Append("  FungibleDivisibility: ").Append(FungibleDivisibility).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
             sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
             sb.Append("  OwnedNonFungibleStore: ").Append(OwnedNonFungibleStore).Append("\n");
-            sb.Append("  AuthRules: ").Append(AuthRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -240,10 +212,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.EntityType == input.EntityType ||
-                    this.EntityType.Equals(input.EntityType)
-                ) && 
-                (
                     this.SubstateType == input.SubstateType ||
                     this.SubstateType.Equals(input.SubstateType)
                 ) && 
@@ -256,10 +224,8 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.FungibleDivisibility.Equals(input.FungibleDivisibility)
                 ) && 
                 (
-                    this.Metadata == input.Metadata ||
-                    this.Metadata != null &&
-                    input.Metadata != null &&
-                    this.Metadata.SequenceEqual(input.Metadata)
+                    this.NonFungibleIdType == input.NonFungibleIdType ||
+                    this.NonFungibleIdType.Equals(input.NonFungibleIdType)
                 ) && 
                 (
                     this.TotalSupply == input.TotalSupply ||
@@ -270,11 +236,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.OwnedNonFungibleStore == input.OwnedNonFungibleStore ||
                     (this.OwnedNonFungibleStore != null &&
                     this.OwnedNonFungibleStore.Equals(input.OwnedNonFungibleStore))
-                ) && 
-                (
-                    this.AuthRules == input.AuthRules ||
-                    (this.AuthRules != null &&
-                    this.AuthRules.Equals(input.AuthRules))
                 );
         }
 
@@ -287,14 +248,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
                 hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
                 hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
                 hashCode = (hashCode * 59) + this.FungibleDivisibility.GetHashCode();
-                if (this.Metadata != null)
-                {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
                 if (this.TotalSupply != null)
                 {
                     hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
@@ -302,10 +259,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.OwnedNonFungibleStore != null)
                 {
                     hashCode = (hashCode * 59) + this.OwnedNonFungibleStore.GetHashCode();
-                }
-                if (this.AuthRules != null)
-                {
-                    hashCode = (hashCode * 59) + this.AuthRules.GetHashCode();
                 }
                 return hashCode;
             }

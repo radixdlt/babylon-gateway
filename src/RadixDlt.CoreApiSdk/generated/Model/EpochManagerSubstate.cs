@@ -98,12 +98,6 @@ namespace RadixDlt.CoreApiSdk.Model
     {
 
         /// <summary>
-        /// Gets or Sets EntityType
-        /// </summary>
-        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
-        public EntityType EntityType { get; set; }
-
-        /// <summary>
         /// Gets or Sets SubstateType
         /// </summary>
         [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
@@ -116,12 +110,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EpochManagerSubstate" /> class.
         /// </summary>
-        /// <param name="entityType">entityType (required).</param>
         /// <param name="substateType">substateType (required).</param>
         /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch (required).</param>
-        public EpochManagerSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), long epoch = default(long))
+        public EpochManagerSubstate(SubstateType substateType = default(SubstateType), long epoch = default(long))
         {
-            this.EntityType = entityType;
             this.SubstateType = substateType;
             this.Epoch = epoch;
         }
@@ -141,7 +133,6 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EpochManagerSubstate {\n");
-            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
             sb.Append("  Epoch: ").Append(Epoch).Append("\n");
             sb.Append("}\n");
@@ -180,10 +171,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.EntityType == input.EntityType ||
-                    this.EntityType.Equals(input.EntityType)
-                ) && 
-                (
                     this.SubstateType == input.SubstateType ||
                     this.SubstateType.Equals(input.SubstateType)
                 ) && 
@@ -202,7 +189,6 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
                 hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
                 hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
                 return hashCode;

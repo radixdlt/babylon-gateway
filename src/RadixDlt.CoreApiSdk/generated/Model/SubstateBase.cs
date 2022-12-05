@@ -98,12 +98,6 @@ namespace RadixDlt.CoreApiSdk.Model
     {
 
         /// <summary>
-        /// Gets or Sets EntityType
-        /// </summary>
-        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
-        public EntityType EntityType { get; set; }
-
-        /// <summary>
         /// Gets or Sets SubstateType
         /// </summary>
         [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
@@ -116,11 +110,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="SubstateBase" /> class.
         /// </summary>
-        /// <param name="entityType">entityType (required).</param>
         /// <param name="substateType">substateType (required).</param>
-        public SubstateBase(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType))
+        public SubstateBase(SubstateType substateType = default(SubstateType))
         {
-            this.EntityType = entityType;
             this.SubstateType = substateType;
         }
 
@@ -132,7 +124,6 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class SubstateBase {\n");
-            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -170,10 +161,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.EntityType == input.EntityType ||
-                    this.EntityType.Equals(input.EntityType)
-                ) && 
-                (
                     this.SubstateType == input.SubstateType ||
                     this.SubstateType.Equals(input.SubstateType)
                 );
@@ -188,7 +175,6 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
                 hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
                 return hashCode;
             }

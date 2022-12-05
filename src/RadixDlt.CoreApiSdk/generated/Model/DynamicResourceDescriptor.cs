@@ -107,7 +107,7 @@ namespace RadixDlt.CoreApiSdk.Model
         public DynamicResourceDescriptor(NonFungibleDynamicResourceDescriptor actualInstance)
         {
             this.IsNullable = false;
-            this.SchemaType= "anyOf";
+            this.SchemaType= "oneOf";
             this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
         }
 
@@ -119,7 +119,7 @@ namespace RadixDlt.CoreApiSdk.Model
         public DynamicResourceDescriptor(ResourceDynamicResourceDescriptor actualInstance)
         {
             this.IsNullable = false;
-            this.SchemaType= "anyOf";
+            this.SchemaType= "oneOf";
             this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
         }
 
@@ -131,7 +131,7 @@ namespace RadixDlt.CoreApiSdk.Model
         public DynamicResourceDescriptor(SchemaPathDynamicResourceDescriptor actualInstance)
         {
             this.IsNullable = false;
-            this.SchemaType= "anyOf";
+            this.SchemaType= "oneOf";
             this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
         }
 
@@ -236,9 +236,54 @@ namespace RadixDlt.CoreApiSdk.Model
 
             try
             {
-                newDynamicResourceDescriptor = new DynamicResourceDescriptor(JsonConvert.DeserializeObject<NonFungibleDynamicResourceDescriptor>(jsonString, DynamicResourceDescriptor.SerializerSettings));
-                // deserialization is considered successful at this point if no exception has been thrown.
-                return newDynamicResourceDescriptor;
+                var discriminatorObj = JObject.Parse(jsonString)["type"];
+                string discriminatorValue =  discriminatorObj == null ?string.Empty :discriminatorObj.ToString();
+                switch (discriminatorValue)
+                {
+                    case "NonFungible":
+                        newDynamicResourceDescriptor = new DynamicResourceDescriptor(JsonConvert.DeserializeObject<NonFungibleDynamicResourceDescriptor>(jsonString, DynamicResourceDescriptor.AdditionalPropertiesSerializerSettings));
+                        return newDynamicResourceDescriptor;
+                    case "NonFungibleDynamicResourceDescriptor":
+                        newDynamicResourceDescriptor = new DynamicResourceDescriptor(JsonConvert.DeserializeObject<NonFungibleDynamicResourceDescriptor>(jsonString, DynamicResourceDescriptor.AdditionalPropertiesSerializerSettings));
+                        return newDynamicResourceDescriptor;
+                    case "Resource":
+                        newDynamicResourceDescriptor = new DynamicResourceDescriptor(JsonConvert.DeserializeObject<ResourceDynamicResourceDescriptor>(jsonString, DynamicResourceDescriptor.AdditionalPropertiesSerializerSettings));
+                        return newDynamicResourceDescriptor;
+                    case "ResourceDynamicResourceDescriptor":
+                        newDynamicResourceDescriptor = new DynamicResourceDescriptor(JsonConvert.DeserializeObject<ResourceDynamicResourceDescriptor>(jsonString, DynamicResourceDescriptor.AdditionalPropertiesSerializerSettings));
+                        return newDynamicResourceDescriptor;
+                    case "SchemaPath":
+                        newDynamicResourceDescriptor = new DynamicResourceDescriptor(JsonConvert.DeserializeObject<SchemaPathDynamicResourceDescriptor>(jsonString, DynamicResourceDescriptor.AdditionalPropertiesSerializerSettings));
+                        return newDynamicResourceDescriptor;
+                    case "SchemaPathDynamicResourceDescriptor":
+                        newDynamicResourceDescriptor = new DynamicResourceDescriptor(JsonConvert.DeserializeObject<SchemaPathDynamicResourceDescriptor>(jsonString, DynamicResourceDescriptor.AdditionalPropertiesSerializerSettings));
+                        return newDynamicResourceDescriptor;
+                    default:
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for DynamicResourceDescriptor. Possible values: NonFungible NonFungibleDynamicResourceDescriptor Resource ResourceDynamicResourceDescriptor SchemaPath SchemaPathDynamicResourceDescriptor", discriminatorValue));
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to parse the json data : `{0}` {1}", jsonString, ex.ToString()));
+            }
+
+            int match = 0;
+            List<string> matchedTypes = new List<string>();
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(NonFungibleDynamicResourceDescriptor).GetProperty("AdditionalProperties") == null)
+                {
+                    newDynamicResourceDescriptor = new DynamicResourceDescriptor(JsonConvert.DeserializeObject<NonFungibleDynamicResourceDescriptor>(jsonString, DynamicResourceDescriptor.SerializerSettings));
+                }
+                else
+                {
+                    newDynamicResourceDescriptor = new DynamicResourceDescriptor(JsonConvert.DeserializeObject<NonFungibleDynamicResourceDescriptor>(jsonString, DynamicResourceDescriptor.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("NonFungibleDynamicResourceDescriptor");
+                match++;
             }
             catch (Exception exception)
             {
@@ -248,9 +293,17 @@ namespace RadixDlt.CoreApiSdk.Model
 
             try
             {
-                newDynamicResourceDescriptor = new DynamicResourceDescriptor(JsonConvert.DeserializeObject<ResourceDynamicResourceDescriptor>(jsonString, DynamicResourceDescriptor.SerializerSettings));
-                // deserialization is considered successful at this point if no exception has been thrown.
-                return newDynamicResourceDescriptor;
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(ResourceDynamicResourceDescriptor).GetProperty("AdditionalProperties") == null)
+                {
+                    newDynamicResourceDescriptor = new DynamicResourceDescriptor(JsonConvert.DeserializeObject<ResourceDynamicResourceDescriptor>(jsonString, DynamicResourceDescriptor.SerializerSettings));
+                }
+                else
+                {
+                    newDynamicResourceDescriptor = new DynamicResourceDescriptor(JsonConvert.DeserializeObject<ResourceDynamicResourceDescriptor>(jsonString, DynamicResourceDescriptor.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("ResourceDynamicResourceDescriptor");
+                match++;
             }
             catch (Exception exception)
             {
@@ -260,9 +313,17 @@ namespace RadixDlt.CoreApiSdk.Model
 
             try
             {
-                newDynamicResourceDescriptor = new DynamicResourceDescriptor(JsonConvert.DeserializeObject<SchemaPathDynamicResourceDescriptor>(jsonString, DynamicResourceDescriptor.SerializerSettings));
-                // deserialization is considered successful at this point if no exception has been thrown.
-                return newDynamicResourceDescriptor;
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(SchemaPathDynamicResourceDescriptor).GetProperty("AdditionalProperties") == null)
+                {
+                    newDynamicResourceDescriptor = new DynamicResourceDescriptor(JsonConvert.DeserializeObject<SchemaPathDynamicResourceDescriptor>(jsonString, DynamicResourceDescriptor.SerializerSettings));
+                }
+                else
+                {
+                    newDynamicResourceDescriptor = new DynamicResourceDescriptor(JsonConvert.DeserializeObject<SchemaPathDynamicResourceDescriptor>(jsonString, DynamicResourceDescriptor.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("SchemaPathDynamicResourceDescriptor");
+                match++;
             }
             catch (Exception exception)
             {
@@ -270,8 +331,17 @@ namespace RadixDlt.CoreApiSdk.Model
                 System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into SchemaPathDynamicResourceDescriptor: {1}", jsonString, exception.ToString()));
             }
 
-            // no match found, throw an exception
-            throw new InvalidDataException("The JSON string `" + jsonString + "` cannot be deserialized into any schema defined.");
+            if (match == 0)
+            {
+                throw new InvalidDataException("The JSON string `" + jsonString + "` cannot be deserialized into any schema defined.");
+            }
+            else if (match > 1)
+            {
+                throw new InvalidDataException("The JSON string `" + jsonString + "` incorrectly matches more than one schema (should be exactly one match): " + matchedTypes);
+            }
+
+            // deserialization is considered successful at this point if no exception has been thrown.
+            return newDynamicResourceDescriptor;
         }
 
         /// <summary>

@@ -101,7 +101,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum EpochUpdate for value: EpochUpdate
         /// </summary>
         [EnumMember(Value = "EpochUpdate")]
-        EpochUpdate = 1
+        EpochUpdate = 1,
+
+        /// <summary>
+        /// Enum TimeUpdate for value: TimeUpdate
+        /// </summary>
+        [EnumMember(Value = "TimeUpdate")]
+        TimeUpdate = 2
 
     }
 

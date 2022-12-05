@@ -112,11 +112,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="notaryPublicKey">notaryPublicKey.</param>
         /// <param name="notaryAsSignatory">Whether the notary should count as a signatory (optional, default false).</param>
         /// <param name="costUnitLimit">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the maximum number of cost units available for transaction execution (required).</param>
-        /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
+        /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;255&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
         /// <param name="nonce">A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, used to ensure the transaction intent is unique. (required).</param>
         /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers (required).</param>
         /// <param name="flags">flags (required).</param>
-        public TransactionPreviewRequest(string network = default(string), string manifest = default(string), List<string> blobsHex = default(List<string>), long startEpochInclusive = default(long), long endEpochExclusive = default(long), PublicKey notaryPublicKey = default(PublicKey), bool notaryAsSignatory = default(bool), long costUnitLimit = default(long), long tipPercentage = default(long), string nonce = default(string), List<PublicKey> signerPublicKeys = default(List<PublicKey>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
+        public TransactionPreviewRequest(string network = default(string), string manifest = default(string), List<string> blobsHex = default(List<string>), long startEpochInclusive = default(long), long endEpochExclusive = default(long), PublicKey notaryPublicKey = default(PublicKey), bool notaryAsSignatory = default(bool), long costUnitLimit = default(long), int tipPercentage = default(int), string nonce = default(string), List<PublicKey> signerPublicKeys = default(List<PublicKey>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -213,11 +213,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public long CostUnitLimit { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.
+        /// An integer between &#x60;0&#x60; and &#x60;255&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;255&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.</value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
-        public long TipPercentage { get; set; }
+        public int TipPercentage { get; set; }
 
         /// <summary>
         /// A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, used to ensure the transaction intent is unique.
@@ -442,14 +442,14 @@ namespace RadixDlt.CoreApiSdk.Model
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value greater than or equal to 0.", new [] { "CostUnitLimit" });
             }
 
-            // TipPercentage (long) maximum
-            if (this.TipPercentage > (long)4294967295)
+            // TipPercentage (int) maximum
+            if (this.TipPercentage > (int)255)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value less than or equal to 4294967295.", new [] { "TipPercentage" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value less than or equal to 255.", new [] { "TipPercentage" });
             }
 
-            // TipPercentage (long) minimum
-            if (this.TipPercentage < (long)0)
+            // TipPercentage (int) minimum
+            if (this.TipPercentage < (int)0)
             {
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value greater than or equal to 0.", new [] { "TipPercentage" });
             }

@@ -104,23 +104,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="BlueprintData" /> class.
         /// </summary>
-        /// <param name="abiHex">The hex-encoded, sbor-encoded package abi (required).</param>
-        public BlueprintData(string abiHex = default(string))
+        /// <param name="abi">abi (required).</param>
+        public BlueprintData(SborData abi = default(SborData))
         {
-            // to ensure "abiHex" is required (not null)
-            if (abiHex == null)
+            // to ensure "abi" is required (not null)
+            if (abi == null)
             {
-                throw new ArgumentNullException("abiHex is a required property for BlueprintData and cannot be null");
+                throw new ArgumentNullException("abi is a required property for BlueprintData and cannot be null");
             }
-            this.AbiHex = abiHex;
+            this.Abi = abi;
         }
 
         /// <summary>
-        /// The hex-encoded, sbor-encoded package abi
+        /// Gets or Sets Abi
         /// </summary>
-        /// <value>The hex-encoded, sbor-encoded package abi</value>
-        [DataMember(Name = "abi_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string AbiHex { get; set; }
+        [DataMember(Name = "abi", IsRequired = true, EmitDefaultValue = true)]
+        public SborData Abi { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -130,7 +129,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class BlueprintData {\n");
-            sb.Append("  AbiHex: ").Append(AbiHex).Append("\n");
+            sb.Append("  Abi: ").Append(Abi).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -167,9 +166,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.AbiHex == input.AbiHex ||
-                    (this.AbiHex != null &&
-                    this.AbiHex.Equals(input.AbiHex))
+                    this.Abi == input.Abi ||
+                    (this.Abi != null &&
+                    this.Abi.Equals(input.Abi))
                 );
         }
 
@@ -182,9 +181,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AbiHex != null)
+                if (this.Abi != null)
                 {
-                    hashCode = (hashCode * 59) + this.AbiHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Abi.GetHashCode();
                 }
                 return hashCode;
             }

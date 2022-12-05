@@ -92,6 +92,22 @@ namespace RadixDlt.CoreApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
+        /// Read current clock data
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <returns>V0StateClockResponse</returns>
+        V0StateClockResponse V0StateClockPost();
+
+        /// <summary>
+        /// Read current clock data
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <returns>ApiResponse of V0StateClockResponse</returns>
+        ApiResponse<V0StateClockResponse> V0StateClockPostWithHttpInfo();
+        /// <summary>
         /// Read component data
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
@@ -110,14 +126,14 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <returns>ApiResponse of V0StateComponentResponse</returns>
         ApiResponse<V0StateComponentResponse> V0StateComponentPostWithHttpInfo(V0StateComponentRequest v0StateComponentRequest);
         /// <summary>
-        /// Read Current Epoch
+        /// Read current epoch data
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>V0StateEpochResponse</returns>
         V0StateEpochResponse V0StateEpochPost();
 
         /// <summary>
-        /// Read Current Epoch
+        /// Read current epoch data
         /// </summary>
         /// <remarks>
         /// 
@@ -243,6 +259,27 @@ namespace RadixDlt.CoreApiSdk.Api
     {
         #region Asynchronous Operations
         /// <summary>
+        /// Read current clock data
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of V0StateClockResponse</returns>
+        System.Threading.Tasks.Task<V0StateClockResponse> V0StateClockPostAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Read current clock data
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (V0StateClockResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<V0StateClockResponse>> V0StateClockPostWithHttpInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
         /// Read component data
         /// </summary>
         /// <remarks>
@@ -266,7 +303,7 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <returns>Task of ApiResponse (V0StateComponentResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<V0StateComponentResponse>> V0StateComponentPostWithHttpInfoAsync(V0StateComponentRequest v0StateComponentRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
-        /// Read Current Epoch
+        /// Read current epoch data
         /// </summary>
         /// <remarks>
         /// 
@@ -277,7 +314,7 @@ namespace RadixDlt.CoreApiSdk.Api
         System.Threading.Tasks.Task<V0StateEpochResponse> V0StateEpochPostAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Read Current Epoch
+        /// Read current epoch data
         /// </summary>
         /// <remarks>
         /// 
@@ -638,6 +675,107 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
+        /// Read current clock data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <returns>V0StateClockResponse</returns>
+        public V0StateClockResponse V0StateClockPost()
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateClockResponse> localVarResponse = V0StateClockPostWithHttpInfo();
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Read current clock data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <returns>ApiResponse of V0StateClockResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateClockResponse> V0StateClockPostWithHttpInfo()
+        {
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<V0StateClockResponse>("/v0/state/clock", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("V0StateClockPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Read current clock data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of V0StateClockResponse</returns>
+        public async System.Threading.Tasks.Task<V0StateClockResponse> V0StateClockPostAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateClockResponse> localVarResponse = await V0StateClockPostWithHttpInfoAsync(cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Read current clock data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (V0StateClockResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateClockResponse>> V0StateClockPostWithHttpInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<V0StateClockResponse>("/v0/state/clock", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("V0StateClockPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
         /// Read component data 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
@@ -755,7 +893,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Read Current Epoch 
+        /// Read current epoch data 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>V0StateEpochResponse</returns>
@@ -766,7 +904,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Read Current Epoch 
+        /// Read current epoch data 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>ApiResponse of V0StateEpochResponse</returns>
@@ -803,7 +941,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Read Current Epoch 
+        /// Read current epoch data 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
@@ -815,7 +953,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Read Current Epoch 
+        /// Read current epoch data 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>

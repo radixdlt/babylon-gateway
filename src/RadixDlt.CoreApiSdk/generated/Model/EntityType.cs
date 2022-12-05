@@ -142,7 +142,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum NonFungibleStore for value: NonFungibleStore
         /// </summary>
         [EnumMember(Value = "NonFungibleStore")]
-        NonFungibleStore = 8
+        NonFungibleStore = 8,
+
+        /// <summary>
+        /// Enum Clock for value: Clock
+        /// </summary>
+        [EnumMember(Value = "Clock")]
+        Clock = 9
 
     }
 

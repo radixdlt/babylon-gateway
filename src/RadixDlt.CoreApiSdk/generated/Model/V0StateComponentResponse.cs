@@ -106,9 +106,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="info">info (required).</param>
         /// <param name="state">state (required).</param>
-        /// <param name="ownedVaults">Any vaults owned directly or indirectly by the component (required).</param>
+        /// <param name="royaltyConfig">royaltyConfig (required).</param>
+        /// <param name="royaltyAccumulator">royaltyAccumulator (required).</param>
+        /// <param name="metadata">metadata (required).</param>
+        /// <param name="accessRules">accessRules (required).</param>
+        /// <param name="stateOwnedVaults">Any vaults owned directly or indirectly by the component (required).</param>
         /// <param name="descendentIds">Any descendent nodes owned directly or indirectly by the component (required).</param>
-        public V0StateComponentResponse(Substate info = default(Substate), Substate state = default(Substate), List<Substate> ownedVaults = default(List<Substate>), List<V0StateComponentDescendentId> descendentIds = default(List<V0StateComponentDescendentId>))
+        public V0StateComponentResponse(Substate info = default(Substate), Substate state = default(Substate), Substate royaltyConfig = default(Substate), Substate royaltyAccumulator = default(Substate), Substate metadata = default(Substate), Substate accessRules = default(Substate), List<Substate> stateOwnedVaults = default(List<Substate>), List<V0StateComponentDescendentId> descendentIds = default(List<V0StateComponentDescendentId>))
         {
             // to ensure "info" is required (not null)
             if (info == null)
@@ -122,12 +126,36 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("state is a required property for V0StateComponentResponse and cannot be null");
             }
             this.State = state;
-            // to ensure "ownedVaults" is required (not null)
-            if (ownedVaults == null)
+            // to ensure "royaltyConfig" is required (not null)
+            if (royaltyConfig == null)
             {
-                throw new ArgumentNullException("ownedVaults is a required property for V0StateComponentResponse and cannot be null");
+                throw new ArgumentNullException("royaltyConfig is a required property for V0StateComponentResponse and cannot be null");
             }
-            this.OwnedVaults = ownedVaults;
+            this.RoyaltyConfig = royaltyConfig;
+            // to ensure "royaltyAccumulator" is required (not null)
+            if (royaltyAccumulator == null)
+            {
+                throw new ArgumentNullException("royaltyAccumulator is a required property for V0StateComponentResponse and cannot be null");
+            }
+            this.RoyaltyAccumulator = royaltyAccumulator;
+            // to ensure "metadata" is required (not null)
+            if (metadata == null)
+            {
+                throw new ArgumentNullException("metadata is a required property for V0StateComponentResponse and cannot be null");
+            }
+            this.Metadata = metadata;
+            // to ensure "accessRules" is required (not null)
+            if (accessRules == null)
+            {
+                throw new ArgumentNullException("accessRules is a required property for V0StateComponentResponse and cannot be null");
+            }
+            this.AccessRules = accessRules;
+            // to ensure "stateOwnedVaults" is required (not null)
+            if (stateOwnedVaults == null)
+            {
+                throw new ArgumentNullException("stateOwnedVaults is a required property for V0StateComponentResponse and cannot be null");
+            }
+            this.StateOwnedVaults = stateOwnedVaults;
             // to ensure "descendentIds" is required (not null)
             if (descendentIds == null)
             {
@@ -149,11 +177,35 @@ namespace RadixDlt.CoreApiSdk.Model
         public Substate State { get; set; }
 
         /// <summary>
+        /// Gets or Sets RoyaltyConfig
+        /// </summary>
+        [DataMember(Name = "royalty_config", IsRequired = true, EmitDefaultValue = true)]
+        public Substate RoyaltyConfig { get; set; }
+
+        /// <summary>
+        /// Gets or Sets RoyaltyAccumulator
+        /// </summary>
+        [DataMember(Name = "royalty_accumulator", IsRequired = true, EmitDefaultValue = true)]
+        public Substate RoyaltyAccumulator { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Metadata
+        /// </summary>
+        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
+        public Substate Metadata { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AccessRules
+        /// </summary>
+        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
+        public Substate AccessRules { get; set; }
+
+        /// <summary>
         /// Any vaults owned directly or indirectly by the component
         /// </summary>
         /// <value>Any vaults owned directly or indirectly by the component</value>
-        [DataMember(Name = "owned_vaults", IsRequired = true, EmitDefaultValue = true)]
-        public List<Substate> OwnedVaults { get; set; }
+        [DataMember(Name = "state_owned_vaults", IsRequired = true, EmitDefaultValue = true)]
+        public List<Substate> StateOwnedVaults { get; set; }
 
         /// <summary>
         /// Any descendent nodes owned directly or indirectly by the component
@@ -172,7 +224,11 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class V0StateComponentResponse {\n");
             sb.Append("  Info: ").Append(Info).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
-            sb.Append("  OwnedVaults: ").Append(OwnedVaults).Append("\n");
+            sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
+            sb.Append("  RoyaltyAccumulator: ").Append(RoyaltyAccumulator).Append("\n");
+            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
+            sb.Append("  StateOwnedVaults: ").Append(StateOwnedVaults).Append("\n");
             sb.Append("  DescendentIds: ").Append(DescendentIds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -220,10 +276,30 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.State.Equals(input.State))
                 ) && 
                 (
-                    this.OwnedVaults == input.OwnedVaults ||
-                    this.OwnedVaults != null &&
-                    input.OwnedVaults != null &&
-                    this.OwnedVaults.SequenceEqual(input.OwnedVaults)
+                    this.RoyaltyConfig == input.RoyaltyConfig ||
+                    (this.RoyaltyConfig != null &&
+                    this.RoyaltyConfig.Equals(input.RoyaltyConfig))
+                ) && 
+                (
+                    this.RoyaltyAccumulator == input.RoyaltyAccumulator ||
+                    (this.RoyaltyAccumulator != null &&
+                    this.RoyaltyAccumulator.Equals(input.RoyaltyAccumulator))
+                ) && 
+                (
+                    this.Metadata == input.Metadata ||
+                    (this.Metadata != null &&
+                    this.Metadata.Equals(input.Metadata))
+                ) && 
+                (
+                    this.AccessRules == input.AccessRules ||
+                    (this.AccessRules != null &&
+                    this.AccessRules.Equals(input.AccessRules))
+                ) && 
+                (
+                    this.StateOwnedVaults == input.StateOwnedVaults ||
+                    this.StateOwnedVaults != null &&
+                    input.StateOwnedVaults != null &&
+                    this.StateOwnedVaults.SequenceEqual(input.StateOwnedVaults)
                 ) && 
                 (
                     this.DescendentIds == input.DescendentIds ||
@@ -250,9 +326,25 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.State.GetHashCode();
                 }
-                if (this.OwnedVaults != null)
+                if (this.RoyaltyConfig != null)
                 {
-                    hashCode = (hashCode * 59) + this.OwnedVaults.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RoyaltyConfig.GetHashCode();
+                }
+                if (this.RoyaltyAccumulator != null)
+                {
+                    hashCode = (hashCode * 59) + this.RoyaltyAccumulator.GetHashCode();
+                }
+                if (this.Metadata != null)
+                {
+                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
+                }
+                if (this.AccessRules != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
+                }
+                if (this.StateOwnedVaults != null)
+                {
+                    hashCode = (hashCode * 59) + this.StateOwnedVaults.GetHashCode();
                 }
                 if (this.DescendentIds != null)
                 {

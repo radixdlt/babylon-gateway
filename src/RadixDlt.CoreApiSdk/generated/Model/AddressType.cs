@@ -142,7 +142,13 @@ namespace RadixDlt.CoreApiSdk.Model
             /// Enum EpochManager for value: EpochManager
             /// </summary>
             [EnumMember(Value = "EpochManager")]
-            EpochManager = 7
+            EpochManager = 7,
+
+            /// <summary>
+            /// Enum Clock for value: Clock
+            /// </summary>
+            [EnumMember(Value = "Clock")]
+            Clock = 8
 
         }
 
