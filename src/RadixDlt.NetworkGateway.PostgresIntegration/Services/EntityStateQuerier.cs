@@ -89,9 +89,9 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record NonFungiblesViewModel(byte[] ResourceEntityGlobalAddress, long NonFungibleIdsCount, int TotalCount);
 
-    private record NonFungibleIdsViewModel(byte[] NonFungibleId, int TotalCount);
+    private record NonFungibleIdsViewModel(string NonFungibleId, int TotalCount);
 
-    private record NonFungibleIdViewModel(byte[] NonFungibleId, bool IsDeleted, byte[] ImmutableData, byte[] MutableData);
+    private record NonFungibleIdViewModel(string NonFungibleId, bool IsDeleted, byte[] ImmutableData, byte[] MutableData);
 
     private const int DefaultMetadataLimit = 10; // TODO make it configurable
     private const int DefaultResourceLimit = 5; // TODO make it configurable
@@ -205,7 +205,7 @@ OFFSET @offset LIMIT @limit",
                         items: nonFungibleIds
                             .Select(nfid => new GatewayModel.EntityDetailsResponseNonFungibleResourceDetailsIdsItem(
                                 nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel(),
-                                nonFungibleId: nfid.NonFungibleId.ToGatewayModel(nfrme.NonFungibleIdType),
+                                nonFungibleId: nfid.NonFungibleId,
                                 immutableDataHex: nfid.ImmutableData.ToHex(),
                                 mutableDataHex: nfid.MutableData.ToHex()))
                             .ToList())));
@@ -510,7 +510,7 @@ WHERE id = (
             {
                 totalCount = vm.TotalCount;
 
-                return new GatewayModel.NonFungibleIdsCollectionItem(vm.NonFungibleId.ToHex());
+                return new GatewayModel.NonFungibleIdsCollectionItem(vm.NonFungibleId);
             })
             .ToList();
 

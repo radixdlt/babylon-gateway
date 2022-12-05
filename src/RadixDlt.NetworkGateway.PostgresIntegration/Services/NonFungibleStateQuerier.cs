@@ -79,9 +79,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class NonFungibleStateQuerier : INonFungibleStateQuerier
 {
-    private record NonFungibleIdViewModel(byte[] NonFungibleId, int TotalCount);
+    private record NonFungibleIdViewModel(string NonFungibleId, int TotalCount);
 
-    private record NonFungibleDataViewModel(byte[] NonFungibleId, bool IsDeleted, byte[] ImmutableData, byte[] MutableData);
+    private record NonFungibleDataViewModel(string NonFungibleId, bool IsDeleted, byte[] ImmutableData, byte[] MutableData);
 
     private readonly ReadOnlyDbContext _dbContext;
 
@@ -128,7 +128,7 @@ WHERE nfd.id IN(
             {
                 totalCount = vm.TotalCount;
 
-                return new GatewayModel.NonFungibleIdsCollectionItem(vm.NonFungibleId.ToHex());
+                return new GatewayModel.NonFungibleIdsCollectionItem(vm.NonFungibleId);
             })
             .ToList();
 
@@ -150,7 +150,7 @@ WHERE nfd.id IN(
                 items: items.Take(request.Limit).ToList()));
     }
 
-    public async Task<GatewayModel.NonFungibleDataResponse> NonFungibleIdData(DecodedRadixAddress address, byte[] nonFungibleId, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.NonFungibleDataResponse> NonFungibleIdData(DecodedRadixAddress address, string nonFungibleId, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity<NonFungibleResourceManagerEntity>(address, ledgerState, token);
 
@@ -188,7 +188,7 @@ LIMIT 1
             ledgerState: ledgerState,
             address: address.ToString(),
             nonFungibleIdType: entity.NonFungibleIdType.ToGatewayModel(),
-            nonFungibleId: data.NonFungibleId.ToGatewayModel(entity.NonFungibleIdType),
+            nonFungibleId: data.NonFungibleId,
             mutableDataHex: data.MutableData.ToHex(),
             immutableDataHex: data.ImmutableData.ToHex());
     }

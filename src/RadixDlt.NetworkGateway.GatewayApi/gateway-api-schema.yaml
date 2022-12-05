@@ -563,9 +563,9 @@ components:
     NonFungibleIdsCollectionItem:
       type: object
       required:
-        - id_hex
+        - non_fungible_id
       properties:
-        id_hex:
+        non_fungible_id:
           type: string
 
     CommittedTransactionInfo:
@@ -1256,13 +1256,10 @@ components:
       type: object
       required:
         - address
-        - non_fungible_id_type
         - non_fungible_id
       properties:
         address:
           $ref: "#/components/schemas/EntityAddress"
-        non_fungible_id_type:
-          $ref: "#/components/schemas/NonFungibleIdType"
         non_fungible_id:
           type: string
         at_state_identifier:
@@ -1277,7 +1274,6 @@ components:
           nullable: true
       example:
         address: "<non-fungible-entity-address>"
-        non_fungible_id_type: "bytes"
         non_fungible_id: "0a0100000000"
     NonFungibleDataResponse:
       allOf:

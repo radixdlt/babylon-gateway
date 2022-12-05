@@ -202,8 +202,6 @@ internal class SubmissionService : ISubmissionService
 
     private async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitAndCreateResponse(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
     {
-        // todo consider this a mock/dumb implementation for testing purposes only
-
         using var timeoutTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3)); // TODO configurable
         using var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutTokenSource.Token, token);
 

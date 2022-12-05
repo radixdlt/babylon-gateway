@@ -77,13 +77,8 @@ internal class NonFungibleDataRequestValidator : AbstractValidator<GatewayModel.
             .NotEmpty()
             .RadixAddress();
 
-        RuleFor(x => x.NonFungibleIdType)
-            .NotEmpty()
-            .IsInEnum();
-
-        RuleFor(x => x.NonFungibleId) // TODO NFID TYPE!
-            .NotEmpty()
-            .Hex();
+        RuleFor(x => x.NonFungibleId)
+            .NotEmpty();
 
         RuleFor(x => x.AtStateIdentifier)
             .SetValidator(partialLedgerStateIdentifierValidator);

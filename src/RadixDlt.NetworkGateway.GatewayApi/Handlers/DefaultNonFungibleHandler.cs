@@ -105,9 +105,6 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
         var address = RadixAddressCodec.Decode(request.Address);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        // TODO NFID TYPE!
-        var nfid = request.NonFungibleId.ConvertFromHex();
-
-        return await _nonFungibleStateQuerier.NonFungibleIdData(address, nfid, ledgerState, token);
+        return await _nonFungibleStateQuerier.NonFungibleIdData(address, request.NonFungibleId, ledgerState, token);
     }
 }

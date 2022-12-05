@@ -195,9 +195,9 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
 
 internal record FungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion);
 
-internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, List<byte[]> NonFungibleIds, long StateVersion);
+internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, List<string> NonFungibleIds, long StateVersion);
 
-internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, byte[] NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
+internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, string NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
 
 internal record NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, long StateVersion);
 

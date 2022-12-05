@@ -531,9 +531,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("immutable_data");
 
-                    b.Property<byte[]>("NonFungibleId")
+                    b.Property<string>("NonFungibleId")
                         .IsRequired()
-                        .HasColumnType("bytea")
+                        .HasColumnType("text")
                         .HasColumnName("non_fungible_id");
 
                     b.Property<long>("NonFungibleResourceManagerEntityId")
@@ -909,9 +909,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceHistory");
 
-                    b.Property<byte[][]>("NonFungibleIds")
+                    b.Property<string[]>("NonFungibleIds")
                         .IsRequired()
-                        .HasColumnType("bytea[]")
+                        .HasColumnType("text[]")
                         .HasColumnName("non_fungible_ids");
 
                     b.Property<long>("NonFungibleIdsCount")

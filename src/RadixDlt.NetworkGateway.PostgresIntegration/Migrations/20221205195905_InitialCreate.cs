@@ -180,7 +180,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     discriminator = table.Column<string>(type: "text", nullable: false),
                     balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
                     nonfungibleidscount = table.Column<long>(name: "non_fungible_ids_count", type: "bigint", nullable: true),
-                    nonfungibleids = table.Column<byte[][]>(name: "non_fungible_ids", type: "bytea[]", nullable: true)
+                    nonfungibleids = table.Column<string[]>(name: "non_fungible_ids", type: "text[]", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -257,7 +257,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
                     nonfungiblestoreentityid = table.Column<long>(name: "non_fungible_store_entity_id", type: "bigint", nullable: false),
                     nonfungibleresourcemanagerentityid = table.Column<long>(name: "non_fungible_resource_manager_entity_id", type: "bigint", nullable: false),
-                    nonfungibleid = table.Column<byte[]>(name: "non_fungible_id", type: "bytea", nullable: false),
+                    nonfungibleid = table.Column<string>(name: "non_fungible_id", type: "text", nullable: false),
                     immutabledata = table.Column<byte[]>(name: "immutable_data", type: "bytea", nullable: false)
                 },
                 constraints: table =>

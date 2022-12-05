@@ -84,7 +84,7 @@ internal class NonFungibleIdData
     public long NonFungibleResourceManagerEntityId { get; set; }
 
     [Column("non_fungible_id")]
-    public byte[] NonFungibleId { get; set; }
+    public string NonFungibleId { get; set; }
 
     [Column("immutable_data")]
     public byte[] ImmutableData { get; set; }

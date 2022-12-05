@@ -75,5 +75,5 @@ public interface INonFungibleStateQuerier
 
     Task<GatewayModel.NonFungibleIdsResponse> NonFungibleIds(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
-    Task<GatewayModel.NonFungibleDataResponse> NonFungibleIdData(DecodedRadixAddress address, byte[] nonFungibleId, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.NonFungibleDataResponse> NonFungibleIdData(DecodedRadixAddress address, string nonFungibleId, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 }

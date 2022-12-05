@@ -62,10 +62,8 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using System;
-using System.Text;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
@@ -81,20 +79,7 @@ internal static class GatewayModelExtensions
             NonFungibleIdType.U64 => GatewayModel.NonFungibleIdType.U64,
             NonFungibleIdType.Bytes => GatewayModel.NonFungibleIdType.Bytes,
             NonFungibleIdType.UUID => GatewayModel.NonFungibleIdType.Uuid,
-            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null)
-        };
-    }
-
-    public static string ToGatewayModel(this byte[] input, NonFungibleIdType type)
-    {
-        return type switch
-        {
-            NonFungibleIdType.String => Encoding.UTF8.GetString(input),
-            NonFungibleIdType.U32 => BitConverter.ToUInt32(input).ToString(),
-            NonFungibleIdType.U64 => BitConverter.ToUInt64(input).ToString(),
-            NonFungibleIdType.Bytes => input.ToHex(),
-            NonFungibleIdType.UUID => new Guid(input).ToString(),
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
         };
     }
 }

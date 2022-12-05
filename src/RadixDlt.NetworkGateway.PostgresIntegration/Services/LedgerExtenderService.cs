@@ -911,7 +911,7 @@ WHERE id IN(
                                 var resourceAddress = RadixAddressCodec.Decode(nfra.ResourceAddress).Data.ToHex();
                                 var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
 
-                                nonFungibleVaultChanges.Add(new NonFungibleVaultChange(re, resourceEntity, nfra.NonFungibleIdsHex.Select(id => id.ConvertFromHex()).ToList(), stateVersion));
+                                nonFungibleVaultChanges.Add(new NonFungibleVaultChange(re, resourceEntity, nfra.NonFungibleIdsHex, stateVersion));
 
                                 break;
                             }
@@ -923,7 +923,7 @@ WHERE id IN(
 
                     if (sd is CoreModel.NonFungibleStoreEntrySubstate nonFungibleStoreEntry)
                     {
-                        nonFungibleIdStoreChanges.Add(new NonFungibleIdChange(re, nonFungibleStoreEntry.NonFungibleIdHex.ConvertFromHex(), nonFungibleStoreEntry.IsDeleted, nonFungibleStoreEntry.NonFungibleData, stateVersion));
+                        nonFungibleIdStoreChanges.Add(new NonFungibleIdChange(re, nonFungibleStoreEntry.NonFungibleIdHex, nonFungibleStoreEntry.IsDeleted, nonFungibleStoreEntry.NonFungibleData, stateVersion));
                     }
                 }
             }
@@ -1259,7 +1259,7 @@ INNER JOIN LATERAL (
                     await writer.WriteAsync(md.FromStateVersion, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(md.NonFungibleStoreEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(md.NonFungibleResourceManagerEntityId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(md.NonFungibleId, NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(md.NonFungibleId, NpgsqlDbType.Text, token);
                     await writer.WriteAsync(md.ImmutableData, NpgsqlDbType.Bytea, token);
                 }
 
