@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// TimeUpdateValidatorTransactionAllOf
     /// </summary>
     [DataContract(Name = "TimeUpdateValidatorTransaction_allOf")]
-    public partial class TimeUpdateValidatorTransactionAllOf : IEquatable<TimeUpdateValidatorTransactionAllOf>, IValidatableObject
+    public partial class TimeUpdateValidatorTransactionAllOf : IEquatable<TimeUpdateValidatorTransactionAllOf>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TimeUpdateValidatorTransactionAllOf" /> class.
@@ -181,27 +180,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // ProposerTimestampMs (long) maximum
-            if (this.ProposerTimestampMs > (long)100000000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for ProposerTimestampMs, must be a value less than or equal to 100000000000000.", new [] { "ProposerTimestampMs" });
-            }
-
-            // ProposerTimestampMs (long) minimum
-            if (this.ProposerTimestampMs < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for ProposerTimestampMs, must be a value greater than or equal to 0.", new [] { "ProposerTimestampMs" });
-            }
-
-            yield break;
-        }
     }
 
 }

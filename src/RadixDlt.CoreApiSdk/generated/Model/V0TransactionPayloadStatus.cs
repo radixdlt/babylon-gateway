@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// V0TransactionPayloadStatus
     /// </summary>
     [DataContract(Name = "V0TransactionPayloadStatus")]
-    public partial class V0TransactionPayloadStatus : IEquatable<V0TransactionPayloadStatus>, IValidatableObject
+    public partial class V0TransactionPayloadStatus : IEquatable<V0TransactionPayloadStatus>
     {
         /// <summary>
         /// The status of the transaction payload, as per this node
@@ -263,27 +262,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // PayloadHash (string) maxLength
-            if (this.PayloadHash != null && this.PayloadHash.Length > 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for PayloadHash, length must be less than 64.", new [] { "PayloadHash" });
-            }
-
-            // PayloadHash (string) minLength
-            if (this.PayloadHash != null && this.PayloadHash.Length < 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for PayloadHash, length must be greater than 64.", new [] { "PayloadHash" });
-            }
-
-            yield break;
-        }
     }
 
 }

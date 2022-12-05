@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// DeletedSubstateVersionRef
     /// </summary>
     [DataContract(Name = "DeletedSubstateVersionRef")]
-    public partial class DeletedSubstateVersionRef : IEquatable<DeletedSubstateVersionRef>, IValidatableObject
+    public partial class DeletedSubstateVersionRef : IEquatable<DeletedSubstateVersionRef>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DeletedSubstateVersionRef" /> class.
@@ -228,27 +227,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // _Version (long) maximum
-            if (this._Version > (long)100000000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value less than or equal to 100000000000000.", new [] { "_Version" });
-            }
-
-            // _Version (long) minimum
-            if (this._Version < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value greater than or equal to 0.", new [] { "_Version" });
-            }
-
-            yield break;
-        }
     }
 
 }

@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// If the transaction is known to not be valid, this gives a reason. Different levels of validation are performed, dependent on the validation mode. Note that, even if validation mode is Static or Full, the transaction may still be rejected or fail due to issues at runtime (eg if the loan cannot be repaid). 
     /// </summary>
     [DataContract(Name = "ParsedNotarizedTransaction_allOf_validation_error")]
-    public partial class ParsedNotarizedTransactionAllOfValidationError : IEquatable<ParsedNotarizedTransactionAllOfValidationError>, IValidatableObject
+    public partial class ParsedNotarizedTransactionAllOfValidationError : IEquatable<ParsedNotarizedTransactionAllOfValidationError>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ParsedNotarizedTransactionAllOfValidationError" /> class.
@@ -205,15 +204,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

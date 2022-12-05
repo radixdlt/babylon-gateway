@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// EddsaEd25519PublicKey
     /// </summary>
     [DataContract(Name = "EddsaEd25519PublicKey")]
-    public partial class EddsaEd25519PublicKey : IEquatable<EddsaEd25519PublicKey>, IValidatableObject
+    public partial class EddsaEd25519PublicKey : IEquatable<EddsaEd25519PublicKey>
     {
 
         /// <summary>
@@ -204,27 +203,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // KeyHex (string) maxLength
-            if (this.KeyHex != null && this.KeyHex.Length > 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for KeyHex, length must be less than 64.", new [] { "KeyHex" });
-            }
-
-            // KeyHex (string) minLength
-            if (this.KeyHex != null && this.KeyHex.Length < 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for KeyHex, length must be greater than 64.", new [] { "KeyHex" });
-            }
-
-            yield break;
-        }
     }
 
 }

@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// Fees paid
     /// </summary>
     [DataContract(Name = "FeeSummary")]
-    public partial class FeeSummary : IEquatable<FeeSummary>, IValidatableObject
+    public partial class FeeSummary : IEquatable<FeeSummary>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FeeSummary" /> class.
@@ -377,51 +376,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // TipPercentage (int) maximum
-            if (this.TipPercentage > (int)255)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value less than or equal to 255.", new [] { "TipPercentage" });
-            }
-
-            // TipPercentage (int) minimum
-            if (this.TipPercentage < (int)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value greater than or equal to 0.", new [] { "TipPercentage" });
-            }
-
-            // CostUnitLimit (long) maximum
-            if (this.CostUnitLimit > (long)4294967295)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value less than or equal to 4294967295.", new [] { "CostUnitLimit" });
-            }
-
-            // CostUnitLimit (long) minimum
-            if (this.CostUnitLimit < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value greater than or equal to 0.", new [] { "CostUnitLimit" });
-            }
-
-            // CostUnitsConsumed (long) maximum
-            if (this.CostUnitsConsumed > (long)4294967295)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitsConsumed, must be a value less than or equal to 4294967295.", new [] { "CostUnitsConsumed" });
-            }
-
-            // CostUnitsConsumed (long) minimum
-            if (this.CostUnitsConsumed < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitsConsumed, must be a value greater than or equal to 0.", new [] { "CostUnitsConsumed" });
-            }
-
-            yield break;
-        }
     }
 
 }

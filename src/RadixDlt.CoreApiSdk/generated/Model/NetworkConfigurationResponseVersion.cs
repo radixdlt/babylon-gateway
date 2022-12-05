@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// Different versions regarding the node, network and api.
     /// </summary>
     [DataContract(Name = "NetworkConfigurationResponse_version")]
-    public partial class NetworkConfigurationResponseVersion : IEquatable<NetworkConfigurationResponseVersion>, IValidatableObject
+    public partial class NetworkConfigurationResponseVersion : IEquatable<NetworkConfigurationResponseVersion>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NetworkConfigurationResponseVersion" /> class.
@@ -212,15 +211,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

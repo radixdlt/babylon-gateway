@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// TransactionHeader
     /// </summary>
     [DataContract(Name = "TransactionHeader")]
-    public partial class TransactionHeader : IEquatable<TransactionHeader>, IValidatableObject
+    public partial class TransactionHeader : IEquatable<TransactionHeader>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionHeader" /> class.
@@ -316,87 +315,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // _Version (int) maximum
-            if (this._Version > (int)255)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value less than or equal to 255.", new [] { "_Version" });
-            }
-
-            // _Version (int) minimum
-            if (this._Version < (int)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value greater than or equal to 0.", new [] { "_Version" });
-            }
-
-            // NetworkId (int) maximum
-            if (this.NetworkId > (int)255)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for NetworkId, must be a value less than or equal to 255.", new [] { "NetworkId" });
-            }
-
-            // NetworkId (int) minimum
-            if (this.NetworkId < (int)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for NetworkId, must be a value greater than or equal to 0.", new [] { "NetworkId" });
-            }
-
-            // StartEpochInclusive (long) maximum
-            if (this.StartEpochInclusive > (long)10000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartEpochInclusive, must be a value less than or equal to 10000000000.", new [] { "StartEpochInclusive" });
-            }
-
-            // StartEpochInclusive (long) minimum
-            if (this.StartEpochInclusive < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartEpochInclusive, must be a value greater than or equal to 0.", new [] { "StartEpochInclusive" });
-            }
-
-            // EndEpochExclusive (long) maximum
-            if (this.EndEpochExclusive > (long)10000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for EndEpochExclusive, must be a value less than or equal to 10000000000.", new [] { "EndEpochExclusive" });
-            }
-
-            // EndEpochExclusive (long) minimum
-            if (this.EndEpochExclusive < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for EndEpochExclusive, must be a value greater than or equal to 0.", new [] { "EndEpochExclusive" });
-            }
-
-            // CostUnitLimit (long) maximum
-            if (this.CostUnitLimit > (long)4294967295)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value less than or equal to 4294967295.", new [] { "CostUnitLimit" });
-            }
-
-            // CostUnitLimit (long) minimum
-            if (this.CostUnitLimit < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value greater than or equal to 0.", new [] { "CostUnitLimit" });
-            }
-
-            // TipPercentage (int) maximum
-            if (this.TipPercentage > (int)255)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value less than or equal to 255.", new [] { "TipPercentage" });
-            }
-
-            // TipPercentage (int) minimum
-            if (this.TipPercentage < (int)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value greater than or equal to 0.", new [] { "TipPercentage" });
-            }
-
-            yield break;
-        }
     }
 
 }

@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// Allows a client to request a response referencing an earlier (&#x60;at_*&#x60; properties) or later (&#x60;from_*&#x60; properties) ledger state.
     /// </summary>
     [DataContract(Name = "PartialLedgerStateIdentifier")]
-    public partial class PartialLedgerStateIdentifier : IEquatable<PartialLedgerStateIdentifier>, IValidatableObject
+    public partial class PartialLedgerStateIdentifier : IEquatable<PartialLedgerStateIdentifier>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PartialLedgerStateIdentifier" /> class.
@@ -236,15 +235,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// ClockCurrentMinuteSubstateAllOf
     /// </summary>
     [DataContract(Name = "ClockCurrentMinuteSubstate_allOf")]
-    public partial class ClockCurrentMinuteSubstateAllOf : IEquatable<ClockCurrentMinuteSubstateAllOf>, IValidatableObject
+    public partial class ClockCurrentMinuteSubstateAllOf : IEquatable<ClockCurrentMinuteSubstateAllOf>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ClockCurrentMinuteSubstateAllOf" /> class.
@@ -181,27 +180,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // TimestampMsRoundedDownToMinute (long) maximum
-            if (this.TimestampMsRoundedDownToMinute > (long)100000000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TimestampMsRoundedDownToMinute, must be a value less than or equal to 100000000000000.", new [] { "TimestampMsRoundedDownToMinute" });
-            }
-
-            // TimestampMsRoundedDownToMinute (long) minimum
-            if (this.TimestampMsRoundedDownToMinute < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TimestampMsRoundedDownToMinute, must be a value greater than or equal to 0.", new [] { "TimestampMsRoundedDownToMinute" });
-            }
-
-            yield break;
-        }
     }
 
 }

@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// TransactionIntent
     /// </summary>
     [DataContract(Name = "TransactionIntent")]
-    public partial class TransactionIntent : IEquatable<TransactionIntent>, IValidatableObject
+    public partial class TransactionIntent : IEquatable<TransactionIntent>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionIntent" /> class.
@@ -236,27 +235,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // Hash (string) maxLength
-            if (this.Hash != null && this.Hash.Length > 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Hash, length must be less than 64.", new [] { "Hash" });
-            }
-
-            // Hash (string) minLength
-            if (this.Hash != null && this.Hash.Length < 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Hash, length must be greater than 64.", new [] { "Hash" });
-            }
-
-            yield break;
-        }
     }
 
 }

@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// RoyaltyPayment
     /// </summary>
     [DataContract(Name = "RoyaltyPayment")]
-    public partial class RoyaltyPayment : IEquatable<RoyaltyPayment>, IValidatableObject
+    public partial class RoyaltyPayment : IEquatable<RoyaltyPayment>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RoyaltyPayment" /> class.
@@ -204,27 +203,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // CostUnitAmount (long) maximum
-            if (this.CostUnitAmount > (long)4294967295)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitAmount, must be a value less than or equal to 4294967295.", new [] { "CostUnitAmount" });
-            }
-
-            // CostUnitAmount (long) minimum
-            if (this.CostUnitAmount < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitAmount, must be a value greater than or equal to 0.", new [] { "CostUnitAmount" });
-            }
-
-            yield break;
-        }
     }
 
 }

@@ -85,7 +85,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using JsonSubTypes;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 using System.Reflection;
@@ -97,7 +96,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [JsonConverter(typeof(AccessRuleNodeJsonConverter))]
     [DataContract(Name = "AccessRuleNode")]
-    public partial class AccessRuleNode : AbstractOpenAPISchema, IEquatable<AccessRuleNode>, IValidatableObject
+    public partial class AccessRuleNode : AbstractOpenAPISchema, IEquatable<AccessRuleNode>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AccessRuleNode" /> class
@@ -382,15 +381,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> IValidatableObject.Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
     /// <summary>

@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// RoyaltyConfig
     /// </summary>
     [DataContract(Name = "RoyaltyConfig")]
-    public partial class RoyaltyConfig : IEquatable<RoyaltyConfig>, IValidatableObject
+    public partial class RoyaltyConfig : IEquatable<RoyaltyConfig>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RoyaltyConfig" /> class.
@@ -206,27 +205,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // DefaultRule (long) maximum
-            if (this.DefaultRule > (long)4294967295)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for DefaultRule, must be a value less than or equal to 4294967295.", new [] { "DefaultRule" });
-            }
-
-            // DefaultRule (long) minimum
-            if (this.DefaultRule < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for DefaultRule, must be a value greater than or equal to 0.", new [] { "DefaultRule" });
-            }
-
-            yield break;
-        }
     }
 
 }

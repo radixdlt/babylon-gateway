@@ -85,7 +85,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using JsonSubTypes;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 using System.Reflection;
@@ -97,7 +96,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// </summary>
     [JsonConverter(typeof(EntityDetailsResponseDetailsJsonConverter))]
     [DataContract(Name = "EntityDetailsResponseDetails")]
-    public partial class EntityDetailsResponseDetails : AbstractOpenAPISchema, IEquatable<EntityDetailsResponseDetails>, IValidatableObject
+    public partial class EntityDetailsResponseDetails : AbstractOpenAPISchema, IEquatable<EntityDetailsResponseDetails>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityDetailsResponseDetails" /> class
@@ -434,15 +433,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> IValidatableObject.Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
     /// <summary>
