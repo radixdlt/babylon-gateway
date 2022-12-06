@@ -205,14 +205,12 @@ internal class SubmissionService : ISubmissionService
         using var timeoutTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3)); // TODO configurable
         using var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutTokenSource.Token, token);
 
-        var notarizedTransaction = request.NotarizedTransactionHex.ConvertFromHex();
-
         try
         {
             var result = await _coreApiHandler.SubmitTransaction(
                 new CoreModel.TransactionSubmitRequest(
                     _coreApiHandler.GetNetworkIdentifier(),
-                    notarizedTransaction.ToHex()
+                    request.NotarizedTransactionHex
                 ),
                 finalTokenSource.Token
             );

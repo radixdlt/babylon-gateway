@@ -125,7 +125,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
         var identifier = new GatewayModel.TransactionCommittedDetailsRequestIdentifier(GatewayModel.TransactionCommittedDetailsRequestIdentifierType.IntentHash, request.IntentHashHex);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
         var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(identifier, ledgerState, false, token);
-        var pendingTransactions = await _transactionQuerier.LookupPendingTransactionsByIntentHash(request.IntentHashHex.ConvertFromHex(), token);
+        var pendingTransactions = await _transactionQuerier.LookupPendingTransactionsByIntentHash(request.IntentHashBytes, token);
         var remainingPendingTransactions = pendingTransactions.Where(pt => pt.PayloadHashHex != committedTransaction?.Info.PayloadHashHex).ToList();
 
         var status = GatewayModel.TransactionStatus.Unknown;

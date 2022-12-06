@@ -81,9 +81,9 @@ internal static class TransactionMapping
         {
             CoreModel.UserLedgerTransaction ult => new UserLedgerTransaction
             {
-                PayloadHash = ult.NotarizedTransaction.Hash.ConvertFromHex(),
-                IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.Hash.ConvertFromHex(),
-                SignedIntentHash = ult.NotarizedTransaction.SignedIntent.Hash.ConvertFromHex(),
+                PayloadHash = ult.NotarizedTransaction.HashBytes,
+                IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.HashBytes,
+                SignedIntentHash = ult.NotarizedTransaction.SignedIntent.HashBytes,
             },
             CoreModel.ValidatorLedgerTransaction => new ValidatorLedgerTransaction(),
             _ => throw new ArgumentOutOfRangeException(nameof(committedTransaction.LedgerTransaction), committedTransaction.LedgerTransaction, null),
@@ -92,7 +92,7 @@ internal static class TransactionMapping
         ledgerTransaction.StateVersion = committedTransaction.StateVersion;
         ledgerTransaction.Status = ToLedgerStatus(committedTransaction.Receipt.Status);
         ledgerTransaction.ErrorMessage = committedTransaction.Receipt.ErrorMessage;
-        ledgerTransaction.TransactionAccumulator = committedTransaction.AccumulatorHash.ConvertFromHex();
+        ledgerTransaction.TransactionAccumulator = committedTransaction.AccumulatorHashBytes;
         // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
         ledgerTransaction.Message = null; // message: transaction.Metadata.Message?.ConvertFromHex(),
         ledgerTransaction.Epoch = summary.Epoch;

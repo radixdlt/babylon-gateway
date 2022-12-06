@@ -114,7 +114,7 @@ internal class TransactionQuerier : ITransactionQuerier
 
     public async Task<DetailsLookupResult?> LookupCommittedTransaction(GatewayModel.TransactionCommittedDetailsRequestIdentifier identifier, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
     {
-        var hash = identifier.ValueHex.ConvertFromHex();
+        var hash = identifier.ValueBytes;
         var query = _dbContext.LedgerTransactions
             .OfType<UserLedgerTransaction>()
             .Where(ult => ult.StateVersion <= ledgerState.StateVersion);

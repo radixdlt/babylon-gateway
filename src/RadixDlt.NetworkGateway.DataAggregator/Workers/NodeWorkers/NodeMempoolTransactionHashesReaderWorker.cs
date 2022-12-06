@@ -155,7 +155,7 @@ public class NodeMempoolTransactionHashesReaderWorker : NodeWorker
 
         // TODO are we sure we want to operate on PayloadHash alone?
         var latestMempoolHashes = mempoolListResponse.Contents
-            .Select(th => th.PayloadHash.ConvertFromHex())
+            .Select(th => th.PayloadHashBytes)
             .ToHashSet(ByteArrayEqualityComparer.Default);
 
         var previousMempoolHashes = _latestTransactionHashes;

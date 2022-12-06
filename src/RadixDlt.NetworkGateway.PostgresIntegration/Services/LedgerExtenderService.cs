@@ -265,8 +265,8 @@ internal class LedgerExtenderService : ILedgerExtenderService
                     return new RawUserTransaction
                     {
                         StateVersion = ult.StateVersion,
-                        PayloadHash = nt.Hash.ConvertFromHex(),
-                        Payload = nt.PayloadHex.ConvertFromHex(),
+                        PayloadHash = nt.HashBytes,
+                        Payload = nt.PayloadBytes,
                         Receipt = ult.Receipt.ToJson(),
                     };
                 })
@@ -515,7 +515,7 @@ SELECT
 
                     if (sd is CoreModel.PackageInfoSubstate packageInfo)
                     {
-                        packageCode[sid.EntityIdHex] = packageInfo.CodeHex.ConvertFromHex();
+                        packageCode[sid.EntityIdHex] = packageInfo.CodeBytes;
                     }
                 }
 
@@ -552,7 +552,7 @@ SELECT
                     RoundInEpoch: newRoundInEpoch ?? lastTransactionSummary.RoundInEpoch,
                     IsStartOfEpoch: isStartOfEpoch,
                     IsStartOfRound: isStartOfRound,
-                    TransactionAccumulator: ct.LedgerTransaction.PayloadHex.ConvertFromHex());
+                    TransactionAccumulator: ct.LedgerTransaction.PayloadBytes);
 
                 ledgerTransactions.Add(TransactionMapping.CreateLedgerTransaction(ct, summary)); // TODO inline this for now on
 
@@ -1059,7 +1059,7 @@ INNER JOIN LATERAL (
                     // TODO or maybe we should iterate until we find entity of appropriate type?
                     NonFungibleResourceManagerEntityId = e.ReferencedStore.DatabaseGlobalAncestorId,
                     NonFungibleId = e.NonFungibleId,
-                    ImmutableData = e.Data?.ImmutableData.StructData.DataHex.ConvertFromHex() ?? Array.Empty<byte>(),
+                    ImmutableData = e.Data?.ImmutableData.StructData.DataBytes ?? Array.Empty<byte>(),
                 };
 
                 nonFungibleIdDataToAdd.Add(nfidData);
@@ -1069,7 +1069,7 @@ INNER JOIN LATERAL (
                     FromStateVersion = e.StateVersion,
                     NonFungibleIdDataId = nfidData.Id,
                     IsDeleted = e.IsDeleted,
-                    MutableData = e.Data?.MutableData.StructData.DataHex.ConvertFromHex() ?? Array.Empty<byte>(),
+                    MutableData = e.Data?.MutableData.StructData.DataBytes ?? Array.Empty<byte>(),
                 });
 
                 var store = nonFungibleIdStoreHistoryToAdd.GetOrAdd(new NonFungibleStoreLookup(e.ReferencedStore.DatabaseGlobalAncestorId, e.StateVersion), _ =>

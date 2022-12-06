@@ -62,12 +62,14 @@
  * permissions under this License.
  */
 
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class VaultSubstate : IGlobalResourcePointer
 {
+    [JsonIgnore]
     public IEnumerable<GlobalResourcePointer> Pointers
     {
         get
