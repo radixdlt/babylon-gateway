@@ -91,12 +91,12 @@ internal static class DictionaryExtensions
     }
 }
 
-internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long StateVersion)
+internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long StateVersion)
 {
     private Entity? _databaseEntity;
     private ReferencedEntity? _immediateParentReference;
 
-    public string? GlobalAddress { get; private set; }
+    public string? GlobalAddressHex { get; private set; }
 
     public Type? TypeHint { get; private set; }
 
@@ -110,7 +110,7 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
 
     public bool CanBeOwner => Type is CoreModel.EntityType.Component or CoreModel.EntityType.ResourceManager or CoreModel.EntityType.KeyValueStore;
 
-    public bool IsGlobal => GlobalAddress != null || GetDatabaseEntity().GlobalAddress != null;
+    public bool IsGlobal => GlobalAddressHex != null || GetDatabaseEntity().GlobalAddress != null;
 
     [MemberNotNullWhen(true, nameof(ImmediateParentReference))]
     public bool HasImmediateParentReference => _immediateParentReference != null;
@@ -119,7 +119,7 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
 
     public void Globalize(string globalAddressHex)
     {
-        GlobalAddress = globalAddressHex;
+        GlobalAddressHex = globalAddressHex;
     }
 
     public void Resolve(Entity entity)
@@ -128,7 +128,7 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
 
         if (entity.GlobalAddress != null)
         {
-            GlobalAddress = entity.GlobalAddress.ToHex();
+            GlobalAddressHex = entity.GlobalAddress.ToHex();
         }
     }
 
@@ -333,7 +333,7 @@ internal class ReferencedEntityDictionary
 
     public ReferencedEntity GetByGlobal(string globalAddressHex)
     {
-        return _globalsCache.GetOrAdd(globalAddressHex, _ => _storage.Values.First(re => re.GlobalAddress == globalAddressHex));
+        return _globalsCache.GetOrAdd(globalAddressHex, _ => _storage.Values.First(re => re.GlobalAddressHex == globalAddressHex));
     }
 
     public ReferencedEntity GetByDatabaseId(long id)

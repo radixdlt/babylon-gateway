@@ -76,7 +76,6 @@ using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 using System;
@@ -380,8 +379,6 @@ SELECT
                 long? newRoundInEpoch = null;
                 DateTime? newRoundTimestamp = null;
 
-                // TODO can we even just dumbly concat both collections?
-
                 foreach (var newSubstate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
                 {
                     var sid = newSubstate.SubstateId;
@@ -521,8 +518,6 @@ SELECT
 
                 foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
                 {
-                    // TODO not sure how to handle those;
-
                     var sid = deletedSubstate.SubstateId;
 
                     referencedEntities.GetOrAdd(sid.EntityIdHex, _ => new ReferencedEntity(sid.EntityIdHex, sid.EntityType, stateVersion));
@@ -554,7 +549,36 @@ SELECT
                     IsStartOfRound: isStartOfRound,
                     TransactionAccumulator: ct.LedgerTransaction.PayloadBytes);
 
-                ledgerTransactions.Add(TransactionMapping.CreateLedgerTransaction(ct, summary)); // TODO inline this for now on
+                LedgerTransaction ledgerTransaction = ct.LedgerTransaction.ActualInstance switch
+                {
+                    CoreModel.UserLedgerTransaction ult => new UserLedgerTransaction
+                    {
+                        PayloadHash = ult.NotarizedTransaction.HashBytes,
+                        IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.HashBytes,
+                        SignedIntentHash = ult.NotarizedTransaction.SignedIntent.HashBytes,
+                    },
+                    CoreModel.ValidatorLedgerTransaction => new ValidatorLedgerTransaction(),
+                    _ => throw new ArgumentOutOfRangeException(nameof(ct.LedgerTransaction), ct.LedgerTransaction, null),
+                };
+
+                ledgerTransaction.StateVersion = ct.StateVersion;
+                ledgerTransaction.Status = ct.Receipt.Status.ToModel();
+                ledgerTransaction.ErrorMessage = ct.Receipt.ErrorMessage;
+                ledgerTransaction.TransactionAccumulator = ct.AccumulatorHashBytes;
+                // TODO commented out as incompatible with current Core API version
+                ledgerTransaction.Message = null; // message: transaction.Metadata.Message?.ConvertFromHex(),
+                ledgerTransaction.Epoch = summary.Epoch;
+                ledgerTransaction.IndexInEpoch = summary.IndexInEpoch;
+                ledgerTransaction.RoundInEpoch = summary.RoundInEpoch;
+                ledgerTransaction.IsStartOfEpoch = summary.IsStartOfEpoch;
+                ledgerTransaction.IsStartOfRound = summary.IsStartOfRound;
+                ledgerTransaction.FeePaid = TokenAmount.FromDecimalString(ct.Receipt.FeeSummary.XrdTotalExecutionCost);
+                ledgerTransaction.TipPaid = TokenAmount.FromDecimalString(ct.Receipt.FeeSummary.XrdTotalTipped);
+                ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
+                ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
+                ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
+
+                ledgerTransactions.Add(ledgerTransaction);
 
                 lastTransactionSummary = summary;
             }
@@ -604,9 +628,9 @@ WHERE id IN(
 
             foreach (var re in referencedEntities.All)
             {
-                if (knownDbEntities.ContainsKey(re.Address))
+                if (knownDbEntities.ContainsKey(re.IdHex))
                 {
-                    re.Resolve(knownDbEntities[re.Address]);
+                    re.Resolve(knownDbEntities[re.IdHex]);
 
                     continue;
                 }
@@ -627,8 +651,8 @@ WHERE id IN(
 
                 dbEntity.Id = sequences.NextEntity;
                 dbEntity.FromStateVersion = re.StateVersion;
-                dbEntity.Address = re.Address.ConvertFromHex();
-                dbEntity.GlobalAddress = re.GlobalAddress == null ? null : (RadixAddress)re.GlobalAddress.ConvertFromHex();
+                dbEntity.Address = re.IdHex.ConvertFromHex();
+                dbEntity.GlobalAddress = re.GlobalAddressHex == null ? null : (RadixAddress)re.GlobalAddressHex.ConvertFromHex();
 
                 re.Resolve(dbEntity);
                 dbEntities.Add(dbEntity);
@@ -775,7 +799,6 @@ WHERE id IN(
                     await writer.WriteAsync(referencedEntities.OfStateVersion(lt.StateVersion).Select(re => re.DatabaseId).ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(lt.FeePaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
                     await writer.WriteAsync(lt.TipPaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-                    // TODO all three below must be guaranteed to be of DateTimeKind == UTC
                     await writer.WriteAsync(lt.RoundTimestamp, NpgsqlDbType.TimestampTz, token);
                     await writer.WriteAsync(lt.CreatedTimestamp, NpgsqlDbType.TimestampTz, token);
                     await writer.WriteAsync(lt.NormalizedRoundTimestamp, NpgsqlDbType.TimestampTz, token);
@@ -857,8 +880,6 @@ WHERE id IN(
             {
                 var stateVersion = ct.StateVersion;
                 var stateUpdates = ct.Receipt.StateUpdates;
-
-                // TODO can we even just dumbly concat both collections?
 
                 foreach (var newSubstate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
                 {
