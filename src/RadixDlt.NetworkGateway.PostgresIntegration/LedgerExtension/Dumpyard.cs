@@ -71,7 +71,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal static class DictionaryExtensions
 {
@@ -350,47 +350,4 @@ internal class ReferencedEntityDictionary
 
         return Array.Empty<ReferencedEntity>();
     }
-}
-
-internal class SequencesHolder
-{
-    public long ComponentEntityStateHistorySequence { get; set; }
-
-    public long EntitySequence { get; set; }
-
-    public long EntityAccessRulesChainHistorySequence { get; set; }
-
-    public long EntityMetadataHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceHistorySequence { get; set; }
-
-    public long FungibleResourceSupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdMutableDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long NextComponentEntityStateHistory => ComponentEntityStateHistorySequence++;
-
-    public long NextEntity => EntitySequence++;
-
-    public long NextEntityAccessRulesChainHistory => EntityAccessRulesChainHistorySequence++;
-
-    public long NextEntityMetadataHistory => EntityMetadataHistorySequence++;
-
-    public long NextEntityResourceAggregateHistory => EntityResourceAggregateHistorySequence++;
-
-    public long NextEntityResourceHistory => EntityResourceHistorySequence++;
-
-    public long NextFungibleResourceSupplyHistory => FungibleResourceSupplyHistorySequence++;
-
-    public long NextNonFungibleIdData => NonFungibleIdDataSequence++;
-
-    public long NextNonFungibleIdMutableDataHistory => NonFungibleIdMutableDataHistorySequence++;
-
-    public long NextNonFungibleIdStoreHistory => NonFungibleIdStoreHistorySequence++;
 }

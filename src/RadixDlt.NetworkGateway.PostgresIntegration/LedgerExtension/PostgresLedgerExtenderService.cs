@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -77,6 +76,7 @@ using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 using System;
 using System.Collections.Generic;
@@ -86,18 +86,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class LedgerExtenderService : ILedgerExtenderService
+internal class PostgresLedgerExtenderService : ILedgerExtenderService
 {
-    private readonly ILogger<LedgerExtenderService> _logger;
+    private readonly ILogger<PostgresLedgerExtenderService> _logger;
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
     private readonly IClock _clock;
 
-    public LedgerExtenderService(
-        ILogger<LedgerExtenderService> logger,
+    public PostgresLedgerExtenderService(
+        ILogger<PostgresLedgerExtenderService> logger,
         IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         INetworkConfigurationProvider networkConfigurationProvider,
         IEnumerable<ILedgerExtenderServiceObserver> observers,
@@ -347,23 +347,9 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
         // step: load current sequences
         {
-            var sw = Stopwatch.StartNew();
+            (sequences, var sequencesInitializeDuration) = await CodeStopwatch.Time(() => SequencesHolder.Initialize(dbConn, token));
 
-            sequences = await dbConn.QueryFirstAsync<SequencesHolder>(
-                @"
-SELECT
-    nextval('component_entity_state_history_id_seq') AS ComponentEntityStateHistorySequence,
-    nextval('entities_id_seq') AS EntitySequence,
-    nextval('entity_access_rules_chain_history_id_seq') AS EntityAccessRulesChainHistorySequence,
-    nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
-    nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
-    nextval('entity_resource_history_id_seq') AS EntityResourceHistorySequence,
-    nextval('fungible_resource_supply_history_id_seq') AS FungibleResourceSupplyHistorySequence,
-    nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
-    nextval('non_fungible_id_mutable_data_history_id_seq') AS NonFungibleIdMutableDataHistorySequence,
-    nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence");
-
-            dbReadDuration += sw.Elapsed;
+            dbReadDuration += sequencesInitializeDuration;
         }
 
         // step: scan for any referenced entities
@@ -1327,36 +1313,9 @@ INNER JOIN LATERAL (
 
         // step: update sequences
         {
-            var sw = Stopwatch.StartNew();
+            var sequencesUpdateDuration = await CodeStopwatch.Time(() => sequences.Update(dbConn, token));
 
-            await dbConn.QueryFirstAsync(
-                @"
-SELECT
-    setval('component_entity_state_history_id_seq', @componentEntityStateHistorySequence),
-    setval('entities_id_seq', @entitySequence),
-    setval('entity_access_rules_chain_history_id_seq', @entityAccessRulesChainHistorySequence),
-    setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
-    setval('entity_resource_aggregate_history_id_seq', @entityResourceAggregateHistorySequence),
-    setval('entity_resource_history_id_seq', @entityResourceHistorySequence),
-    setval('fungible_resource_supply_history_id_seq', @fungibleResourceSupplyHistorySequence),
-    setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
-    setval('non_fungible_id_mutable_data_history_id_seq', @nonFungibleIdMutableDataHistorySequence),
-    setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence)",
-                new
-                {
-                    componentEntityStateHistorySequence = sequences.ComponentEntityStateHistorySequence,
-                    entitySequence = sequences.EntitySequence,
-                    entityAccessRulesChainHistorySequence = sequences.EntityAccessRulesChainHistorySequence,
-                    entityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,
-                    entityResourceAggregateHistorySequence = sequences.EntityResourceAggregateHistorySequence,
-                    entityResourceHistorySequence = sequences.EntityResourceHistorySequence,
-                    fungibleResourceSupplyHistorySequence = sequences.FungibleResourceSupplyHistorySequence,
-                    nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
-                    nonFungibleIdMutableDataHistorySequence = sequences.NonFungibleIdMutableDataHistorySequence,
-                    nonFungibleIdStoreHistorySequence = sequences.NonFungibleIdStoreHistorySequence,
-                });
-
-            dbWriteDuration += sw.Elapsed;
+            dbWriteDuration += sequencesUpdateDuration;
         }
 
         var contentHandlingDuration = outerStopwatch.Elapsed - dbReadDuration - dbWriteDuration;
