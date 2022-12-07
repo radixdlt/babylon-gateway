@@ -20,19 +20,19 @@ import { exists, mapValues } from '../runtime';
  */
 export interface ResultSetCursorMixin {
     /**
-     * TBD (make it nullable when we're dealing with unknown result set sizes?)
+     * 
      * @type {number}
      * @memberof ResultSetCursorMixin
      */
     total_count?: number | null;
     /**
-     * TBD (maybe we should use HATEOAS-like permalinks?)
+     * 
      * @type {string}
      * @memberof ResultSetCursorMixin
      */
     previous_cursor?: string | null;
     /**
-     * TBD (maybe we should use HATEOAS-like permalinks?)
+     * 
      * @type {string}
      * @memberof ResultSetCursorMixin
      */

@@ -13,12 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { PartialLedgerStateIdentifier } from './PartialLedgerStateIdentifier';
+import type { LedgerStateSelector } from './LedgerStateSelector';
 import {
-    PartialLedgerStateIdentifierFromJSON,
-    PartialLedgerStateIdentifierFromJSONTyped,
-    PartialLedgerStateIdentifierToJSON,
-} from './PartialLedgerStateIdentifier';
+    LedgerStateSelectorFromJSON,
+    LedgerStateSelectorFromJSONTyped,
+    LedgerStateSelectorToJSON,
+} from './LedgerStateSelector';
 
 /**
  * 
@@ -27,17 +27,17 @@ import {
  */
 export interface EntityResourcesRequest {
     /**
+     * 
+     * @type {LedgerStateSelector}
+     * @memberof EntityResourcesRequest
+     */
+    at_ledger_state?: LedgerStateSelector | null;
+    /**
      * The Bech32m-encoded human readable version of the entity's global address.
      * @type {string}
      * @memberof EntityResourcesRequest
      */
     address: string;
-    /**
-     * 
-     * @type {PartialLedgerStateIdentifier}
-     * @memberof EntityResourcesRequest
-     */
-    at_state_identifier?: PartialLedgerStateIdentifier | null;
 }
 
 /**
@@ -60,8 +60,8 @@ export function EntityResourcesRequestFromJSONTyped(json: any, ignoreDiscriminat
     }
     return {
         
+        'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
         'address': json['address'],
-        'at_state_identifier': !exists(json, 'at_state_identifier') ? undefined : PartialLedgerStateIdentifierFromJSON(json['at_state_identifier']),
     };
 }
 
@@ -74,8 +74,8 @@ export function EntityResourcesRequestToJSON(value?: EntityResourcesRequest | nu
     }
     return {
         
+        'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
         'address': value.address,
-        'at_state_identifier': PartialLedgerStateIdentifierToJSON(value.at_state_identifier),
     };
 }
 

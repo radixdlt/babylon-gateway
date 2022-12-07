@@ -13,73 +13,66 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { LedgerStateSelector } from './LedgerStateSelector';
-import {
-    LedgerStateSelectorFromJSON,
-    LedgerStateSelectorFromJSONTyped,
-    LedgerStateSelectorToJSON,
-} from './LedgerStateSelector';
-
 /**
  * 
  * @export
- * @interface EntityMetadataRequest
+ * @interface EntityNonFungibleIdsRequestAllOf
  */
-export interface EntityMetadataRequest {
-    /**
-     * 
-     * @type {LedgerStateSelector}
-     * @memberof EntityMetadataRequest
-     */
-    at_ledger_state?: LedgerStateSelector | null;
+export interface EntityNonFungibleIdsRequestAllOf {
     /**
      * The Bech32m-encoded human readable version of the entity's global address.
      * @type {string}
-     * @memberof EntityMetadataRequest
+     * @memberof EntityNonFungibleIdsRequestAllOf
      */
     address: string;
     /**
+     * The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
+     * @type {string}
+     * @memberof EntityNonFungibleIdsRequestAllOf
+     */
+    resource_address?: string;
+    /**
      * This cursor allows forward pagination, by providing the cursor from the previous request.
      * @type {string}
-     * @memberof EntityMetadataRequest
+     * @memberof EntityNonFungibleIdsRequestAllOf
      */
     cursor?: string | null;
     /**
      * The page size requested.
      * @type {number}
-     * @memberof EntityMetadataRequest
+     * @memberof EntityNonFungibleIdsRequestAllOf
      */
     limit?: number | null;
 }
 
 /**
- * Check if a given object implements the EntityMetadataRequest interface.
+ * Check if a given object implements the EntityNonFungibleIdsRequestAllOf interface.
  */
-export function instanceOfEntityMetadataRequest(value: object): boolean {
+export function instanceOfEntityNonFungibleIdsRequestAllOf(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "address" in value;
 
     return isInstance;
 }
 
-export function EntityMetadataRequestFromJSON(json: any): EntityMetadataRequest {
-    return EntityMetadataRequestFromJSONTyped(json, false);
+export function EntityNonFungibleIdsRequestAllOfFromJSON(json: any): EntityNonFungibleIdsRequestAllOf {
+    return EntityNonFungibleIdsRequestAllOfFromJSONTyped(json, false);
 }
 
-export function EntityMetadataRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): EntityMetadataRequest {
+export function EntityNonFungibleIdsRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): EntityNonFungibleIdsRequestAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
         'address': json['address'],
+        'resource_address': !exists(json, 'resource_address') ? undefined : json['resource_address'],
         'cursor': !exists(json, 'cursor') ? undefined : json['cursor'],
         'limit': !exists(json, 'limit') ? undefined : json['limit'],
     };
 }
 
-export function EntityMetadataRequestToJSON(value?: EntityMetadataRequest | null): any {
+export function EntityNonFungibleIdsRequestAllOfToJSON(value?: EntityNonFungibleIdsRequestAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -88,8 +81,8 @@ export function EntityMetadataRequestToJSON(value?: EntityMetadataRequest | null
     }
     return {
         
-        'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
         'address': value.address,
+        'resource_address': value.resource_address,
         'cursor': value.cursor,
         'limit': value.limit,
     };

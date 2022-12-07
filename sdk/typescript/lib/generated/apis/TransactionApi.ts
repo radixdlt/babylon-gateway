@@ -110,8 +110,6 @@ export class TransactionApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
-     * TBD
      */
     async transactionConstructionRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionConstructionResponse>> {
         const queryParameters: any = {};
@@ -129,8 +127,6 @@ export class TransactionApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
-     * TBD
      */
     async transactionConstruction(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionConstructionResponse> {
         const response = await this.transactionConstructionRaw(initOverrides);
@@ -173,7 +169,7 @@ export class TransactionApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
+     * Returns user-initiated transactions which have been successfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
      * Get Recent Transactions
      */
     async transactionRecentRaw(requestParameters: TransactionRecentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionRecentResponse>> {
@@ -199,7 +195,7 @@ export class TransactionApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
+     * Returns user-initiated transactions which have been successfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
      * Get Recent Transactions
      */
     async transactionRecent(requestParameters: TransactionRecentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionRecentResponse> {
@@ -208,7 +204,6 @@ export class TransactionApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Transaction Status
      */
     async transactionStatusRaw(requestParameters: TransactionStatusOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionStatusResponse>> {
@@ -234,7 +229,6 @@ export class TransactionApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Transaction Status
      */
     async transactionStatus(requestParameters: TransactionStatusOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionStatusResponse> {

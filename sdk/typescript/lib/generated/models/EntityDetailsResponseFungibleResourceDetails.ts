@@ -19,12 +19,6 @@ import {
     EntityDetailsResponseDetailsTypeFromJSONTyped,
     EntityDetailsResponseDetailsTypeToJSON,
 } from './EntityDetailsResponseDetailsType';
-import type { TokenAmount } from './TokenAmount';
-import {
-    TokenAmountFromJSON,
-    TokenAmountFromJSONTyped,
-    TokenAmountToJSON,
-} from './TokenAmount';
 
 /**
  * 
@@ -43,7 +37,13 @@ export interface EntityDetailsResponseFungibleResourceDetails {
      * @type {object}
      * @memberof EntityDetailsResponseFungibleResourceDetails
      */
-    auth_rules: object;
+    access_rules_chain: object;
+    /**
+     * 
+     * @type {object}
+     * @memberof EntityDetailsResponseFungibleResourceDetails
+     */
+    vault_access_rules_chain: object;
     /**
      * 
      * @type {number}
@@ -51,23 +51,23 @@ export interface EntityDetailsResponseFungibleResourceDetails {
      */
     divisibility: number;
     /**
-     * 
-     * @type {TokenAmount}
+     * The string-encoded decimal representing the amount
+     * @type {string}
      * @memberof EntityDetailsResponseFungibleResourceDetails
      */
-    total_supply: TokenAmount;
+    total_supply: string;
     /**
-     * 
-     * @type {TokenAmount}
+     * The string-encoded decimal representing the amount
+     * @type {string}
      * @memberof EntityDetailsResponseFungibleResourceDetails
      */
-    total_minted: TokenAmount;
+    total_minted: string;
     /**
-     * 
-     * @type {TokenAmount}
+     * The string-encoded decimal representing the amount
+     * @type {string}
      * @memberof EntityDetailsResponseFungibleResourceDetails
      */
-    total_burnt: TokenAmount;
+    total_burnt: string;
 }
 
 /**
@@ -76,7 +76,8 @@ export interface EntityDetailsResponseFungibleResourceDetails {
 export function instanceOfEntityDetailsResponseFungibleResourceDetails(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "discriminator" in value;
-    isInstance = isInstance && "auth_rules" in value;
+    isInstance = isInstance && "access_rules_chain" in value;
+    isInstance = isInstance && "vault_access_rules_chain" in value;
     isInstance = isInstance && "divisibility" in value;
     isInstance = isInstance && "total_supply" in value;
     isInstance = isInstance && "total_minted" in value;
@@ -96,11 +97,12 @@ export function EntityDetailsResponseFungibleResourceDetailsFromJSONTyped(json: 
     return {
         
         'discriminator': EntityDetailsResponseDetailsTypeFromJSON(json['discriminator']),
-        'auth_rules': json['auth_rules'],
+        'access_rules_chain': json['access_rules_chain'],
+        'vault_access_rules_chain': json['vault_access_rules_chain'],
         'divisibility': json['divisibility'],
-        'total_supply': TokenAmountFromJSON(json['total_supply']),
-        'total_minted': TokenAmountFromJSON(json['total_minted']),
-        'total_burnt': TokenAmountFromJSON(json['total_burnt']),
+        'total_supply': json['total_supply'],
+        'total_minted': json['total_minted'],
+        'total_burnt': json['total_burnt'],
     };
 }
 
@@ -114,11 +116,12 @@ export function EntityDetailsResponseFungibleResourceDetailsToJSON(value?: Entit
     return {
         
         'discriminator': EntityDetailsResponseDetailsTypeToJSON(value.discriminator),
-        'auth_rules': value.auth_rules,
+        'access_rules_chain': value.access_rules_chain,
+        'vault_access_rules_chain': value.vault_access_rules_chain,
         'divisibility': value.divisibility,
-        'total_supply': TokenAmountToJSON(value.total_supply),
-        'total_minted': TokenAmountToJSON(value.total_minted),
-        'total_burnt': TokenAmountToJSON(value.total_burnt),
+        'total_supply': value.total_supply,
+        'total_minted': value.total_minted,
+        'total_burnt': value.total_burnt,
     };
 }
 

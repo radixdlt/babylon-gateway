@@ -19,12 +19,12 @@ import {
     EntityDetailsResponseDetailsTypeFromJSONTyped,
     EntityDetailsResponseDetailsTypeToJSON,
 } from './EntityDetailsResponseDetailsType';
-import type { EntityDetailsResponseNonFungibleResourceDetailsIds } from './EntityDetailsResponseNonFungibleResourceDetailsIds';
+import type { NonFungibleIdType } from './NonFungibleIdType';
 import {
-    EntityDetailsResponseNonFungibleResourceDetailsIdsFromJSON,
-    EntityDetailsResponseNonFungibleResourceDetailsIdsFromJSONTyped,
-    EntityDetailsResponseNonFungibleResourceDetailsIdsToJSON,
-} from './EntityDetailsResponseNonFungibleResourceDetailsIds';
+    NonFungibleIdTypeFromJSON,
+    NonFungibleIdTypeFromJSONTyped,
+    NonFungibleIdTypeToJSON,
+} from './NonFungibleIdType';
 
 /**
  * 
@@ -43,13 +43,19 @@ export interface EntityDetailsResponseNonFungibleResourceDetails {
      * @type {object}
      * @memberof EntityDetailsResponseNonFungibleResourceDetails
      */
-    auth_rules: object;
+    access_rules_chain: object;
     /**
      * 
-     * @type {EntityDetailsResponseNonFungibleResourceDetailsIds}
+     * @type {object}
      * @memberof EntityDetailsResponseNonFungibleResourceDetails
      */
-    ids: EntityDetailsResponseNonFungibleResourceDetailsIds;
+    vault_access_rules_chain: object;
+    /**
+     * 
+     * @type {NonFungibleIdType}
+     * @memberof EntityDetailsResponseNonFungibleResourceDetails
+     */
+    non_fungible_id_type: NonFungibleIdType;
 }
 
 /**
@@ -58,8 +64,9 @@ export interface EntityDetailsResponseNonFungibleResourceDetails {
 export function instanceOfEntityDetailsResponseNonFungibleResourceDetails(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "discriminator" in value;
-    isInstance = isInstance && "auth_rules" in value;
-    isInstance = isInstance && "ids" in value;
+    isInstance = isInstance && "access_rules_chain" in value;
+    isInstance = isInstance && "vault_access_rules_chain" in value;
+    isInstance = isInstance && "non_fungible_id_type" in value;
 
     return isInstance;
 }
@@ -75,8 +82,9 @@ export function EntityDetailsResponseNonFungibleResourceDetailsFromJSONTyped(jso
     return {
         
         'discriminator': EntityDetailsResponseDetailsTypeFromJSON(json['discriminator']),
-        'auth_rules': json['auth_rules'],
-        'ids': EntityDetailsResponseNonFungibleResourceDetailsIdsFromJSON(json['ids']),
+        'access_rules_chain': json['access_rules_chain'],
+        'vault_access_rules_chain': json['vault_access_rules_chain'],
+        'non_fungible_id_type': NonFungibleIdTypeFromJSON(json['non_fungible_id_type']),
     };
 }
 
@@ -90,8 +98,9 @@ export function EntityDetailsResponseNonFungibleResourceDetailsToJSON(value?: En
     return {
         
         'discriminator': EntityDetailsResponseDetailsTypeToJSON(value.discriminator),
-        'auth_rules': value.auth_rules,
-        'ids': EntityDetailsResponseNonFungibleResourceDetailsIdsToJSON(value.ids),
+        'access_rules_chain': value.access_rules_chain,
+        'vault_access_rules_chain': value.vault_access_rules_chain,
+        'non_fungible_id_type': NonFungibleIdTypeToJSON(value.non_fungible_id_type),
     };
 }
 

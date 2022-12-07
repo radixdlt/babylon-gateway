@@ -13,12 +13,6 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { LedgerStateSelector } from './LedgerStateSelector';
-import {
-    LedgerStateSelectorFromJSON,
-    LedgerStateSelectorFromJSONTyped,
-    LedgerStateSelectorToJSON,
-} from './LedgerStateSelector';
 import type { TransactionCommittedDetailsRequestIdentifier } from './TransactionCommittedDetailsRequestIdentifier';
 import {
     TransactionCommittedDetailsRequestIdentifierFromJSON,
@@ -29,49 +23,42 @@ import {
 /**
  * 
  * @export
- * @interface TransactionCommittedDetailsRequest
+ * @interface TransactionCommittedDetailsRequestAllOf
  */
-export interface TransactionCommittedDetailsRequest {
-    /**
-     * 
-     * @type {LedgerStateSelector}
-     * @memberof TransactionCommittedDetailsRequest
-     */
-    at_ledger_state?: LedgerStateSelector | null;
+export interface TransactionCommittedDetailsRequestAllOf {
     /**
      * 
      * @type {TransactionCommittedDetailsRequestIdentifier}
-     * @memberof TransactionCommittedDetailsRequest
+     * @memberof TransactionCommittedDetailsRequestAllOf
      */
     transaction_identifier: TransactionCommittedDetailsRequestIdentifier;
 }
 
 /**
- * Check if a given object implements the TransactionCommittedDetailsRequest interface.
+ * Check if a given object implements the TransactionCommittedDetailsRequestAllOf interface.
  */
-export function instanceOfTransactionCommittedDetailsRequest(value: object): boolean {
+export function instanceOfTransactionCommittedDetailsRequestAllOf(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "transaction_identifier" in value;
 
     return isInstance;
 }
 
-export function TransactionCommittedDetailsRequestFromJSON(json: any): TransactionCommittedDetailsRequest {
-    return TransactionCommittedDetailsRequestFromJSONTyped(json, false);
+export function TransactionCommittedDetailsRequestAllOfFromJSON(json: any): TransactionCommittedDetailsRequestAllOf {
+    return TransactionCommittedDetailsRequestAllOfFromJSONTyped(json, false);
 }
 
-export function TransactionCommittedDetailsRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionCommittedDetailsRequest {
+export function TransactionCommittedDetailsRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionCommittedDetailsRequestAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
         'transaction_identifier': TransactionCommittedDetailsRequestIdentifierFromJSON(json['transaction_identifier']),
     };
 }
 
-export function TransactionCommittedDetailsRequestToJSON(value?: TransactionCommittedDetailsRequest | null): any {
+export function TransactionCommittedDetailsRequestAllOfToJSON(value?: TransactionCommittedDetailsRequestAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -80,7 +67,6 @@ export function TransactionCommittedDetailsRequestToJSON(value?: TransactionComm
     }
     return {
         
-        'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
         'transaction_identifier': TransactionCommittedDetailsRequestIdentifierToJSON(value.transaction_identifier),
     };
 }

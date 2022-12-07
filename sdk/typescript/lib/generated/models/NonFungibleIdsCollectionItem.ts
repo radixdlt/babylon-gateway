@@ -24,7 +24,7 @@ export interface NonFungibleIdsCollectionItem {
      * @type {string}
      * @memberof NonFungibleIdsCollectionItem
      */
-    id_hex: string;
+    non_fungible_id: string;
 }
 
 /**
@@ -32,7 +32,7 @@ export interface NonFungibleIdsCollectionItem {
  */
 export function instanceOfNonFungibleIdsCollectionItem(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "id_hex" in value;
+    isInstance = isInstance && "non_fungible_id" in value;
 
     return isInstance;
 }
@@ -47,7 +47,7 @@ export function NonFungibleIdsCollectionItemFromJSONTyped(json: any, ignoreDiscr
     }
     return {
         
-        'id_hex': json['id_hex'],
+        'non_fungible_id': json['non_fungible_id'],
     };
 }
 
@@ -60,7 +60,7 @@ export function NonFungibleIdsCollectionItemToJSON(value?: NonFungibleIdsCollect
     }
     return {
         
-        'id_hex': value.id_hex,
+        'non_fungible_id': value.non_fungible_id,
     };
 }
 

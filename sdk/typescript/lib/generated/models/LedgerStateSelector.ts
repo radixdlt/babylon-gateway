@@ -16,49 +16,49 @@ import { exists, mapValues } from '../runtime';
 /**
  * Allows a client to request a response referencing an earlier (`at_*` properties) or later (`from_*` properties) ledger state.
  * @export
- * @interface PartialLedgerStateIdentifier
+ * @interface LedgerStateSelector
  */
-export interface PartialLedgerStateIdentifier {
+export interface LedgerStateSelector {
     /**
      * If the version is provided, the latest ledger state <= the given version is returned.
      * @type {number}
-     * @memberof PartialLedgerStateIdentifier
+     * @memberof LedgerStateSelector
      */
     state_version?: number | null;
     /**
      * If a timestamp is provided, the latest ledger state <= the given timestamp is returned.
      * @type {Date}
-     * @memberof PartialLedgerStateIdentifier
+     * @memberof LedgerStateSelector
      */
     timestamp?: Date | null;
     /**
      * If an epoch is provided, the ledger state at the given epoch <= the given round (else round 0) is returned.
      * @type {number}
-     * @memberof PartialLedgerStateIdentifier
+     * @memberof LedgerStateSelector
      */
     epoch?: number | null;
     /**
      * 
      * @type {number}
-     * @memberof PartialLedgerStateIdentifier
+     * @memberof LedgerStateSelector
      */
     round?: number | null;
 }
 
 /**
- * Check if a given object implements the PartialLedgerStateIdentifier interface.
+ * Check if a given object implements the LedgerStateSelector interface.
  */
-export function instanceOfPartialLedgerStateIdentifier(value: object): boolean {
+export function instanceOfLedgerStateSelector(value: object): boolean {
     let isInstance = true;
 
     return isInstance;
 }
 
-export function PartialLedgerStateIdentifierFromJSON(json: any): PartialLedgerStateIdentifier {
-    return PartialLedgerStateIdentifierFromJSONTyped(json, false);
+export function LedgerStateSelectorFromJSON(json: any): LedgerStateSelector {
+    return LedgerStateSelectorFromJSONTyped(json, false);
 }
 
-export function PartialLedgerStateIdentifierFromJSONTyped(json: any, ignoreDiscriminator: boolean): PartialLedgerStateIdentifier {
+export function LedgerStateSelectorFromJSONTyped(json: any, ignoreDiscriminator: boolean): LedgerStateSelector {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -71,7 +71,7 @@ export function PartialLedgerStateIdentifierFromJSONTyped(json: any, ignoreDiscr
     };
 }
 
-export function PartialLedgerStateIdentifierToJSON(value?: PartialLedgerStateIdentifier | null): any {
+export function LedgerStateSelectorToJSON(value?: LedgerStateSelector | null): any {
     if (value === undefined) {
         return undefined;
     }

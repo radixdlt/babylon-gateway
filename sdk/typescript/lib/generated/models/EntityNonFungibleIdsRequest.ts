@@ -13,12 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { PartialLedgerStateIdentifier } from './PartialLedgerStateIdentifier';
+import type { LedgerStateSelector } from './LedgerStateSelector';
 import {
-    PartialLedgerStateIdentifierFromJSON,
-    PartialLedgerStateIdentifierFromJSONTyped,
-    PartialLedgerStateIdentifierToJSON,
-} from './PartialLedgerStateIdentifier';
+    LedgerStateSelectorFromJSON,
+    LedgerStateSelectorFromJSONTyped,
+    LedgerStateSelectorToJSON,
+} from './LedgerStateSelector';
 
 /**
  * 
@@ -26,6 +26,12 @@ import {
  * @interface EntityNonFungibleIdsRequest
  */
 export interface EntityNonFungibleIdsRequest {
+    /**
+     * 
+     * @type {LedgerStateSelector}
+     * @memberof EntityNonFungibleIdsRequest
+     */
+    at_ledger_state?: LedgerStateSelector | null;
     /**
      * The Bech32m-encoded human readable version of the entity's global address.
      * @type {string}
@@ -38,12 +44,6 @@ export interface EntityNonFungibleIdsRequest {
      * @memberof EntityNonFungibleIdsRequest
      */
     resource_address?: string;
-    /**
-     * 
-     * @type {PartialLedgerStateIdentifier}
-     * @memberof EntityNonFungibleIdsRequest
-     */
-    at_state_identifier?: PartialLedgerStateIdentifier | null;
     /**
      * This cursor allows forward pagination, by providing the cursor from the previous request.
      * @type {string}
@@ -78,9 +78,9 @@ export function EntityNonFungibleIdsRequestFromJSONTyped(json: any, ignoreDiscri
     }
     return {
         
+        'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
         'address': json['address'],
         'resource_address': !exists(json, 'resource_address') ? undefined : json['resource_address'],
-        'at_state_identifier': !exists(json, 'at_state_identifier') ? undefined : PartialLedgerStateIdentifierFromJSON(json['at_state_identifier']),
         'cursor': !exists(json, 'cursor') ? undefined : json['cursor'],
         'limit': !exists(json, 'limit') ? undefined : json['limit'],
     };
@@ -95,9 +95,9 @@ export function EntityNonFungibleIdsRequestToJSON(value?: EntityNonFungibleIdsRe
     }
     return {
         
+        'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
         'address': value.address,
         'resource_address': value.resource_address,
-        'at_state_identifier': PartialLedgerStateIdentifierToJSON(value.at_state_identifier),
         'cursor': value.cursor,
         'limit': value.limit,
     };

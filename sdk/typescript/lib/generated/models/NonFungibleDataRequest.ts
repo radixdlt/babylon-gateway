@@ -13,12 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { PartialLedgerStateIdentifier } from './PartialLedgerStateIdentifier';
+import type { LedgerStateSelector } from './LedgerStateSelector';
 import {
-    PartialLedgerStateIdentifierFromJSON,
-    PartialLedgerStateIdentifierFromJSONTyped,
-    PartialLedgerStateIdentifierToJSON,
-} from './PartialLedgerStateIdentifier';
+    LedgerStateSelectorFromJSON,
+    LedgerStateSelectorFromJSONTyped,
+    LedgerStateSelectorToJSON,
+} from './LedgerStateSelector';
 
 /**
  * 
@@ -26,6 +26,12 @@ import {
  * @interface NonFungibleDataRequest
  */
 export interface NonFungibleDataRequest {
+    /**
+     * 
+     * @type {LedgerStateSelector}
+     * @memberof NonFungibleDataRequest
+     */
+    at_ledger_state?: LedgerStateSelector | null;
     /**
      * The Bech32m-encoded human readable version of the entity's global address.
      * @type {string}
@@ -37,13 +43,7 @@ export interface NonFungibleDataRequest {
      * @type {string}
      * @memberof NonFungibleDataRequest
      */
-    non_fungible_id_hex: string;
-    /**
-     * 
-     * @type {PartialLedgerStateIdentifier}
-     * @memberof NonFungibleDataRequest
-     */
-    at_state_identifier?: PartialLedgerStateIdentifier | null;
+    non_fungible_id: string;
     /**
      * This cursor allows forward pagination, by providing the cursor from the previous request.
      * @type {string}
@@ -64,7 +64,7 @@ export interface NonFungibleDataRequest {
 export function instanceOfNonFungibleDataRequest(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "address" in value;
-    isInstance = isInstance && "non_fungible_id_hex" in value;
+    isInstance = isInstance && "non_fungible_id" in value;
 
     return isInstance;
 }
@@ -79,9 +79,9 @@ export function NonFungibleDataRequestFromJSONTyped(json: any, ignoreDiscriminat
     }
     return {
         
+        'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
         'address': json['address'],
-        'non_fungible_id_hex': json['non_fungible_id_hex'],
-        'at_state_identifier': !exists(json, 'at_state_identifier') ? undefined : PartialLedgerStateIdentifierFromJSON(json['at_state_identifier']),
+        'non_fungible_id': json['non_fungible_id'],
         'cursor': !exists(json, 'cursor') ? undefined : json['cursor'],
         'limit': !exists(json, 'limit') ? undefined : json['limit'],
     };
@@ -96,9 +96,9 @@ export function NonFungibleDataRequestToJSON(value?: NonFungibleDataRequest | nu
     }
     return {
         
+        'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
         'address': value.address,
-        'non_fungible_id_hex': value.non_fungible_id_hex,
-        'at_state_identifier': PartialLedgerStateIdentifierToJSON(value.at_state_identifier),
+        'non_fungible_id': value.non_fungible_id,
         'cursor': value.cursor,
         'limit': value.limit,
     };
