@@ -1212,7 +1212,7 @@ INNER JOIN LATERAL (
                     await writer.WriteAsync(nonFungibleDiscriminator, NpgsqlDbType.Text, token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteAsync(nonFungible.NonFungibleIdsCount, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(nonFungible.NonFungibleIds, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(nonFungible.NonFungibleIds, NpgsqlDbType.Array | NpgsqlDbType.Text, token);
                 }
 
                 await writer.CompleteAsync(token);
