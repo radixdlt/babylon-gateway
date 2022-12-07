@@ -55,7 +55,7 @@ export interface EntityDetailsResponseComponentDetails {
      * @type {object}
      * @memberof EntityDetailsResponseComponentDetails
      */
-    access_rules_layers: object;
+    access_rules_chain: object;
 }
 
 /**
@@ -67,7 +67,7 @@ export function instanceOfEntityDetailsResponseComponentDetails(value: object): 
     isInstance = isInstance && "package_address" in value;
     isInstance = isInstance && "blueprint_name" in value;
     isInstance = isInstance && "state" in value;
-    isInstance = isInstance && "access_rules_layers" in value;
+    isInstance = isInstance && "access_rules_chain" in value;
 
     return isInstance;
 }
@@ -86,7 +86,7 @@ export function EntityDetailsResponseComponentDetailsFromJSONTyped(json: any, ig
         'package_address': json['package_address'],
         'blueprint_name': json['blueprint_name'],
         'state': json['state'],
-        'access_rules_layers': json['access_rules_layers'],
+        'access_rules_chain': json['access_rules_chain'],
     };
 }
 
@@ -103,7 +103,7 @@ export function EntityDetailsResponseComponentDetailsToJSON(value?: EntityDetail
         'package_address': value.package_address,
         'blueprint_name': value.blueprint_name,
         'state': value.state,
-        'access_rules_layers': value.access_rules_layers,
+        'access_rules_chain': value.access_rules_chain,
     };
 }
 

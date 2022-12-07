@@ -27,25 +27,25 @@ import {
  */
 export interface EntityMetadataCollection {
     /**
-     * TBD (make it nullable when we're dealing with unknown result set sizes?)
+     * 
      * @type {number}
      * @memberof EntityMetadataCollection
      */
     total_count?: number | null;
     /**
-     * TBD (maybe we should use HATEOAS-like permalinks?)
+     * 
      * @type {string}
      * @memberof EntityMetadataCollection
      */
     previous_cursor?: string | null;
     /**
-     * TBD (maybe we should use HATEOAS-like permalinks?)
+     * 
      * @type {string}
      * @memberof EntityMetadataCollection
      */
     next_cursor?: string | null;
     /**
-     * TBD
+     * 
      * @type {Array<EntityMetadataItem>}
      * @memberof EntityMetadataCollection
      */

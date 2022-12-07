@@ -13,73 +13,59 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { LedgerStateSelector } from './LedgerStateSelector';
-import {
-    LedgerStateSelectorFromJSON,
-    LedgerStateSelectorFromJSONTyped,
-    LedgerStateSelectorToJSON,
-} from './LedgerStateSelector';
-
 /**
  * 
  * @export
- * @interface EntityMetadataRequest
+ * @interface EntityMetadataRequestAllOf
  */
-export interface EntityMetadataRequest {
-    /**
-     * 
-     * @type {LedgerStateSelector}
-     * @memberof EntityMetadataRequest
-     */
-    at_ledger_state?: LedgerStateSelector | null;
+export interface EntityMetadataRequestAllOf {
     /**
      * The Bech32m-encoded human readable version of the entity's global address.
      * @type {string}
-     * @memberof EntityMetadataRequest
+     * @memberof EntityMetadataRequestAllOf
      */
     address: string;
     /**
      * This cursor allows forward pagination, by providing the cursor from the previous request.
      * @type {string}
-     * @memberof EntityMetadataRequest
+     * @memberof EntityMetadataRequestAllOf
      */
     cursor?: string | null;
     /**
      * The page size requested.
      * @type {number}
-     * @memberof EntityMetadataRequest
+     * @memberof EntityMetadataRequestAllOf
      */
     limit?: number | null;
 }
 
 /**
- * Check if a given object implements the EntityMetadataRequest interface.
+ * Check if a given object implements the EntityMetadataRequestAllOf interface.
  */
-export function instanceOfEntityMetadataRequest(value: object): boolean {
+export function instanceOfEntityMetadataRequestAllOf(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "address" in value;
 
     return isInstance;
 }
 
-export function EntityMetadataRequestFromJSON(json: any): EntityMetadataRequest {
-    return EntityMetadataRequestFromJSONTyped(json, false);
+export function EntityMetadataRequestAllOfFromJSON(json: any): EntityMetadataRequestAllOf {
+    return EntityMetadataRequestAllOfFromJSONTyped(json, false);
 }
 
-export function EntityMetadataRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): EntityMetadataRequest {
+export function EntityMetadataRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): EntityMetadataRequestAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
         'address': json['address'],
         'cursor': !exists(json, 'cursor') ? undefined : json['cursor'],
         'limit': !exists(json, 'limit') ? undefined : json['limit'],
     };
 }
 
-export function EntityMetadataRequestToJSON(value?: EntityMetadataRequest | null): any {
+export function EntityMetadataRequestAllOfToJSON(value?: EntityMetadataRequestAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -88,7 +74,6 @@ export function EntityMetadataRequestToJSON(value?: EntityMetadataRequest | null
     }
     return {
         
-        'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
         'address': value.address,
         'cursor': value.cursor,
         'limit': value.limit,

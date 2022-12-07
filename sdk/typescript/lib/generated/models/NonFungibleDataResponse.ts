@@ -19,6 +19,12 @@ import {
     LedgerStateFromJSONTyped,
     LedgerStateToJSON,
 } from './LedgerState';
+import type { NonFungibleIdType } from './NonFungibleIdType';
+import {
+    NonFungibleIdTypeFromJSON,
+    NonFungibleIdTypeFromJSONTyped,
+    NonFungibleIdTypeToJSON,
+} from './NonFungibleIdType';
 
 /**
  * 
@@ -40,10 +46,16 @@ export interface NonFungibleDataResponse {
     address: string;
     /**
      * 
+     * @type {NonFungibleIdType}
+     * @memberof NonFungibleDataResponse
+     */
+    non_fungible_id_type: NonFungibleIdType;
+    /**
+     * 
      * @type {string}
      * @memberof NonFungibleDataResponse
      */
-    non_fungible_id_hex: string;
+    non_fungible_id: string;
     /**
      * 
      * @type {string}
@@ -65,7 +77,8 @@ export function instanceOfNonFungibleDataResponse(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "ledger_state" in value;
     isInstance = isInstance && "address" in value;
-    isInstance = isInstance && "non_fungible_id_hex" in value;
+    isInstance = isInstance && "non_fungible_id_type" in value;
+    isInstance = isInstance && "non_fungible_id" in value;
     isInstance = isInstance && "mutable_data_hex" in value;
     isInstance = isInstance && "immutable_data_hex" in value;
 
@@ -84,7 +97,8 @@ export function NonFungibleDataResponseFromJSONTyped(json: any, ignoreDiscrimina
         
         'ledger_state': LedgerStateFromJSON(json['ledger_state']),
         'address': json['address'],
-        'non_fungible_id_hex': json['non_fungible_id_hex'],
+        'non_fungible_id_type': NonFungibleIdTypeFromJSON(json['non_fungible_id_type']),
+        'non_fungible_id': json['non_fungible_id'],
         'mutable_data_hex': json['mutable_data_hex'],
         'immutable_data_hex': json['immutable_data_hex'],
     };
@@ -101,7 +115,8 @@ export function NonFungibleDataResponseToJSON(value?: NonFungibleDataResponse | 
         
         'ledger_state': LedgerStateToJSON(value.ledger_state),
         'address': value.address,
-        'non_fungible_id_hex': value.non_fungible_id_hex,
+        'non_fungible_id_type': NonFungibleIdTypeToJSON(value.non_fungible_id_type),
+        'non_fungible_id': value.non_fungible_id,
         'mutable_data_hex': value.mutable_data_hex,
         'immutable_data_hex': value.immutable_data_hex,
     };

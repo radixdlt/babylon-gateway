@@ -39,19 +39,19 @@ export interface TransactionRecentResponse {
      */
     ledger_state: LedgerState;
     /**
-     * TBD (make it nullable when we're dealing with unknown result set sizes?)
+     * 
      * @type {number}
      * @memberof TransactionRecentResponse
      */
     total_count?: number | null;
     /**
-     * TBD (maybe we should use HATEOAS-like permalinks?)
+     * 
      * @type {string}
      * @memberof TransactionRecentResponse
      */
     previous_cursor?: string | null;
     /**
-     * TBD (maybe we should use HATEOAS-like permalinks?)
+     * 
      * @type {string}
      * @memberof TransactionRecentResponse
      */

@@ -98,7 +98,6 @@ export interface EntityResourcesOperationRequest {
 export class EntityApi extends runtime.BaseAPI {
 
     /**
-     * TBD 
      * Returns detailed information for a given entity.
      */
     async entityDetailsRaw(requestParameters: EntityDetailsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityDetailsResponse>> {
@@ -124,7 +123,6 @@ export class EntityApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Returns detailed information for a given entity.
      */
     async entityDetails(requestParameters: EntityDetailsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityDetailsResponse> {
@@ -133,7 +131,6 @@ export class EntityApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Iterates through all fungible resources associated with a given entity.
      */
     async entityFungiblesRaw(requestParameters: EntityFungiblesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityFungiblesResponse>> {
@@ -159,7 +156,6 @@ export class EntityApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Iterates through all fungible resources associated with a given entity.
      */
     async entityFungibles(requestParameters: EntityFungiblesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityFungiblesResponse> {
@@ -168,7 +164,6 @@ export class EntityApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Iterates through all metadata associated with a given entity.
      */
     async entityMetadataRaw(requestParameters: EntityMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityMetadataResponse>> {
@@ -194,7 +189,6 @@ export class EntityApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Iterates through all metadata associated with a given entity.
      */
     async entityMetadata(requestParameters: EntityMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityMetadataResponse> {
@@ -203,7 +197,6 @@ export class EntityApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity.
      */
     async entityNonFungibleIdsRaw(requestParameters: EntityNonFungibleIdsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityNonFungibleIdsResponse>> {
@@ -229,7 +222,6 @@ export class EntityApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity.
      */
     async entityNonFungibleIds(requestParameters: EntityNonFungibleIdsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityNonFungibleIdsResponse> {
@@ -238,7 +230,6 @@ export class EntityApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Iterates through all non-fungible resources associated with a given entity.
      */
     async entityNonFungiblesRaw(requestParameters: EntityNonFungiblesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityNonFungiblesResponse>> {
@@ -264,7 +255,6 @@ export class EntityApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Iterates through all non-fungible resources associated with a given entity.
      */
     async entityNonFungibles(requestParameters: EntityNonFungiblesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityNonFungiblesResponse> {
@@ -273,7 +263,6 @@ export class EntityApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Returns incomplete collection of basic information for a given collection of entities.
      */
     async entityOverviewRaw(requestParameters: EntityOverviewOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityOverviewResponse>> {
@@ -299,7 +288,6 @@ export class EntityApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Returns incomplete collection of basic information for a given collection of entities.
      */
     async entityOverview(requestParameters: EntityOverviewOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityOverviewResponse> {
@@ -308,7 +296,6 @@ export class EntityApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Returns incomplete collection of fungible and non-fungible resources associated with a given entity.
      */
     async entityResourcesRaw(requestParameters: EntityResourcesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityResourcesResponse>> {
@@ -334,7 +321,6 @@ export class EntityApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Returns incomplete collection of fungible and non-fungible resources associated with a given entity.
      */
     async entityResources(requestParameters: EntityResourcesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityResourcesResponse> {

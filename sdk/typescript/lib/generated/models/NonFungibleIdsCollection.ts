@@ -27,19 +27,19 @@ import {
  */
 export interface NonFungibleIdsCollection {
     /**
-     * TBD (make it nullable when we're dealing with unknown result set sizes?)
+     * 
      * @type {number}
      * @memberof NonFungibleIdsCollection
      */
     total_count?: number | null;
     /**
-     * TBD (maybe we should use HATEOAS-like permalinks?)
+     * 
      * @type {string}
      * @memberof NonFungibleIdsCollection
      */
     previous_cursor?: string | null;
     /**
-     * TBD (maybe we should use HATEOAS-like permalinks?)
+     * 
      * @type {string}
      * @memberof NonFungibleIdsCollection
      */

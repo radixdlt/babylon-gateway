@@ -23,63 +23,55 @@ import {
 /**
  * 
  * @export
- * @interface EntityMetadataRequest
+ * @interface TransactionRecentRequestAllOf
  */
-export interface EntityMetadataRequest {
+export interface TransactionRecentRequestAllOf {
     /**
      * 
      * @type {LedgerStateSelector}
-     * @memberof EntityMetadataRequest
+     * @memberof TransactionRecentRequestAllOf
      */
-    at_ledger_state?: LedgerStateSelector | null;
-    /**
-     * The Bech32m-encoded human readable version of the entity's global address.
-     * @type {string}
-     * @memberof EntityMetadataRequest
-     */
-    address: string;
+    from_ledger_state?: LedgerStateSelector | null;
     /**
      * This cursor allows forward pagination, by providing the cursor from the previous request.
      * @type {string}
-     * @memberof EntityMetadataRequest
+     * @memberof TransactionRecentRequestAllOf
      */
     cursor?: string | null;
     /**
      * The page size requested.
      * @type {number}
-     * @memberof EntityMetadataRequest
+     * @memberof TransactionRecentRequestAllOf
      */
     limit?: number | null;
 }
 
 /**
- * Check if a given object implements the EntityMetadataRequest interface.
+ * Check if a given object implements the TransactionRecentRequestAllOf interface.
  */
-export function instanceOfEntityMetadataRequest(value: object): boolean {
+export function instanceOfTransactionRecentRequestAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "address" in value;
 
     return isInstance;
 }
 
-export function EntityMetadataRequestFromJSON(json: any): EntityMetadataRequest {
-    return EntityMetadataRequestFromJSONTyped(json, false);
+export function TransactionRecentRequestAllOfFromJSON(json: any): TransactionRecentRequestAllOf {
+    return TransactionRecentRequestAllOfFromJSONTyped(json, false);
 }
 
-export function EntityMetadataRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): EntityMetadataRequest {
+export function TransactionRecentRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionRecentRequestAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
-        'address': json['address'],
+        'from_ledger_state': !exists(json, 'from_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['from_ledger_state']),
         'cursor': !exists(json, 'cursor') ? undefined : json['cursor'],
         'limit': !exists(json, 'limit') ? undefined : json['limit'],
     };
 }
 
-export function EntityMetadataRequestToJSON(value?: EntityMetadataRequest | null): any {
+export function TransactionRecentRequestAllOfToJSON(value?: TransactionRecentRequestAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -88,8 +80,7 @@ export function EntityMetadataRequestToJSON(value?: EntityMetadataRequest | null
     }
     return {
         
-        'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
-        'address': value.address,
+        'from_ledger_state': LedgerStateSelectorToJSON(value.from_ledger_state),
         'cursor': value.cursor,
         'limit': value.limit,
     };
