@@ -110,19 +110,19 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="EpochUpdateValidatorTransaction" /> class.
         /// </summary>
         /// <param name="type">type (required).</param>
-        /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch (required).</param>
-        public EpochUpdateValidatorTransaction(ValidatorTransactionType type = default(ValidatorTransactionType), long epoch = default(long))
+        /// <param name="scryptoEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch. Note that currently this is not the same as &#x60;consensus_epoch&#x60;, but eventually will be.  (required).</param>
+        public EpochUpdateValidatorTransaction(ValidatorTransactionType type = default(ValidatorTransactionType), long scryptoEpoch = default(long))
         {
             this.Type = type;
-            this.Epoch = epoch;
+            this.ScryptoEpoch = scryptoEpoch;
         }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch. Note that currently this is not the same as &#x60;consensus_epoch&#x60;, but eventually will be. 
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch</value>
-        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long Epoch { get; set; }
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch. Note that currently this is not the same as &#x60;consensus_epoch&#x60;, but eventually will be. </value>
+        [DataMember(Name = "scrypto_epoch", IsRequired = true, EmitDefaultValue = true)]
+        public long ScryptoEpoch { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -133,7 +133,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EpochUpdateValidatorTransaction {\n");
             sb.Append("  Type: ").Append(Type).Append("\n");
-            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
+            sb.Append("  ScryptoEpoch: ").Append(ScryptoEpoch).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,8 +174,8 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Type.Equals(input.Type)
                 ) && 
                 (
-                    this.Epoch == input.Epoch ||
-                    this.Epoch.Equals(input.Epoch)
+                    this.ScryptoEpoch == input.ScryptoEpoch ||
+                    this.ScryptoEpoch.Equals(input.ScryptoEpoch)
                 );
         }
 
@@ -189,7 +189,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.Type.GetHashCode();
-                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
+                hashCode = (hashCode * 59) + this.ScryptoEpoch.GetHashCode();
                 return hashCode;
             }
         }

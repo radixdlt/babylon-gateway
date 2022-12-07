@@ -109,7 +109,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleId" /> class.
         /// </summary>
-        /// <param name="simpleRep">The simple string representation of the non-fungible id. For string id types, this is simply the string itself; for integer types, this is the integer as a decimal; and for the bytes id type, this is the lower case hex representation. A non-fungible resource has a fixed &#x60;NonFungibleType&#x60;, so this representation uniquely identifies this non-fungible under the given resource address.  (required).</param>
+        /// <param name="simpleRep">The simple string representation of the non-fungible id. For string id types, this is simply the string itself; for integer types, this is the integer as a decimal; and for the bytes id type, this is the lower case hex representation. A non-fungible resource has a fixed &#x60;NonFungibleIdType&#x60;, so this representation uniquely identifies this non-fungible under the given resource address.  (required).</param>
         /// <param name="idType">idType (required).</param>
         /// <param name="sborHex">The hex-encoded SBOR-encoded bytes of its non-fungible id (required).</param>
         public NonFungibleId(string simpleRep = default(string), NonFungibleIdType idType = default(NonFungibleIdType), string sborHex = default(string))
@@ -130,9 +130,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The simple string representation of the non-fungible id. For string id types, this is simply the string itself; for integer types, this is the integer as a decimal; and for the bytes id type, this is the lower case hex representation. A non-fungible resource has a fixed &#x60;NonFungibleType&#x60;, so this representation uniquely identifies this non-fungible under the given resource address. 
+        /// The simple string representation of the non-fungible id. For string id types, this is simply the string itself; for integer types, this is the integer as a decimal; and for the bytes id type, this is the lower case hex representation. A non-fungible resource has a fixed &#x60;NonFungibleIdType&#x60;, so this representation uniquely identifies this non-fungible under the given resource address. 
         /// </summary>
-        /// <value>The simple string representation of the non-fungible id. For string id types, this is simply the string itself; for integer types, this is the integer as a decimal; and for the bytes id type, this is the lower case hex representation. A non-fungible resource has a fixed &#x60;NonFungibleType&#x60;, so this representation uniquely identifies this non-fungible under the given resource address. </value>
+        /// <value>The simple string representation of the non-fungible id. For string id types, this is simply the string itself; for integer types, this is the integer as a decimal; and for the bytes id type, this is the lower case hex representation. A non-fungible resource has a fixed &#x60;NonFungibleIdType&#x60;, so this representation uniquely identifies this non-fungible under the given resource address. </value>
         [DataMember(Name = "simple_rep", IsRequired = true, EmitDefaultValue = true)]
         public string SimpleRep { get; set; }
 

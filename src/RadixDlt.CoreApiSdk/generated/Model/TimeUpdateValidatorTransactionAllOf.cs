@@ -104,9 +104,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="TimeUpdateValidatorTransactionAllOf" /> class.
         /// </summary>
         /// <param name="proposerTimestampMs">An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the round proposer&#39;s unix timestamp in ms (required).</param>
-        public TimeUpdateValidatorTransactionAllOf(long proposerTimestampMs = default(long))
+        /// <param name="consensusEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. Note that currently this is not the same as &#x60;scrypto_epoch&#x60;, but eventually will be.  (required).</param>
+        /// <param name="roundInEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus round in the epoch (required).</param>
+        public TimeUpdateValidatorTransactionAllOf(long proposerTimestampMs = default(long), long consensusEpoch = default(long), long roundInEpoch = default(long))
         {
             this.ProposerTimestampMs = proposerTimestampMs;
+            this.ConsensusEpoch = consensusEpoch;
+            this.RoundInEpoch = roundInEpoch;
         }
 
         /// <summary>
@@ -117,6 +121,20 @@ namespace RadixDlt.CoreApiSdk.Model
         public long ProposerTimestampMs { get; set; }
 
         /// <summary>
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. Note that currently this is not the same as &#x60;scrypto_epoch&#x60;, but eventually will be. 
+        /// </summary>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. Note that currently this is not the same as &#x60;scrypto_epoch&#x60;, but eventually will be. </value>
+        [DataMember(Name = "consensus_epoch", IsRequired = true, EmitDefaultValue = true)]
+        public long ConsensusEpoch { get; set; }
+
+        /// <summary>
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus round in the epoch
+        /// </summary>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus round in the epoch</value>
+        [DataMember(Name = "round_in_epoch", IsRequired = true, EmitDefaultValue = true)]
+        public long RoundInEpoch { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -125,6 +143,8 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TimeUpdateValidatorTransactionAllOf {\n");
             sb.Append("  ProposerTimestampMs: ").Append(ProposerTimestampMs).Append("\n");
+            sb.Append("  ConsensusEpoch: ").Append(ConsensusEpoch).Append("\n");
+            sb.Append("  RoundInEpoch: ").Append(RoundInEpoch).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -163,6 +183,14 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.ProposerTimestampMs == input.ProposerTimestampMs ||
                     this.ProposerTimestampMs.Equals(input.ProposerTimestampMs)
+                ) && 
+                (
+                    this.ConsensusEpoch == input.ConsensusEpoch ||
+                    this.ConsensusEpoch.Equals(input.ConsensusEpoch)
+                ) && 
+                (
+                    this.RoundInEpoch == input.RoundInEpoch ||
+                    this.RoundInEpoch.Equals(input.RoundInEpoch)
                 );
         }
 
@@ -176,6 +204,8 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.ProposerTimestampMs.GetHashCode();
+                hashCode = (hashCode * 59) + this.ConsensusEpoch.GetHashCode();
+                hashCode = (hashCode * 59) + this.RoundInEpoch.GetHashCode();
                 return hashCode;
             }
         }

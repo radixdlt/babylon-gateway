@@ -1,4 +1,47 @@
 openapi: 3.0.0
+# NOTES TO EDITORS:
+#
+# Guidance for integer types (see https://swagger.io/docs/specification/data-models/data-types/#numbers)
+#
+# => If a u8, use type: integer, format: int32, minimum: 0, maximum: 255
+# => If an i8, use type: integer, format: int32, minimum: -128, maximum: 127 (also, why are you using an i8!?)
+# => If a u32:
+#    => If there's a domain-imposed requirement that fits it within an i32 (2,147,483,647 = 2^31 - 1), with bound B use
+#       type: integer, format: int32, minimum: 0, maximum: B
+#       And be sure to validate against B in the code which maps into the type. See EG epoch max length in numerics.rs
+#    => If not, to be compatible with OAS, we need to put it into an int64:
+#       type: integer, format: int64, minimum: 0, maximum: 4294967295 = 2^32 - 1
+# => If an i32, use type: integer, format: int32
+# => If a u64:
+#    => The maximum safe integer in Javascript is (+-)2^53 – 1 = 9,007,199,254,740,991 ~ 9 * 10^15
+#       To be pragmatic, any numbers outside this range we will choose to represent as strings.
+#    => So if it's possible for us to assert that: value <= bound B <= 2^53 - 1, then use:
+#       type: integer, format: int64, minimum: 0, maximum: B
+#       And be sure to validate against B in the code which maps into the type. See EG epoch max length in numerics.rs
+#    => If not, use a string instead
+# => If an i64:
+#    => The maximum safe integer in Javascript is (+-)2^53 – 1 = 9,007,199,254,740,991 ~ 9 * 10^15
+#       To be pragmatic, any numbers outside this range we will choose to represent as strings.
+#    => So if it's possible for us to assert that: -(2^53 - 1) <= B1 <= value <= B2 <= 2^53 - 1, then use:
+#       type: integer, format: int64, minimum: B1, maximum: B2
+#       And be sure to validate against B in the code which maps into the type. See EG epoch max length in numerics.rs
+#    => If not, use a string instead
+# => If something over i64/u64, use type: string
+#
+# Regardless of the type, specify in the description what the underlying type and bounds are, by starting with something like:
+# - An integer between 0 and 10^10, giving
+# - A decimal-string-encoded integer between 0 and 2^64 - 1, which
+# - A decimal-string-encoded integer between 0 and 10^123, that
+#
+# Descriptions guidance:
+# => For descriptions of encoded types, we follow this pattern: 'The xyz-encoded, abc-encoded xx of the yy'
+#    EG 'The hex-encoded, SBOR-encoded data' or 'The hex-encoded double-SHA256 hash of the banana payload'
+# => Don't end in a full-stop, unless it is more than 1 sentence, then all sentences should end in a full stop
+# => It's not technically valid to have both $ref and description, but it works in ReDocly, so feel free to do it
+#
+# Naming guidance:
+# => Hex-encoded hashes should end _hash
+# => Hex-encoded bytes/payload should end _hex and not include _bytes
 info:
   version: '0.1.0'
   title: 'Babylon Core API'
@@ -1789,7 +1832,6 @@ components:
         - String
         - U32
         - U64
-        - Decimal
         - Bytes
         - UUID
     NonFungibleId:
@@ -1811,7 +1853,7 @@ components:
       description: |
         The simple string representation of the non-fungible id.
         For string id types, this is simply the string itself; for integer types, this is the integer as a decimal; and for the bytes id type, this is the lower case hex representation.
-        A non-fungible resource has a fixed `NonFungibleType`, so this representation uniquely identifies this non-fungible
+        A non-fungible resource has a fixed `NonFungibleIdType`, so this representation uniquely identifies this non-fungible
         under the given resource address.
     ResourceAmount:
       oneOf:
@@ -2973,20 +3015,24 @@ components:
         - $ref: "#/components/schemas/ValidatorTransactionBase"
         - type: object
           required:
-            - epoch
+            - scrypto_epoch
           properties:
-            epoch:
+            scrypto_epoch:
               type: integer
               format: int64
               minimum: 0
               maximum: 10000000000
-              description: An integer between `0` and `10^10`, marking the new epoch
+              description: |
+                An integer between `0` and `10^10`, marking the new epoch.
+                Note that currently this is not the same as `consensus_epoch`, but eventually will be.
     TimeUpdateValidatorTransaction:
       allOf:
         - $ref: "#/components/schemas/ValidatorTransactionBase"
         - type: object
           required:
             - proposer_timestamp_ms
+            - consensus_epoch
+            - round_in_epoch
           properties:
             proposer_timestamp_ms:
               type: integer
@@ -2994,6 +3040,20 @@ components:
               minimum: 0
               maximum: 100000000000000
               description: An integer between `0` and `10^14`, marking the round proposer's unix timestamp in ms
+            consensus_epoch:
+              type: integer
+              format: int64
+              minimum: 0
+              maximum: 10000000000
+              description: |
+                An integer between `0` and `10^10`, marking the consensus epoch.
+                Note that currently this is not the same as `scrypto_epoch`, but eventually will be.
+            round_in_epoch:
+              type: integer
+              format: int64
+              minimum: 0
+              maximum: 10000000000
+              description: An integer between `0` and `10^10`, marking the consensus round in the epoch
     ############################################################################################################
     # V0
     ###################################

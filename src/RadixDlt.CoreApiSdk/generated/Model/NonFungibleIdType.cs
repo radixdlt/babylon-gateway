@@ -114,22 +114,16 @@ namespace RadixDlt.CoreApiSdk.Model
         U64 = 3,
 
         /// <summary>
-        /// Enum Decimal for value: Decimal
-        /// </summary>
-        [EnumMember(Value = "Decimal")]
-        Decimal = 4,
-
-        /// <summary>
         /// Enum Bytes for value: Bytes
         /// </summary>
         [EnumMember(Value = "Bytes")]
-        Bytes = 5,
+        Bytes = 4,
 
         /// <summary>
         /// Enum UUID for value: UUID
         /// </summary>
         [EnumMember(Value = "UUID")]
-        UUID = 6
+        UUID = 5
 
     }
 

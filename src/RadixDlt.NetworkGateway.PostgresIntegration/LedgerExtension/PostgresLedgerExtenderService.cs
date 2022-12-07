@@ -365,6 +365,20 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 long? newRoundInEpoch = null;
                 DateTime? newRoundTimestamp = null;
 
+                if (ct.LedgerTransaction.ActualInstance is CoreModel.ValidatorLedgerTransaction vlt)
+                {
+                    switch (vlt.ValidatorTransaction.ActualInstance)
+                    {
+                        case CoreModel.EpochUpdateValidatorTransaction epochUpdate:
+                            newEpoch = epochUpdate.ScryptoEpoch;
+                            break;
+                        case CoreModel.TimeUpdateValidatorTransaction timeUpdate:
+                            newRoundInEpoch = timeUpdate.RoundInEpoch;
+                            newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(timeUpdate.ProposerTimestampMs).UtcDateTime;
+                            break;
+                    }
+                }
+
                 foreach (var newSubstate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
                 {
                     var sid = newSubstate.SubstateId;
@@ -418,22 +432,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             knownGlobalAddressesToLoad.Add(pointer.GlobalAddress);
                         }
                     }
-
-                    if (sd is CoreModel.EpochManagerSubstate epochManager)
-                    {
-                        newEpoch = epochManager.Epoch;
-
-                        // TODO dummy placeholder
-                        newRoundInEpoch = 0;
-                        newRoundTimestamp = _clock.UtcNow;
-                    }
-
-                    // if (sd is CoreModel.ClockCurrentMinuteSubstate clock)
-                    // {
-                    //     newRoundInEpoch ??= 0;
-                    //     newRoundInEpoch += 1;
-                    //     newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(clock.TimestampMsRoundedDownToMinute).UtcDateTime;
-                    // }
 
                     if (sd is CoreModel.ResourceManagerSubstate resourceManager)
                     {
