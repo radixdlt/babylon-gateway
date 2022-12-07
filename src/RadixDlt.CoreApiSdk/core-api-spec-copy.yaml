@@ -2327,12 +2327,12 @@ components:
       type: object
       description: Only present if the non fungible isn't deleted
       required:
-        - immutable_data
-        - mutable_data
+        - immutable_data_raw_hex
+        - mutable_data_raw_hex
       properties:
-        immutable_data:
+        immutable_data_raw_hex:
           $ref: '#/components/schemas/DataStruct'
-        mutable_data:
+        mutable_data_raw_hex:
           $ref: '#/components/schemas/DataStruct'
     ##########################################
     # REQUEST: /status/network-configuration #

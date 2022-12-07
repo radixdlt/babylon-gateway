@@ -1064,7 +1064,7 @@ INNER JOIN LATERAL (
                     // TODO or maybe we should iterate until we find entity of appropriate type?
                     NonFungibleResourceManagerEntityId = e.ReferencedStore.DatabaseGlobalAncestorId,
                     NonFungibleId = e.NonFungibleId,
-                    ImmutableData = e.Data?.ImmutableData.StructData.DataBytes ?? Array.Empty<byte>(),
+                    ImmutableData = e.Data?.ImmutableDataRawHex.StructData.DataBytes ?? Array.Empty<byte>(),
                 };
 
                 nonFungibleIdDataToAdd.Add(nfidData);
@@ -1074,7 +1074,7 @@ INNER JOIN LATERAL (
                     FromStateVersion = e.StateVersion,
                     NonFungibleIdDataId = nfidData.Id,
                     IsDeleted = e.IsDeleted,
-                    MutableData = e.Data?.MutableData.StructData.DataBytes ?? Array.Empty<byte>(),
+                    MutableData = e.Data?.MutableDataRawHex.StructData.DataBytes ?? Array.Empty<byte>(),
                 });
 
                 var store = nonFungibleIdStoreHistoryToAdd.GetOrAdd(new NonFungibleStoreLookup(e.ReferencedStore.DatabaseGlobalAncestorId, e.StateVersion), _ =>

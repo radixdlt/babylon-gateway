@@ -103,35 +103,35 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleData" /> class.
         /// </summary>
-        /// <param name="immutableData">immutableData (required).</param>
-        /// <param name="mutableData">mutableData (required).</param>
-        public NonFungibleData(DataStruct immutableData = default(DataStruct), DataStruct mutableData = default(DataStruct))
+        /// <param name="immutableDataRawHex">immutableDataRawHex (required).</param>
+        /// <param name="mutableDataRawHex">mutableDataRawHex (required).</param>
+        public NonFungibleData(DataStruct immutableDataRawHex = default(DataStruct), DataStruct mutableDataRawHex = default(DataStruct))
         {
-            // to ensure "immutableData" is required (not null)
-            if (immutableData == null)
+            // to ensure "immutableDataRawHex" is required (not null)
+            if (immutableDataRawHex == null)
             {
-                throw new ArgumentNullException("immutableData is a required property for NonFungibleData and cannot be null");
+                throw new ArgumentNullException("immutableDataRawHex is a required property for NonFungibleData and cannot be null");
             }
-            this.ImmutableData = immutableData;
-            // to ensure "mutableData" is required (not null)
-            if (mutableData == null)
+            this.ImmutableDataRawHex = immutableDataRawHex;
+            // to ensure "mutableDataRawHex" is required (not null)
+            if (mutableDataRawHex == null)
             {
-                throw new ArgumentNullException("mutableData is a required property for NonFungibleData and cannot be null");
+                throw new ArgumentNullException("mutableDataRawHex is a required property for NonFungibleData and cannot be null");
             }
-            this.MutableData = mutableData;
+            this.MutableDataRawHex = mutableDataRawHex;
         }
 
         /// <summary>
-        /// Gets or Sets ImmutableData
+        /// Gets or Sets ImmutableDataRawHex
         /// </summary>
-        [DataMember(Name = "immutable_data", IsRequired = true, EmitDefaultValue = true)]
-        public DataStruct ImmutableData { get; set; }
+        [DataMember(Name = "immutable_data_raw_hex", IsRequired = true, EmitDefaultValue = true)]
+        public DataStruct ImmutableDataRawHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets MutableData
+        /// Gets or Sets MutableDataRawHex
         /// </summary>
-        [DataMember(Name = "mutable_data", IsRequired = true, EmitDefaultValue = true)]
-        public DataStruct MutableData { get; set; }
+        [DataMember(Name = "mutable_data_raw_hex", IsRequired = true, EmitDefaultValue = true)]
+        public DataStruct MutableDataRawHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,8 +141,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleData {\n");
-            sb.Append("  ImmutableData: ").Append(ImmutableData).Append("\n");
-            sb.Append("  MutableData: ").Append(MutableData).Append("\n");
+            sb.Append("  ImmutableDataRawHex: ").Append(ImmutableDataRawHex).Append("\n");
+            sb.Append("  MutableDataRawHex: ").Append(MutableDataRawHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,14 +179,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ImmutableData == input.ImmutableData ||
-                    (this.ImmutableData != null &&
-                    this.ImmutableData.Equals(input.ImmutableData))
+                    this.ImmutableDataRawHex == input.ImmutableDataRawHex ||
+                    (this.ImmutableDataRawHex != null &&
+                    this.ImmutableDataRawHex.Equals(input.ImmutableDataRawHex))
                 ) && 
                 (
-                    this.MutableData == input.MutableData ||
-                    (this.MutableData != null &&
-                    this.MutableData.Equals(input.MutableData))
+                    this.MutableDataRawHex == input.MutableDataRawHex ||
+                    (this.MutableDataRawHex != null &&
+                    this.MutableDataRawHex.Equals(input.MutableDataRawHex))
                 );
         }
 
@@ -199,13 +199,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ImmutableData != null)
+                if (this.ImmutableDataRawHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.ImmutableData.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ImmutableDataRawHex.GetHashCode();
                 }
-                if (this.MutableData != null)
+                if (this.MutableDataRawHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.MutableData.GetHashCode();
+                    hashCode = (hashCode * 59) + this.MutableDataRawHex.GetHashCode();
                 }
                 return hashCode;
             }
