@@ -94,9 +94,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <summary>
         /// Returns data associated with a given non-fungible id.
         /// </summary>
-        /// <remarks>
-        /// TBD 
-        /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleDataRequest"></param>
         /// <returns>NonFungibleDataResponse</returns>
@@ -106,7 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns data associated with a given non-fungible id.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleDataRequest"></param>
@@ -115,9 +112,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <summary>
         /// Iterates through all non-fungible ids of a given non-fungible resource.
         /// </summary>
-        /// <remarks>
-        /// TBD 
-        /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleIdsRequest"></param>
         /// <returns>NonFungibleIdsResponse</returns>
@@ -127,7 +121,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Iterates through all non-fungible ids of a given non-fungible resource.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleIdsRequest"></param>
@@ -146,7 +140,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns data associated with a given non-fungible id.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleDataRequest"></param>
@@ -158,7 +152,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns data associated with a given non-fungible id.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleDataRequest"></param>
@@ -169,7 +163,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Iterates through all non-fungible ids of a given non-fungible resource.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleIdsRequest"></param>
@@ -181,7 +175,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Iterates through all non-fungible ids of a given non-fungible resource.
         /// </summary>
         /// <remarks>
-        /// TBD 
+        /// 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleIdsRequest"></param>
@@ -402,7 +396,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns data associated with a given non-fungible id. TBD 
+        /// Returns data associated with a given non-fungible id. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleDataRequest"></param>
@@ -414,7 +408,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns data associated with a given non-fungible id. TBD 
+        /// Returns data associated with a given non-fungible id. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleDataRequest"></param>
@@ -458,7 +452,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns data associated with a given non-fungible id. TBD 
+        /// Returns data associated with a given non-fungible id. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleDataRequest"></param>
@@ -471,7 +465,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Returns data associated with a given non-fungible id. TBD 
+        /// Returns data associated with a given non-fungible id. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleDataRequest"></param>
@@ -519,7 +513,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all non-fungible ids of a given non-fungible resource. TBD 
+        /// Iterates through all non-fungible ids of a given non-fungible resource. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleIdsRequest"></param>
@@ -531,7 +525,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all non-fungible ids of a given non-fungible resource. TBD 
+        /// Iterates through all non-fungible ids of a given non-fungible resource. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleIdsRequest"></param>
@@ -575,7 +569,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all non-fungible ids of a given non-fungible resource. TBD 
+        /// Iterates through all non-fungible ids of a given non-fungible resource. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleIdsRequest"></param>
@@ -588,7 +582,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Iterates through all non-fungible ids of a given non-fungible resource. TBD 
+        /// Iterates through all non-fungible ids of a given non-fungible resource. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="nonFungibleIdsRequest"></param>

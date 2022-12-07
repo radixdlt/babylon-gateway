@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// V0StateResourceResponse
     /// </summary>
     [DataContract(Name = "V0StateResourceResponse")]
-    public partial class V0StateResourceResponse : IEquatable<V0StateResourceResponse>, IValidatableObject
+    public partial class V0StateResourceResponse : IEquatable<V0StateResourceResponse>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="V0StateResourceResponse" /> class.
@@ -105,7 +104,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="V0StateResourceResponse" /> class.
         /// </summary>
         /// <param name="manager">manager (required).</param>
-        public V0StateResourceResponse(Substate manager = default(Substate))
+        /// <param name="metadata">metadata (required).</param>
+        /// <param name="accessRules">accessRules (required).</param>
+        /// <param name="vaultAccessRules">vaultAccessRules (required).</param>
+        public V0StateResourceResponse(Substate manager = default(Substate), Substate metadata = default(Substate), Substate accessRules = default(Substate), Substate vaultAccessRules = default(Substate))
         {
             // to ensure "manager" is required (not null)
             if (manager == null)
@@ -113,6 +115,24 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("manager is a required property for V0StateResourceResponse and cannot be null");
             }
             this.Manager = manager;
+            // to ensure "metadata" is required (not null)
+            if (metadata == null)
+            {
+                throw new ArgumentNullException("metadata is a required property for V0StateResourceResponse and cannot be null");
+            }
+            this.Metadata = metadata;
+            // to ensure "accessRules" is required (not null)
+            if (accessRules == null)
+            {
+                throw new ArgumentNullException("accessRules is a required property for V0StateResourceResponse and cannot be null");
+            }
+            this.AccessRules = accessRules;
+            // to ensure "vaultAccessRules" is required (not null)
+            if (vaultAccessRules == null)
+            {
+                throw new ArgumentNullException("vaultAccessRules is a required property for V0StateResourceResponse and cannot be null");
+            }
+            this.VaultAccessRules = vaultAccessRules;
         }
 
         /// <summary>
@@ -120,6 +140,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "manager", IsRequired = true, EmitDefaultValue = true)]
         public Substate Manager { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Metadata
+        /// </summary>
+        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
+        public Substate Metadata { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AccessRules
+        /// </summary>
+        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
+        public Substate AccessRules { get; set; }
+
+        /// <summary>
+        /// Gets or Sets VaultAccessRules
+        /// </summary>
+        [DataMember(Name = "vault_access_rules", IsRequired = true, EmitDefaultValue = true)]
+        public Substate VaultAccessRules { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -130,6 +168,9 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class V0StateResourceResponse {\n");
             sb.Append("  Manager: ").Append(Manager).Append("\n");
+            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
+            sb.Append("  VaultAccessRules: ").Append(VaultAccessRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,6 +210,21 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Manager == input.Manager ||
                     (this.Manager != null &&
                     this.Manager.Equals(input.Manager))
+                ) && 
+                (
+                    this.Metadata == input.Metadata ||
+                    (this.Metadata != null &&
+                    this.Metadata.Equals(input.Metadata))
+                ) && 
+                (
+                    this.AccessRules == input.AccessRules ||
+                    (this.AccessRules != null &&
+                    this.AccessRules.Equals(input.AccessRules))
+                ) && 
+                (
+                    this.VaultAccessRules == input.VaultAccessRules ||
+                    (this.VaultAccessRules != null &&
+                    this.VaultAccessRules.Equals(input.VaultAccessRules))
                 );
         }
 
@@ -185,19 +241,22 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Manager.GetHashCode();
                 }
+                if (this.Metadata != null)
+                {
+                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
+                }
+                if (this.AccessRules != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
+                }
+                if (this.VaultAccessRules != null)
+                {
+                    hashCode = (hashCode * 59) + this.VaultAccessRules.GetHashCode();
+                }
                 return hashCode;
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

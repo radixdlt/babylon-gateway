@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// ResourceChange
     /// </summary>
     [DataContract(Name = "ResourceChange")]
-    public partial class ResourceChange : IEquatable<ResourceChange>, IValidatableObject
+    public partial class ResourceChange : IEquatable<ResourceChange>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceChange" /> class.
@@ -260,15 +259,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// SubstateId
     /// </summary>
     [DataContract(Name = "SubstateId")]
-    public partial class SubstateId : IEquatable<SubstateId>, IValidatableObject
+    public partial class SubstateId : IEquatable<SubstateId>
     {
 
         /// <summary>
@@ -108,6 +107,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
         public SubstateType SubstateType { get; set; }
+
+        /// <summary>
+        /// Gets or Sets SubstateKeyType
+        /// </summary>
+        [DataMember(Name = "substate_key_type", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateKeyType SubstateKeyType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="SubstateId" /> class.
         /// </summary>
@@ -119,8 +124,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="entityType">entityType (required).</param>
         /// <param name="entityIdHex">The hex-encoded bytes of the entity id (required).</param>
         /// <param name="substateType">substateType (required).</param>
+        /// <param name="substateKeyType">substateKeyType (required).</param>
         /// <param name="substateKeyHex">The hex-encoded bytes of the substate key, under the entity (required).</param>
-        public SubstateId(EntityType entityType = default(EntityType), string entityIdHex = default(string), SubstateType substateType = default(SubstateType), string substateKeyHex = default(string))
+        public SubstateId(EntityType entityType = default(EntityType), string entityIdHex = default(string), SubstateType substateType = default(SubstateType), SubstateKeyType substateKeyType = default(SubstateKeyType), string substateKeyHex = default(string))
         {
             this.EntityType = entityType;
             // to ensure "entityIdHex" is required (not null)
@@ -130,6 +136,7 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.EntityIdHex = entityIdHex;
             this.SubstateType = substateType;
+            this.SubstateKeyType = substateKeyType;
             // to ensure "substateKeyHex" is required (not null)
             if (substateKeyHex == null)
             {
@@ -163,6 +170,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  EntityType: ").Append(EntityType).Append("\n");
             sb.Append("  EntityIdHex: ").Append(EntityIdHex).Append("\n");
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
+            sb.Append("  SubstateKeyType: ").Append(SubstateKeyType).Append("\n");
             sb.Append("  SubstateKeyHex: ").Append(SubstateKeyHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -213,6 +221,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.SubstateType.Equals(input.SubstateType)
                 ) && 
                 (
+                    this.SubstateKeyType == input.SubstateKeyType ||
+                    this.SubstateKeyType.Equals(input.SubstateKeyType)
+                ) && 
+                (
                     this.SubstateKeyHex == input.SubstateKeyHex ||
                     (this.SubstateKeyHex != null &&
                     this.SubstateKeyHex.Equals(input.SubstateKeyHex))
@@ -234,6 +246,7 @@ namespace RadixDlt.CoreApiSdk.Model
                     hashCode = (hashCode * 59) + this.EntityIdHex.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
+                hashCode = (hashCode * 59) + this.SubstateKeyType.GetHashCode();
                 if (this.SubstateKeyHex != null)
                 {
                     hashCode = (hashCode * 59) + this.SubstateKeyHex.GetHashCode();
@@ -242,15 +255,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

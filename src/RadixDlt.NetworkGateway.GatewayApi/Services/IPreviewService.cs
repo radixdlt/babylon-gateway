@@ -115,9 +115,7 @@ internal class PreviewService : IPreviewService
 
     private async Task<object> HandlePreviewAndCreateResponse(JToken request, CancellationToken token)
     {
-        // TODO consider this a mock/dumb implementation for testing purposes only
-
-        CoreModel.TransactionPreviewRequest? coreApiRequest = null;
+        CoreModel.TransactionPreviewRequest? coreApiRequest;
 
         try
         {

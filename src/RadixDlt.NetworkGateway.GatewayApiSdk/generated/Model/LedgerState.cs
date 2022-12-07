@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// The ledger state against which the response was generated. Can be used to detect if the Network Gateway is returning up-to-date information. 
     /// </summary>
     [DataContract(Name = "LedgerState")]
-    public partial class LedgerState : IEquatable<LedgerState>, IValidatableObject
+    public partial class LedgerState : IEquatable<LedgerState>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LedgerState" /> class.
@@ -106,10 +105,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="network">The name of the network against which the request is made. (required).</param>
         /// <param name="stateVersion">The state version of the ledger. Each transaction increments the state version by 1. (required).</param>
-        /// <param name="timestamp">The round timestamp of the consensus round when this transaction was committed to ledger. This is not guaranteed to be strictly increasing, as it is computed as an average across the validator set. If this is significantly behind the current timestamp, the Network Gateway is likely reporting out-dated information, or the network has stalled.  (required).</param>
+        /// <param name="proposerRoundTimestamp">The round timestamp of the consensus round when this transaction was committed to ledger. This is not guaranteed to be strictly increasing, as it is computed as an average across the validator set. If this is significantly behind the current timestamp, the Network Gateway is likely reporting out-dated information, or the network has stalled.  (required).</param>
         /// <param name="epoch">The epoch number of the ledger at this state version. (required).</param>
         /// <param name="round">The consensus round in the epoch that this state version was committed in. (required).</param>
-        public LedgerState(string network = default(string), long stateVersion = default(long), string timestamp = default(string), long epoch = default(long), long round = default(long))
+        public LedgerState(string network = default(string), long stateVersion = default(long), string proposerRoundTimestamp = default(string), long epoch = default(long), long round = default(long))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -118,12 +117,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.Network = network;
             this.StateVersion = stateVersion;
-            // to ensure "timestamp" is required (not null)
-            if (timestamp == null)
+            // to ensure "proposerRoundTimestamp" is required (not null)
+            if (proposerRoundTimestamp == null)
             {
-                throw new ArgumentNullException("timestamp is a required property for LedgerState and cannot be null");
+                throw new ArgumentNullException("proposerRoundTimestamp is a required property for LedgerState and cannot be null");
             }
-            this.Timestamp = timestamp;
+            this.ProposerRoundTimestamp = proposerRoundTimestamp;
             this.Epoch = epoch;
             this.Round = round;
         }
@@ -146,8 +145,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// The round timestamp of the consensus round when this transaction was committed to ledger. This is not guaranteed to be strictly increasing, as it is computed as an average across the validator set. If this is significantly behind the current timestamp, the Network Gateway is likely reporting out-dated information, or the network has stalled. 
         /// </summary>
         /// <value>The round timestamp of the consensus round when this transaction was committed to ledger. This is not guaranteed to be strictly increasing, as it is computed as an average across the validator set. If this is significantly behind the current timestamp, the Network Gateway is likely reporting out-dated information, or the network has stalled. </value>
-        [DataMember(Name = "timestamp", IsRequired = true, EmitDefaultValue = true)]
-        public string Timestamp { get; set; }
+        [DataMember(Name = "proposer_round_timestamp", IsRequired = true, EmitDefaultValue = true)]
+        public string ProposerRoundTimestamp { get; set; }
 
         /// <summary>
         /// The epoch number of the ledger at this state version.
@@ -173,7 +172,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class LedgerState {\n");
             sb.Append("  Network: ").Append(Network).Append("\n");
             sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
-            sb.Append("  Timestamp: ").Append(Timestamp).Append("\n");
+            sb.Append("  ProposerRoundTimestamp: ").Append(ProposerRoundTimestamp).Append("\n");
             sb.Append("  Epoch: ").Append(Epoch).Append("\n");
             sb.Append("  Round: ").Append(Round).Append("\n");
             sb.Append("}\n");
@@ -221,9 +220,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.StateVersion.Equals(input.StateVersion)
                 ) && 
                 (
-                    this.Timestamp == input.Timestamp ||
-                    (this.Timestamp != null &&
-                    this.Timestamp.Equals(input.Timestamp))
+                    this.ProposerRoundTimestamp == input.ProposerRoundTimestamp ||
+                    (this.ProposerRoundTimestamp != null &&
+                    this.ProposerRoundTimestamp.Equals(input.ProposerRoundTimestamp))
                 ) && 
                 (
                     this.Epoch == input.Epoch ||
@@ -249,9 +248,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     hashCode = (hashCode * 59) + this.Network.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
-                if (this.Timestamp != null)
+                if (this.ProposerRoundTimestamp != null)
                 {
-                    hashCode = (hashCode * 59) + this.Timestamp.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ProposerRoundTimestamp.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
                 hashCode = (hashCode * 59) + this.Round.GetHashCode();
@@ -259,15 +258,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

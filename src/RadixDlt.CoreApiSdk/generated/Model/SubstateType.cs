@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -97,58 +96,100 @@ namespace RadixDlt.CoreApiSdk.Model
     public enum SubstateType
     {
         /// <summary>
-        /// Enum EpochManager for value: EpochManager
+        /// Enum Metadata for value: Metadata
         /// </summary>
-        [EnumMember(Value = "EpochManager")]
-        EpochManager = 1,
+        [EnumMember(Value = "Metadata")]
+        Metadata = 1,
 
         /// <summary>
-        /// Enum ResourceManager for value: ResourceManager
+        /// Enum AccessRulesChain for value: AccessRulesChain
         /// </summary>
-        [EnumMember(Value = "ResourceManager")]
-        ResourceManager = 2,
+        [EnumMember(Value = "AccessRulesChain")]
+        AccessRulesChain = 2,
+
+        /// <summary>
+        /// Enum GlobalAddress for value: GlobalAddress
+        /// </summary>
+        [EnumMember(Value = "GlobalAddress")]
+        GlobalAddress = 3,
 
         /// <summary>
         /// Enum ComponentInfo for value: ComponentInfo
         /// </summary>
         [EnumMember(Value = "ComponentInfo")]
-        ComponentInfo = 3,
+        ComponentInfo = 4,
 
         /// <summary>
         /// Enum ComponentState for value: ComponentState
         /// </summary>
         [EnumMember(Value = "ComponentState")]
-        ComponentState = 4,
+        ComponentState = 5,
 
         /// <summary>
-        /// Enum Package for value: Package
+        /// Enum ComponentRoyaltyConfig for value: ComponentRoyaltyConfig
         /// </summary>
-        [EnumMember(Value = "Package")]
-        Package = 5,
+        [EnumMember(Value = "ComponentRoyaltyConfig")]
+        ComponentRoyaltyConfig = 6,
 
         /// <summary>
-        /// Enum Vault for value: Vault
+        /// Enum ComponentRoyaltyAccumulator for value: ComponentRoyaltyAccumulator
         /// </summary>
-        [EnumMember(Value = "Vault")]
-        Vault = 6,
+        [EnumMember(Value = "ComponentRoyaltyAccumulator")]
+        ComponentRoyaltyAccumulator = 7,
 
         /// <summary>
-        /// Enum NonFungible for value: NonFungible
+        /// Enum PackageInfo for value: PackageInfo
         /// </summary>
-        [EnumMember(Value = "NonFungible")]
-        NonFungible = 7,
+        [EnumMember(Value = "PackageInfo")]
+        PackageInfo = 8,
+
+        /// <summary>
+        /// Enum PackageRoyaltyConfig for value: PackageRoyaltyConfig
+        /// </summary>
+        [EnumMember(Value = "PackageRoyaltyConfig")]
+        PackageRoyaltyConfig = 9,
+
+        /// <summary>
+        /// Enum PackageRoyaltyAccumulator for value: PackageRoyaltyAccumulator
+        /// </summary>
+        [EnumMember(Value = "PackageRoyaltyAccumulator")]
+        PackageRoyaltyAccumulator = 10,
+
+        /// <summary>
+        /// Enum ResourceManager for value: ResourceManager
+        /// </summary>
+        [EnumMember(Value = "ResourceManager")]
+        ResourceManager = 11,
+
+        /// <summary>
+        /// Enum EpochManager for value: EpochManager
+        /// </summary>
+        [EnumMember(Value = "EpochManager")]
+        EpochManager = 12,
+
+        /// <summary>
+        /// Enum ClockCurrentMinute for value: ClockCurrentMinute
+        /// </summary>
+        [EnumMember(Value = "ClockCurrentMinute")]
+        ClockCurrentMinute = 13,
 
         /// <summary>
         /// Enum KeyValueStoreEntry for value: KeyValueStoreEntry
         /// </summary>
         [EnumMember(Value = "KeyValueStoreEntry")]
-        KeyValueStoreEntry = 8,
+        KeyValueStoreEntry = 14,
 
         /// <summary>
-        /// Enum Global for value: Global
+        /// Enum NonFungibleStoreEntry for value: NonFungibleStoreEntry
         /// </summary>
-        [EnumMember(Value = "Global")]
-        Global = 9
+        [EnumMember(Value = "NonFungibleStoreEntry")]
+        NonFungibleStoreEntry = 15,
+
+        /// <summary>
+        /// Enum Vault for value: Vault
+        /// </summary>
+        [EnumMember(Value = "Vault")]
+        Vault = 16
 
     }
 

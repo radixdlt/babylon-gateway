@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -142,7 +141,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum NonFungibleStore for value: NonFungibleStore
         /// </summary>
         [EnumMember(Value = "NonFungibleStore")]
-        NonFungibleStore = 8
+        NonFungibleStore = 8,
+
+        /// <summary>
+        /// Enum Clock for value: Clock
+        /// </summary>
+        [EnumMember(Value = "Clock")]
+        Clock = 9
 
     }
 

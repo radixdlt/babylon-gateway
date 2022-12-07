@@ -85,7 +85,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using JsonSubTypes;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 using System.Reflection;
@@ -97,7 +96,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [JsonConverter(typeof(SchemaSubpathJsonConverter))]
     [DataContract(Name = "SchemaSubpath")]
-    public partial class SchemaSubpath : AbstractOpenAPISchema, IEquatable<SchemaSubpath>, IValidatableObject
+    public partial class SchemaSubpath : AbstractOpenAPISchema, IEquatable<SchemaSubpath>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SchemaSubpath" /> class
@@ -107,7 +106,7 @@ namespace RadixDlt.CoreApiSdk.Model
         public SchemaSubpath(IndexSchemaSubpath actualInstance)
         {
             this.IsNullable = false;
-            this.SchemaType= "anyOf";
+            this.SchemaType= "oneOf";
             this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
         }
 
@@ -119,7 +118,7 @@ namespace RadixDlt.CoreApiSdk.Model
         public SchemaSubpath(FieldSchemaSubpath actualInstance)
         {
             this.IsNullable = false;
-            this.SchemaType= "anyOf";
+            this.SchemaType= "oneOf";
             this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
         }
 
@@ -210,9 +209,48 @@ namespace RadixDlt.CoreApiSdk.Model
 
             try
             {
-                newSchemaSubpath = new SchemaSubpath(JsonConvert.DeserializeObject<FieldSchemaSubpath>(jsonString, SchemaSubpath.SerializerSettings));
-                // deserialization is considered successful at this point if no exception has been thrown.
-                return newSchemaSubpath;
+                var discriminatorObj = JObject.Parse(jsonString)["type"];
+                string discriminatorValue =  discriminatorObj == null ?string.Empty :discriminatorObj.ToString();
+                switch (discriminatorValue)
+                {
+                    case "Field":
+                        newSchemaSubpath = new SchemaSubpath(JsonConvert.DeserializeObject<FieldSchemaSubpath>(jsonString, SchemaSubpath.AdditionalPropertiesSerializerSettings));
+                        return newSchemaSubpath;
+                    case "FieldSchemaSubpath":
+                        newSchemaSubpath = new SchemaSubpath(JsonConvert.DeserializeObject<FieldSchemaSubpath>(jsonString, SchemaSubpath.AdditionalPropertiesSerializerSettings));
+                        return newSchemaSubpath;
+                    case "Index":
+                        newSchemaSubpath = new SchemaSubpath(JsonConvert.DeserializeObject<IndexSchemaSubpath>(jsonString, SchemaSubpath.AdditionalPropertiesSerializerSettings));
+                        return newSchemaSubpath;
+                    case "IndexSchemaSubpath":
+                        newSchemaSubpath = new SchemaSubpath(JsonConvert.DeserializeObject<IndexSchemaSubpath>(jsonString, SchemaSubpath.AdditionalPropertiesSerializerSettings));
+                        return newSchemaSubpath;
+                    default:
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for SchemaSubpath. Possible values: Field FieldSchemaSubpath Index IndexSchemaSubpath", discriminatorValue));
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to parse the json data : `{0}` {1}", jsonString, ex.ToString()));
+            }
+
+            int match = 0;
+            List<string> matchedTypes = new List<string>();
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(FieldSchemaSubpath).GetProperty("AdditionalProperties") == null)
+                {
+                    newSchemaSubpath = new SchemaSubpath(JsonConvert.DeserializeObject<FieldSchemaSubpath>(jsonString, SchemaSubpath.SerializerSettings));
+                }
+                else
+                {
+                    newSchemaSubpath = new SchemaSubpath(JsonConvert.DeserializeObject<FieldSchemaSubpath>(jsonString, SchemaSubpath.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("FieldSchemaSubpath");
+                match++;
             }
             catch (Exception exception)
             {
@@ -222,9 +260,17 @@ namespace RadixDlt.CoreApiSdk.Model
 
             try
             {
-                newSchemaSubpath = new SchemaSubpath(JsonConvert.DeserializeObject<IndexSchemaSubpath>(jsonString, SchemaSubpath.SerializerSettings));
-                // deserialization is considered successful at this point if no exception has been thrown.
-                return newSchemaSubpath;
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(IndexSchemaSubpath).GetProperty("AdditionalProperties") == null)
+                {
+                    newSchemaSubpath = new SchemaSubpath(JsonConvert.DeserializeObject<IndexSchemaSubpath>(jsonString, SchemaSubpath.SerializerSettings));
+                }
+                else
+                {
+                    newSchemaSubpath = new SchemaSubpath(JsonConvert.DeserializeObject<IndexSchemaSubpath>(jsonString, SchemaSubpath.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("IndexSchemaSubpath");
+                match++;
             }
             catch (Exception exception)
             {
@@ -232,8 +278,17 @@ namespace RadixDlt.CoreApiSdk.Model
                 System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into IndexSchemaSubpath: {1}", jsonString, exception.ToString()));
             }
 
-            // no match found, throw an exception
-            throw new InvalidDataException("The JSON string `" + jsonString + "` cannot be deserialized into any schema defined.");
+            if (match == 0)
+            {
+                throw new InvalidDataException("The JSON string `" + jsonString + "` cannot be deserialized into any schema defined.");
+            }
+            else if (match > 1)
+            {
+                throw new InvalidDataException("The JSON string `" + jsonString + "` incorrectly matches more than one schema (should be exactly one match): " + matchedTypes);
+            }
+
+            // deserialization is considered successful at this point if no exception has been thrown.
+            return newSchemaSubpath;
         }
 
         /// <summary>
@@ -274,15 +329,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> IValidatableObject.Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
     /// <summary>

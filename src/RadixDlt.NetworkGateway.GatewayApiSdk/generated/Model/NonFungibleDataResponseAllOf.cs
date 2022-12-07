@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,8 +93,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// NonFungibleDataResponseAllOf
     /// </summary>
     [DataContract(Name = "NonFungibleDataResponse_allOf")]
-    public partial class NonFungibleDataResponseAllOf : IEquatable<NonFungibleDataResponseAllOf>, IValidatableObject
+    public partial class NonFungibleDataResponseAllOf : IEquatable<NonFungibleDataResponseAllOf>
     {
+
+        /// <summary>
+        /// Gets or Sets NonFungibleIdType
+        /// </summary>
+        [DataMember(Name = "non_fungible_id_type", IsRequired = true, EmitDefaultValue = true)]
+        public NonFungibleIdType NonFungibleIdType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleDataResponseAllOf" /> class.
         /// </summary>
@@ -105,10 +110,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="NonFungibleDataResponseAllOf" /> class.
         /// </summary>
         /// <param name="address">The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
-        /// <param name="nonFungibleIdHex">nonFungibleIdHex (required).</param>
+        /// <param name="nonFungibleIdType">nonFungibleIdType (required).</param>
+        /// <param name="nonFungibleId">nonFungibleId (required).</param>
         /// <param name="mutableDataHex">mutableDataHex (required).</param>
         /// <param name="immutableDataHex">immutableDataHex (required).</param>
-        public NonFungibleDataResponseAllOf(string address = default(string), string nonFungibleIdHex = default(string), string mutableDataHex = default(string), string immutableDataHex = default(string))
+        public NonFungibleDataResponseAllOf(string address = default(string), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), string nonFungibleId = default(string), string mutableDataHex = default(string), string immutableDataHex = default(string))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -116,12 +122,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("address is a required property for NonFungibleDataResponseAllOf and cannot be null");
             }
             this.Address = address;
-            // to ensure "nonFungibleIdHex" is required (not null)
-            if (nonFungibleIdHex == null)
+            this.NonFungibleIdType = nonFungibleIdType;
+            // to ensure "nonFungibleId" is required (not null)
+            if (nonFungibleId == null)
             {
-                throw new ArgumentNullException("nonFungibleIdHex is a required property for NonFungibleDataResponseAllOf and cannot be null");
+                throw new ArgumentNullException("nonFungibleId is a required property for NonFungibleDataResponseAllOf and cannot be null");
             }
-            this.NonFungibleIdHex = nonFungibleIdHex;
+            this.NonFungibleId = nonFungibleId;
             // to ensure "mutableDataHex" is required (not null)
             if (mutableDataHex == null)
             {
@@ -144,10 +151,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Address { get; set; }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIdHex
+        /// Gets or Sets NonFungibleId
         /// </summary>
-        [DataMember(Name = "non_fungible_id_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string NonFungibleIdHex { get; set; }
+        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
+        public string NonFungibleId { get; set; }
 
         /// <summary>
         /// Gets or Sets MutableDataHex
@@ -170,7 +177,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleDataResponseAllOf {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  NonFungibleIdHex: ").Append(NonFungibleIdHex).Append("\n");
+            sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
+            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("  MutableDataHex: ").Append(MutableDataHex).Append("\n");
             sb.Append("  ImmutableDataHex: ").Append(ImmutableDataHex).Append("\n");
             sb.Append("}\n");
@@ -214,9 +222,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.NonFungibleIdHex == input.NonFungibleIdHex ||
-                    (this.NonFungibleIdHex != null &&
-                    this.NonFungibleIdHex.Equals(input.NonFungibleIdHex))
+                    this.NonFungibleIdType == input.NonFungibleIdType ||
+                    this.NonFungibleIdType.Equals(input.NonFungibleIdType)
+                ) && 
+                (
+                    this.NonFungibleId == input.NonFungibleId ||
+                    (this.NonFungibleId != null &&
+                    this.NonFungibleId.Equals(input.NonFungibleId))
                 ) && 
                 (
                     this.MutableDataHex == input.MutableDataHex ||
@@ -243,9 +255,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.NonFungibleIdHex != null)
+                hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
+                if (this.NonFungibleId != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleIdHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
                 }
                 if (this.MutableDataHex != null)
                 {
@@ -259,15 +272,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

@@ -85,7 +85,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using JsonSubTypes;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 using System.Reflection;
@@ -97,7 +96,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [JsonConverter(typeof(ValidatorTransactionJsonConverter))]
     [DataContract(Name = "ValidatorTransaction")]
-    public partial class ValidatorTransaction : AbstractOpenAPISchema, IEquatable<ValidatorTransaction>, IValidatableObject
+    public partial class ValidatorTransaction : AbstractOpenAPISchema, IEquatable<ValidatorTransaction>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorTransaction" /> class
@@ -105,6 +104,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="actualInstance">An instance of EpochUpdateValidatorTransaction.</param>
         public ValidatorTransaction(EpochUpdateValidatorTransaction actualInstance)
+        {
+            this.IsNullable = false;
+            this.SchemaType= "oneOf";
+            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ValidatorTransaction" /> class
+        /// with the <see cref="TimeUpdateValidatorTransaction" /> class
+        /// </summary>
+        /// <param name="actualInstance">An instance of TimeUpdateValidatorTransaction.</param>
+        public ValidatorTransaction(TimeUpdateValidatorTransaction actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -129,9 +140,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     this._actualInstance = value;
                 }
+                else if (value.GetType() == typeof(TimeUpdateValidatorTransaction))
+                {
+                    this._actualInstance = value;
+                }
                 else
                 {
-                    throw new ArgumentException("Invalid instance found. Must be the following types: EpochUpdateValidatorTransaction");
+                    throw new ArgumentException("Invalid instance found. Must be the following types: EpochUpdateValidatorTransaction, TimeUpdateValidatorTransaction");
                 }
             }
         }
@@ -144,6 +159,16 @@ namespace RadixDlt.CoreApiSdk.Model
         public EpochUpdateValidatorTransaction GetEpochUpdateValidatorTransaction()
         {
             return (EpochUpdateValidatorTransaction)this.ActualInstance;
+        }
+
+        /// <summary>
+        /// Get the actual instance of `TimeUpdateValidatorTransaction`. If the actual instance is not `TimeUpdateValidatorTransaction`,
+        /// the InvalidClassException will be thrown
+        /// </summary>
+        /// <returns>An instance of TimeUpdateValidatorTransaction</returns>
+        public TimeUpdateValidatorTransaction GetTimeUpdateValidatorTransaction()
+        {
+            return (TimeUpdateValidatorTransaction)this.ActualInstance;
         }
 
         /// <summary>
@@ -194,8 +219,14 @@ namespace RadixDlt.CoreApiSdk.Model
                     case "EpochUpdateValidatorTransaction":
                         newValidatorTransaction = new ValidatorTransaction(JsonConvert.DeserializeObject<EpochUpdateValidatorTransaction>(jsonString, ValidatorTransaction.AdditionalPropertiesSerializerSettings));
                         return newValidatorTransaction;
+                    case "TimeUpdate":
+                        newValidatorTransaction = new ValidatorTransaction(JsonConvert.DeserializeObject<TimeUpdateValidatorTransaction>(jsonString, ValidatorTransaction.AdditionalPropertiesSerializerSettings));
+                        return newValidatorTransaction;
+                    case "TimeUpdateValidatorTransaction":
+                        newValidatorTransaction = new ValidatorTransaction(JsonConvert.DeserializeObject<TimeUpdateValidatorTransaction>(jsonString, ValidatorTransaction.AdditionalPropertiesSerializerSettings));
+                        return newValidatorTransaction;
                     default:
-                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for ValidatorTransaction. Possible values: EpochUpdate EpochUpdateValidatorTransaction", discriminatorValue));
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for ValidatorTransaction. Possible values: EpochUpdate EpochUpdateValidatorTransaction TimeUpdate TimeUpdateValidatorTransaction", discriminatorValue));
                         break;
                 }
             }
@@ -225,6 +256,26 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 // deserialization failed, try the next one
                 System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into EpochUpdateValidatorTransaction: {1}", jsonString, exception.ToString()));
+            }
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(TimeUpdateValidatorTransaction).GetProperty("AdditionalProperties") == null)
+                {
+                    newValidatorTransaction = new ValidatorTransaction(JsonConvert.DeserializeObject<TimeUpdateValidatorTransaction>(jsonString, ValidatorTransaction.SerializerSettings));
+                }
+                else
+                {
+                    newValidatorTransaction = new ValidatorTransaction(JsonConvert.DeserializeObject<TimeUpdateValidatorTransaction>(jsonString, ValidatorTransaction.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("TimeUpdateValidatorTransaction");
+                match++;
+            }
+            catch (Exception exception)
+            {
+                // deserialization failed, try the next one
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into TimeUpdateValidatorTransaction: {1}", jsonString, exception.ToString()));
             }
 
             if (match == 0)
@@ -278,15 +329,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> IValidatableObject.Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
     /// <summary>

@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// EcdsaSecp256k1Signature
     /// </summary>
     [DataContract(Name = "EcdsaSecp256k1Signature")]
-    public partial class EcdsaSecp256k1Signature : IEquatable<EcdsaSecp256k1Signature>, IValidatableObject
+    public partial class EcdsaSecp256k1Signature : IEquatable<EcdsaSecp256k1Signature>
     {
 
         /// <summary>
@@ -204,27 +203,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // SignatureHex (string) maxLength
-            if (this.SignatureHex != null && this.SignatureHex.Length > 130)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignatureHex, length must be less than 130.", new [] { "SignatureHex" });
-            }
-
-            // SignatureHex (string) minLength
-            if (this.SignatureHex != null && this.SignatureHex.Length < 130)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignatureHex, length must be greater than 130.", new [] { "SignatureHex" });
-            }
-
-            yield break;
-        }
     }
 
 }

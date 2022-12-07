@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// TransactionRecentResponse
     /// </summary>
     [DataContract(Name = "TransactionRecentResponse")]
-    public partial class TransactionRecentResponse : IEquatable<TransactionRecentResponse>, IValidatableObject
+    public partial class TransactionRecentResponse : IEquatable<TransactionRecentResponse>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionRecentResponse" /> class.
@@ -105,9 +104,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionRecentResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?).</param>
-        /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
-        /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        /// <param name="totalCount">totalCount.</param>
+        /// <param name="previousCursor">previousCursor.</param>
+        /// <param name="nextCursor">nextCursor.</param>
         /// <param name="items">The page of user transactions. (required).</param>
         public TransactionRecentResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<CommittedTransactionInfo> items = default(List<CommittedTransactionInfo>))
         {
@@ -135,23 +134,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
+        /// Gets or Sets TotalCount
         /// </summary>
-        /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
         [DataMember(Name = "total_count", EmitDefaultValue = true)]
         public long? TotalCount { get; set; }
 
         /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
+        /// Gets or Sets PreviousCursor
         /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
         [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
         public string PreviousCursor { get; set; }
 
         /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
+        /// Gets or Sets NextCursor
         /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
         [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
         public string NextCursor { get; set; }
 
@@ -271,15 +267,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

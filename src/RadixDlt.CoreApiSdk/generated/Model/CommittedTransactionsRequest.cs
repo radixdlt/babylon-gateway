@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// A request to retrieve a sublist of committed transactions from the ledger. 
     /// </summary>
     [DataContract(Name = "CommittedTransactionsRequest")]
-    public partial class CommittedTransactionsRequest : IEquatable<CommittedTransactionsRequest>, IValidatableObject
+    public partial class CommittedTransactionsRequest : IEquatable<CommittedTransactionsRequest>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedTransactionsRequest" /> class.
@@ -220,27 +219,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // FromStateVersion (long) maximum
-            if (this.FromStateVersion > (long)100000000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FromStateVersion, must be a value less than or equal to 100000000000000.", new [] { "FromStateVersion" });
-            }
-
-            // FromStateVersion (long) minimum
-            if (this.FromStateVersion < (long)1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FromStateVersion, must be a value greater than or equal to 1.", new [] { "FromStateVersion" });
-            }
-
-            yield break;
-        }
     }
 
 }

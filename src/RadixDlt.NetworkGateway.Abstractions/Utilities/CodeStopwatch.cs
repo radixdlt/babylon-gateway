@@ -73,6 +73,20 @@ namespace RadixDlt.NetworkGateway.Abstractions.Utilities;
 /// </summary>
 public static class CodeStopwatch
 {
+    public static async Task<TimeSpan> Time(Func<Task> action)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        await action();
+        return stopwatch.Elapsed;
+    }
+
+    public static async Task<(T Result, TimeSpan Duration)> Time<T>(Func<Task<T>> action)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        var output = await action();
+        return (output, stopwatch.Elapsed);
+    }
+
     public static async Task<long> TimeInMs(Func<Task> action)
     {
         var stopwatch = Stopwatch.StartNew();

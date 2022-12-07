@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -101,7 +100,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum EpochUpdate for value: EpochUpdate
         /// </summary>
         [EnumMember(Value = "EpochUpdate")]
-        EpochUpdate = 1
+        EpochUpdate = 1,
+
+        /// <summary>
+        /// Enum TimeUpdate for value: TimeUpdate
+        /// </summary>
+        [EnumMember(Value = "TimeUpdate")]
+        TimeUpdate = 2
 
     }
 

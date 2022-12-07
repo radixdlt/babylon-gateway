@@ -85,7 +85,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using JsonSubTypes;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
@@ -103,7 +102,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(InvalidTransactionError), "InvalidTransactionError")]
     [JsonSubtypes.KnownSubType(typeof(NotSyncedUpError), "NotSyncedUpError")]
     [JsonSubtypes.KnownSubType(typeof(TransactionNotFoundError), "TransactionNotFoundError")]
-    public partial class GatewayError : IEquatable<GatewayError>, IValidatableObject
+    public partial class GatewayError : IEquatable<GatewayError>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="GatewayError" /> class.
@@ -199,25 +198,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            return this.BaseValidate(validationContext);
-        }
-
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        protected IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> BaseValidate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

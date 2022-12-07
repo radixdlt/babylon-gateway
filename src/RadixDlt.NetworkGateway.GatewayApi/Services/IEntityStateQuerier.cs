@@ -87,4 +87,8 @@ public interface IEntityStateQuerier
     Task<GatewayModel.EntityNonFungiblesResponse> EntityNonFungibles(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
     Task<GatewayModel.EntityNonFungibleIdsResponse> EntityNonFungibleIds(PageRequest request, DecodedRadixAddress resourceAddress, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+
+    Task<GatewayModel.NonFungibleIdsResponse> NonFungibleIds(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+
+    Task<GatewayModel.NonFungibleDataResponse> NonFungibleIdData(DecodedRadixAddress address, string nonFungibleId, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 }

@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,14 +93,8 @@ namespace RadixDlt.CoreApiSdk.Model
     /// ComponentInfoSubstate
     /// </summary>
     [DataContract(Name = "ComponentInfoSubstate")]
-    public partial class ComponentInfoSubstate : IEquatable<ComponentInfoSubstate>, IValidatableObject
+    public partial class ComponentInfoSubstate : IEquatable<ComponentInfoSubstate>
     {
-
-        /// <summary>
-        /// Gets or Sets EntityType
-        /// </summary>
-        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
-        public EntityType EntityType { get; set; }
 
         /// <summary>
         /// Gets or Sets SubstateType
@@ -116,14 +109,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ComponentInfoSubstate" /> class.
         /// </summary>
-        /// <param name="entityType">entityType (required).</param>
         /// <param name="substateType">substateType (required).</param>
         /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
         /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="accessRulesLayers">accessRulesLayers (required).</param>
-        public ComponentInfoSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), string packageAddress = default(string), string blueprintName = default(string), List<ComponentAccessRulesLayer> accessRulesLayers = default(List<ComponentAccessRulesLayer>))
+        public ComponentInfoSubstate(SubstateType substateType = default(SubstateType), string packageAddress = default(string), string blueprintName = default(string))
         {
-            this.EntityType = entityType;
             this.SubstateType = substateType;
             // to ensure "packageAddress" is required (not null)
             if (packageAddress == null)
@@ -137,12 +127,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("blueprintName is a required property for ComponentInfoSubstate and cannot be null");
             }
             this.BlueprintName = blueprintName;
-            // to ensure "accessRulesLayers" is required (not null)
-            if (accessRulesLayers == null)
-            {
-                throw new ArgumentNullException("accessRulesLayers is a required property for ComponentInfoSubstate and cannot be null");
-            }
-            this.AccessRulesLayers = accessRulesLayers;
         }
 
         /// <summary>
@@ -159,12 +143,6 @@ namespace RadixDlt.CoreApiSdk.Model
         public string BlueprintName { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccessRulesLayers
-        /// </summary>
-        [DataMember(Name = "access_rules_layers", IsRequired = true, EmitDefaultValue = true)]
-        public List<ComponentAccessRulesLayer> AccessRulesLayers { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -172,11 +150,9 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ComponentInfoSubstate {\n");
-            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
-            sb.Append("  AccessRulesLayers: ").Append(AccessRulesLayers).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -213,10 +189,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.EntityType == input.EntityType ||
-                    this.EntityType.Equals(input.EntityType)
-                ) && 
-                (
                     this.SubstateType == input.SubstateType ||
                     this.SubstateType.Equals(input.SubstateType)
                 ) && 
@@ -229,12 +201,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.BlueprintName == input.BlueprintName ||
                     (this.BlueprintName != null &&
                     this.BlueprintName.Equals(input.BlueprintName))
-                ) && 
-                (
-                    this.AccessRulesLayers == input.AccessRulesLayers ||
-                    this.AccessRulesLayers != null &&
-                    input.AccessRulesLayers != null &&
-                    this.AccessRulesLayers.SequenceEqual(input.AccessRulesLayers)
                 );
         }
 
@@ -247,7 +213,6 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
                 hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
                 if (this.PackageAddress != null)
                 {
@@ -257,23 +222,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
                 }
-                if (this.AccessRulesLayers != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccessRulesLayers.GetHashCode();
-                }
                 return hashCode;
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

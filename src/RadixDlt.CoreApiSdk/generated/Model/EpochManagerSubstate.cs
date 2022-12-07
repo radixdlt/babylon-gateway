@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,14 +93,8 @@ namespace RadixDlt.CoreApiSdk.Model
     /// EpochManagerSubstate
     /// </summary>
     [DataContract(Name = "EpochManagerSubstate")]
-    public partial class EpochManagerSubstate : IEquatable<EpochManagerSubstate>, IValidatableObject
+    public partial class EpochManagerSubstate : IEquatable<EpochManagerSubstate>
     {
-
-        /// <summary>
-        /// Gets or Sets EntityType
-        /// </summary>
-        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
-        public EntityType EntityType { get; set; }
 
         /// <summary>
         /// Gets or Sets SubstateType
@@ -116,12 +109,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EpochManagerSubstate" /> class.
         /// </summary>
-        /// <param name="entityType">entityType (required).</param>
         /// <param name="substateType">substateType (required).</param>
         /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch (required).</param>
-        public EpochManagerSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), long epoch = default(long))
+        public EpochManagerSubstate(SubstateType substateType = default(SubstateType), long epoch = default(long))
         {
-            this.EntityType = entityType;
             this.SubstateType = substateType;
             this.Epoch = epoch;
         }
@@ -141,7 +132,6 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EpochManagerSubstate {\n");
-            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
             sb.Append("  Epoch: ").Append(Epoch).Append("\n");
             sb.Append("}\n");
@@ -180,10 +170,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.EntityType == input.EntityType ||
-                    this.EntityType.Equals(input.EntityType)
-                ) && 
-                (
                     this.SubstateType == input.SubstateType ||
                     this.SubstateType.Equals(input.SubstateType)
                 ) && 
@@ -202,34 +188,12 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
                 hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
                 hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
                 return hashCode;
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // Epoch (long) maximum
-            if (this.Epoch > (long)10000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Epoch, must be a value less than or equal to 10000000000.", new [] { "Epoch" });
-            }
-
-            // Epoch (long) minimum
-            if (this.Epoch < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Epoch, must be a value greater than or equal to 0.", new [] { "Epoch" });
-            }
-
-            yield break;
-        }
     }
 
 }

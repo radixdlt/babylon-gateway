@@ -62,11 +62,13 @@
  * permissions under this License.
  */
 
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class ComponentStateSubstate : IOwner
 {
+    [JsonIgnore]
     public IEnumerable<EntityReference> OwnedEntities => DataStruct.OwnedEntities;
 }

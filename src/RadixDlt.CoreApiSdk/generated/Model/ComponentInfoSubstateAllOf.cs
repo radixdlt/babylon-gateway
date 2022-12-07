@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// ComponentInfoSubstateAllOf
     /// </summary>
     [DataContract(Name = "ComponentInfoSubstate_allOf")]
-    public partial class ComponentInfoSubstateAllOf : IEquatable<ComponentInfoSubstateAllOf>, IValidatableObject
+    public partial class ComponentInfoSubstateAllOf : IEquatable<ComponentInfoSubstateAllOf>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ComponentInfoSubstateAllOf" /> class.
@@ -106,8 +105,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
         /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="accessRulesLayers">accessRulesLayers (required).</param>
-        public ComponentInfoSubstateAllOf(string packageAddress = default(string), string blueprintName = default(string), List<ComponentAccessRulesLayer> accessRulesLayers = default(List<ComponentAccessRulesLayer>))
+        public ComponentInfoSubstateAllOf(string packageAddress = default(string), string blueprintName = default(string))
         {
             // to ensure "packageAddress" is required (not null)
             if (packageAddress == null)
@@ -121,12 +119,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("blueprintName is a required property for ComponentInfoSubstateAllOf and cannot be null");
             }
             this.BlueprintName = blueprintName;
-            // to ensure "accessRulesLayers" is required (not null)
-            if (accessRulesLayers == null)
-            {
-                throw new ArgumentNullException("accessRulesLayers is a required property for ComponentInfoSubstateAllOf and cannot be null");
-            }
-            this.AccessRulesLayers = accessRulesLayers;
         }
 
         /// <summary>
@@ -143,12 +135,6 @@ namespace RadixDlt.CoreApiSdk.Model
         public string BlueprintName { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccessRulesLayers
-        /// </summary>
-        [DataMember(Name = "access_rules_layers", IsRequired = true, EmitDefaultValue = true)]
-        public List<ComponentAccessRulesLayer> AccessRulesLayers { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -158,7 +144,6 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class ComponentInfoSubstateAllOf {\n");
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
-            sb.Append("  AccessRulesLayers: ").Append(AccessRulesLayers).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -203,12 +188,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.BlueprintName == input.BlueprintName ||
                     (this.BlueprintName != null &&
                     this.BlueprintName.Equals(input.BlueprintName))
-                ) && 
-                (
-                    this.AccessRulesLayers == input.AccessRulesLayers ||
-                    this.AccessRulesLayers != null &&
-                    input.AccessRulesLayers != null &&
-                    this.AccessRulesLayers.SequenceEqual(input.AccessRulesLayers)
                 );
         }
 
@@ -229,23 +208,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
                 }
-                if (this.AccessRulesLayers != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccessRulesLayers.GetHashCode();
-                }
                 return hashCode;
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

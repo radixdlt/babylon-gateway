@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// EntityMetadataCollectionAllOf
     /// </summary>
     [DataContract(Name = "EntityMetadataCollection_allOf")]
-    public partial class EntityMetadataCollectionAllOf : IEquatable<EntityMetadataCollectionAllOf>, IValidatableObject
+    public partial class EntityMetadataCollectionAllOf : IEquatable<EntityMetadataCollectionAllOf>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityMetadataCollectionAllOf" /> class.
@@ -104,7 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityMetadataCollectionAllOf" /> class.
         /// </summary>
-        /// <param name="items">TBD (required).</param>
+        /// <param name="items">items (required).</param>
         public EntityMetadataCollectionAllOf(List<EntityMetadataItem> items = default(List<EntityMetadataItem>))
         {
             // to ensure "items" is required (not null)
@@ -116,9 +115,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// TBD
+        /// Gets or Sets Items
         /// </summary>
-        /// <value>TBD</value>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
         public List<EntityMetadataItem> Items { get; set; }
 
@@ -191,15 +189,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

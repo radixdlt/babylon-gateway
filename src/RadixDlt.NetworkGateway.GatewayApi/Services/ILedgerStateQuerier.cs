@@ -72,11 +72,11 @@ public interface ILedgerStateQuerier
 {
     Task<GatewayModel.GatewayInformationResponse> GetGatewayInformation(CancellationToken token = default);
 
-    Task<GatewayModel.LedgerState> GetValidLedgerStateForReadRequest(GatewayModel.PartialLedgerStateIdentifier? atLedgerStateIdentifier, CancellationToken token = default);
+    Task<GatewayModel.LedgerState> GetValidLedgerStateForReadRequest(GatewayModel.LedgerStateSelector? atLedgerStateIdentifier, CancellationToken token = default);
 
-    Task<GatewayModel.LedgerState?> GetValidLedgerStateForReadForwardRequest(GatewayModel.PartialLedgerStateIdentifier? fromLedgerStateIdentifier, CancellationToken token = default);
+    Task<GatewayModel.LedgerState?> GetValidLedgerStateForReadForwardRequest(GatewayModel.LedgerStateSelector? fromLedgerStateIdentifier, CancellationToken token = default);
 
-    Task<GatewayModel.LedgerState> GetValidLedgerStateForConstructionRequest(GatewayModel.PartialLedgerStateIdentifier? atLedgerStateIdentifier, CancellationToken token = default);
+    Task<GatewayModel.LedgerState> GetValidLedgerStateForConstructionRequest(GatewayModel.LedgerStateSelector? atLedgerStateIdentifier, CancellationToken token = default);
 
     Task<long> GetTopOfLedgerStateVersion(CancellationToken token = default);
 }

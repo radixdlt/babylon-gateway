@@ -202,19 +202,15 @@ internal class SubmissionService : ISubmissionService
 
     private async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitAndCreateResponse(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
     {
-        // todo consider this a mock/dumb implementation for testing purposes only
-
         using var timeoutTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3)); // TODO configurable
         using var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutTokenSource.Token, token);
-
-        var notarizedTransaction = request.NotarizedTransactionHex.ConvertFromHex();
 
         try
         {
             var result = await _coreApiHandler.SubmitTransaction(
                 new CoreModel.TransactionSubmitRequest(
                     _coreApiHandler.GetNetworkIdentifier(),
-                    notarizedTransaction.ToHex()
+                    request.NotarizedTransactionHex
                 ),
                 finalTokenSource.Token
             );

@@ -67,6 +67,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -88,9 +89,9 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record NonFungiblesViewModel(byte[] ResourceEntityGlobalAddress, long NonFungibleIdsCount, int TotalCount);
 
-    private record NonFungibleIdsViewModel(byte[] NonFungibleId, int TotalCount);
+    private record NonFungibleIdsViewModel(string NonFungibleId, int TotalCount);
 
-    private record NonFungibleIdViewModel(byte[] NonFungibleId, bool IsDeleted, byte[] ImmutableData, byte[] MutableData);
+    private record NonFungibleIdDataViewModel(string NonFungibleId, bool IsDeleted, byte[] ImmutableData, byte[] MutableData);
 
     private const int DefaultMetadataLimit = 10; // TODO make it configurable
     private const int DefaultResourceLimit = 5; // TODO make it configurable
@@ -126,74 +127,54 @@ internal class EntityStateQuerier : IEntityStateQuerier
         {
             case FungibleResourceManagerEntity frme:
             {
+                // TODO refactor so that we just just one query (reduce number of network roundtrips)
+
                 var supplyHistory = await _dbContext.FungibleResourceSupplyHistory
                     .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ResourceEntityId == frme.Id)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
-                var authRules = await _dbContext.ResourceManagerEntityAuthRulesHistory
-                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ResourceManagerEntityId == frme.Id)
+                var accessRulesChain = await _dbContext.EntityAccessRulesLayersHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == frme.Id && e.Subtype == AccessRulesChainSubtype.None)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
-                var tokenAddress = entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition());
+                var vaultAccessRulesChain = await _dbContext.EntityAccessRulesLayersHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == frme.Id && e.Subtype == AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain)
+                    .OrderByDescending(e => e.FromStateVersion)
+                    .FirstAsync(token);
 
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseFungibleResourceDetails(
                     discriminator: GatewayModel.EntityDetailsResponseDetailsType.FungibleResource,
-                    authRules: new JRaw(authRules.AuthRules),
+                    accessRulesChain: new JRaw(accessRulesChain.AccessRulesChain),
+                    vaultAccessRulesChain: new JRaw(vaultAccessRulesChain.AccessRulesChain),
                     divisibility: frme.Divisibility,
-                    totalSupply: new GatewayModel.TokenAmount(supplyHistory.TotalSupply.ToString(), tokenAddress),
-                    totalMinted: new GatewayModel.TokenAmount(supplyHistory.TotalMinted.ToString(), tokenAddress),
-                    totalBurnt: new GatewayModel.TokenAmount(supplyHistory.TotalBurnt.ToString(), tokenAddress)));
+                    totalSupply: supplyHistory.TotalSupply.ToString(),
+                    totalMinted: supplyHistory.TotalMinted.ToString(),
+                    totalBurnt: supplyHistory.TotalBurnt.ToString()));
 
                 break;
             }
 
             case NonFungibleResourceManagerEntity nfrme:
             {
-                var dbConn = _dbContext.Database.GetDbConnection();
+                // TODO refactor so that we just just one query (reduce number of network roundtrips)
 
-                // TODO ORDER BY nfih.from_state_version DESC might be insufficient as we might have more than one NFID created in single state_version (add ", id ASC"?)
+                var accessRulesChain = await _dbContext.EntityAccessRulesLayersHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == nfrme.Id && e.Subtype == AccessRulesChainSubtype.None)
+                    .OrderByDescending(e => e.FromStateVersion)
+                    .FirstAsync(token);
 
-                var nonFungibleIds = await dbConn.QueryAsync<NonFungibleIdViewModel>(new CommandDefinition(
-                    commandText: @"
-SELECT nfid.non_fungible_id AS NonFungibleId, nfimdh.is_deleted AS IsDeleted, nfid.immutable_data AS ImmutableData, nfimdh.mutable_data AS MutableData
-FROM non_fungible_id_data nfid
-INNER JOIN LATERAL (
-    SELECT is_deleted, mutable_data
-    FROM non_fungible_id_mutable_data_history nfimdh
-    WHERE nfimdh.from_state_version <= @stateVersion AND nfid.id = nfimdh.non_fungible_id_data_id
-    ORDER BY nfid.from_state_version DESC
-    LIMIT 1
-) nfimdh ON TRUE
-WHERE nfid.from_state_version <= @stateVersion AND nfid.non_fungible_resource_manager_entity_id = @entityId
-ORDER BY nfid.from_state_version DESC
-OFFSET @offset LIMIT @limit",
-                    parameters: new
-                    {
-                        stateVersion = ledgerState.StateVersion,
-                        entityId = nfrme.Id,
-                        offset = 0,
-                        limit = DefaultResourceLimit,
-                    },
-                    cancellationToken: token));
-
-                var authRules = await _dbContext.ResourceManagerEntityAuthRulesHistory
-                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ResourceManagerEntityId == nfrme.Id)
+                var vaultAccessRulesChain = await _dbContext.EntityAccessRulesLayersHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == nfrme.Id && e.Subtype == AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseNonFungibleResourceDetails(
                     discriminator: GatewayModel.EntityDetailsResponseDetailsType.NonFungibleResource,
-                    authRules: new JRaw(authRules.AuthRules),
-                    ids: new GatewayModel.EntityDetailsResponseNonFungibleResourceDetailsIds(
-                        nextCursor: "TBD (currently first 10 NFIDs are returned)",
-                        items: nonFungibleIds
-                            .Select(nfid => new GatewayModel.EntityDetailsResponseNonFungibleResourceDetailsIdsItem(
-                                idHex: nfid.NonFungibleId.ToHex(),
-                                immutableDataHex: nfid.ImmutableData.ToHex(),
-                                mutableDataHex: nfid.MutableData.ToHex()))
-                            .ToList())));
+                    accessRulesChain: new JRaw(accessRulesChain.AccessRulesChain),
+                    vaultAccessRulesChain: new JRaw(vaultAccessRulesChain.AccessRulesChain),
+                    nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel()));
                 break;
             }
 
@@ -212,8 +193,8 @@ OFFSET @offset LIMIT @limit",
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
-                var accessRulesLayers = await _dbContext.ComponentEntityAccessRulesLayersHistory
-                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ComponentEntityId == ce.Id)
+                var accessRulesLayers = await _dbContext.EntityAccessRulesLayersHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == ce.Id)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
@@ -222,7 +203,7 @@ OFFSET @offset LIMIT @limit",
                     packageAddress: package.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()),
                     blueprintName: ce.BlueprintName,
                     state: new JRaw(state.State),
-                    accessRulesLayers: new JRaw(accessRulesLayers.AccessRulesLayers)));
+                    accessRulesChain: new JRaw(accessRulesLayers.AccessRulesChain)));
                 break;
 
             default:
@@ -283,6 +264,109 @@ OFFSET @offset LIMIT @limit",
         var nonFungibleIds = await GetNonFungibleIdsSlice(entity.Id, resourceEntity.Id, request.Offset, request.Limit, ledgerState, token);
 
         return new GatewayModel.EntityNonFungibleIdsResponse(ledgerState, request.Address.ToString(), resourceAddress.ToString(), nonFungibleIds);
+    }
+
+    public async Task<GatewayModel.NonFungibleIdsResponse> NonFungibleIds(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    {
+        var entity = await GetEntity<NonFungibleResourceManagerEntity>(request.Address, ledgerState, token);
+
+        var cd = new CommandDefinition(
+            commandText: @"
+WITH store_history (nfids, total_count) AS (
+    SELECT non_fungible_id_data_ids[@offset:@limit], array_length(non_fungible_id_data_ids, 1)
+    FROM non_fungible_id_store_history
+    WHERE non_fungible_resource_manager_entity_id = @entityId AND from_state_version < @stateVersion
+    ORDER BY from_state_version DESC
+    LIMIT 1
+),
+non_fungible_data_ids (id) AS (
+    SELECT UNNEST(nfids)
+    FROM store_history
+)
+SELECT nfd.non_fungible_id AS NonFungibleId, store_history.total_count AS TotalCount
+FROM non_fungible_id_data nfd, store_history
+WHERE nfd.id IN(
+    SELECT id FROM non_fungible_data_ids
+)",
+            parameters: new
+            {
+                stateVersion = ledgerState.StateVersion,
+                entityId = entity.Id,
+                offset = request.Offset + 1,
+                limit = request.Offset + request.Limit + 1,
+            },
+            cancellationToken: token);
+
+        long? totalCount = 0;
+
+        var items = (await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdsViewModel>(cd)).ToList()
+            .Select(vm =>
+            {
+                totalCount = vm.TotalCount;
+
+                return new GatewayModel.NonFungibleIdsCollectionItem(vm.NonFungibleId);
+            })
+            .ToList();
+
+        var previousCursor = request.Offset > 0
+            ? new GatewayModel.EntityFungiblesCursor(Math.Max(request.Offset - request.Limit, 0)).ToCursorString()
+            : null;
+
+        var nextCursor = items.Count > request.Limit
+            ? new GatewayModel.EntityFungiblesCursor(request.Offset + request.Limit).ToCursorString()
+            : null;
+
+        return new GatewayModel.NonFungibleIdsResponse(
+            ledgerState: ledgerState,
+            address: request.Address.ToString(),
+            nonFungibleIds: new GatewayModel.NonFungibleIdsCollection(
+                totalCount: totalCount,
+                previousCursor: previousCursor,
+                nextCursor: nextCursor,
+                items: items.Take(request.Limit).ToList()));
+    }
+
+    public async Task<GatewayModel.NonFungibleDataResponse> NonFungibleIdData(DecodedRadixAddress address, string nonFungibleId, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    {
+        var entity = await GetEntity<NonFungibleResourceManagerEntity>(address, ledgerState, token);
+
+        var cd = new CommandDefinition(
+            commandText: @"
+SELECT nfid.non_fungible_id AS NonFungibleId, md.is_deleted AS IsDeleted, nfid.immutable_data AS ImmutableData, md.mutable_data AS MutableData
+FROM non_fungible_id_data nfid
+LEFT JOIN LATERAL (
+    SELECT *
+    FROM non_fungible_id_mutable_data_history nfidmdh
+    WHERE nfidmdh.non_fungible_id_data_id = nfid.id AND nfidmdh.from_state_version <= @stateVersion
+    ORDER BY nfidmdh.non_fungible_id_data_id DESC
+    LIMIT 1
+) md ON TRUE
+WHERE nfid.from_state_version <= @stateVersion AND nfid.non_fungible_resource_manager_entity_id = @entityId AND nfid.non_fungible_id = @nonFungibleId
+ORDER BY nfid.from_state_version DESC
+LIMIT 1
+",
+            parameters: new
+            {
+                stateVersion = ledgerState.StateVersion,
+                entityId = entity.Id,
+                nonFungibleId = nonFungibleId,
+            },
+            cancellationToken: token);
+
+        var data = await _dbContext.Database.GetDbConnection().QueryFirstOrDefaultAsync<NonFungibleIdDataViewModel>(cd);
+
+        if (data == null || data.IsDeleted)
+        {
+            throw new EntityNotFoundException(address.ToString()); // TODO change it to some "resource not found"?
+        }
+
+        return new GatewayModel.NonFungibleDataResponse(
+            ledgerState: ledgerState,
+            address: address.ToString(),
+            nonFungibleIdType: entity.NonFungibleIdType.ToGatewayModel(),
+            nonFungibleId: data.NonFungibleId,
+            mutableDataHex: data.MutableData.ToHex(),
+            immutableDataHex: data.ImmutableData.ToHex());
     }
 
     private async Task<GatewayModel.EntityMetadataCollection> GetMetadataSlice(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
@@ -495,7 +579,7 @@ WHERE id = (
             {
                 totalCount = vm.TotalCount;
 
-                return new GatewayModel.NonFungibleIdsCollectionItem(vm.NonFungibleId.ToHex());
+                return new GatewayModel.NonFungibleIdsCollectionItem(vm.NonFungibleId);
             })
             .ToList();
 

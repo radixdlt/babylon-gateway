@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// GlobalEntityAssignment
     /// </summary>
     [DataContract(Name = "GlobalEntityAssignment")]
-    public partial class GlobalEntityAssignment : IEquatable<GlobalEntityAssignment>, IValidatableObject
+    public partial class GlobalEntityAssignment : IEquatable<GlobalEntityAssignment>
     {
 
         /// <summary>
@@ -112,9 +111,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="targetEntityType">targetEntityType (required).</param>
         /// <param name="targetEntityIdHex">The hex-encoded bytes of the target entity id (required).</param>
+        /// <param name="globalEntityIdHex">The hex-encoded bytes of the global entity id (required).</param>
         /// <param name="globalAddressHex">The hex-encoded bytes of the assigned global address. (required).</param>
         /// <param name="globalAddress">The Bech32m-encoded human readable version of the assigned global address (required).</param>
-        public GlobalEntityAssignment(EntityType targetEntityType = default(EntityType), string targetEntityIdHex = default(string), string globalAddressHex = default(string), string globalAddress = default(string))
+        public GlobalEntityAssignment(EntityType targetEntityType = default(EntityType), string targetEntityIdHex = default(string), string globalEntityIdHex = default(string), string globalAddressHex = default(string), string globalAddress = default(string))
         {
             this.TargetEntityType = targetEntityType;
             // to ensure "targetEntityIdHex" is required (not null)
@@ -123,6 +123,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("targetEntityIdHex is a required property for GlobalEntityAssignment and cannot be null");
             }
             this.TargetEntityIdHex = targetEntityIdHex;
+            // to ensure "globalEntityIdHex" is required (not null)
+            if (globalEntityIdHex == null)
+            {
+                throw new ArgumentNullException("globalEntityIdHex is a required property for GlobalEntityAssignment and cannot be null");
+            }
+            this.GlobalEntityIdHex = globalEntityIdHex;
             // to ensure "globalAddressHex" is required (not null)
             if (globalAddressHex == null)
             {
@@ -143,6 +149,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <value>The hex-encoded bytes of the target entity id</value>
         [DataMember(Name = "target_entity_id_hex", IsRequired = true, EmitDefaultValue = true)]
         public string TargetEntityIdHex { get; set; }
+
+        /// <summary>
+        /// The hex-encoded bytes of the global entity id
+        /// </summary>
+        /// <value>The hex-encoded bytes of the global entity id</value>
+        [DataMember(Name = "global_entity_id_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string GlobalEntityIdHex { get; set; }
 
         /// <summary>
         /// The hex-encoded bytes of the assigned global address.
@@ -168,6 +181,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class GlobalEntityAssignment {\n");
             sb.Append("  TargetEntityType: ").Append(TargetEntityType).Append("\n");
             sb.Append("  TargetEntityIdHex: ").Append(TargetEntityIdHex).Append("\n");
+            sb.Append("  GlobalEntityIdHex: ").Append(GlobalEntityIdHex).Append("\n");
             sb.Append("  GlobalAddressHex: ").Append(GlobalAddressHex).Append("\n");
             sb.Append("  GlobalAddress: ").Append(GlobalAddress).Append("\n");
             sb.Append("}\n");
@@ -215,6 +229,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.TargetEntityIdHex.Equals(input.TargetEntityIdHex))
                 ) && 
                 (
+                    this.GlobalEntityIdHex == input.GlobalEntityIdHex ||
+                    (this.GlobalEntityIdHex != null &&
+                    this.GlobalEntityIdHex.Equals(input.GlobalEntityIdHex))
+                ) && 
+                (
                     this.GlobalAddressHex == input.GlobalAddressHex ||
                     (this.GlobalAddressHex != null &&
                     this.GlobalAddressHex.Equals(input.GlobalAddressHex))
@@ -240,6 +259,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.TargetEntityIdHex.GetHashCode();
                 }
+                if (this.GlobalEntityIdHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.GlobalEntityIdHex.GetHashCode();
+                }
                 if (this.GlobalAddressHex != null)
                 {
                     hashCode = (hashCode * 59) + this.GlobalAddressHex.GetHashCode();
@@ -252,15 +275,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

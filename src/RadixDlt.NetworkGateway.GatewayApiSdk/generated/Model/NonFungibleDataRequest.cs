@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// NonFungibleDataRequest
     /// </summary>
     [DataContract(Name = "NonFungibleDataRequest")]
-    public partial class NonFungibleDataRequest : IEquatable<NonFungibleDataRequest>, IValidatableObject
+    public partial class NonFungibleDataRequest : IEquatable<NonFungibleDataRequest>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleDataRequest" /> class.
@@ -104,12 +103,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleDataRequest" /> class.
         /// </summary>
+        /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="nonFungibleIdHex">nonFungibleIdHex (required).</param>
-        /// <param name="atStateIdentifier">atStateIdentifier.</param>
+        /// <param name="nonFungibleId">nonFungibleId (required).</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limit">The page size requested..</param>
-        public NonFungibleDataRequest(string address = default(string), string nonFungibleIdHex = default(string), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier), string cursor = default(string), int? limit = default(int?))
+        public NonFungibleDataRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string address = default(string), string nonFungibleId = default(string), string cursor = default(string), int? limit = default(int?))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -117,16 +116,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("address is a required property for NonFungibleDataRequest and cannot be null");
             }
             this.Address = address;
-            // to ensure "nonFungibleIdHex" is required (not null)
-            if (nonFungibleIdHex == null)
+            // to ensure "nonFungibleId" is required (not null)
+            if (nonFungibleId == null)
             {
-                throw new ArgumentNullException("nonFungibleIdHex is a required property for NonFungibleDataRequest and cannot be null");
+                throw new ArgumentNullException("nonFungibleId is a required property for NonFungibleDataRequest and cannot be null");
             }
-            this.NonFungibleIdHex = nonFungibleIdHex;
-            this.AtStateIdentifier = atStateIdentifier;
+            this.NonFungibleId = nonFungibleId;
+            this.AtLedgerState = atLedgerState;
             this.Cursor = cursor;
             this.Limit = limit;
         }
+
+        /// <summary>
+        /// Gets or Sets AtLedgerState
+        /// </summary>
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
         /// The Bech32m-encoded human readable version of the entity&#39;s global address.
@@ -136,16 +141,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Address { get; set; }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIdHex
+        /// Gets or Sets NonFungibleId
         /// </summary>
-        [DataMember(Name = "non_fungible_id_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string NonFungibleIdHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets AtStateIdentifier
-        /// </summary>
-        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
-        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
+        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
+        public string NonFungibleId { get; set; }
 
         /// <summary>
         /// This cursor allows forward pagination, by providing the cursor from the previous request.
@@ -169,9 +168,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleDataRequest {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  NonFungibleIdHex: ").Append(NonFungibleIdHex).Append("\n");
-            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
+            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
             sb.Append("  Limit: ").Append(Limit).Append("\n");
             sb.Append("}\n");
@@ -210,19 +209,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
+                (
                     this.Address == input.Address ||
                     (this.Address != null &&
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.NonFungibleIdHex == input.NonFungibleIdHex ||
-                    (this.NonFungibleIdHex != null &&
-                    this.NonFungibleIdHex.Equals(input.NonFungibleIdHex))
-                ) && 
-                (
-                    this.AtStateIdentifier == input.AtStateIdentifier ||
-                    (this.AtStateIdentifier != null &&
-                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
+                    this.NonFungibleId == input.NonFungibleId ||
+                    (this.NonFungibleId != null &&
+                    this.NonFungibleId.Equals(input.NonFungibleId))
                 ) && 
                 (
                     this.Cursor == input.Cursor ||
@@ -245,17 +244,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
                 if (this.Address != null)
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.NonFungibleIdHex != null)
+                if (this.NonFungibleId != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleIdHex.GetHashCode();
-                }
-                if (this.AtStateIdentifier != null)
-                {
-                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
                 }
                 if (this.Cursor != null)
                 {
@@ -269,15 +268,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

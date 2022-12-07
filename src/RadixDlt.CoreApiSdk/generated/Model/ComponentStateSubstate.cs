@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,14 +93,8 @@ namespace RadixDlt.CoreApiSdk.Model
     /// ComponentStateSubstate
     /// </summary>
     [DataContract(Name = "ComponentStateSubstate")]
-    public partial class ComponentStateSubstate : IEquatable<ComponentStateSubstate>, IValidatableObject
+    public partial class ComponentStateSubstate : IEquatable<ComponentStateSubstate>
     {
-
-        /// <summary>
-        /// Gets or Sets EntityType
-        /// </summary>
-        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
-        public EntityType EntityType { get; set; }
 
         /// <summary>
         /// Gets or Sets SubstateType
@@ -116,12 +109,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ComponentStateSubstate" /> class.
         /// </summary>
-        /// <param name="entityType">entityType (required).</param>
         /// <param name="substateType">substateType (required).</param>
         /// <param name="dataStruct">dataStruct (required).</param>
-        public ComponentStateSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), DataStruct dataStruct = default(DataStruct))
+        public ComponentStateSubstate(SubstateType substateType = default(SubstateType), DataStruct dataStruct = default(DataStruct))
         {
-            this.EntityType = entityType;
             this.SubstateType = substateType;
             // to ensure "dataStruct" is required (not null)
             if (dataStruct == null)
@@ -145,7 +136,6 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ComponentStateSubstate {\n");
-            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
             sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
             sb.Append("}\n");
@@ -184,10 +174,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.EntityType == input.EntityType ||
-                    this.EntityType.Equals(input.EntityType)
-                ) && 
-                (
                     this.SubstateType == input.SubstateType ||
                     this.SubstateType.Equals(input.SubstateType)
                 ) && 
@@ -207,7 +193,6 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
                 hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
                 if (this.DataStruct != null)
                 {
@@ -217,15 +202,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

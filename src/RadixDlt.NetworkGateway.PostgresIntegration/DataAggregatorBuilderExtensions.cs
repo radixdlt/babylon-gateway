@@ -67,6 +67,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
@@ -83,7 +84,7 @@ public static class DataAggregatorBuilderExtensions
     public static DataAggregatorBuilder AddPostgresPersistenceCore(this DataAggregatorBuilder builder)
     {
         builder.Services
-            .AddSingleton<ILedgerExtenderService, LedgerExtenderService>()
+            .AddSingleton<ILedgerExtenderService, PostgresLedgerExtenderService>()
             .AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>()
             .AddSingleton<IPendingTransactionTrackerService, PendingTransactionTrackerService>()
             .AddSingleton<IPendingTransactionResubmissionService, PendingTransactionResubmissionService>()

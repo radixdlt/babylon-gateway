@@ -85,7 +85,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using JsonSubTypes;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 using System.Reflection;
@@ -97,7 +96,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [JsonConverter(typeof(DynamicResourceDescriptorListJsonConverter))]
     [DataContract(Name = "DynamicResourceDescriptorList")]
-    public partial class DynamicResourceDescriptorList : AbstractOpenAPISchema, IEquatable<DynamicResourceDescriptorList>, IValidatableObject
+    public partial class DynamicResourceDescriptorList : AbstractOpenAPISchema, IEquatable<DynamicResourceDescriptorList>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicResourceDescriptorList" /> class
@@ -107,7 +106,7 @@ namespace RadixDlt.CoreApiSdk.Model
         public DynamicResourceDescriptorList(ListDynamicResourceDescriptorList actualInstance)
         {
             this.IsNullable = false;
-            this.SchemaType= "anyOf";
+            this.SchemaType= "oneOf";
             this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
         }
 
@@ -119,7 +118,7 @@ namespace RadixDlt.CoreApiSdk.Model
         public DynamicResourceDescriptorList(SchemaPathDynamicResourceDescriptorList actualInstance)
         {
             this.IsNullable = false;
-            this.SchemaType= "anyOf";
+            this.SchemaType= "oneOf";
             this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
         }
 
@@ -210,9 +209,48 @@ namespace RadixDlt.CoreApiSdk.Model
 
             try
             {
-                newDynamicResourceDescriptorList = new DynamicResourceDescriptorList(JsonConvert.DeserializeObject<ListDynamicResourceDescriptorList>(jsonString, DynamicResourceDescriptorList.SerializerSettings));
-                // deserialization is considered successful at this point if no exception has been thrown.
-                return newDynamicResourceDescriptorList;
+                var discriminatorObj = JObject.Parse(jsonString)["type"];
+                string discriminatorValue =  discriminatorObj == null ?string.Empty :discriminatorObj.ToString();
+                switch (discriminatorValue)
+                {
+                    case "List":
+                        newDynamicResourceDescriptorList = new DynamicResourceDescriptorList(JsonConvert.DeserializeObject<ListDynamicResourceDescriptorList>(jsonString, DynamicResourceDescriptorList.AdditionalPropertiesSerializerSettings));
+                        return newDynamicResourceDescriptorList;
+                    case "ListDynamicResourceDescriptorList":
+                        newDynamicResourceDescriptorList = new DynamicResourceDescriptorList(JsonConvert.DeserializeObject<ListDynamicResourceDescriptorList>(jsonString, DynamicResourceDescriptorList.AdditionalPropertiesSerializerSettings));
+                        return newDynamicResourceDescriptorList;
+                    case "SchemaPath":
+                        newDynamicResourceDescriptorList = new DynamicResourceDescriptorList(JsonConvert.DeserializeObject<SchemaPathDynamicResourceDescriptorList>(jsonString, DynamicResourceDescriptorList.AdditionalPropertiesSerializerSettings));
+                        return newDynamicResourceDescriptorList;
+                    case "SchemaPathDynamicResourceDescriptorList":
+                        newDynamicResourceDescriptorList = new DynamicResourceDescriptorList(JsonConvert.DeserializeObject<SchemaPathDynamicResourceDescriptorList>(jsonString, DynamicResourceDescriptorList.AdditionalPropertiesSerializerSettings));
+                        return newDynamicResourceDescriptorList;
+                    default:
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for DynamicResourceDescriptorList. Possible values: List ListDynamicResourceDescriptorList SchemaPath SchemaPathDynamicResourceDescriptorList", discriminatorValue));
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to parse the json data : `{0}` {1}", jsonString, ex.ToString()));
+            }
+
+            int match = 0;
+            List<string> matchedTypes = new List<string>();
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(ListDynamicResourceDescriptorList).GetProperty("AdditionalProperties") == null)
+                {
+                    newDynamicResourceDescriptorList = new DynamicResourceDescriptorList(JsonConvert.DeserializeObject<ListDynamicResourceDescriptorList>(jsonString, DynamicResourceDescriptorList.SerializerSettings));
+                }
+                else
+                {
+                    newDynamicResourceDescriptorList = new DynamicResourceDescriptorList(JsonConvert.DeserializeObject<ListDynamicResourceDescriptorList>(jsonString, DynamicResourceDescriptorList.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("ListDynamicResourceDescriptorList");
+                match++;
             }
             catch (Exception exception)
             {
@@ -222,9 +260,17 @@ namespace RadixDlt.CoreApiSdk.Model
 
             try
             {
-                newDynamicResourceDescriptorList = new DynamicResourceDescriptorList(JsonConvert.DeserializeObject<SchemaPathDynamicResourceDescriptorList>(jsonString, DynamicResourceDescriptorList.SerializerSettings));
-                // deserialization is considered successful at this point if no exception has been thrown.
-                return newDynamicResourceDescriptorList;
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(SchemaPathDynamicResourceDescriptorList).GetProperty("AdditionalProperties") == null)
+                {
+                    newDynamicResourceDescriptorList = new DynamicResourceDescriptorList(JsonConvert.DeserializeObject<SchemaPathDynamicResourceDescriptorList>(jsonString, DynamicResourceDescriptorList.SerializerSettings));
+                }
+                else
+                {
+                    newDynamicResourceDescriptorList = new DynamicResourceDescriptorList(JsonConvert.DeserializeObject<SchemaPathDynamicResourceDescriptorList>(jsonString, DynamicResourceDescriptorList.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("SchemaPathDynamicResourceDescriptorList");
+                match++;
             }
             catch (Exception exception)
             {
@@ -232,8 +278,17 @@ namespace RadixDlt.CoreApiSdk.Model
                 System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into SchemaPathDynamicResourceDescriptorList: {1}", jsonString, exception.ToString()));
             }
 
-            // no match found, throw an exception
-            throw new InvalidDataException("The JSON string `" + jsonString + "` cannot be deserialized into any schema defined.");
+            if (match == 0)
+            {
+                throw new InvalidDataException("The JSON string `" + jsonString + "` cannot be deserialized into any schema defined.");
+            }
+            else if (match > 1)
+            {
+                throw new InvalidDataException("The JSON string `" + jsonString + "` incorrectly matches more than one schema (should be exactly one match): " + matchedTypes);
+            }
+
+            // deserialization is considered successful at this point if no exception has been thrown.
+            return newDynamicResourceDescriptorList;
         }
 
         /// <summary>
@@ -274,15 +329,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> IValidatableObject.Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
     /// <summary>

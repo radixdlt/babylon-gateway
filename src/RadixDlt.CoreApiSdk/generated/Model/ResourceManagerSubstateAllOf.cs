@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// ResourceManagerSubstateAllOf
     /// </summary>
     [DataContract(Name = "ResourceManagerSubstate_allOf")]
-    public partial class ResourceManagerSubstateAllOf : IEquatable<ResourceManagerSubstateAllOf>, IValidatableObject
+    public partial class ResourceManagerSubstateAllOf : IEquatable<ResourceManagerSubstateAllOf>
     {
 
         /// <summary>
@@ -102,6 +101,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
         public ResourceType ResourceType { get; set; }
+
+        /// <summary>
+        /// Gets or Sets NonFungibleIdType
+        /// </summary>
+        [DataMember(Name = "non_fungible_id_type", EmitDefaultValue = true)]
+        public NonFungibleIdType? NonFungibleIdType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceManagerSubstateAllOf" /> class.
         /// </summary>
@@ -112,32 +117,20 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="resourceType">resourceType (required).</param>
         /// <param name="fungibleDivisibility">fungibleDivisibility.</param>
-        /// <param name="metadata">metadata (required).</param>
+        /// <param name="nonFungibleIdType">nonFungibleIdType.</param>
         /// <param name="totalSupply">The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
         /// <param name="ownedNonFungibleStore">ownedNonFungibleStore.</param>
-        /// <param name="authRules">authRules (required).</param>
-        public ResourceManagerSubstateAllOf(ResourceType resourceType = default(ResourceType), int fungibleDivisibility = default(int), List<ResourceManagerSubstateAllOfMetadata> metadata = default(List<ResourceManagerSubstateAllOfMetadata>), string totalSupply = default(string), EntityReference ownedNonFungibleStore = default(EntityReference), ResourceManagerSubstateAllOfAuthRules authRules = default(ResourceManagerSubstateAllOfAuthRules))
+        public ResourceManagerSubstateAllOf(ResourceType resourceType = default(ResourceType), int fungibleDivisibility = default(int), NonFungibleIdType? nonFungibleIdType = default(NonFungibleIdType?), string totalSupply = default(string), EntityReference ownedNonFungibleStore = default(EntityReference))
         {
             this.ResourceType = resourceType;
-            // to ensure "metadata" is required (not null)
-            if (metadata == null)
-            {
-                throw new ArgumentNullException("metadata is a required property for ResourceManagerSubstateAllOf and cannot be null");
-            }
-            this.Metadata = metadata;
             // to ensure "totalSupply" is required (not null)
             if (totalSupply == null)
             {
                 throw new ArgumentNullException("totalSupply is a required property for ResourceManagerSubstateAllOf and cannot be null");
             }
             this.TotalSupply = totalSupply;
-            // to ensure "authRules" is required (not null)
-            if (authRules == null)
-            {
-                throw new ArgumentNullException("authRules is a required property for ResourceManagerSubstateAllOf and cannot be null");
-            }
-            this.AuthRules = authRules;
             this.FungibleDivisibility = fungibleDivisibility;
+            this.NonFungibleIdType = nonFungibleIdType;
             this.OwnedNonFungibleStore = ownedNonFungibleStore;
         }
 
@@ -146,12 +139,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "fungible_divisibility", EmitDefaultValue = true)]
         public int FungibleDivisibility { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Metadata
-        /// </summary>
-        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public List<ResourceManagerSubstateAllOfMetadata> Metadata { get; set; }
 
         /// <summary>
         /// The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
@@ -167,12 +154,6 @@ namespace RadixDlt.CoreApiSdk.Model
         public EntityReference OwnedNonFungibleStore { get; set; }
 
         /// <summary>
-        /// Gets or Sets AuthRules
-        /// </summary>
-        [DataMember(Name = "auth_rules", IsRequired = true, EmitDefaultValue = true)]
-        public ResourceManagerSubstateAllOfAuthRules AuthRules { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -182,10 +163,9 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class ResourceManagerSubstateAllOf {\n");
             sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
             sb.Append("  FungibleDivisibility: ").Append(FungibleDivisibility).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
             sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
             sb.Append("  OwnedNonFungibleStore: ").Append(OwnedNonFungibleStore).Append("\n");
-            sb.Append("  AuthRules: ").Append(AuthRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -230,10 +210,8 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.FungibleDivisibility.Equals(input.FungibleDivisibility)
                 ) && 
                 (
-                    this.Metadata == input.Metadata ||
-                    this.Metadata != null &&
-                    input.Metadata != null &&
-                    this.Metadata.SequenceEqual(input.Metadata)
+                    this.NonFungibleIdType == input.NonFungibleIdType ||
+                    this.NonFungibleIdType.Equals(input.NonFungibleIdType)
                 ) && 
                 (
                     this.TotalSupply == input.TotalSupply ||
@@ -244,11 +222,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.OwnedNonFungibleStore == input.OwnedNonFungibleStore ||
                     (this.OwnedNonFungibleStore != null &&
                     this.OwnedNonFungibleStore.Equals(input.OwnedNonFungibleStore))
-                ) && 
-                (
-                    this.AuthRules == input.AuthRules ||
-                    (this.AuthRules != null &&
-                    this.AuthRules.Equals(input.AuthRules))
                 );
         }
 
@@ -263,10 +236,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
                 hashCode = (hashCode * 59) + this.FungibleDivisibility.GetHashCode();
-                if (this.Metadata != null)
-                {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
                 if (this.TotalSupply != null)
                 {
                     hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
@@ -275,35 +245,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.OwnedNonFungibleStore.GetHashCode();
                 }
-                if (this.AuthRules != null)
-                {
-                    hashCode = (hashCode * 59) + this.AuthRules.GetHashCode();
-                }
                 return hashCode;
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // FungibleDivisibility (int) maximum
-            if (this.FungibleDivisibility > (int)18)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FungibleDivisibility, must be a value less than or equal to 18.", new [] { "FungibleDivisibility" });
-            }
-
-            // FungibleDivisibility (int) minimum
-            if (this.FungibleDivisibility < (int)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FungibleDivisibility, must be a value greater than or equal to 0.", new [] { "FungibleDivisibility" });
-            }
-
-            yield break;
-        }
     }
 
 }

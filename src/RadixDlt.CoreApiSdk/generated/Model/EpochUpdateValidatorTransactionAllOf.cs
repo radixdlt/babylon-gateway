@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// EpochUpdateValidatorTransactionAllOf
     /// </summary>
     [DataContract(Name = "EpochUpdateValidatorTransaction_allOf")]
-    public partial class EpochUpdateValidatorTransactionAllOf : IEquatable<EpochUpdateValidatorTransactionAllOf>, IValidatableObject
+    public partial class EpochUpdateValidatorTransactionAllOf : IEquatable<EpochUpdateValidatorTransactionAllOf>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EpochUpdateValidatorTransactionAllOf" /> class.
@@ -104,18 +103,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EpochUpdateValidatorTransactionAllOf" /> class.
         /// </summary>
-        /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch (required).</param>
-        public EpochUpdateValidatorTransactionAllOf(long epoch = default(long))
+        /// <param name="scryptoEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch. Note that currently this is not the same as &#x60;consensus_epoch&#x60;, but eventually will be.  (required).</param>
+        public EpochUpdateValidatorTransactionAllOf(long scryptoEpoch = default(long))
         {
-            this.Epoch = epoch;
+            this.ScryptoEpoch = scryptoEpoch;
         }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch. Note that currently this is not the same as &#x60;consensus_epoch&#x60;, but eventually will be. 
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch</value>
-        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long Epoch { get; set; }
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch. Note that currently this is not the same as &#x60;consensus_epoch&#x60;, but eventually will be. </value>
+        [DataMember(Name = "scrypto_epoch", IsRequired = true, EmitDefaultValue = true)]
+        public long ScryptoEpoch { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -125,7 +124,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EpochUpdateValidatorTransactionAllOf {\n");
-            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
+            sb.Append("  ScryptoEpoch: ").Append(ScryptoEpoch).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -162,8 +161,8 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Epoch == input.Epoch ||
-                    this.Epoch.Equals(input.Epoch)
+                    this.ScryptoEpoch == input.ScryptoEpoch ||
+                    this.ScryptoEpoch.Equals(input.ScryptoEpoch)
                 );
         }
 
@@ -176,32 +175,11 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
+                hashCode = (hashCode * 59) + this.ScryptoEpoch.GetHashCode();
                 return hashCode;
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // Epoch (long) maximum
-            if (this.Epoch > (long)10000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Epoch, must be a value less than or equal to 10000000000.", new [] { "Epoch" });
-            }
-
-            // Epoch (long) minimum
-            if (this.Epoch < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Epoch, must be a value greater than or equal to 0.", new [] { "Epoch" });
-            }
-
-            yield break;
-        }
     }
 
 }

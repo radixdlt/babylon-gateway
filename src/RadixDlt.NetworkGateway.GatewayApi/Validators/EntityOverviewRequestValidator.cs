@@ -69,7 +69,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class EntityOverviewRequestValidator : AbstractValidator<GatewayModel.EntityOverviewRequest>
 {
-    public EntityOverviewRequestValidator(PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
+    public EntityOverviewRequestValidator(LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
         RuleFor(x => x.Addresses)
             .NotEmpty()
@@ -84,7 +84,7 @@ internal class EntityOverviewRequestValidator : AbstractValidator<GatewayModel.E
                     .RadixAddress();
             });
 
-        RuleFor(x => x.AtStateIdentifier)
-            .SetValidator(partialLedgerStateIdentifierValidator);
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
     }
 }

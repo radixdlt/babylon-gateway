@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// TransactionHeader
     /// </summary>
     [DataContract(Name = "TransactionHeader")]
-    public partial class TransactionHeader : IEquatable<TransactionHeader>, IValidatableObject
+    public partial class TransactionHeader : IEquatable<TransactionHeader>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionHeader" /> class.
@@ -112,8 +111,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="notaryPublicKey">notaryPublicKey (required).</param>
         /// <param name="notaryAsSignatory">Specifies whether the notary&#39;s signature should be included in transaction signers list (required).</param>
         /// <param name="costUnitLimit">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the maximum number of cost units available for transaction execution. (required).</param>
-        /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
-        public TransactionHeader(int version = default(int), int networkId = default(int), long startEpochInclusive = default(long), long endEpochExclusive = default(long), string nonce = default(string), PublicKey notaryPublicKey = default(PublicKey), bool notaryAsSignatory = default(bool), long costUnitLimit = default(long), long tipPercentage = default(long))
+        /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;255&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
+        public TransactionHeader(int version = default(int), int networkId = default(int), long startEpochInclusive = default(long), long endEpochExclusive = default(long), string nonce = default(string), PublicKey notaryPublicKey = default(PublicKey), bool notaryAsSignatory = default(bool), long costUnitLimit = default(long), int tipPercentage = default(int))
         {
             this._Version = version;
             this.NetworkId = networkId;
@@ -190,11 +189,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public long CostUnitLimit { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.
+        /// An integer between &#x60;0&#x60; and &#x60;255&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;255&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.</value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
-        public long TipPercentage { get; set; }
+        public int TipPercentage { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -316,87 +315,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // _Version (int) maximum
-            if (this._Version > (int)255)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value less than or equal to 255.", new [] { "_Version" });
-            }
-
-            // _Version (int) minimum
-            if (this._Version < (int)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value greater than or equal to 0.", new [] { "_Version" });
-            }
-
-            // NetworkId (int) maximum
-            if (this.NetworkId > (int)255)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for NetworkId, must be a value less than or equal to 255.", new [] { "NetworkId" });
-            }
-
-            // NetworkId (int) minimum
-            if (this.NetworkId < (int)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for NetworkId, must be a value greater than or equal to 0.", new [] { "NetworkId" });
-            }
-
-            // StartEpochInclusive (long) maximum
-            if (this.StartEpochInclusive > (long)10000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartEpochInclusive, must be a value less than or equal to 10000000000.", new [] { "StartEpochInclusive" });
-            }
-
-            // StartEpochInclusive (long) minimum
-            if (this.StartEpochInclusive < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartEpochInclusive, must be a value greater than or equal to 0.", new [] { "StartEpochInclusive" });
-            }
-
-            // EndEpochExclusive (long) maximum
-            if (this.EndEpochExclusive > (long)10000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for EndEpochExclusive, must be a value less than or equal to 10000000000.", new [] { "EndEpochExclusive" });
-            }
-
-            // EndEpochExclusive (long) minimum
-            if (this.EndEpochExclusive < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for EndEpochExclusive, must be a value greater than or equal to 0.", new [] { "EndEpochExclusive" });
-            }
-
-            // CostUnitLimit (long) maximum
-            if (this.CostUnitLimit > (long)4294967295)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value less than or equal to 4294967295.", new [] { "CostUnitLimit" });
-            }
-
-            // CostUnitLimit (long) minimum
-            if (this.CostUnitLimit < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value greater than or equal to 0.", new [] { "CostUnitLimit" });
-            }
-
-            // TipPercentage (long) maximum
-            if (this.TipPercentage > (long)4294967295)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value less than or equal to 4294967295.", new [] { "TipPercentage" });
-            }
-
-            // TipPercentage (long) minimum
-            if (this.TipPercentage < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value greater than or equal to 0.", new [] { "TipPercentage" });
-            }
-
-            yield break;
-        }
     }
 
 }

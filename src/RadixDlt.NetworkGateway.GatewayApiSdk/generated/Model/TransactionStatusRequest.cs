@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,30 +93,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// TransactionStatusRequest
     /// </summary>
     [DataContract(Name = "TransactionStatusRequest")]
-    public partial class TransactionStatusRequest : IEquatable<TransactionStatusRequest>, IValidatableObject
+    public partial class TransactionStatusRequest : IEquatable<TransactionStatusRequest>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionStatusRequest" /> class.
         /// </summary>
+        /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="intentHashHex">intentHashHex.</param>
-        /// <param name="atStateIdentifier">atStateIdentifier.</param>
-        public TransactionStatusRequest(string intentHashHex = default(string), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
+        public TransactionStatusRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string intentHashHex = default(string))
         {
+            this.AtLedgerState = atLedgerState;
             this.IntentHashHex = intentHashHex;
-            this.AtStateIdentifier = atStateIdentifier;
         }
+
+        /// <summary>
+        /// Gets or Sets AtLedgerState
+        /// </summary>
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
         /// Gets or Sets IntentHashHex
         /// </summary>
         [DataMember(Name = "intent_hash_hex", EmitDefaultValue = true)]
         public string IntentHashHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets AtStateIdentifier
-        /// </summary>
-        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
-        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +126,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionStatusRequest {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
-            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,14 +164,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
+                (
                     this.IntentHashHex == input.IntentHashHex ||
                     (this.IntentHashHex != null &&
                     this.IntentHashHex.Equals(input.IntentHashHex))
-                ) && 
-                (
-                    this.AtStateIdentifier == input.AtStateIdentifier ||
-                    (this.AtStateIdentifier != null &&
-                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
                 );
         }
 
@@ -185,27 +184,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
                 if (this.IntentHashHex != null)
                 {
                     hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
-                }
-                if (this.AtStateIdentifier != null)
-                {
-                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
                 }
                 return hashCode;
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

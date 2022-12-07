@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// TransactionIdentifiers
     /// </summary>
     [DataContract(Name = "TransactionIdentifiers")]
-    public partial class TransactionIdentifiers : IEquatable<TransactionIdentifiers>, IValidatableObject
+    public partial class TransactionIdentifiers : IEquatable<TransactionIdentifiers>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionIdentifiers" /> class.
@@ -238,51 +237,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // IntentHash (string) maxLength
-            if (this.IntentHash != null && this.IntentHash.Length > 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for IntentHash, length must be less than 64.", new [] { "IntentHash" });
-            }
-
-            // IntentHash (string) minLength
-            if (this.IntentHash != null && this.IntentHash.Length < 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for IntentHash, length must be greater than 64.", new [] { "IntentHash" });
-            }
-
-            // SignaturesHash (string) maxLength
-            if (this.SignaturesHash != null && this.SignaturesHash.Length > 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignaturesHash, length must be less than 64.", new [] { "SignaturesHash" });
-            }
-
-            // SignaturesHash (string) minLength
-            if (this.SignaturesHash != null && this.SignaturesHash.Length < 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignaturesHash, length must be greater than 64.", new [] { "SignaturesHash" });
-            }
-
-            // PayloadHash (string) maxLength
-            if (this.PayloadHash != null && this.PayloadHash.Length > 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for PayloadHash, length must be less than 64.", new [] { "PayloadHash" });
-            }
-
-            // PayloadHash (string) minLength
-            if (this.PayloadHash != null && this.PayloadHash.Length < 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for PayloadHash, length must be greater than 64.", new [] { "PayloadHash" });
-            }
-
-            yield break;
-        }
     }
 
 }

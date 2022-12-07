@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// AddressType
     /// </summary>
     [DataContract(Name = "AddressType")]
-    public partial class AddressType : IEquatable<AddressType>, IValidatableObject
+    public partial class AddressType : IEquatable<AddressType>
     {
         /// <summary>
         /// Defines Subtype
@@ -142,7 +141,13 @@ namespace RadixDlt.CoreApiSdk.Model
             /// Enum EpochManager for value: EpochManager
             /// </summary>
             [EnumMember(Value = "EpochManager")]
-            EpochManager = 7
+            EpochManager = 7,
+
+            /// <summary>
+            /// Enum Clock for value: Clock
+            /// </summary>
+            [EnumMember(Value = "Clock")]
+            Clock = 8
 
         }
 
@@ -295,39 +300,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // AddressBytePrefix (int) maximum
-            if (this.AddressBytePrefix > (int)255)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for AddressBytePrefix, must be a value less than or equal to 255.", new [] { "AddressBytePrefix" });
-            }
-
-            // AddressBytePrefix (int) minimum
-            if (this.AddressBytePrefix < (int)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for AddressBytePrefix, must be a value greater than or equal to 0.", new [] { "AddressBytePrefix" });
-            }
-
-            // AddressByteLength (int) maximum
-            if (this.AddressByteLength > (int)255)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for AddressByteLength, must be a value less than or equal to 255.", new [] { "AddressByteLength" });
-            }
-
-            // AddressByteLength (int) minimum
-            if (this.AddressByteLength < (int)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for AddressByteLength, must be a value greater than or equal to 0.", new [] { "AddressByteLength" });
-            }
-
-            yield break;
-        }
     }
 
 }

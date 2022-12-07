@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// EntityOverviewRequest
     /// </summary>
     [DataContract(Name = "EntityOverviewRequest")]
-    public partial class EntityOverviewRequest : IEquatable<EntityOverviewRequest>, IValidatableObject
+    public partial class EntityOverviewRequest : IEquatable<EntityOverviewRequest>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityOverviewRequest" /> class.
@@ -104,9 +103,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityOverviewRequest" /> class.
         /// </summary>
+        /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="addresses">addresses (required).</param>
-        /// <param name="atStateIdentifier">atStateIdentifier.</param>
-        public EntityOverviewRequest(List<string> addresses = default(List<string>), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
+        public EntityOverviewRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), List<string> addresses = default(List<string>))
         {
             // to ensure "addresses" is required (not null)
             if (addresses == null)
@@ -114,20 +113,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("addresses is a required property for EntityOverviewRequest and cannot be null");
             }
             this.Addresses = addresses;
-            this.AtStateIdentifier = atStateIdentifier;
+            this.AtLedgerState = atLedgerState;
         }
+
+        /// <summary>
+        /// Gets or Sets AtLedgerState
+        /// </summary>
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
         /// Gets or Sets Addresses
         /// </summary>
         [DataMember(Name = "addresses", IsRequired = true, EmitDefaultValue = true)]
         public List<string> Addresses { get; set; }
-
-        /// <summary>
-        /// Gets or Sets AtStateIdentifier
-        /// </summary>
-        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
-        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,8 +136,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityOverviewRequest {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  Addresses: ").Append(Addresses).Append("\n");
-            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -175,15 +174,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
+                (
                     this.Addresses == input.Addresses ||
                     this.Addresses != null &&
                     input.Addresses != null &&
                     this.Addresses.SequenceEqual(input.Addresses)
-                ) && 
-                (
-                    this.AtStateIdentifier == input.AtStateIdentifier ||
-                    (this.AtStateIdentifier != null &&
-                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
                 );
         }
 
@@ -196,27 +195,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
                 if (this.Addresses != null)
                 {
                     hashCode = (hashCode * 59) + this.Addresses.GetHashCode();
-                }
-                if (this.AtStateIdentifier != null)
-                {
-                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
                 }
                 return hashCode;
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

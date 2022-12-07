@@ -412,7 +412,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         {
             _quorumAccumulatorCacheByStateVersion.Set(
                 committedTransaction.StateVersion,
-                committedTransaction.AccumulatorHash.ConvertFromHex()
+                committedTransaction.AccumulatorHashBytes
             );
         }
     }
@@ -497,16 +497,16 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
                     previousStateVersion: previousStateVersion,
                     previousAccumulator: previousAccumulator,
                     stateVersion: transaction.StateVersion,
-                    accumulator: transaction.AccumulatorHash.ConvertFromHex(),
-                    payload: transaction.LedgerTransaction.PayloadHex.ConvertFromHex());
+                    accumulator: transaction.AccumulatorHashBytes,
+                    payload: transaction.LedgerTransaction.PayloadBytes);
 
                 if (transaction.LedgerTransaction.ActualInstance is CoreModel.UserLedgerTransaction ult)
                 {
-                    TransactionConsistency.AssertTransactionHashCorrect(ult.NotarizedTransaction.PayloadHex.ConvertFromHex(), ult.NotarizedTransaction.Hash.ConvertFromHex());
+                    TransactionConsistency.AssertTransactionHashCorrect(ult.NotarizedTransaction.PayloadBytes, ult.NotarizedTransaction.HashBytes);
                 }
 
                 previousStateVersion = transaction.StateVersion;
-                previousAccumulator = transaction.AccumulatorHash.ConvertFromHex();
+                previousAccumulator = transaction.AccumulatorHashBytes;
             }
 
             _observers.ForEach(x => x.QuorumExtensionConsistentGained());

@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// NonFungibleIdsCollectionItem
     /// </summary>
     [DataContract(Name = "NonFungibleIdsCollectionItem")]
-    public partial class NonFungibleIdsCollectionItem : IEquatable<NonFungibleIdsCollectionItem>, IValidatableObject
+    public partial class NonFungibleIdsCollectionItem : IEquatable<NonFungibleIdsCollectionItem>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleIdsCollectionItem" /> class.
@@ -104,22 +103,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleIdsCollectionItem" /> class.
         /// </summary>
-        /// <param name="idHex">idHex (required).</param>
-        public NonFungibleIdsCollectionItem(string idHex = default(string))
+        /// <param name="nonFungibleId">nonFungibleId (required).</param>
+        public NonFungibleIdsCollectionItem(string nonFungibleId = default(string))
         {
-            // to ensure "idHex" is required (not null)
-            if (idHex == null)
+            // to ensure "nonFungibleId" is required (not null)
+            if (nonFungibleId == null)
             {
-                throw new ArgumentNullException("idHex is a required property for NonFungibleIdsCollectionItem and cannot be null");
+                throw new ArgumentNullException("nonFungibleId is a required property for NonFungibleIdsCollectionItem and cannot be null");
             }
-            this.IdHex = idHex;
+            this.NonFungibleId = nonFungibleId;
         }
 
         /// <summary>
-        /// Gets or Sets IdHex
+        /// Gets or Sets NonFungibleId
         /// </summary>
-        [DataMember(Name = "id_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string IdHex { get; set; }
+        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
+        public string NonFungibleId { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,7 +128,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleIdsCollectionItem {\n");
-            sb.Append("  IdHex: ").Append(IdHex).Append("\n");
+            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,9 +165,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.IdHex == input.IdHex ||
-                    (this.IdHex != null &&
-                    this.IdHex.Equals(input.IdHex))
+                    this.NonFungibleId == input.NonFungibleId ||
+                    (this.NonFungibleId != null &&
+                    this.NonFungibleId.Equals(input.NonFungibleId))
                 );
         }
 
@@ -181,23 +180,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.IdHex != null)
+                if (this.NonFungibleId != null)
                 {
-                    hashCode = (hashCode * 59) + this.IdHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
                 }
                 return hashCode;
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

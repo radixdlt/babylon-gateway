@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,34 +93,34 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// TransactionRecentRequest
     /// </summary>
     [DataContract(Name = "TransactionRecentRequest")]
-    public partial class TransactionRecentRequest : IEquatable<TransactionRecentRequest>, IValidatableObject
+    public partial class TransactionRecentRequest : IEquatable<TransactionRecentRequest>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionRecentRequest" /> class.
         /// </summary>
-        /// <param name="atStateIdentifier">atStateIdentifier.</param>
-        /// <param name="fromStateIdentifier">fromStateIdentifier.</param>
+        /// <param name="atLedgerState">atLedgerState.</param>
+        /// <param name="fromLedgerState">fromLedgerState.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limit">The page size requested..</param>
-        public TransactionRecentRequest(PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier), PartialLedgerStateIdentifier fromStateIdentifier = default(PartialLedgerStateIdentifier), string cursor = default(string), int? limit = default(int?))
+        public TransactionRecentRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limit = default(int?))
         {
-            this.AtStateIdentifier = atStateIdentifier;
-            this.FromStateIdentifier = fromStateIdentifier;
+            this.AtLedgerState = atLedgerState;
+            this.FromLedgerState = fromLedgerState;
             this.Cursor = cursor;
             this.Limit = limit;
         }
 
         /// <summary>
-        /// Gets or Sets AtStateIdentifier
+        /// Gets or Sets AtLedgerState
         /// </summary>
-        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
-        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
-        /// Gets or Sets FromStateIdentifier
+        /// Gets or Sets FromLedgerState
         /// </summary>
-        [DataMember(Name = "from_state_identifier", EmitDefaultValue = true)]
-        public PartialLedgerStateIdentifier FromStateIdentifier { get; set; }
+        [DataMember(Name = "from_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector FromLedgerState { get; set; }
 
         /// <summary>
         /// This cursor allows forward pagination, by providing the cursor from the previous request.
@@ -145,8 +144,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionRecentRequest {\n");
-            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
-            sb.Append("  FromStateIdentifier: ").Append(FromStateIdentifier).Append("\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
+            sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
             sb.Append("  Limit: ").Append(Limit).Append("\n");
             sb.Append("}\n");
@@ -185,14 +184,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtStateIdentifier == input.AtStateIdentifier ||
-                    (this.AtStateIdentifier != null &&
-                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
                 ) && 
                 (
-                    this.FromStateIdentifier == input.FromStateIdentifier ||
-                    (this.FromStateIdentifier != null &&
-                    this.FromStateIdentifier.Equals(input.FromStateIdentifier))
+                    this.FromLedgerState == input.FromLedgerState ||
+                    (this.FromLedgerState != null &&
+                    this.FromLedgerState.Equals(input.FromLedgerState))
                 ) && 
                 (
                     this.Cursor == input.Cursor ||
@@ -215,13 +214,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtStateIdentifier != null)
+                if (this.AtLedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
                 }
-                if (this.FromStateIdentifier != null)
+                if (this.FromLedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.FromStateIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
                 }
                 if (this.Cursor != null)
                 {
@@ -235,15 +234,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

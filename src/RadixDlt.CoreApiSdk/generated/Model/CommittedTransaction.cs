@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// CommittedTransaction
     /// </summary>
     [DataContract(Name = "CommittedTransaction")]
-    public partial class CommittedTransaction : IEquatable<CommittedTransaction>, IValidatableObject
+    public partial class CommittedTransaction : IEquatable<CommittedTransaction>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
@@ -251,39 +250,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // StateVersion (long) maximum
-            if (this.StateVersion > (long)100000000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value less than or equal to 100000000000000.", new [] { "StateVersion" });
-            }
-
-            // StateVersion (long) minimum
-            if (this.StateVersion < (long)1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value greater than or equal to 1.", new [] { "StateVersion" });
-            }
-
-            // AccumulatorHash (string) maxLength
-            if (this.AccumulatorHash != null && this.AccumulatorHash.Length > 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for AccumulatorHash, length must be less than 64.", new [] { "AccumulatorHash" });
-            }
-
-            // AccumulatorHash (string) minLength
-            if (this.AccumulatorHash != null && this.AccumulatorHash.Length < 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for AccumulatorHash, length must be greater than 64.", new [] { "AccumulatorHash" });
-            }
-
-            yield break;
-        }
     }
 
 }

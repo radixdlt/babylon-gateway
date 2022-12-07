@@ -161,7 +161,7 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
 
         // TODO are we sure we want to operate on PayloadHash alone?
         var hashesInMempool = mempoolListResponse.Contents
-            .Select(ti => ti.PayloadHash.ConvertFromHex())
+            .Select(ti => ti.PayloadHashBytes)
             .ToList();
 
         if (hashesInMempool.Count == 0)
@@ -252,11 +252,7 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
                 token
             ));
 
-            return new FullTransactionData(
-                payloadHash,
-                _clock.UtcNow,
-                response.NotarizedTransaction.PayloadHex.ConvertFromHex()
-            );
+            return new FullTransactionData(payloadHash, _clock.UtcNow, response.NotarizedTransaction.PayloadBytes);
         }
 
         // TODO fix me

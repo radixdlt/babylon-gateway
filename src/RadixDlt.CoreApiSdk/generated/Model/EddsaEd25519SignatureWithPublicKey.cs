@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// The EDDSA public key and signature
     /// </summary>
     [DataContract(Name = "EddsaEd25519SignatureWithPublicKey")]
-    public partial class EddsaEd25519SignatureWithPublicKey : IEquatable<EddsaEd25519SignatureWithPublicKey>, IValidatableObject
+    public partial class EddsaEd25519SignatureWithPublicKey : IEquatable<EddsaEd25519SignatureWithPublicKey>
     {
 
         /// <summary>
@@ -226,15 +225,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

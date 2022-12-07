@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// V0StatePackageResponse
     /// </summary>
     [DataContract(Name = "V0StatePackageResponse")]
-    public partial class V0StatePackageResponse : IEquatable<V0StatePackageResponse>, IValidatableObject
+    public partial class V0StatePackageResponse : IEquatable<V0StatePackageResponse>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="V0StatePackageResponse" /> class.
@@ -104,22 +103,74 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="V0StatePackageResponse" /> class.
         /// </summary>
-        /// <param name="package">package (required).</param>
-        public V0StatePackageResponse(Substate package = default(Substate))
+        /// <param name="info">info (required).</param>
+        /// <param name="royaltyConfig">royaltyConfig (required).</param>
+        /// <param name="royaltyAccumulator">royaltyAccumulator (required).</param>
+        /// <param name="metadata">metadata (required).</param>
+        /// <param name="accessRules">accessRules (required).</param>
+        public V0StatePackageResponse(Substate info = default(Substate), Substate royaltyConfig = default(Substate), Substate royaltyAccumulator = default(Substate), Substate metadata = default(Substate), Substate accessRules = default(Substate))
         {
-            // to ensure "package" is required (not null)
-            if (package == null)
+            // to ensure "info" is required (not null)
+            if (info == null)
             {
-                throw new ArgumentNullException("package is a required property for V0StatePackageResponse and cannot be null");
+                throw new ArgumentNullException("info is a required property for V0StatePackageResponse and cannot be null");
             }
-            this.Package = package;
+            this.Info = info;
+            // to ensure "royaltyConfig" is required (not null)
+            if (royaltyConfig == null)
+            {
+                throw new ArgumentNullException("royaltyConfig is a required property for V0StatePackageResponse and cannot be null");
+            }
+            this.RoyaltyConfig = royaltyConfig;
+            // to ensure "royaltyAccumulator" is required (not null)
+            if (royaltyAccumulator == null)
+            {
+                throw new ArgumentNullException("royaltyAccumulator is a required property for V0StatePackageResponse and cannot be null");
+            }
+            this.RoyaltyAccumulator = royaltyAccumulator;
+            // to ensure "metadata" is required (not null)
+            if (metadata == null)
+            {
+                throw new ArgumentNullException("metadata is a required property for V0StatePackageResponse and cannot be null");
+            }
+            this.Metadata = metadata;
+            // to ensure "accessRules" is required (not null)
+            if (accessRules == null)
+            {
+                throw new ArgumentNullException("accessRules is a required property for V0StatePackageResponse and cannot be null");
+            }
+            this.AccessRules = accessRules;
         }
 
         /// <summary>
-        /// Gets or Sets Package
+        /// Gets or Sets Info
         /// </summary>
-        [DataMember(Name = "package", IsRequired = true, EmitDefaultValue = true)]
-        public Substate Package { get; set; }
+        [DataMember(Name = "info", IsRequired = true, EmitDefaultValue = true)]
+        public Substate Info { get; set; }
+
+        /// <summary>
+        /// Gets or Sets RoyaltyConfig
+        /// </summary>
+        [DataMember(Name = "royalty_config", IsRequired = true, EmitDefaultValue = true)]
+        public Substate RoyaltyConfig { get; set; }
+
+        /// <summary>
+        /// Gets or Sets RoyaltyAccumulator
+        /// </summary>
+        [DataMember(Name = "royalty_accumulator", IsRequired = true, EmitDefaultValue = true)]
+        public Substate RoyaltyAccumulator { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Metadata
+        /// </summary>
+        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
+        public Substate Metadata { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AccessRules
+        /// </summary>
+        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
+        public Substate AccessRules { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,7 +180,11 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class V0StatePackageResponse {\n");
-            sb.Append("  Package: ").Append(Package).Append("\n");
+            sb.Append("  Info: ").Append(Info).Append("\n");
+            sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
+            sb.Append("  RoyaltyAccumulator: ").Append(RoyaltyAccumulator).Append("\n");
+            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,9 +221,29 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Package == input.Package ||
-                    (this.Package != null &&
-                    this.Package.Equals(input.Package))
+                    this.Info == input.Info ||
+                    (this.Info != null &&
+                    this.Info.Equals(input.Info))
+                ) && 
+                (
+                    this.RoyaltyConfig == input.RoyaltyConfig ||
+                    (this.RoyaltyConfig != null &&
+                    this.RoyaltyConfig.Equals(input.RoyaltyConfig))
+                ) && 
+                (
+                    this.RoyaltyAccumulator == input.RoyaltyAccumulator ||
+                    (this.RoyaltyAccumulator != null &&
+                    this.RoyaltyAccumulator.Equals(input.RoyaltyAccumulator))
+                ) && 
+                (
+                    this.Metadata == input.Metadata ||
+                    (this.Metadata != null &&
+                    this.Metadata.Equals(input.Metadata))
+                ) && 
+                (
+                    this.AccessRules == input.AccessRules ||
+                    (this.AccessRules != null &&
+                    this.AccessRules.Equals(input.AccessRules))
                 );
         }
 
@@ -181,23 +256,30 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Package != null)
+                if (this.Info != null)
                 {
-                    hashCode = (hashCode * 59) + this.Package.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Info.GetHashCode();
+                }
+                if (this.RoyaltyConfig != null)
+                {
+                    hashCode = (hashCode * 59) + this.RoyaltyConfig.GetHashCode();
+                }
+                if (this.RoyaltyAccumulator != null)
+                {
+                    hashCode = (hashCode * 59) + this.RoyaltyAccumulator.GetHashCode();
+                }
+                if (this.Metadata != null)
+                {
+                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
+                }
+                if (this.AccessRules != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
                 }
                 return hashCode;
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

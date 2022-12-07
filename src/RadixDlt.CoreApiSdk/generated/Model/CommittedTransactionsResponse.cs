@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,7 +93,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// CommittedTransactionsResponse
     /// </summary>
     [DataContract(Name = "CommittedTransactionsResponse")]
-    public partial class CommittedTransactionsResponse : IEquatable<CommittedTransactionsResponse>, IValidatableObject
+    public partial class CommittedTransactionsResponse : IEquatable<CommittedTransactionsResponse>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
@@ -236,51 +235,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
         }
 
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // FromStateVersion (long) maximum
-            if (this.FromStateVersion > (long)100000000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FromStateVersion, must be a value less than or equal to 100000000000000.", new [] { "FromStateVersion" });
-            }
-
-            // FromStateVersion (long) minimum
-            if (this.FromStateVersion < (long)1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FromStateVersion, must be a value greater than or equal to 1.", new [] { "FromStateVersion" });
-            }
-
-            // Count (int) maximum
-            if (this.Count > (int)10000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Count, must be a value less than or equal to 10000.", new [] { "Count" });
-            }
-
-            // Count (int) minimum
-            if (this.Count < (int)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Count, must be a value greater than or equal to 0.", new [] { "Count" });
-            }
-
-            // MaxLedgerStateVersion (long) maximum
-            if (this.MaxLedgerStateVersion > (long)100000000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for MaxLedgerStateVersion, must be a value less than or equal to 100000000000000.", new [] { "MaxLedgerStateVersion" });
-            }
-
-            // MaxLedgerStateVersion (long) minimum
-            if (this.MaxLedgerStateVersion < (long)1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for MaxLedgerStateVersion, must be a value greater than or equal to 1.", new [] { "MaxLedgerStateVersion" });
-            }
-
-            yield break;
-        }
     }
 
 }

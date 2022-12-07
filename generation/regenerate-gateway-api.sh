@@ -24,13 +24,6 @@ if [[ ! -f "$specLocation" ]]; then
     exit 1
 fi
 
-openApiSpecVersion="$(head -5 $specLocation | grep "version: " | cut -d":" -f 2 | cut -d" " -f 2)"
-
-if [[ -z "$openApiSpecVersion" ]]; then
-    echo "Couldn't read open api spec version from the first 5 lines of the api spec"
-    exit 1
-fi
-
 #########
 # REGEN #
 #########
@@ -53,7 +46,7 @@ java -jar ./openapi-generator-cli-6.1.0.jar \
     -g csharp-netcore \
     -o "$dummyApiDirectory" \
     --library httpclient \
-    --additional-properties=packageName=$packageName,targetFramework=net6.0,optionalEmitDefaultValues=true,useOneOfDiscriminatorLookup=true
+    --additional-properties=packageName=$packageName,targetFramework=net6.0,optionalEmitDefaultValues=true,useOneOfDiscriminatorLookup=true,validatable=false
 
 rm -rf "../src/${packageName}/generated"
 cp -R "${dummyApiDirectory}src/${packageName}/" "../src/${packageName}/generated/"
