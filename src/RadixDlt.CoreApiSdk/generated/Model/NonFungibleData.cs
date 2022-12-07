@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Only present if the non fungible isn&#39;t deleted
+    /// Only present if the non fungible isn&#39;t deleted. NOTE: Currently there is no schema for mutable/immutable data, and it&#39;s not even guaranteed to be SBOR-encoded. But from scrypto, it likely always will be. For now, immutable_data / mutable_data is optional, and only included if the data is valid SBOR. When the payload is validated, &#x60;immutable_data_raw_hex&#x60; / &#x60;mutable_data_raw_hex&#x60; will be removed. 
     /// </summary>
     [DataContract(Name = "NonFungibleData")]
     public partial class NonFungibleData : IEquatable<NonFungibleData>
@@ -103,9 +103,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleData" /> class.
         /// </summary>
-        /// <param name="immutableDataRawHex">immutableDataRawHex (required).</param>
-        /// <param name="mutableDataRawHex">mutableDataRawHex (required).</param>
-        public NonFungibleData(DataStruct immutableDataRawHex = default(DataStruct), DataStruct mutableDataRawHex = default(DataStruct))
+        /// <param name="immutableData">immutableData.</param>
+        /// <param name="immutableDataRawHex">The hex-encoded raw bytes of the immutable data of the NF.  (required).</param>
+        /// <param name="mutableData">mutableData.</param>
+        /// <param name="mutableDataRawHex">The hex-encoded raw bytes of the mutadata data of the NF.  (required).</param>
+        public NonFungibleData(DataStruct immutableData = default(DataStruct), string immutableDataRawHex = default(string), DataStruct mutableData = default(DataStruct), string mutableDataRawHex = default(string))
         {
             // to ensure "immutableDataRawHex" is required (not null)
             if (immutableDataRawHex == null)
@@ -119,19 +121,35 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("mutableDataRawHex is a required property for NonFungibleData and cannot be null");
             }
             this.MutableDataRawHex = mutableDataRawHex;
+            this.ImmutableData = immutableData;
+            this.MutableData = mutableData;
         }
 
         /// <summary>
-        /// Gets or Sets ImmutableDataRawHex
+        /// Gets or Sets ImmutableData
         /// </summary>
-        [DataMember(Name = "immutable_data_raw_hex", IsRequired = true, EmitDefaultValue = true)]
-        public DataStruct ImmutableDataRawHex { get; set; }
+        [DataMember(Name = "immutable_data", EmitDefaultValue = true)]
+        public DataStruct ImmutableData { get; set; }
 
         /// <summary>
-        /// Gets or Sets MutableDataRawHex
+        /// The hex-encoded raw bytes of the immutable data of the NF. 
         /// </summary>
+        /// <value>The hex-encoded raw bytes of the immutable data of the NF. </value>
+        [DataMember(Name = "immutable_data_raw_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string ImmutableDataRawHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets MutableData
+        /// </summary>
+        [DataMember(Name = "mutable_data", EmitDefaultValue = true)]
+        public DataStruct MutableData { get; set; }
+
+        /// <summary>
+        /// The hex-encoded raw bytes of the mutadata data of the NF. 
+        /// </summary>
+        /// <value>The hex-encoded raw bytes of the mutadata data of the NF. </value>
         [DataMember(Name = "mutable_data_raw_hex", IsRequired = true, EmitDefaultValue = true)]
-        public DataStruct MutableDataRawHex { get; set; }
+        public string MutableDataRawHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,7 +159,9 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleData {\n");
+            sb.Append("  ImmutableData: ").Append(ImmutableData).Append("\n");
             sb.Append("  ImmutableDataRawHex: ").Append(ImmutableDataRawHex).Append("\n");
+            sb.Append("  MutableData: ").Append(MutableData).Append("\n");
             sb.Append("  MutableDataRawHex: ").Append(MutableDataRawHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -179,9 +199,19 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.ImmutableData == input.ImmutableData ||
+                    (this.ImmutableData != null &&
+                    this.ImmutableData.Equals(input.ImmutableData))
+                ) && 
+                (
                     this.ImmutableDataRawHex == input.ImmutableDataRawHex ||
                     (this.ImmutableDataRawHex != null &&
                     this.ImmutableDataRawHex.Equals(input.ImmutableDataRawHex))
+                ) && 
+                (
+                    this.MutableData == input.MutableData ||
+                    (this.MutableData != null &&
+                    this.MutableData.Equals(input.MutableData))
                 ) && 
                 (
                     this.MutableDataRawHex == input.MutableDataRawHex ||
@@ -199,9 +229,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.ImmutableData != null)
+                {
+                    hashCode = (hashCode * 59) + this.ImmutableData.GetHashCode();
+                }
                 if (this.ImmutableDataRawHex != null)
                 {
                     hashCode = (hashCode * 59) + this.ImmutableDataRawHex.GetHashCode();
+                }
+                if (this.MutableData != null)
+                {
+                    hashCode = (hashCode * 59) + this.MutableData.GetHashCode();
                 }
                 if (this.MutableDataRawHex != null)
                 {
