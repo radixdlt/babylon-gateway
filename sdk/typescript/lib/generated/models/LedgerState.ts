@@ -36,7 +36,7 @@ export interface LedgerState {
      * @type {string}
      * @memberof LedgerState
      */
-    timestamp: string;
+    proposer_round_timestamp: string;
     /**
      * The epoch number of the ledger at this state version.
      * @type {number}
@@ -58,7 +58,7 @@ export function instanceOfLedgerState(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "network" in value;
     isInstance = isInstance && "state_version" in value;
-    isInstance = isInstance && "timestamp" in value;
+    isInstance = isInstance && "proposer_round_timestamp" in value;
     isInstance = isInstance && "epoch" in value;
     isInstance = isInstance && "round" in value;
 
@@ -77,7 +77,7 @@ export function LedgerStateFromJSONTyped(json: any, ignoreDiscriminator: boolean
         
         'network': json['network'],
         'state_version': json['state_version'],
-        'timestamp': json['timestamp'],
+        'proposer_round_timestamp': json['proposer_round_timestamp'],
         'epoch': json['epoch'],
         'round': json['round'],
     };
@@ -94,7 +94,7 @@ export function LedgerStateToJSON(value?: LedgerState | null): any {
         
         'network': value.network,
         'state_version': value.state_version,
-        'timestamp': value.timestamp,
+        'proposer_round_timestamp': value.proposer_round_timestamp,
         'epoch': value.epoch,
         'round': value.round,
     };

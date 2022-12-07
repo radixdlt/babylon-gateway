@@ -27,7 +27,7 @@ import {
  */
 export interface EntityMetadataCollectionAllOf {
     /**
-     * TBD
+     * 
      * @type {Array<EntityMetadataItem>}
      * @memberof EntityMetadataCollectionAllOf
      */

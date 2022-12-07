@@ -48,7 +48,6 @@ export interface NonFungibleIdsOperationRequest {
 export class NonFungibleApi extends runtime.BaseAPI {
 
     /**
-     * TBD 
      * Returns data associated with a given non-fungible id.
      */
     async nonFungibleDataRaw(requestParameters: NonFungibleDataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<NonFungibleDataResponse>> {
@@ -74,7 +73,6 @@ export class NonFungibleApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Returns data associated with a given non-fungible id.
      */
     async nonFungibleData(requestParameters: NonFungibleDataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<NonFungibleDataResponse> {
@@ -83,7 +81,6 @@ export class NonFungibleApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Iterates through all non-fungible ids of a given non-fungible resource.
      */
     async nonFungibleIdsRaw(requestParameters: NonFungibleIdsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<NonFungibleIdsResponse>> {
@@ -109,7 +106,6 @@ export class NonFungibleApi extends runtime.BaseAPI {
     }
 
     /**
-     * TBD 
      * Iterates through all non-fungible ids of a given non-fungible resource.
      */
     async nonFungibleIds(requestParameters: NonFungibleIdsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<NonFungibleIdsResponse> {

@@ -16,32 +16,32 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface EntityNotFoundErrorAllOf
+ * @interface EntityResourcesRequestAllOf
  */
-export interface EntityNotFoundErrorAllOf {
+export interface EntityResourcesRequestAllOf {
     /**
      * The Bech32m-encoded human readable version of the entity's global address.
      * @type {string}
-     * @memberof EntityNotFoundErrorAllOf
+     * @memberof EntityResourcesRequestAllOf
      */
     address: string;
 }
 
 /**
- * Check if a given object implements the EntityNotFoundErrorAllOf interface.
+ * Check if a given object implements the EntityResourcesRequestAllOf interface.
  */
-export function instanceOfEntityNotFoundErrorAllOf(value: object): boolean {
+export function instanceOfEntityResourcesRequestAllOf(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "address" in value;
 
     return isInstance;
 }
 
-export function EntityNotFoundErrorAllOfFromJSON(json: any): EntityNotFoundErrorAllOf {
-    return EntityNotFoundErrorAllOfFromJSONTyped(json, false);
+export function EntityResourcesRequestAllOfFromJSON(json: any): EntityResourcesRequestAllOf {
+    return EntityResourcesRequestAllOfFromJSONTyped(json, false);
 }
 
-export function EntityNotFoundErrorAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): EntityNotFoundErrorAllOf {
+export function EntityResourcesRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): EntityResourcesRequestAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -51,7 +51,7 @@ export function EntityNotFoundErrorAllOfFromJSONTyped(json: any, ignoreDiscrimin
     };
 }
 
-export function EntityNotFoundErrorAllOfToJSON(value?: EntityNotFoundErrorAllOf | null): any {
+export function EntityResourcesRequestAllOfToJSON(value?: EntityResourcesRequestAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }

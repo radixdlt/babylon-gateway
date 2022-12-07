@@ -13,12 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { PartialLedgerStateIdentifier } from './PartialLedgerStateIdentifier';
+import type { LedgerStateSelector } from './LedgerStateSelector';
 import {
-    PartialLedgerStateIdentifierFromJSON,
-    PartialLedgerStateIdentifierFromJSONTyped,
-    PartialLedgerStateIdentifierToJSON,
-} from './PartialLedgerStateIdentifier';
+    LedgerStateSelectorFromJSON,
+    LedgerStateSelectorFromJSONTyped,
+    LedgerStateSelectorToJSON,
+} from './LedgerStateSelector';
 
 /**
  * 
@@ -28,16 +28,16 @@ import {
 export interface TransactionRecentRequest {
     /**
      * 
-     * @type {PartialLedgerStateIdentifier}
+     * @type {LedgerStateSelector}
      * @memberof TransactionRecentRequest
      */
-    at_state_identifier?: PartialLedgerStateIdentifier | null;
+    at_ledger_state?: LedgerStateSelector | null;
     /**
      * 
-     * @type {PartialLedgerStateIdentifier}
+     * @type {LedgerStateSelector}
      * @memberof TransactionRecentRequest
      */
-    from_state_identifier?: PartialLedgerStateIdentifier | null;
+    from_ledger_state?: LedgerStateSelector | null;
     /**
      * This cursor allows forward pagination, by providing the cursor from the previous request.
      * @type {string}
@@ -71,8 +71,8 @@ export function TransactionRecentRequestFromJSONTyped(json: any, ignoreDiscrimin
     }
     return {
         
-        'at_state_identifier': !exists(json, 'at_state_identifier') ? undefined : PartialLedgerStateIdentifierFromJSON(json['at_state_identifier']),
-        'from_state_identifier': !exists(json, 'from_state_identifier') ? undefined : PartialLedgerStateIdentifierFromJSON(json['from_state_identifier']),
+        'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
+        'from_ledger_state': !exists(json, 'from_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['from_ledger_state']),
         'cursor': !exists(json, 'cursor') ? undefined : json['cursor'],
         'limit': !exists(json, 'limit') ? undefined : json['limit'],
     };
@@ -87,8 +87,8 @@ export function TransactionRecentRequestToJSON(value?: TransactionRecentRequest 
     }
     return {
         
-        'at_state_identifier': PartialLedgerStateIdentifierToJSON(value.at_state_identifier),
-        'from_state_identifier': PartialLedgerStateIdentifierToJSON(value.from_state_identifier),
+        'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
+        'from_ledger_state': LedgerStateSelectorToJSON(value.from_ledger_state),
         'cursor': value.cursor,
         'limit': value.limit,
     };

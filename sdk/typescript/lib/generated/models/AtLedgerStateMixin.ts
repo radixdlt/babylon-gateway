@@ -23,48 +23,41 @@ import {
 /**
  * 
  * @export
- * @interface TransactionStatusRequest
+ * @interface AtLedgerStateMixin
  */
-export interface TransactionStatusRequest {
+export interface AtLedgerStateMixin {
     /**
      * 
      * @type {LedgerStateSelector}
-     * @memberof TransactionStatusRequest
+     * @memberof AtLedgerStateMixin
      */
     at_ledger_state?: LedgerStateSelector | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof TransactionStatusRequest
-     */
-    intent_hash_hex?: string;
 }
 
 /**
- * Check if a given object implements the TransactionStatusRequest interface.
+ * Check if a given object implements the AtLedgerStateMixin interface.
  */
-export function instanceOfTransactionStatusRequest(value: object): boolean {
+export function instanceOfAtLedgerStateMixin(value: object): boolean {
     let isInstance = true;
 
     return isInstance;
 }
 
-export function TransactionStatusRequestFromJSON(json: any): TransactionStatusRequest {
-    return TransactionStatusRequestFromJSONTyped(json, false);
+export function AtLedgerStateMixinFromJSON(json: any): AtLedgerStateMixin {
+    return AtLedgerStateMixinFromJSONTyped(json, false);
 }
 
-export function TransactionStatusRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionStatusRequest {
+export function AtLedgerStateMixinFromJSONTyped(json: any, ignoreDiscriminator: boolean): AtLedgerStateMixin {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
         'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
-        'intent_hash_hex': !exists(json, 'intent_hash_hex') ? undefined : json['intent_hash_hex'],
     };
 }
 
-export function TransactionStatusRequestToJSON(value?: TransactionStatusRequest | null): any {
+export function AtLedgerStateMixinToJSON(value?: AtLedgerStateMixin | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -74,7 +67,6 @@ export function TransactionStatusRequestToJSON(value?: TransactionStatusRequest 
     return {
         
         'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
-        'intent_hash_hex': value.intent_hash_hex,
     };
 }
 

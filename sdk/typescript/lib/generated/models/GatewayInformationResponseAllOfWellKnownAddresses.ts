@@ -32,6 +32,18 @@ export interface GatewayInformationResponseAllOfWellKnownAddresses {
      */
     faucet: string;
     /**
+     * The Bech32m-encoded human readable version of the entity's global address.
+     * @type {string}
+     * @memberof GatewayInformationResponseAllOfWellKnownAddresses
+     */
+    epoch_manager: string;
+    /**
+     * The Bech32m-encoded human readable version of the entity's global address.
+     * @type {string}
+     * @memberof GatewayInformationResponseAllOfWellKnownAddresses
+     */
+    clock: string;
+    /**
      * The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
      * @type {string}
      * @memberof GatewayInformationResponseAllOfWellKnownAddresses
@@ -58,6 +70,8 @@ export function instanceOfGatewayInformationResponseAllOfWellKnownAddresses(valu
     let isInstance = true;
     isInstance = isInstance && "account_package" in value;
     isInstance = isInstance && "faucet" in value;
+    isInstance = isInstance && "epoch_manager" in value;
+    isInstance = isInstance && "clock" in value;
     isInstance = isInstance && "ecdsa_secp256k1" in value;
     isInstance = isInstance && "eddsa_ed25519" in value;
     isInstance = isInstance && "xrd" in value;
@@ -77,6 +91,8 @@ export function GatewayInformationResponseAllOfWellKnownAddressesFromJSONTyped(j
         
         'account_package': json['account_package'],
         'faucet': json['faucet'],
+        'epoch_manager': json['epoch_manager'],
+        'clock': json['clock'],
         'ecdsa_secp256k1': json['ecdsa_secp256k1'],
         'eddsa_ed25519': json['eddsa_ed25519'],
         'xrd': json['xrd'],
@@ -94,6 +110,8 @@ export function GatewayInformationResponseAllOfWellKnownAddressesToJSON(value?: 
         
         'account_package': value.account_package,
         'faucet': value.faucet,
+        'epoch_manager': value.epoch_manager,
+        'clock': value.clock,
         'ecdsa_secp256k1': value.ecdsa_secp256k1,
         'eddsa_ed25519': value.eddsa_ed25519,
         'xrd': value.xrd,

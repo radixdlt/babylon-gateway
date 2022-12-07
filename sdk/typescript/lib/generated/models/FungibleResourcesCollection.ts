@@ -27,19 +27,19 @@ import {
  */
 export interface FungibleResourcesCollection {
     /**
-     * TBD (make it nullable when we're dealing with unknown result set sizes?)
+     * 
      * @type {number}
      * @memberof FungibleResourcesCollection
      */
     total_count?: number | null;
     /**
-     * TBD (maybe we should use HATEOAS-like permalinks?)
+     * 
      * @type {string}
      * @memberof FungibleResourcesCollection
      */
     previous_cursor?: string | null;
     /**
-     * TBD (maybe we should use HATEOAS-like permalinks?)
+     * 
      * @type {string}
      * @memberof FungibleResourcesCollection
      */
