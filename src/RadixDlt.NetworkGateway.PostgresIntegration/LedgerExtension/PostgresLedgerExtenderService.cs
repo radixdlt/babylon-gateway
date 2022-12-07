@@ -1064,7 +1064,7 @@ INNER JOIN LATERAL (
                     // TODO or maybe we should iterate until we find entity of appropriate type?
                     NonFungibleResourceManagerEntityId = e.ReferencedStore.DatabaseGlobalAncestorId,
                     NonFungibleId = e.NonFungibleId,
-                    ImmutableData = e.Data?.ImmutableData.StructData.DataBytes ?? Array.Empty<byte>(),
+                    ImmutableData = e.Data?.ImmutableDataRawBytes ?? Array.Empty<byte>(),
                 };
 
                 nonFungibleIdDataToAdd.Add(nfidData);
@@ -1074,7 +1074,7 @@ INNER JOIN LATERAL (
                     FromStateVersion = e.StateVersion,
                     NonFungibleIdDataId = nfidData.Id,
                     IsDeleted = e.IsDeleted,
-                    MutableData = e.Data?.MutableData.StructData.DataBytes ?? Array.Empty<byte>(),
+                    MutableData = e.Data?.MutableDataRawBytes ?? Array.Empty<byte>(),
                 });
 
                 var store = nonFungibleIdStoreHistoryToAdd.GetOrAdd(new NonFungibleStoreLookup(e.ReferencedStore.DatabaseGlobalAncestorId, e.StateVersion), _ =>
@@ -1212,7 +1212,7 @@ INNER JOIN LATERAL (
                     await writer.WriteAsync(nonFungibleDiscriminator, NpgsqlDbType.Text, token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteAsync(nonFungible.NonFungibleIdsCount, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(nonFungible.NonFungibleIds, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(nonFungible.NonFungibleIds, NpgsqlDbType.Array | NpgsqlDbType.Text, token);
                 }
 
                 await writer.CompleteAsync(token);

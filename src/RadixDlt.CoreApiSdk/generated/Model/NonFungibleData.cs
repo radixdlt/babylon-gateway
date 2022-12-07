@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Only present if the non fungible isn&#39;t deleted
+    /// Only present if the non fungible isn&#39;t deleted. NOTE: Currently there is no schema for mutable/immutable data, and it&#39;s not even guaranteed to be SBOR-encoded. But from scrypto, it likely always will be. For now, immutable_data / mutable_data is optional, and only included if the data is valid SBOR. When the payload is validated, &#x60;immutable_data_raw_hex&#x60; / &#x60;mutable_data_raw_hex&#x60; will be removed. 
     /// </summary>
     [DataContract(Name = "NonFungibleData")]
     public partial class NonFungibleData : IEquatable<NonFungibleData>
@@ -103,35 +103,53 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleData" /> class.
         /// </summary>
-        /// <param name="immutableData">immutableData (required).</param>
-        /// <param name="mutableData">mutableData (required).</param>
-        public NonFungibleData(DataStruct immutableData = default(DataStruct), DataStruct mutableData = default(DataStruct))
+        /// <param name="immutableData">immutableData.</param>
+        /// <param name="immutableDataRawHex">The hex-encoded raw bytes of the immutable data of the NF.  (required).</param>
+        /// <param name="mutableData">mutableData.</param>
+        /// <param name="mutableDataRawHex">The hex-encoded raw bytes of the mutadata data of the NF.  (required).</param>
+        public NonFungibleData(DataStruct immutableData = default(DataStruct), string immutableDataRawHex = default(string), DataStruct mutableData = default(DataStruct), string mutableDataRawHex = default(string))
         {
-            // to ensure "immutableData" is required (not null)
-            if (immutableData == null)
+            // to ensure "immutableDataRawHex" is required (not null)
+            if (immutableDataRawHex == null)
             {
-                throw new ArgumentNullException("immutableData is a required property for NonFungibleData and cannot be null");
+                throw new ArgumentNullException("immutableDataRawHex is a required property for NonFungibleData and cannot be null");
             }
+            this.ImmutableDataRawHex = immutableDataRawHex;
+            // to ensure "mutableDataRawHex" is required (not null)
+            if (mutableDataRawHex == null)
+            {
+                throw new ArgumentNullException("mutableDataRawHex is a required property for NonFungibleData and cannot be null");
+            }
+            this.MutableDataRawHex = mutableDataRawHex;
             this.ImmutableData = immutableData;
-            // to ensure "mutableData" is required (not null)
-            if (mutableData == null)
-            {
-                throw new ArgumentNullException("mutableData is a required property for NonFungibleData and cannot be null");
-            }
             this.MutableData = mutableData;
         }
 
         /// <summary>
         /// Gets or Sets ImmutableData
         /// </summary>
-        [DataMember(Name = "immutable_data", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "immutable_data", EmitDefaultValue = true)]
         public DataStruct ImmutableData { get; set; }
+
+        /// <summary>
+        /// The hex-encoded raw bytes of the immutable data of the NF. 
+        /// </summary>
+        /// <value>The hex-encoded raw bytes of the immutable data of the NF. </value>
+        [DataMember(Name = "immutable_data_raw_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string ImmutableDataRawHex { get; set; }
 
         /// <summary>
         /// Gets or Sets MutableData
         /// </summary>
-        [DataMember(Name = "mutable_data", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "mutable_data", EmitDefaultValue = true)]
         public DataStruct MutableData { get; set; }
+
+        /// <summary>
+        /// The hex-encoded raw bytes of the mutadata data of the NF. 
+        /// </summary>
+        /// <value>The hex-encoded raw bytes of the mutadata data of the NF. </value>
+        [DataMember(Name = "mutable_data_raw_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string MutableDataRawHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,7 +160,9 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleData {\n");
             sb.Append("  ImmutableData: ").Append(ImmutableData).Append("\n");
+            sb.Append("  ImmutableDataRawHex: ").Append(ImmutableDataRawHex).Append("\n");
             sb.Append("  MutableData: ").Append(MutableData).Append("\n");
+            sb.Append("  MutableDataRawHex: ").Append(MutableDataRawHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -184,9 +204,19 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.ImmutableData.Equals(input.ImmutableData))
                 ) && 
                 (
+                    this.ImmutableDataRawHex == input.ImmutableDataRawHex ||
+                    (this.ImmutableDataRawHex != null &&
+                    this.ImmutableDataRawHex.Equals(input.ImmutableDataRawHex))
+                ) && 
+                (
                     this.MutableData == input.MutableData ||
                     (this.MutableData != null &&
                     this.MutableData.Equals(input.MutableData))
+                ) && 
+                (
+                    this.MutableDataRawHex == input.MutableDataRawHex ||
+                    (this.MutableDataRawHex != null &&
+                    this.MutableDataRawHex.Equals(input.MutableDataRawHex))
                 );
         }
 
@@ -203,9 +233,17 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ImmutableData.GetHashCode();
                 }
+                if (this.ImmutableDataRawHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.ImmutableDataRawHex.GetHashCode();
+                }
                 if (this.MutableData != null)
                 {
                     hashCode = (hashCode * 59) + this.MutableData.GetHashCode();
+                }
+                if (this.MutableDataRawHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.MutableDataRawHex.GetHashCode();
                 }
                 return hashCode;
             }
