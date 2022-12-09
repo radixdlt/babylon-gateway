@@ -16,7 +16,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="6.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
-    <PackageVersion Include="Microsoft.OpenApi.Readers" Version="1.4.4" />
+    <PackageVersion Include="Microsoft.OpenApi.Readers" Version="1.4.5" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.0" />
     <PackageVersion Include="Polly" Version="7.2.3" />
