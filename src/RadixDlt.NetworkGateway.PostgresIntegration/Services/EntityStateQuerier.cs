@@ -185,6 +185,20 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 break;
 
             case ComponentEntity ce:
+                if (entity.Id == -1)
+                {
+                    // Virtual account
+                    // TODO - we should better fake the data - eg accessRulesChain when this is possible
+                    details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseComponentDetails(
+                        discriminator: GatewayModel.EntityDetailsResponseDetailsType.Component,
+                        packageAddress: _networkConfigurationProvider.GetWellKnownAddresses().AccountPackage,
+                        blueprintName: "Account",
+                        state: new JObject(),
+                        accessRulesChain: new JArray()
+                    ));
+                    break;
+                }
+
                 var package = await _dbContext.Entities
                     .FirstAsync(e => e.Id == ce.PackageId, token);
 
@@ -603,7 +617,9 @@ WHERE id = (
         if (entity == null)
         {
             // TODO super quick & dirty support for virtual accounts, see https://rdxworks.slack.com/archives/D03P4L6J0RM/p1668528064132679
-            if (address.Data[0] is 0x05 or 0x06)
+            // Instead, we should store the AddressPrefixes in NetworkConfigurationProvider and check against those bytes, so that
+            // we don't hard code these prefixes here
+            if (address.Data[0] is 0x06 or 0x07)
             {
                 return new AccountComponentEntity { Id = -1, GlobalAddress = address.Data };
             }
