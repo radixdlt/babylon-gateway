@@ -68,10 +68,9 @@ public sealed record HrpDefinition(
     string Package,
     string NormalComponent,
     string AccountComponent,
-    string SystemComponent,
-    string Resource,
-    string Validator,
-    string Node
+    string EpochManager,
+    string Clock,
+    string Resource
 );
 
 public sealed record WellKnownAddresses(

@@ -170,7 +170,6 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 
     private static NetworkConfiguration MapNetworkConfigurationResponse(CoreModel.NetworkConfigurationResponse networkConfiguration)
     {
-        var hrpSuffix = networkConfiguration.NetworkHrpSuffix;
         var wka = networkConfiguration.WellKnownAddresses;
         var addressTypes = networkConfiguration.AddressTypes.Select(MapAddressTypeDefinition).ToArray();
 
@@ -181,10 +180,9 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 Package: addressTypes.First(at => at.Subtype == AddressSubtype.Package).HrpPrefix,
                 NormalComponent: addressTypes.First(at => at.Subtype == AddressSubtype.NormalComponent).HrpPrefix,
                 AccountComponent: addressTypes.First(at => at.Subtype == AddressSubtype.AccountComponent).HrpPrefix,
-                SystemComponent: $"system_{hrpSuffix}",
-                Resource: addressTypes.First(at => at.Subtype == AddressSubtype.Resource).HrpPrefix,
-                Validator: $"validator_{hrpSuffix}",
-                Node: $"node_{hrpSuffix}"
+                EpochManager: addressTypes.First(at => at.Subtype == AddressSubtype.EpochManager).HrpPrefix,
+                Clock: addressTypes.First(at => at.Subtype == AddressSubtype.Clock).HrpPrefix,
+                Resource: addressTypes.First(at => at.Subtype == AddressSubtype.Resource).HrpPrefix
             ),
             WellKnownAddresses = new WellKnownAddresses(
                 AccountPackage: wka.AccountPackage,
