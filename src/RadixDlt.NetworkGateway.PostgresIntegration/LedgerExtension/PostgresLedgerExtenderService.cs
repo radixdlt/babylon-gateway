@@ -393,18 +393,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (target.TargetEntityType == CoreModel.EntityType.Component)
                         {
-                            if (target.GlobalAddress.StartsWith(hrp.AccountComponent))
-                            {
-                                te.WithTypeHint(typeof(AccountComponentEntity));
-                            }
-                            else if (target.GlobalAddress.StartsWith(hrp.SystemComponent))
-                            {
-                                te.WithTypeHint(typeof(SystemComponentEntity));
-                            }
-                            else
-                            {
-                                te.WithTypeHint(typeof(NormalComponentEntity));
-                            }
+                            te.WithTypeHint(target.GlobalAddress.StartsWith(hrp.AccountComponent) ? typeof(AccountComponentEntity) : typeof(NormalComponentEntity));
                         }
 
                         // we do not want to store GlobalEntities as they bring no value from NG perspective

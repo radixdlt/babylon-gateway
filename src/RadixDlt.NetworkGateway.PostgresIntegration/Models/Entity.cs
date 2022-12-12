@@ -113,7 +113,8 @@ internal abstract class Entity
             PackageEntity => hrp.Package,
             NormalComponentEntity => hrp.NormalComponent,
             AccountComponentEntity => hrp.AccountComponent,
-            SystemComponentEntity => hrp.SystemComponent,
+            EpochManagerEntity => hrp.EpochManager,
+            ClockEntity => hrp.Clock,
             ResourceManagerEntity => hrp.Resource,
             _ => throw new InvalidOperationException("Unable to build HRP address on entity of type " + GetType().Name),
         };
@@ -164,10 +165,6 @@ internal class VirtualAccountComponentEntity : AccountComponentEntity
     {
         GlobalAddress = globalAddress;
     }
-}
-
-internal class SystemComponentEntity : ComponentEntity
-{
 }
 
 internal class PackageEntity : Entity

@@ -78,7 +78,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221212102314_InitialCreate")]
+    [Migration("20221212130639_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -496,7 +496,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    b.Property<AddressTypeDefinition[]>("AddressTypeDefinition")
+                    b.Property<AddressTypeDefinition[]>("AddressTypeDefinitions")
                         .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("address_type_definitions");
@@ -868,26 +868,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("package");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.SystemComponentEntity", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
-
-                    b.Property<string>("BlueprintName")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("text")
-                        .HasColumnName("blueprint_name");
-
-                    b.Property<long>("PackageId")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("bigint")
-                        .HasColumnName("package_id");
-
-                    b.ToTable("entities");
-
-                    b.HasDiscriminator().HasValue("system_component");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.VaultEntity", b =>

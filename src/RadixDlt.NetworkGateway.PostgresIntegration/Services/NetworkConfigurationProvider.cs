@@ -171,18 +171,18 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
     private static NetworkConfiguration MapNetworkConfigurationResponse(CoreModel.NetworkConfigurationResponse networkConfiguration)
     {
         var wka = networkConfiguration.WellKnownAddresses;
-        var addressTypes = networkConfiguration.AddressTypes.Select(MapAddressTypeDefinition).ToArray();
+        var at = networkConfiguration.AddressTypes.Select(MapAddressTypeDefinition).ToArray();
 
         return new NetworkConfiguration
         {
             NetworkName = networkConfiguration.Network,
             HrpDefinition = new HrpDefinition(
-                Package: addressTypes.First(at => at.Subtype == AddressSubtype.Package).HrpPrefix,
-                NormalComponent: addressTypes.First(at => at.Subtype == AddressSubtype.NormalComponent).HrpPrefix,
-                AccountComponent: addressTypes.First(at => at.Subtype == AddressSubtype.AccountComponent).HrpPrefix,
-                EpochManager: addressTypes.First(at => at.Subtype == AddressSubtype.EpochManager).HrpPrefix,
-                Clock: addressTypes.First(at => at.Subtype == AddressSubtype.Clock).HrpPrefix,
-                Resource: addressTypes.First(at => at.Subtype == AddressSubtype.Resource).HrpPrefix
+                Package: GetHrpPrefix(at, AddressSubtype.Package),
+                NormalComponent: GetHrpPrefix(at, AddressSubtype.NormalComponent),
+                AccountComponent: GetHrpPrefix(at, AddressSubtype.AccountComponent),
+                EpochManager: GetHrpPrefix(at, AddressSubtype.EpochManager),
+                Clock: GetHrpPrefix(at, AddressSubtype.Clock),
+                Resource: GetHrpPrefix(at, AddressSubtype.Resource)
             ),
             WellKnownAddresses = new WellKnownAddresses(
                 AccountPackage: wka.AccountPackage,
@@ -193,8 +193,13 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 EddsaEd25519: wka.EddsaEd25519,
                 Xrd: wka.Xrd
             ),
-            AddressTypeDefinitions = addressTypes,
+            AddressTypeDefinitions = at,
         };
+    }
+
+    private static string GetHrpPrefix(AddressTypeDefinition[] addressTypeDefinitions, AddressSubtype subtype)
+    {
+        return addressTypeDefinitions.First(at => at.Subtype == subtype).HrpPrefix;
     }
 
     private static AddressTypeDefinition MapAddressTypeDefinition(CoreModel.AddressType arg)
