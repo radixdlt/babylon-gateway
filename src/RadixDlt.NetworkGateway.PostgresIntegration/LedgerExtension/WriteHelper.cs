@@ -383,7 +383,7 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task UpdateSequences(SequencesHolder sequences, CancellationToken token = default)
+    public async Task UpdateSequences(SequencesHolder sequences, CancellationToken token)
     {
         var cd = new CommandDefinition(
             commandText: @"

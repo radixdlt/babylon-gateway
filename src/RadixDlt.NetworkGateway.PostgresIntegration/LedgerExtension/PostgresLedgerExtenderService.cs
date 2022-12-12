@@ -243,8 +243,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var ledgerTransactionsToAdd = new List<LedgerTransaction>();
 
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
-        var dbConn = (NpgsqlConnection)dbContext.Database.GetDbConnection();
-        var writeHelper = new WriteHelper(dbConn, dbContext.Model);
+        var readHelper = new ReadHelper((NpgsqlConnection)dbContext.Database.GetDbConnection());
+        var writeHelper = new WriteHelper((NpgsqlConnection)dbContext.Database.GetDbConnection(), dbContext.Model);
 
         PreparationReport preparationReport;
         SequencesHolder sequences;
@@ -332,7 +332,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         // step: load current sequences
         {
-            (sequences, var sequencesInitializeDuration) = await CodeStopwatch.Time(() => SequencesHolder.Initialize(dbConn, token));
+            (sequences, var sequencesInitializeDuration) = await CodeStopwatch.Time(() => readHelper.LoadSequences(token));
 
             dbReadDuration += sequencesInitializeDuration;
         }
@@ -685,7 +685,7 @@ WHERE id IN(
         var metadataChanges = new List<MetadataChange>();
         var resourceManagerSupplyChanges = new List<ResourceManagerSupplyChange>();
         var entityAccessRulesChainHistoryToAdd = new List<EntityAccessRulesChainHistory>();
-        var componentEntityRawStateToAdd = new List<ComponentEntityStateHistory>();
+        var componentEntityStateToAdd = new List<ComponentEntityStateHistory>();
 
         // step: scan all substates to figure out changes
         {
@@ -757,7 +757,7 @@ WHERE id IN(
 
                     if (sd is CoreModel.ComponentStateSubstate componentState)
                     {
-                        componentEntityRawStateToAdd.Add(new ComponentEntityStateHistory
+                        componentEntityStateToAdd.Add(new ComponentEntityStateHistory
                         {
                             Id = sequences.ComponentEntityStateHistorySequence++,
                             FromStateVersion = stateVersion,
@@ -834,7 +834,7 @@ WHERE id IN(
                 })
                 .ToList();
 
-            var entityMetadataToAdd = metadataChanges
+            var entityMetadataHistoryToAdd = metadataChanges
                 .Select(e =>
                 {
                     var keys = new List<string>();
@@ -1053,15 +1053,15 @@ INNER JOIN LATERAL (
 
             rowsUpdated += affected;
 
-            rowsInserted += await writeHelper.CopyEntityMetadataHistory(entityMetadataToAdd, token);
+            rowsInserted += await writeHelper.CopyComponentEntityStateHistory(componentEntityStateToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityAccessRulesChainHistory(entityAccessRulesChainHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityMetadataHistory(entityMetadataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceAggregateHistory(entityResourceAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceHistory(entityResourceHistoryToAdd, nonFungibleVaultsHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyResourceManagerEntitySupplyHistory(resourceManagerEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdData(nonFungibleIdDataToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdMutableDataHistory(nonFungibleIdsMutableDataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(nonFungibleIdStoreHistoryToAdd.Values, token);
-            rowsInserted += await writeHelper.CopyEntityAccessRulesChainHistory(entityAccessRulesChainHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyComponentEntityStateHistory(componentEntityRawStateToAdd, token);
+            rowsInserted += await writeHelper.CopyResourceManagerEntitySupplyHistory(resourceManagerEntitySupplyHistoryToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);
 
             dbWriteDuration += sw.Elapsed;
