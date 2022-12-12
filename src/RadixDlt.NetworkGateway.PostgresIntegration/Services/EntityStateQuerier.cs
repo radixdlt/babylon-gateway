@@ -93,8 +93,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record NonFungibleIdDataViewModel(string NonFungibleId, bool IsDeleted, byte[] ImmutableData, byte[] MutableData);
 
-    private const int DefaultMetadataLimit = 10; // TODO make it configurable
-    private const int DefaultResourceLimit = 5; // TODO make it configurable
+    private const int DefaultMetadataLimit = 100; // TODO make it configurable
+    private const int DefaultResourceLimit = 20; // TODO make it configurable
 
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ReadOnlyDbContext _dbContext;
