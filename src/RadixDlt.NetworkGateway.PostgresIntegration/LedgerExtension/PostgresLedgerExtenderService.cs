@@ -234,8 +234,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var dbReadDuration = TimeSpan.Zero;
         var dbWriteDuration = TimeSpan.Zero;
         var outerStopwatch = Stopwatch.StartNew();
-
-        // TODO replace usage of HEX-encoded strings in favor of raw RadixAddress? how about global addresses?
         var ledgerTransactions = new List<LedgerTransaction>(ledgerExtension.CommittedTransactions.Count);
         var referencedEntities = new ReferencedEntityDictionary();
         var knownGlobalAddressesToLoad = new HashSet<string>();
@@ -845,7 +843,7 @@ WHERE id IN(
         var nonFungibleVaultChanges = new List<NonFungibleVaultChange>();
         var nonFungibleIdStoreChanges = new List<NonFungibleIdChange>();
         var metadataChanges = new List<MetadataChange>();
-        var fungibleResourceSupplyChanges = new List<FungibleResourceSupply>();
+        var resourceManagerSupplyChanges = new List<ResourceManagerSupplyChange>();
 
         // step: scan all substates to figure out changes
         {
@@ -875,12 +873,7 @@ WHERE id IN(
 
                     if (sd is CoreModel.ResourceManagerSubstate resourceManager)
                     {
-                        var totalSupply = TokenAmount.FromDecimalString(resourceManager.TotalSupply);
-
-                        if (resourceManager.ResourceType == CoreModel.ResourceType.Fungible)
-                        {
-                            fungibleResourceSupplyChanges.Add(new FungibleResourceSupply(re, totalSupply, TokenAmount.Zero, TokenAmount.Zero, stateVersion)); // TODO support mint & burnt
-                        }
+                        resourceManagerSupplyChanges.Add(new ResourceManagerSupplyChange(re, TokenAmount.FromDecimalString(resourceManager.TotalSupply), stateVersion));
                     }
 
                     if (sd is CoreModel.VaultSubstate vault)
@@ -992,18 +985,6 @@ WHERE id IN(
                 })
                 .ToList();
 
-            var fungibleSuppliesHistory = fungibleResourceSupplyChanges
-                .Select(e => new FungibleResourceSupplyHistory
-                {
-                    Id = sequences.NextFungibleResourceSupplyHistory,
-                    FromStateVersion = e.StateVersion,
-                    ResourceEntityId = e.ResourceEntity.DatabaseId,
-                    TotalSupply = e.TotalSupply,
-                    TotalMinted = e.TotalMinted,
-                    TotalBurnt = e.TotalBurnt,
-                })
-                .ToList();
-
             var sw = Stopwatch.StartNew();
 
             var vaultAggregateDeltaIds = vaultAggregateDelta.Keys.ToList();
@@ -1031,6 +1012,24 @@ INNER JOIN LATERAL (
 ) emh ON true;")
                 .AsNoTracking()
                 .ToDictionaryAsync(e => e.NonFungibleResourceManagerEntityId, token);
+
+            var yyy = resourceManagerSupplyChanges.Select(c => c.ResourceEntity.DatabaseId).Distinct().ToList();
+            var mostRecentResourceManagerEntitySupplies = await dbContext.ResourceManagerEntitySupplyHistory
+                .FromSqlInterpolated(@$"
+WITH variables (resource_manager_entity_id) AS (
+    SELECT UNNEST({yyy})
+)
+SELECT rmesh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM resource_manager_entity_supply_history
+    WHERE resource_manager_entity_id = variables.resource_manager_entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) rmesh ON true;")
+                .AsNoTracking()
+                .ToDictionaryAsync(e => e.ResourceManagerEntityId, token);
 
             dbReadDuration += sw.Elapsed;
 
@@ -1133,6 +1132,44 @@ INNER JOIN LATERAL (
                 aggregate.IsMostRecent = true;
             }
 
+            var resourceManagerSuppliesHistory = resourceManagerSupplyChanges
+                .Select(e =>
+                {
+                    var previous = mostRecentResourceManagerEntitySupplies.GetOrAdd(e.ResourceEntity.DatabaseId, _ => new ResourceManagerEntitySupplyHistory
+                    {
+                        TotalSupply = TokenAmount.Zero,
+                        TotalMinted = TokenAmount.Zero,
+                        TotalBurnt = TokenAmount.Zero,
+                    });
+
+                    TokenAmount totalMinted = previous.TotalMinted;
+                    TokenAmount totalBurnt = previous.TotalBurnt;
+
+                    if (previous.TotalSupply < e.TotalSupply)
+                    {
+                        totalMinted += e.TotalSupply - previous.TotalSupply;
+                    }
+                    else if (previous.TotalSupply > e.TotalSupply)
+                    {
+                        totalBurnt += previous.TotalSupply - e.TotalSupply;
+                    }
+
+                    var entry = new ResourceManagerEntitySupplyHistory
+                    {
+                        Id = sequences.NextResourceManagerEntitySupplyHistory,
+                        FromStateVersion = e.StateVersion,
+                        ResourceManagerEntityId = e.ResourceEntity.DatabaseId,
+                        TotalSupply = e.TotalSupply,
+                        TotalMinted = totalMinted,
+                        TotalBurnt = totalBurnt,
+                    };
+
+                    mostRecentResourceManagerEntitySupplies[e.ResourceEntity.DatabaseId] = entry;
+
+                    return entry;
+                })
+                .ToList();
+
             sw = Stopwatch.StartNew();
 
             var entityIds = aggregates.Select(a => a.EntityId).Distinct().ToList();
@@ -1224,16 +1261,16 @@ INNER JOIN LATERAL (
                 await writer.CompleteAsync(token);
             }
 
-            if (fungibleSuppliesHistory.Any())
+            if (resourceManagerSuppliesHistory.Any())
             {
-                await using var writer = await dbConn.BeginBinaryImportAsync("COPY fungible_resource_supply_history (id, from_state_version, resource_entity_id, total_supply, total_minted, total_burnt) FROM STDIN (FORMAT BINARY)", token);
+                await using var writer = await dbConn.BeginBinaryImportAsync("COPY resource_manager_entity_supply_history (id, from_state_version, resource_manager_entity_id, total_supply, total_minted, total_burnt) FROM STDIN (FORMAT BINARY)", token);
 
-                foreach (var fs in fungibleSuppliesHistory)
+                foreach (var fs in resourceManagerSuppliesHistory)
                 {
                     await writer.StartRowAsync(token);
                     await writer.WriteAsync(fs.Id, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(fs.FromStateVersion, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(fs.ResourceEntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(fs.ResourceManagerEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(fs.TotalSupply.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
                     await writer.WriteAsync(fs.TotalMinted.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
                     await writer.WriteAsync(fs.TotalBurnt.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);

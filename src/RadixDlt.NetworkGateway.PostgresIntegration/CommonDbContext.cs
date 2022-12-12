@@ -94,7 +94,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityResourceHistory> EntityResourceHistory => Set<EntityResourceHistory>();
 
-    public DbSet<FungibleResourceSupplyHistory> FungibleResourceSupplyHistory => Set<FungibleResourceSupplyHistory>();
+    public DbSet<ResourceManagerEntitySupplyHistory> ResourceManagerEntitySupplyHistory => Set<ResourceManagerEntitySupplyHistory>();
 
     public DbSet<NonFungibleIdData> NonFungibleIdData => Set<NonFungibleIdData>();
 
@@ -263,8 +263,8 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<EntityResourceHistory>()
             .HasIndex(e => new { e.GlobalEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<FungibleResourceSupplyHistory>()
-            .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
+        modelBuilder.Entity<ResourceManagerEntitySupplyHistory>()
+            .HasIndex(e => new { e.ResourceManagerEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleIdData>()
             .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.FromStateVersion });

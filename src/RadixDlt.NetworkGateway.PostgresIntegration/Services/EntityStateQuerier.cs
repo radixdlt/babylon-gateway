@@ -134,8 +134,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
             {
                 // TODO refactor so that we just just one query (reduce number of network roundtrips)
 
-                var supplyHistory = await _dbContext.FungibleResourceSupplyHistory
-                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ResourceEntityId == frme.Id)
+                var supplyHistory = await _dbContext.ResourceManagerEntitySupplyHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ResourceManagerEntityId == frme.Id)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 

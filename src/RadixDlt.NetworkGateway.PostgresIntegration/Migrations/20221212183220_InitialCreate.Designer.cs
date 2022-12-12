@@ -78,7 +78,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221212130639_InitialCreate")]
+    [Migration("20221212183220_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -329,45 +329,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator<string>("discriminator").HasValue("EntityResourceHistory");
 
                     b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.FungibleResourceSupplyHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<long>("ResourceEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("resource_entity_id");
-
-                    b.Property<BigInteger>("TotalBurnt")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric")
-                        .HasColumnName("total_burnt");
-
-                    b.Property<BigInteger>("TotalMinted")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric")
-                        .HasColumnName("total_minted");
-
-                    b.Property<BigInteger>("TotalSupply")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric")
-                        .HasColumnName("total_supply");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ResourceEntityId", "FromStateVersion");
-
-                    b.ToTable("fungible_resource_supply_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerStatus", b =>
@@ -751,6 +712,45 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasKey("StateVersion");
 
                     b.ToTable("raw_user_transactions");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ResourceManagerEntitySupplyHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("ResourceManagerEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_manager_entity_id");
+
+                    b.Property<BigInteger>("TotalBurnt")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_burnt");
+
+                    b.Property<BigInteger>("TotalMinted")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_minted");
+
+                    b.Property<BigInteger>("TotalSupply")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_supply");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResourceManagerEntityId", "FromStateVersion");
+
+                    b.ToTable("resource_manager_entity_supply_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountComponentEntity", b =>

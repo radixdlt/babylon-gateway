@@ -68,8 +68,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("fungible_resource_supply_history")]
-internal class FungibleResourceSupplyHistory
+[Table("resource_manager_entity_supply_history")]
+internal class ResourceManagerEntitySupplyHistory
 {
     [Key]
     [Column("id")]
@@ -78,8 +78,8 @@ internal class FungibleResourceSupplyHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
+    [Column("resource_manager_entity_id")]
+    public long ResourceManagerEntityId { get; set; }
 
     [Column("total_supply")]
     public TokenAmount TotalSupply { get; set; }

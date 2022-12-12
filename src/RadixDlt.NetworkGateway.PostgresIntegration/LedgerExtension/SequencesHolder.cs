@@ -83,7 +83,7 @@ internal class SequencesHolder
 
     public long EntityResourceHistorySequence { get; set; }
 
-    public long FungibleResourceSupplyHistorySequence { get; set; }
+    public long ResourceManagerEntitySupplyHistorySequence { get; set; }
 
     public long NonFungibleIdDataSequence { get; set; }
 
@@ -103,7 +103,7 @@ internal class SequencesHolder
 
     public long NextEntityResourceHistory => EntityResourceHistorySequence++;
 
-    public long NextFungibleResourceSupplyHistory => FungibleResourceSupplyHistorySequence++;
+    public long NextResourceManagerEntitySupplyHistory => ResourceManagerEntitySupplyHistorySequence++;
 
     public long NextNonFungibleIdData => NonFungibleIdDataSequence++;
 
@@ -122,7 +122,7 @@ SELECT
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
     nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
     nextval('entity_resource_history_id_seq') AS EntityResourceHistorySequence,
-    nextval('fungible_resource_supply_history_id_seq') AS FungibleResourceSupplyHistorySequence,
+    nextval('resource_manager_entity_supply_history_id_seq') AS ResourceManagerEntitySupplyHistorySequence,
     nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
     nextval('non_fungible_id_mutable_data_history_id_seq') AS NonFungibleIdMutableDataHistorySequence,
     nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence",
@@ -142,7 +142,7 @@ SELECT
     setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
     setval('entity_resource_aggregate_history_id_seq', @entityResourceAggregateHistorySequence),
     setval('entity_resource_history_id_seq', @entityResourceHistorySequence),
-    setval('fungible_resource_supply_history_id_seq', @fungibleResourceSupplyHistorySequence),
+    setval('resource_manager_entity_supply_history_id_seq', @resourceManagerEntitySupplyHistorySequence),
     setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
     setval('non_fungible_id_mutable_data_history_id_seq', @nonFungibleIdMutableDataHistorySequence),
     setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence)",
@@ -154,7 +154,7 @@ SELECT
                 entityMetadataHistorySequence = EntityMetadataHistorySequence,
                 entityResourceAggregateHistorySequence = EntityResourceAggregateHistorySequence,
                 entityResourceHistorySequence = EntityResourceHistorySequence,
-                fungibleResourceSupplyHistorySequence = FungibleResourceSupplyHistorySequence,
+                resourceManagerEntitySupplyHistorySequence = ResourceManagerEntitySupplyHistorySequence,
                 nonFungibleIdDataSequence = NonFungibleIdDataSequence,
                 nonFungibleIdMutableDataHistorySequence = NonFungibleIdMutableDataHistorySequence,
                 nonFungibleIdStoreHistorySequence = NonFungibleIdStoreHistorySequence,

@@ -205,7 +205,7 @@ internal record AccessRulesChainLookup(string EntityIdHex, AccessRulesChainSubty
 
 internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
 
-internal record FungibleResourceSupply(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, TokenAmount TotalMinted, TokenAmount TotalBurnt, long StateVersion);
+internal record ResourceManagerSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);
 
 internal record AggregateChange
 {
