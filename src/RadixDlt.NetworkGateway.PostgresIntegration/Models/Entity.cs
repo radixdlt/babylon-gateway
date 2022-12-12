@@ -157,6 +157,15 @@ internal class AccountComponentEntity : ComponentEntity
 {
 }
 
+// This is transient model, not stored in database
+internal class VirtualAccountComponentEntity : AccountComponentEntity
+{
+    public VirtualAccountComponentEntity(byte[] globalAddress)
+    {
+        GlobalAddress = globalAddress;
+    }
+}
+
 internal class SystemComponentEntity : ComponentEntity
 {
 }

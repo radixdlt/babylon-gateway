@@ -493,6 +493,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
+                    b.Property<AddressTypeDefinition[]>("AddressTypeDefinition")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("address_type_definitions");
+
                     b.Property<HrpDefinition>("HrpDefinition")
                         .IsRequired()
                         .HasColumnType("jsonb")

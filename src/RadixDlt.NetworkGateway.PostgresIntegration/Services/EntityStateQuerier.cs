@@ -98,11 +98,16 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ReadOnlyDbContext _dbContext;
+    private readonly byte _ecdsaSecp256k1VirtualAccountAddressPrefix;
+    private readonly byte _eddsaEd25519VirtualAccountAddressPrefix;
 
     public EntityStateQuerier(INetworkConfigurationProvider networkConfigurationProvider, ReadOnlyDbContext dbContext)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _dbContext = dbContext;
+
+        _ecdsaSecp256k1VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EcdsaSecp256k1VirtualAccountComponent).AddressBytePrefix;
+        _eddsaEd25519VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EddsaEd25519VirtualAccountComponent).AddressBytePrefix;
     }
 
     public async Task<GatewayModel.EntityResourcesResponse> EntityResourcesSnapshot(DecodedRadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
@@ -182,6 +187,17 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponsePackageDetails(
                     discriminator: GatewayModel.EntityDetailsResponseDetailsType.Package,
                     codeHex: pe.Code.ToHex()));
+                break;
+
+            case VirtualAccountComponentEntity:
+                // TODO - we should better fake the data - eg accessRulesChain when this is possible
+                details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseComponentDetails(
+                    discriminator: GatewayModel.EntityDetailsResponseDetailsType.Component,
+                    packageAddress: _networkConfigurationProvider.GetWellKnownAddresses().AccountPackage,
+                    blueprintName: "Account",
+                    state: new JObject(),
+                    accessRulesChain: new JArray()
+                ));
                 break;
 
             case ComponentEntity ce:
@@ -602,10 +618,9 @@ WHERE id = (
 
         if (entity == null)
         {
-            // TODO super quick & dirty support for virtual accounts, see https://rdxworks.slack.com/archives/D03P4L6J0RM/p1668528064132679
-            if (address.Data[0] is 0x05 or 0x06)
+            if (address.Data[0] == _ecdsaSecp256k1VirtualAccountAddressPrefix || address.Data[0] == _eddsaEd25519VirtualAccountAddressPrefix)
             {
-                return new AccountComponentEntity { Id = -1, GlobalAddress = address.Data };
+                return new VirtualAccountComponentEntity(address.Data);
             }
 
             throw new EntityNotFoundException(address.ToString());

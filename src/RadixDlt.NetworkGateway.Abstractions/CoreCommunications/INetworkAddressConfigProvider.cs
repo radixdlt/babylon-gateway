@@ -71,4 +71,6 @@ public interface INetworkAddressConfigProvider
     HrpDefinition GetHrpDefinition();
 
     WellKnownAddresses GetWellKnownAddresses();
+
+    AddressTypeDefinition GetAddressTypeDefinition(AddressSubtype subtype);
 }

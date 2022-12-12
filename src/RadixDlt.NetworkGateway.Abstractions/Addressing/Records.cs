@@ -83,3 +83,22 @@ public sealed record WellKnownAddresses(
     string EddsaEd25519,
     string Xrd
 );
+
+public enum AddressSubtype
+{
+    Resource,
+    Package,
+    NormalComponent,
+    AccountComponent,
+    EcdsaSecp256k1VirtualAccountComponent,
+    EddsaEd25519VirtualAccountComponent,
+    EpochManager,
+    Clock,
+}
+
+public sealed record AddressTypeDefinition(
+    AddressSubtype Subtype,
+    string HrpPrefix,
+    int AddressBytePrefix,
+    int AddressByteLength
+);
