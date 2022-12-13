@@ -105,4 +105,3 @@ jobs:
                   "database_migrations_image_tag": "${{ needs.publish-docker.outputs.database-migrations-tag }}"
                 }
             }'
-
