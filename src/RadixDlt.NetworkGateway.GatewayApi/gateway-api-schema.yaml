@@ -5,46 +5,85 @@ info:
   license:
     name: The Radix License, Version 1.0
     url: https://www.radixfoundation.org/licenses/LICENSE-v1
+  x-logo:
+    url: https://docs.radixdlt.com/main/_images/radix-logo-banner.png
+    href: https://docs.radixdlt.com
   description: | # TODO replace URLs with "babylon betanet" versions once they get published
-    This API is designed to enable clients to efficiently query information on the RadixDLT ledger, and allow clients to build and submit transactions to the network.
+    This API is designed to enable clients to efficiently query information on the RadixDLT ledger, and allow clients to build and submit transactions to the network. It is
+    designed for use by the Radix Foundation's [Desktop Wallet](https://wallet.radixdlt.com/), [Explorer](https://explorer.radixdlt.com/) and any 3rd-party willing to interact with
+    the network.
 
-    The API is designed for use by the Radix Foundation's [Desktop Wallet](https://wallet.radixdlt.com/), [Explorer](https://explorer.radixdlt.com/) and any 3rd-party willing to interact with the network.
+    This document is an API reference documentation, visit [User Guide](https://docs.radixdlt.com/main/apis/gateway-api.html) to learn more about different usage scenarios.
 
-    # Gateway API Overview
-
-    The Gateway API is separated into distinct groupings:
-
-    * `/status/*` - information about the Gateway API status.
-    * `/transaction/*` - to build, submit and query for the status or details of transactions.
-    * `/stream/*` - to query for the recently seen transactions on the network.
-    * `/state/*` - to query for a current or past state of any entity on the network.
-
-    The Gateway API is implemented by the [Network Gateway](https://github.com/radixdlt/babylon-gateway), which is configured to read from full node/s to extract and index data from the network.
-
-    # Gateway API Format
-
-    The API is designed in a JSON-RPC-like style, using HTTP as a transport layer, which means that:
-
-    * Requests are almost always POST requests.
-    * There is no HTTP cache involved.
-    * Client-originated errors result in HTTP 4xx error responses.
-    * Server-originated errors result in HTTP 500 Internal Server Response:
-      * The error object contains an HTTP-like `code`
-      * The error object also contains a structured/typed properties, with a `type` discriminator, allowing for structured error interpretation in clients.
-
-    Read more: https://docs.radixdlt.com/main/apis/introduction.html
-servers:
+    The Gateway API is implemented by the [Network Gateway](https://github.com/radixdlt/babylon-gateway), which is configured to read from full node(s) to extract and index data
+    from the network.
+servers: # TODO define mainnet / betanet endpoints?
   - url: http://localhost:5208
-  - url: https://stokenet.radixdlt.com
-  - url: https://mainnet.radixdlt.com
+x-tagGroups:
+  - name: Overview
+    tags:
+      - SubAPIs
+      - Architecture
+  - name: Endpoints
+    tags:
+      - Status
+      - Transaction
+      - Stream
+      - State
 tags:
+  - name: SubAPIs
+    x-displayName: Sub-APIs
+    x-traitTag: true
+    description: |
+      The Gateway API is split into 4 sub APIs:
+      - **Status** (`/status/*`) - information about the Gateway API status.
+      - **Transaction** (`/transaction/*`) - to build, submit and query for the status or details of transactions.
+      - **Stream** (`/transaction/*`) - to query for the recently seen transactions on the network.
+      - **State** (`/state/*`) - to query for a current or past state of any entity on the network.
+  - name: Architecture
+    x-traitTag: true
+    description: |
+
+      ## Request-Response Format
+
+      The API is designed in a JSON-RPC-like style, using HTTP as a transport layer, which means that:
+      - Requests always use HTTP POST method.
+      - There is no HTTP cache involved.
+      - Client-originated errors result in HTTP 4xx error responses.
+      - Server-originated errors result in HTTP 5xx error responses:
+          - The error object contains an HTTP-like `code`
+          - The error object also contains a structured/typed properties, with a `type` discriminator, allowing for structured error interpretation in client software.
+
+      ## Pagination Model
+
+      Collections can grow in size therefore every dynamic-length collection is a subject to pagination where a generic data struct is used to represent a chunk (page) of
+      underlying data. Gateway API uses cursor-based pagination model where the sole existence of the cursor indicates that next chunk (page) of the underlying collection is
+      available.
+
+      ```
+      collection {
+        int64? total_count,
+        string? next_cursor,
+        string? previous_cursor,
+        T[] items
+      }
+      ```
+
+      - `total_count` *(optional)* if present specifies the overall size of the underlying collection,
+      - `next_cursor` *(optional)* if present indicates that the next chunk (page) exists and can be fetched using collection-specific endpoint and cursor value,
+      - `previous_cursor` *(optional)* if present indicates that the previous chunk (page) exists and can be fetched using collection-specific endpoint and cursor value,
+      - `items` a chunk (page) of unerlying collection items.
   - name: Status
+    x-displayName: Status Endpoints
     description: Query information about the Gateway API status.
   - name: Transaction
+    x-displayName: Transaction Endpoints
     description: Query status of, construct, preview and submit transactions.
   - name: Stream
+    x-displayName: Stream Endpoints
     description: Browse through the history of transactions.
   - name: State
+    x-displayName: State Endpoints
     description: Query information snapshot about state of ledger entities at present or past time.
 paths:
   "/gateway/information":
