@@ -76,8 +76,10 @@ internal class PendingTransactionStatusValueConverter : EnumTypeValueConverterBa
             { PendingTransactionStatus.SubmittedOrKnownInNodeMempool, "SUBMITTED_OR_KNOWN_IN_NODE_MEMPOOL" },
             { PendingTransactionStatus.Missing, "MISSING" },
             { PendingTransactionStatus.ResolvedButUnknownTillSyncedUp, "RESOLVED_BUT_UNKNOWN_TILL_SYNCED_UP" },
-            { PendingTransactionStatus.Failed, "FAILED" },
-            { PendingTransactionStatus.Committed, "COMMITTED" },
+            { PendingTransactionStatus.RejectedTemporarily, "REJECTED_TEMPORARILY" },
+            { PendingTransactionStatus.RejectedPermanently, "REJECTED_PERMANENTLY" },
+            { PendingTransactionStatus.CommittedSuccess, "COMMITTED_SUCCESS" },
+            { PendingTransactionStatus.CommittedFailure, "COMMITTED_FAILURE" },
         }.ToImmutableDictionary();
 
     public PendingTransactionStatusValueConverter()

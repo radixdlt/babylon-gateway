@@ -251,23 +251,24 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         // step: preparation (previously RawTransactionWriter logic)
         {
-            var rawUserTransactionsByPayloadHash = ledgerExtension.CommittedTransactions
-                .Where(ct => ct.LedgerTransaction.ActualInstance is CoreModel.UserLedgerTransaction)
-                .Select(ult =>
+            var rawUserTransactionStatusByPayloadHash = new Dictionary<byte[], CoreModel.TransactionStatus>(ByteArrayEqualityComparer.Default);
+            var rawUserTransactionByPayloadHash = new Dictionary<byte[], RawUserTransaction>(ByteArrayEqualityComparer.Default);
+
+            foreach (var ct in ledgerExtension.CommittedTransactions.Where(ct => ct.LedgerTransaction.ActualInstance is CoreModel.UserLedgerTransaction))
+            {
+                var nt = ct.LedgerTransaction.GetUserLedgerTransaction().NotarizedTransaction;
+
+                rawUserTransactionStatusByPayloadHash[nt.HashBytes] = ct.Receipt.Status;
+                rawUserTransactionByPayloadHash[nt.HashBytes] = new RawUserTransaction
                 {
-                    var nt = ult.LedgerTransaction.GetUserLedgerTransaction().NotarizedTransaction;
+                    StateVersion = ct.StateVersion,
+                    PayloadHash = nt.HashBytes,
+                    Payload = nt.PayloadBytes,
+                    Receipt = ct.Receipt.ToJson(),
+                };
+            }
 
-                    return new RawUserTransaction
-                    {
-                        StateVersion = ult.StateVersion,
-                        PayloadHash = nt.HashBytes,
-                        Payload = nt.PayloadBytes,
-                        Receipt = ult.Receipt.ToJson(),
-                    };
-                })
-                .ToDictionary(x => x.PayloadHash, ByteArrayEqualityComparer.Default);
-
-            var rawUserTransactionsToAdd = rawUserTransactionsByPayloadHash.Values.ToList();
+            var rawUserTransactionsToAdd = rawUserTransactionByPayloadHash.Values.ToList();
 
             var (rawTransactionsTouched, rawTransactionCommitMs) = await CodeStopwatch.TimeInMs(async () =>
             {
@@ -278,10 +279,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
             var (pendingTransactionsTouched, pendingTransactionUpdateMs) = await CodeStopwatch.TimeInMs(async () =>
             {
-                var transactionPayloadHashList = rawUserTransactionsByPayloadHash.Keys.ToList(); // List<> are optimised for PostgreSQL lookups
+                var transactionPayloadHashList = rawUserTransactionByPayloadHash.Keys.ToList(); // List<> are optimised for PostgreSQL lookups
 
                 var toUpdate = await dbContext.PendingTransactions
-                    .Where(mt => mt.Status != PendingTransactionStatus.Committed && transactionPayloadHashList.Contains(mt.PayloadHash))
+                    .Where(pt => pt.Status != PendingTransactionStatus.CommittedSuccess && pt.Status != PendingTransactionStatus.CommittedFailure)
+                    .Where(pt => transactionPayloadHashList.Contains(pt.PayloadHash))
                     .ToListAsync(token);
 
                 if (toUpdate.Count == 0)
@@ -291,23 +293,34 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 foreach (var pendingTransaction in toUpdate)
                 {
-                    if (pendingTransaction.Status == PendingTransactionStatus.Failed)
+                    if (pendingTransaction.Status is PendingTransactionStatus.RejectedPermanently or PendingTransactionStatus.RejectedTemporarily)
                     {
                         await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedWhichWasFailed());
 
                         _logger.LogError(
-                            "Transaction with payload hash {PayloadHash} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark failed at {FailureTime} due to {FailureReason} ({FailureExplanation}) but has now been marked committed",
+                            "Transaction with payload hash {PayloadHash} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark {FailureTransiency} at {FailureTime} due to {FailureReason} ({FailureExplanation}) but has now been marked committed",
                             pendingTransaction.PayloadHash.ToHex(),
                             pendingTransaction.FirstSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                             pendingTransaction.LastSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                             pendingTransaction.LastDroppedOutOfMempoolTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                            pendingTransaction.Status,
                             pendingTransaction.FailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                             pendingTransaction.FailureReason?.ToString(),
                             pendingTransaction.FailureExplanation
                         );
                     }
 
-                    pendingTransaction.MarkAsCommitted(_clock.UtcNow);
+                    switch (rawUserTransactionStatusByPayloadHash[pendingTransaction.PayloadHash])
+                    {
+                        case CoreModel.TransactionStatus.Succeeded:
+                            pendingTransaction.MarkAsCommitted(true, _clock.UtcNow);
+                            break;
+                        case CoreModel.TransactionStatus.Failed:
+                            pendingTransaction.MarkAsCommitted(false, _clock.UtcNow);
+                            break;
+                        default:
+                            throw new UnreachableException();
+                    }
                 }
 
                 // If this errors (due to changes to the MempoolTransaction.Status ConcurrencyToken), we may have to consider

@@ -70,16 +70,31 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class GatewayModelExtensions
 {
-    public static GatewayModel.NonFungibleIdType ToGatewayModel(this NonFungibleIdType input)
+    public static GatewayModel.NonFungibleIdType ToGatewayModel(this NonFungibleIdType nonFungibleIdType)
     {
-        return input switch
+        return nonFungibleIdType switch
         {
             NonFungibleIdType.String => GatewayModel.NonFungibleIdType.String,
             NonFungibleIdType.U32 => GatewayModel.NonFungibleIdType.U32,
             NonFungibleIdType.U64 => GatewayModel.NonFungibleIdType.U64,
             NonFungibleIdType.Bytes => GatewayModel.NonFungibleIdType.Bytes,
             NonFungibleIdType.UUID => GatewayModel.NonFungibleIdType.Uuid,
-            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
+            _ => throw new ArgumentOutOfRangeException(nameof(nonFungibleIdType), nonFungibleIdType, null),
+        };
+    }
+
+    public static GatewayModel.TransactionStatus ToGatewayModel(this PendingTransactionStatus status)
+    {
+        return status switch
+        {
+            PendingTransactionStatus.SubmittedOrKnownInNodeMempool => GatewayModel.TransactionStatus.Pending,
+            PendingTransactionStatus.Missing => GatewayModel.TransactionStatus.Pending,
+            PendingTransactionStatus.ResolvedButUnknownTillSyncedUp => GatewayModel.TransactionStatus.Pending,
+            PendingTransactionStatus.RejectedTemporarily => GatewayModel.TransactionStatus.Pending,
+            PendingTransactionStatus.RejectedPermanently => GatewayModel.TransactionStatus.Rejected,
+            PendingTransactionStatus.CommittedSuccess => GatewayModel.TransactionStatus.CommittedSuccess,
+            PendingTransactionStatus.CommittedFailure => GatewayModel.TransactionStatus.CommittedFailure,
+            _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
         };
     }
 }

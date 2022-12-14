@@ -80,6 +80,7 @@ public interface ISubmissionTrackingService
     );
 
     Task MarkAsFailed(
+        bool permanent,
         byte[] payloadHash,
         PendingTransactionFailureReason failureReason,
         string failureExplanation,

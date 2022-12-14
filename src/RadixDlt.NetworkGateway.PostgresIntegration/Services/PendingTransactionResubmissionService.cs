@@ -227,7 +227,8 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
             {
                 _observers.ForEach(x => x.TransactionMarkedAsFailed());
 
-                transaction.MarkAsFailed(
+                transaction.MarkAsRejected(
+                    true,
                     PendingTransactionFailureReason.Timeout,
                     "The transaction keeps dropping out of the mempool, so we're not resubmitting it",
                     submittedAt
@@ -299,7 +300,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
             {
                 await _observers.ForEachAsync(x => x.TransactionMarkedAsFailedAfterSubmittedToNode());
 
-                transaction.MarkAsFailedAfterSubmittedToNode(nodeName, failureReason.Value, failureExplanation!, submittedAt, _clock.UtcNow);
+                transaction.MarkAsFailedAfterSubmittedToNode(false, nodeName, failureReason.Value, failureExplanation!, submittedAt, _clock.UtcNow);
             }
         }
     }
@@ -354,20 +355,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
             return new SubmissionResult(transaction, false, null, null, chosenNode.Name);
         }
-
-        // TODO incompatible
-        // catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
-        // {
-        //     _transactionResubmissionErrorCount.Inc();
-        //     _transactionResubmissionResolutionByResultCount.WithLabels("substate_missing_or_already_used").Inc();
-        //     _logger.LogDebug(
-        //         "Dropping transaction because a substate identifier it used is missing or already downed - possibly it's already been committed. Substate Identifier: {Substate}",
-        //         ex.Error.SubstateIdentifierNotFound.Identifier
-        //     );
-        //     var failureExplanation = "Double spend on resubmission";
-        //     return new SubmissionResult(transaction, true, MempoolTransactionFailureReason.DoubleSpend, failureExplanation, chosenNode.Name);
-        // }
-        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == Transience.Permanent)
+        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Permanent)
         {
             await _observers.ForEachAsync(x => x.ResubmitFailedPermanently(notarizedTransaction, ex));
 

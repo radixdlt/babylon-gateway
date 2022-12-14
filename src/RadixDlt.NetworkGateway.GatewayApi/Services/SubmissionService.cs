@@ -64,7 +64,9 @@
 
 using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
@@ -129,7 +131,7 @@ internal class SubmissionService : ISubmissionService
             await _observers.ForEachAsync(x => x.SubmissionAlreadySubmitted(request, trackingGuidance));
 
             return new GatewayModel.TransactionSubmitResponse(
-                duplicate: true // TODO what should we do here? maybe we should throw some well-known exception?
+                duplicate: true
             );
         }
 
@@ -137,7 +139,7 @@ internal class SubmissionService : ISubmissionService
         {
             await _observers.ForEachAsync(x => x.PreHandleSubmitRequest(request));
 
-            var response = await HandleSubmitAndCreateResponse(request, token);
+            var response = await HandleSubmitAndCreateResponse(request, parsedTransaction, token);
 
             await _observers.ForEachAsync(x => x.PostHandleSubmitRequest(request, response));
 
@@ -180,18 +182,12 @@ internal class SubmissionService : ISubmissionService
 
             return parsed.NotarizedTransaction;
         }
+        catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
+        {
+            await _observers.ForEachAsync(x => x.ParseTransactionFailedInvalidTransaction(request, ex));
 
-        // TODO adjust for Babylon
-        // catch (WrappedCoreApiException<Core.SubstateDependencyNotFoundError> ex)
-        // {
-        //     _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_substate_missing_or_already_used").Inc();
-        //     throw InvalidTransactionException.FromSubstateDependencyNotFoundError(signedTransaction.AsString, ex.Error);
-        // }
-        // catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
-        // {
-        //     _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_invalid_transaction").Inc();
-        //     throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(signedTransaction.AsString, ex);
-        // }
+            throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(ex);
+        }
         catch (Exception ex)
         {
             await _observers.ForEachAsync(x => x.ParseTransactionFailedUnknown(request, ex));
@@ -200,7 +196,10 @@ internal class SubmissionService : ISubmissionService
         }
     }
 
-    private async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitAndCreateResponse(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
+    private async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitAndCreateResponse(
+        GatewayModel.TransactionSubmitRequest request,
+        CoreModel.NotarizedTransaction parsedTransaction,
+        CancellationToken token)
     {
         using var timeoutTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3)); // TODO configurable
         using var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutTokenSource.Token, token);
@@ -228,45 +227,35 @@ internal class SubmissionService : ISubmissionService
                 duplicate: result.Duplicate
             );
         }
+        catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
+        {
+            await _observers.ForEachAsync(x => x.HandleSubmissionFailedInvalidTransaction(request, ex));
 
-        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-        // catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
-        // {
-        //     await _observers.ForEachAsync(x => x.HandleSubmissionFailedSubstateNotFound(signedTransaction, ex));
-        //
-        //     await _submissionTrackingService.MarkAsFailed(
-        //         transactionIdentifierHash,
-        //         MempoolTransactionFailureReason.DoubleSpend,
-        //         "A substate identifier the transaction uses is missing or already downed"
-        //     );
-        //
-        //     throw InvalidTransactionException.FromSubstateDependencyNotFoundError(signedTransaction.AsString, ex.Error);
-        // }
-        // catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
-        // {
-        //     await _observers.ForEachAsync(x => x.HandleSubmissionFailedInvalidTransaction(signedTransaction, ex));
-        //
-        //     await _submissionTrackingService.MarkAsFailed(
-        //         transactionIdentifierHash,
-        //         MempoolTransactionFailureReason.Unknown,
-        //         $"Core API Exception: {ex.Error.GetType().Name} marking invalid transaction on initial submission"
-        //     );
-        //
-        //     throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(signedTransaction.AsString, ex);
-        // }
-        // catch (WrappedCoreApiException ex) when (ex.Properties.Transience == Transience.Permanent)
-        // {
-        //     // Any other known Core exception which can't result in the transaction being submitted
-        //     await _observers.ForEachAsync(x => x.HandleSubmissionFailedPermanently(signedTransaction, ex));
-        //
-        //     await _submissionTrackingService.MarkAsFailed(
-        //         transactionIdentifierHash,
-        //         MempoolTransactionFailureReason.Unknown,
-        //         $"Core API Exception: {ex.Error.GetType().Name} without undefined behaviour on initial submission"
-        //     );
-        //
-        //     throw;
-        // }
+            await _submissionTrackingService.MarkAsFailed(
+                ex.Properties.Transience == CoreApiErrorTransience.Permanent,
+                parsedTransaction.PayloadBytes,
+                PendingTransactionFailureReason.Unknown,
+                $"Core API Exception: {ex.Error.GetType().Name} marking invalid transaction on initial submission",
+                token
+            );
+
+            throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(ex);
+        }
+        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Permanent)
+        {
+            // Any other known Core exception which can't result in the transaction being submitted
+            await _observers.ForEachAsync(x => x.HandleSubmissionFailedPermanently(request, ex));
+
+            await _submissionTrackingService.MarkAsFailed(
+                true,
+                parsedTransaction.PayloadBytes,
+                PendingTransactionFailureReason.Unknown,
+                $"Core API Exception: {ex.Error.GetType().Name} without undefined behaviour on initial submission",
+                token
+            );
+
+            throw;
+        }
         catch (OperationCanceledException ex) when (timeoutTokenSource.Token.IsCancellationRequested)
         {
             await _observers.ForEachAsync(x => x.HandleSubmissionFailedTimeout(request, ex));
