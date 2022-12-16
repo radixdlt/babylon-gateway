@@ -132,7 +132,7 @@ paths:
       operationId: TransactionConstruction
       summary: Construction
       description: |
-        Returns all the information needed to construct new transaction.
+        Returns information needed to construct a new transaction including current `epoch` number.
       tags:
         - Transaction
       responses:
@@ -175,7 +175,6 @@ paths:
       summary: Submit Transaction
       description: |
         Submits a signed transaction payload to the network.
-        The transaction identifier from finalize or submit can then be used to track the transaction status.
       tags:
         - Transaction
       requestBody:
@@ -198,9 +197,8 @@ paths:
       operationId: TransactionCommittedDetails
       summary: Transaction Committed Details
       description: |
-        Returns the status and contents of the transaction for a given transaction identifier. Transaction identifiers
-        which aren't recognised as either belonging to a committed transaction or a transaction
-        submitted through this Network Gateway may return a `TransactionNotFoundError`. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a `TransactionNotFoundError`.
+        Returns the status and contents of the transaction for a given transaction identifier. Transaction identifiers which aren't recognised committed transaction may return a
+        `TransactionNotFoundError`.
       tags:
         - Transaction
       requestBody:
