@@ -765,7 +765,12 @@ WHERE id IN(
 
                     if (sd is CoreModel.NonFungibleStoreEntrySubstate nonFungibleStoreEntry)
                     {
-                        nonFungibleIdStoreChanges.Add(new NonFungibleIdChange(re, nonFungibleStoreEntry.NonFungibleId.SimpleRep, nonFungibleStoreEntry.IsDeleted, nonFungibleStoreEntry.NonFungibleData, stateVersion));
+                        // TODO is it guaranteed to be ResourceManager?
+                        // TODO or maybe we should use OwnerAncestorId?
+                        // TODO or maybe we should iterate until we find entity of appropriate type?
+                        var resourceManagerEntity = referencedEntities.GetByDatabaseId(re.DatabaseGlobalAncestorId);
+
+                        nonFungibleIdStoreChanges.Add(new NonFungibleIdChange(re, resourceManagerEntity, nonFungibleStoreEntry.NonFungibleId.SimpleRep, nonFungibleStoreEntry.IsDeleted, nonFungibleStoreEntry.NonFungibleData, stateVersion));
                     }
 
                     if (sd is CoreModel.ComponentStateSubstate componentState)
@@ -829,8 +834,6 @@ WHERE id IN(
             var nonFungibleVaultsHistoryToAdd = nonFungibleVaultChanges
                 .Select(e =>
                 {
-                    // TODO handle removal (is_deleted)
-
                     vaultAggregateDelta.GetOrAdd(e.ReferencedVault.DatabaseOwnerAncestorId, _ => new Dictionary<long, AggregateChange>()).GetOrAdd(e.StateVersion, _ => new AggregateChange(e.StateVersion)).AppendNonFungible(e.ReferencedResource.DatabaseId);
                     vaultAggregateDelta.GetOrAdd(e.ReferencedVault.DatabaseGlobalAncestorId, _ => new Dictionary<long, AggregateChange>()).GetOrAdd(e.StateVersion, _ => new AggregateChange(e.StateVersion)).AppendNonFungible(e.ReferencedResource.DatabaseId);
 
@@ -881,6 +884,7 @@ WHERE id IN(
 
             var mostRecentNonFungibleIdStoreHistory = await readHelper.MostRecentNonFungibleIdStoreHistoryFor(nonFungibleIdStoreChanges, token);
             var mostRecentResourceManagerEntitySupplyHistory = await readHelper.MostRecentResourceManagerEntitySupplyHistoryFor(resourceManagerSupplyChanges, token);
+            var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdStoreChanges, token);
 
             dbReadDuration += sw.Elapsed;
 
@@ -890,33 +894,24 @@ WHERE id IN(
 
             foreach (var e in nonFungibleIdStoreChanges)
             {
-                // TODO we must find all existing NonFungibleIdData by ResourceManagerId+NfId so that for we can handle situation where NFID is not created but its mutable data has changed
-                // TODO only add NonFungibleIdData if does not exist, otherwise use existing one
-
-                var nfidData = new NonFungibleIdData
+                var nonFungibleIdData = existingNonFungibleIdData.GetOrAdd(new NonFungibleIdLookup(e.ReferencedResource.DatabaseId, e.NonFungibleId), _ =>
                 {
-                    Id = sequences.NonFungibleIdDataSequence++,
-                    FromStateVersion = e.StateVersion,
-                    NonFungibleStoreEntityId = e.ReferencedStore.DatabaseId,
-                    // TODO is it guaranteed to be ResourceManager?
-                    // TODO or maybe we should use OwnerAncestorId?
-                    // TODO or maybe we should iterate until we find entity of appropriate type?
-                    NonFungibleResourceManagerEntityId = e.ReferencedStore.DatabaseGlobalAncestorId,
-                    NonFungibleId = e.NonFungibleId,
-                    ImmutableData = e.Data?.ImmutableDataRawBytes ?? Array.Empty<byte>(),
-                };
+                    var ret = new NonFungibleIdData
+                    {
+                        Id = sequences.NonFungibleIdDataSequence++,
+                        FromStateVersion = e.StateVersion,
+                        NonFungibleStoreEntityId = e.ReferencedStore.DatabaseId,
+                        NonFungibleResourceManagerEntityId = e.ReferencedResource.DatabaseId,
+                        NonFungibleId = e.NonFungibleId,
+                        ImmutableData = e.Data?.ImmutableDataRawBytes ?? Array.Empty<byte>(),
+                    };
 
-                nonFungibleIdDataToAdd.Add(nfidData);
-                nonFungibleIdsMutableDataHistoryToAdd.Add(new NonFungibleIdMutableDataHistory
-                {
-                    Id = sequences.NonFungibleIdMutableDataHistorySequence++,
-                    FromStateVersion = e.StateVersion,
-                    NonFungibleIdDataId = nfidData.Id,
-                    IsDeleted = e.IsDeleted,
-                    MutableData = e.Data?.MutableDataRawBytes ?? Array.Empty<byte>(),
+                    nonFungibleIdDataToAdd.Add(ret);
+
+                    return ret;
                 });
 
-                var store = nonFungibleIdStoreHistoryToAdd.GetOrAdd(new NonFungibleStoreLookup(e.ReferencedStore.DatabaseGlobalAncestorId, e.StateVersion), _ =>
+                var nonFungibleIdStore = nonFungibleIdStoreHistoryToAdd.GetOrAdd(new NonFungibleStoreLookup(e.ReferencedStore.DatabaseGlobalAncestorId, e.StateVersion), _ =>
                 {
                     IEnumerable<long> previousNonFungibleIdDataIds = mostRecentNonFungibleIdStoreHistory.ContainsKey(e.ReferencedStore.DatabaseGlobalAncestorId)
                         ? mostRecentNonFungibleIdStoreHistory[e.ReferencedStore.DatabaseGlobalAncestorId].NonFungibleIdDataIds
@@ -936,7 +931,16 @@ WHERE id IN(
                     return ret;
                 });
 
-                store.NonFungibleIdDataIds.Add(nfidData.Id);
+                nonFungibleIdsMutableDataHistoryToAdd.Add(new NonFungibleIdMutableDataHistory
+                {
+                    Id = sequences.NonFungibleIdMutableDataHistorySequence++,
+                    FromStateVersion = e.StateVersion,
+                    NonFungibleIdDataId = nonFungibleIdData.Id,
+                    IsDeleted = e.IsDeleted,
+                    MutableData = e.Data?.MutableDataRawBytes ?? Array.Empty<byte>(),
+                });
+
+                nonFungibleIdStore.NonFungibleIdDataIds.Add(nonFungibleIdData.Id);
             }
 
             var entityResourceAggregateHistoryToAdd = new List<EntityResourceAggregateHistory>();

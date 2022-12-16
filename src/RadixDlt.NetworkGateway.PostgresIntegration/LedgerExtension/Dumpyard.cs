@@ -197,9 +197,11 @@ internal record FungibleVaultChange(ReferencedEntity ReferencedVault, Referenced
 
 internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, List<string> NonFungibleIds, long StateVersion);
 
-internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, string NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
+internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
 
 internal record NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, long StateVersion);
+
+internal record NonFungibleIdLookup(long ResourceManagerEntityId, string NonFungibleId);
 
 internal record AccessRulesChainLookup(string EntityIdHex, AccessRulesChainSubtype Subtype);
 

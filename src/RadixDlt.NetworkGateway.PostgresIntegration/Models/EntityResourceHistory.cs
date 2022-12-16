@@ -101,5 +101,5 @@ internal class EntityNonFungibleResourceHistory : EntityResourceHistory
     public long NonFungibleIdsCount { get; set; } // TODO drop in favor of array_length(ids, 1) ?
 
     [Column("non_fungible_ids")]
-    public List<string> NonFungibleIds { get; set; }
+    public List<string> NonFungibleIds { get; set; } // TODO we should store List<long> of IDs from non_fungible_id_data table
 }

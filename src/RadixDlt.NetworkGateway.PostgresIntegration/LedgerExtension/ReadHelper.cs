@@ -129,6 +129,26 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.ResourceManagerEntityId, token);
     }
 
+    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, CancellationToken token)
+    {
+        var resourceManagerEntityIds = new List<long>();
+        var nonFungibleIds = new List<string>();
+
+        foreach (var nonFungibleIdChange in nonFungibleIdStoreChanges)
+        {
+            resourceManagerEntityIds.Add(nonFungibleIdChange.ReferencedResource.DatabaseId);
+            nonFungibleIds.Add(nonFungibleIdChange.NonFungibleId);
+        }
+
+        return await _dbContext.NonFungibleIdData
+            .FromSqlInterpolated(@$"
+SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_manager_entity_id, non_fungible_id) IN (
+    SELECT UNNEST({resourceManagerEntityIds}), UNNEST({nonFungibleIds})
+)")
+            .AsNoTracking()
+            .ToDictionaryAsync(e => new NonFungibleIdLookup(e.NonFungibleResourceManagerEntityId, e.NonFungibleId), token);
+    }
+
     public async Task<SequencesHolder> LoadSequences(CancellationToken token)
     {
         var cd = new CommandDefinition(
