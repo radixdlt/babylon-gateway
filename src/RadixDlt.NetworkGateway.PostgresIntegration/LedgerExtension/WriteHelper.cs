@@ -63,6 +63,7 @@
  */
 
 using Dapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Npgsql;
 using NpgsqlTypes;
@@ -83,10 +84,10 @@ internal class WriteHelper
     private readonly NpgsqlConnection _connection;
     private readonly IModel _model;
 
-    public WriteHelper(NpgsqlConnection connection, IModel model)
+    public WriteHelper(ReadWriteDbContext dbContext)
     {
-        _connection = connection;
-        _model = model;
+        _connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
+        _model = dbContext.Model;
     }
 
     public async Task<int> CopyRawUserTransaction(ICollection<RawUserTransaction> entities, CancellationToken token)

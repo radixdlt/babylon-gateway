@@ -63,7 +63,11 @@
  */
 
 using Dapper;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -71,11 +75,58 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal class ReadHelper
 {
+    private readonly ReadWriteDbContext _dbContext;
     private readonly NpgsqlConnection _connection;
 
-    public ReadHelper(NpgsqlConnection connection)
+    public ReadHelper(ReadWriteDbContext dbContext)
     {
-        _connection = connection;
+        _dbContext = dbContext;
+        _connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
+    }
+
+    public async Task<Dictionary<long, NonFungibleIdStoreHistory>> MostRecentNonFungibleIdStoreHistoryFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, CancellationToken token)
+    {
+        // TODO is it guaranteed that given NonFungibleStore has always proper NF ResourceManager as its global ancestor?
+        var ids = nonFungibleIdStoreChanges.Select(x => x.ReferencedStore.DatabaseGlobalAncestorId).Distinct().ToList();
+
+        return await _dbContext.NonFungibleIdStoreHistory
+            .FromSqlInterpolated(@$"
+WITH entities (id) AS (
+    SELECT UNNEST({ids})
+)
+SELECT emh.*
+FROM entities
+INNER JOIN LATERAL (
+    SELECT *
+    FROM non_fungible_id_store_history
+    WHERE non_fungible_resource_manager_entity_id = entities.id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) emh ON true;")
+            .AsNoTracking()
+            .ToDictionaryAsync(e => e.NonFungibleResourceManagerEntityId, token);
+    }
+
+    public async Task<Dictionary<long, ResourceManagerEntitySupplyHistory>> MostRecentResourceManagerEntitySupplyHistoryFor(List<ResourceManagerSupplyChange> resourceManagerSupplyChanges, CancellationToken token)
+    {
+        var ids = resourceManagerSupplyChanges.Select(c => c.ResourceEntity.DatabaseId).Distinct().ToList();
+
+        return await _dbContext.ResourceManagerEntitySupplyHistory
+            .FromSqlInterpolated(@$"
+WITH variables (resource_manager_entity_id) AS (
+    SELECT UNNEST({ids})
+)
+SELECT rmesh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM resource_manager_entity_supply_history
+    WHERE resource_manager_entity_id = variables.resource_manager_entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) rmesh ON true;")
+            .AsNoTracking()
+            .ToDictionaryAsync(e => e.ResourceManagerEntityId, token);
     }
 
     public async Task<SequencesHolder> LoadSequences(CancellationToken token)

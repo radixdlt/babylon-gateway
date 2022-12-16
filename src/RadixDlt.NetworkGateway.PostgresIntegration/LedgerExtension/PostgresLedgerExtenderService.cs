@@ -225,7 +225,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
     {
         // TODO further improvements:
         // - queries with WHERE xxx = ANY(<list of 12345 ids>) are probably not very performant
-        // - replace with proper Activity at some point
+        // - replace with proper Activity at some point to eliminate stopwatches and primitve counters
 
         var rowsInserted = 0;
         var rowsUpdated = 0;
@@ -243,8 +243,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var ledgerTransactionsToAdd = new List<LedgerTransaction>();
 
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
-        var readHelper = new ReadHelper((NpgsqlConnection)dbContext.Database.GetDbConnection());
-        var writeHelper = new WriteHelper((NpgsqlConnection)dbContext.Database.GetDbConnection(), dbContext.Model);
+        var readHelper = new ReadHelper(dbContext);
+        var writeHelper = new WriteHelper(dbContext);
 
         PreparationReport preparationReport;
         SequencesHolder sequences;
@@ -879,42 +879,8 @@ WHERE id IN(
                 .Where(e => vaultAggregateDeltaIds.Contains(e.EntityId))
                 .ToDictionaryAsync(e => e.EntityId, token);
 
-            // TODO is it guaranteed that given NonFungibleStore has always proper NF ResourceManager as its global ancestor?
-            var xxx = nonFungibleIdStoreChanges.Select(x => x.ReferencedStore.DatabaseGlobalAncestorId).Distinct().ToList();
-            var mostRecentNonFungibleStore = await dbContext.NonFungibleIdStoreHistory
-                .FromSqlInterpolated(@$"
-WITH entities (id) AS (
-    SELECT UNNEST({xxx})
-)
-SELECT emh.*
-FROM entities
-INNER JOIN LATERAL (
-    SELECT *
-    FROM non_fungible_id_store_history
-    WHERE non_fungible_resource_manager_entity_id = entities.id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) emh ON true;")
-                .AsNoTracking()
-                .ToDictionaryAsync(e => e.NonFungibleResourceManagerEntityId, token);
-
-            var yyy = resourceManagerSupplyChanges.Select(c => c.ResourceEntity.DatabaseId).Distinct().ToList();
-            var mostRecentResourceManagerEntitySupplies = await dbContext.ResourceManagerEntitySupplyHistory
-                .FromSqlInterpolated(@$"
-WITH variables (resource_manager_entity_id) AS (
-    SELECT UNNEST({yyy})
-)
-SELECT rmesh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM resource_manager_entity_supply_history
-    WHERE resource_manager_entity_id = variables.resource_manager_entity_id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) rmesh ON true;")
-                .AsNoTracking()
-                .ToDictionaryAsync(e => e.ResourceManagerEntityId, token);
+            var mostRecentNonFungibleIdStoreHistory = await readHelper.MostRecentNonFungibleIdStoreHistoryFor(nonFungibleIdStoreChanges, token);
+            var mostRecentResourceManagerEntitySupplyHistory = await readHelper.MostRecentResourceManagerEntitySupplyHistoryFor(resourceManagerSupplyChanges, token);
 
             dbReadDuration += sw.Elapsed;
 
@@ -952,8 +918,8 @@ INNER JOIN LATERAL (
 
                 var store = nonFungibleIdStoreHistoryToAdd.GetOrAdd(new NonFungibleStoreLookup(e.ReferencedStore.DatabaseGlobalAncestorId, e.StateVersion), _ =>
                 {
-                    IEnumerable<long> previousNonFungibleIdDataIds = mostRecentNonFungibleStore.ContainsKey(e.ReferencedStore.DatabaseGlobalAncestorId)
-                        ? mostRecentNonFungibleStore[e.ReferencedStore.DatabaseGlobalAncestorId].NonFungibleIdDataIds
+                    IEnumerable<long> previousNonFungibleIdDataIds = mostRecentNonFungibleIdStoreHistory.ContainsKey(e.ReferencedStore.DatabaseGlobalAncestorId)
+                        ? mostRecentNonFungibleIdStoreHistory[e.ReferencedStore.DatabaseGlobalAncestorId].NonFungibleIdDataIds
                         : Array.Empty<long>();
 
                     var ret = new NonFungibleIdStoreHistory
@@ -965,7 +931,7 @@ INNER JOIN LATERAL (
                         NonFungibleIdDataIds = new List<long>(previousNonFungibleIdDataIds),
                     };
 
-                    mostRecentNonFungibleStore[e.ReferencedStore.DatabaseGlobalAncestorId] = ret;
+                    mostRecentNonFungibleIdStoreHistory[e.ReferencedStore.DatabaseGlobalAncestorId] = ret;
 
                     return ret;
                 });
@@ -1019,7 +985,7 @@ INNER JOIN LATERAL (
             var resourceManagerEntitySupplyHistoryToAdd = resourceManagerSupplyChanges
                 .Select(e =>
                 {
-                    var previous = mostRecentResourceManagerEntitySupplies.GetOrAdd(e.ResourceEntity.DatabaseId, _ => new ResourceManagerEntitySupplyHistory
+                    var previous = mostRecentResourceManagerEntitySupplyHistory.GetOrAdd(e.ResourceEntity.DatabaseId, _ => new ResourceManagerEntitySupplyHistory
                     {
                         TotalSupply = TokenAmount.Zero,
                         TotalMinted = TokenAmount.Zero,
@@ -1048,7 +1014,7 @@ INNER JOIN LATERAL (
                         TotalBurnt = totalBurnt,
                     };
 
-                    mostRecentResourceManagerEntitySupplies[e.ResourceEntity.DatabaseId] = entry;
+                    mostRecentResourceManagerEntitySupplyHistory[e.ResourceEntity.DatabaseId] = entry;
 
                     return entry;
                 })
