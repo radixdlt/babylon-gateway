@@ -651,7 +651,7 @@ WHERE id IN(
 
                 referencedEntities.Get(childAddress).ConfigureDatabaseEntity((Entity dbe) =>
                 {
-                    dbe.AncestorIds = allAncestors.ToArray();
+                    dbe.AncestorIds = allAncestors;
                     dbe.ParentAncestorId = parentId.Value;
                     dbe.OwnerAncestorId = ownerId.Value;
                     dbe.GlobalAncestorId = globalId.Value;
@@ -842,7 +842,7 @@ WHERE id IN(
                         GlobalEntityId = e.ReferencedVault.DatabaseGlobalAncestorId,
                         ResourceEntityId = e.ReferencedResource.DatabaseId,
                         NonFungibleIdsCount = e.NonFungibleIds.Count,
-                        NonFungibleIds = e.NonFungibleIds.ToArray(),
+                        NonFungibleIds = new List<string>(e.NonFungibleIds),
                     };
                 })
                 .ToList();
@@ -864,8 +864,8 @@ WHERE id IN(
                         Id = sequences.EntityMetadataHistorySequence++,
                         FromStateVersion = e.StateVersion,
                         EntityId = e.ResourceEntity.DatabaseId,
-                        Keys = keys.ToArray(),
-                        Values = values.ToArray(),
+                        Keys = keys,
+                        Values = values,
                     };
                 })
                 .ToList();
@@ -952,12 +952,9 @@ INNER JOIN LATERAL (
 
                 var store = nonFungibleIdStoreHistoryToAdd.GetOrAdd(new NonFungibleStoreLookup(e.ReferencedStore.DatabaseGlobalAncestorId, e.StateVersion), _ =>
                 {
-                    var nonFungibleIdDataIds = Array.Empty<long>();
-
-                    if (mostRecentNonFungibleStore.ContainsKey(e.ReferencedStore.DatabaseGlobalAncestorId))
-                    {
-                        nonFungibleIdDataIds = mostRecentNonFungibleStore[e.ReferencedStore.DatabaseGlobalAncestorId].NonFungibleIdDataIds;
-                    }
+                    IEnumerable<long> previousNonFungibleIdDataIds = mostRecentNonFungibleStore.ContainsKey(e.ReferencedStore.DatabaseGlobalAncestorId)
+                        ? mostRecentNonFungibleStore[e.ReferencedStore.DatabaseGlobalAncestorId].NonFungibleIdDataIds
+                        : Array.Empty<long>();
 
                     var ret = new NonFungibleIdStoreHistory
                     {
@@ -965,7 +962,7 @@ INNER JOIN LATERAL (
                         FromStateVersion = e.StateVersion,
                         NonFungibleStoreEntityId = e.ReferencedStore.DatabaseId,
                         NonFungibleResourceManagerEntityId = e.ReferencedStore.DatabaseGlobalAncestorId,
-                        NonFungibleIdDataIds = nonFungibleIdDataIds,
+                        NonFungibleIdDataIds = new List<long>(previousNonFungibleIdDataIds),
                     };
 
                     mostRecentNonFungibleStore[e.ReferencedStore.DatabaseGlobalAncestorId] = ret;
@@ -973,7 +970,7 @@ INNER JOIN LATERAL (
                     return ret;
                 });
 
-                store.NonFungibleIdDataIds = store.NonFungibleIdDataIds.Concat(new[] { nfidData.Id }).ToArray(); // TODO super ineffective
+                store.NonFungibleIdDataIds.Add(nfidData.Id);
             }
 
             var entityResourceAggregateHistoryToAdd = new List<EntityResourceAggregateHistory>();
@@ -1004,8 +1001,8 @@ INNER JOIN LATERAL (
                             Id = sequences.EntityResourceAggregateHistorySequence++,
                             EntityId = entityId,
                             FromStateVersion = orderedStateVersions[i],
-                            FungibleResourceEntityIds = current.FungibleIds.ToArray(),
-                            NonFungibleResourceEntityIds = current.NonFungibleIds.ToArray(),
+                            FungibleResourceEntityIds = new List<long>(current.FungibleIds),
+                            NonFungibleResourceEntityIds = new List<long>(current.NonFungibleIds),
                         };
 
                         entityResourceAggregateHistoryToAdd.Add(dbAggregate);

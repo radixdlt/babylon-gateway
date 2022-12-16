@@ -223,7 +223,7 @@ internal record AggregateChange
         Persistable = true;
     }
 
-    public AggregateChange(long stateVersion, long[] fungibleIds, long[] nonFungibleIds)
+    public AggregateChange(long stateVersion, IEnumerable<long> fungibleIds, IEnumerable<long> nonFungibleIds)
     {
         StateVersion = stateVersion;
         FungibleIds = new List<long>(fungibleIds);

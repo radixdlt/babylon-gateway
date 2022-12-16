@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -84,8 +85,8 @@ internal class EntityResourceAggregateHistory
     public bool IsMostRecent { get; set; }
 
     [Column("fungible_resource_entity_ids")]
-    public long[] FungibleResourceEntityIds { get; set; }
+    public List<long> FungibleResourceEntityIds { get; set; }
 
     [Column("non_fungible_resource_entity_ids")]
-    public long[] NonFungibleResourceEntityIds { get; set; }
+    public List<long> NonFungibleResourceEntityIds { get; set; }
 }

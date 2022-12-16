@@ -132,7 +132,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Address.AsByteArray(), NpgsqlDbType.Bytea, token);
             await writer.WriteNullableAsync(e.GlobalAddress.AsByteArray(), NpgsqlDbType.Bytea, token);
-            await writer.WriteNullableAsync(e.AncestorIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteNullableAsync(e.AncestorIds?.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteNullableAsync(e.ParentAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteNullableAsync(e.OwnerAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteNullableAsync(e.GlobalAncestorId, NpgsqlDbType.Bigint, token);
@@ -221,8 +221,8 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.Keys, NpgsqlDbType.Array | NpgsqlDbType.Text, token);
-            await writer.WriteAsync(e.Values, NpgsqlDbType.Array | NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.Keys.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.Values.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Text, token);
         }
 
         await writer.CompleteAsync(token);
@@ -320,8 +320,8 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.IsMostRecent, NpgsqlDbType.Boolean, token);
-            await writer.WriteAsync(e.FungibleResourceEntityIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleResourceEntityIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FungibleResourceEntityIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.NonFungibleResourceEntityIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
         }
 
         await writer.CompleteAsync(token);
@@ -366,7 +366,7 @@ internal class WriteHelper
             await writer.WriteAsync(nonFungibleDiscriminator, NpgsqlDbType.Text, token);
             await writer.WriteNullAsync(token);
             await writer.WriteAsync(e.NonFungibleIdsCount, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleIds, NpgsqlDbType.Array | NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.NonFungibleIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Text, token);
         }
 
         await writer.CompleteAsync(token);
@@ -439,7 +439,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.NonFungibleStoreEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.NonFungibleResourceManagerEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleIdDataIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.NonFungibleIdDataIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
         }
 
         await writer.CompleteAsync(token);

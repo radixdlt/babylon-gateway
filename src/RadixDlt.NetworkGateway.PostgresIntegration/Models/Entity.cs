@@ -66,6 +66,7 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -88,7 +89,7 @@ internal abstract class Entity
     public RadixAddress? GlobalAddress { get; set; }
 
     [Column("ancestor_ids")]
-    public long[]? AncestorIds { get; set; }
+    public List<long>? AncestorIds { get; set; }
 
     [Column("parent_ancestor_id")]
     public long? ParentAncestorId { get; set; }
