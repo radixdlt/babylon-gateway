@@ -8,21 +8,24 @@ info:
   x-logo:
     url: https://docs.radixdlt.com/main/_images/radix-logo-banner.png
     href: https://docs.radixdlt.com
-  description: | # TODO replace URLs with "babylon betanet" versions once they get published
-    This API is designed to enable clients to efficiently query information on the RadixDLT ledger, and allow clients to build and submit transactions to the network. It is
-    designed for use by the Radix Foundation's [Desktop Wallet](https://wallet.radixdlt.com/), [Explorer](https://explorer.radixdlt.com/) and any 3rd-party willing to interact with
-    the network.
+  description: | # TODO Add links to wallet once they get published
+    This API is designed to enable clients to efficiently query information on the RadixDLT ledger,
+    and allow clients to build and submit transactions to the network.
+    It is designed for use by wallets and explorers.
 
     This document is an API reference documentation, visit [User Guide](https://docs.radixdlt.com/main/apis/gateway-api.html) to learn more about different usage scenarios.
 
-    The Gateway API is implemented by the [Network Gateway](https://github.com/radixdlt/babylon-gateway), which is configured to read from full node(s) to extract and index data
-    from the network.
+    The Gateway API is implemented by the [Network Gateway](https://github.com/radixdlt/babylon-gateway),
+    which is configured to read from [full node(s)](https://github.com/radixdlt/babylon-node) to extract
+    and index data from the network.
 servers: # TODO define mainnet / betanet endpoints?
+  - url: https://betanet.radixdlt.com
   - url: http://localhost:5208
 x-tagGroups:
   - name: Overview
     tags:
       - SubAPIs
+      - Concepts
       - Architecture
   - name: Endpoints
     tags:
@@ -36,10 +39,10 @@ tags:
     x-traitTag: true
     description: |
       The Gateway API is split into 4 sub APIs:
-      - **Status** (`/status/*`) - information about the Gateway API status.
-      - **Transaction** (`/transaction/*`) - to build, submit and query for the status or details of transactions.
-      - **Stream** (`/transaction/*`) - to query for the recently seen transactions on the network.
-      - **State** (`/state/*`) - to query for a current or past state of any entity on the network.
+      - **Status** (`/status/*`) - For status and configuration details for the Gateway / Network.
+      - **Transaction** (`/transaction/*`) - For transaction construction, preview, submission, and monitoring the status of an individual transaction.
+      - **Stream** (`/transaction/*`) - For reading committed transactions.
+      - **State** (`/state/*`, `/entity/*` and `/non-fungible/*`) - For reading the current or past ledger state of the network.
   - name: Architecture
     x-traitTag: true
     description: |
@@ -73,6 +76,53 @@ tags:
       - `next_cursor` *(optional)* if present indicates that the next chunk (page) exists and can be fetched using collection-specific endpoint and cursor value,
       - `previous_cursor` *(optional)* if present indicates that the previous chunk (page) exists and can be fetched using collection-specific endpoint and cursor value,
       - `items` a chunk (page) of unerlying collection items.
+  - name: Concepts
+    x-displayName: Concepts
+    x-traitTag: true # Don't display endpoints under this tag
+    description: |
+      Interacting with this API effectively may require knowledge about the Radix Babylon Transaction Model and the State Model.
+
+      We share some very high-level details below, but please see the [official documentation](http://docs.radixdlt.com) for more details on this.
+
+      ## Transactions and the Gateway
+
+      User transactions are formed of a core "intent", which is then signed by 0+ signatories, before being notarized. The output is called a notarized payload.
+      It is this notarized transaction payload which is submitted to the network.
+      
+      For most users, this construction process will generally happen in their Radix Wallet. If you wish to construct transactions programmatically or offline,
+      you will need to integrate the Radix Engine Toolkit into your application for construction and finalization.
+
+      Once submitted, a transaction payload can end up being either rejected or committed. Transactions get rejected if they fail to pass certain criteria at the given time.
+      A transaction payload can be marked as a:
+      - **Permanent Rejection** if it is never possible for it to be committed (eg it's statically invalid, or only valid up until epoch 100 and it's now epoch 101)
+      - **Temporary Rejection** if it still may be possible that the transaction payload could be committed
+
+      A given intent typically is only part of one submitted notarized payload, but it's possible for a notary to notarize and submit multiple payloads for the same intent.
+      The Radix Engine ensures that any intent can only be committed once.
+
+      A committed transaction is either committed with an outcome of "Success" or "Failure":
+      - **Committed Failure** will result in fees being paid up until the failure point, but all other changes will be discarded.
+      - **Committed Success** will result in all changes being committed.
+
+      Only committed transactions appear on ledger.
+
+      The gateway will attempt to submit your transaction to nodes on the network.
+      If it gets temporarily rejected, the error message will be recorded against the transaction, but the Gateway will
+      retry submission for a limited time. During this time, the status will be reported as pending.
+
+      ## State Model
+
+      The Radix Engine consists of "global entities".
+      A global entity has a Bech32m Address, with a human-readable-prefix (and prefix byte) matching the entity type.
+
+      As an example, entities include concepts like Components, Packages, Vaults, Resource Managers and Key-Value Stores.
+
+      Each entity owns substates which store data, and these substates can own other entities.
+      For example, an Account Component has a struct substate which owns a Key-Value Store. This Key-Value store has an
+      entry for each resoure the Account owns, and each Key-Value Store Entry owns a corresponding Vault.
+
+      For each global entity, the Gateway aggregates its owned resources by looking at the contents of Vaults in the
+      subtree of entities under that global entity.
   - name: Status
     x-displayName: Status Endpoints
     description: Query information about the Gateway API status.
@@ -89,7 +139,7 @@ paths:
   "/gateway/information":
     post:
       operationId: GatewayInformation
-      summary: Gateway Information
+      summary: Get Gateway Information
       description: |
         Returns the Gateway API version, current ledger state and well-known network addresses.
       tags:
@@ -105,10 +155,10 @@ paths:
   "/transaction/recent":
     post:
       operationId: TransactionRecent
-      summary: Recent Transactions
+      summary: Get Recent Transactions
       description: |
         Returns user-initiated transactions which have been committed to the ledger.
-        Returned response is in a paginated format, ordered by most recent.
+        The returned response is in a paginated format, ordered by most recently committed.
       tags:
         - Stream
       requestBody:
@@ -130,7 +180,7 @@ paths:
   "/transaction/construction":
     post:
       operationId: TransactionConstruction
-      summary: Construction
+      summary: Get Construction Metadata
       description: |
         Returns information needed to construct a new transaction including current `epoch` number.
       tags:
@@ -195,10 +245,10 @@ paths:
   "/transaction/committed-details":
     post:
       operationId: TransactionCommittedDetails
-      summary: Transaction Committed Details
+      summary: Get Committed Transaction Details
       description: |
-        Returns the status and contents of the transaction for a given transaction identifier. Transaction identifiers which aren't recognised committed transaction may return a
-        `TransactionNotFoundError`.
+        Returns the committed details and receipt of the transaction for a given transaction identifier.
+        Transaction identifiers which don't correspond to a committed transaction will return a `TransactionNotFoundError`.
       tags:
         - Transaction
       requestBody:
@@ -219,7 +269,7 @@ paths:
   "/transaction/status":
     post:
       operationId: TransactionStatus
-      summary: Transaction Status
+      summary: Get Transaction Status
       description: |
         Returns overall transaction status and all of its known payloads based on supplied intent hash.
       tags:
@@ -243,9 +293,11 @@ paths:
   /entity/overview:
     post:
       operationId: EntityOverview
-      summary: Entities Overview
+      summary: Get Entities Overview
       description: |
         Returns basic information (incomplete metadata) for a given collection of entities.
+        This endpoint is intended to be used for populating screens which contain a small bit of information about
+        multiple entities.
       tags:
         - State
       requestBody:
@@ -266,9 +318,9 @@ paths:
   /entity/details:
     post:
       operationId: EntityDetails
-      summary: Entity Details
+      summary: Get Entity Details
       description: |
-        Returns detailed information for a given entity.
+        Returns detailed information for a single entity.
       tags:
         - State
       requestBody:
@@ -289,10 +341,13 @@ paths:
   /entity/resources:
     post:
       operationId: EntityResources
-      summary: Entity Resources
+      summary: Get Entity Resource Totals
       description: |
-        Returns incomplete collections (first page) of fungible and non-fungible resources associated with a given
-        entity.
+        Returns the total amount of each fungible and non-fungible resources owned by a given global entity.
+        The response for fungibles and non-fungibles is paginated, and only the first page of each is returned.
+        The returned lists are ordered by the resource's first appearance on the ledger.
+        For further pages, use the `entity/fungibles` and `entity/non-fungibles` endpoints.
+        To get the owned non-fungible ids (instead of just the amount), use the `entity/non-fungible-ids` endpoint.
       tags:
         - State
       requestBody:
@@ -313,10 +368,10 @@ paths:
   /entity/metadata:
     post:
       operationId: EntityMetadata
-      summary: Entity Metadata
+      summary: Get Entity Metadata
       description: |
-        Iterates through all metadata properties associated with a given entity.
-        Returned response is in a paginated format, ordered by order of occurence on the ledger.
+        Returns all the metadata properties associated with a given global entity.
+        The returned response is in a paginated format, ordered by first appearance on the ledger.
       tags:
         - State
       requestBody:
@@ -337,10 +392,10 @@ paths:
   /entity/fungibles:
     post:
       operationId: EntityFungibles
-      summary: Entity Fungibles
+      summary: Get Entity Fungible Resource Totals
       description: |
-        Iterates through all fungible resources associated with a given entity.
-        Returned response is in a paginated format, ordered by order of occurence on the ledger.
+        Returns the total amount of each fungible resource owned by a given global entity.
+        The returned response is in a paginated format, ordered by the resource's first appearance on the ledger.
       tags:
         - State
       requestBody:
@@ -361,10 +416,10 @@ paths:
   /entity/non-fungibles:
     post:
       operationId: EntityNonFungibles
-      summary: Entity Non-Fungibles
+      summary: Get Entity Non-Fungible Resource Totals
       description: |
-        Iterates through all non-fungible resources associated with a given entity.
-        Returned response is in a paginated format, ordered by order of occurence on the ledger.
+        Returns the total amount of each non-fungible resource owned by a given global entity.
+        The returned response is in a paginated format, ordered by the resource's first appearance on the ledger.
       tags:
         - State
       requestBody:
@@ -385,10 +440,11 @@ paths:
   /entity/non-fungible/ids:
     post:
       operationId: EntityNonFungibleIds
-      summary: Entity Non-Fungible IDs
+      #### TODO: CONTINUE FROM HERE WITH ADDING GET AND FIXING THE DESCRIPTIONS
+      summary: Get Entity Non-Fungible IDs
       description: |
-        Iterates through all non-fungible IDs associated with a given non-fungible resource of a given entity.
-        Returned response is in a paginated format, ordered by order of occurence on the ledger.
+        Returns all non-fungible IDs of a given non-fungible resource owned by a given entity.
+        The returned response is in a paginated format, ordered by the resource's first appearence on the ledger.
       tags:
         - State
       requestBody:
@@ -410,10 +466,10 @@ paths:
   /non-fungible/ids:
     post:
       operationId: NonFungibleIds
-      summary: Non-Fungible IDs
+      summary: Get Non-Fungible Collection
       description: |
-        Iterates through all non-fungible IDs of a given non-fungible resource.
-        Returned response is in a paginated format, ordered by order of occurence on the ledger.
+        Returns the non-fungible IDs of a given non-fungible resource.
+        Returned response is in a paginated format, ordered by their first appearance on the ledger.
       tags:
         - State
       requestBody:
@@ -434,7 +490,7 @@ paths:
   /non-fungible/data:
     post:
       operationId: NonFungibleIdData
-      summary: Non-Fungible ID Data
+      summary: Get Non-Fungible Data
       description: |
         Returns data associated with a given non-fungible ID of a given non-fungible resource.
       tags:
@@ -514,8 +570,9 @@ components:
 
     LedgerStateSelector:
       description: |
-        If specified instructs Network Gateway to limit request processing up to the ledger state version lower than
-        or equal to one of the following constraints.
+        Optional. This allows for a request to be made against a historic state.
+        If a constraint is specified, the Gateway will resolve the request against the ledger state at that time.
+        If not specified, requests will be made with respect to the top of the committed ledger.
       type: object
       nullable: true
       properties:
