@@ -952,9 +952,11 @@ INNER JOIN LATERAL (
 
                 var store = nonFungibleIdStoreHistoryToAdd.GetOrAdd(new NonFungibleStoreLookup(e.ReferencedStore.DatabaseGlobalAncestorId, e.StateVersion), _ =>
                 {
+                    var nonFungibleIdDataIds = Array.Empty<long>();
+
                     if (mostRecentNonFungibleStore.ContainsKey(e.ReferencedStore.DatabaseGlobalAncestorId))
                     {
-                        return mostRecentNonFungibleStore[e.ReferencedStore.DatabaseGlobalAncestorId];
+                        nonFungibleIdDataIds = mostRecentNonFungibleStore[e.ReferencedStore.DatabaseGlobalAncestorId].NonFungibleIdDataIds;
                     }
 
                     var ret = new NonFungibleIdStoreHistory
@@ -963,7 +965,7 @@ INNER JOIN LATERAL (
                         FromStateVersion = e.StateVersion,
                         NonFungibleStoreEntityId = e.ReferencedStore.DatabaseId,
                         NonFungibleResourceManagerEntityId = e.ReferencedStore.DatabaseGlobalAncestorId,
-                        NonFungibleIdDataIds = Array.Empty<long>(),
+                        NonFungibleIdDataIds = nonFungibleIdDataIds,
                     };
 
                     mostRecentNonFungibleStore[e.ReferencedStore.DatabaseGlobalAncestorId] = ret;
