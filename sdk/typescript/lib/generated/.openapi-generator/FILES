@@ -1,7 +1,7 @@
 .openapi-generator-ignore
-apis/EntityApi.ts
-apis/NonFungibleApi.ts
+apis/StateApi.ts
 apis/StatusApi.ts
+apis/StreamApi.ts
 apis/TransactionApi.ts
 apis/index.ts
 index.ts

@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-export * from './EntityApi';
-export * from './NonFungibleApi';
+export * from './StateApi';
 export * from './StatusApi';
+export * from './StreamApi';
 export * from './TransactionApi';
