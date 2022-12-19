@@ -135,9 +135,6 @@ internal abstract class CommonDbContext : DbContext
         configurationBuilder.Properties<PendingTransactionStatus>()
             .HaveConversion<PendingTransactionStatusValueConverter>();
 
-        configurationBuilder.Properties<PendingTransactionFailureReason>()
-            .HaveConversion<PendingTransactionFailureReasonValueConverter>();
-
         configurationBuilder.Properties<LedgerTransactionStatus>()
             .HaveConversion<LedgerTransactionStatusValueConverter>();
 

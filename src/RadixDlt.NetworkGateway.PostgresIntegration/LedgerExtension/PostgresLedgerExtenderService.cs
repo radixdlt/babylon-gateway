@@ -298,15 +298,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedWhichWasFailed());
 
                         _logger.LogError(
-                            "Transaction with payload hash {PayloadHash} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark {FailureTransiency} at {FailureTime} due to {FailureReason} ({FailureExplanation}) but has now been marked committed",
+                            "Transaction with payload hash {PayloadHash} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark {FailureTransiency} at {FailureTime} due to \"{FailureReason}\" but has now been marked committed",
                             pendingTransaction.PayloadHash.ToHex(),
                             pendingTransaction.FirstSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                             pendingTransaction.LastSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                             pendingTransaction.LastDroppedOutOfMempoolTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                             pendingTransaction.Status,
                             pendingTransaction.FailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                            pendingTransaction.FailureReason?.ToString(),
-                            pendingTransaction.FailureExplanation
+                            pendingTransaction.FailureReason
                         );
                     }
 

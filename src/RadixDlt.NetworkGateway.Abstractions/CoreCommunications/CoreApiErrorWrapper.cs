@@ -124,7 +124,7 @@ public static class CoreApiErrorWrapper
             return errorResponse.Message switch
             {
                 "Transaction with given payload hash is not in the mempool" => WrappedCoreApiException.Of(apiException, new CoreModel.MempoolTransactionNotFoundError(), new CoreApiErrorProperties(false, CoreApiErrorTransience.Transient)),
-                _ => null,
+                _ => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(false, CoreApiErrorTransience.Transient)),
             };
         }
 

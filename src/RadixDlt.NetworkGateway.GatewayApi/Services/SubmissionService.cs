@@ -117,13 +117,11 @@ internal class SubmissionService : ISubmissionService
             token
         );
 
-        if (trackingGuidance.TransactionAlreadyFailedReason.HasValue)
+        if (trackingGuidance.FailureReason != null)
         {
             await _observers.ForEachAsync(x => x.SubmissionAlreadyFailed(request, trackingGuidance));
 
-            throw InvalidTransactionException.FromPreviouslyFailedTransactionError(
-                trackingGuidance.TransactionAlreadyFailedReason.Value
-            );
+            throw InvalidTransactionException.FromPreviouslyFailedTransactionError(trackingGuidance.FailureReason);
         }
 
         if (!trackingGuidance.ShouldSubmitToNode)
@@ -234,8 +232,7 @@ internal class SubmissionService : ISubmissionService
             await _submissionTrackingService.MarkAsFailed(
                 ex.Properties.Transience == CoreApiErrorTransience.Permanent,
                 parsedTransaction.PayloadBytes,
-                PendingTransactionFailureReason.Unknown,
-                $"Core API Exception: {ex.Error.GetType().Name} marking invalid transaction on initial submission",
+                ex.Error.Message,
                 token
             );
 
@@ -249,8 +246,7 @@ internal class SubmissionService : ISubmissionService
             await _submissionTrackingService.MarkAsFailed(
                 true,
                 parsedTransaction.PayloadBytes,
-                PendingTransactionFailureReason.Unknown,
-                $"Core API Exception: {ex.Error.GetType().Name} without undefined behaviour on initial submission",
+                ex.Error.Message,
                 token
             );
 

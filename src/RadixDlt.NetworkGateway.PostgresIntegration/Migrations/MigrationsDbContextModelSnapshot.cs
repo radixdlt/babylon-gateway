@@ -595,10 +595,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("commit_timestamp");
 
-                    b.Property<string>("FailureExplanation")
-                        .HasColumnType("text")
-                        .HasColumnName("failure_explanation");
-
                     b.Property<string>("FailureReason")
                         .HasColumnType("text")
                         .HasColumnName("failure_reason");

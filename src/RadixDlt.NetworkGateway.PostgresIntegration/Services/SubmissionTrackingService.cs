@@ -107,7 +107,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         {
             if (existingPendingTransaction.Status is PendingTransactionStatus.RejectedPermanently or PendingTransactionStatus.RejectedTemporarily)
             {
-                return new TackingGuidance(ShouldSubmitToNode: false, TransactionAlreadyFailedReason: existingPendingTransaction.FailureReason);
+                return new TackingGuidance(ShouldSubmitToNode: false, FailureReason: existingPendingTransaction.FailureReason);
             }
 
             existingPendingTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
@@ -145,7 +145,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         }
     }
 
-    public async Task MarkAsFailed(bool permanent, byte[] payloadHash, PendingTransactionFailureReason failureReason, string failureExplanation, CancellationToken token = default)
+    public async Task MarkAsFailed(bool permanent, byte[] payloadHash, string failureReason, CancellationToken token = default)
     {
         var pendingTransaction = await GetPendingTransaction(payloadHash, token);
 
@@ -154,7 +154,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
             throw new PendingTransactionNotFoundException($"Could not find mempool transaction {payloadHash.ToHex()} to mark it as failed");
         }
 
-        pendingTransaction.MarkAsRejected(permanent, failureReason, failureExplanation, _clock.UtcNow);
+        pendingTransaction.MarkAsRejected(permanent, failureReason, _clock.UtcNow);
 
         await _observers.ForEachAsync(x => x.PostPendingTransactionMarkedAsFailed());
         await _dbContext.SaveChangesAsync(token);

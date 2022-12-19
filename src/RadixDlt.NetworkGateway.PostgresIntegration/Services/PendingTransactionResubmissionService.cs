@@ -151,7 +151,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         // against resubmitting the same transaction multiple times - even if (eg) two data aggregators are running.
         await dbContext.SaveChangesAsync(token);
 
-        await ResubmitAllAndUpdateTransactionStatusesOnFailure(mempoolConfiguration, transactionsToResubmitWithNodes, submittedAt, ctsWithSubmissionTimeout.Token);
+        await ResubmitAllAndUpdateTransactionStatusesOnFailure(transactionsToResubmitWithNodes, submittedAt, ctsWithSubmissionTimeout.Token);
 
         await dbContext.SaveChangesAsync(token);
     }
@@ -165,14 +165,14 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     )
     {
         var transactionsToResubmit =
-            await GetMempoolTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolOptions, dbContext)
+            await GetPendingTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolOptions, dbContext)
                 .OrderBy(mt => mt.LastSubmittedToNodeTimestamp)
                 .Take(batchSize)
                 .ToListAsync(token);
 
         var totalTransactionsNeedingResubmission = transactionsToResubmit.Count < batchSize
             ? transactionsToResubmit.Count
-            : await GetMempoolTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolOptions, dbContext)
+            : await GetPendingTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolOptions, dbContext)
                 .CountAsync(token);
 
         await _observers.ForEachAsync(x => x.TransactionsSelected(totalTransactionsNeedingResubmission));
@@ -229,7 +229,6 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
                 transaction.MarkAsRejected(
                     true,
-                    PendingTransactionFailureReason.Timeout,
                     "The transaction keeps dropping out of the mempool, so we're not resubmitting it",
                     submittedAt
                 );
@@ -241,7 +240,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
     private record PendingTransactionWithChosenNode(PendingTransaction PendingTransaction, CoreApiNode Node);
 
-    private IQueryable<PendingTransaction> GetMempoolTransactionsNeedingResubmission(DateTime currentTimestamp, MempoolOptions mempoolOptions, ReadWriteDbContext dbContext)
+    private IQueryable<PendingTransaction> GetPendingTransactionsNeedingResubmission(DateTime currentTimestamp, MempoolOptions mempoolOptions, ReadWriteDbContext dbContext)
     {
         var allowResubmissionIfLastSubmittedBefore = currentTimestamp - mempoolOptions.MinDelayBetweenResubmissions;
         var allowResubmissionIfDroppedOutOfMempoolBefore = currentTimestamp - mempoolOptions.MinDelayBetweenMissingFromMempoolAndResubmission;
@@ -254,6 +253,8 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
                     /* Transactions get marked Missing way by the MempoolTrackerService */
                     mt.Status == PendingTransactionStatus.Missing
 
+                    || mt.Status == PendingTransactionStatus.RejectedTemporarily
+
                     /* If we're synced up now, try submitting transactions with unknown status again. They almost
                        certainly failed due to a real double spend - so we'll detect it now and can mark them failed */
                     || (isEssentiallySyncedUpNow && mt.Status == PendingTransactionStatus.ResolvedButUnknownTillSyncedUp)
@@ -264,7 +265,6 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     }
 
     private async Task ResubmitAllAndUpdateTransactionStatusesOnFailure(
-        MempoolOptions mempoolOptions,
         List<PendingTransactionWithChosenNode> transactionsToResubmitWithNodes,
         DateTime submittedAt,
         CancellationToken token
@@ -272,44 +272,23 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     {
         var submissionResults = await ResubmitAll(transactionsToResubmitWithNodes, token);
 
-        foreach (var (transaction, failed, failureReason, failureExplanation, nodeName) in submissionResults)
+        foreach (var (transaction, permanentError, failureReason, nodeName) in submissionResults)
         {
-            if (!failed)
+            if (failureReason == null)
             {
                 continue;
             }
 
-            var isDoubleSpendWhichCouldBeItself =
-                failureReason!.Value == PendingTransactionFailureReason.DoubleSpend
-                && !_systemStatusService.GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(
-                    mempoolOptions.AssumedBoundOnNetworkLedgerDataAggregatorClockDrift,
-                    transaction.LastDroppedOutOfMempoolTimestamp!.Value
-                );
+            await _observers.ForEachAsync(x => x.TransactionMarkedAsFailedAfterSubmittedToNode());
 
-            if (isDoubleSpendWhichCouldBeItself)
-            {
-                // If we're not synced up, we can't be sure if the double spend from the node is actually just the
-                // transaction itself having already hit the ledger! Let's just assume it submitted correctly and
-                // resubmit.
-
-                await _observers.ForEachAsync(x => x.TransactionMarkedAsResolvedButUnknownAfterSubmittedToNode());
-
-                transaction.MarkAsResolvedButUnknownAfterSubmittedToNode(nodeName, submittedAt);
-            }
-            else
-            {
-                await _observers.ForEachAsync(x => x.TransactionMarkedAsFailedAfterSubmittedToNode());
-
-                transaction.MarkAsFailedAfterSubmittedToNode(false, nodeName, failureReason.Value, failureExplanation!, submittedAt, _clock.UtcNow);
-            }
+            transaction.MarkAsFailedAfterSubmittedToNode(permanentError, nodeName, failureReason, submittedAt, _clock.UtcNow);
         }
     }
 
     private record SubmissionResult(
-        PendingTransaction MempoolTransaction,
-        bool TransactionInvalid,
-        PendingTransactionFailureReason? FailureReason,
-        string? SubmissionFailureExplanation,
+        PendingTransaction PendingTransaction,
+        bool PermanentError,
+        string? FailureReason,
         string NodeName
     );
 
@@ -353,27 +332,31 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
                 await _observers.ForEachAsync(x => x.PostResubmitSucceeded(notarizedTransaction));
             }
 
-            return new SubmissionResult(transaction, false, null, null, chosenNode.Name);
+            return new SubmissionResult(transaction, false, null, chosenNode.Name);
         }
         catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Permanent)
         {
             await _observers.ForEachAsync(x => x.ResubmitFailedPermanently(notarizedTransaction, ex));
 
-            var failureExplanation = $"Core API Exception: {ex.Error.GetType().Name} on resubmission";
+            return new SubmissionResult(transaction, true, ex.Error.Message, chosenNode.Name);
+        }
+        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Transient)
+        {
+            await _observers.ForEachAsync(x => x.ResubmitFailedTemporary(notarizedTransaction, ex));
 
-            return new SubmissionResult(transaction, true, PendingTransactionFailureReason.Unknown, failureExplanation, chosenNode.Name);
+            return new SubmissionResult(transaction, false, ex.Error.Message, chosenNode.Name);
         }
         catch (OperationCanceledException ex)
         {
             await _observers.ForEachAsync(x => x.ResubmitFailedTimeout(notarizedTransaction, ex));
 
-            return new SubmissionResult(transaction, false, null, null, chosenNode.Name);
+            return new SubmissionResult(transaction, false, "Operation timed-out", chosenNode.Name);
         }
         catch (Exception ex)
         {
             await _observers.ForEachAsync(x => x.ResubmitFailedUnknown(notarizedTransaction, ex));
 
-            return new SubmissionResult(transaction, false, null, null, chosenNode.Name);
+            return new SubmissionResult(transaction, false, "Unknown error", chosenNode.Name);
         }
     }
 

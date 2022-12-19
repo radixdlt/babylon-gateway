@@ -79,7 +79,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221219095318_InitialCreate")]
+    [Migration("20221219153020_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -597,10 +597,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<DateTime?>("CommitTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("commit_timestamp");
-
-                    b.Property<string>("FailureExplanation")
-                        .HasColumnType("text")
-                        .HasColumnName("failure_explanation");
 
                     b.Property<string>("FailureReason")
                         .HasColumnType("text")

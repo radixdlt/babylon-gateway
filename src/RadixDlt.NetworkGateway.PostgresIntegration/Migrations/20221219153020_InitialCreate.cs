@@ -303,7 +303,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     lastmissingfrommempooltimestamp = table.Column<DateTime>(name: "last_missing_from_mempool_timestamp", type: "timestamp with time zone", nullable: true),
                     committimestamp = table.Column<DateTime>(name: "commit_timestamp", type: "timestamp with time zone", nullable: true),
                     failurereason = table.Column<string>(name: "failure_reason", type: "text", nullable: true),
-                    failureexplanation = table.Column<string>(name: "failure_explanation", type: "text", nullable: true),
                     failuretimestamp = table.Column<DateTime>(name: "failure_timestamp", type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
