@@ -273,8 +273,6 @@ internal class SubmissionService : ISubmissionService
             _logger.LogWarning(ex, "Unknown error submitting transaction with hash {TransactionHash}", request.NotarizedTransactionHex);
         }
 
-        // TODO ok, so we're not throwing, should we actually return this value?
-
         return new GatewayModel.TransactionSubmitResponse(
             duplicate: false
         );

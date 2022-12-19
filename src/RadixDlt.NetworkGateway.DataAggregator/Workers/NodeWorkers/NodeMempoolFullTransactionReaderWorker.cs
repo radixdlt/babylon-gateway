@@ -67,6 +67,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
+using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.Abstractions.Workers;
@@ -236,11 +237,7 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
         return new FetchAndSubmissionReport(fetchedNonDuplicateCount, fetchedDuplicateCount);
     }
 
-    private async Task<FullTransactionData?> FetchTransactionContents(
-        ICoreApiProvider coreApiProvider,
-        byte[] payloadHash,
-        CancellationToken token
-    )
+    private async Task<FullTransactionData?> FetchTransactionContents(ICoreApiProvider coreApiProvider, byte[] payloadHash, CancellationToken token)
     {
         try
         {
@@ -254,18 +251,10 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
 
             return new FullTransactionData(payloadHash, _clock.UtcNow, response.NotarizedTransaction.PayloadBytes);
         }
-
-        // TODO fix me
-        catch (Exception)
+        catch (WrappedCoreApiException<CoreModel.MempoolTransactionNotFoundError>)
         {
+            // It's likely dropped out of the mempool, so we can't fetch it
             return null;
         }
-
-        // TODO fix me
-        // catch (WrappedCoreApiException<TransactionNotFoundError>)
-        // {
-        //     // It's likely dropped out of the mempool, so we can't fetch it
-        //     return null;
-        // }
     }
 }
