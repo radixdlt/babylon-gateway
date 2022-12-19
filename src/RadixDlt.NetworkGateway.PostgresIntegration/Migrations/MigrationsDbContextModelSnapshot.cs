@@ -432,10 +432,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("StateVersion");
 
-                    b.HasIndex("Epoch")
-                        .IsUnique()
-                        .HasFilter("is_start_of_epoch = true");
-
                     b.HasIndex("RoundTimestamp");
 
                     b.HasIndex("Epoch", "RoundInEpoch")
@@ -679,9 +675,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("PayloadHash"), "hash");
 
-                    b.HasIndex("SignedIntentHash");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SignedIntentHash"), "hash");
+                    b.HasIndex("Status");
 
                     b.ToTable("pending_transactions");
                 });
