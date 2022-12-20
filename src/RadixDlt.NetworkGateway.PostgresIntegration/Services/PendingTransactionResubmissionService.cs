@@ -253,14 +253,15 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
                     /* Transactions get marked Missing way by the MempoolTrackerService */
                     mt.Status == PendingTransactionStatus.Missing
 
+                    /* Transactions get marked RejectedTemporarily by PendingTransactionResubmissionService */
                     || mt.Status == PendingTransactionStatus.RejectedTemporarily
 
                     /* If we're synced up now, try submitting transactions with unknown status again. They almost
                        certainly failed due to a real double spend - so we'll detect it now and can mark them failed */
                     || (isEssentiallySyncedUpNow && mt.Status == PendingTransactionStatus.ResolvedButUnknownTillSyncedUp)
                 )
-                && mt.LastDroppedOutOfMempoolTimestamp!.Value < allowResubmissionIfDroppedOutOfMempoolBefore
-                && mt.LastSubmittedToNodeTimestamp!.Value < allowResubmissionIfLastSubmittedBefore
+                && (mt.LastDroppedOutOfMempoolTimestamp!.Value < allowResubmissionIfDroppedOutOfMempoolBefore)
+                && (mt.LastSubmittedToNodeTimestamp!.Value < allowResubmissionIfLastSubmittedBefore)
             );
     }
 
