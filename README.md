@@ -1,6 +1,6 @@
-# RadixDLT Network Gateway
+# Babylon Network Gateway
 
-This system is designed to be the Radix-run publicly exposed gateway into the Babylon Radix network, and replaces the archive module which previously ran on-node.
+This system is designed to be the Radix-run publicly exposed gateway into the Babylon Radix network. It is the successor to the [Olympia Gateway](https://github.com/radixdlt/radixdlt-network-gateway).
 
 The system is in three main parts:
 * **Database Migrations** - This project has ownership of the PostgreSQL database schema migrations.
@@ -9,11 +9,11 @@ The system is in three main parts:
 
 ## Using the Gateway API
 
-For documentation on the Gateway API, see the [Gateway API docs on ReDocly](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/radixdlt/babylon-gateway/main/src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-schema.yaml).
+For documentation on the Gateway API, see the [Gateway API docs on ReDocly](https://betanet-gateway.redoc.ly/).
 
 ## Technical Docs
 
-For docs giving an overview of the Network Gateway and its place in the Radix Ecosystem - including information on the Radix-run Network Gateway, and how to run one of your own - check out [the Radix docs site](https://docs.radixdlt.com/).
+For docs giving an overview of the Network Gateway and its place in the Radix Ecosystem - including information on the Radix-run Network Gateway, and how to run one of your own - check out [the Radix Babylon docs site](https://docs-babylon.radixdlt.com/).
 
 For docs related to development on the Network Gateway, see the [docs folder](./docs).
 
