@@ -80,9 +80,15 @@ public enum PendingTransactionStatus
     // and detected itself, or clashed with another transaction.
     ResolvedButUnknownTillSyncedUp,
 
-    // A transaction which we have tried to (re)submit, but it returns a permanent error from the node (eg substate clash)
-    Failed,
+    // A transaction which we have tried to (re)submit, but it returns a temporary/transient error from the node (e.g. mempool exhausted)
+    RejectedTemporarily,
 
-    // A transaction which we know got committed to the ledger
-    Committed,
+    // A transaction which we have tried to (re)submit, but it returns a permanent error from the node (e.g. substate clash)
+    RejectedPermanently,
+
+    // A transaction which we know got successfully committed to the ledger
+    CommittedSuccess,
+
+    // A transaction which we know got faultily committed to the ledger
+    CommittedFailure,
 }

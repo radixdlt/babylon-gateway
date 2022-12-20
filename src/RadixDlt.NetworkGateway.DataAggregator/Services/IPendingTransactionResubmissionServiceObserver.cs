@@ -90,6 +90,8 @@ public interface IPendingTransactionResubmissionServiceObserver
 
     ValueTask ResubmitFailedPermanently(byte[] notarizedTransaction, WrappedCoreApiException wrappedCoreApiException);
 
+    ValueTask ResubmitFailedTemporary(byte[] notarizedTransaction, WrappedCoreApiException wrappedCoreApiException);
+
     ValueTask ResubmitFailedTimeout(byte[] notarizedTransaction, OperationCanceledException operationCanceledException);
 
     ValueTask ResubmitFailedUnknown(byte[] notarizedTransaction, Exception exception);

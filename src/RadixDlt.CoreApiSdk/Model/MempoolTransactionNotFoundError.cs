@@ -62,12 +62,9 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Model;
+namespace RadixDlt.CoreApiSdk.Model;
 
-public enum PendingTransactionFailureReason
+// TODO get rid of once CoreApi gets support for structuralized errors
+public class MempoolTransactionNotFoundError : ErrorResponse
 {
-    DoubleSpend,
-    Timeout,
-    Unknown,
-    // Invalid shouldn't be possible, because they shouldn't make it to this table in the first place - mark as Unknown
 }

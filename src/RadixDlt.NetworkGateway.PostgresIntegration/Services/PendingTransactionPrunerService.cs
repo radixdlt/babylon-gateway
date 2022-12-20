@@ -136,7 +136,7 @@ internal class PendingTransactionPrunerService : IPendingTransactionPrunerServic
             .Where(mt =>
                 (
                     /* For committed transactions, remove from the mempool if we're synced up (as a committed transaction will be on ledger) */
-                    mt.Status == PendingTransactionStatus.Committed
+                    (mt.Status == PendingTransactionStatus.CommittedSuccess || mt.Status == PendingTransactionStatus.CommittedFailure)
                     && aggregatorIsSyncedUpEnoughToRemoveCommittedTransactions
                     && mt.CommitTimestamp!.Value < pruneIfCommittedBefore
                 )
@@ -162,7 +162,7 @@ internal class PendingTransactionPrunerService : IPendingTransactionPrunerServic
             _logger.LogInformation(
                 "Pruning {PrunedCount} transactions from the pending list, of which {PrunedCommittedCount} were committed",
                 transactionsToPrune.Count,
-                transactionsToPrune.Count(t => t.Status == PendingTransactionStatus.Committed)
+                transactionsToPrune.Count(t => t.Status is PendingTransactionStatus.CommittedSuccess or PendingTransactionStatus.CommittedFailure)
             );
 
             await _observers.ForEachAsync(x => x.PreMempoolTransactionPruned(transactionsToPrune.Count));

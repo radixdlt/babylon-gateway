@@ -62,24 +62,31 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public sealed record HrpDefinition(
-    string Package,
-    string NormalComponent,
-    string AccountComponent,
-    string SystemComponent,
-    string Resource,
-    string Validator,
-    string Node
-);
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public sealed record WellKnownAddresses(
-    string AccountPackage,
-    string Faucet,
-    string EpochManager,
-    string Clock,
-    string EcdsaSecp256k1,
-    string EddsaEd25519,
-    string Xrd
-);
+[Table("resource_manager_entity_supply_history")]
+internal class ResourceManagerEntitySupplyHistory
+{
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
+
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
+
+    [Column("resource_manager_entity_id")]
+    public long ResourceManagerEntityId { get; set; }
+
+    [Column("total_supply")]
+    public TokenAmount TotalSupply { get; set; }
+
+    [Column("total_minted")]
+    public TokenAmount TotalMinted { get; set; }
+
+    [Column("total_burnt")]
+    public TokenAmount TotalBurnt { get; set; }
+}

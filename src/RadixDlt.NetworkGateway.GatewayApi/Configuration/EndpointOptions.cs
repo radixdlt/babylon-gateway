@@ -71,9 +71,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
 
 public sealed class EndpointOptions
 {
-    [ConfigurationKeyName("GatewayOpenApiSchemaVersion")]
-    public string GatewayOpenApiSchemaVersion { get; set; } = "UNKNOWN";
-
+    // TODO replace with <Version> in Directory.Build.Props
     [ConfigurationKeyName("GatewayApiVersion")]
     public string GatewayApiVersion { get; set; } = "UNKNOWN";
 
@@ -88,7 +86,6 @@ internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptio
 {
     public EndpointOptionsValidator()
     {
-        RuleFor(x => x.GatewayOpenApiSchemaVersion).NotNull();
         RuleFor(x => x.GatewayApiVersion).NotNull();
         RuleFor(x => x.MaxPageSize).GreaterThan(0);
         RuleFor(x => x.RequestTimeout).GreaterThan(TimeSpan.Zero);

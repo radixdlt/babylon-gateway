@@ -302,6 +302,13 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
+    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedTemporary(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception)
+    {
+        _transactionSubmitResolutionByResultCount.WithLabels("unknown_temporary_error").Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
     ValueTask ISubmissionServiceObserver.HandleSubmissionFailedTimeout(GatewayModel.TransactionSubmitRequest request, OperationCanceledException exception)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("request_timeout").Inc();

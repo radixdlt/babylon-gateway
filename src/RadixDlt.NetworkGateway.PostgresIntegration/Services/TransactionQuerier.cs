@@ -154,7 +154,7 @@ internal class TransactionQuerier : ITransactionQuerier
             .Where(pt => pt.IntentHash == intentHash)
             .ToListAsync(token);
 
-        return pendingTransactions.Select(MapToStatusLookupResult).ToArray();
+        return pendingTransactions.Select(pt => new StatusLookupResult(pt.PayloadHash.ToHex(), pt.Status.ToGatewayModel(), pt.FailureReason)).ToArray();
     }
 
     private async Task<List<long>> GetRecentUserTransactionStateVersions(
@@ -206,7 +206,7 @@ internal class TransactionQuerier : ITransactionQuerier
 
     private async Task<DetailsLookupResult> GetTransactionWithDetails(long stateVersion, CancellationToken token)
     {
-        // TODO how to execute that with join?
+        // TODO ideally we'd like to run those as either single query or separate ones but without await between them
 
         var transaction = await _dbContext.LedgerTransactions
             .OfType<UserLedgerTransaction>()
@@ -247,23 +247,6 @@ internal class TransactionQuerier : ITransactionQuerier
             confirmedAt: ult.RoundTimestamp,
             errorMessage: ult.ErrorMessage
         );
-    }
-
-    private StatusLookupResult MapToStatusLookupResult(PendingTransaction pt)
-    {
-        // TODO this HAS TO be changed ?
-
-        var status = pt.Status switch
-        {
-            PendingTransactionStatus.Committed => GatewayModel.TransactionStatus.CommittedSuccess, // TODO we can't assume it has succeeded, see https://github.com/radixdlt/babylon-gateway/pull/64#discussion_r1021967257
-            PendingTransactionStatus.SubmittedOrKnownInNodeMempool => GatewayModel.TransactionStatus.Pending,
-            PendingTransactionStatus.Missing => GatewayModel.TransactionStatus.Pending,
-            PendingTransactionStatus.ResolvedButUnknownTillSyncedUp => GatewayModel.TransactionStatus.Pending,
-            PendingTransactionStatus.Failed => GatewayModel.TransactionStatus.CommittedFailure,
-            _ => throw new UnreachableException(),
-        };
-
-        return new StatusLookupResult(pt.PayloadHash.ToHex(), status, pt.FailureExplanation);
     }
 
     private DetailsLookupResult MapToGatewayAccountTransactionWithDetails(UserLedgerTransaction ult, RawUserTransaction rawUserTransaction, List<Entity> referencedEntities)

@@ -74,14 +74,20 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayClient = RadixDlt.NetworkGateway.GatewayApiSdk.Client;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class LedgerStateQuerier : ILedgerStateQuerier
 {
+    private static readonly Regex _oasVersionRegex = new("Version of the API: (\\d+\\.\\d+\\.\\d+)", RegexOptions.Compiled | RegexOptions.Multiline);
+
+    private static string _oasVersion = GetOpenApiSchemaVersion();
+
     private readonly ILogger<LedgerStateQuerier> _logger;
     private readonly ReadOnlyDbContext _dbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
@@ -122,10 +128,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
                 ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
             ),
             new GatewayModel.GatewayInfoResponseKnownTarget(ledgerStatus.TargetStateVersion),
-            new GatewayModel.GatewayInfoResponseReleaseInfo(
-                _endpointOptionsMonitor.CurrentValue.GatewayApiVersion,
-                _endpointOptionsMonitor.CurrentValue.GatewayOpenApiSchemaVersion
-            ),
+            new GatewayModel.GatewayInfoResponseReleaseInfo(_endpointOptionsMonitor.CurrentValue.GatewayApiVersion, _oasVersion),
             new GatewayModel.GatewayInformationResponseAllOfWellKnownAddresses(
                 wellKnownAddresses.AccountPackage,
                 wellKnownAddresses.Faucet,
@@ -237,6 +240,18 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         var ledgerStatus = await GetLedgerStatus(token);
 
         return ledgerStatus.TopOfLedgerStateVersion;
+    }
+
+    private static string GetOpenApiSchemaVersion()
+    {
+        var match = _oasVersionRegex.Match(GatewayClient.Configuration.ToDebugReport());
+
+        if (!match.Success || match.Groups.Count != 2)
+        {
+            throw new InvalidOperationException("Unable to determine OpenApi schema version.");
+        }
+
+        return match.Groups[1].Value;
     }
 
     private async Task<LedgerStatus> GetLedgerStatus(CancellationToken token)

@@ -67,18 +67,20 @@ using CoreClient = RadixDlt.CoreApiSdk.Client;
 
 namespace RadixDlt.NetworkGateway.Abstractions.Exceptions;
 
-public enum Transience
+public enum CoreApiErrorTransience
 {
     Transient,
-    MaybeTransient,
     Permanent,
 }
 
 public sealed class CoreApiErrorProperties
 {
-    public bool MarksInvalidTransaction { get; init; }
+    public CoreApiErrorTransience Transience { get; }
 
-    public Transience Transience { get; init; } = Transience.Permanent;
+    public CoreApiErrorProperties(CoreApiErrorTransience transience)
+    {
+        Transience = transience;
+    }
 }
 
 /// <summary>
@@ -91,7 +93,7 @@ public sealed class WrappedCoreApiException<T> : WrappedCoreApiException
 {
     public override T Error { get; }
 
-    public WrappedCoreApiException(CoreClient.ApiException apiException, T error, CoreApiErrorProperties? properties = null)
+    public WrappedCoreApiException(CoreClient.ApiException apiException, T error, CoreApiErrorProperties properties)
         : base($"Core API reported a {typeof(T).Name}", apiException, properties)
     {
         Error = error;
@@ -106,14 +108,14 @@ public abstract class WrappedCoreApiException : Exception
 
     public CoreApiErrorProperties Properties { get; }
 
-    protected WrappedCoreApiException(string message, CoreClient.ApiException apiException, CoreApiErrorProperties? properties = null)
+    protected WrappedCoreApiException(string message, CoreClient.ApiException apiException, CoreApiErrorProperties properties)
         : base(message, apiException)
     {
         ApiException = apiException;
-        Properties = properties ?? new CoreApiErrorProperties();
+        Properties = properties;
     }
 
-    public static WrappedCoreApiException<T> Of<T>(CoreClient.ApiException apiException, T error, CoreApiErrorProperties? properties = null)
+    public static WrappedCoreApiException<T> Of<T>(CoreClient.ApiException apiException, T error, CoreApiErrorProperties properties)
         where T : RadixDlt.CoreApiSdk.Model.ErrorResponse
     {
         return new WrappedCoreApiException<T>(apiException, error, properties);

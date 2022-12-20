@@ -1,14 +1,15 @@
 # RadixDLT Network Gateway
 
-This system is designed to be the Radix-run publicly exposed gateway into the Olympia Radix network, and replaces the archive module which previously ran on-node.
+This system is designed to be the Radix-run publicly exposed gateway into the Babylon Radix network, and replaces the archive module which previously ran on-node.
 
-The system is in two main parts:
-* **Data Aggregator** - Reads from the Core API of one or more full nodes, ingesting from their Transaction API and Mempool Contents API, and committing transactions to a PostgreSQL database. It also handles the pruning (and resubmission where relevant) of submitted transactions. This project has ownership of the schema migrations.
+The system is in three main parts:
+* **Database Migrations** - This project has ownership of the PostgreSQL database schema migrations.
+* **Data Aggregator** - Reads from the Core API of one or more full nodes, ingesting from their Transaction Stream API and Mempool Contents API, and committing transactions to a PostgreSQL database. It also handles the pruning (and resubmission where relevant) of submitted transactions.
 * **Gateway API** - Provides the public API for Wallets and Explorers, and maps construction and submission requests to the Core API of one or more full nodes.
 
 ## Using the Gateway API
 
-For documentation on the Gateway API, see the [Gateway API docs on ReDocly](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/radixdlt/radixdlt-network-gateway/main/gateway-api-schema.yaml).
+For documentation on the Gateway API, see the [Gateway API docs on ReDocly](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/radixdlt/babylon-gateway/main/src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-schema.yaml).
 
 ## Technical Docs
 

@@ -65,6 +65,7 @@
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -110,7 +111,7 @@ internal abstract class LedgerTransaction
     public bool IsStartOfRound { get; set; }
 
     [Column("referenced_entities")]
-    public long[] ReferencedEntities { get; set; }
+    public List<long> ReferencedEntities { get; set; }
 
     [Column("fee_paid")]
     public TokenAmount FeePaid { get; set; }

@@ -67,6 +67,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
+using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.Abstractions.Workers;
@@ -159,9 +160,8 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
             cancellationToken
         ));
 
-        // TODO are we sure we want to operate on PayloadHash alone?
         var hashesInMempool = mempoolListResponse.Contents
-            .Select(ti => ti.PayloadHashBytes)
+            .Select(ti => new PendingTransactionHashPair(ti.IntentHashBytes, ti.PayloadHashBytes))
             .ToList();
 
         if (hashesInMempool.Count == 0)
@@ -193,7 +193,7 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
     private async Task<FetchAndSubmissionReport> FetchAndSubmitEachTransactionContents(
         MempoolOptions mempoolOptions,
         ICoreApiProvider coreApiProvider,
-        HashSet<byte[]> transactionsToFetchByPayloadHash,
+        HashSet<PendingTransactionHashPair> transactionsToFetchByPayloadHash,
         CancellationToken cancellationToken
     )
     {
@@ -207,14 +207,14 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
                 MaxDegreeOfParallelism = mempoolOptions.FetchUnknownTransactionFromMempoolDegreeOfParallelizationPerNode,
                 CancellationToken = cancellationToken,
             },
-            async (payloadHash, token) =>
+            async (hashes, token) =>
             {
-                if (!_mempoolTrackerService.TransactionContentsStillNeedFetching(payloadHash))
+                if (!_mempoolTrackerService.TransactionContentsStillNeedFetching(hashes))
                 {
                     return;
                 }
 
-                var transactionData = await FetchTransactionContents(coreApiProvider, payloadHash, token);
+                var transactionData = await FetchTransactionContents(coreApiProvider, hashes, token);
 
                 if (transactionData != null)
                 {
@@ -236,36 +236,24 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
         return new FetchAndSubmissionReport(fetchedNonDuplicateCount, fetchedDuplicateCount);
     }
 
-    private async Task<FullTransactionData?> FetchTransactionContents(
-        ICoreApiProvider coreApiProvider,
-        byte[] payloadHash,
-        CancellationToken token
-    )
+    private async Task<PendingTransactionData?> FetchTransactionContents(ICoreApiProvider coreApiProvider, PendingTransactionHashPair hashes, CancellationToken token)
     {
         try
         {
             var response = await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await coreApiProvider.MempoolApi.MempoolTransactionPostAsync(
                 new CoreModel.MempoolTransactionRequest(
                     network: _networkConfigurationProvider.GetNetworkName(),
-                    payloadHash: payloadHash.ToHex()
+                    payloadHash: hashes.PayloadHash.ToHex()
                 ),
                 token
             ));
 
-            return new FullTransactionData(payloadHash, _clock.UtcNow, response.NotarizedTransaction.PayloadBytes);
+            return new PendingTransactionData(hashes, _clock.UtcNow, response.NotarizedTransaction.PayloadBytes);
         }
-
-        // TODO fix me
-        catch (Exception)
+        catch (WrappedCoreApiException<CoreModel.MempoolTransactionNotFoundError>)
         {
+            // It's likely dropped out of the mempool, so we can't fetch it
             return null;
         }
-
-        // TODO fix me
-        // catch (WrappedCoreApiException<TransactionNotFoundError>)
-        // {
-        //     // It's likely dropped out of the mempool, so we can't fetch it
-        //     return null;
-        // }
     }
 }

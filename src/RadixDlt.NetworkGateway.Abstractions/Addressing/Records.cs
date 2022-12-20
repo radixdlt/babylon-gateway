@@ -62,31 +62,42 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+public sealed record HrpDefinition(
+    string Package,
+    string NormalComponent,
+    string AccountComponent,
+    string EpochManager,
+    string Clock,
+    string Resource
+);
 
-[Table("fungible_resource_supply_history")]
-internal class FungibleResourceSupplyHistory
+public sealed record WellKnownAddresses(
+    string AccountPackage,
+    string Faucet,
+    string EpochManager,
+    string Clock,
+    string EcdsaSecp256k1,
+    string EddsaEd25519,
+    string Xrd
+);
+
+public enum AddressSubtype
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-
-    [Column("total_supply")]
-    public TokenAmount TotalSupply { get; set; }
-
-    [Column("total_minted")]
-    public TokenAmount TotalMinted { get; set; }
-
-    [Column("total_burnt")]
-    public TokenAmount TotalBurnt { get; set; }
+    Resource,
+    Package,
+    NormalComponent,
+    AccountComponent,
+    EcdsaSecp256k1VirtualAccountComponent,
+    EddsaEd25519VirtualAccountComponent,
+    EpochManager,
+    Clock,
 }
+
+public sealed record AddressTypeDefinition(
+    AddressSubtype Subtype,
+    string HrpPrefix,
+    int AddressBytePrefix,
+    int AddressByteLength
+);

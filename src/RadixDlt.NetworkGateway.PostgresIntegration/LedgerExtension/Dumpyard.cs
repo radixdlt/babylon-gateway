@@ -197,15 +197,17 @@ internal record FungibleVaultChange(ReferencedEntity ReferencedVault, Referenced
 
 internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, List<string> NonFungibleIds, long StateVersion);
 
-internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, string NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
+internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
 
 internal record NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, long StateVersion);
+
+internal record NonFungibleIdLookup(long ResourceManagerEntityId, string NonFungibleId);
 
 internal record AccessRulesChainLookup(string EntityIdHex, AccessRulesChainSubtype Subtype);
 
 internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
 
-internal record FungibleResourceSupply(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, TokenAmount TotalMinted, TokenAmount TotalBurnt, long StateVersion);
+internal record ResourceManagerSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);
 
 internal record AggregateChange
 {
@@ -223,7 +225,7 @@ internal record AggregateChange
         Persistable = true;
     }
 
-    public AggregateChange(long stateVersion, long[] fungibleIds, long[] nonFungibleIds)
+    public AggregateChange(long stateVersion, IEnumerable<long> fungibleIds, IEnumerable<long> nonFungibleIds)
     {
         StateVersion = stateVersion;
         FungibleIds = new List<long>(fungibleIds);

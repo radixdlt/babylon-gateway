@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -84,5 +85,5 @@ internal class NonFungibleIdStoreHistory
     public long NonFungibleResourceManagerEntityId { get; set; }
 
     [Column("non_fungible_id_data_ids")]
-    public long[] NonFungibleIdDataIds { get; set; }
+    public List<long> NonFungibleIdDataIds { get; set; }
 }

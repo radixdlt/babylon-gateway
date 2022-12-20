@@ -80,11 +80,11 @@ public interface ISubmissionTrackingService
     );
 
     Task MarkAsFailed(
+        bool permanent,
         byte[] payloadHash,
-        PendingTransactionFailureReason failureReason,
-        string failureExplanation,
+        string failureReason,
         CancellationToken token = default
     );
 }
 
-public sealed record TackingGuidance(bool ShouldSubmitToNode, PendingTransactionFailureReason? TransactionAlreadyFailedReason = null);
+public sealed record TackingGuidance(bool ShouldSubmitToNode, string? FailureReason = null);

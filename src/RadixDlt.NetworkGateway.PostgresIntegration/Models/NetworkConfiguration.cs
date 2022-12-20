@@ -64,6 +64,7 @@
 
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
@@ -79,10 +80,14 @@ internal class NetworkConfiguration : SingleEntryBase
     [Column("well_known_addresses", TypeName = "jsonb")]
     public WellKnownAddresses WellKnownAddresses { get; set; }
 
+    [Column("address_type_definitions", TypeName = "jsonb")]
+    public AddressTypeDefinition[] AddressTypeDefinitions { get; set; }
+
     public bool HasEqualConfiguration(NetworkConfiguration other)
     {
         return NetworkName == other.NetworkName
                && HrpDefinition == other.HrpDefinition
-               && WellKnownAddresses == other.WellKnownAddresses;
+               && WellKnownAddresses == other.WellKnownAddresses
+               && AddressTypeDefinitions.SequenceEqual(other.AddressTypeDefinitions);
     }
 }

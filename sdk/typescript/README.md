@@ -1,6 +1,6 @@
 # Gateway API SDK
 
-This SDK is a thin wrapper around the Babylon Gateway API, detailed in [the Open API schema](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/radixdlt/babylon-gateway/main/src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-schema.yaml).
+This SDK is a thin wrapper around the [Babylon Gateway API](https://betanet-gateway.redoc.ly/).
 
 ## Usage
 
@@ -16,11 +16,10 @@ const transactionApi = new TransactionApi();
 
 async function getTransactionStatus(transactionIntentHashHex: string) {
     let response = await transactionApi.transactionStatus({
-        transaction_identifier: {
-            origin: TransactionLookupOrigin.Intent,
-            value_hex: transactionIntentHashHex
+        transactionStatusRequest: {
+            intent_hash_hex: transactionIntentHashHex
         }
     });
-    return response.transaction.transaction_status;
+    return response.status;
 }
 ```

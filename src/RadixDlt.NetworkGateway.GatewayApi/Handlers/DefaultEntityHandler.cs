@@ -73,7 +73,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 internal class DefaultEntityHandler : IEntityHandler
 {
-    private const int DefaultPageLimit = 10; // TODO make it configurable
+    private const int DefaultPageLimit = 100; // TODO make it configurable
 
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IEntityStateQuerier _entityStateQuerier;

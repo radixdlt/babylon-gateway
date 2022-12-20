@@ -66,6 +66,7 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -88,7 +89,7 @@ internal abstract class Entity
     public RadixAddress? GlobalAddress { get; set; }
 
     [Column("ancestor_ids")]
-    public long[]? AncestorIds { get; set; }
+    public List<long>? AncestorIds { get; set; }
 
     [Column("parent_ancestor_id")]
     public long? ParentAncestorId { get; set; }
@@ -113,7 +114,8 @@ internal abstract class Entity
             PackageEntity => hrp.Package,
             NormalComponentEntity => hrp.NormalComponent,
             AccountComponentEntity => hrp.AccountComponent,
-            SystemComponentEntity => hrp.SystemComponent,
+            EpochManagerEntity => hrp.EpochManager,
+            ClockEntity => hrp.Clock,
             ResourceManagerEntity => hrp.Resource,
             _ => throw new InvalidOperationException("Unable to build HRP address on entity of type " + GetType().Name),
         };
@@ -157,8 +159,13 @@ internal class AccountComponentEntity : ComponentEntity
 {
 }
 
-internal class SystemComponentEntity : ComponentEntity
+// This is transient model, not stored in database
+internal class VirtualAccountComponentEntity : AccountComponentEntity
 {
+    public VirtualAccountComponentEntity(byte[] globalAddress)
+    {
+        GlobalAddress = globalAddress;
+    }
 }
 
 internal class PackageEntity : Entity

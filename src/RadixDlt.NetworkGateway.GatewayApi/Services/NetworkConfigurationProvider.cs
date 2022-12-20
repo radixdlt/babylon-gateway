@@ -65,6 +65,7 @@
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -79,7 +80,7 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
     string GetNetworkName();
 }
 
-public sealed record CapturedConfig(string NetworkName, HrpDefinition HrpDefinition, WellKnownAddresses WellKnownAddresses);
+public sealed record CapturedConfig(string NetworkName, HrpDefinition HrpDefinition, WellKnownAddresses WellKnownAddresses, AddressTypeDefinition[] AddressTypeDefinitions);
 
 public interface ICapturedConfigProvider
 {
@@ -119,6 +120,11 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
     public WellKnownAddresses GetWellKnownAddresses()
     {
         return GetCapturedConfig().WellKnownAddresses;
+    }
+
+    public AddressTypeDefinition GetAddressTypeDefinition(AddressSubtype subtype)
+    {
+        return GetCapturedConfig().AddressTypeDefinitions.First(atd => atd.Subtype == subtype);
     }
 
     private CapturedConfig GetCapturedConfig()

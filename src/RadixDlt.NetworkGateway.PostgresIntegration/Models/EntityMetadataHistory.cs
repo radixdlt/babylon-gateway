@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -81,8 +82,8 @@ internal class EntityMetadataHistory
     public long EntityId { get; set; }
 
     [Column("keys")]
-    public string[] Keys { get; set; }
+    public List<string> Keys { get; set; }
 
     [Column("values")]
-    public string[] Values { get; set; }
+    public List<string> Values { get; set; }
 }

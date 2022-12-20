@@ -68,6 +68,8 @@ using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -161,32 +163,48 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().WellKnownAddresses;
     }
 
+    public AddressTypeDefinition GetAddressTypeDefinition(AddressSubtype subtype)
+    {
+        return GetCapturedConfig().AddressTypeDefinitions.First(atd => atd.Subtype == subtype);
+    }
+
     private static NetworkConfiguration MapNetworkConfigurationResponse(CoreModel.NetworkConfigurationResponse networkConfiguration)
     {
-        var hrpSuffix = networkConfiguration.NetworkHrpSuffix;
+        var wka = networkConfiguration.WellKnownAddresses;
+        var at = networkConfiguration.AddressTypes.Select(MapAddressTypeDefinition).ToArray();
 
         return new NetworkConfiguration
         {
             NetworkName = networkConfiguration.Network,
             HrpDefinition = new HrpDefinition(
-                Package: $"package_{hrpSuffix}",
-                NormalComponent: $"component_{hrpSuffix}",
-                AccountComponent: $"account_{hrpSuffix}",
-                SystemComponent: $"system_{hrpSuffix}",
-                Resource: $"resource_{hrpSuffix}",
-                Validator: $"validator_{hrpSuffix}",
-                Node: $"node_{hrpSuffix}"
+                Package: GetHrpPrefix(at, AddressSubtype.Package),
+                NormalComponent: GetHrpPrefix(at, AddressSubtype.NormalComponent),
+                AccountComponent: GetHrpPrefix(at, AddressSubtype.AccountComponent),
+                EpochManager: GetHrpPrefix(at, AddressSubtype.EpochManager),
+                Clock: GetHrpPrefix(at, AddressSubtype.Clock),
+                Resource: GetHrpPrefix(at, AddressSubtype.Resource)
             ),
             WellKnownAddresses = new WellKnownAddresses(
-                AccountPackage: networkConfiguration.WellKnownAddresses.AccountPackage,
-                Faucet: networkConfiguration.WellKnownAddresses.Faucet,
-                EpochManager: networkConfiguration.WellKnownAddresses.EpochManager,
-                Clock: networkConfiguration.WellKnownAddresses.Clock,
-                EcdsaSecp256k1: networkConfiguration.WellKnownAddresses.EcdsaSecp256k1,
-                EddsaEd25519: networkConfiguration.WellKnownAddresses.EddsaEd25519,
-                Xrd: networkConfiguration.WellKnownAddresses.Xrd
+                AccountPackage: wka.AccountPackage,
+                Faucet: wka.Faucet,
+                EpochManager: wka.EpochManager,
+                Clock: wka.Clock,
+                EcdsaSecp256k1: wka.EcdsaSecp256k1,
+                EddsaEd25519: wka.EddsaEd25519,
+                Xrd: wka.Xrd
             ),
+            AddressTypeDefinitions = at,
         };
+    }
+
+    private static string GetHrpPrefix(AddressTypeDefinition[] addressTypeDefinitions, AddressSubtype subtype)
+    {
+        return addressTypeDefinitions.First(at => at.Subtype == subtype).HrpPrefix;
+    }
+
+    private static AddressTypeDefinition MapAddressTypeDefinition(CoreModel.AddressType arg)
+    {
+        return new AddressTypeDefinition(Enum.Parse<AddressSubtype>(arg.Subtype.ToString(), true), arg.HrpPrefix, arg.AddressBytePrefix, arg.AddressByteLength);
     }
 
     private NetworkConfiguration GetCapturedConfig()

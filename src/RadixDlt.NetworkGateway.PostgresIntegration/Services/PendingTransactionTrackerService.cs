@@ -91,7 +91,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly ILogger<PendingTransactionTrackerService> _logger;
     private readonly ConcurrentDictionary<string, NodeMempoolHashes> _latestMempoolContentsByNode = new();
-    private readonly ConcurrentLruCache<byte[], FullTransactionData> _recentFullTransactionsFetched;
+    private readonly ConcurrentLruCache<PendingTransactionHashPair, PendingTransactionData> _recentFullTransactionsFetched;
     private readonly IEnumerable<IMempoolTrackerServiceObserver> _observers;
     private readonly IClock _clock;
 
@@ -108,9 +108,8 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
         _observers = observers;
         _clock = clock;
 
-        _recentFullTransactionsFetched = new ConcurrentLruCache<byte[], FullTransactionData>(
-            mempoolOptionsMonitor.CurrentValue.RecentFetchedUnknownTransactionsCacheSize,
-            ByteArrayEqualityComparer.Default
+        _recentFullTransactionsFetched = new ConcurrentLruCache<PendingTransactionHashPair, PendingTransactionData>(
+            mempoolOptionsMonitor.CurrentValue.RecentFetchedUnknownTransactionsCacheSize
         );
     }
 
@@ -127,29 +126,28 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
     /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to work out which transaction
     /// contents actually need fetching.
     /// </summary>
-    public async Task<HashSet<byte[]>> WhichTransactionsNeedContentFetching(IEnumerable<byte[]> payloadHashes, CancellationToken cancellationToken)
+    public async Task<HashSet<PendingTransactionHashPair>> WhichTransactionsNeedContentFetching(IEnumerable<PendingTransactionHashPair> payloadHashes, CancellationToken cancellationToken)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         var payloadHashesInMempoolNotRecentlyFetched = payloadHashes
-            .Where(hash => !_recentFullTransactionsFetched.Contains(hash))
+            .Where(h => !_recentFullTransactionsFetched.Contains(h))
+            .Select(h => Tuple.Create(h.IntentHash, h.PayloadHash))
             .ToList(); // Npgsql optimises ToList calls but not ToHashSet
 
         if (payloadHashesInMempoolNotRecentlyFetched.Count == 0)
         {
-            return new HashSet<byte[]>(ByteArrayEqualityComparer.Default);
+            return new HashSet<PendingTransactionHashPair>();
         }
 
-        // TODO are we sure we want to operate on PayloadHash alone?
         var unfetchedTransactionsAlreadyInDatabase = await dbContext.PendingTransactions
-            .Where(lt => payloadHashesInMempoolNotRecentlyFetched.Contains(lt.PayloadHash))
-            .Select(lt => lt.PayloadHash)
+            .Where(pt => payloadHashesInMempoolNotRecentlyFetched.Contains(Tuple.Create(pt.IntentHash, pt.PayloadHash)))
+            .Select(pt => Tuple.Create(pt.IntentHash, pt.PayloadHash))
             .ToListAsync(cancellationToken);
 
-        var payloadHashesToFetch = payloadHashesInMempoolNotRecentlyFetched
-            .ToHashSet(ByteArrayEqualityComparer.Default);
+        var payloadHashesToFetch = payloadHashesInMempoolNotRecentlyFetched.Select(t => new PendingTransactionHashPair(t.Item1, t.Item2)).ToHashSet();
 
-        payloadHashesToFetch.ExceptWith(unfetchedTransactionsAlreadyInDatabase);
+        payloadHashesToFetch.ExceptWith(unfetchedTransactionsAlreadyInDatabase.Select(t => new PendingTransactionHashPair(t.Item1, t.Item2)));
 
         return payloadHashesToFetch;
     }
@@ -160,7 +158,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
     /// from another node in the mean-time.
     /// </summary>
     /// <returns>If the transaction was first seen (true) or (false).</returns>
-    public bool TransactionContentsStillNeedFetching(byte[] transactionIdentifier)
+    public bool TransactionContentsStillNeedFetching(PendingTransactionHashPair transactionIdentifier)
     {
         return !_recentFullTransactionsFetched.Contains(transactionIdentifier);
     }
@@ -170,9 +168,9 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
     /// data.
     /// </summary>
     /// <returns>If the transaction was first seen (true) or (false).</returns>
-    public bool SubmitTransactionContents(FullTransactionData fullTransactionData)
+    public bool SubmitTransactionContents(PendingTransactionData pendingTransactionData)
     {
-        return _recentFullTransactionsFetched.SetIfNotExists(fullTransactionData.PayloadHash, fullTransactionData);
+        return _recentFullTransactionsFetched.SetIfNotExists(pendingTransactionData.Hashes, pendingTransactionData);
     }
 
     public async Task HandleChanges(CancellationToken token)
@@ -189,7 +187,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
         );
     }
 
-    private Dictionary<byte[], DateTime> CombineNodeMempools(MempoolOptions mempoolOptions)
+    private Dictionary<PendingTransactionHashPair, DateTime> CombineNodeMempools(MempoolOptions mempoolOptions)
     {
         var nodeMempoolsToConsider = _latestMempoolContentsByNode
             .Where(kvp => kvp.Value.AtTime.WithinPeriodOfNow(mempoolOptions.ExcludeNodeMempoolsFromUnionIfStaleFor, _clock))
@@ -202,7 +200,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
             );
         }
 
-        var combinedMempoolByLatestSeen = new Dictionary<byte[], DateTime>(ByteArrayEqualityComparer.Default);
+        var combinedMempoolByLatestSeen = new Dictionary<PendingTransactionHashPair, DateTime>();
 
         foreach (var (_, mempoolContents) in nodeMempoolsToConsider)
         {
@@ -232,16 +230,16 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
     }
 
     private async Task MarkRelevantMempoolTransactionsInCombinedMempoolAsReappeared(
-        Dictionary<byte[], DateTime> combinedMempoolWithLastSeen,
+        Dictionary<PendingTransactionHashPair, DateTime> combinedMempoolWithLastSeen,
         CancellationToken token
     )
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var mempoolTransactionIds = combinedMempoolWithLastSeen.Keys.ToList(); // Npgsql optimizes List<> Contains
+        var pendingTransactionIds = combinedMempoolWithLastSeen.Keys.Select(h => h.PayloadHash).ToList(); // Npgsql optimizes List<> Contains
 
         var reappearedTransactions = await dbContext.PendingTransactions
-            .Where(mt => mempoolTransactionIds.Contains(mt.PayloadHash))
+            .Where(mt => pendingTransactionIds.Contains(mt.PayloadHash))
             .Where(mt => mt.Status == PendingTransactionStatus.Missing)
             .ToListAsync(token);
 
@@ -271,7 +269,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
 
     private async Task CreateMempoolTransactionsFromNewTransactionsDiscoveredInCombinedMempool(
         MempoolOptions mempoolOptions,
-        Dictionary<byte[], DateTime> combinedMempoolWithLastSeen,
+        Dictionary<PendingTransactionHashPair, DateTime> combinedMempoolWithLastSeen,
         CancellationToken token
     )
     {
@@ -291,7 +289,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
             .ToList();
 
         var transactionIdsWhichMightNeedAdding = transactionsWhichMightNeedAdding
-            .Select(t => t.PayloadHash)
+            .Select(t => t.Hashes.PayloadHash)
             .ToList(); // Npgsql optimizes List<> Contains
 
         // Now check that these are actually new and need adding, by checking the transaction ids against the database.
@@ -299,8 +297,8 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
         // If a node mempool gets really far behind, it could include committed transactions we've already pruned
         // from our MempoolTransactions table due to being committed - so let's ensure these don't get re-added.
         var transactionIdsInANodeMempoolWhichAreAlreadyAMempoolTransactionInTheDb = await dbContext.PendingTransactions
-            .Where(mt => transactionIdsWhichMightNeedAdding.Contains(mt.PayloadHash))
-            .Select(mt => mt.PayloadHash)
+            .Where(pt => transactionIdsWhichMightNeedAdding.Contains(pt.PayloadHash))
+            .Select(pt => pt.PayloadHash)
             .ToHashSetAsync(ByteArrayEqualityComparer.Default, token);
 
         var transactionIdsInANodeMempoolWhichAreAlreadyCommitted = await dbContext.LedgerTransactions
@@ -310,10 +308,10 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
             .ToHashSetAsync(ByteArrayEqualityComparer.Default, token);
 
         var transactionsToAdd = transactionsWhichMightNeedAdding
-            .Where(mt =>
-                !transactionIdsInANodeMempoolWhichAreAlreadyAMempoolTransactionInTheDb.Contains(mt.PayloadHash)
+            .Where(pt =>
+                !transactionIdsInANodeMempoolWhichAreAlreadyAMempoolTransactionInTheDb.Contains(pt.Hashes.PayloadHash)
                 &&
-                !transactionIdsInANodeMempoolWhichAreAlreadyCommitted.Contains(mt.PayloadHash)
+                !transactionIdsInANodeMempoolWhichAreAlreadyCommitted.Contains(pt.Hashes.PayloadHash)
             )
             .ToList();
 
@@ -322,56 +320,55 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
             return;
         }
 
-        // TODO fetch transaction details using CoreApi's /mempool/transaction endpoint and add to DB
-        // var newDbMempoolTransactions = transactionsToAdd
-        //     .Select((transactionData, index) => PendingTransaction.NewFirstSeenInMempool(
-        //         transactionData.Id,
-        //         transactionData.Payload,
-        //         GatewayTransactionContents.Default(), // TODO - Changed to Default to get Babylon Repo working
-        //         transactionData.SeenAt
-        //     ));
-        //
-        // dbContext.PendingTransactions.AddRange(newDbMempoolTransactions);
-        //
-        // // If save changes partially succeeds, we might double-count these metrics
-        // _observers.ForEach(x => x.TransactionsAddedDueToNodeMempoolAppearanceCount(transactionsToAdd.Count));
-        //
-        // var (_, dbUpdateMs) = await CodeStopwatch.TimeInMs(
-        //     async () => await dbContext.SaveChangesAsync(token)
-        // );
-        //
-        // _logger.LogInformation(
-        //     "{TransactionsAddedCount} created in {DbUpdatesMs}ms",
-        //     transactionsToAdd.Count,
-        //     dbUpdateMs
-        // );
+        var newDbMempoolTransactions = transactionsToAdd
+            .Select(ptd => PendingTransaction.NewFirstSeenInMempool(
+                ptd.Hashes.PayloadHash,
+                ptd.Hashes.IntentHash,
+                ptd.Payload,
+                ptd.SeenAt
+            ));
+
+        dbContext.PendingTransactions.AddRange(newDbMempoolTransactions);
+
+        // If save changes partially succeeds, we might double-count these metrics
+        _observers.ForEach(x => x.TransactionsAddedDueToNodeMempoolAppearanceCount(transactionsToAdd.Count));
+
+        var (_, dbUpdateMs) = await CodeStopwatch.TimeInMs(
+            async () => await dbContext.SaveChangesAsync(token)
+        );
+
+        _logger.LogInformation(
+            "{TransactionsAddedCount} created in {DbUpdatesMs}ms",
+            transactionsToAdd.Count,
+            dbUpdateMs
+        );
     }
 
     private async Task MarkRelevantMempoolTransactionsNotInCombinedMempoolAsMissing(
         DateTime currentTimestamp,
         MempoolOptions mempoolOptions,
-        Dictionary<byte[], DateTime> combinedMempoolWithLastSeen,
+        Dictionary<PendingTransactionHashPair, DateTime> combinedMempoolWithLastSeen,
         CancellationToken token
     )
     {
         // NB - this should be a list as Npgsql optimises that case
-        var seenTransactionIds = combinedMempoolWithLastSeen.Keys.ToList();
+        var seenTransactionIds = combinedMempoolWithLastSeen.Keys.Select(h => h.PayloadHash).ToList();
 
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
         var submissionGracePeriodCutOff = currentTimestamp - mempoolOptions.PostSubmissionGracePeriodBeforeCanBeMarkedMissing;
 
         var previouslyTrackedTransactionsNowMissingFromNodeMempools = await dbContext.PendingTransactions
-            .Where(mt => mt.Status == PendingTransactionStatus.SubmittedOrKnownInNodeMempool)
-            .Where(mt =>
-                !mt.SubmittedByThisGateway
+            .Where(pt => pt.Status == PendingTransactionStatus.SubmittedOrKnownInNodeMempool)
+            .Where(pt =>
+                !pt.SubmittedByThisGateway
                 ||
-                (mt.SubmittedByThisGateway && (
-                    mt.LastSubmittedToNodeTimestamp == null // Shouldn't happen, but protect against it regardless
-                    || mt.LastSubmittedToNodeTimestamp < submissionGracePeriodCutOff
+                (pt.SubmittedByThisGateway && (
+                    pt.LastSubmittedToNodeTimestamp == null // Shouldn't happen, but protect against it regardless
+                    || pt.LastSubmittedToNodeTimestamp < submissionGracePeriodCutOff
                 ))
             )
-            .Where(mempoolItem => !seenTransactionIds.Contains(mempoolItem.PayloadHash))
+            .Where(pt => !seenTransactionIds.Contains(pt.PayloadHash))
             .ToListAsync(token);
 
         if (previouslyTrackedTransactionsNowMissingFromNodeMempools.Count == 0)
@@ -379,10 +376,10 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
             return;
         }
 
-        foreach (var mempoolItem in previouslyTrackedTransactionsNowMissingFromNodeMempools)
+        foreach (var pendingTransaction in previouslyTrackedTransactionsNowMissingFromNodeMempools)
         {
             _observers.ForEach(x => x.TransactionsMarkedAsMissing());
-            mempoolItem.MarkAsMissing(_clock.UtcNow);
+            pendingTransaction.MarkAsMissing(_clock.UtcNow);
         }
 
         var (_, dbUpdateMs) = await CodeStopwatch.TimeInMs(

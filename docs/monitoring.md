@@ -2,7 +2,7 @@
 
 ## Logging
 
-Logging configuration follows the [ASP.NET paradigms](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-6.0#dnrvs).
+Logging configuration follows the [ASP.NET paradigms](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/#dnrvs).
 
 In particular, both the log levels and the logger can be configured in the configuration.
 
