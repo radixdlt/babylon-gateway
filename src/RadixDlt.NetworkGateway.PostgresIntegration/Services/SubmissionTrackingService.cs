@@ -154,6 +154,12 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
             throw new PendingTransactionNotFoundException($"Could not find mempool transaction {payloadHash.ToHex()} to mark it as failed");
         }
 
+        // TODO this is workaround needed for PendingTransactionResubmissionService to correctly pick up TXs for resubmissions
+        if (permanent == false)
+        {
+            pendingTransaction.MarkAsMissing(_clock.UtcNow);
+        }
+
         pendingTransaction.MarkAsRejected(permanent, failureReason, _clock.UtcNow);
 
         await _observers.ForEachAsync(x => x.PostPendingTransactionMarkedAsFailed());
