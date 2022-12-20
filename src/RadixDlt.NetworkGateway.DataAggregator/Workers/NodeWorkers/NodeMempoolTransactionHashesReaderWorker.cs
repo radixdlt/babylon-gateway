@@ -102,7 +102,7 @@ public class NodeMempoolTransactionHashesReaderWorker : NodeWorker
     private readonly IEnumerable<INodeMempoolTransactionHashesReaderWorkerObserver> _observers;
     private readonly IClock _clock;
 
-    private HashSet<byte[]> _latestTransactionHashes = new(ByteArrayEqualityComparer.Default);
+    private HashSet<PendingTransactionHashPair> _latestTransactionHashes = new();
 
     // NB - So that we can get new transient dependencies each iteration, we create most dependencies
     //      from the service provider.
@@ -153,10 +153,9 @@ public class NodeMempoolTransactionHashesReaderWorker : NodeWorker
 
         await _observers.ForEachAsync(x => x.MempoolSize(_nodeConfig.CoreApiNode.Name, mempoolListResponse.Contents.Count));
 
-        // TODO are we sure we want to operate on PayloadHash alone?
         var latestMempoolHashes = mempoolListResponse.Contents
-            .Select(th => th.PayloadHashBytes)
-            .ToHashSet(ByteArrayEqualityComparer.Default);
+            .Select(th => new PendingTransactionHashPair(th.IntentHashBytes, th.PayloadHashBytes))
+            .ToHashSet();
 
         var previousMempoolHashes = _latestTransactionHashes;
         _latestTransactionHashes = latestMempoolHashes;

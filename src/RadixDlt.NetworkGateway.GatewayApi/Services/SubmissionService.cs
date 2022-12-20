@@ -66,7 +66,6 @@ using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
@@ -117,13 +116,11 @@ internal class SubmissionService : ISubmissionService
             token
         );
 
-        if (trackingGuidance.TransactionAlreadyFailedReason.HasValue)
+        if (trackingGuidance.FailureReason != null)
         {
             await _observers.ForEachAsync(x => x.SubmissionAlreadyFailed(request, trackingGuidance));
 
-            throw InvalidTransactionException.FromPreviouslyFailedTransactionError(
-                trackingGuidance.TransactionAlreadyFailedReason.Value
-            );
+            throw InvalidTransactionException.FromPreviouslyFailedTransactionError(trackingGuidance.FailureReason);
         }
 
         if (!trackingGuidance.ShouldSubmitToNode)
@@ -182,7 +179,7 @@ internal class SubmissionService : ISubmissionService
 
             return parsed.NotarizedTransaction;
         }
-        catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
+        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Permanent)
         {
             await _observers.ForEachAsync(x => x.ParseTransactionFailedInvalidTransaction(request, ex));
 
@@ -227,20 +224,6 @@ internal class SubmissionService : ISubmissionService
                 duplicate: result.Duplicate
             );
         }
-        catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
-        {
-            await _observers.ForEachAsync(x => x.HandleSubmissionFailedInvalidTransaction(request, ex));
-
-            await _submissionTrackingService.MarkAsFailed(
-                ex.Properties.Transience == CoreApiErrorTransience.Permanent,
-                parsedTransaction.PayloadBytes,
-                PendingTransactionFailureReason.Unknown,
-                $"Core API Exception: {ex.Error.GetType().Name} marking invalid transaction on initial submission",
-                token
-            );
-
-            throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(ex);
-        }
         catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Permanent)
         {
             // Any other known Core exception which can't result in the transaction being submitted
@@ -248,13 +231,24 @@ internal class SubmissionService : ISubmissionService
 
             await _submissionTrackingService.MarkAsFailed(
                 true,
-                parsedTransaction.PayloadBytes,
-                PendingTransactionFailureReason.Unknown,
-                $"Core API Exception: {ex.Error.GetType().Name} without undefined behaviour on initial submission",
+                parsedTransaction.HashBytes,
+                ex.Error.Message,
                 token
             );
 
-            throw;
+            throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(ex);
+        }
+        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Transient)
+        {
+            // Any other known Core exception which can't result in the transaction being submitted
+            await _observers.ForEachAsync(x => x.HandleSubmissionFailedTemporary(request, ex));
+
+            await _submissionTrackingService.MarkAsFailed(
+                false,
+                parsedTransaction.HashBytes,
+                ex.Error.Message,
+                token
+            );
         }
         catch (OperationCanceledException ex) when (timeoutTokenSource.Token.IsCancellationRequested)
         {
@@ -272,8 +266,6 @@ internal class SubmissionService : ISubmissionService
 
             _logger.LogWarning(ex, "Unknown error submitting transaction with hash {TransactionHash}", request.NotarizedTransactionHex);
         }
-
-        // TODO ok, so we're not throwing, should we actually return this value?
 
         return new GatewayModel.TransactionSubmitResponse(
             duplicate: false

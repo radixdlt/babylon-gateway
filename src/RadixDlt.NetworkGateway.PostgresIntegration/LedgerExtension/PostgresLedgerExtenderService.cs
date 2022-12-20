@@ -298,15 +298,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedWhichWasFailed());
 
                         _logger.LogError(
-                            "Transaction with payload hash {PayloadHash} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark {FailureTransiency} at {FailureTime} due to {FailureReason} ({FailureExplanation}) but has now been marked committed",
+                            "Transaction with payload hash {PayloadHash} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark {FailureTransiency} at {FailureTime} due to \"{FailureReason}\" but has now been marked committed",
                             pendingTransaction.PayloadHash.ToHex(),
                             pendingTransaction.FirstSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                             pendingTransaction.LastSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                             pendingTransaction.LastDroppedOutOfMempoolTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                             pendingTransaction.Status,
                             pendingTransaction.FailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                            pendingTransaction.FailureReason?.ToString(),
-                            pendingTransaction.FailureExplanation
+                            pendingTransaction.FailureReason
                         );
                     }
 
@@ -765,9 +764,7 @@ WHERE id IN(
 
                     if (sd is CoreModel.NonFungibleStoreEntrySubstate nonFungibleStoreEntry)
                     {
-                        // TODO is it guaranteed to be ResourceManager?
-                        // TODO or maybe we should use OwnerAncestorId?
-                        // TODO or maybe we should iterate until we find entity of appropriate type?
+                        // TODO is it guaranteed to be ResourceManager? or maybe we should use OwnerAncestorId? or maybe we should iterate until we find entity of appropriate type?
                         var resourceManagerEntity = referencedEntities.GetByDatabaseId(re.DatabaseGlobalAncestorId);
 
                         nonFungibleIdStoreChanges.Add(new NonFungibleIdChange(re, resourceManagerEntity, nonFungibleStoreEntry.NonFungibleId.SimpleRep, nonFungibleStoreEntry.IsDeleted, nonFungibleStoreEntry.NonFungibleData, stateVersion));

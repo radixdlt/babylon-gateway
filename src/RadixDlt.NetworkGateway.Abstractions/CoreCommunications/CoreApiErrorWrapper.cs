@@ -102,19 +102,33 @@ public static class CoreApiErrorWrapper
     {
         var errorResponse = ExtractErrorResponse(apiException.ErrorContent?.ToString());
 
-        if (errorResponse == null || errorResponse.Code != (int)HttpStatusCode.BadRequest)
+        if (errorResponse == null)
         {
             return null;
         }
 
-        return errorResponse.Message switch
+        if (errorResponse.Code == (int)HttpStatusCode.BadRequest)
         {
-            "Mempool is full" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(false, CoreApiErrorTransience.Transient)),
-            "Rejected: ExecutionError" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(true, CoreApiErrorTransience.Permanent)),
-            "Rejected: ValidationError" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(true, CoreApiErrorTransience.Permanent)),
-            "Rejected: IntentHashCommitted" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(true, CoreApiErrorTransience.Permanent)),
-            _ => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(false, CoreApiErrorTransience.Transient)),
-        };
+            return errorResponse.Message switch
+            {
+                "Mempool is full" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Transient)),
+                "Rejected: ExecutionError" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Permanent)),
+                "Rejected: ValidationError" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Permanent)),
+                "Rejected: IntentHashCommitted" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Permanent)),
+                _ => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Transient)),
+            };
+        }
+
+        if (errorResponse.Code == (int)HttpStatusCode.NotFound)
+        {
+            return errorResponse.Message switch
+            {
+                "Transaction with given payload hash is not in the mempool" => WrappedCoreApiException.Of(apiException, new CoreModel.MempoolTransactionNotFoundError(), new CoreApiErrorProperties(CoreApiErrorTransience.Transient)),
+                _ => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Transient)),
+            };
+        }
+
+        return null;
     }
 
     private static CoreModel.ErrorResponse? ExtractErrorResponse(string? errorResponse)

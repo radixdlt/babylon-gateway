@@ -114,7 +114,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
     {
         var entity = await GetEntity<ComponentEntity>(address, ledgerState, token);
 
-        // TODO refactor so that we drop EF completely and access two connections + Task.WhenAll at the same time
+        // TODO ideally we'd like to run those as either single query or separate ones but without await between them
 
         var fungibles = await GetFungiblesSlice(entity.Id, 0, DefaultResourceLimit, ledgerState, token);
         var nonFungibles = await GetNonFungiblesSlice(entity.Id, 0, DefaultResourceLimit, ledgerState, token);
@@ -132,7 +132,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         {
             case FungibleResourceManagerEntity frme:
             {
-                // TODO refactor so that we just just one query (reduce number of network roundtrips)
+                // TODO ideally we'd like to run those as either single query or separate ones but without await between them
 
                 var supplyHistory = await _dbContext.ResourceManagerEntitySupplyHistory
                     .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ResourceManagerEntityId == frme.Id)
@@ -163,7 +163,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
             case NonFungibleResourceManagerEntity nfrme:
             {
-                // TODO refactor so that we just just one query (reduce number of network roundtrips)
+                // TODO ideally we'd like to run those as either single query or separate ones but without await between them
 
                 var accessRulesChain = await _dbContext.EntityAccessRulesLayersHistory
                     .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == nfrme.Id && e.Subtype == AccessRulesChainSubtype.None)

@@ -155,10 +155,7 @@ internal class PendingTransaction
     public DateTime? CommitTimestamp { get; private set; }
 
     [Column("failure_reason")]
-    public PendingTransactionFailureReason? FailureReason { get; private set; }
-
-    [Column("failure_explanation")]
-    public string? FailureExplanation { get; private set; }
+    public string? FailureReason { get; private set; }
 
     [Column("failure_timestamp")]
     public DateTime? FailureTimestamp { get; private set; }
@@ -227,11 +224,10 @@ internal class PendingTransaction
         FirstSeenInMempoolTimestamp ??= timestamp;
     }
 
-    public void MarkAsRejected(bool permanent, PendingTransactionFailureReason failureReason, string failureExplanation, DateTime timestamp)
+    public void MarkAsRejected(bool permanent, string failureReason, DateTime timestamp)
     {
         Status = permanent ? PendingTransactionStatus.RejectedPermanently : PendingTransactionStatus.RejectedTemporarily;
         FailureReason = failureReason;
-        FailureExplanation = failureExplanation;
         FailureTimestamp = timestamp;
     }
 
@@ -248,15 +244,9 @@ internal class PendingTransaction
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 
-    public void MarkAsFailedAfterSubmittedToNode(bool permanent, string nodeSubmittedTo, PendingTransactionFailureReason failureReason, string failureExplanation, DateTime submittedAt, DateTime timestamp)
+    public void MarkAsFailedAfterSubmittedToNode(bool permanent, string nodeSubmittedTo, string failureReason, DateTime submittedAt, DateTime timestamp)
     {
-        MarkAsRejected(permanent, failureReason, failureExplanation, timestamp);
-        RecordSubmission(nodeSubmittedTo, submittedAt);
-    }
-
-    public void MarkAsResolvedButUnknownAfterSubmittedToNode(string nodeSubmittedTo, DateTime submittedAt)
-    {
-        Status = PendingTransactionStatus.ResolvedButUnknownTillSyncedUp;
+        MarkAsRejected(permanent, failureReason, timestamp);
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 

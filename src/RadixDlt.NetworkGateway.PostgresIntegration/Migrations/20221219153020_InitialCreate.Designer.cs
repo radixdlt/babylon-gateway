@@ -79,7 +79,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221216104901_InitialCreate")]
+    [Migration("20221219153020_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -435,10 +435,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("StateVersion");
 
-                    b.HasIndex("Epoch")
-                        .IsUnique()
-                        .HasFilter("is_start_of_epoch = true");
-
                     b.HasIndex("RoundTimestamp");
 
                     b.HasIndex("Epoch", "RoundInEpoch")
@@ -602,10 +598,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("commit_timestamp");
 
-                    b.Property<string>("FailureExplanation")
-                        .HasColumnType("text")
-                        .HasColumnName("failure_explanation");
-
                     b.Property<string>("FailureReason")
                         .HasColumnType("text")
                         .HasColumnName("failure_reason");
@@ -682,9 +674,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("PayloadHash"), "hash");
 
-                    b.HasIndex("SignedIntentHash");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SignedIntentHash"), "hash");
+                    b.HasIndex("Status");
 
                     b.ToTable("pending_transactions");
                 });

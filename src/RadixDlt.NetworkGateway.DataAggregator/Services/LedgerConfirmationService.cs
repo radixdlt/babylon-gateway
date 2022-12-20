@@ -99,7 +99,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     private readonly IClock _clock;
 
     /* Variables */
-    private readonly ConcurrentLruCache<long, byte[]> _quorumAccumulatorCacheByStateVersion = new(2000); // TODO not sure how this suits Babylon
+    private readonly ConcurrentLruCache<long, byte[]> _quorumAccumulatorCacheByStateVersion = new(2000);
     private readonly ConcurrentDictionary<string, long> _latestLedgerTipByNode = new();
     private readonly ConcurrentDictionary<string, ConcurrentDictionary<long, CoreModel.CommittedTransaction>> _transactionsByNode = new();
     private TransactionSummary? _knownTopOfCommittedLedger;

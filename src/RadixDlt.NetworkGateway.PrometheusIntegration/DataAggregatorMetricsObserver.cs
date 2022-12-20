@@ -634,6 +634,14 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
+    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedTemporary(byte[] notarizedTransaction, WrappedCoreApiException wrappedCoreApiException)
+    {
+        _transactionResubmissionErrorCount.Inc();
+        _transactionResubmissionResolutionByResultCount.WithLabels("unknown_temporary_error").Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
     ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedTimeout(byte[] notarizedTransaction, OperationCanceledException operationCanceledException)
     {
         _transactionResubmissionErrorCount.Inc();

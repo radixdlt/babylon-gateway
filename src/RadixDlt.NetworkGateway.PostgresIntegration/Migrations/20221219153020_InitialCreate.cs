@@ -303,7 +303,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     lastmissingfrommempooltimestamp = table.Column<DateTime>(name: "last_missing_from_mempool_timestamp", type: "timestamp with time zone", nullable: true),
                     committimestamp = table.Column<DateTime>(name: "commit_timestamp", type: "timestamp with time zone", nullable: true),
                     failurereason = table.Column<string>(name: "failure_reason", type: "text", nullable: true),
-                    failureexplanation = table.Column<string>(name: "failure_explanation", type: "text", nullable: true),
                     failuretimestamp = table.Column<DateTime>(name: "failure_timestamp", type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -416,13 +415,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 column: "top_of_ledger_state_version");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ledger_transactions_epoch",
-                table: "ledger_transactions",
-                column: "epoch",
-                unique: true,
-                filter: "is_start_of_epoch = true");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_epoch_round_in_epoch",
                 table: "ledger_transactions",
                 columns: new[] { "epoch", "round_in_epoch" },
@@ -488,10 +480,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:IndexMethod", "hash");
 
             migrationBuilder.CreateIndex(
-                name: "IX_pending_transactions_signed_intent_hash",
+                name: "IX_pending_transactions_status",
                 table: "pending_transactions",
-                column: "signed_intent_hash")
-                .Annotation("Npgsql:IndexMethod", "hash");
+                column: "status");
 
             migrationBuilder.CreateIndex(
                 name: "IX_resource_manager_entity_supply_history_resource_manager_ent~",

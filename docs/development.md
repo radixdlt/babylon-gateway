@@ -3,14 +3,14 @@
 ## Pre-requisites
 
 The following are pre-requisites:
-* We use [dotnet 6](https://dotnet.microsoft.com/download/dotnet/6.0) - ensure `dotnet --version` returns at least 6.x
+* We use [dotnet 7](https://dotnet.microsoft.com/download/dotnet/7.0) - ensure `dotnet --version` returns at least 7.x
 * Install docker
 
 Whilst any IDE supporting dotnet core can be used for development, we would recommend Jetbrains Rider.
 
 ## Configuration
 
-In development, configuration comes from a few places, with items lower down the list taking priority for a given field. `[X]` is `DataAggregator` or `GatewayApi`.
+In development, configuration comes from a few places, with items lower down the list taking priority for a given field. `[X]` is `DataAggregator`, `GatewayApi` or `DatabaseMigrations`.
 
 * `apps/[X]/appsettings.json`
 * `apps/[X]/appsettings.Development.json`
@@ -48,14 +48,15 @@ You'll need to run a version 1.1.0 or higher in order for the node to have the C
 
 Run following tasks:
 
-* `PostgreSQL & PgAdmin` (this runs `docker-compose up`)
+* `Postgres` (this runs `docker-compose up`)
+* `Database Migrations with Wipe Database` (this runs database migrations)
 
-And then, depending on what you're working on, you can run one or both of these. Note that the `Data Aggregator` needs to have run successfully at least once to create the Database, and start the ledger, for the `Gateway API` to be able to connect.
+And then, depending on what you're working on, you can run one or both of these. Note that the `Data Aggregator` needs to have run successfully at least once to start the ledger, for the `Gateway API` to be able to connect.
 
 * `Data Aggregator`
 * `Gateway API`
 
-You can use the `Wipe Database` task if you ever need to clear the database. (Say, because the DB ledger got corrupted; or you wish to change which network you're connected to)
+You can use the `Database Migrations with Wipe Database` task if you ever need to clear the database. (Say, because the DB ledger got corrupted; or you wish to change which network you're connected to)
 
 ## Developing using the command line
 
@@ -64,8 +65,13 @@ All the commands should be run from the repo root.
 Run the following in separate terminals:
 
 ```bash
-# Spin up PostgreSQL and PgAdmin first
+# Spin up PostgreSQL first
 docker-compose up
+```
+
+```bash
+# Run the DatabaseMigrations
+dotnet run --project apps/DatabaseMigrations --launch-profile "Database Migrations"
 ```
 
 ```bash
@@ -82,18 +88,8 @@ And, if you need to wipe the database, you should stop all of the above processe
 
 ```bash
 # Wipe the database
-dotnet run --project apps/DatabaseMigrations --launch-profile "Wipe Database"
+dotnet run --project apps/DatabaseMigrations --launch-profile "Database Migrations with Wipe Database"
 ```
-
-## Looking at the database
-
-To inspect the database, we have included a pgAdmin docker container.
-
-After doing `docker-compose up` from the repo root, a pgAdmin container is also booted up.
-
-* Location: http://localhost:5050/
-* Local server is at "Servers / Local Radix Public Gateway"
-* Password is `db_dev_password` (click "save" and you should only need to ass it once)
 
 ## Testing
 

@@ -135,9 +135,6 @@ internal abstract class CommonDbContext : DbContext
         configurationBuilder.Properties<PendingTransactionStatus>()
             .HaveConversion<PendingTransactionStatusValueConverter>();
 
-        configurationBuilder.Properties<PendingTransactionFailureReason>()
-            .HaveConversion<PendingTransactionFailureReasonValueConverter>();
-
         configurationBuilder.Properties<LedgerTransactionStatus>()
             .HaveConversion<LedgerTransactionStatusValueConverter>();
 
@@ -159,8 +156,6 @@ internal abstract class CommonDbContext : DbContext
 
     private static void HookupTransactions(ModelBuilder modelBuilder)
     {
-        // TODO we most likely want to drop most of those indices as they must slow down ingestion rate by quite some margin
-
         modelBuilder.Entity<LedgerTransaction>()
             .HasDiscriminator<string>("discriminator")
             .HasValue<UserLedgerTransaction>("user")
@@ -193,24 +188,19 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(lt => new { lt.Epoch, lt.RoundInEpoch })
             .IsUnique()
             .HasFilter("is_start_of_round = true");
-
-        // This index allows us to use the LedgerTransactions as an Epoch table, to look up the start of each epoch
-        modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => new { lt.Epoch })
-            .IsUnique()
-            .HasFilter("is_start_of_epoch = true");
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<PendingTransaction>()
+            .HasIndex(pt => pt.Status);
+
+        modelBuilder.Entity<PendingTransaction>()
             .HasIndex(pt => pt.PayloadHash)
             .HasMethod("hash");
+
         modelBuilder.Entity<PendingTransaction>()
             .HasIndex(pt => pt.IntentHash)
-            .HasMethod("hash");
-        modelBuilder.Entity<PendingTransaction>()
-            .HasIndex(pt => pt.SignedIntentHash)
             .HasMethod("hash");
     }
 
@@ -241,7 +231,6 @@ internal abstract class CommonDbContext : DbContext
 
     private static void HookupHistory(ModelBuilder modelBuilder)
     {
-        // TODO investigate what's more performant FromStateVersion+EntityId or EntityId+FromStateVersion, then apply to all entities
         modelBuilder.Entity<EntityMetadataHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 

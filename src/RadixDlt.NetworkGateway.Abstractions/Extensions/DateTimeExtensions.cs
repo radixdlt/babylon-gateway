@@ -103,9 +103,7 @@ public static class DateTimeExtensions
 
     public static double ToUnixTimeSecondsWithMilliPrecision(this DateTime a)
     {
-        // TODO we should throw if this is not DateTimeKind == UTC
-
-        return new DateTimeOffset(a).ToUnixTimeMilliseconds() / 1000.0;
+        return new DateTimeOffset(a.ToUniversalTime()).ToUnixTimeMilliseconds() / 1000.0;
     }
 
     public static string FormatSecondsHumanReadable(this TimeSpan duration)

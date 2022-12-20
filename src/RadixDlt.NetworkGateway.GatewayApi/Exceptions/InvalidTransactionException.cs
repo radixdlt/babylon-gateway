@@ -89,13 +89,9 @@ public class InvalidTransactionException : ValidationException
         return new InvalidTransactionException("Transaction is invalid", wrappedCoreApiException);
     }
 
-    public static InvalidTransactionException FromPreviouslyFailedTransactionError(PendingTransactionFailureReason previousFailureReason)
+    public static InvalidTransactionException FromPreviouslyFailedTransactionError(string failureReason)
     {
-        var userFacingMessage = previousFailureReason == PendingTransactionFailureReason.DoubleSpend
-            ? "The transaction submission has already failed as it clashes with a previous transaction"
-            : "The transaction submission has already failed";
-
-        return new InvalidTransactionException(userFacingMessage);
+        return new InvalidTransactionException(failureReason);
     }
 
     public static Exception FromUnsupportedPayloadType()

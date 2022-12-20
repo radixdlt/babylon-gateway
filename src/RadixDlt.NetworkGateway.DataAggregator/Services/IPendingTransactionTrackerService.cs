@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -69,21 +70,23 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-// TODO rename as the name no longer reflects its usage
-public sealed record FullTransactionData(byte[] PayloadHash, DateTime SeenAt, byte[] Payload);
-
-public sealed record NodeMempoolHashes
+// TODO we should introduce custom type over byte[] and make it "compare by value" by default
+public readonly record struct PendingTransactionHashPair(byte[] IntentHash, byte[] PayloadHash)
 {
-    public HashSet<byte[]> TransactionHashes { get; }
-
-    public DateTime AtTime { get; }
-
-    public NodeMempoolHashes(HashSet<byte[]> transactionHashes, DateTime atTime)
+    public override int GetHashCode()
     {
-        TransactionHashes = transactionHashes;
-        AtTime = atTime;
+        return HashCode.Combine(ByteArrayEqualityComparer.Default.GetHashCode(IntentHash), ByteArrayEqualityComparer.Default.GetHashCode(PayloadHash));
+    }
+
+    public bool Equals(PendingTransactionHashPair other)
+    {
+        return ByteArrayEqualityComparer.Default.Equals(IntentHash, other.IntentHash) && ByteArrayEqualityComparer.Default.Equals(PayloadHash, other.PayloadHash);
     }
 }
+
+public sealed record PendingTransactionData(PendingTransactionHashPair Hashes, DateTime SeenAt, byte[] Payload);
+
+public sealed record NodeMempoolHashes(HashSet<PendingTransactionHashPair> TransactionHashes, DateTime AtTime);
 
 public interface IPendingTransactionTrackerService
 {
@@ -95,9 +98,9 @@ public interface IPendingTransactionTrackerService
     /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to work out which transaction
     /// contents actually need fetching.
     /// </summary>
-    Task<HashSet<byte[]>> WhichTransactionsNeedContentFetching(IEnumerable<byte[]> payloadHashes, CancellationToken cancellationToken);
+    Task<HashSet<PendingTransactionHashPair>> WhichTransactionsNeedContentFetching(IEnumerable<PendingTransactionHashPair> candidates, CancellationToken cancellationToken);
 
-    bool SubmitTransactionContents(FullTransactionData fullTransactionData);
+    bool SubmitTransactionContents(PendingTransactionData pendingTransactionData);
 
     /// <summary>
     /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to check if the transaction
@@ -105,5 +108,5 @@ public interface IPendingTransactionTrackerService
     /// from another node in the mean-time.
     /// </summary>
     /// <returns>If the transaction was first seen (true) or (false).</returns>
-    bool TransactionContentsStillNeedFetching(byte[] transactionIdentifier);
+    bool TransactionContentsStillNeedFetching(PendingTransactionHashPair transactionIdentifier);
 }

@@ -154,7 +154,7 @@ internal class TransactionQuerier : ITransactionQuerier
             .Where(pt => pt.IntentHash == intentHash)
             .ToListAsync(token);
 
-        return pendingTransactions.Select(pt => new StatusLookupResult(pt.PayloadHash.ToHex(), pt.Status.ToGatewayModel(), pt.FailureExplanation)).ToArray();
+        return pendingTransactions.Select(pt => new StatusLookupResult(pt.PayloadHash.ToHex(), pt.Status.ToGatewayModel(), pt.FailureReason)).ToArray();
     }
 
     private async Task<List<long>> GetRecentUserTransactionStateVersions(
@@ -206,7 +206,7 @@ internal class TransactionQuerier : ITransactionQuerier
 
     private async Task<DetailsLookupResult> GetTransactionWithDetails(long stateVersion, CancellationToken token)
     {
-        // TODO how to execute that with join?
+        // TODO ideally we'd like to run those as either single query or separate ones but without await between them
 
         var transaction = await _dbContext.LedgerTransactions
             .OfType<UserLedgerTransaction>()

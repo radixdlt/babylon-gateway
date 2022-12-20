@@ -154,8 +154,8 @@ public static class ServiceCollectionExtensions
     {
         // Add node workers - these will be instantiated by the NodeWorkersRunner.cs.
         services.TryAddScoped<INodeWorker, NodeTransactionLogWorker>();
-        // services.AddScoped<INodeWorker, NodeMempoolTransactionHashesReaderWorker>();
-        // services.AddScoped<INodeWorker, NodeMempoolFullTransactionReaderWorker>();
+        services.AddScoped<INodeWorker, NodeMempoolTransactionHashesReaderWorker>();
+        services.AddScoped<INodeWorker, NodeMempoolFullTransactionReaderWorker>();
     }
 
     private static HttpClientHandler ConfigureHttpClientHandler(IOptions<NetworkOptions> options)

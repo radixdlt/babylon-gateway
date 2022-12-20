@@ -98,6 +98,8 @@ public interface ISubmissionServiceObserver
 
     ValueTask HandleSubmissionFailedPermanently(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception);
 
+    ValueTask HandleSubmissionFailedTemporary(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception);
+
     ValueTask HandleSubmissionFailedTimeout(GatewayModel.TransactionSubmitRequest request, OperationCanceledException exception);
 
     ValueTask HandleSubmissionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception);
