@@ -259,8 +259,8 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
                        certainly failed due to a real double spend - so we'll detect it now and can mark them failed */
                     || (isEssentiallySyncedUpNow && mt.Status == PendingTransactionStatus.ResolvedButUnknownTillSyncedUp)
                 )
-                && mt.LastDroppedOutOfMempoolTimestamp!.Value < allowResubmissionIfDroppedOutOfMempoolBefore
-                && mt.LastSubmittedToNodeTimestamp!.Value < allowResubmissionIfLastSubmittedBefore
+                && (mt.LastDroppedOutOfMempoolTimestamp == null || mt.LastDroppedOutOfMempoolTimestamp.Value < allowResubmissionIfDroppedOutOfMempoolBefore)
+                && (mt.LastSubmittedToNodeTimestamp == null || mt.LastSubmittedToNodeTimestamp.Value < allowResubmissionIfLastSubmittedBefore)
             );
     }
 
