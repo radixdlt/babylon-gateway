@@ -69,7 +69,11 @@ namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class MempoolTransactionHashes
 {
+    private byte[] _intentHashBytes;
     private byte[] _payloadHashBytes;
+
+    [JsonIgnore]
+    public byte[] IntentHashBytes => _intentHashBytes ??= Convert.FromHexString(IntentHash);
 
     [JsonIgnore]
     public byte[] PayloadHashBytes => _payloadHashBytes ??= Convert.FromHexString(PayloadHash);

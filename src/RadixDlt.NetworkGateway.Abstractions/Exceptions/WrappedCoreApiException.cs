@@ -75,13 +75,10 @@ public enum CoreApiErrorTransience
 
 public sealed class CoreApiErrorProperties
 {
-    public bool MarksInvalidTransaction { get; }
-
     public CoreApiErrorTransience Transience { get; }
 
-    public CoreApiErrorProperties(bool marksInvalidTransaction, CoreApiErrorTransience transience)
+    public CoreApiErrorProperties(CoreApiErrorTransience transience)
     {
-        MarksInvalidTransaction = marksInvalidTransaction;
         Transience = transience;
     }
 }
