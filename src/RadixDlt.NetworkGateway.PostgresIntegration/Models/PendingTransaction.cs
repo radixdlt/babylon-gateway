@@ -216,6 +216,8 @@ internal class PendingTransaction
     {
         Status = succeeded ? PendingTransactionStatus.CommittedSuccess : PendingTransactionStatus.CommittedFailure;
         CommitTimestamp = timestamp;
+        FailureReason = null;
+        FailureTimestamp = null;
     }
 
     public void MarkAsSeenInAMempool(DateTime timestamp)
