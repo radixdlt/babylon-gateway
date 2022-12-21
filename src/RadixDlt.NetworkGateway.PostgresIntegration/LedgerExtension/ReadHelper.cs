@@ -84,6 +84,42 @@ internal class ReadHelper
         _connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
     }
 
+    public async Task<Dictionary<long, EntityResourceAggregateHistory>> MostRecentEntityResourceAggregateHistoryFor(List<FungibleVaultChange> fungibleVaultChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    {
+        var entityIds = new HashSet<long>();
+
+        foreach (var change in fungibleVaultChanges)
+        {
+            entityIds.Add(change.ReferencedVault.DatabaseOwnerAncestorId);
+            entityIds.Add(change.ReferencedVault.DatabaseGlobalAncestorId);
+        }
+
+        foreach (var change in nonFungibleVaultChanges)
+        {
+            entityIds.Add(change.ReferencedVault.DatabaseOwnerAncestorId);
+            entityIds.Add(change.ReferencedVault.DatabaseGlobalAncestorId);
+        }
+
+        var ids = entityIds.ToList();
+
+        return await _dbContext.EntityResourceAggregateHistory
+            .FromSqlInterpolated(@$"
+WITH variables (entity_id) AS (
+    SELECT UNNEST({ids})
+)
+SELECT erah.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_resource_aggregate_history
+    WHERE entity_id = variables.entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) erah ON true;")
+            .AsNoTracking()
+            .ToDictionaryAsync(e => e.EntityId, token);
+    }
+
     public async Task<Dictionary<long, NonFungibleIdStoreHistory>> MostRecentNonFungibleIdStoreHistoryFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, CancellationToken token)
     {
         // TODO is it guaranteed that given NonFungibleStore has always proper NF ResourceManager as its global ancestor?
@@ -91,15 +127,15 @@ internal class ReadHelper
 
         return await _dbContext.NonFungibleIdStoreHistory
             .FromSqlInterpolated(@$"
-WITH entities (id) AS (
+WITH variables (entity_id) AS (
     SELECT UNNEST({ids})
 )
 SELECT emh.*
-FROM entities
+FROM variables
 INNER JOIN LATERAL (
     SELECT *
     FROM non_fungible_id_store_history
-    WHERE non_fungible_resource_manager_entity_id = entities.id
+    WHERE non_fungible_resource_manager_entity_id = variables.entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) emh ON true;")

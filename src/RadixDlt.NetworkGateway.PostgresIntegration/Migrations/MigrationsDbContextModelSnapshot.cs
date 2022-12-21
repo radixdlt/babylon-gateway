@@ -268,10 +268,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint[]")
                         .HasColumnName("fungible_resource_entity_ids");
 
-                    b.Property<bool>("IsMostRecent")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_most_recent");
-
                     b.Property<List<long>>("NonFungibleResourceEntityIds")
                         .IsRequired()
                         .HasColumnType("bigint[]")
@@ -280,9 +276,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EntityId", "FromStateVersion");
-
-                    b.HasIndex("IsMostRecent", "EntityId")
-                        .HasFilter("is_most_recent IS TRUE");
 
                     b.ToTable("entity_resource_aggregate_history");
                 });
