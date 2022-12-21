@@ -62,33 +62,12 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
-
-internal static class DictionaryExtensions
-{
-    public static TVal GetOrAdd<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> factory)
-        where TKey : notnull
-    {
-        if (dictionary.ContainsKey(key))
-        {
-            return dictionary[key];
-        }
-
-        var value = factory(key);
-
-        dictionary[key] = value;
-
-        return value;
-    }
-}
 
 internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long StateVersion)
 {
@@ -205,76 +184,5 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
     public override string ToString()
     {
         return $"{nameof(ReferencedEntity)} {{ {nameof(IdHex)}: {IdHex}, {nameof(Type)}: {Type}, {nameof(StateVersion)}: {StateVersion}, {nameof(_databaseEntity)}: {_databaseEntity?.ToString() ?? "null"} }}";
-    }
-}
-
-internal record FungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion);
-
-internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, List<string> NonFungibleIds, long StateVersion);
-
-internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
-
-internal record NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, long StateVersion);
-
-internal record NonFungibleIdLookup(long ResourceManagerEntityId, string NonFungibleId);
-
-internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
-
-internal record ResourceManagerSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);
-
-internal class ReferencedEntityDictionary
-{
-    private readonly Dictionary<string, ReferencedEntity> _storage = new();
-    private readonly Dictionary<long, List<ReferencedEntity>> _inversed = new();
-    private readonly Dictionary<string, ReferencedEntity> _globalsCache = new();
-    private readonly Dictionary<long, ReferencedEntity> _dbIdCache = new();
-
-    public ICollection<string> Addresses => _storage.Keys;
-
-    public ICollection<ReferencedEntity> All => _storage.Values;
-
-    public ReferencedEntity GetOrAdd(string addressHex, Func<string, ReferencedEntity> factory)
-    {
-        if (_storage.ContainsKey(addressHex))
-        {
-            return _storage[addressHex];
-        }
-
-        var value = factory(addressHex);
-
-        if (!_inversed.ContainsKey(value.StateVersion))
-        {
-            _inversed[value.StateVersion] = new List<ReferencedEntity>();
-        }
-
-        _storage[addressHex] = value;
-        _inversed[value.StateVersion].Add(value);
-
-        return value;
-    }
-
-    public ReferencedEntity Get(string addressHex)
-    {
-        return _storage[addressHex];
-    }
-
-    public ReferencedEntity GetByGlobal(string globalAddressHex)
-    {
-        return _globalsCache.GetOrAdd(globalAddressHex, _ => _storage.Values.First(re => re.GlobalAddressHex == globalAddressHex));
-    }
-
-    public ReferencedEntity GetByDatabaseId(long id)
-    {
-        return _dbIdCache.GetOrAdd(id, _ => _storage.Values.First(re => re.DatabaseId == id));
-    }
-
-    public IEnumerable<ReferencedEntity> OfStateVersion(long stateVersion)
-    {
-        if (_inversed.ContainsKey(stateVersion))
-        {
-            return _inversed[stateVersion];
-        }
-
-        return Array.Empty<ReferencedEntity>();
     }
 }
