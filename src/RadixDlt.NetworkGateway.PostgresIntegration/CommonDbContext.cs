@@ -62,7 +62,9 @@
  * permissions under this License.
  */
 
+using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
@@ -106,6 +108,20 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityAccessRulesChainHistory> EntityAccessRulesLayersHistory => Set<EntityAccessRulesChainHistory>();
 
+    static CommonDbContext()
+    {
+        SqlMapper.AddTypeHandler(new GenericArrayHandler<int>());
+        SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
+        SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
+
+#pragma warning disable CS0618
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccessRulesChainSubtype>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
+#pragma warning restore CS0618
+    }
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -115,6 +131,11 @@ internal abstract class CommonDbContext : DbContext
     // So secondary indexes might benefit from the inclusion of columns for faster lookups
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresEnum<AccessRulesChainSubtype>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
+        modelBuilder.HasPostgresEnum<NonFungibleIdType>();
+        modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
+
         HookupSingleEntries(modelBuilder);
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
@@ -131,18 +152,6 @@ internal abstract class CommonDbContext : DbContext
 
         configurationBuilder.Properties<RadixAddress>()
             .HaveConversion<RadixAddressToByteArrayConverter>();
-
-        configurationBuilder.Properties<PendingTransactionStatus>()
-            .HaveConversion<PendingTransactionStatusValueConverter>();
-
-        configurationBuilder.Properties<LedgerTransactionStatus>()
-            .HaveConversion<LedgerTransactionStatusValueConverter>();
-
-        configurationBuilder.Properties<NonFungibleIdType>()
-            .HaveConversion<NonFungibleIdTypeValueConverter>();
-
-        configurationBuilder.Properties<AccessRulesChainSubtype>()
-            .HaveConversion<AccessRulesChainSubtypeValueConverter>();
     }
 
     private static void HookupSingleEntries(ModelBuilder modelBuilder)

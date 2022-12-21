@@ -62,14 +62,12 @@
  * permissions under this License.
  */
 
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
@@ -85,10 +83,6 @@ public static class GatewayApiBuilderExtensions
 
     public static GatewayApiBuilder AddPostgresPersistenceCore(this GatewayApiBuilder builder)
     {
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<int>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
-
         builder.Services
             .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
             .AddScoped<ITransactionQuerier, TransactionQuerier>()

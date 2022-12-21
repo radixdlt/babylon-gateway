@@ -68,6 +68,7 @@ using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 
 #nullable disable
 
@@ -79,6 +80,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:Enum:access_rules_chain_subtype", "none,resource_manager_vault_access_rules_chain")
+                .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
+                .Annotation("Npgsql:Enum:non_fungible_id_type", "string,u32,u64,bytes,uuid")
+                .Annotation("Npgsql:Enum:pending_transaction_status", "submitted_or_known_in_node_mempool,missing,resolved_but_unknown_till_synced_up,rejected_temporarily,rejected_permanently,committed_success,committed_failure");
+
             migrationBuilder.CreateTable(
                 name: "component_entity_state_history",
                 columns: table => new
@@ -111,7 +118,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     packageid = table.Column<long>(name: "package_id", type: "bigint", nullable: true),
                     blueprintname = table.Column<string>(name: "blueprint_name", type: "text", nullable: true),
                     divisibility = table.Column<int>(type: "integer", nullable: true),
-                    nonfungibleidtype = table.Column<string>(name: "non_fungible_id_type", type: "text", nullable: true),
+                    nonfungibleidtype = table.Column<NonFungibleIdType>(name: "non_fungible_id_type", type: "non_fungible_id_type", nullable: true),
                     code = table.Column<byte[]>(type: "bytea", nullable: true)
                 },
                 constraints: table =>
@@ -127,7 +134,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
                     entityid = table.Column<long>(name: "entity_id", type: "bigint", nullable: false),
-                    subtype = table.Column<string>(type: "text", nullable: false),
+                    subtype = table.Column<AccessRulesChainSubtype>(type: "access_rules_chain_subtype", nullable: false),
                     accessruleschain = table.Column<string>(name: "access_rules_chain", type: "jsonb", nullable: false)
                 },
                 constraints: table =>
@@ -192,7 +199,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: table => new
                 {
                     stateversion = table.Column<long>(name: "state_version", type: "bigint", nullable: false),
-                    status = table.Column<string>(type: "text", nullable: false),
+                    status = table.Column<LedgerTransactionStatus>(type: "ledger_transaction_status", nullable: false),
                     errormessage = table.Column<string>(name: "error_message", type: "text", nullable: true),
                     transactionaccumulator = table.Column<byte[]>(name: "transaction_accumulator", type: "bytea", nullable: false),
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
@@ -291,7 +298,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     intenthash = table.Column<byte[]>(name: "intent_hash", type: "bytea", nullable: false),
                     signedintenthash = table.Column<byte[]>(name: "signed_intent_hash", type: "bytea", nullable: false),
                     notarizedtransactionblob = table.Column<byte[]>(name: "notarized_transaction_blob", type: "bytea", nullable: false),
-                    status = table.Column<string>(type: "text", nullable: false),
+                    status = table.Column<PendingTransactionStatus>(type: "pending_transaction_status", nullable: false),
                     submittedbythisgateway = table.Column<bool>(name: "submitted_by_this_gateway", type: "boolean", nullable: false),
                     firstsubmittedtogatewaytimestamp = table.Column<DateTime>(name: "first_submitted_to_gateway_timestamp", type: "timestamp with time zone", nullable: true),
                     lastsubmittedtogatewaytimestamp = table.Column<DateTime>(name: "last_submitted_to_gateway_timestamp", type: "timestamp with time zone", nullable: true),
