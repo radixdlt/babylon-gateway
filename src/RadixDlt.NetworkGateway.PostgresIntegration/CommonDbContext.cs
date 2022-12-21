@@ -235,10 +235,6 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityResourceAggregateHistory>()
-            .HasIndex(e => new { e.IsMostRecent, e.EntityId })
-            .HasFilter("is_most_recent IS TRUE");
-
-        modelBuilder.Entity<EntityResourceAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityResourceHistory>()

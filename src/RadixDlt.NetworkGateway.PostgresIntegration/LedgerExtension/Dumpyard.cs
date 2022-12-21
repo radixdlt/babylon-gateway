@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
@@ -219,99 +218,9 @@ internal record NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, 
 
 internal record NonFungibleIdLookup(long ResourceManagerEntityId, string NonFungibleId);
 
-internal record AccessRulesChainLookup(string EntityIdHex, AccessRulesChainSubtype Subtype);
-
 internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
 
 internal record ResourceManagerSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);
-
-internal record AggregateChange
-{
-    public long StateVersion { get; }
-
-    public List<long> FungibleIds { get; } = new();
-
-    public List<long> NonFungibleIds { get; } = new();
-
-    public bool Persistable { get; }
-
-    public AggregateChange(long stateVersion)
-        : this(stateVersion, Array.Empty<long>(), Array.Empty<long>())
-    {
-        Persistable = true;
-    }
-
-    public AggregateChange(long stateVersion, IEnumerable<long> fungibleIds, IEnumerable<long> nonFungibleIds)
-    {
-        StateVersion = stateVersion;
-        FungibleIds = new List<long>(fungibleIds);
-        NonFungibleIds = new List<long>(nonFungibleIds);
-    }
-
-    public void AppendFungible(long id)
-    {
-        if (!FungibleIds.Contains(id))
-        {
-            FungibleIds.Add(id);
-        }
-    }
-
-    public void AppendNonFungible(long id)
-    {
-        if (!NonFungibleIds.Contains(id))
-        {
-            NonFungibleIds.Add(id);
-        }
-    }
-
-    public void Apply(AggregateChange? previous)
-    {
-        if (previous == null)
-        {
-            return;
-        }
-
-        var finalFungibleIds = new List<long>(previous.FungibleIds);
-        var finalNonFungibleIds = new List<long>(previous.NonFungibleIds);
-
-        foreach (var id in FungibleIds.Where(id => !finalFungibleIds.Contains(id)))
-        {
-            finalFungibleIds.Add(id);
-        }
-
-        foreach (var id in NonFungibleIds.Where(id => !finalNonFungibleIds.Contains(id)))
-        {
-            finalNonFungibleIds.Add(id);
-        }
-
-        // TODO add support for NonFungibleIds removal (separate collections + foreach + finalNonFungibleIds.Remove(id)
-
-        FungibleIds.Clear();
-        FungibleIds.AddRange(finalFungibleIds);
-        NonFungibleIds.Clear();
-        NonFungibleIds.AddRange(finalNonFungibleIds);
-    }
-
-    public bool ShouldBePersisted(AggregateChange? previous)
-    {
-        if (!Persistable)
-        {
-            return false;
-        }
-
-        if (previous == null)
-        {
-            return true;
-        }
-
-        if (FungibleIds.SequenceEqual(previous.FungibleIds) && NonFungibleIds.SequenceEqual(previous.NonFungibleIds))
-        {
-            return false;
-        }
-
-        return true;
-    }
-}
 
 internal class ReferencedEntityDictionary
 {

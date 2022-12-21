@@ -159,7 +159,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
                     entityid = table.Column<long>(name: "entity_id", type: "bigint", nullable: false),
-                    ismostrecent = table.Column<bool>(name: "is_most_recent", type: "boolean", nullable: false),
                     fungibleresourceentityids = table.Column<List<long>>(name: "fungible_resource_entity_ids", type: "bigint[]", nullable: false),
                     nonfungibleresourceentityids = table.Column<List<long>>(name: "non_fungible_resource_entity_ids", type: "bigint[]", nullable: false)
                 },
@@ -392,12 +391,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_entity_resource_aggregate_history_entity_id_from_state_vers~",
                 table: "entity_resource_aggregate_history",
                 columns: new[] { "entity_id", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_entity_resource_aggregate_history_is_most_recent_entity_id",
-                table: "entity_resource_aggregate_history",
-                columns: new[] { "is_most_recent", "entity_id" },
-                filter: "is_most_recent IS TRUE");
 
             migrationBuilder.CreateIndex(
                 name: "IX_entity_resource_history_global_entity_id_from_state_version",
