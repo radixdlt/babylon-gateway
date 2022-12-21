@@ -255,7 +255,7 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleIdData>()
-            .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.NonFungibleId });
+            .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.NonFungibleId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleIdMutableDataHistory>()
             .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
