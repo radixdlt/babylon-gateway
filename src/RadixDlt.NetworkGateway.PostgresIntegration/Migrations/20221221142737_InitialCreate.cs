@@ -443,7 +443,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_non_fungible_id_data_non_fungible_resource_manager_entity_~1",
                 table: "non_fungible_id_data",
-                columns: new[] { "non_fungible_resource_manager_entity_id", "non_fungible_id" });
+                columns: new[] { "non_fungible_resource_manager_entity_id", "non_fungible_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_non_fungible_id_data_non_fungible_resource_manager_entity_i~",
