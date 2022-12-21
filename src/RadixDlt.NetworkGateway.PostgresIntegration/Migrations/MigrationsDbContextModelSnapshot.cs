@@ -71,6 +71,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 
 #nullable disable
@@ -87,6 +88,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .HasAnnotation("ProductVersion", "7.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "access_rules_chain_subtype", new[] { "none", "resource_manager_vault_access_rules_chain" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "non_fungible_id_type", new[] { "string", "u32", "u64", "bytes", "uuid" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_status", new[] { "submitted_or_known_in_node_mempool", "missing", "resolved_but_unknown_till_synced_up", "rejected_temporarily", "rejected_permanently", "committed_success", "committed_failure" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentEntityStateHistory", b =>
@@ -200,9 +205,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
 
-                    b.Property<string>("Subtype")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<AccessRulesChainSubtype>("Subtype")
+                        .HasColumnType("access_rules_chain_subtype")
                         .HasColumnName("subtype");
 
                     b.HasKey("Id");
@@ -404,9 +408,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("round_timestamp");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<LedgerTransactionStatus>("Status")
+                        .HasColumnType("ledger_transaction_status")
                         .HasColumnName("status");
 
                     b.Property<BigInteger>("TipPaid")
@@ -640,10 +643,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("signed_intent_hash");
 
-                    b.Property<string>("Status")
+                    b.Property<PendingTransactionStatus>("Status")
                         .IsConcurrencyToken()
-                        .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("pending_transaction_status")
                         .HasColumnName("status");
 
                     b.Property<int>("SubmissionToNodesCount")
@@ -798,9 +800,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
-                    b.Property<string>("NonFungibleIdType")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<NonFungibleIdType>("NonFungibleIdType")
+                        .HasColumnType("non_fungible_id_type")
                         .HasColumnName("non_fungible_id_type");
 
                     b.ToTable("entities");
