@@ -141,27 +141,34 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
     {
         if (TypeHint != null && TypeHint != type)
         {
-            throw new ArgumentException("Already annotated with different type hint", nameof(type));
+            throw new ArgumentException($"{this} already annotated with different type hint", nameof(type));
         }
 
         TypeHint = type;
+    }
+
+    public TEntity CreateUsingTypeHintOrDefault<TEntity>(Type defaultType)
+    {
+        TypeHint ??= defaultType;
+
+        return CreateUsingTypeHint<TEntity>();
     }
 
     public TEntity CreateUsingTypeHint<TEntity>()
     {
         if (TypeHint == null)
         {
-            throw new InvalidOperationException("No TypeHint specified");
+            throw new InvalidOperationException($"No TypeHint specified for: {this}");
         }
 
         if (!TypeHint.IsAssignableTo(typeof(TEntity)))
         {
-            throw new InvalidOperationException("Conflicting hint type");
+            throw new InvalidOperationException($"Conflicting hint type for: {this}");
         }
 
         if (Activator.CreateInstance(TypeHint) is not TEntity instance)
         {
-            throw new InvalidOperationException("Unable to create instance");
+            throw new InvalidOperationException($"Unable to create instance for: {this}");
         }
 
         return instance;
@@ -174,7 +181,7 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
 
         if (dbEntity is not T typedDbEntity)
         {
-            throw new ArgumentException("Action argument type does not match underlying entity type.", nameof(action));
+            throw new ArgumentException($"Action argument type does not match underlying entity type for {this}.", nameof(action));
         }
 
         action.Invoke(typedDbEntity);
@@ -182,14 +189,23 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
 
     private Entity GetDatabaseEntity()
     {
-        var de = _databaseEntity ?? throw new InvalidOperationException("Database entity not loaded yet.");
+        var de = _databaseEntity ?? throw new InvalidOperationException($"Database entity not loaded yet for {this}.");
 
         if (de.Id == 0)
         {
-            throw new InvalidOperationException("Database entity not ready yet.");
+            throw new InvalidOperationException($"Database entity not ready yet for {this}.");
         }
 
         return de;
+    }
+
+    /// <summary>
+    /// Define custom ToString to avoid infinitely recursive ToString calls, and calls to the database, etc.
+    /// </summary>
+    /// <returns>The string representation of the type for debugging.</returns>
+    public override string ToString()
+    {
+        return $"{nameof(ReferencedEntity)} {{ {nameof(IdHex)}: {IdHex}, {nameof(Type)}: {Type}, {nameof(StateVersion)}: {StateVersion}, {nameof(_databaseEntity)}: {_databaseEntity?.ToString() ?? "null"} }}";
     }
 }
 

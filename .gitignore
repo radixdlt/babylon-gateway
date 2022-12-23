@@ -6,6 +6,7 @@
 *.DevelopmentOverrides.json
 *.ProductionOverrides.json
 ng_dev/.postgresdata/
+*.DS_Store
 
 # Rider gitignore
 
