@@ -65,8 +65,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Npgsql;
-using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
@@ -533,23 +531,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         // step: resolve known types & optionally create missing entities
         {
-            var entityAddresses = referencedEntities.Addresses.Select(x => x.ConvertFromHex()).ToList();
-            var globalEntityAddresses = knownGlobalAddressesToLoad.Select(x => RadixAddressCodec.Decode(x).Data).ToList();
-            var entityAddressesParameter = new NpgsqlParameter("@entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = entityAddresses };
-            var globalEntityAddressesParameter = new NpgsqlParameter("@global_entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = globalEntityAddresses };
-
             var sw = Stopwatch.StartNew();
-            var knownDbEntities = await dbContext.Entities
-                .FromSqlInterpolated($@"
-SELECT *
-FROM entities
-WHERE id IN(
-    SELECT DISTINCT UNNEST(id || ancestor_ids) AS id
-    FROM entities
-    WHERE address = ANY({entityAddressesParameter}) OR global_address = ANY({globalEntityAddressesParameter})
-)")
-                .AsNoTracking()
-                .ToDictionaryAsync(e => ((byte[])e.Address).ToHex(), token);
+
+            var knownDbEntities = await readHelper.ExistingEntitiesFor(referencedEntities, knownGlobalAddressesToLoad, token);
 
             dbReadDuration += sw.Elapsed;
 
