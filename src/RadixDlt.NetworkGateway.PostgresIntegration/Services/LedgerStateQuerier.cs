@@ -73,6 +73,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -86,6 +87,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 {
     private static readonly Regex _oasVersionRegex = new("Version of the API: (\\d+\\.\\d+\\.\\d+)", RegexOptions.Compiled | RegexOptions.Multiline);
 
+    private static string _gatewayVersion = GetGatewayProductVersion();
     private static string _oasVersion = GetOpenApiSchemaVersion();
 
     private readonly ILogger<LedgerStateQuerier> _logger;
@@ -128,7 +130,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
                 ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
             ),
             new GatewayModel.GatewayInfoResponseKnownTarget(ledgerStatus.TargetStateVersion),
-            new GatewayModel.GatewayInfoResponseReleaseInfo(_endpointOptionsMonitor.CurrentValue.GatewayApiVersion, _oasVersion),
+            new GatewayModel.GatewayInfoResponseReleaseInfo(_gatewayVersion, _oasVersion),
             new GatewayModel.GatewayInformationResponseAllOfWellKnownAddresses(
                 wellKnownAddresses.AccountPackage,
                 wellKnownAddresses.Faucet,
@@ -240,6 +242,13 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         var ledgerStatus = await GetLedgerStatus(token);
 
         return ledgerStatus.TopOfLedgerStateVersion;
+    }
+
+    private static string GetGatewayProductVersion()
+    {
+        var version = FileVersionInfo.GetVersionInfo(typeof(NetworkGatewayConstants).Assembly.Location).ProductVersion;
+
+        return version ?? throw new InvalidOperationException("Unable to determine product version");
     }
 
     private static string GetOpenApiSchemaVersion()
