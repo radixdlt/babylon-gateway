@@ -256,12 +256,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             {
                 var nt = ct.LedgerTransaction.GetUserLedgerTransaction().NotarizedTransaction;
 
-                rawUserTransactionStatusByPayloadHash[nt.HashBytes] = ct.Receipt.Status;
-                rawUserTransactionByPayloadHash[nt.HashBytes] = new RawUserTransaction
+                rawUserTransactionStatusByPayloadHash[nt.GetHashBytes()] = ct.Receipt.Status;
+                rawUserTransactionByPayloadHash[nt.GetHashBytes()] = new RawUserTransaction
                 {
                     StateVersion = ct.StateVersion,
-                    PayloadHash = nt.HashBytes,
-                    Payload = nt.PayloadBytes,
+                    PayloadHash = nt.GetHashBytes(),
+                    Payload = nt.GetPayloadBytes(),
                     Receipt = ct.Receipt.ToJson(),
                 };
             }
@@ -401,7 +401,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (sd is CoreModel.IOwner owner)
                     {
-                        foreach (var oe in owner.OwnedEntities)
+                        foreach (var oe in owner.GetOwnedEntities())
                         {
                             referencedEntities.GetOrAdd(oe.EntityIdHex, _ => new ReferencedEntity(oe.EntityIdHex, oe.EntityType, stateVersion)).IsImmediateChildOf(re);
 
@@ -411,7 +411,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (sd is CoreModel.IGlobalResourcePointer globalResourcePointer)
                     {
-                        foreach (var pointer in globalResourcePointer.Pointers)
+                        foreach (var pointer in globalResourcePointer.GetPointers())
                         {
                             knownGlobalAddressesToLoad.Add(pointer.GlobalAddress);
                         }
@@ -457,7 +457,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (sd is CoreModel.PackageInfoSubstate packageInfo)
                     {
-                        packageCode[sid.EntityIdHex] = packageInfo.CodeBytes;
+                        packageCode[sid.EntityIdHex] = packageInfo.GetCodeBytes();
                     }
                 }
 
@@ -492,15 +492,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     RoundInEpoch: newRoundInEpoch ?? lastTransactionSummary.RoundInEpoch,
                     IsStartOfEpoch: isStartOfEpoch,
                     IsStartOfRound: isStartOfRound,
-                    TransactionAccumulator: ct.LedgerTransaction.PayloadBytes);
+                    TransactionAccumulator: ct.LedgerTransaction.GetPayloadBytes());
 
                 LedgerTransaction ledgerTransaction = ct.LedgerTransaction.ActualInstance switch
                 {
                     CoreModel.UserLedgerTransaction ult => new UserLedgerTransaction
                     {
-                        PayloadHash = ult.NotarizedTransaction.HashBytes,
-                        IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.HashBytes,
-                        SignedIntentHash = ult.NotarizedTransaction.SignedIntent.HashBytes,
+                        PayloadHash = ult.NotarizedTransaction.GetHashBytes(),
+                        IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.GetHashBytes(),
+                        SignedIntentHash = ult.NotarizedTransaction.SignedIntent.GetHashBytes(),
                     },
                     CoreModel.ValidatorLedgerTransaction => new ValidatorLedgerTransaction(),
                     _ => throw new ArgumentOutOfRangeException(nameof(ct.LedgerTransaction), ct.LedgerTransaction, null),
@@ -509,7 +509,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 ledgerTransaction.StateVersion = ct.StateVersion;
                 ledgerTransaction.Status = ct.Receipt.Status.ToModel();
                 ledgerTransaction.ErrorMessage = ct.Receipt.ErrorMessage;
-                ledgerTransaction.TransactionAccumulator = ct.AccumulatorHashBytes;
+                ledgerTransaction.TransactionAccumulator = ct.GetAccumulatorHashBytes();
                 // TODO commented out as incompatible with current Core API version
                 ledgerTransaction.Message = null; // message: transaction.Metadata.Message?.ConvertFromHex(),
                 ledgerTransaction.Epoch = summary.Epoch;
@@ -918,7 +918,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         NonFungibleStoreEntityId = e.ReferencedStore.DatabaseId,
                         NonFungibleResourceManagerEntityId = e.ReferencedResource.DatabaseId,
                         NonFungibleId = e.NonFungibleId,
-                        ImmutableData = e.Data?.ImmutableDataRawBytes ?? Array.Empty<byte>(),
+                        ImmutableData = e.Data?.GetImmutableDataRawBytes() ?? Array.Empty<byte>(),
                     };
 
                     nonFungibleIdDataToAdd.Add(ret);
@@ -952,7 +952,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     FromStateVersion = e.StateVersion,
                     NonFungibleIdDataId = nonFungibleIdData.Id,
                     IsDeleted = e.IsDeleted,
-                    MutableData = e.Data?.MutableDataRawBytes ?? Array.Empty<byte>(),
+                    MutableData = e.Data?.GetMutableDataRawBytes() ?? Array.Empty<byte>(),
                 });
 
                 nonFungibleIdStore.NonFungibleIdDataIds.Add(nonFungibleIdData.Id);

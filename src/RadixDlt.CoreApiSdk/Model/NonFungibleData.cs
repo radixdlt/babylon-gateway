@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json;
 using System;
 
 namespace RadixDlt.CoreApiSdk.Model;
@@ -72,9 +71,7 @@ public partial class NonFungibleData
     private byte[] _immutableDataRawHex;
     private byte[] _mutableDataRawHex;
 
-    [JsonIgnore]
-    public byte[] ImmutableDataRawBytes => _immutableDataRawHex ??= Convert.FromHexString(ImmutableDataRawHex);
+    public byte[] GetImmutableDataRawBytes() => _immutableDataRawHex ??= Convert.FromHexString(ImmutableDataRawHex);
 
-    [JsonIgnore]
-    public byte[] MutableDataRawBytes => _mutableDataRawHex ??= Convert.FromHexString(MutableDataRawHex);
+    public byte[] GetMutableDataRawBytes() => _mutableDataRawHex ??= Convert.FromHexString(MutableDataRawHex);
 }

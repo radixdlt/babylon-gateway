@@ -69,15 +69,11 @@ namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class ResourceManagerSubstate : IOwner
 {
-    [JsonIgnore]
-    public IEnumerable<EntityReference> OwnedEntities
+    public IEnumerable<EntityReference> GetOwnedEntities()
     {
-        get
+        if (OwnedNonFungibleStore != null)
         {
-            if (OwnedNonFungibleStore != null)
-            {
-                yield return new EntityReference(OwnedNonFungibleStore.EntityType, OwnedNonFungibleStore.EntityIdHex);
-            }
+            yield return new EntityReference(OwnedNonFungibleStore.EntityType, OwnedNonFungibleStore.EntityIdHex);
         }
     }
 }
