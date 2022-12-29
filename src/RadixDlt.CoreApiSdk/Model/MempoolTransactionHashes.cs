@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json;
 using System;
 
 namespace RadixDlt.CoreApiSdk.Model;
@@ -72,9 +71,7 @@ public partial class MempoolTransactionHashes
     private byte[] _intentHashBytes;
     private byte[] _payloadHashBytes;
 
-    [JsonIgnore]
-    public byte[] IntentHashBytes => _intentHashBytes ??= Convert.FromHexString(IntentHash);
+    public byte[] GetIntentHashBytes() => _intentHashBytes ??= Convert.FromHexString(IntentHash);
 
-    [JsonIgnore]
-    public byte[] PayloadHashBytes => _payloadHashBytes ??= Convert.FromHexString(PayloadHash);
+    public byte[] GetPayloadHashBytes() => _payloadHashBytes ??= Convert.FromHexString(PayloadHash);
 }

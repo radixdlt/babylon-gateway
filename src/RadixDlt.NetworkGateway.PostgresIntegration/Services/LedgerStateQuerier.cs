@@ -184,15 +184,15 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
     {
         LedgerStateReport? ledgerStateReport = null;
 
-        if (fromLedgerStateIdentifier?.HasStateVersion == true)
+        if (fromLedgerStateIdentifier?.HasStateVersion() == true)
         {
             ledgerStateReport = await GetLedgerStateAfterStateVersion(fromLedgerStateIdentifier.StateVersion.Value, token);
         }
-        else if (fromLedgerStateIdentifier?.HasTimestamp == true)
+        else if (fromLedgerStateIdentifier?.HasTimestamp() == true)
         {
             ledgerStateReport = await GetLedgerStateAfterTimestamp(fromLedgerStateIdentifier.Timestamp.Value, token);
         }
-        else if (fromLedgerStateIdentifier?.HasEpoch == true)
+        else if (fromLedgerStateIdentifier?.HasEpoch() == true)
         {
             ledgerStateReport = await GetLedgerStateAfterEpochAndRound(fromLedgerStateIdentifier.Epoch.Value, fromLedgerStateIdentifier.Round ?? 0, token);
         }
@@ -283,15 +283,15 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
     {
         LedgerStateReport result;
 
-        if (at?.HasStateVersion == true)
+        if (at?.HasStateVersion() == true)
         {
             result = await GetLedgerStateBeforeStateVersion(at.StateVersion.Value, token);
         }
-        else if (at?.HasTimestamp == true)
+        else if (at?.HasTimestamp() == true)
         {
             result = await GetLedgerStateBeforeTimestamp(at.Timestamp.Value, token);
         }
-        else if (at?.HasEpoch == true)
+        else if (at?.HasEpoch() == true)
         {
             result = await GetLedgerStateAtEpochAndRound(at.Epoch.Value, at.Round ?? 0, token);
         }

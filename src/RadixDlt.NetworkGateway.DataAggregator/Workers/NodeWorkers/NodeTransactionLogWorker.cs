@@ -149,7 +149,7 @@ public sealed class NodeTransactionLogWorker : NodeWorker
         var nodeLedgerTip = networkStatus.CurrentStateIdentifier.StateVersion;
         var nodeLedgerTarget = nodeLedgerTip; // TODO waiting for CoreApi: networkStatus.SyncStatus.TargetStateVersion;
 
-        _ledgerConfirmationService.SubmitNodeNetworkStatus(NodeName, nodeLedgerTip, networkStatus.CurrentStateIdentifier.AccumulatorHashBytes, nodeLedgerTarget);
+        _ledgerConfirmationService.SubmitNodeNetworkStatus(NodeName, nodeLedgerTip, networkStatus.CurrentStateIdentifier.GetAccumulatorHashBytes(), nodeLedgerTarget);
 
         var toFetch = _ledgerConfirmationService.GetWhichTransactionsAreRequestedFromNode(NodeName);
 
