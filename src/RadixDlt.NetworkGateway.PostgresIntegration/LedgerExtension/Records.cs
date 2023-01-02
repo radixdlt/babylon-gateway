@@ -74,9 +74,9 @@ internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, Referen
 
 internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
 
-internal record NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, long StateVersion);
+internal record struct NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, long StateVersion);
 
-internal record NonFungibleIdLookup(long ResourceManagerEntityId, string NonFungibleId);
+internal record struct NonFungibleIdLookup(long ResourceManagerEntityId, string NonFungibleId);
 
 internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
 

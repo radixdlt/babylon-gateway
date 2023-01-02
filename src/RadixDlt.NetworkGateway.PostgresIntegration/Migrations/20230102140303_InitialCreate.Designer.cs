@@ -80,7 +80,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221221152355_InitialCreate")]
+    [Migration("20230102140303_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -882,14 +882,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceHistory");
 
-                    b.Property<List<string>>("NonFungibleIds")
+                    b.Property<List<long>>("NonFungibleIds")
                         .IsRequired()
-                        .HasColumnType("text[]")
+                        .HasColumnType("bigint[]")
                         .HasColumnName("non_fungible_ids");
-
-                    b.Property<long>("NonFungibleIdsCount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("non_fungible_ids_count");
 
                     b.ToTable("entity_resource_history");
 

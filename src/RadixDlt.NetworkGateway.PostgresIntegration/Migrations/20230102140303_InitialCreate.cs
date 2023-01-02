@@ -186,8 +186,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     resourceentityid = table.Column<long>(name: "resource_entity_id", type: "bigint", nullable: false),
                     discriminator = table.Column<string>(type: "text", nullable: false),
                     balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
-                    nonfungibleidscount = table.Column<long>(name: "non_fungible_ids_count", type: "bigint", nullable: true),
-                    nonfungibleids = table.Column<List<string>>(name: "non_fungible_ids", type: "text[]", nullable: true)
+                    nonfungibleids = table.Column<List<long>>(name: "non_fungible_ids", type: "bigint[]", nullable: true)
                 },
                 constraints: table =>
                 {
