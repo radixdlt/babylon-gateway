@@ -188,15 +188,29 @@ WHERE id IN(
             .ToDictionaryAsync(e => ((byte[])e.Address).ToHex(), token);
     }
 
-    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, CancellationToken token)
+    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
     {
+        var nonFungibles = new HashSet<NonFungibleIdLookup>();
         var resourceManagerEntityIds = new List<long>();
         var nonFungibleIds = new List<string>();
 
         foreach (var nonFungibleIdChange in nonFungibleIdStoreChanges)
         {
-            resourceManagerEntityIds.Add(nonFungibleIdChange.ReferencedResource.DatabaseId);
-            nonFungibleIds.Add(nonFungibleIdChange.NonFungibleId);
+            nonFungibles.Add(new NonFungibleIdLookup(nonFungibleIdChange.ReferencedResource.DatabaseId, nonFungibleIdChange.NonFungibleId));
+        }
+
+        foreach (var nonFungibleVaultChange in nonFungibleVaultChanges)
+        {
+            foreach (var nfid in nonFungibleVaultChange.NonFungibleIds)
+            {
+                nonFungibles.Add(new NonFungibleIdLookup(nonFungibleVaultChange.ReferencedResource.DatabaseId, nfid));
+            }
+        }
+
+        foreach (var nf in nonFungibles)
+        {
+            resourceManagerEntityIds.Add(nf.ResourceManagerEntityId);
+            nonFungibleIds.Add(nf.NonFungibleId);
         }
 
         return await _dbContext.NonFungibleIdData

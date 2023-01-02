@@ -343,7 +343,7 @@ internal class WriteHelper
         var fungibleDiscriminator = GetDiscriminator(typeof(EntityFungibleResourceHistory));
         var nonFungibleDiscriminator = GetDiscriminator(typeof(EntityNonFungibleResourceHistory));
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_resource_history (id, from_state_version, owner_entity_id, global_entity_id, resource_entity_id, discriminator, balance, non_fungible_ids_count, non_fungible_ids) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_resource_history (id, from_state_version, owner_entity_id, global_entity_id, resource_entity_id, discriminator, balance, non_fungible_ids) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in fungibleEntities)
         {
@@ -355,7 +355,6 @@ internal class WriteHelper
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(fungibleDiscriminator, NpgsqlDbType.Text, token);
             await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-            await writer.WriteNullAsync(token);
             await writer.WriteNullAsync(token);
         }
 
@@ -369,8 +368,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(nonFungibleDiscriminator, NpgsqlDbType.Text, token);
             await writer.WriteNullAsync(token);
-            await writer.WriteAsync(e.NonFungibleIdsCount, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.NonFungibleIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
         }
 
         await writer.CompleteAsync(token);
