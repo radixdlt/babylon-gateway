@@ -72,6 +72,8 @@ public static class ServiceCollectionExtensions
 {
     public static void AddNetworkGatewayPostgresMigrations(this IServiceCollection services)
     {
+        CustomTypes.EnsureConfigured();
+
         services
             .AddDbContextFactory<MigrationsDbContext>((serviceProvider, options) =>
             {
