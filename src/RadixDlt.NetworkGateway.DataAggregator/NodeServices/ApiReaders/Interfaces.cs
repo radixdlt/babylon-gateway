@@ -74,6 +74,8 @@ public interface ICoreApiProvider
 {
     CoreApi.TransactionApi TransactionsApi { get; }
 
+    CoreApi.StreamApi StreamApi { get; }
+
     CoreApi.StatusApi StatusApi { get; }
 
     CoreApi.MempoolApi MempoolApi { get; }

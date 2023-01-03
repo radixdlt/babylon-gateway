@@ -88,109 +88,69 @@ namespace RadixDlt.CoreApiSdk.Api
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public interface IStatusApiSync : IApiAccessor
+    public interface IStreamApiSync : IApiAccessor
     {
         #region Synchronous Operations
         /// <summary>
-        /// Get Network Configuration
+        /// Get Committed Transactions
         /// </summary>
         /// <remarks>
-        /// Returns the network configuration of the network the node is connected to.
+        /// Returns the list of committed transactions. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <returns>NetworkConfigurationResponse</returns>
-        NetworkConfigurationResponse StatusNetworkConfigurationPost();
+        /// <param name="committedTransactionsRequest"></param>
+        /// <returns>CommittedTransactionsResponse</returns>
+        CommittedTransactionsResponse TransactionStreamPost(CommittedTransactionsRequest committedTransactionsRequest);
 
         /// <summary>
-        /// Get Network Configuration
+        /// Get Committed Transactions
         /// </summary>
         /// <remarks>
-        /// Returns the network configuration of the network the node is connected to.
+        /// Returns the list of committed transactions. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <returns>ApiResponse of NetworkConfigurationResponse</returns>
-        ApiResponse<NetworkConfigurationResponse> StatusNetworkConfigurationPostWithHttpInfo();
-        /// <summary>
-        /// Get Network Status
-        /// </summary>
-        /// <remarks>
-        /// Returns the current state and status of the node&#39;s copy of the ledger.
-        /// </remarks>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="networkStatusRequest"></param>
-        /// <returns>NetworkStatusResponse</returns>
-        NetworkStatusResponse StatusNetworkStatusPost(NetworkStatusRequest networkStatusRequest);
-
-        /// <summary>
-        /// Get Network Status
-        /// </summary>
-        /// <remarks>
-        /// Returns the current state and status of the node&#39;s copy of the ledger.
-        /// </remarks>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="networkStatusRequest"></param>
-        /// <returns>ApiResponse of NetworkStatusResponse</returns>
-        ApiResponse<NetworkStatusResponse> StatusNetworkStatusPostWithHttpInfo(NetworkStatusRequest networkStatusRequest);
+        /// <param name="committedTransactionsRequest"></param>
+        /// <returns>ApiResponse of CommittedTransactionsResponse</returns>
+        ApiResponse<CommittedTransactionsResponse> TransactionStreamPostWithHttpInfo(CommittedTransactionsRequest committedTransactionsRequest);
         #endregion Synchronous Operations
     }
 
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public interface IStatusApiAsync : IApiAccessor
+    public interface IStreamApiAsync : IApiAccessor
     {
         #region Asynchronous Operations
         /// <summary>
-        /// Get Network Configuration
+        /// Get Committed Transactions
         /// </summary>
         /// <remarks>
-        /// Returns the network configuration of the network the node is connected to.
+        /// Returns the list of committed transactions. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="committedTransactionsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of NetworkConfigurationResponse</returns>
-        System.Threading.Tasks.Task<NetworkConfigurationResponse> StatusNetworkConfigurationPostAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of CommittedTransactionsResponse</returns>
+        System.Threading.Tasks.Task<CommittedTransactionsResponse> TransactionStreamPostAsync(CommittedTransactionsRequest committedTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Get Network Configuration
+        /// Get Committed Transactions
         /// </summary>
         /// <remarks>
-        /// Returns the network configuration of the network the node is connected to.
+        /// Returns the list of committed transactions. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="committedTransactionsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (NetworkConfigurationResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<NetworkConfigurationResponse>> StatusNetworkConfigurationPostWithHttpInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-        /// <summary>
-        /// Get Network Status
-        /// </summary>
-        /// <remarks>
-        /// Returns the current state and status of the node&#39;s copy of the ledger.
-        /// </remarks>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="networkStatusRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of NetworkStatusResponse</returns>
-        System.Threading.Tasks.Task<NetworkStatusResponse> StatusNetworkStatusPostAsync(NetworkStatusRequest networkStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-        /// <summary>
-        /// Get Network Status
-        /// </summary>
-        /// <remarks>
-        /// Returns the current state and status of the node&#39;s copy of the ledger.
-        /// </remarks>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="networkStatusRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (NetworkStatusResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<NetworkStatusResponse>> StatusNetworkStatusPostWithHttpInfoAsync(NetworkStatusRequest networkStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (CommittedTransactionsResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<CommittedTransactionsResponse>> TransactionStreamPostWithHttpInfoAsync(CommittedTransactionsRequest committedTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public interface IStatusApi : IStatusApiSync, IStatusApiAsync
+    public interface IStreamApi : IStreamApiSync, IStreamApiAsync
     {
 
     }
@@ -198,29 +158,29 @@ namespace RadixDlt.CoreApiSdk.Api
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public partial class StatusApi : IDisposable, IStatusApi
+    public partial class StreamApi : IDisposable, IStreamApi
     {
         private RadixDlt.CoreApiSdk.Client.ExceptionFactory _exceptionFactory = (name, response) => null;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatusApi"/> class.
+        /// Initializes a new instance of the <see cref="StreamApi"/> class.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <returns></returns>
-        public StatusApi() : this((string)null)
+        public StreamApi() : this((string)null)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatusApi"/> class.
+        /// Initializes a new instance of the <see cref="StreamApi"/> class.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <param name="basePath">The target service's base path in URL format.</param>
         /// <exception cref="ArgumentException"></exception>
         /// <returns></returns>
-        public StatusApi(string basePath)
+        public StreamApi(string basePath)
         {
             this.Configuration = RadixDlt.CoreApiSdk.Client.Configuration.MergeConfigurations(
                 RadixDlt.CoreApiSdk.Client.GlobalConfiguration.Instance,
@@ -233,14 +193,14 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatusApi"/> class using Configuration object.
+        /// Initializes a new instance of the <see cref="StreamApi"/> class using Configuration object.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <param name="configuration">An instance of Configuration.</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <returns></returns>
-        public StatusApi(RadixDlt.CoreApiSdk.Client.Configuration configuration)
+        public StreamApi(RadixDlt.CoreApiSdk.Client.Configuration configuration)
         {
             if (configuration == null) throw new ArgumentNullException("configuration");
 
@@ -255,7 +215,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatusApi"/> class.
+        /// Initializes a new instance of the <see cref="StreamApi"/> class.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="handler">An optional instance of HttpClientHandler that is used by HttpClient.</param>
@@ -265,12 +225,12 @@ namespace RadixDlt.CoreApiSdk.Api
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public StatusApi(HttpClient client, HttpClientHandler handler = null) : this(client, (string)null, handler)
+        public StreamApi(HttpClient client, HttpClientHandler handler = null) : this(client, (string)null, handler)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatusApi"/> class.
+        /// Initializes a new instance of the <see cref="StreamApi"/> class.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="basePath">The target service's base path in URL format.</param>
@@ -282,7 +242,7 @@ namespace RadixDlt.CoreApiSdk.Api
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public StatusApi(HttpClient client, string basePath, HttpClientHandler handler = null)
+        public StreamApi(HttpClient client, string basePath, HttpClientHandler handler = null)
         {
             if (client == null) throw new ArgumentNullException("client");
 
@@ -297,7 +257,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatusApi"/> class using Configuration object.
+        /// Initializes a new instance of the <see cref="StreamApi"/> class using Configuration object.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="configuration">An instance of Configuration.</param>
@@ -308,7 +268,7 @@ namespace RadixDlt.CoreApiSdk.Api
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public StatusApi(HttpClient client, RadixDlt.CoreApiSdk.Client.Configuration configuration, HttpClientHandler handler = null)
+        public StreamApi(HttpClient client, RadixDlt.CoreApiSdk.Client.Configuration configuration, HttpClientHandler handler = null)
         {
             if (configuration == null) throw new ArgumentNullException("configuration");
             if (client == null) throw new ArgumentNullException("client");
@@ -324,14 +284,14 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatusApi"/> class
+        /// Initializes a new instance of the <see cref="StreamApi"/> class
         /// using a Configuration object and client instance.
         /// </summary>
         /// <param name="client">The client interface for synchronous API access.</param>
         /// <param name="asyncClient">The client interface for asynchronous API access.</param>
         /// <param name="configuration">The configuration object.</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public StatusApi(RadixDlt.CoreApiSdk.Client.ISynchronousClient client, RadixDlt.CoreApiSdk.Client.IAsynchronousClient asyncClient, RadixDlt.CoreApiSdk.Client.IReadableConfiguration configuration)
+        public StreamApi(RadixDlt.CoreApiSdk.Client.ISynchronousClient client, RadixDlt.CoreApiSdk.Client.IAsynchronousClient asyncClient, RadixDlt.CoreApiSdk.Client.IReadableConfiguration configuration)
         {
             if (client == null) throw new ArgumentNullException("client");
             if (asyncClient == null) throw new ArgumentNullException("asyncClient");
@@ -398,26 +358,33 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Get Network Configuration Returns the network configuration of the network the node is connected to.
+        /// Get Committed Transactions Returns the list of committed transactions. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <returns>NetworkConfigurationResponse</returns>
-        public NetworkConfigurationResponse StatusNetworkConfigurationPost()
+        /// <param name="committedTransactionsRequest"></param>
+        /// <returns>CommittedTransactionsResponse</returns>
+        public CommittedTransactionsResponse TransactionStreamPost(CommittedTransactionsRequest committedTransactionsRequest)
         {
-            RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkConfigurationResponse> localVarResponse = StatusNetworkConfigurationPostWithHttpInfo();
+            RadixDlt.CoreApiSdk.Client.ApiResponse<CommittedTransactionsResponse> localVarResponse = TransactionStreamPostWithHttpInfo(committedTransactionsRequest);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Network Configuration Returns the network configuration of the network the node is connected to.
+        /// Get Committed Transactions Returns the list of committed transactions. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <returns>ApiResponse of NetworkConfigurationResponse</returns>
-        public RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkConfigurationResponse> StatusNetworkConfigurationPostWithHttpInfo()
+        /// <param name="committedTransactionsRequest"></param>
+        /// <returns>ApiResponse of CommittedTransactionsResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<CommittedTransactionsResponse> TransactionStreamPostWithHttpInfo(CommittedTransactionsRequest committedTransactionsRequest)
         {
+            // verify the required parameter 'committedTransactionsRequest' is set
+            if (committedTransactionsRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'committedTransactionsRequest' when calling StreamApi->TransactionStreamPost");
+
             RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
 
             string[] _contentTypes = new string[] {
+                "application/json"
             };
 
             // to determine the Accept header
@@ -431,14 +398,15 @@ namespace RadixDlt.CoreApiSdk.Api
             var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
+            localVarRequestOptions.Data = committedTransactionsRequest;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<NetworkConfigurationResponse>("/status/network-configuration", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<CommittedTransactionsResponse>("/transaction/stream", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("StatusNetworkConfigurationPost", localVarResponse);
+                Exception _exception = this.ExceptionFactory("TransactionStreamPost", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -446,139 +414,30 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Get Network Configuration Returns the network configuration of the network the node is connected to.
+        /// Get Committed Transactions Returns the list of committed transactions. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="committedTransactionsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of NetworkConfigurationResponse</returns>
-        public async System.Threading.Tasks.Task<NetworkConfigurationResponse> StatusNetworkConfigurationPostAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of CommittedTransactionsResponse</returns>
+        public async System.Threading.Tasks.Task<CommittedTransactionsResponse> TransactionStreamPostAsync(CommittedTransactionsRequest committedTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkConfigurationResponse> localVarResponse = await StatusNetworkConfigurationPostWithHttpInfoAsync(cancellationToken).ConfigureAwait(false);
+            RadixDlt.CoreApiSdk.Client.ApiResponse<CommittedTransactionsResponse> localVarResponse = await TransactionStreamPostWithHttpInfoAsync(committedTransactionsRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Network Configuration Returns the network configuration of the network the node is connected to.
+        /// Get Committed Transactions Returns the list of committed transactions. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="committedTransactionsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (NetworkConfigurationResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkConfigurationResponse>> StatusNetworkConfigurationPostWithHttpInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (CommittedTransactionsResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<CommittedTransactionsResponse>> TransactionStreamPostWithHttpInfoAsync(CommittedTransactionsRequest committedTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-
-            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-
-            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-
-
-            // make the HTTP request
-
-            var localVarResponse = await this.AsynchronousClient.PostAsync<NetworkConfigurationResponse>("/status/network-configuration", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("StatusNetworkConfigurationPost", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Get Network Status Returns the current state and status of the node&#39;s copy of the ledger.
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="networkStatusRequest"></param>
-        /// <returns>NetworkStatusResponse</returns>
-        public NetworkStatusResponse StatusNetworkStatusPost(NetworkStatusRequest networkStatusRequest)
-        {
-            RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkStatusResponse> localVarResponse = StatusNetworkStatusPostWithHttpInfo(networkStatusRequest);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get Network Status Returns the current state and status of the node&#39;s copy of the ledger.
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="networkStatusRequest"></param>
-        /// <returns>ApiResponse of NetworkStatusResponse</returns>
-        public RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkStatusResponse> StatusNetworkStatusPostWithHttpInfo(NetworkStatusRequest networkStatusRequest)
-        {
-            // verify the required parameter 'networkStatusRequest' is set
-            if (networkStatusRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'networkStatusRequest' when calling StatusApi->StatusNetworkStatusPost");
-
-            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = networkStatusRequest;
-
-
-            // make the HTTP request
-            var localVarResponse = this.Client.Post<NetworkStatusResponse>("/status/network-status", localVarRequestOptions, this.Configuration);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("StatusNetworkStatusPost", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Get Network Status Returns the current state and status of the node&#39;s copy of the ledger.
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="networkStatusRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of NetworkStatusResponse</returns>
-        public async System.Threading.Tasks.Task<NetworkStatusResponse> StatusNetworkStatusPostAsync(NetworkStatusRequest networkStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkStatusResponse> localVarResponse = await StatusNetworkStatusPostWithHttpInfoAsync(networkStatusRequest, cancellationToken).ConfigureAwait(false);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get Network Status Returns the current state and status of the node&#39;s copy of the ledger.
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="networkStatusRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (NetworkStatusResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkStatusResponse>> StatusNetworkStatusPostWithHttpInfoAsync(NetworkStatusRequest networkStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            // verify the required parameter 'networkStatusRequest' is set
-            if (networkStatusRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'networkStatusRequest' when calling StatusApi->StatusNetworkStatusPost");
+            // verify the required parameter 'committedTransactionsRequest' is set
+            if (committedTransactionsRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'committedTransactionsRequest' when calling StreamApi->TransactionStreamPost");
 
 
             RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
@@ -599,16 +458,16 @@ namespace RadixDlt.CoreApiSdk.Api
             var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = networkStatusRequest;
+            localVarRequestOptions.Data = committedTransactionsRequest;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<NetworkStatusResponse>("/status/network-status", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<CommittedTransactionsResponse>("/transaction/stream", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("StatusNetworkStatusPost", localVarResponse);
+                Exception _exception = this.ExceptionFactory("TransactionStreamPost", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
