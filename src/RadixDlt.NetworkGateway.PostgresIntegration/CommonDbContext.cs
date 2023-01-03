@@ -108,20 +108,6 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityAccessRulesChainHistory> EntityAccessRulesLayersHistory => Set<EntityAccessRulesChainHistory>();
 
-    static CommonDbContext()
-    {
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<int>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
-
-#pragma warning disable CS0618
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccessRulesChainSubtype>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
-#pragma warning restore CS0618
-    }
-
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {

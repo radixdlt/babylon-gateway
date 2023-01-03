@@ -62,54 +62,37 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.DataAggregator;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
-using RadixDlt.NetworkGateway.PostgresIntegration.Services;
+using Dapper;
+using Npgsql;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public static class DataAggregatorBuilderExtensions
+internal static class CustomTypes
 {
-    public static DataAggregatorBuilder AddPostgresPersistence(this DataAggregatorBuilder builder)
+    private static bool _configured;
+
+    public static void EnsureConfigured()
     {
-        return builder
-            .AddPostgresPersistenceCore()
-            .AddPostgresPersistenceHealthChecks();
-    }
+        if (_configured)
+        {
+            return;
+        }
 
-    public static DataAggregatorBuilder AddPostgresPersistenceCore(this DataAggregatorBuilder builder)
-    {
-        CustomTypes.EnsureConfigured();
+        // needed to read int[], bigint[] and text[] columns using Dapper
+        SqlMapper.AddTypeHandler(new GenericArrayHandler<int>());
+        SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
+        SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
 
-        builder.Services
-            .AddSingleton<ILedgerExtenderService, PostgresLedgerExtenderService>()
-            .AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>()
-            .AddSingleton<IPendingTransactionTrackerService, PendingTransactionTrackerService>()
-            .AddSingleton<IPendingTransactionResubmissionService, PendingTransactionResubmissionService>()
-            .AddSingleton<IPendingTransactionPrunerService, PendingTransactionPrunerService>();
+#pragma warning disable CS0618
+        // needed to support custom enums in postgres
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccessRulesChainSubtype>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
+#pragma warning restore CS0618
 
-        // Useful links:
-        // https://www.npgsql.org/efcore/index.html
-        // https://www.npgsql.org/doc/connection-string-parameters.html
-        builder.Services
-            .AddDbContextFactory<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName));
-            });
-
-        return builder;
-    }
-
-    public static DataAggregatorBuilder AddPostgresPersistenceHealthChecks(this DataAggregatorBuilder builder)
-    {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadWriteDbContext>("database_connection_check");
-
-        return builder;
+        _configured = true;
     }
 }

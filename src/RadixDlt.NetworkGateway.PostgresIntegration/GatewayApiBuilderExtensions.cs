@@ -83,6 +83,8 @@ public static class GatewayApiBuilderExtensions
 
     public static GatewayApiBuilder AddPostgresPersistenceCore(this GatewayApiBuilder builder)
     {
+        CustomTypes.EnsureConfigured();
+
         builder.Services
             .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
             .AddScoped<ITransactionQuerier, TransactionQuerier>()
