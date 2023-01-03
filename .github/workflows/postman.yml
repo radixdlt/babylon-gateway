@@ -2,6 +2,7 @@ name: Sync OpenAPI specs with Postman
 
 on:
   push:
+    - develop
   workflow_dispatch:
     inputs:
       network_name:
