@@ -120,8 +120,6 @@ jobs:
         run: |
           echo "GATEWAY_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
       - name: Deploy and test on an ephemeral network
-        env:
-          NODE_DOCKER_TAG: ${{ github.head_ref || github.ref_name }}
         uses: toptal/jenkins-job-trigger-action@649c04c83c099c759aba134bf78138a303ec095f
         with:
           jenkins_url: "${{ secrets.JENKINS_URL }}"
@@ -132,6 +130,6 @@ jobs:
             {
               "gatewayDockerTag": "${{ needs.publish-docker.outputs.gateway-api-tag }}",
               "gatewayBranch": "${{ env.GATEWAY_BRANCH }}",
-              "nodeDockerTag": "${{ env.NODE_DOCKER_TAG }}"
+              "nodeDockerTag": "develop"
             }
           job_timeout: "3600"
