@@ -125,7 +125,6 @@ INNER JOIN LATERAL (
 
     public async Task<Dictionary<long, NonFungibleIdStoreHistory>> MostRecentNonFungibleIdStoreHistoryFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, CancellationToken token)
     {
-        // TODO is it guaranteed that given NonFungibleStore has always proper NF ResourceManager as its global ancestor?
         var ids = nonFungibleIdStoreChanges.Select(x => x.ReferencedStore.DatabaseGlobalAncestorId).Distinct().ToList();
 
         return await _dbContext.NonFungibleIdStoreHistory
