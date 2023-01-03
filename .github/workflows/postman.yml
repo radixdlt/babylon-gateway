@@ -2,8 +2,6 @@ name: Sync OpenAPI specs with Postman
 
 on:
   push:
-    branches:
-    - main
   workflow_dispatch:
     inputs:
       network_name:
@@ -90,7 +88,7 @@ jobs:
           curl -X GET -H "X-API-KEY:${{secrets.POSTMAN_API_TOKEN}}" https://api.getpostman.com/collections/${{env.gateway_api_collection_id}} > tmp.collection.json
       - name: Update the collection name w/ timestamp and git tag
         run: |
-          sed -i 's/"name":".*","description":"See/"name":"${{env.gateway_api_collection_name}}","description":"See/' tmp.collection.json
+          sed -i 's/"name":".*","description":"This/"name":"${{env.gateway_api_collection_name}}","description":"This/' tmp.collection.json
       - name: Change the baseUrl variable name
         run: |
           sed -i 's/{{baseUrl}}/{{gatewayBaseUrl}}/g' tmp.collection.json
