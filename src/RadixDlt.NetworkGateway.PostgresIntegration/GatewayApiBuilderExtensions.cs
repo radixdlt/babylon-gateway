@@ -73,6 +73,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 public static class GatewayApiBuilderExtensions
 {
+    static GatewayApiBuilderExtensions()
+    {
+        CustomTypes.EnsureConfigured();
+    }
+
     public static GatewayApiBuilder AddPostgresPersistence(this GatewayApiBuilder builder)
     {
         return builder
@@ -83,8 +88,6 @@ public static class GatewayApiBuilderExtensions
 
     public static GatewayApiBuilder AddPostgresPersistenceCore(this GatewayApiBuilder builder)
     {
-        CustomTypes.EnsureConfigured();
-
         builder.Services
             .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
             .AddScoped<ITransactionQuerier, TransactionQuerier>()

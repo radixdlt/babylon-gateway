@@ -70,10 +70,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddNetworkGatewayPostgresMigrations(this IServiceCollection services)
+    static ServiceCollectionExtensions()
     {
         CustomTypes.EnsureConfigured();
+    }
 
+    public static void AddNetworkGatewayPostgresMigrations(this IServiceCollection services)
+    {
         services
             .AddDbContextFactory<MigrationsDbContext>((serviceProvider, options) =>
             {
