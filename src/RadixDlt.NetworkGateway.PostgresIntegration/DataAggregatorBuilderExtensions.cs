@@ -74,6 +74,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 public static class DataAggregatorBuilderExtensions
 {
+    static DataAggregatorBuilderExtensions()
+    {
+        CustomTypes.EnsureConfigured();
+    }
+
     public static DataAggregatorBuilder AddPostgresPersistence(this DataAggregatorBuilder builder)
     {
         return builder
@@ -83,8 +88,6 @@ public static class DataAggregatorBuilderExtensions
 
     public static DataAggregatorBuilder AddPostgresPersistenceCore(this DataAggregatorBuilder builder)
     {
-        CustomTypes.EnsureConfigured();
-
         builder.Services
             .AddSingleton<ILedgerExtenderService, PostgresLedgerExtenderService>()
             .AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>()
