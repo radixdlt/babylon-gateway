@@ -18,6 +18,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
     <PackageVersion Include="Microsoft.OpenApi.Readers" Version="1.4.5" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageVersion Include="Npgsql.DependencyInjection" Version="7.0.1" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.1" />
     <PackageVersion Include="Polly" Version="7.2.3" />
     <PackageVersion Include="prometheus-net" Version="7.0.0" />
