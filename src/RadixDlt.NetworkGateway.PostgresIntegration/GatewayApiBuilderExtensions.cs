@@ -63,7 +63,6 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -96,15 +95,15 @@ public static class GatewayApiBuilderExtensions
             .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
 
         builder.Services
+            .AddTypedNpgsqlDataSource<ReadOnlyDbContext>(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName)
             .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
             {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName));
+                options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadOnlyDbContext>>().NpgsqlDataSource);
             })
+            .AddTypedNpgsqlDataSource<ReadWriteDbContext>(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName)
             .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
             {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName));
+                options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadWriteDbContext>>().NpgsqlDataSource);
             });
 
         return builder;
