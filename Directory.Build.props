@@ -12,6 +12,11 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionSuffix>develop</VersionSuffix>
+  </PropertyGroup>
+
   <ItemGroup Condition="$(MSBuildProjectExtension) == '.csproj'">
     <PackageReference Include="StyleCop.Analyzers" PrivateAssets="all" />
   </ItemGroup>

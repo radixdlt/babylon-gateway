@@ -73,6 +73,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -86,6 +87,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 {
     private static readonly Regex _oasVersionRegex = new("Version of the API: (\\d+\\.\\d+\\.\\d+)", RegexOptions.Compiled | RegexOptions.Multiline);
 
+    private static string _gatewayVersion = GetGatewayProductVersion();
     private static string _oasVersion = GetOpenApiSchemaVersion();
 
     private readonly ILogger<LedgerStateQuerier> _logger;
@@ -128,7 +130,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
                 ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
             ),
             new GatewayModel.GatewayInfoResponseKnownTarget(ledgerStatus.TargetStateVersion),
-            new GatewayModel.GatewayInfoResponseReleaseInfo(_endpointOptionsMonitor.CurrentValue.GatewayApiVersion, _oasVersion),
+            new GatewayModel.GatewayInfoResponseReleaseInfo(_gatewayVersion, _oasVersion),
             new GatewayModel.GatewayInformationResponseAllOfWellKnownAddresses(
                 wellKnownAddresses.AccountPackage,
                 wellKnownAddresses.Faucet,
@@ -182,15 +184,15 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
     {
         LedgerStateReport? ledgerStateReport = null;
 
-        if (fromLedgerStateIdentifier?.HasStateVersion == true)
+        if (fromLedgerStateIdentifier?.HasStateVersion() == true)
         {
             ledgerStateReport = await GetLedgerStateAfterStateVersion(fromLedgerStateIdentifier.StateVersion.Value, token);
         }
-        else if (fromLedgerStateIdentifier?.HasTimestamp == true)
+        else if (fromLedgerStateIdentifier?.HasTimestamp() == true)
         {
             ledgerStateReport = await GetLedgerStateAfterTimestamp(fromLedgerStateIdentifier.Timestamp.Value, token);
         }
-        else if (fromLedgerStateIdentifier?.HasEpoch == true)
+        else if (fromLedgerStateIdentifier?.HasEpoch() == true)
         {
             ledgerStateReport = await GetLedgerStateAfterEpochAndRound(fromLedgerStateIdentifier.Epoch.Value, fromLedgerStateIdentifier.Round ?? 0, token);
         }
@@ -242,6 +244,13 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerStatus.TopOfLedgerStateVersion;
     }
 
+    private static string GetGatewayProductVersion()
+    {
+        var version = FileVersionInfo.GetVersionInfo(typeof(NetworkGatewayConstants).Assembly.Location).ProductVersion;
+
+        return version ?? throw new InvalidOperationException("Unable to determine product version");
+    }
+
     private static string GetOpenApiSchemaVersion()
     {
         var match = _oasVersionRegex.Match(GatewayClient.Configuration.ToDebugReport());
@@ -274,15 +283,15 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
     {
         LedgerStateReport result;
 
-        if (at?.HasStateVersion == true)
+        if (at?.HasStateVersion() == true)
         {
             result = await GetLedgerStateBeforeStateVersion(at.StateVersion.Value, token);
         }
-        else if (at?.HasTimestamp == true)
+        else if (at?.HasTimestamp() == true)
         {
             result = await GetLedgerStateBeforeTimestamp(at.Timestamp.Value, token);
         }
-        else if (at?.HasEpoch == true)
+        else if (at?.HasEpoch() == true)
         {
             result = await GetLedgerStateAtEpochAndRound(at.Epoch.Value, at.Round ?? 0, token);
         }

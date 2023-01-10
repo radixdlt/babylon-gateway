@@ -62,24 +62,37 @@
  * permissions under this License.
  */
 
+using Dapper;
+using Npgsql;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.Collections.Generic;
+using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-internal class NonFungibleIdTypeValueConverter : EnumTypeValueConverterBase<NonFungibleIdType>
+internal static class CustomTypes
 {
-    private static readonly Dictionary<NonFungibleIdType, string> _conversion = new()
-    {
-        { NonFungibleIdType.String, "STRING" },
-        { NonFungibleIdType.U32, "U32" },
-        { NonFungibleIdType.U64, "U64" },
-        { NonFungibleIdType.Bytes, "BYTES" },
-        { NonFungibleIdType.UUID, "UUID" },
-    };
+    private static bool _configured;
 
-    public NonFungibleIdTypeValueConverter()
-        : base(_conversion, Invert(_conversion))
+    public static void EnsureConfigured()
     {
+        if (_configured)
+        {
+            return;
+        }
+
+        // needed to read int[], bigint[] and text[] columns using Dapper
+        SqlMapper.AddTypeHandler(new GenericArrayHandler<int>());
+        SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
+        SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
+
+#pragma warning disable CS0618
+        // needed to support custom enums in postgres
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccessRulesChainSubtype>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
+#pragma warning restore CS0618
+
+        _configured = true;
     }
 }

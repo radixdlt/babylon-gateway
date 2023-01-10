@@ -231,7 +231,7 @@ internal class SubmissionService : ISubmissionService
 
             await _submissionTrackingService.MarkAsFailed(
                 true,
-                parsedTransaction.HashBytes,
+                parsedTransaction.GetHashBytes(),
                 ex.Error.Message,
                 token
             );
@@ -245,7 +245,7 @@ internal class SubmissionService : ISubmissionService
 
             await _submissionTrackingService.MarkAsFailed(
                 false,
-                parsedTransaction.HashBytes,
+                parsedTransaction.GetHashBytes(),
                 ex.Error.Message,
                 token
             );

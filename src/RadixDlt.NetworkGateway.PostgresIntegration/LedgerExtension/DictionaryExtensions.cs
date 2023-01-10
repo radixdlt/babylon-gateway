@@ -62,27 +62,25 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class EnumTypeValueConverterBase<TEnum> : ValueConverter<TEnum, string>
-    where TEnum : notnull
+internal static class DictionaryExtensions
 {
-    public EnumTypeValueConverterBase(IReadOnlyDictionary<TEnum, string> conversion, IReadOnlyDictionary<string, TEnum> inverseConversion)
-        : base(
-            value => conversion[value],
-            value => inverseConversion[value]
-        )
+    public static TVal GetOrAdd<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> factory)
+        where TKey : notnull
     {
-    }
+        if (dictionary.ContainsKey(key))
+        {
+            return dictionary[key];
+        }
 
-    protected static Dictionary<TOut, TIn> Invert<TIn, TOut>(IReadOnlyDictionary<TIn, TOut> conversion)
-        where TIn : notnull
-        where TOut : notnull
-    {
-        return conversion.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
+        var value = factory(key);
+
+        dictionary[key] = value;
+
+        return value;
     }
 }

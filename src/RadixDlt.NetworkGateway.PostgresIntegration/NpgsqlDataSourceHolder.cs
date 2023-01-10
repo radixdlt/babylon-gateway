@@ -62,21 +62,24 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.Collections.Generic;
+using Npgsql;
+using System;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-internal class AccessRulesChainSubtypeValueConverter : EnumTypeValueConverterBase<AccessRulesChainSubtype>
+// ReSharper disable once UnusedTypeParameter
+internal class NpgsqlDataSourceHolder<T> : IAsyncDisposable
 {
-    private static readonly Dictionary<AccessRulesChainSubtype, string> _conversion = new()
+    public NpgsqlDataSourceHolder(NpgsqlDataSource npgsqlDataSource)
     {
-        { AccessRulesChainSubtype.None, "NONE" },
-        { AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain, "ResourceManagerVaultAccessRulesChain" },
-    };
+        NpgsqlDataSource = npgsqlDataSource;
+    }
 
-    public AccessRulesChainSubtypeValueConverter()
-        : base(_conversion, Invert(_conversion))
+    public NpgsqlDataSource NpgsqlDataSource { get; }
+
+    public ValueTask DisposeAsync()
     {
+        return NpgsqlDataSource.DisposeAsync();
     }
 }

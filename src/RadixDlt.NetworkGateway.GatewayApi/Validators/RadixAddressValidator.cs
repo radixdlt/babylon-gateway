@@ -108,11 +108,14 @@ public sealed class RadixAddressValidator<T> : PropertyValidator<T, string?>
         }
         catch (AddressException)
         {
-            context.AddFailure("'{PropertyName}' must be a valid Bech32M-encoded RadixAddress.");
-
             return false;
         }
 
         return true;
+    }
+
+    protected override string GetDefaultMessageTemplate(string errorCode)
+    {
+        return "'{PropertyName}' must be a valid Bech32M-encoded RadixAddress.";
     }
 }

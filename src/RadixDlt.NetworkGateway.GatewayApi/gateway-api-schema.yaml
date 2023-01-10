@@ -88,7 +88,7 @@ tags:
 
       User transactions are formed of a core "intent", which is then signed by 0+ signatories, before being notarized. The output is called a notarized payload.
       It is this notarized transaction payload which is submitted to the network.
-      
+
       For most users, this construction process will generally happen in their Radix Wallet. If you wish to construct transactions programmatically or offline,
       you will need to integrate the Radix Engine Toolkit into your application for construction and finalization.
 
@@ -933,7 +933,6 @@ components:
 
     TransactionStatusRequest:
       allOf:
-        - $ref: "#/components/schemas/AtLedgerStateMixin"
         - type: object
           required:
             - intent_hash_hex

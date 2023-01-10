@@ -547,8 +547,8 @@ internal class DataAggregatorMetricsObserver :
 
         foreach (var countByStatus in mempoolCountByStatus)
         {
-            _mempoolDbSizeByStatus.WithLabels(countByStatus.Status).Set(countByStatus.Count);
-            existingStatusLabelsNeedingUpdating.Remove(countByStatus.Status);
+            _mempoolDbSizeByStatus.WithLabels(countByStatus.Status.ToString()).Set(countByStatus.Count);
+            existingStatusLabelsNeedingUpdating.Remove(countByStatus.Status.ToString());
         }
 
         // If a known status doesn't appear in the database, it should be set to 0.

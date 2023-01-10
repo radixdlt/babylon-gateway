@@ -71,12 +71,12 @@ namespace RadixDlt.CoreApiSdk.Model;
 // b) has owned_entities
 public interface IOwner
 {
-    public IEnumerable<EntityReference> OwnedEntities { get; }
+    public IEnumerable<EntityReference> GetOwnedEntities();
 }
 
 public interface IGlobalResourcePointer
 {
-    public IEnumerable<GlobalResourcePointer> Pointers { get; }
+    public IEnumerable<GlobalResourcePointer> GetPointers();
 }
 
 public record GlobalResourcePointer(ResourceType Type, string GlobalAddress);

@@ -161,7 +161,7 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
         ));
 
         var hashesInMempool = mempoolListResponse.Contents
-            .Select(ti => new PendingTransactionHashPair(ti.IntentHashBytes, ti.PayloadHashBytes))
+            .Select(ti => new PendingTransactionHashPair(ti.GetIntentHashBytes(), ti.GetPayloadHashBytes()))
             .ToList();
 
         if (hashesInMempool.Count == 0)
@@ -248,7 +248,7 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
                 token
             ));
 
-            return new PendingTransactionData(hashes, _clock.UtcNow, response.NotarizedTransaction.PayloadBytes);
+            return new PendingTransactionData(hashes, _clock.UtcNow, response.NotarizedTransaction.GetPayloadBytes());
         }
         catch (WrappedCoreApiException<CoreModel.MempoolTransactionNotFoundError>)
         {

@@ -71,10 +71,6 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
 
 public sealed class EndpointOptions
 {
-    // TODO replace with <Version> in Directory.Build.Props
-    [ConfigurationKeyName("GatewayApiVersion")]
-    public string GatewayApiVersion { get; set; } = "UNKNOWN";
-
     [ConfigurationKeyName("MaxPageSize")]
     public int MaxPageSize { get; set; } = 30;
 
@@ -86,7 +82,6 @@ internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptio
 {
     public EndpointOptionsValidator()
     {
-        RuleFor(x => x.GatewayApiVersion).NotNull();
         RuleFor(x => x.MaxPageSize).GreaterThan(0);
         RuleFor(x => x.RequestTimeout).GreaterThan(TimeSpan.Zero);
     }

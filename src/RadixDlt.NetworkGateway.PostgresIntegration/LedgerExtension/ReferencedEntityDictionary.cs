@@ -62,21 +62,65 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class LedgerTransactionStatusValueConverter : EnumTypeValueConverterBase<LedgerTransactionStatus>
+internal class ReferencedEntityDictionary
 {
-    private static readonly Dictionary<LedgerTransactionStatus, string> _conversion = new()
-    {
-        { LedgerTransactionStatus.Succeeded, "SUCCEEDED" },
-        { LedgerTransactionStatus.Failed, "FAILED" },
-    };
+    private readonly Dictionary<string, ReferencedEntity> _storage = new();
+    private readonly Dictionary<long, List<ReferencedEntity>> _inversed = new();
+    private readonly Dictionary<string, ReferencedEntity> _globalsCache = new();
+    private readonly Dictionary<long, ReferencedEntity> _dbIdCache = new();
 
-    public LedgerTransactionStatusValueConverter()
-        : base(_conversion, Invert(_conversion))
+    public ICollection<string> Addresses => _storage.Keys;
+
+    public ICollection<ReferencedEntity> All => _storage.Values;
+
+    public ReferencedEntity GetOrAdd(string addressHex, Func<string, ReferencedEntity> factory)
     {
+        if (_storage.ContainsKey(addressHex))
+        {
+            return _storage[addressHex];
+        }
+
+        var value = factory(addressHex);
+
+        if (!_inversed.ContainsKey(value.StateVersion))
+        {
+            _inversed[value.StateVersion] = new List<ReferencedEntity>();
+        }
+
+        _storage[addressHex] = value;
+        _inversed[value.StateVersion].Add(value);
+
+        return value;
+    }
+
+    public ReferencedEntity Get(string addressHex)
+    {
+        return _storage[addressHex];
+    }
+
+    public ReferencedEntity GetByGlobal(string globalAddressHex)
+    {
+        return _globalsCache.GetOrAdd(globalAddressHex, _ => _storage.Values.First(re => re.GlobalAddressHex == globalAddressHex));
+    }
+
+    public ReferencedEntity GetByDatabaseId(long id)
+    {
+        return _dbIdCache.GetOrAdd(id, _ => _storage.Values.First(re => re.DatabaseId == id));
+    }
+
+    public IEnumerable<ReferencedEntity> OfStateVersion(long stateVersion)
+    {
+        if (_inversed.ContainsKey(stateVersion))
+        {
+            return _inversed[stateVersion];
+        }
+
+        return Array.Empty<ReferencedEntity>();
     }
 }

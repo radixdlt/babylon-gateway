@@ -72,6 +72,8 @@ internal class CoreApiProvider : ICoreApiProvider
 {
     public CoreApi.TransactionApi TransactionsApi { get; }
 
+    public CoreApi.StreamApi StreamApi { get; }
+
     public CoreApi.StatusApi StatusApi { get; }
 
     public CoreApi.MempoolApi MempoolApi { get; }
@@ -84,6 +86,7 @@ internal class CoreApiProvider : ICoreApiProvider
         }
 
         TransactionsApi = new CoreApi.TransactionApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
+        StreamApi = new CoreApi.StreamApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
         StatusApi = new CoreApi.StatusApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
         MempoolApi = new CoreApi.MempoolApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
     }

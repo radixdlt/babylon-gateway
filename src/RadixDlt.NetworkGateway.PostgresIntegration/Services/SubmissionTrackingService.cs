@@ -101,7 +101,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         CancellationToken token = default
     )
     {
-        var existingPendingTransaction = await GetPendingTransaction(notarizedTransaction.HashBytes, token);
+        var existingPendingTransaction = await GetPendingTransaction(notarizedTransaction.GetHashBytes(), token);
 
         if (existingPendingTransaction != null)
         {
@@ -118,10 +118,10 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         }
 
         var pendingTransaction = PendingTransaction.NewAsSubmittedForFirstTimeByGateway(
-            notarizedTransaction.HashBytes,
-            notarizedTransaction.SignedIntent.Intent.HashBytes,
-            notarizedTransaction.SignedIntent.HashBytes,
-            notarizedTransaction.PayloadBytes,
+            notarizedTransaction.GetHashBytes(),
+            notarizedTransaction.SignedIntent.Intent.GetHashBytes(),
+            notarizedTransaction.SignedIntent.GetHashBytes(),
+            notarizedTransaction.GetPayloadBytes(),
             submittedToNodeName,
             submittedTimestamp
         );
