@@ -175,28 +175,34 @@ namespace RadixDlt.CoreApiSdk.Model
         EpochManager = 13,
 
         /// <summary>
+        /// Enum ValidatorSet for value: ValidatorSet
+        /// </summary>
+        [EnumMember(Value = "ValidatorSet")]
+        ValidatorSet = 14,
+
+        /// <summary>
         /// Enum ClockCurrentMinute for value: ClockCurrentMinute
         /// </summary>
         [EnumMember(Value = "ClockCurrentMinute")]
-        ClockCurrentMinute = 14,
+        ClockCurrentMinute = 15,
 
         /// <summary>
         /// Enum KeyValueStoreEntry for value: KeyValueStoreEntry
         /// </summary>
         [EnumMember(Value = "KeyValueStoreEntry")]
-        KeyValueStoreEntry = 15,
+        KeyValueStoreEntry = 16,
 
         /// <summary>
         /// Enum NonFungibleStoreEntry for value: NonFungibleStoreEntry
         /// </summary>
         [EnumMember(Value = "NonFungibleStoreEntry")]
-        NonFungibleStoreEntry = 16,
+        NonFungibleStoreEntry = 17,
 
         /// <summary>
         /// Enum Vault for value: Vault
         /// </summary>
         [EnumMember(Value = "Vault")]
-        Vault = 17
+        Vault = 18
 
     }
 

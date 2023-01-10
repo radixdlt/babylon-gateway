@@ -374,6 +374,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     }
                 }
 
+                if (ct.LedgerTransaction.ActualInstance is CoreModel.SystemLedgerTransaction slt)
+                {
+                    // no-op so far
+                }
+
                 foreach (var newSubstate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
                 {
                     var sid = newSubstate.SubstateId;
@@ -503,6 +508,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         SignedIntentHash = ult.NotarizedTransaction.SignedIntent.GetHashBytes(),
                     },
                     CoreModel.ValidatorLedgerTransaction => new ValidatorLedgerTransaction(),
+                    CoreModel.SystemLedgerTransaction => new SystemLedgerTransaction(),
                     _ => throw new ArgumentOutOfRangeException(nameof(ct.LedgerTransaction), ct.LedgerTransaction, null),
                 };
 

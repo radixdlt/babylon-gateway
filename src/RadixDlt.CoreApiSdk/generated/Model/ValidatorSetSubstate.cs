@@ -90,112 +90,118 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines SubstateType
+    /// ValidatorSetSubstate
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum SubstateType
+    [DataContract(Name = "ValidatorSetSubstate")]
+    public partial class ValidatorSetSubstate : IEquatable<ValidatorSetSubstate>
     {
-        /// <summary>
-        /// Enum Metadata for value: Metadata
-        /// </summary>
-        [EnumMember(Value = "Metadata")]
-        Metadata = 1,
 
         /// <summary>
-        /// Enum AccessRulesChain for value: AccessRulesChain
+        /// Gets or Sets SubstateType
         /// </summary>
-        [EnumMember(Value = "AccessRulesChain")]
-        AccessRulesChain = 2,
+        [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateType SubstateType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ValidatorSetSubstate" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected ValidatorSetSubstate() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ValidatorSetSubstate" /> class.
+        /// </summary>
+        /// <param name="substateType">substateType (required).</param>
+        /// <param name="validatorSet">validatorSet (required).</param>
+        public ValidatorSetSubstate(SubstateType substateType = default(SubstateType), List<EcdsaSecp256k1PublicKey> validatorSet = default(List<EcdsaSecp256k1PublicKey>))
+        {
+            this.SubstateType = substateType;
+            // to ensure "validatorSet" is required (not null)
+            if (validatorSet == null)
+            {
+                throw new ArgumentNullException("validatorSet is a required property for ValidatorSetSubstate and cannot be null");
+            }
+            this.ValidatorSet = validatorSet;
+        }
 
         /// <summary>
-        /// Enum GlobalAddress for value: GlobalAddress
+        /// Gets or Sets ValidatorSet
         /// </summary>
-        [EnumMember(Value = "GlobalAddress")]
-        GlobalAddress = 3,
+        [DataMember(Name = "validator_set", IsRequired = true, EmitDefaultValue = true)]
+        public List<EcdsaSecp256k1PublicKey> ValidatorSet { get; set; }
 
         /// <summary>
-        /// Enum ComponentInfo for value: ComponentInfo
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "ComponentInfo")]
-        ComponentInfo = 4,
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class ValidatorSetSubstate {\n");
+            sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
+            sb.Append("  ValidatorSet: ").Append(ValidatorSet).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
 
         /// <summary>
-        /// Enum ComponentState for value: ComponentState
+        /// Returns the JSON string presentation of the object
         /// </summary>
-        [EnumMember(Value = "ComponentState")]
-        ComponentState = 5,
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
 
         /// <summary>
-        /// Enum ComponentRoyaltyConfig for value: ComponentRoyaltyConfig
+        /// Returns true if objects are equal
         /// </summary>
-        [EnumMember(Value = "ComponentRoyaltyConfig")]
-        ComponentRoyaltyConfig = 6,
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as ValidatorSetSubstate);
+        }
 
         /// <summary>
-        /// Enum ComponentRoyaltyAccumulator for value: ComponentRoyaltyAccumulator
+        /// Returns true if ValidatorSetSubstate instances are equal
         /// </summary>
-        [EnumMember(Value = "ComponentRoyaltyAccumulator")]
-        ComponentRoyaltyAccumulator = 7,
+        /// <param name="input">Instance of ValidatorSetSubstate to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(ValidatorSetSubstate input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.SubstateType == input.SubstateType ||
+                    this.SubstateType.Equals(input.SubstateType)
+                ) && 
+                (
+                    this.ValidatorSet == input.ValidatorSet ||
+                    this.ValidatorSet != null &&
+                    input.ValidatorSet != null &&
+                    this.ValidatorSet.SequenceEqual(input.ValidatorSet)
+                );
+        }
 
         /// <summary>
-        /// Enum PackageInfo for value: PackageInfo
+        /// Gets the hash code
         /// </summary>
-        [EnumMember(Value = "PackageInfo")]
-        PackageInfo = 8,
-
-        /// <summary>
-        /// Enum PackageRoyaltyConfig for value: PackageRoyaltyConfig
-        /// </summary>
-        [EnumMember(Value = "PackageRoyaltyConfig")]
-        PackageRoyaltyConfig = 9,
-
-        /// <summary>
-        /// Enum PackageRoyaltyAccumulator for value: PackageRoyaltyAccumulator
-        /// </summary>
-        [EnumMember(Value = "PackageRoyaltyAccumulator")]
-        PackageRoyaltyAccumulator = 10,
-
-        /// <summary>
-        /// Enum ResourceManager for value: ResourceManager
-        /// </summary>
-        [EnumMember(Value = "ResourceManager")]
-        ResourceManager = 11,
-
-        /// <summary>
-        /// Enum EpochManager for value: EpochManager
-        /// </summary>
-        [EnumMember(Value = "EpochManager")]
-        EpochManager = 12,
-
-        /// <summary>
-        /// Enum ValidatorSet for value: ValidatorSet
-        /// </summary>
-        [EnumMember(Value = "ValidatorSet")]
-        ValidatorSet = 13,
-
-        /// <summary>
-        /// Enum ClockCurrentMinute for value: ClockCurrentMinute
-        /// </summary>
-        [EnumMember(Value = "ClockCurrentMinute")]
-        ClockCurrentMinute = 14,
-
-        /// <summary>
-        /// Enum KeyValueStoreEntry for value: KeyValueStoreEntry
-        /// </summary>
-        [EnumMember(Value = "KeyValueStoreEntry")]
-        KeyValueStoreEntry = 15,
-
-        /// <summary>
-        /// Enum NonFungibleStoreEntry for value: NonFungibleStoreEntry
-        /// </summary>
-        [EnumMember(Value = "NonFungibleStoreEntry")]
-        NonFungibleStoreEntry = 16,
-
-        /// <summary>
-        /// Enum Vault for value: Vault
-        /// </summary>
-        [EnumMember(Value = "Vault")]
-        Vault = 17
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
+                if (this.ValidatorSet != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValidatorSet.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
 
     }
 

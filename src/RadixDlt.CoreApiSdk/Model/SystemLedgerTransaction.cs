@@ -66,16 +66,9 @@ using System;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class LedgerTransaction
+public partial class SystemLedgerTransaction
 {
-    public byte[] GetPayloadBytes()
-    {
-        return ActualInstance switch
-        {
-            UserLedgerTransaction ult => ult.GetPayloadBytes(),
-            ValidatorLedgerTransaction vlt => vlt.GetPayloadBytes(),
-            SystemLedgerTransaction slt => slt.GetPayloadBytes(),
-            _ => throw new ArgumentOutOfRangeException(nameof(ActualInstance), ActualInstance, null)
-        };
-    }
+    private byte[] _payloadBytes;
+
+    public byte[] GetPayloadBytes() => _payloadBytes ??= Convert.FromHexString(PayloadHex);
 }

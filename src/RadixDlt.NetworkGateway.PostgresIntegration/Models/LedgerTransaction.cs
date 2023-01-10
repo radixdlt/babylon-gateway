@@ -168,3 +168,7 @@ internal class UserLedgerTransaction : LedgerTransaction
 internal class ValidatorLedgerTransaction : LedgerTransaction
 {
 }
+
+internal class SystemLedgerTransaction : LedgerTransaction
+{
+}

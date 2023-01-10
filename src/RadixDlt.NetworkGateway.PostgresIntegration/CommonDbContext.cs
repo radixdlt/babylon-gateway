@@ -154,7 +154,8 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<LedgerTransaction>()
             .HasDiscriminator<string>("discriminator")
             .HasValue<UserLedgerTransaction>("user")
-            .HasValue<ValidatorLedgerTransaction>("validator");
+            .HasValue<ValidatorLedgerTransaction>("validator")
+            .HasValue<SystemLedgerTransaction>("system");
 
         modelBuilder.Entity<UserLedgerTransaction>()
             .HasIndex(lt => lt.PayloadHash)
