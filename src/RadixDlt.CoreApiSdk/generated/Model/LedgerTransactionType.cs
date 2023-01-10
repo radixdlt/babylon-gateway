@@ -106,7 +106,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum Validator for value: Validator
         /// </summary>
         [EnumMember(Value = "Validator")]
-        Validator = 2
+        Validator = 2,
+
+        /// <summary>
+        /// Enum System for value: System
+        /// </summary>
+        [EnumMember(Value = "System")]
+        System = 3
 
     }
 

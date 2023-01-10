@@ -166,6 +166,7 @@ internal class WriteHelper
 
         var userDiscriminator = GetDiscriminator(typeof(UserLedgerTransaction));
         var validatorDiscriminator = GetDiscriminator(typeof(ValidatorLedgerTransaction));
+        var systemDiscriminator = GetDiscriminator(typeof(SystemLedgerTransaction));
 
         await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, error_message, transaction_accumulator, message, epoch, index_in_epoch, round_in_epoch, is_start_of_epoch, is_start_of_round, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
 
@@ -198,6 +199,12 @@ internal class WriteHelper
                     await writer.WriteAsync(ult.SignedIntentHash, NpgsqlDbType.Bytea, token);
                     break;
                 case ValidatorLedgerTransaction:
+                    await writer.WriteAsync(validatorDiscriminator, NpgsqlDbType.Text, token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    break;
+                case SystemLedgerTransaction:
                     await writer.WriteAsync(validatorDiscriminator, NpgsqlDbType.Text, token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);

@@ -90,112 +90,104 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines SubstateType
+    /// ValidatorSetSubstateAllOf
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum SubstateType
+    [DataContract(Name = "ValidatorSetSubstate_allOf")]
+    public partial class ValidatorSetSubstateAllOf : IEquatable<ValidatorSetSubstateAllOf>
     {
         /// <summary>
-        /// Enum Metadata for value: Metadata
+        /// Initializes a new instance of the <see cref="ValidatorSetSubstateAllOf" /> class.
         /// </summary>
-        [EnumMember(Value = "Metadata")]
-        Metadata = 1,
+        [JsonConstructorAttribute]
+        protected ValidatorSetSubstateAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ValidatorSetSubstateAllOf" /> class.
+        /// </summary>
+        /// <param name="validatorSet">validatorSet (required).</param>
+        public ValidatorSetSubstateAllOf(List<EcdsaSecp256k1PublicKey> validatorSet = default(List<EcdsaSecp256k1PublicKey>))
+        {
+            // to ensure "validatorSet" is required (not null)
+            if (validatorSet == null)
+            {
+                throw new ArgumentNullException("validatorSet is a required property for ValidatorSetSubstateAllOf and cannot be null");
+            }
+            this.ValidatorSet = validatorSet;
+        }
 
         /// <summary>
-        /// Enum AccessRulesChain for value: AccessRulesChain
+        /// Gets or Sets ValidatorSet
         /// </summary>
-        [EnumMember(Value = "AccessRulesChain")]
-        AccessRulesChain = 2,
+        [DataMember(Name = "validator_set", IsRequired = true, EmitDefaultValue = true)]
+        public List<EcdsaSecp256k1PublicKey> ValidatorSet { get; set; }
 
         /// <summary>
-        /// Enum GlobalAddress for value: GlobalAddress
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "GlobalAddress")]
-        GlobalAddress = 3,
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class ValidatorSetSubstateAllOf {\n");
+            sb.Append("  ValidatorSet: ").Append(ValidatorSet).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
 
         /// <summary>
-        /// Enum ComponentInfo for value: ComponentInfo
+        /// Returns the JSON string presentation of the object
         /// </summary>
-        [EnumMember(Value = "ComponentInfo")]
-        ComponentInfo = 4,
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
 
         /// <summary>
-        /// Enum ComponentState for value: ComponentState
+        /// Returns true if objects are equal
         /// </summary>
-        [EnumMember(Value = "ComponentState")]
-        ComponentState = 5,
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as ValidatorSetSubstateAllOf);
+        }
 
         /// <summary>
-        /// Enum ComponentRoyaltyConfig for value: ComponentRoyaltyConfig
+        /// Returns true if ValidatorSetSubstateAllOf instances are equal
         /// </summary>
-        [EnumMember(Value = "ComponentRoyaltyConfig")]
-        ComponentRoyaltyConfig = 6,
+        /// <param name="input">Instance of ValidatorSetSubstateAllOf to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(ValidatorSetSubstateAllOf input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.ValidatorSet == input.ValidatorSet ||
+                    this.ValidatorSet != null &&
+                    input.ValidatorSet != null &&
+                    this.ValidatorSet.SequenceEqual(input.ValidatorSet)
+                );
+        }
 
         /// <summary>
-        /// Enum ComponentRoyaltyAccumulator for value: ComponentRoyaltyAccumulator
+        /// Gets the hash code
         /// </summary>
-        [EnumMember(Value = "ComponentRoyaltyAccumulator")]
-        ComponentRoyaltyAccumulator = 7,
-
-        /// <summary>
-        /// Enum PackageInfo for value: PackageInfo
-        /// </summary>
-        [EnumMember(Value = "PackageInfo")]
-        PackageInfo = 8,
-
-        /// <summary>
-        /// Enum PackageRoyaltyConfig for value: PackageRoyaltyConfig
-        /// </summary>
-        [EnumMember(Value = "PackageRoyaltyConfig")]
-        PackageRoyaltyConfig = 9,
-
-        /// <summary>
-        /// Enum PackageRoyaltyAccumulator for value: PackageRoyaltyAccumulator
-        /// </summary>
-        [EnumMember(Value = "PackageRoyaltyAccumulator")]
-        PackageRoyaltyAccumulator = 10,
-
-        /// <summary>
-        /// Enum ResourceManager for value: ResourceManager
-        /// </summary>
-        [EnumMember(Value = "ResourceManager")]
-        ResourceManager = 11,
-
-        /// <summary>
-        /// Enum EpochManager for value: EpochManager
-        /// </summary>
-        [EnumMember(Value = "EpochManager")]
-        EpochManager = 12,
-
-        /// <summary>
-        /// Enum ValidatorSet for value: ValidatorSet
-        /// </summary>
-        [EnumMember(Value = "ValidatorSet")]
-        ValidatorSet = 13,
-
-        /// <summary>
-        /// Enum ClockCurrentMinute for value: ClockCurrentMinute
-        /// </summary>
-        [EnumMember(Value = "ClockCurrentMinute")]
-        ClockCurrentMinute = 14,
-
-        /// <summary>
-        /// Enum KeyValueStoreEntry for value: KeyValueStoreEntry
-        /// </summary>
-        [EnumMember(Value = "KeyValueStoreEntry")]
-        KeyValueStoreEntry = 15,
-
-        /// <summary>
-        /// Enum NonFungibleStoreEntry for value: NonFungibleStoreEntry
-        /// </summary>
-        [EnumMember(Value = "NonFungibleStoreEntry")]
-        NonFungibleStoreEntry = 16,
-
-        /// <summary>
-        /// Enum Vault for value: Vault
-        /// </summary>
-        [EnumMember(Value = "Vault")]
-        Vault = 17
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                if (this.ValidatorSet != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValidatorSet.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
 
     }
 
