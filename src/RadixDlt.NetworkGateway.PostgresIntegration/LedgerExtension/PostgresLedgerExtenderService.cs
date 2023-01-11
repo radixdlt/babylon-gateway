@@ -365,6 +365,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     switch (vlt.ValidatorTransaction.ActualInstance)
                     {
                         case CoreModel.TimeUpdateValidatorTransaction timeUpdate:
+                            newEpoch = timeUpdate.ConsensusEpoch;
                             newRoundInEpoch = timeUpdate.RoundInEpoch;
                             newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(timeUpdate.ProposerTimestampMs).UtcDateTime;
                             break;
