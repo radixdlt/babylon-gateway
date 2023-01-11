@@ -365,7 +365,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     switch (vlt.ValidatorTransaction.ActualInstance)
                     {
                         case CoreModel.TimeUpdateValidatorTransaction timeUpdate:
-                            newEpoch = timeUpdate.ConsensusEpoch;
                             newRoundInEpoch = timeUpdate.RoundInEpoch;
                             newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(timeUpdate.ProposerTimestampMs).UtcDateTime;
                             break;
@@ -482,7 +481,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                    as the _first_ transaction of a new epoch, as creates the next EpochData, and the RoundData to 0.
                 */
 
-                var isStartOfEpoch = newEpoch != null && newEpoch != lastTransactionSummary.Epoch;
+                var isStartOfEpoch = newEpoch != null;
                 var isStartOfRound = newRoundInEpoch != null;
                 var roundTimestamp = newRoundTimestamp ?? lastTransactionSummary.RoundTimestamp;
                 var createdTimestamp = _clock.UtcNow;
