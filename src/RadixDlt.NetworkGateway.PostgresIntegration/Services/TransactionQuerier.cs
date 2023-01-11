@@ -169,11 +169,7 @@ internal class TransactionQuerier : ITransactionQuerier
             var topStateVersionBoundary = atLedgerState.StateVersion;
 
             return await _dbContext.LedgerTransactions
-                .Where(lt =>
-                    lt.StateVersion >= bottomStateVersionBoundary && lt.StateVersion <= topStateVersionBoundary
-                    && !lt.IsStartOfEpoch
-                    && !lt.IsStartOfRound
-                )
+                .Where(lt => lt.StateVersion >= bottomStateVersionBoundary && lt.StateVersion <= topStateVersionBoundary)
                 .OrderBy(at => at.StateVersion)
                 .Take(request.PageSize + 1)
                 .Select(at => at.StateVersion)
