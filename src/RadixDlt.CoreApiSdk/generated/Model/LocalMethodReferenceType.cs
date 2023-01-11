@@ -102,16 +102,10 @@ namespace RadixDlt.CoreApiSdk.Model
         NativeMethod = 1,
 
         /// <summary>
-        /// Enum NativeFunction for value: NativeFunction
-        /// </summary>
-        [EnumMember(Value = "NativeFunction")]
-        NativeFunction = 2,
-
-        /// <summary>
         /// Enum ScryptoMethod for value: ScryptoMethod
         /// </summary>
         [EnumMember(Value = "ScryptoMethod")]
-        ScryptoMethod = 3
+        ScryptoMethod = 2
 
     }
 

@@ -364,9 +364,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 {
                     switch (vlt.ValidatorTransaction.ActualInstance)
                     {
-                        case CoreModel.EpochUpdateValidatorTransaction epochUpdate:
-                            newEpoch = epochUpdate.ScryptoEpoch;
-                            break;
                         case CoreModel.TimeUpdateValidatorTransaction timeUpdate:
                             newRoundInEpoch = timeUpdate.RoundInEpoch;
                             newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(timeUpdate.ProposerTimestampMs).UtcDateTime;
@@ -374,7 +371,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     }
                 }
 
-                if (ct.LedgerTransaction.ActualInstance is CoreModel.SystemLedgerTransaction slt)
+                if (ct.LedgerTransaction.ActualInstance is CoreModel.SystemLedgerTransaction)
                 {
                     // no-op so far
                 }
@@ -463,6 +460,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     if (sd is CoreModel.PackageInfoSubstate packageInfo)
                     {
                         packageCode[sid.EntityIdHex] = packageInfo.GetCodeBytes();
+                    }
+
+                    if (sd is CoreModel.ValidatorSetSubstate validatorSet)
+                    {
+                        // TODO this is known to be buggy as it is NEXT transaction that should be marked as beginning of the new epoch
+                        newEpoch = validatorSet.Epoch;
                     }
                 }
 

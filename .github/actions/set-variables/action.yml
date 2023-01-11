@@ -42,8 +42,9 @@ runs:
         GH_ACTION_NAME=${{ inputs.github_action_name }}
         GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g')
         GIT_COMMIT=$(git log -1 --format=%h )
-        DOCKER_TAG=${GIT_BRANCH}-${GIT_COMMIT}
-        VERSION_SUFFIX=${GIT_BRANCH}-${GIT_COMMIT}
+        NORMALIZED_SUFFIX=$(echo "${GIT_BRANCH}-${GIT_COMMIT}" | tr -cd '[:alnum:]-')
+        DOCKER_TAG=${NORMALIZED_SUFFIX}
+        VERSION_SUFFIX=${NORMALIZED_SUFFIX}
 
         DOCKER_REPO_DATA_AGGREGATOR="eu.gcr.io/dev-container-repo/babylon-ng-data-aggregator"
         DOCKER_REPO_GATEWAY_API="eu.gcr.io/dev-container-repo/babylon-ng-gateway-api"

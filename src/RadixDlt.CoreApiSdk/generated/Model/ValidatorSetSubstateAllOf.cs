@@ -104,7 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="ValidatorSetSubstateAllOf" /> class.
         /// </summary>
         /// <param name="validatorSet">validatorSet (required).</param>
-        public ValidatorSetSubstateAllOf(List<EcdsaSecp256k1PublicKey> validatorSet = default(List<EcdsaSecp256k1PublicKey>))
+        /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch the validator set is a part of (required).</param>
+        public ValidatorSetSubstateAllOf(List<EcdsaSecp256k1PublicKey> validatorSet = default(List<EcdsaSecp256k1PublicKey>), long epoch = default(long))
         {
             // to ensure "validatorSet" is required (not null)
             if (validatorSet == null)
@@ -112,6 +113,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("validatorSet is a required property for ValidatorSetSubstateAllOf and cannot be null");
             }
             this.ValidatorSet = validatorSet;
+            this.Epoch = epoch;
         }
 
         /// <summary>
@@ -119,6 +121,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "validator_set", IsRequired = true, EmitDefaultValue = true)]
         public List<EcdsaSecp256k1PublicKey> ValidatorSet { get; set; }
+
+        /// <summary>
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch the validator set is a part of
+        /// </summary>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch the validator set is a part of</value>
+        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
+        public long Epoch { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,6 +138,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ValidatorSetSubstateAllOf {\n");
             sb.Append("  ValidatorSet: ").Append(ValidatorSet).Append("\n");
+            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,6 +179,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.ValidatorSet != null &&
                     input.ValidatorSet != null &&
                     this.ValidatorSet.SequenceEqual(input.ValidatorSet)
+                ) && 
+                (
+                    this.Epoch == input.Epoch ||
+                    this.Epoch.Equals(input.Epoch)
                 );
         }
 
@@ -185,6 +199,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ValidatorSet.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
                 return hashCode;
             }
         }

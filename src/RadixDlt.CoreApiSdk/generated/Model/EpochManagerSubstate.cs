@@ -111,10 +111,14 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="substateType">substateType (required).</param>
         /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch (required).</param>
-        public EpochManagerSubstate(SubstateType substateType = default(SubstateType), long epoch = default(long))
+        /// <param name="round">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch (required).</param>
+        /// <param name="roundsPerEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the number of rounds per epoch (required).</param>
+        public EpochManagerSubstate(SubstateType substateType = default(SubstateType), long epoch = default(long), long round = default(long), long roundsPerEpoch = default(long))
         {
             this.SubstateType = substateType;
             this.Epoch = epoch;
+            this.Round = round;
+            this.RoundsPerEpoch = roundsPerEpoch;
         }
 
         /// <summary>
@@ -123,6 +127,20 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch</value>
         [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
         public long Epoch { get; set; }
+
+        /// <summary>
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch
+        /// </summary>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch</value>
+        [DataMember(Name = "round", IsRequired = true, EmitDefaultValue = true)]
+        public long Round { get; set; }
+
+        /// <summary>
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the number of rounds per epoch
+        /// </summary>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the number of rounds per epoch</value>
+        [DataMember(Name = "rounds_per_epoch", IsRequired = true, EmitDefaultValue = true)]
+        public long RoundsPerEpoch { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -134,6 +152,8 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class EpochManagerSubstate {\n");
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
             sb.Append("  Epoch: ").Append(Epoch).Append("\n");
+            sb.Append("  Round: ").Append(Round).Append("\n");
+            sb.Append("  RoundsPerEpoch: ").Append(RoundsPerEpoch).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -176,6 +196,14 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.Epoch == input.Epoch ||
                     this.Epoch.Equals(input.Epoch)
+                ) && 
+                (
+                    this.Round == input.Round ||
+                    this.Round.Equals(input.Round)
+                ) && 
+                (
+                    this.RoundsPerEpoch == input.RoundsPerEpoch ||
+                    this.RoundsPerEpoch.Equals(input.RoundsPerEpoch)
                 );
         }
 
@@ -190,6 +218,8 @@ namespace RadixDlt.CoreApiSdk.Model
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
                 hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
+                hashCode = (hashCode * 59) + this.Round.GetHashCode();
+                hashCode = (hashCode * 59) + this.RoundsPerEpoch.GetHashCode();
                 return hashCode;
             }
         }
