@@ -364,17 +364,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 {
                     switch (vlt.ValidatorTransaction.ActualInstance)
                     {
-                        case CoreModel.EpochUpdateValidatorTransaction epochUpdate:
-                            newEpoch = epochUpdate.ScryptoEpoch;
-                            break;
                         case CoreModel.TimeUpdateValidatorTransaction timeUpdate:
+                            newEpoch = timeUpdate.ConsensusEpoch;
                             newRoundInEpoch = timeUpdate.RoundInEpoch;
                             newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(timeUpdate.ProposerTimestampMs).UtcDateTime;
                             break;
                     }
                 }
 
-                if (ct.LedgerTransaction.ActualInstance is CoreModel.SystemLedgerTransaction slt)
+                if (ct.LedgerTransaction.ActualInstance is CoreModel.SystemLedgerTransaction)
                 {
                     // no-op so far
                 }

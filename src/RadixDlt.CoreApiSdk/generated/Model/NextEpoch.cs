@@ -90,43 +90,44 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// LocalNativeFunctionReference
+    /// NextEpoch
     /// </summary>
-    [DataContract(Name = "LocalNativeFunctionReference")]
-    public partial class LocalNativeFunctionReference : IEquatable<LocalNativeFunctionReference>
+    [DataContract(Name = "NextEpoch")]
+    public partial class NextEpoch : IEquatable<NextEpoch>
     {
-
         /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public LocalMethodReferenceType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LocalNativeFunctionReference" /> class.
+        /// Initializes a new instance of the <see cref="NextEpoch" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected LocalNativeFunctionReference() { }
+        protected NextEpoch() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalNativeFunctionReference" /> class.
+        /// Initializes a new instance of the <see cref="NextEpoch" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        /// <param name="name">name (required).</param>
-        public LocalNativeFunctionReference(LocalMethodReferenceType type = default(LocalMethodReferenceType), string name = default(string))
+        /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60; (required).</param>
+        /// <param name="validators">validators (required).</param>
+        public NextEpoch(long epoch = default(long), List<EcdsaSecp256k1PublicKey> validators = default(List<EcdsaSecp256k1PublicKey>))
         {
-            this.Type = type;
-            // to ensure "name" is required (not null)
-            if (name == null)
+            this.Epoch = epoch;
+            // to ensure "validators" is required (not null)
+            if (validators == null)
             {
-                throw new ArgumentNullException("name is a required property for LocalNativeFunctionReference and cannot be null");
+                throw new ArgumentNullException("validators is a required property for NextEpoch and cannot be null");
             }
-            this.Name = name;
+            this.Validators = validators;
         }
 
         /// <summary>
-        /// Gets or Sets Name
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;
         /// </summary>
-        [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
-        public string Name { get; set; }
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;</value>
+        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
+        public long Epoch { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Validators
+        /// </summary>
+        [DataMember(Name = "validators", IsRequired = true, EmitDefaultValue = true)]
+        public List<EcdsaSecp256k1PublicKey> Validators { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -135,9 +136,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class LocalNativeFunctionReference {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
-            sb.Append("  Name: ").Append(Name).Append("\n");
+            sb.Append("class NextEpoch {\n");
+            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
+            sb.Append("  Validators: ").Append(Validators).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -158,15 +159,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as LocalNativeFunctionReference);
+            return this.Equals(input as NextEpoch);
         }
 
         /// <summary>
-        /// Returns true if LocalNativeFunctionReference instances are equal
+        /// Returns true if NextEpoch instances are equal
         /// </summary>
-        /// <param name="input">Instance of LocalNativeFunctionReference to be compared</param>
+        /// <param name="input">Instance of NextEpoch to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(LocalNativeFunctionReference input)
+        public bool Equals(NextEpoch input)
         {
             if (input == null)
             {
@@ -174,13 +175,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
+                    this.Epoch == input.Epoch ||
+                    this.Epoch.Equals(input.Epoch)
                 ) && 
                 (
-                    this.Name == input.Name ||
-                    (this.Name != null &&
-                    this.Name.Equals(input.Name))
+                    this.Validators == input.Validators ||
+                    this.Validators != null &&
+                    input.Validators != null &&
+                    this.Validators.SequenceEqual(input.Validators)
                 );
         }
 
@@ -193,10 +195,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
-                if (this.Name != null)
+                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
+                if (this.Validators != null)
                 {
-                    hashCode = (hashCode * 59) + this.Name.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Validators.GetHashCode();
                 }
                 return hashCode;
             }
