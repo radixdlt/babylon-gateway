@@ -356,9 +356,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 var stateVersion = ct.StateVersion;
                 var stateUpdates = ct.Receipt.StateUpdates;
 
-                long? newEpoch = null;
+                long? nextEpoch = null;
                 long? newRoundInEpoch = null;
                 DateTime? newRoundTimestamp = null;
+
+                if (ct.Receipt.NextEpoch != null)
+                {
+                    nextEpoch = ct.Receipt.NextEpoch.Epoch;
+                }
 
                 if (ct.LedgerTransaction.ActualInstance is CoreModel.ValidatorLedgerTransaction vlt)
                 {
@@ -461,12 +466,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         packageCode[sid.EntityIdHex] = packageInfo.GetCodeBytes();
                     }
-
-                    if (sd is CoreModel.ValidatorSetSubstate validatorSet)
-                    {
-                        // TODO this is known to be buggy as it is NEXT transaction that should be marked as beginning of the new epoch
-                        newEpoch = validatorSet.Epoch;
-                    }
                 }
 
                 foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -481,7 +480,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                    as the _first_ transaction of a new epoch, as creates the next EpochData, and the RoundData to 0.
                 */
 
-                var isStartOfEpoch = newEpoch != null;
+                var isStartOfEpoch = lastTransactionSummary.IsEndOfEpoch;
                 var isStartOfRound = newRoundInEpoch != null;
                 var roundTimestamp = newRoundTimestamp ?? lastTransactionSummary.RoundTimestamp;
                 var createdTimestamp = _clock.UtcNow;
@@ -495,11 +494,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     RoundTimestamp: roundTimestamp,
                     NormalizedRoundTimestamp: normalizedRoundTimestamp,
                     CreatedTimestamp: createdTimestamp,
-                    Epoch: newEpoch ?? lastTransactionSummary.Epoch,
-                    IndexInEpoch: isStartOfEpoch ? 0 : lastTransactionSummary.IndexInEpoch + 1,
+                    Epoch: isStartOfEpoch ? lastTransactionSummary.Epoch + 1 : lastTransactionSummary.Epoch,
                     RoundInEpoch: newRoundInEpoch ?? lastTransactionSummary.RoundInEpoch,
-                    IsStartOfEpoch: isStartOfEpoch,
-                    IsStartOfRound: isStartOfRound,
+                    IndexInEpoch: isStartOfEpoch ? 0 : lastTransactionSummary.IndexInEpoch + 1,
+                    IndexInRound: isStartOfRound ? 0 : lastTransactionSummary.IndexInRound + 1,
+                    IsEndOfEpoch: nextEpoch != null,
                     TransactionAccumulator: ct.LedgerTransaction.GetPayloadBytes());
 
                 LedgerTransaction ledgerTransaction = ct.LedgerTransaction.ActualInstance switch
@@ -522,10 +521,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 // TODO commented out as incompatible with current Core API version
                 ledgerTransaction.Message = null; // message: transaction.Metadata.Message?.ConvertFromHex(),
                 ledgerTransaction.Epoch = summary.Epoch;
-                ledgerTransaction.IndexInEpoch = summary.IndexInEpoch;
                 ledgerTransaction.RoundInEpoch = summary.RoundInEpoch;
-                ledgerTransaction.IsStartOfEpoch = summary.IsStartOfEpoch;
-                ledgerTransaction.IsStartOfRound = summary.IsStartOfRound;
+                ledgerTransaction.IndexInEpoch = summary.IndexInEpoch;
+                ledgerTransaction.IndexInRound = summary.IndexInRound;
+                ledgerTransaction.IsEndOfEpoch = summary.IsEndOfEpoch;
                 ledgerTransaction.FeePaid = TokenAmount.FromDecimalString(ct.Receipt.FeeSummary.XrdTotalExecutionCost);
                 ledgerTransaction.TipPaid = TokenAmount.FromDecimalString(ct.Receipt.FeeSummary.XrdTotalTipped);
                 ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
@@ -1060,10 +1059,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             NormalizedRoundTimestamp: lastTransaction.NormalizedRoundTimestamp,
             CreatedTimestamp: lastTransaction.CreatedTimestamp,
             Epoch: lastTransaction.Epoch,
-            IndexInEpoch: lastTransaction.IndexInEpoch,
             RoundInEpoch: lastTransaction.RoundInEpoch,
-            IsStartOfEpoch: lastTransaction.IsStartOfEpoch,
-            IsStartOfRound: lastTransaction.IsStartOfRound,
+            IndexInEpoch: lastTransaction.IndexInEpoch,
+            IndexInRound: lastTransaction.IndexInRound,
+            IsEndOfEpoch: lastTransaction.IsEndOfEpoch,
             TransactionAccumulator: lastTransaction.TransactionAccumulator
         );
 
@@ -1079,10 +1078,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             NormalizedRoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
             CreatedTimestamp: _clock.UtcNow,
             Epoch: 0,
-            IndexInEpoch: 0,
             RoundInEpoch: 0,
-            IsStartOfEpoch: false,
-            IsStartOfRound: false,
+            IndexInEpoch: 0,
+            IndexInRound: 0,
+            IsEndOfEpoch: false,
             TransactionAccumulator: new byte[32]
         );
     }

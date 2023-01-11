@@ -168,7 +168,7 @@ internal class WriteHelper
         var validatorDiscriminator = GetDiscriminator(typeof(ValidatorLedgerTransaction));
         var systemDiscriminator = GetDiscriminator(typeof(SystemLedgerTransaction));
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, error_message, transaction_accumulator, message, epoch, index_in_epoch, round_in_epoch, is_start_of_epoch, is_start_of_round, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, error_message, transaction_accumulator, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var lt in entities)
         {
@@ -179,10 +179,10 @@ internal class WriteHelper
             await writer.WriteAsync(lt.TransactionAccumulator, NpgsqlDbType.Bytea, token);
             await writer.WriteNullableAsync(lt.Message, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(lt.Epoch, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(lt.IndexInEpoch, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.RoundInEpoch, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(lt.IsStartOfEpoch, NpgsqlDbType.Boolean, token);
-            await writer.WriteAsync(lt.IsStartOfRound, NpgsqlDbType.Boolean, token);
+            await writer.WriteAsync(lt.IndexInEpoch, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(lt.IndexInRound, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(lt.IsEndOfEpoch, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(referencedEntities.OfStateVersion(lt.StateVersion).Select(re => re.DatabaseId).ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.FeePaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
             await writer.WriteAsync(lt.TipPaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);

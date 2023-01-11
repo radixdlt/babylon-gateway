@@ -98,17 +98,17 @@ internal abstract class LedgerTransaction
     [Column("epoch")]
     public long Epoch { get; set; }
 
-    [Column("index_in_epoch")]
-    public long IndexInEpoch { get; set; }
-
     [Column("round_in_epoch")]
     public long RoundInEpoch { get; set; }
 
-    [Column("is_start_of_epoch")]
-    public bool IsStartOfEpoch { get; set; }
+    [Column("index_in_epoch")]
+    public long IndexInEpoch { get; set; }
 
-    [Column("is_start_of_round")]
-    public bool IsStartOfRound { get; set; }
+    [Column("index_in_round")]
+    public long IndexInRound { get; set; }
+
+    [Column("is_end_of_epoch")]
+    public bool IsEndOfEpoch { get; set; }
 
     [Column("referenced_entities")]
     public List<long> ReferencedEntities { get; set; }
