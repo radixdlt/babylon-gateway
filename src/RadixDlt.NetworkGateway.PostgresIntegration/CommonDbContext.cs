@@ -183,7 +183,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<LedgerTransaction>()
             .HasIndex(lt => new { lt.Epoch, lt.RoundInEpoch })
             .IsUnique()
-            .HasFilter("is_start_of_round = true");
+            .HasFilter("index_in_round = 0");
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)

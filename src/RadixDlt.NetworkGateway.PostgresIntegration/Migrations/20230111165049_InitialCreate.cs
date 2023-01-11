@@ -203,10 +203,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     transactionaccumulator = table.Column<byte[]>(name: "transaction_accumulator", type: "bytea", nullable: false),
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
                     epoch = table.Column<long>(type: "bigint", nullable: false),
-                    indexinepoch = table.Column<long>(name: "index_in_epoch", type: "bigint", nullable: false),
                     roundinepoch = table.Column<long>(name: "round_in_epoch", type: "bigint", nullable: false),
-                    isstartofepoch = table.Column<bool>(name: "is_start_of_epoch", type: "boolean", nullable: false),
-                    isstartofround = table.Column<bool>(name: "is_start_of_round", type: "boolean", nullable: false),
+                    indexinepoch = table.Column<long>(name: "index_in_epoch", type: "bigint", nullable: false),
+                    indexinround = table.Column<long>(name: "index_in_round", type: "bigint", nullable: false),
+                    isendofepoch = table.Column<bool>(name: "is_end_of_epoch", type: "boolean", nullable: false),
                     referencedentities = table.Column<List<long>>(name: "referenced_entities", type: "bigint[]", nullable: false),
                     feepaid = table.Column<BigInteger>(name: "fee_paid", type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
                     tippaid = table.Column<BigInteger>(name: "tip_paid", type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
@@ -418,7 +418,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 table: "ledger_transactions",
                 columns: new[] { "epoch", "round_in_epoch" },
                 unique: true,
-                filter: "is_start_of_round = true");
+                filter: "index_in_round = 0");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_intent_hash",
