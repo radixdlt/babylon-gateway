@@ -112,9 +112,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="status">status (required).</param>
         /// <param name="feeSummary">feeSummary (required).</param>
         /// <param name="stateUpdates">stateUpdates (required).</param>
+        /// <param name="nextEpoch">nextEpoch.</param>
         /// <param name="output">The manifest line-by-line engine return data (only present if status is Succeeded).</param>
         /// <param name="errorMessage">Error message (only present if status is Failed or Rejected).</param>
-        public TransactionReceipt(TransactionStatus status = default(TransactionStatus), FeeSummary feeSummary = default(FeeSummary), StateUpdates stateUpdates = default(StateUpdates), List<SborData> output = default(List<SborData>), string errorMessage = default(string))
+        public TransactionReceipt(TransactionStatus status = default(TransactionStatus), FeeSummary feeSummary = default(FeeSummary), StateUpdates stateUpdates = default(StateUpdates), NextEpoch nextEpoch = default(NextEpoch), List<SborData> output = default(List<SborData>), string errorMessage = default(string))
         {
             this.Status = status;
             // to ensure "feeSummary" is required (not null)
@@ -129,6 +130,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("stateUpdates is a required property for TransactionReceipt and cannot be null");
             }
             this.StateUpdates = stateUpdates;
+            this.NextEpoch = nextEpoch;
             this.Output = output;
             this.ErrorMessage = errorMessage;
         }
@@ -144,6 +146,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "state_updates", IsRequired = true, EmitDefaultValue = true)]
         public StateUpdates StateUpdates { get; set; }
+
+        /// <summary>
+        /// Gets or Sets NextEpoch
+        /// </summary>
+        [DataMember(Name = "next_epoch", EmitDefaultValue = true)]
+        public NextEpoch NextEpoch { get; set; }
 
         /// <summary>
         /// The manifest line-by-line engine return data (only present if status is Succeeded)
@@ -170,6 +178,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("  FeeSummary: ").Append(FeeSummary).Append("\n");
             sb.Append("  StateUpdates: ").Append(StateUpdates).Append("\n");
+            sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
             sb.Append("  Output: ").Append(Output).Append("\n");
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("}\n");
@@ -222,6 +231,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.StateUpdates.Equals(input.StateUpdates))
                 ) && 
                 (
+                    this.NextEpoch == input.NextEpoch ||
+                    (this.NextEpoch != null &&
+                    this.NextEpoch.Equals(input.NextEpoch))
+                ) && 
+                (
                     this.Output == input.Output ||
                     this.Output != null &&
                     input.Output != null &&
@@ -251,6 +265,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.StateUpdates != null)
                 {
                     hashCode = (hashCode * 59) + this.StateUpdates.GetHashCode();
+                }
+                if (this.NextEpoch != null)
+                {
+                    hashCode = (hashCode * 59) + this.NextEpoch.GetHashCode();
                 }
                 if (this.Output != null)
                 {
