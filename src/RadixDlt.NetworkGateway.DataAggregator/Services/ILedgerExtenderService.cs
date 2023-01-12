@@ -83,10 +83,10 @@ public sealed record TransactionSummary(
     DateTime NormalizedRoundTimestamp,
     DateTime CreatedTimestamp,
     long Epoch,
-    long IndexInEpoch,
     long RoundInEpoch,
-    bool IsStartOfEpoch,
-    bool IsStartOfRound,
+    long IndexInEpoch,
+    long IndexInRound,
+    bool IsEndOfEpoch,
     byte[] TransactionAccumulator
 );
 

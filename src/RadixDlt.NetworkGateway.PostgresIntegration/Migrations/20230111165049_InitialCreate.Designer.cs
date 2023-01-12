@@ -80,7 +80,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230102140303_InitialCreate")]
+    [Migration("20230111165049_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -382,13 +382,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("index_in_epoch");
 
-                    b.Property<bool>("IsStartOfEpoch")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_start_of_epoch");
+                    b.Property<long>("IndexInRound")
+                        .HasColumnType("bigint")
+                        .HasColumnName("index_in_round");
 
-                    b.Property<bool>("IsStartOfRound")
+                    b.Property<bool>("IsEndOfEpoch")
                         .HasColumnType("boolean")
-                        .HasColumnName("is_start_of_round");
+                        .HasColumnName("is_end_of_epoch");
 
                     b.Property<byte[]>("Message")
                         .HasColumnType("bytea")
@@ -435,7 +435,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("Epoch", "RoundInEpoch")
                         .IsUnique()
-                        .HasFilter("is_start_of_round = true");
+                        .HasFilter("index_in_round = 0");
 
                     b.ToTable("ledger_transactions");
 
@@ -890,6 +890,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entity_resource_history");
 
                     b.HasDiscriminator().HasValue("non_fungible");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.SystemLedgerTransaction", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
+
+                    b.ToTable("ledger_transactions");
+
+                    b.HasDiscriminator().HasValue("system");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.UserLedgerTransaction", b =>
