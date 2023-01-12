@@ -81,9 +81,9 @@ internal class ReferencedEntityDictionary
 
     public ReferencedEntity GetOrAdd(string addressHex, Func<string, ReferencedEntity> factory)
     {
-        if (_storage.ContainsKey(addressHex))
+        if (_storage.TryGetValue(addressHex, out var existing))
         {
-            return _storage[addressHex];
+            return existing;
         }
 
         var value = factory(addressHex);
@@ -116,9 +116,9 @@ internal class ReferencedEntityDictionary
 
     public IEnumerable<ReferencedEntity> OfStateVersion(long stateVersion)
     {
-        if (_inversed.ContainsKey(stateVersion))
+        if (_inversed.TryGetValue(stateVersion, out var existing))
         {
-            return _inversed[stateVersion];
+            return existing;
         }
 
         return Array.Empty<ReferencedEntity>();

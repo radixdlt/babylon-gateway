@@ -205,7 +205,7 @@ internal class WriteHelper
                     await writer.WriteNullAsync(token);
                     break;
                 case SystemLedgerTransaction:
-                    await writer.WriteAsync(validatorDiscriminator, NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(systemDiscriminator, NpgsqlDbType.Text, token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);

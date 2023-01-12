@@ -72,9 +72,9 @@ internal static class DictionaryExtensions
     public static TVal GetOrAdd<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> factory)
         where TKey : notnull
     {
-        if (dictionary.ContainsKey(key))
+        if (dictionary.TryGetValue(key, out var existingValue))
         {
-            return dictionary[key];
+            return existingValue;
         }
 
         var value = factory(key);

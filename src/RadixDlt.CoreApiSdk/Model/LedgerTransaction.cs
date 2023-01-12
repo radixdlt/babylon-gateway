@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+using System.Diagnostics;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
@@ -75,7 +75,7 @@ public partial class LedgerTransaction
             UserLedgerTransaction ult => ult.GetPayloadBytes(),
             ValidatorLedgerTransaction vlt => vlt.GetPayloadBytes(),
             SystemLedgerTransaction slt => slt.GetPayloadBytes(),
-            _ => throw new ArgumentOutOfRangeException(nameof(ActualInstance), ActualInstance, null)
+            _ => throw new UnreachableException(),
         };
     }
 }
