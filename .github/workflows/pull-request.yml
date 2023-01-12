@@ -14,12 +14,13 @@ jobs:
         dotnet-version: ['7.0.x']
     steps:
       - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+        with:
+          fetch-depth: 0
       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
         uses: actions/setup-dotnet@5a3fa01c67e60dba8f95e2878436c7151c4b5f01
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
           include-prerelease: true
-          fetch-depth: 0
       - name: Install dependencies
         run: dotnet restore
       - name: Build
