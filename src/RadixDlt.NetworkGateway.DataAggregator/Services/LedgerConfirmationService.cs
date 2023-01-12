@@ -391,10 +391,10 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         _logger.LogInformation(
             "[TimeSplitsInMs: RawTxns={RawTxnPersistenceMs},Mempool={MempoolTransactionUpdateMs},TxnContentHandling={TxnContentHandlingMs},DbDependencyLoading={DbDependenciesLoadingMs},DbPersistence={DbPersistanceMs}]",
             commitReport.RawTxnPersistenceMs,
-            commitReport.MempoolTransactionUpdateMs,
-            commitReport.TransactionContentHandlingMs,
+            commitReport.PendingTransactionsUpdateMs,
+            commitReport.ContentHandlingMs,
             commitReport.DbDependenciesLoadingMs,
-            commitReport.DbPersistanceMs
+            commitReport.DbPersistenceMs
         );
 
         _logger.LogInformation(

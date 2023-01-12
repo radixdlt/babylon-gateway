@@ -115,57 +115,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
     public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, SyncTargetCarrier latestSyncTarget, CancellationToken token = default)
     {
-        var (preparationReport, ledgerExtensionReport) = await ExtendLedger(ledgerExtension, latestSyncTarget.TargetStateVersion, token);
-        var processTransactionReport = ledgerExtensionReport.ProcessTransactionsReport;
+        // TODO further improvements:
+        // - queries with WHERE xxx = ANY(<list of 12345 ids>) are probably not very performant
+        // - replace with proper Activity at some point to eliminate stopwatches and primitive counters
+        // - when it comes to fungibles and nonFungibles and their respective xxxResourceHistory we should change that to VaultHistory
+        // - avoid dbContextFactory - just make sure we use scoped services with single dbContext (UoW) passed through .ctor
 
-        var dbEntriesWritten =
-            preparationReport.RawTxnUpsertTouchedRecords
-            + preparationReport.PendingTransactionsTouchedRecords
-            + preparationReport.PreparationEntriesTouched
-            + ledgerExtensionReport.EntriesWritten;
-
-        return new CommitTransactionsReport(
-            ledgerExtension.CommittedTransactions.Count,
-            ledgerExtensionReport.FinalTransactionSummary,
-            preparationReport.RawTxnPersistenceMs,
-            preparationReport.PendingTransactionUpdateMs,
-            (long)processTransactionReport.ContentHandlingDuration.TotalMilliseconds,
-            (long)processTransactionReport.DbReadDuration.TotalMilliseconds,
-            ledgerExtensionReport.DbPersistenceMs,
-            dbEntriesWritten
-        );
-    }
-
-    private async Task EnsureDbLedgerIsInitialized(CancellationToken token)
-    {
-        var created = await _networkConfigurationProvider.SaveLedgerNetworkConfigurationToDatabaseOnInitIfNotExists(token);
-
-        if (created)
-        {
-            _logger.LogInformation(
-                "Ledger initialized with network: {NetworkName}",
-                _networkConfigurationProvider.GetNetworkName()
-            );
-        }
-    }
-
-    private record PreparationReport(
-        long RawTxnPersistenceMs,
-        int RawTxnUpsertTouchedRecords,
-        long PendingTransactionUpdateMs,
-        int PendingTransactionsTouchedRecords,
-        int PreparationEntriesTouched
-    );
-
-    private record ExtensionReport(
-        ProcessTransactionsReport ProcessTransactionsReport,
-        TransactionSummary FinalTransactionSummary,
-        int EntriesWritten,
-        long DbPersistenceMs
-    );
-
-    private async Task<(PreparationReport PreparationReport, ExtensionReport ExtensionReport)> ExtendLedger(ConsistentLedgerExtension ledgerExtension, long latestSyncTarget, CancellationToken token)
-    {
         // Create own context for ledger extension unit of work
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
         await using var tx = await dbContext.Database.BeginTransactionAsync(token);
@@ -181,23 +136,29 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 await EnsureDbLedgerIsInitialized(token);
             }
 
-            var (finalTransaction, preparationReport, processReport) = await ProcessTransactions(dbContext, ledgerExtension, token);
+            var extendLedgerReport = await ProcessTransactions(dbContext, ledgerExtension, token);
 
-            await CreateOrUpdateLedgerStatus(dbContext, finalTransaction, latestSyncTarget, token);
+            await CreateOrUpdateLedgerStatus(dbContext, extendLedgerReport.FinalTransaction, latestSyncTarget.TargetStateVersion, token);
 
-            var (remainingRowsTouched, remainingDbDuration) = await CodeStopwatch.TimeInMs(
-                () => dbContext.SaveChangesAsync(token)
-            );
-
+            await dbContext.SaveChangesAsync(token);
             await tx.CommitAsync(token);
 
-            var extensionReport = new ExtensionReport(
-                processReport,
-                finalTransaction,
-                processReport.RowsTouched + remainingRowsTouched,
-                ((long)processReport.DbWriteDuration.TotalMilliseconds) + remainingDbDuration);
+            var dbEntriesWritten =
+                extendLedgerReport.PreparationReport.RawTxnUpsertTouchedRecords
+                + extendLedgerReport.PreparationReport.PendingTransactionsTouchedRecords
+                + extendLedgerReport.PreparationReport.PreparationEntriesTouched
+                + extendLedgerReport.RowsInserted;
 
-            return (preparationReport, extensionReport);
+            return new CommitTransactionsReport(
+                ledgerExtension.CommittedTransactions.Count,
+                extendLedgerReport.FinalTransaction,
+                extendLedgerReport.PreparationReport.RawTxnPersistenceMs,
+                extendLedgerReport.PreparationReport.PendingTransactionUpdateMs,
+                (long)extendLedgerReport.ContentHandlingDuration.TotalMilliseconds,
+                (long)extendLedgerReport.DbReadDuration.TotalMilliseconds,
+                (long)extendLedgerReport.DbWriteDuration.TotalMilliseconds,
+                dbEntriesWritten
+            );
         }
         catch (Exception)
         {
@@ -207,25 +168,24 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         }
     }
 
-    private record ProcessTransactionsResult(
-        TransactionSummary FinalTransaction,
-        PreparationReport PreparationReport,
-        ProcessTransactionsReport Report);
-
-    private record ProcessTransactionsReport(
-        int RowsTouched,
-        TimeSpan DbReadDuration,
-        TimeSpan DbWriteDuration,
-        TimeSpan ContentHandlingDuration
+    private record PreparationReport(
+        long RawTxnPersistenceMs,
+        int RawTxnUpsertTouchedRecords,
+        long PendingTransactionUpdateMs,
+        int PendingTransactionsTouchedRecords,
+        int PreparationEntriesTouched
     );
 
-    private async Task<ProcessTransactionsResult> ProcessTransactions(ReadWriteDbContext dbContext, ConsistentLedgerExtension ledgerExtension, CancellationToken token)
-    {
-        // TODO further improvements:
-        // - queries with WHERE xxx = ANY(<list of 12345 ids>) are probably not very performant
-        // - replace with proper Activity at some point to eliminate stopwatches and primitive counters
-        // - when it comes to fungibles and nonFungibles and their respective xxxResourceHistory we should change that to VaultHistory
+    private record ExtendLedgerReport(
+        TransactionSummary FinalTransaction,
+        PreparationReport PreparationReport,
+        int RowsInserted,
+        TimeSpan DbReadDuration,
+        TimeSpan DbWriteDuration,
+        TimeSpan ContentHandlingDuration);
 
+    private async Task<ExtendLedgerReport> ProcessTransactions(ReadWriteDbContext dbContext, ConsistentLedgerExtension ledgerExtension, CancellationToken token)
+    {
         var rowsInserted = 0;
         var dbReadDuration = TimeSpan.Zero;
         var dbWriteDuration = TimeSpan.Zero;
@@ -1021,17 +981,24 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         }
 
         var contentHandlingDuration = outerStopwatch.Elapsed - dbReadDuration - dbWriteDuration;
-        var processReport = new ProcessTransactionsReport(rowsInserted, dbReadDuration, dbWriteDuration, contentHandlingDuration);
 
-        return new ProcessTransactionsResult(lastTransactionSummary, preparationReport, processReport);
+        return new ExtendLedgerReport(lastTransactionSummary, preparationReport, rowsInserted, dbReadDuration, dbWriteDuration, contentHandlingDuration);
     }
 
-    private async Task CreateOrUpdateLedgerStatus(
-        ReadWriteDbContext dbContext,
-        TransactionSummary finalTransaction,
-        long latestSyncTarget,
-        CancellationToken token
-    )
+    private async Task EnsureDbLedgerIsInitialized(CancellationToken token)
+    {
+        var created = await _networkConfigurationProvider.SaveLedgerNetworkConfigurationToDatabaseOnInitIfNotExists(token);
+
+        if (created)
+        {
+            _logger.LogInformation(
+                "Ledger initialized with network: {NetworkName}",
+                _networkConfigurationProvider.GetNetworkName()
+            );
+        }
+    }
+
+    private async Task CreateOrUpdateLedgerStatus(ReadWriteDbContext dbContext, TransactionSummary finalTransaction, long latestSyncTarget, CancellationToken token)
     {
         var ledgerStatus = await dbContext.LedgerStatus.SingleOrDefaultAsync(token);
 

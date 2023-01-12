@@ -103,9 +103,9 @@ public sealed record CommitTransactionsReport(
     int TransactionsCommittedCount,
     TransactionSummary FinalTransaction,
     long RawTxnPersistenceMs,
-    long MempoolTransactionUpdateMs,
-    long TransactionContentHandlingMs,
+    long PendingTransactionsUpdateMs,
+    long ContentHandlingMs,
     long DbDependenciesLoadingMs,
-    long DbPersistanceMs,
+    long DbPersistenceMs,
     int DbEntriesWritten
 );
