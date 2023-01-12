@@ -121,7 +121,7 @@ jobs:
           echo "GATEWAY_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
       - name: Deploy and test on an ephemeral network
         env:
-          NODE_DOCKER_TAG: ${{ github.base_ref }}
+          NODE_DOCKER_TAG: develop
         uses: toptal/jenkins-job-trigger-action@649c04c83c099c759aba134bf78138a303ec095f
         with:
           jenkins_url: "${{ secrets.JENKINS_URL }}"
