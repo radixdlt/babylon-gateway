@@ -119,6 +119,8 @@ jobs:
       - name: Export branch name in github's environment
         run: |
           echo "GATEWAY_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
+      - name: debug
+        run: echo ${{ github.base_ref }}
       - name: Deploy and test on an ephemeral network
         env:
           NODE_DOCKER_TAG: ${{ github.base_ref }}
