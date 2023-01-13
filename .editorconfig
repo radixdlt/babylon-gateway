@@ -283,6 +283,7 @@ dotnet_diagnostic.SA1649.severity = none # SA1649FileNameMustMatchTypeName - it 
 dotnet_diagnostic.SA0001.severity = none # SA0001XmlCommentAnalysisDisabled
 dotnet_diagnostic.SA1101.severity = none
 dotnet_diagnostic.SA1124.severity = none
+dotnet_diagnostic.SA1129.severity = none
 dotnet_diagnostic.SA1201.severity = none
 dotnet_diagnostic.SA1309.severity = none
 dotnet_diagnostic.SA1633.severity = none

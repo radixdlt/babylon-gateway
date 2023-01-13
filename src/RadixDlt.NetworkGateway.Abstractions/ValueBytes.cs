@@ -62,58 +62,48 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
-using Npgsql;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using System;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.Abstractions;
 
-public static class ServiceCollectionExtensions
+public readonly struct ValueBytes : IEquatable<ValueBytes>
 {
-    static ServiceCollectionExtensions()
+    private readonly byte[] _value;
+
+    public ValueBytes(byte[] value)
     {
-        CustomTypes.EnsureConfigured();
+        _value = value;
     }
 
-    public static void AddNetworkGatewayPostgresMigrations(this IServiceCollection services)
+    public static bool operator ==(ValueBytes left, ValueBytes right) => left.Equals(right);
+
+    public static bool operator !=(ValueBytes left, ValueBytes right) => !left.Equals(right);
+
+    public static implicit operator byte[](ValueBytes vb) => vb._value;
+
+    public static implicit operator ValueBytes(byte[] bytes) => new(bytes);
+
+    public bool Equals(ValueBytes other)
     {
-        services
-            .AddTypedNpgsqlDataSource<MigrationsDbContext>(PostgresIntegrationConstants.Configuration.MigrationsConnectionStringName)
-            .AddDbContextFactory<MigrationsDbContext>((serviceProvider, options) =>
-            {
-                options.UseNpgsql(
-                    serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<MigrationsDbContext>>().NpgsqlDataSource,
-                    o => o.MigrationsAssembly(typeof(MigrationsDbContext).Assembly.GetName().Name));
-            });
+        return ((Span<byte>)_value).SequenceEqual(other._value);
     }
 
-    // TODO https://github.com/npgsql/npgsql/issues/4873
-    internal static IServiceCollection AddTypedNpgsqlDataSource<T>(this IServiceCollection services, string connectionStringName, Action<NpgsqlDataSourceBuilder>? configure = null)
+    public override bool Equals(object? obj)
     {
-        services.TryAdd(new ServiceDescriptor(
-            typeof(NpgsqlDataSourceHolder<T>),
-            sp =>
-            {
-                var connectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString(connectionStringName);
-                var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+        if (obj is ValueBytes vb)
+        {
+            return Equals(vb);
+        }
 
-                dataSourceBuilder.UseLoggerFactory(sp.GetService<ILoggerFactory>());
-                dataSourceBuilder.MapEnum<AccessRulesChainSubtype>();
-                dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
-                dataSourceBuilder.MapEnum<NonFungibleIdType>();
-                dataSourceBuilder.MapEnum<PendingTransactionStatus>();
+        return false;
+    }
 
-                configure?.Invoke(dataSourceBuilder);
+    public override int GetHashCode()
+    {
+        var hc = new HashCode();
 
-                return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
-            },
-            ServiceLifetime.Singleton));
+        hc.AddBytes(_value);
 
-        return services;
+        return hc.ToHashCode();
     }
 }
