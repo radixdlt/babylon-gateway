@@ -141,7 +141,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
         }
 
         var unfetchedTransactionsAlreadyInDatabase = await dbContext.PendingTransactions
-            .Where(pt => payloadHashesInMempoolNotRecentlyFetched.Contains(Tuple.Create(pt.IntentHash, pt.PayloadHash)))
+            .Where(pt => payloadHashesInMempoolNotRecentlyFetched.Contains(Tuple.Create((ValueBytes)pt.IntentHash, (ValueBytes)pt.PayloadHash)))
             .Select(pt => Tuple.Create(pt.IntentHash, pt.PayloadHash))
             .ToListAsync(cancellationToken);
 
