@@ -74,6 +74,9 @@ internal class ReferencedEntityDictionary
     private readonly Dictionary<long, List<ReferencedEntity>> _inversed = new();
     private readonly Dictionary<string, ReferencedEntity> _globalsCache = new();
     private readonly Dictionary<long, ReferencedEntity> _dbIdCache = new();
+    private readonly HashSet<string> _knownGlobalAddressesToLoad = new();
+
+    public ICollection<string> KnownGlobalAddresses => _knownGlobalAddressesToLoad;
 
     public ICollection<string> Addresses => _storage.Keys;
 
@@ -122,5 +125,18 @@ internal class ReferencedEntityDictionary
         }
 
         return Array.Empty<ReferencedEntity>();
+    }
+
+    public void InvokePostResolveConfiguration()
+    {
+        foreach (var re in All)
+        {
+            re.InvokePostResolveConfiguration();
+        }
+    }
+
+    public void MarkSeenGlobalAddress(string globalAddress)
+    {
+        _knownGlobalAddressesToLoad.Add(globalAddress);
     }
 }

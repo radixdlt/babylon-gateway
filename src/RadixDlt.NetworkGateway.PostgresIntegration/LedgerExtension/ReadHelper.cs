@@ -167,10 +167,10 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.ResourceManagerEntityId, token);
     }
 
-    public async Task<Dictionary<string, Entity>> ExistingEntitiesFor(ReferencedEntityDictionary referencedEntities, HashSet<string> knownGlobalAddressesToLoad, CancellationToken token)
+    public async Task<Dictionary<string, Entity>> ExistingEntitiesFor(ReferencedEntityDictionary referencedEntities, CancellationToken token)
     {
         var entityAddresses = referencedEntities.Addresses.Select(x => x.ConvertFromHex()).ToList();
-        var globalEntityAddresses = knownGlobalAddressesToLoad.Select(x => RadixAddressCodec.Decode(x).Data).ToList();
+        var globalEntityAddresses = referencedEntities.KnownGlobalAddresses.Select(x => RadixAddressCodec.Decode(x).Data).ToList();
         var entityAddressesParameter = new NpgsqlParameter("@entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = entityAddresses };
         var globalEntityAddressesParameter = new NpgsqlParameter("@global_entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = globalEntityAddresses };
 

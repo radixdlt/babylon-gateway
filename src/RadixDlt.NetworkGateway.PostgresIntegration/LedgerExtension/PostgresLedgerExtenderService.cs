@@ -120,6 +120,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         // - replace with proper Activity at some point to eliminate stopwatches and primitive counters
         // - when it comes to fungibles and nonFungibles and their respective xxxResourceHistory we should change that to VaultHistory
         // - avoid dbContextFactory - just make sure we use scoped services with single dbContext (UoW) passed through .ctor
+        // - ProcessTransactions should be divided into smaller methods invoked in chain
 
         // Create own context for ledger extension unit of work
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
@@ -191,18 +192,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var dbWriteDuration = TimeSpan.Zero;
         var outerStopwatch = Stopwatch.StartNew();
         var referencedEntities = new ReferencedEntityDictionary();
-        var knownGlobalAddressesToLoad = new HashSet<string>();
         var childToParentEntities = new Dictionary<string, string>();
-        var componentToGlobalPackage = new Dictionary<string, (string PackageAddress, string BlueprintName)>();
-        var fungibleResourceManagerDivisibility = new Dictionary<string, int>();
-        var nonFungibleResourceManagerNonFungibleIdType = new Dictionary<string, NonFungibleIdType>();
-        var packageCode = new Dictionary<string, byte[]>();
 
-        var ledgerTransactionsToAdd = new List<LedgerTransaction>();
-
-        var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
         var readHelper = new ReadHelper(dbContext);
         var writeHelper = new WriteHelper(dbContext);
+
+        var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
+
+        var ledgerTransactionsToAdd = new List<LedgerTransaction>();
+        var entitiesToAdd = new List<Entity>();
 
         PreparationReport preparationReport;
         SequencesHolder sequences;
@@ -380,7 +378,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         foreach (var pointer in globalResourcePointer.GetPointers())
                         {
-                            knownGlobalAddressesToLoad.Add(pointer.GlobalAddress);
+                            referencedEntities.MarkSeenGlobalAddress(pointer.GlobalAddress);
                         }
                     }
 
@@ -397,14 +395,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (resourceManager.ResourceType == CoreModel.ResourceType.Fungible)
                         {
-                            fungibleResourceManagerDivisibility[sid.EntityIdHex] = resourceManager.FungibleDivisibility;
+                            re.PostResolveConfigure((FungibleResourceManagerEntity e) => e.Divisibility = resourceManager.FungibleDivisibility);
                         }
 
                         if (resourceManager.ResourceType == CoreModel.ResourceType.NonFungible)
                         {
                             var type = resourceManager.NonFungibleIdType ?? throw new InvalidOperationException("NonFungibleIdType must be set.");
 
-                            nonFungibleResourceManagerNonFungibleIdType[sid.EntityIdHex] = type switch
+                            re.PostResolveConfigure((NonFungibleResourceManagerEntity e) => e.NonFungibleIdType = type switch
                             {
                                 CoreModel.NonFungibleIdType.String => NonFungibleIdType.String,
                                 CoreModel.NonFungibleIdType.U32 => NonFungibleIdType.U32,
@@ -412,19 +410,26 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 CoreModel.NonFungibleIdType.Bytes => NonFungibleIdType.Bytes,
                                 CoreModel.NonFungibleIdType.UUID => NonFungibleIdType.UUID,
                                 _ => throw new ArgumentOutOfRangeException(),
-                            };
+                            });
                         }
                     }
 
                     if (sd is CoreModel.ComponentInfoSubstate componentInfo)
                     {
-                        knownGlobalAddressesToLoad.Add(componentInfo.PackageAddress);
-                        componentToGlobalPackage[sid.EntityIdHex] = (componentInfo.PackageAddress, componentInfo.BlueprintName);
+                        referencedEntities.MarkSeenGlobalAddress(componentInfo.PackageAddress);
+
+                        re.PostResolveConfigure((ComponentEntity e) =>
+                        {
+                            var packageAddress = RadixAddressCodec.Decode(componentInfo.PackageAddress).Data.ToHex();
+
+                            e.PackageId = referencedEntities.GetByGlobal(packageAddress).DatabaseId;
+                            e.BlueprintName = componentInfo.BlueprintName;
+                        });
                     }
 
                     if (sd is CoreModel.PackageInfoSubstate packageInfo)
                     {
-                        packageCode[sid.EntityIdHex] = packageInfo.GetCodeBytes();
+                        re.PostResolveConfigure((PackageEntity e) => e.Code = packageInfo.GetCodeBytes());
                     }
                 }
 
@@ -501,7 +506,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         {
             var sw = Stopwatch.StartNew();
 
-            var knownDbEntities = await readHelper.ExistingEntitiesFor(referencedEntities, knownGlobalAddressesToLoad, token);
+            var knownDbEntities = await readHelper.ExistingEntitiesFor(referencedEntities, token);
 
             dbReadDuration += sw.Elapsed;
 
@@ -522,8 +527,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 referencedEntities.GetOrAdd(knownDbEntity.Address.ToHex(), address => new ReferencedEntity(address, entityType, knownDbEntity.FromStateVersion));
             }
-
-            var entitiesToAdd = new List<Entity>();
 
             foreach (var re in referencedEntities.All)
             {
@@ -602,7 +605,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     throw new InvalidOperationException($"Unable to compute ancestors of entity {childAddress}: parentId={parentId}, ownerId={ownerId}, globalId={globalId}.");
                 }
 
-                referencedEntities.Get(childAddress).ConfigureDatabaseEntity((Entity dbe) =>
+                referencedEntities.Get(childAddress).PostResolveConfigure((Entity dbe) =>
                 {
                     dbe.AncestorIds = allAncestors;
                     dbe.ParentAncestorId = parentId.Value;
@@ -611,31 +614,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 });
             }
 
-            foreach (var (entityAddress, tuple) in componentToGlobalPackage)
-            {
-                referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((ComponentEntity dbe) =>
-                {
-                    var packageAddress = RadixAddressCodec.Decode(tuple.PackageAddress).Data.ToHex();
-
-                    dbe.PackageId = referencedEntities.GetByGlobal(packageAddress).DatabaseId;
-                    dbe.BlueprintName = tuple.BlueprintName;
-                });
-            }
-
-            foreach (var (entityAddress, divisibility) in fungibleResourceManagerDivisibility)
-            {
-                referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((FungibleResourceManagerEntity dbe) => dbe.Divisibility = divisibility);
-            }
-
-            foreach (var (entityAddress, nonFungibleIdType) in nonFungibleResourceManagerNonFungibleIdType)
-            {
-                referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((NonFungibleResourceManagerEntity dbe) => dbe.NonFungibleIdType = nonFungibleIdType);
-            }
-
-            foreach (var (entityAddress, code) in packageCode)
-            {
-                referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((PackageEntity pe) => pe.Code = code);
-            }
+            referencedEntities.InvokePostResolveConfiguration();
 
             sw = Stopwatch.StartNew();
 

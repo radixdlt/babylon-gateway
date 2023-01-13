@@ -64,6 +64,7 @@
 
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
@@ -71,8 +72,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long StateVersion)
 {
+    private readonly IList<Action> _postResolveActions = new List<Action>();
+
     private Entity? _databaseEntity;
     private ReferencedEntity? _immediateParentReference;
+    private bool _resolved;
+    private bool _postResolveConfigurationInvoked;
 
     public string? GlobalAddressHex { get; private set; }
 
@@ -108,6 +113,8 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
         {
             GlobalAddressHex = entity.GlobalAddress.ToHex();
         }
+
+        _resolved = true;
     }
 
     public void IsImmediateChildOf(ReferencedEntity parent)
@@ -152,17 +159,41 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
         return instance;
     }
 
-    public void ConfigureDatabaseEntity<T>(Action<T> action)
+    public void PostResolveConfigure<T>(Action<T> action)
         where T : Entity
     {
-        var dbEntity = GetDatabaseEntity();
-
-        if (dbEntity is not T typedDbEntity)
+        _postResolveActions.Add(() =>
         {
-            throw new ArgumentException($"Action argument type does not match underlying entity type for {this}.", nameof(action));
+            var dbEntity = GetDatabaseEntity();
+
+            if (dbEntity is not T typedDbEntity)
+            {
+                throw new ArgumentException($"Action argument type does not match underlying entity type for {this}.", nameof(action));
+            }
+
+            action.Invoke(typedDbEntity);
+        });
+    }
+
+    public void InvokePostResolveConfiguration()
+    {
+        if (!_resolved)
+        {
+            throw new InvalidOperationException("Not resolved yet");
         }
 
-        action.Invoke(typedDbEntity);
+        if (_postResolveConfigurationInvoked)
+        {
+            throw new InvalidOperationException("Already configured");
+        }
+
+        foreach (var action in _postResolveActions)
+        {
+            action.Invoke();
+        }
+
+        _postResolveActions.Clear();
+        _postResolveConfigurationInvoked = true;
     }
 
     private Entity GetDatabaseEntity()
