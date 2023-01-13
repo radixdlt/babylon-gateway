@@ -64,6 +64,7 @@
 
 using FluentAssertions;
 using RadixDlt.NetworkGateway.Abstractions;
+using System.Collections.Generic;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.UnitTests.Abstractions;
@@ -101,5 +102,18 @@ public class ValueBytesTests
         left.Equals(right).Should().BeFalse();
         (left == right).Should().BeFalse();
         (left != right).Should().BeTrue();
+    }
+
+    [Fact]
+    public void GivenDefaultEqualityComparer_ShouldRespectValueEquality()
+    {
+        var hashSet = new HashSet<ValueBytes>
+        {
+            new(new byte[] { 1, 2, 3 }),
+            new(new byte[] { 1, 2, 2 }),
+            new(new byte[] { 1, 2, 2 }),
+        };
+
+        hashSet.Count.Should().Be(2);
     }
 }
