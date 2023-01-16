@@ -281,15 +281,15 @@ dotnet_diagnostic.SA1649.severity = none # SA1649FileNameMustMatchTypeName - it 
 
 # > Inherited from other projects
 dotnet_diagnostic.SA0001.severity = none # SA0001XmlCommentAnalysisDisabled
-dotnet_diagnostic.SA1101.severity = none
-dotnet_diagnostic.SA1124.severity = none
-dotnet_diagnostic.SA1129.severity = none
-dotnet_diagnostic.SA1201.severity = none
-dotnet_diagnostic.SA1309.severity = none
-dotnet_diagnostic.SA1633.severity = none
+dotnet_diagnostic.SA1101.severity = none # SA1101PrefixLocalCallsWithThis
+dotnet_diagnostic.SA1124.severity = none # SA1124DoNotUseRegions
+dotnet_diagnostic.SA1129.severity = none # SA1129DoNotUseDefaultValueTypeConstructor - does not comply with the use of HashCode
+dotnet_diagnostic.SA1201.severity = none # SA1201ElementsMustAppearInTheCorrectOrder
+dotnet_diagnostic.SA1309.severity = none # SA1309FieldNamesMustNotBeginWithUnderscore
+dotnet_diagnostic.SA1633.severity = none # SA1633FileMustHaveHeader
 
-dotnet_diagnostic.SX1101.severity = warning
-dotnet_diagnostic.SX1309.severity = warning
+dotnet_diagnostic.SX1101.severity = warning # SX1101DoNotPrefixLocalMembersWithThis
+dotnet_diagnostic.SX1309.severity = warning # SX1309FieldNamesMustBeginWithUnderscore
 
 # [Resharper] - see https://www.jetbrains.com/help/rider/EditorConfig_Index.html
 resharper_inconsistent_naming_highlighting = none # Resharper disagrees with IDE1006 for public static fields
