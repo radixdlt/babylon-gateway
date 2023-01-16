@@ -62,58 +62,58 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
-using Npgsql;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System;
+using FluentAssertions;
+using RadixDlt.NetworkGateway.Abstractions;
+using System.Collections.Generic;
+using Xunit;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.UnitTests.Abstractions;
 
-public static class ServiceCollectionExtensions
+public class ValueBytesTests
 {
-    static ServiceCollectionExtensions()
+    [Fact]
+    public void GivenSameValues_ShouldBeEqual()
     {
-        CustomTypes.EnsureConfigured();
+        var leftBytes = new byte[] { 1, 2, 3, 4, 5 };
+        var rightBytes = new byte[] { 1, 2, 3, 4, 5 };
+        var left = new ValueBytes(leftBytes);
+        var right = new ValueBytes(rightBytes);
+
+        leftBytes.Should().NotBeSameAs(rightBytes);
+        left.Should().NotBeSameAs(right);
+        left.Should().Be(right);
+        left.Equals(right).Should().BeTrue();
+        left.GetHashCode().Should().Be(right.GetHashCode());
+        (left == right).Should().BeTrue();
+        (left != right).Should().BeFalse();
     }
 
-    public static void AddNetworkGatewayPostgresMigrations(this IServiceCollection services)
+    [Fact]
+    public void GivenDifferentValues_ShouldNotBeEqual()
     {
-        services
-            .AddTypedNpgsqlDataSource<MigrationsDbContext>(PostgresIntegrationConstants.Configuration.MigrationsConnectionStringName)
-            .AddDbContextFactory<MigrationsDbContext>((serviceProvider, options) =>
-            {
-                options.UseNpgsql(
-                    serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<MigrationsDbContext>>().NpgsqlDataSource,
-                    o => o.MigrationsAssembly(typeof(MigrationsDbContext).Assembly.GetName().Name));
-            });
+        var leftBytes = new byte[] { 1, 2, 3, 4, 5 };
+        var rightBytes = new byte[] { 1, 2, 3, 4, 6 };
+        var left = new ValueBytes(leftBytes);
+        var right = new ValueBytes(rightBytes);
+
+        leftBytes.Should().NotBeSameAs(rightBytes);
+        left.Should().NotBeSameAs(right);
+        left.Should().NotBe(right);
+        left.Equals(right).Should().BeFalse();
+        (left == right).Should().BeFalse();
+        (left != right).Should().BeTrue();
     }
 
-    // TODO https://github.com/npgsql/npgsql/issues/4873
-    internal static IServiceCollection AddTypedNpgsqlDataSource<T>(this IServiceCollection services, string connectionStringName, Action<NpgsqlDataSourceBuilder>? configure = null)
+    [Fact]
+    public void GivenDefaultEqualityComparer_ShouldRespectValueEquality()
     {
-        services.TryAdd(new ServiceDescriptor(
-            typeof(NpgsqlDataSourceHolder<T>),
-            sp =>
-            {
-                var connectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString(connectionStringName);
-                var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+        var hashSet = new HashSet<ValueBytes>
+        {
+            new(new byte[] { 1, 2, 3 }),
+            new(new byte[] { 1, 2, 2 }),
+            new(new byte[] { 1, 2, 2 }),
+        };
 
-                dataSourceBuilder.UseLoggerFactory(sp.GetService<ILoggerFactory>());
-                dataSourceBuilder.MapEnum<AccessRulesChainSubtype>();
-                dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
-                dataSourceBuilder.MapEnum<NonFungibleIdType>();
-                dataSourceBuilder.MapEnum<PendingTransactionStatus>();
-
-                configure?.Invoke(dataSourceBuilder);
-
-                return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
-            },
-            ServiceLifetime.Singleton));
-
-        return services;
+        hashSet.Count.Should().Be(2);
     }
 }

@@ -207,8 +207,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         // step: preparation (previously RawTransactionWriter logic)
         {
-            var rawUserTransactionStatusByPayloadHash = new Dictionary<byte[], CoreModel.TransactionStatus>(ByteArrayEqualityComparer.Default);
-            var rawUserTransactionByPayloadHash = new Dictionary<byte[], RawUserTransaction>(ByteArrayEqualityComparer.Default);
+            var rawUserTransactionStatusByPayloadHash = new Dictionary<ValueBytes, CoreModel.TransactionStatus>();
+            var rawUserTransactionByPayloadHash = new Dictionary<ValueBytes, RawUserTransaction>();
 
             foreach (var ct in ledgerExtension.CommittedTransactions.Where(ct => ct.LedgerTransaction.ActualInstance is CoreModel.UserLedgerTransaction))
             {
@@ -235,7 +235,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
             var (pendingTransactionsTouched, pendingTransactionUpdateMs) = await CodeStopwatch.TimeInMs(async () =>
             {
-                var transactionPayloadHashList = rawUserTransactionByPayloadHash.Keys.ToList(); // List<> are optimised for PostgreSQL lookups
+                var transactionPayloadHashList = rawUserTransactionByPayloadHash.Keys.Select(x => (byte[])x).ToList(); // List<> are optimised for PostgreSQL lookups
 
                 var toUpdate = await dbContext.PendingTransactions
                     .Where(pt => pt.Status != PendingTransactionStatus.CommittedSuccess && pt.Status != PendingTransactionStatus.CommittedFailure)

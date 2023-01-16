@@ -62,53 +62,15 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
+using System;
 
-namespace RadixDlt.NetworkGateway.Abstractions.Utilities;
+namespace RadixDlt.NetworkGateway.Abstractions.Extensions;
 
-public sealed class ByteArrayEqualityComparer : IEqualityComparer<byte[]>
+public static class ValueBytesExtensions
 {
-    public static readonly ByteArrayEqualityComparer Default = new();
-
-    public bool Equals(byte[]? first, byte[]? second)
+    public static string ToHex(this ValueBytes bytes)
     {
-        if (first == second)
-        {
-            return true;
-        }
-
-        if (first == null || second == null)
-        {
-            return false;
-        }
-
-        if (first.Length != second.Length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i < first.Length; i++)
-        {
-            if (first[i] != second[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public int GetHashCode(byte[] array)
-    {
-        unchecked
-        {
-            int hash = 17;
-            foreach (byte element in array)
-            {
-                hash = (hash * 31) + element; // byte.GetHashCode() = byte
-            }
-
-            return hash;
-        }
+        // The Gateway spec assumes lower case
+        return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 }
