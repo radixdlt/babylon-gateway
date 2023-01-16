@@ -177,6 +177,8 @@ internal class SubmissionService : ISubmissionService
                 throw InvalidTransactionException.FromStaticallyInvalid(parsed.ValidationError.Reason);
             }
 
+            // TODO replace CoreApi call with RadixEngineToolkit.RadixEngineToolkit.DecompileNotarizedTransactionIntent(request.GetNotarizedTransactionBytes());
+
             return parsed.NotarizedTransaction;
         }
         catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Permanent)
