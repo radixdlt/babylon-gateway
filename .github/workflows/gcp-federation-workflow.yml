@@ -1,0 +1,88 @@
+name: GCP - Federation
+
+on:
+  push:
+    branches:
+      - DO-908
+
+jobs:
+  # build:
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     matrix:
+  #       dotnet-version: ['7.0.x']
+  #   steps:
+      # - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      # - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+      #   uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a
+      #   with:
+      #     dotnet-version: ${{ matrix.dotnet-version }}
+      #     include-prerelease: true
+      # - name: Install dependencies
+      #   run: dotnet restore
+      # - name: Build
+      #   run: dotnet build --configuration Release --no-restore
+      # - name: Unit tests
+      #   # Add --verbosity normal to get more noisy logs if required for debugging
+      #   run: dotnet test --no-restore --filter RadixDlt.NetworkGateway.UnitTests
+
+  login-docker:
+    runs-on: ubuntu-22.04
+    environment: release
+
+    steps:
+      - name: Dump context
+        uses: crazy-max/ghaction-dump-context@516dbb0c760f39b4cdd750ae095f1688780f68f4
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+        with:
+          fetch-depth: 0
+      - id: auth
+        uses: google-github-actions/auth@v0.4.0
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - id: configure Docker
+        run: |
+            gcloud auth configure-docker -q
+
+  #     - name: Login to GCR
+  #       uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+  #       with:
+  #         registry: eu.gcr.io
+  #         username: _json_key
+  #         password: ${{ secrets.GCR_EU_DEV_JSON_KEY }}
+
+  #     - name: Setup tags for docker image
+  #       id: setup_tags
+  #       uses: ./.github/actions/set-variables
+  #       with:
+  #         github_event_name: ${{ github.event_name }}
+  #         github_action_name: ${{ github.event.action}}
+
+  #     - name: Docker build and push DataAggregator
+  #       uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
+  #       with:
+  #         file: ./apps/DataAggregator/Dockerfile
+  #         TAGS: |
+  #           ${{ steps.setup_tags.outputs.data_aggregator_tags }}
+  #         push: true
+  #         context: ./
+
+  #     - name: Docker build and push Gateway API
+  #       uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
+  #       with:
+  #         file: ./apps/GatewayApi/Dockerfile
+  #         TAGS: |
+  #           ${{ steps.setup_tags.outputs.gateway_api_tags }}
+  #         push: true
+  #         context: ./
+
+
+  #     - name: Docker build and push Database Migrations
+  #       uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
+  #       with:
+  #         file: ./apps/DatabaseMigrations/Dockerfile
+  #         TAGS: |
+  #           ${{ steps.setup_tags.outputs.database_migrations_tags }}
+  #         push: true
+  #         context: ./
