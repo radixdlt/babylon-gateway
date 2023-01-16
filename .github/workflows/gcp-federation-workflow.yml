@@ -41,7 +41,7 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - id: configure Docker
+      - name: configure-docker
         run: |
             gcloud auth configure-docker -q
 
