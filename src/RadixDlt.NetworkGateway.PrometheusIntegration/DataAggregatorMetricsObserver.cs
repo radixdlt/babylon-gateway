@@ -213,13 +213,6 @@ internal class DataAggregatorMetricsObserver :
             new GaugeConfiguration { LabelNames = new[] { "node" } }
         );
 
-    private static readonly Gauge _nodeLedgerTargetStateVersion = Metrics
-        .CreateGauge(
-            "ng_node_ledger_target_state_version",
-            "The state version which the node reports as the highest seen on the network.",
-            new GaugeConfiguration { LabelNames = new[] { "node" } }
-        );
-
     private static readonly Gauge _nodeLedgerTipIsConsistentWithQuorumStatus = Metrics
         .CreateGauge(
             "ng_node_ledger_tip_is_consistent_with_quorum_status",
@@ -471,23 +464,22 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    void ILedgerConfirmationServiceObserver.PreSubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, long targetStateVersion)
+    void ILedgerConfirmationServiceObserver.PreSubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion)
     {
         _nodeLedgerTipStateVersion.WithLabels(nodeName).Set(ledgerTipStateVersion);
-        _nodeLedgerTargetStateVersion.WithLabels(nodeName).Set(targetStateVersion);
     }
 
-    void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusUnknown(string nodeName, long ledgerTipStateVersion, long targetStateVersion)
+    void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusUnknown(string nodeName, long ledgerTipStateVersion)
     {
         _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.Unknown);
     }
 
-    void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusUpToDate(string nodeName, long ledgerTipStateVersion, long targetStateVersion)
+    void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusUpToDate(string nodeName, long ledgerTipStateVersion)
     {
         _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.Yes);
     }
 
-    void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusOutOfDate(string nodeName, long ledgerTipStateVersion, long targetStateVersion)
+    void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusOutOfDate(string nodeName, long ledgerTipStateVersion)
     {
         _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.No);
     }
