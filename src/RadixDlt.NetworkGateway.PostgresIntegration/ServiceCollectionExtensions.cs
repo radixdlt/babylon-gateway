@@ -83,7 +83,7 @@ public static class ServiceCollectionExtensions
     public static void AddNetworkGatewayPostgresMigrations(this IServiceCollection services)
     {
         services
-            .AddTypedNpgsqlDataSource<MigrationsDbContext>(PostgresIntegrationConstants.Configuration.MigrationsConnectionStringName)
+            .AddNpgsqlDataSourceHolder<MigrationsDbContext>(PostgresIntegrationConstants.Configuration.MigrationsConnectionStringName)
             .AddDbContextFactory<MigrationsDbContext>((serviceProvider, options) =>
             {
                 options.UseNpgsql(
@@ -92,8 +92,8 @@ public static class ServiceCollectionExtensions
             });
     }
 
-    // TODO https://github.com/npgsql/npgsql/issues/4873
-    internal static IServiceCollection AddTypedNpgsqlDataSource<T>(this IServiceCollection services, string connectionStringName, Action<NpgsqlDataSourceBuilder>? configure = null)
+    // TODO the moment we eliminate multiple data sources per application we could roll back to Npgsql.DependencyInjection and its AddNpgsqlDataSource
+    internal static IServiceCollection AddNpgsqlDataSourceHolder<T>(this IServiceCollection services, string connectionStringName)
     {
         services.TryAdd(new ServiceDescriptor(
             typeof(NpgsqlDataSourceHolder<T>),
@@ -107,8 +107,6 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
                 dataSourceBuilder.MapEnum<NonFungibleIdType>();
                 dataSourceBuilder.MapEnum<PendingTransactionStatus>();
-
-                configure?.Invoke(dataSourceBuilder);
 
                 return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
             },

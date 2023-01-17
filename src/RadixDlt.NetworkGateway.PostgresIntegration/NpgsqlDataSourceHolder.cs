@@ -69,7 +69,7 @@ using System.Threading.Tasks;
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 // ReSharper disable once UnusedTypeParameter
-internal class NpgsqlDataSourceHolder<T> : IAsyncDisposable
+internal class NpgsqlDataSourceHolder<T> : IAsyncDisposable, IDisposable
 {
     public NpgsqlDataSourceHolder(NpgsqlDataSource npgsqlDataSource)
     {
@@ -81,5 +81,10 @@ internal class NpgsqlDataSourceHolder<T> : IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         return NpgsqlDataSource.DisposeAsync();
+    }
+
+    public void Dispose()
+    {
+        NpgsqlDataSource.Dispose();
     }
 }
