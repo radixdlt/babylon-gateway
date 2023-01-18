@@ -45,7 +45,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - id: auth
-        uses: google-github-actions/auth@v0.4.0
+        uses: google-github-actions/auth@a61909d048e0be579b6c15b27088d19668493851
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
