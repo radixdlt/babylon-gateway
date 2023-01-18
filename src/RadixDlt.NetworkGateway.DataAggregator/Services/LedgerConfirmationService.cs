@@ -162,9 +162,9 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     /// <summary>
     /// To be called from the node worker.
     /// </summary>
-    public void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipAccumulator, long targetStateVersion)
+    public void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipAccumulator)
     {
-        _observers.ForEach(x => x.PreSubmitNodeNetworkStatus(nodeName, ledgerTipStateVersion, targetStateVersion));
+        _observers.ForEach(x => x.PreSubmitNodeNetworkStatus(nodeName, ledgerTipStateVersion));
 
         _latestLedgerTipByNode[nodeName] = ledgerTipStateVersion;
 
@@ -181,15 +181,15 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
             // Ledger Tip is too far behind -- so don't report on consistency.
             // We could change this to do a database look-up in future to give a consistency check.
 
-            _observers.ForEach(x => x.SubmitNodeNetworkStatusUnknown(nodeName, ledgerTipStateVersion, targetStateVersion));
+            _observers.ForEach(x => x.SubmitNodeNetworkStatusUnknown(nodeName, ledgerTipStateVersion));
         }
         else if (cachedAccumulator.BytesAreEqual(ledgerTipAccumulator))
         {
-            _observers.ForEach(x => x.SubmitNodeNetworkStatusUpToDate(nodeName, ledgerTipStateVersion, targetStateVersion));
+            _observers.ForEach(x => x.SubmitNodeNetworkStatusUpToDate(nodeName, ledgerTipStateVersion));
         }
         else
         {
-            _observers.ForEach(x => x.SubmitNodeNetworkStatusOutOfDate(nodeName, ledgerTipStateVersion, targetStateVersion));
+            _observers.ForEach(x => x.SubmitNodeNetworkStatusOutOfDate(nodeName, ledgerTipStateVersion));
         }
     }
 

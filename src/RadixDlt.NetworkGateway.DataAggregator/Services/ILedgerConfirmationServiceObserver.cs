@@ -75,13 +75,13 @@ public interface ILedgerConfirmationServiceObserver
 
     ValueTask PreHandleLedgerExtensionIfQuorum(DateTime timestamp);
 
-    void PreSubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, long targetStateVersion);
+    void PreSubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion);
 
-    void SubmitNodeNetworkStatusUnknown(string nodeName, long ledgerTipStateVersion, long targetStateVersion);
+    void SubmitNodeNetworkStatusUnknown(string nodeName, long ledgerTipStateVersion);
 
-    void SubmitNodeNetworkStatusUpToDate(string nodeName, long ledgerTipStateVersion, long targetStateVersion);
+    void SubmitNodeNetworkStatusUpToDate(string nodeName, long ledgerTipStateVersion);
 
-    void SubmitNodeNetworkStatusOutOfDate(string nodeName, long ledgerTipStateVersion, long targetStateVersion);
+    void SubmitNodeNetworkStatusOutOfDate(string nodeName, long ledgerTipStateVersion);
 
     void LedgerTipInconsistentWithQuorumStatus(string inconsistentNodeName);
 
