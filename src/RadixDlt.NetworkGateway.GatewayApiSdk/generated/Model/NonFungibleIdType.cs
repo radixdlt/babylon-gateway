@@ -102,28 +102,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         String = 1,
 
         /// <summary>
-        /// Enum U32 for value: u32
+        /// Enum Number for value: number
         /// </summary>
-        [EnumMember(Value = "u32")]
-        U32 = 2,
-
-        /// <summary>
-        /// Enum U64 for value: u64
-        /// </summary>
-        [EnumMember(Value = "u64")]
-        U64 = 3,
+        [EnumMember(Value = "number")]
+        Number = 2,
 
         /// <summary>
         /// Enum Bytes for value: bytes
         /// </summary>
         [EnumMember(Value = "bytes")]
-        Bytes = 4,
+        Bytes = 3,
 
         /// <summary>
         /// Enum Uuid for value: uuid
         /// </summary>
         [EnumMember(Value = "uuid")]
-        Uuid = 5
+        Uuid = 4
 
     }
 

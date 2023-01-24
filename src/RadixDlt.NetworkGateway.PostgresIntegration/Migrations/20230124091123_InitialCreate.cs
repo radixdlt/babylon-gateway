@@ -83,7 +83,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:access_rules_chain_subtype", "none,resource_manager_vault_access_rules_chain")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
-                .Annotation("Npgsql:Enum:non_fungible_id_type", "string,u32,u64,bytes,uuid")
+                .Annotation("Npgsql:Enum:non_fungible_id_type", "string,number,bytes,uuid")
                 .Annotation("Npgsql:Enum:pending_transaction_status", "submitted_or_known_in_node_mempool,missing,resolved_but_unknown_till_synced_up,rejected_temporarily,rejected_permanently,committed_success,committed_failure");
 
             migrationBuilder.CreateTable(

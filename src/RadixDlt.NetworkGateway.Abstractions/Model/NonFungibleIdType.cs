@@ -67,8 +67,7 @@ namespace RadixDlt.NetworkGateway.Abstractions.Model;
 public enum NonFungibleIdType
 {
     String,
-    U32,
-    U64,
+    Number,
     Bytes,
     UUID,
 }
