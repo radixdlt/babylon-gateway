@@ -90,30 +90,49 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// DynamicCountBase
+    /// ComponentMethodTargetIdentifierAllOf
     /// </summary>
-    [DataContract(Name = "DynamicCountBase")]
-    public partial class DynamicCountBase : IEquatable<DynamicCountBase>
+    [DataContract(Name = "ComponentMethodTargetIdentifier_allOf")]
+    public partial class ComponentMethodTargetIdentifierAllOf : IEquatable<ComponentMethodTargetIdentifierAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public DynamicCountType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicCountBase" /> class.
+        /// Initializes a new instance of the <see cref="ComponentMethodTargetIdentifierAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected DynamicCountBase() { }
+        protected ComponentMethodTargetIdentifierAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicCountBase" /> class.
+        /// Initializes a new instance of the <see cref="ComponentMethodTargetIdentifierAllOf" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        public DynamicCountBase(DynamicCountType type = default(DynamicCountType))
+        /// <param name="componentAddress">The Bech32m-encoded human readable version of the component address (required).</param>
+        /// <param name="methodName">methodName (required).</param>
+        public ComponentMethodTargetIdentifierAllOf(string componentAddress = default(string), string methodName = default(string))
         {
-            this.Type = type;
+            // to ensure "componentAddress" is required (not null)
+            if (componentAddress == null)
+            {
+                throw new ArgumentNullException("componentAddress is a required property for ComponentMethodTargetIdentifierAllOf and cannot be null");
+            }
+            this.ComponentAddress = componentAddress;
+            // to ensure "methodName" is required (not null)
+            if (methodName == null)
+            {
+                throw new ArgumentNullException("methodName is a required property for ComponentMethodTargetIdentifierAllOf and cannot be null");
+            }
+            this.MethodName = methodName;
         }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the component address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the component address</value>
+        [DataMember(Name = "component_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ComponentAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets MethodName
+        /// </summary>
+        [DataMember(Name = "method_name", IsRequired = true, EmitDefaultValue = true)]
+        public string MethodName { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -122,8 +141,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class DynamicCountBase {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("class ComponentMethodTargetIdentifierAllOf {\n");
+            sb.Append("  ComponentAddress: ").Append(ComponentAddress).Append("\n");
+            sb.Append("  MethodName: ").Append(MethodName).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -144,15 +164,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as DynamicCountBase);
+            return this.Equals(input as ComponentMethodTargetIdentifierAllOf);
         }
 
         /// <summary>
-        /// Returns true if DynamicCountBase instances are equal
+        /// Returns true if ComponentMethodTargetIdentifierAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of DynamicCountBase to be compared</param>
+        /// <param name="input">Instance of ComponentMethodTargetIdentifierAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(DynamicCountBase input)
+        public bool Equals(ComponentMethodTargetIdentifierAllOf input)
         {
             if (input == null)
             {
@@ -160,8 +180,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
+                    this.ComponentAddress == input.ComponentAddress ||
+                    (this.ComponentAddress != null &&
+                    this.ComponentAddress.Equals(input.ComponentAddress))
+                ) && 
+                (
+                    this.MethodName == input.MethodName ||
+                    (this.MethodName != null &&
+                    this.MethodName.Equals(input.MethodName))
                 );
         }
 
@@ -174,7 +200,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                if (this.ComponentAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ComponentAddress.GetHashCode();
+                }
+                if (this.MethodName != null)
+                {
+                    hashCode = (hashCode * 59) + this.MethodName.GetHashCode();
+                }
                 return hashCode;
             }
         }

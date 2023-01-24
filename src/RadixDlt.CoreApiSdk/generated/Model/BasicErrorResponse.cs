@@ -84,50 +84,36 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// LedgerTransactionBase
+    /// BasicErrorResponse
     /// </summary>
-    [DataContract(Name = "LedgerTransactionBase")]
-    public partial class LedgerTransactionBase : IEquatable<LedgerTransactionBase>
+    [DataContract(Name = "BasicErrorResponse")]
+    [JsonConverter(typeof(JsonSubtypes), "ErrorType")]
+    [JsonSubtypes.KnownSubType(typeof(BasicErrorResponse), "Basic")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitErrorResponse), "TransactionSubmit")]
+    public partial class BasicErrorResponse : ErrorResponse, IEquatable<BasicErrorResponse>
     {
-
         /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public LedgerTransactionType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LedgerTransactionBase" /> class.
+        /// Initializes a new instance of the <see cref="BasicErrorResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected LedgerTransactionBase() { }
+        protected BasicErrorResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="LedgerTransactionBase" /> class.
+        /// Initializes a new instance of the <see cref="BasicErrorResponse" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        /// <param name="payloadHex">The hex-encoded full ledger transaction payload (required).</param>
-        public LedgerTransactionBase(LedgerTransactionType type = default(LedgerTransactionType), string payloadHex = default(string))
+        /// <param name="errorType">errorType (required) (default to &quot;BasicErrorResponse&quot;).</param>
+        /// <param name="code">A numeric code corresponding to the given HTTP error code. (required).</param>
+        /// <param name="message">A human-readable error message. (required).</param>
+        /// <param name="traceId">A GUID to be used when reporting errors, to allow correlation with the Core API&#39;s error logs, in the case where the Core API details are hidden..</param>
+        public BasicErrorResponse(ErrorResponseType errorType = "BasicErrorResponse", int code = default(int), string message = default(string), string traceId = default(string)) : base(errorType, code, message, traceId)
         {
-            this.Type = type;
-            // to ensure "payloadHex" is required (not null)
-            if (payloadHex == null)
-            {
-                throw new ArgumentNullException("payloadHex is a required property for LedgerTransactionBase and cannot be null");
-            }
-            this.PayloadHex = payloadHex;
         }
-
-        /// <summary>
-        /// The hex-encoded full ledger transaction payload
-        /// </summary>
-        /// <value>The hex-encoded full ledger transaction payload</value>
-        [DataMember(Name = "payload_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string PayloadHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -136,9 +122,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class LedgerTransactionBase {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
-            sb.Append("  PayloadHex: ").Append(PayloadHex).Append("\n");
+            sb.Append("class BasicErrorResponse {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -147,7 +132,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -159,30 +144,21 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as LedgerTransactionBase);
+            return this.Equals(input as BasicErrorResponse);
         }
 
         /// <summary>
-        /// Returns true if LedgerTransactionBase instances are equal
+        /// Returns true if BasicErrorResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of LedgerTransactionBase to be compared</param>
+        /// <param name="input">Instance of BasicErrorResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(LedgerTransactionBase input)
+        public bool Equals(BasicErrorResponse input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
-                (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
-                ) && 
-                (
-                    this.PayloadHex == input.PayloadHex ||
-                    (this.PayloadHex != null &&
-                    this.PayloadHex.Equals(input.PayloadHex))
-                );
+            return base.Equals(input);
         }
 
         /// <summary>
@@ -193,12 +169,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
-                if (this.PayloadHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.PayloadHex.GetHashCode();
-                }
+                int hashCode = base.GetHashCode();
                 return hashCode;
             }
         }

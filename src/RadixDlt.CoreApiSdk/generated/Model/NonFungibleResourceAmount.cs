@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,11 @@ namespace RadixDlt.CoreApiSdk.Model
     /// NonFungibleResourceAmount
     /// </summary>
     [DataContract(Name = "NonFungibleResourceAmount")]
-    public partial class NonFungibleResourceAmount : IEquatable<NonFungibleResourceAmount>
+    [JsonConverter(typeof(JsonSubtypes), "ResourceType")]
+    [JsonSubtypes.KnownSubType(typeof(FungibleResourceAmount), "Fungible")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceAmount), "NonFungible")]
+    public partial class NonFungibleResourceAmount : ResourceAmount, IEquatable<NonFungibleResourceAmount>
     {
-
-        /// <summary>
-        /// Gets or Sets ResourceType
-        /// </summary>
-        [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
-        public ResourceType ResourceType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourceAmount" /> class.
         /// </summary>
@@ -109,18 +107,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourceAmount" /> class.
         /// </summary>
-        /// <param name="resourceType">resourceType (required).</param>
-        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
         /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
-        public NonFungibleResourceAmount(ResourceType resourceType = default(ResourceType), string resourceAddress = default(string), List<NonFungibleId> nonFungibleIds = default(List<NonFungibleId>))
+        /// <param name="resourceType">resourceType (required) (default to &quot;NonFungibleResourceAmount&quot;).</param>
+        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        public NonFungibleResourceAmount(List<NonFungibleId> nonFungibleIds = default(List<NonFungibleId>), ResourceType resourceType = "NonFungibleResourceAmount", string resourceAddress = default(string)) : base(resourceType, resourceAddress)
         {
-            this.ResourceType = resourceType;
-            // to ensure "resourceAddress" is required (not null)
-            if (resourceAddress == null)
-            {
-                throw new ArgumentNullException("resourceAddress is a required property for NonFungibleResourceAmount and cannot be null");
-            }
-            this.ResourceAddress = resourceAddress;
             // to ensure "nonFungibleIds" is required (not null)
             if (nonFungibleIds == null)
             {
@@ -128,13 +119,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.NonFungibleIds = nonFungibleIds;
         }
-
-        /// <summary>
-        /// The Bech32m-encoded human readable version of the resource address
-        /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the resource address</value>
-        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Gets or Sets NonFungibleIds
@@ -150,8 +134,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleResourceAmount {\n");
-            sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
-            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -161,7 +144,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -187,16 +170,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.ResourceType == input.ResourceType ||
-                    this.ResourceType.Equals(input.ResourceType)
-                ) && 
-                (
-                    this.ResourceAddress == input.ResourceAddress ||
-                    (this.ResourceAddress != null &&
-                    this.ResourceAddress.Equals(input.ResourceAddress))
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.NonFungibleIds == input.NonFungibleIds ||
                     this.NonFungibleIds != null &&
@@ -213,12 +187,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
-                if (this.ResourceAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
-                }
+                int hashCode = base.GetHashCode();
                 if (this.NonFungibleIds != null)
                 {
                     hashCode = (hashCode * 59) + this.NonFungibleIds.GetHashCode();

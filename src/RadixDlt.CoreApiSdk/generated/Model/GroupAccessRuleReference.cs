@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,11 @@ namespace RadixDlt.CoreApiSdk.Model
     /// GroupAccessRuleReference
     /// </summary>
     [DataContract(Name = "GroupAccessRuleReference")]
-    public partial class GroupAccessRuleReference : IEquatable<GroupAccessRuleReference>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(GroupAccessRuleReference), "Group")]
+    [JsonSubtypes.KnownSubType(typeof(RuleAccessRuleReference), "Rule")]
+    public partial class GroupAccessRuleReference : AccessRuleReference, IEquatable<GroupAccessRuleReference>
     {
-
-        /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public AccessRuleReferenceType Type { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="GroupAccessRuleReference" /> class.
         /// </summary>
@@ -109,11 +107,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="GroupAccessRuleReference" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
         /// <param name="groupName">groupName (required).</param>
-        public GroupAccessRuleReference(AccessRuleReferenceType type = default(AccessRuleReferenceType), string groupName = default(string))
+        /// <param name="type">type (required) (default to &quot;GroupAccessRuleReference&quot;).</param>
+        public GroupAccessRuleReference(string groupName = default(string), AccessRuleReferenceType type = "GroupAccessRuleReference") : base(type)
         {
-            this.Type = type;
             // to ensure "groupName" is required (not null)
             if (groupName == null)
             {
@@ -136,7 +133,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class GroupAccessRuleReference {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  GroupName: ").Append(GroupName).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -146,7 +143,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -172,11 +169,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.GroupName == input.GroupName ||
                     (this.GroupName != null &&
@@ -192,8 +185,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                int hashCode = base.GetHashCode();
                 if (this.GroupName != null)
                 {
                     hashCode = (hashCode * 59) + this.GroupName.GetHashCode();

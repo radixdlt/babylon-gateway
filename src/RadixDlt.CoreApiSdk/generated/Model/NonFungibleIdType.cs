@@ -102,28 +102,22 @@ namespace RadixDlt.CoreApiSdk.Model
         String = 1,
 
         /// <summary>
-        /// Enum U32 for value: U32
+        /// Enum Number for value: Number
         /// </summary>
-        [EnumMember(Value = "U32")]
-        U32 = 2,
-
-        /// <summary>
-        /// Enum U64 for value: U64
-        /// </summary>
-        [EnumMember(Value = "U64")]
-        U64 = 3,
+        [EnumMember(Value = "Number")]
+        Number = 2,
 
         /// <summary>
         /// Enum Bytes for value: Bytes
         /// </summary>
         [EnumMember(Value = "Bytes")]
-        Bytes = 4,
+        Bytes = 3,
 
         /// <summary>
         /// Enum UUID for value: UUID
         /// </summary>
         [EnumMember(Value = "UUID")]
-        UUID = 5
+        UUID = 4
 
     }
 

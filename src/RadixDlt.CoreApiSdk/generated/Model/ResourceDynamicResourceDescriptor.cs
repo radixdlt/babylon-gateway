@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,12 @@ namespace RadixDlt.CoreApiSdk.Model
     /// ResourceDynamicResourceDescriptor
     /// </summary>
     [DataContract(Name = "ResourceDynamicResourceDescriptor")]
-    public partial class ResourceDynamicResourceDescriptor : IEquatable<ResourceDynamicResourceDescriptor>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleDynamicResourceDescriptor), "NonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceDynamicResourceDescriptor), "Resource")]
+    [JsonSubtypes.KnownSubType(typeof(SchemaPathDynamicResourceDescriptor), "SchemaPath")]
+    public partial class ResourceDynamicResourceDescriptor : DynamicResourceDescriptor, IEquatable<ResourceDynamicResourceDescriptor>
     {
-
-        /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public DynamicResourceDescriptorType Type { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceDynamicResourceDescriptor" /> class.
         /// </summary>
@@ -109,11 +108,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceDynamicResourceDescriptor" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
         /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
-        public ResourceDynamicResourceDescriptor(DynamicResourceDescriptorType type = default(DynamicResourceDescriptorType), string resourceAddress = default(string))
+        /// <param name="type">type (required) (default to &quot;ResourceDynamicResourceDescriptor&quot;).</param>
+        public ResourceDynamicResourceDescriptor(string resourceAddress = default(string), DynamicResourceDescriptorType type = "ResourceDynamicResourceDescriptor") : base(type)
         {
-            this.Type = type;
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
             {
@@ -137,7 +135,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ResourceDynamicResourceDescriptor {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -147,7 +145,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -173,11 +171,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.ResourceAddress == input.ResourceAddress ||
                     (this.ResourceAddress != null &&
@@ -193,8 +187,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                int hashCode = base.GetHashCode();
                 if (this.ResourceAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();

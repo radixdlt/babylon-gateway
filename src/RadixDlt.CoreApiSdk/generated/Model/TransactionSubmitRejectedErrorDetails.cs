@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,11 @@ namespace RadixDlt.CoreApiSdk.Model
     /// TransactionSubmitRejectedErrorDetails
     /// </summary>
     [DataContract(Name = "TransactionSubmitRejectedErrorDetails")]
-    public partial class TransactionSubmitRejectedErrorDetails : IEquatable<TransactionSubmitRejectedErrorDetails>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitMempoolFullErrorDetails), "MempoolFull")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitRejectedErrorDetails), "Rejected")]
+    public partial class TransactionSubmitRejectedErrorDetails : TransactionSubmitErrorDetails, IEquatable<TransactionSubmitRejectedErrorDetails>
     {
-
-        /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionSubmitErrorDetailsType Type { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionSubmitRejectedErrorDetails" /> class.
         /// </summary>
@@ -109,17 +107,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionSubmitRejectedErrorDetails" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
         /// <param name="errorMessage">An explanation of the error (required).</param>
         /// <param name="isFresh">Whether (true) this rejected status has just been calculated fresh, or (false) the status is from the pending transaction result cache.  (required).</param>
         /// <param name="isPayloadRejectionPermanent">Whether the rejection of this payload is known to be permanent.  (required).</param>
         /// <param name="isIntentRejectionPermanent">Whether the rejection of this intent is known to be permanent - this is a stronger statement than the payload rejection being permanent, as it implies any payloads containing the intent will also be permanently rejected.  (required).</param>
         /// <param name="isRejectedBecauseIntentAlreadyCommitted">Whether the cached rejection of this intent is due to the intent already having been committed. If so, see the /transaction/receipt endpoint for further information.  (required).</param>
-        /// <param name="recalculationDue">An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the unix timestamp in milliseconds after which the node will consider recalculating the validity of the transaction. Only present if the rejection isn&#39;t permanent. .</param>
+        /// <param name="recalculationDue">recalculationDue.</param>
         /// <param name="invalidFromEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the rejection isn&#39;t permanent. .</param>
-        public TransactionSubmitRejectedErrorDetails(TransactionSubmitErrorDetailsType type = default(TransactionSubmitErrorDetailsType), string errorMessage = default(string), bool isFresh = default(bool), bool isPayloadRejectionPermanent = default(bool), bool isIntentRejectionPermanent = default(bool), bool isRejectedBecauseIntentAlreadyCommitted = default(bool), long recalculationDue = default(long), long invalidFromEpoch = default(long))
+        /// <param name="type">type (required) (default to &quot;TransactionSubmitRejectedErrorDetails&quot;).</param>
+        public TransactionSubmitRejectedErrorDetails(string errorMessage = default(string), bool isFresh = default(bool), bool isPayloadRejectionPermanent = default(bool), bool isIntentRejectionPermanent = default(bool), bool isRejectedBecauseIntentAlreadyCommitted = default(bool), Instant recalculationDue = default(Instant), long invalidFromEpoch = default(long), TransactionSubmitErrorDetailsType type = "TransactionSubmitRejectedErrorDetails") : base(type)
         {
-            this.Type = type;
             // to ensure "errorMessage" is required (not null)
             if (errorMessage == null)
             {
@@ -170,11 +167,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool IsRejectedBecauseIntentAlreadyCommitted { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the unix timestamp in milliseconds after which the node will consider recalculating the validity of the transaction. Only present if the rejection isn&#39;t permanent. 
+        /// Gets or Sets RecalculationDue
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the unix timestamp in milliseconds after which the node will consider recalculating the validity of the transaction. Only present if the rejection isn&#39;t permanent. </value>
         [DataMember(Name = "recalculation_due", EmitDefaultValue = true)]
-        public long RecalculationDue { get; set; }
+        public Instant RecalculationDue { get; set; }
 
         /// <summary>
         /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the rejection isn&#39;t permanent. 
@@ -191,7 +187,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionSubmitRejectedErrorDetails {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("  IsFresh: ").Append(IsFresh).Append("\n");
             sb.Append("  IsPayloadRejectionPermanent: ").Append(IsPayloadRejectionPermanent).Append("\n");
@@ -207,7 +203,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -233,36 +229,33 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.ErrorMessage == input.ErrorMessage ||
                     (this.ErrorMessage != null &&
                     this.ErrorMessage.Equals(input.ErrorMessage))
-                ) && 
+                ) && base.Equals(input) && 
                 (
                     this.IsFresh == input.IsFresh ||
                     this.IsFresh.Equals(input.IsFresh)
-                ) && 
+                ) && base.Equals(input) && 
                 (
                     this.IsPayloadRejectionPermanent == input.IsPayloadRejectionPermanent ||
                     this.IsPayloadRejectionPermanent.Equals(input.IsPayloadRejectionPermanent)
-                ) && 
+                ) && base.Equals(input) && 
                 (
                     this.IsIntentRejectionPermanent == input.IsIntentRejectionPermanent ||
                     this.IsIntentRejectionPermanent.Equals(input.IsIntentRejectionPermanent)
-                ) && 
+                ) && base.Equals(input) && 
                 (
                     this.IsRejectedBecauseIntentAlreadyCommitted == input.IsRejectedBecauseIntentAlreadyCommitted ||
                     this.IsRejectedBecauseIntentAlreadyCommitted.Equals(input.IsRejectedBecauseIntentAlreadyCommitted)
-                ) && 
+                ) && base.Equals(input) && 
                 (
                     this.RecalculationDue == input.RecalculationDue ||
-                    this.RecalculationDue.Equals(input.RecalculationDue)
-                ) && 
+                    (this.RecalculationDue != null &&
+                    this.RecalculationDue.Equals(input.RecalculationDue))
+                ) && base.Equals(input) && 
                 (
                     this.InvalidFromEpoch == input.InvalidFromEpoch ||
                     this.InvalidFromEpoch.Equals(input.InvalidFromEpoch)
@@ -277,8 +270,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                int hashCode = base.GetHashCode();
                 if (this.ErrorMessage != null)
                 {
                     hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
@@ -287,7 +279,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 hashCode = (hashCode * 59) + this.IsPayloadRejectionPermanent.GetHashCode();
                 hashCode = (hashCode * 59) + this.IsIntentRejectionPermanent.GetHashCode();
                 hashCode = (hashCode * 59) + this.IsRejectedBecauseIntentAlreadyCommitted.GetHashCode();
-                hashCode = (hashCode * 59) + this.RecalculationDue.GetHashCode();
+                if (this.RecalculationDue != null)
+                {
+                    hashCode = (hashCode * 59) + this.RecalculationDue.GetHashCode();
+                }
                 hashCode = (hashCode * 59) + this.InvalidFromEpoch.GetHashCode();
                 return hashCode;
             }

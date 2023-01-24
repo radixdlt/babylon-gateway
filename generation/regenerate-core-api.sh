@@ -2,13 +2,6 @@
 
 set -e
 
-# !!!WARNING!!!
-# OAS file must be manually changed so that:
-# - it uses openapi 3.0.0 rather 3.1.0,
-# - it uses oneOf rather anyOf; if you're going to do a "find & replace" substitution make sure it runs in
-#   case-sensitive mode, as there are schema types named OneOf and AnyO
-# !!!WARNING!!!
-
 # NB - as currently written, this script has only been tested on Mac OSX
 # In particular, Mac makes use of a variant of sed which might not work on other UNIX variants
 

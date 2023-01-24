@@ -84,36 +84,73 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// DynamicAmountBase
+    /// BlueprintFunctionTargetIdentifier
     /// </summary>
-    [DataContract(Name = "DynamicAmountBase")]
-    public partial class DynamicAmountBase : IEquatable<DynamicAmountBase>
+    [DataContract(Name = "BlueprintFunctionTargetIdentifier")]
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(BlueprintFunctionTargetIdentifier), "Function")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentMethodTargetIdentifier), "Method")]
+    public partial class BlueprintFunctionTargetIdentifier : TargetIdentifier, IEquatable<BlueprintFunctionTargetIdentifier>
     {
-
         /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public DynamicAmountType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicAmountBase" /> class.
+        /// Initializes a new instance of the <see cref="BlueprintFunctionTargetIdentifier" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected DynamicAmountBase() { }
+        protected BlueprintFunctionTargetIdentifier() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicAmountBase" /> class.
+        /// Initializes a new instance of the <see cref="BlueprintFunctionTargetIdentifier" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        public DynamicAmountBase(DynamicAmountType type = default(DynamicAmountType))
+        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
+        /// <param name="blueprintName">blueprintName (required).</param>
+        /// <param name="functionName">functionName (required).</param>
+        /// <param name="type">type (required) (default to &quot;BlueprintFunctionTargetIdentifier&quot;).</param>
+        public BlueprintFunctionTargetIdentifier(string packageAddress = default(string), string blueprintName = default(string), string functionName = default(string), TargetIdentifierType type = "BlueprintFunctionTargetIdentifier") : base(type)
         {
-            this.Type = type;
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
+            {
+                throw new ArgumentNullException("packageAddress is a required property for BlueprintFunctionTargetIdentifier and cannot be null");
+            }
+            this.PackageAddress = packageAddress;
+            // to ensure "blueprintName" is required (not null)
+            if (blueprintName == null)
+            {
+                throw new ArgumentNullException("blueprintName is a required property for BlueprintFunctionTargetIdentifier and cannot be null");
+            }
+            this.BlueprintName = blueprintName;
+            // to ensure "functionName" is required (not null)
+            if (functionName == null)
+            {
+                throw new ArgumentNullException("functionName is a required property for BlueprintFunctionTargetIdentifier and cannot be null");
+            }
+            this.FunctionName = functionName;
         }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the package address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the package address</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets BlueprintName
+        /// </summary>
+        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
+        public string BlueprintName { get; set; }
+
+        /// <summary>
+        /// Gets or Sets FunctionName
+        /// </summary>
+        [DataMember(Name = "function_name", IsRequired = true, EmitDefaultValue = true)]
+        public string FunctionName { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -122,8 +159,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class DynamicAmountBase {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("class BlueprintFunctionTargetIdentifier {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
+            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
+            sb.Append("  FunctionName: ").Append(FunctionName).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -132,7 +172,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -144,24 +184,35 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as DynamicAmountBase);
+            return this.Equals(input as BlueprintFunctionTargetIdentifier);
         }
 
         /// <summary>
-        /// Returns true if DynamicAmountBase instances are equal
+        /// Returns true if BlueprintFunctionTargetIdentifier instances are equal
         /// </summary>
-        /// <param name="input">Instance of DynamicAmountBase to be compared</param>
+        /// <param name="input">Instance of BlueprintFunctionTargetIdentifier to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(DynamicAmountBase input)
+        public bool Equals(BlueprintFunctionTargetIdentifier input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
+                ) && base.Equals(input) && 
+                (
+                    this.BlueprintName == input.BlueprintName ||
+                    (this.BlueprintName != null &&
+                    this.BlueprintName.Equals(input.BlueprintName))
+                ) && base.Equals(input) && 
+                (
+                    this.FunctionName == input.FunctionName ||
+                    (this.FunctionName != null &&
+                    this.FunctionName.Equals(input.FunctionName))
                 );
         }
 
@@ -173,8 +224,19 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                int hashCode = base.GetHashCode();
+                if (this.PackageAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
+                }
+                if (this.BlueprintName != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                }
+                if (this.FunctionName != null)
+                {
+                    hashCode = (hashCode * 59) + this.FunctionName.GetHashCode();
+                }
                 return hashCode;
             }
         }

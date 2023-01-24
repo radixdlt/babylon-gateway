@@ -103,22 +103,26 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TimeUpdateValidatorTransactionAllOf" /> class.
         /// </summary>
-        /// <param name="proposerTimestampMs">An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the round proposer&#39;s unix timestamp in ms (required).</param>
+        /// <param name="proposerTimestamp">proposerTimestamp (required).</param>
         /// <param name="consensusEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. Note that currently this is not the same as &#x60;scrypto_epoch&#x60;, but eventually will be.  (required).</param>
         /// <param name="roundInEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus round in the epoch (required).</param>
-        public TimeUpdateValidatorTransactionAllOf(long proposerTimestampMs = default(long), long consensusEpoch = default(long), long roundInEpoch = default(long))
+        public TimeUpdateValidatorTransactionAllOf(Instant proposerTimestamp = default(Instant), long consensusEpoch = default(long), long roundInEpoch = default(long))
         {
-            this.ProposerTimestampMs = proposerTimestampMs;
+            // to ensure "proposerTimestamp" is required (not null)
+            if (proposerTimestamp == null)
+            {
+                throw new ArgumentNullException("proposerTimestamp is a required property for TimeUpdateValidatorTransactionAllOf and cannot be null");
+            }
+            this.ProposerTimestamp = proposerTimestamp;
             this.ConsensusEpoch = consensusEpoch;
             this.RoundInEpoch = roundInEpoch;
         }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the round proposer&#39;s unix timestamp in ms
+        /// Gets or Sets ProposerTimestamp
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the round proposer&#39;s unix timestamp in ms</value>
-        [DataMember(Name = "proposer_timestamp_ms", IsRequired = true, EmitDefaultValue = true)]
-        public long ProposerTimestampMs { get; set; }
+        [DataMember(Name = "proposer_timestamp", IsRequired = true, EmitDefaultValue = true)]
+        public Instant ProposerTimestamp { get; set; }
 
         /// <summary>
         /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. Note that currently this is not the same as &#x60;scrypto_epoch&#x60;, but eventually will be. 
@@ -142,7 +146,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TimeUpdateValidatorTransactionAllOf {\n");
-            sb.Append("  ProposerTimestampMs: ").Append(ProposerTimestampMs).Append("\n");
+            sb.Append("  ProposerTimestamp: ").Append(ProposerTimestamp).Append("\n");
             sb.Append("  ConsensusEpoch: ").Append(ConsensusEpoch).Append("\n");
             sb.Append("  RoundInEpoch: ").Append(RoundInEpoch).Append("\n");
             sb.Append("}\n");
@@ -181,8 +185,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ProposerTimestampMs == input.ProposerTimestampMs ||
-                    this.ProposerTimestampMs.Equals(input.ProposerTimestampMs)
+                    this.ProposerTimestamp == input.ProposerTimestamp ||
+                    (this.ProposerTimestamp != null &&
+                    this.ProposerTimestamp.Equals(input.ProposerTimestamp))
                 ) && 
                 (
                     this.ConsensusEpoch == input.ConsensusEpoch ||
@@ -203,7 +208,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.ProposerTimestampMs.GetHashCode();
+                if (this.ProposerTimestamp != null)
+                {
+                    hashCode = (hashCode * 59) + this.ProposerTimestamp.GetHashCode();
+                }
                 hashCode = (hashCode * 59) + this.ConsensusEpoch.GetHashCode();
                 hashCode = (hashCode * 59) + this.RoundInEpoch.GetHashCode();
                 return hashCode;

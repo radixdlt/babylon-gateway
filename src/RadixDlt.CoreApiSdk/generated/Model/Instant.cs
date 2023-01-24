@@ -90,30 +90,45 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// AccessRuleBase
+    /// Instant
     /// </summary>
-    [DataContract(Name = "AccessRuleBase")]
-    public partial class AccessRuleBase : IEquatable<AccessRuleBase>
+    [DataContract(Name = "Instant")]
+    public partial class Instant : IEquatable<Instant>
     {
-
         /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public AccessRuleType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRuleBase" /> class.
+        /// Initializes a new instance of the <see cref="Instant" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccessRuleBase() { }
+        protected Instant() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRuleBase" /> class.
+        /// Initializes a new instance of the <see cref="Instant" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        public AccessRuleBase(AccessRuleType type = default(AccessRuleType))
+        /// <param name="unixTimestampMs">An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the unix timestamp in ms. (required).</param>
+        /// <param name="dateTime">The RFC 3339 / ISO 8601 string representation of the timestamp. Will always use \&quot;Z\&quot; denoting UTC and include milliseconds. EG: &#x60;2023-01-26T18:30:09.453Z&#x60;.  (required).</param>
+        public Instant(long unixTimestampMs = default(long), string dateTime = default(string))
         {
-            this.Type = type;
+            this.UnixTimestampMs = unixTimestampMs;
+            // to ensure "dateTime" is required (not null)
+            if (dateTime == null)
+            {
+                throw new ArgumentNullException("dateTime is a required property for Instant and cannot be null");
+            }
+            this.DateTime = dateTime;
         }
+
+        /// <summary>
+        /// An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the unix timestamp in ms.
+        /// </summary>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the unix timestamp in ms.</value>
+        [DataMember(Name = "unix_timestamp_ms", IsRequired = true, EmitDefaultValue = true)]
+        public long UnixTimestampMs { get; set; }
+
+        /// <summary>
+        /// The RFC 3339 / ISO 8601 string representation of the timestamp. Will always use \&quot;Z\&quot; denoting UTC and include milliseconds. EG: &#x60;2023-01-26T18:30:09.453Z&#x60;. 
+        /// </summary>
+        /// <value>The RFC 3339 / ISO 8601 string representation of the timestamp. Will always use \&quot;Z\&quot; denoting UTC and include milliseconds. EG: &#x60;2023-01-26T18:30:09.453Z&#x60;. </value>
+        [DataMember(Name = "date_time", IsRequired = true, EmitDefaultValue = true)]
+        public string DateTime { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -122,8 +137,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccessRuleBase {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("class Instant {\n");
+            sb.Append("  UnixTimestampMs: ").Append(UnixTimestampMs).Append("\n");
+            sb.Append("  DateTime: ").Append(DateTime).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -144,15 +160,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccessRuleBase);
+            return this.Equals(input as Instant);
         }
 
         /// <summary>
-        /// Returns true if AccessRuleBase instances are equal
+        /// Returns true if Instant instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccessRuleBase to be compared</param>
+        /// <param name="input">Instance of Instant to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccessRuleBase input)
+        public bool Equals(Instant input)
         {
             if (input == null)
             {
@@ -160,8 +176,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
+                    this.UnixTimestampMs == input.UnixTimestampMs ||
+                    this.UnixTimestampMs.Equals(input.UnixTimestampMs)
+                ) && 
+                (
+                    this.DateTime == input.DateTime ||
+                    (this.DateTime != null &&
+                    this.DateTime.Equals(input.DateTime))
                 );
         }
 
@@ -174,7 +195,11 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                hashCode = (hashCode * 59) + this.UnixTimestampMs.GetHashCode();
+                if (this.DateTime != null)
+                {
+                    hashCode = (hashCode * 59) + this.DateTime.GetHashCode();
+                }
                 return hashCode;
             }
         }

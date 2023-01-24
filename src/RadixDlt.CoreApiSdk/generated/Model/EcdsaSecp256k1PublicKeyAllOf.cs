@@ -90,30 +90,36 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ParsedTransactionBase
+    /// EcdsaSecp256k1PublicKeyAllOf
     /// </summary>
-    [DataContract(Name = "ParsedTransactionBase")]
-    public partial class ParsedTransactionBase : IEquatable<ParsedTransactionBase>
+    [DataContract(Name = "EcdsaSecp256k1PublicKey_allOf")]
+    public partial class EcdsaSecp256k1PublicKeyAllOf : IEquatable<EcdsaSecp256k1PublicKeyAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public ParsedTransactionType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParsedTransactionBase" /> class.
+        /// Initializes a new instance of the <see cref="EcdsaSecp256k1PublicKeyAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ParsedTransactionBase() { }
+        protected EcdsaSecp256k1PublicKeyAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ParsedTransactionBase" /> class.
+        /// Initializes a new instance of the <see cref="EcdsaSecp256k1PublicKeyAllOf" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        public ParsedTransactionBase(ParsedTransactionType type = default(ParsedTransactionType))
+        /// <param name="keyHex">The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes) (required).</param>
+        public EcdsaSecp256k1PublicKeyAllOf(string keyHex = default(string))
         {
-            this.Type = type;
+            // to ensure "keyHex" is required (not null)
+            if (keyHex == null)
+            {
+                throw new ArgumentNullException("keyHex is a required property for EcdsaSecp256k1PublicKeyAllOf and cannot be null");
+            }
+            this.KeyHex = keyHex;
         }
+
+        /// <summary>
+        /// The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes)
+        /// </summary>
+        /// <value>The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes)</value>
+        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -122,8 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ParsedTransactionBase {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("class EcdsaSecp256k1PublicKeyAllOf {\n");
+            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -144,15 +150,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ParsedTransactionBase);
+            return this.Equals(input as EcdsaSecp256k1PublicKeyAllOf);
         }
 
         /// <summary>
-        /// Returns true if ParsedTransactionBase instances are equal
+        /// Returns true if EcdsaSecp256k1PublicKeyAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of ParsedTransactionBase to be compared</param>
+        /// <param name="input">Instance of EcdsaSecp256k1PublicKeyAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ParsedTransactionBase input)
+        public bool Equals(EcdsaSecp256k1PublicKeyAllOf input)
         {
             if (input == null)
             {
@@ -160,8 +166,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
+                    this.KeyHex == input.KeyHex ||
+                    (this.KeyHex != null &&
+                    this.KeyHex.Equals(input.KeyHex))
                 );
         }
 
@@ -174,7 +181,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                if (this.KeyHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
+                }
                 return hashCode;
             }
         }

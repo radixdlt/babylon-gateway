@@ -84,36 +84,60 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// DynamicResourceDescriptorListBase
+    /// ComponentMethodTargetIdentifier
     /// </summary>
-    [DataContract(Name = "DynamicResourceDescriptorListBase")]
-    public partial class DynamicResourceDescriptorListBase : IEquatable<DynamicResourceDescriptorListBase>
+    [DataContract(Name = "ComponentMethodTargetIdentifier")]
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(BlueprintFunctionTargetIdentifier), "Function")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentMethodTargetIdentifier), "Method")]
+    public partial class ComponentMethodTargetIdentifier : TargetIdentifier, IEquatable<ComponentMethodTargetIdentifier>
     {
-
         /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public DynamicResourceDescriptorListType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicResourceDescriptorListBase" /> class.
+        /// Initializes a new instance of the <see cref="ComponentMethodTargetIdentifier" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected DynamicResourceDescriptorListBase() { }
+        protected ComponentMethodTargetIdentifier() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicResourceDescriptorListBase" /> class.
+        /// Initializes a new instance of the <see cref="ComponentMethodTargetIdentifier" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        public DynamicResourceDescriptorListBase(DynamicResourceDescriptorListType type = default(DynamicResourceDescriptorListType))
+        /// <param name="componentAddress">The Bech32m-encoded human readable version of the component address (required).</param>
+        /// <param name="methodName">methodName (required).</param>
+        /// <param name="type">type (required) (default to &quot;ComponentMethodTargetIdentifier&quot;).</param>
+        public ComponentMethodTargetIdentifier(string componentAddress = default(string), string methodName = default(string), TargetIdentifierType type = "ComponentMethodTargetIdentifier") : base(type)
         {
-            this.Type = type;
+            // to ensure "componentAddress" is required (not null)
+            if (componentAddress == null)
+            {
+                throw new ArgumentNullException("componentAddress is a required property for ComponentMethodTargetIdentifier and cannot be null");
+            }
+            this.ComponentAddress = componentAddress;
+            // to ensure "methodName" is required (not null)
+            if (methodName == null)
+            {
+                throw new ArgumentNullException("methodName is a required property for ComponentMethodTargetIdentifier and cannot be null");
+            }
+            this.MethodName = methodName;
         }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the component address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the component address</value>
+        [DataMember(Name = "component_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ComponentAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets MethodName
+        /// </summary>
+        [DataMember(Name = "method_name", IsRequired = true, EmitDefaultValue = true)]
+        public string MethodName { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -122,8 +146,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class DynamicResourceDescriptorListBase {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("class ComponentMethodTargetIdentifier {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  ComponentAddress: ").Append(ComponentAddress).Append("\n");
+            sb.Append("  MethodName: ").Append(MethodName).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -132,7 +158,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -144,24 +170,30 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as DynamicResourceDescriptorListBase);
+            return this.Equals(input as ComponentMethodTargetIdentifier);
         }
 
         /// <summary>
-        /// Returns true if DynamicResourceDescriptorListBase instances are equal
+        /// Returns true if ComponentMethodTargetIdentifier instances are equal
         /// </summary>
-        /// <param name="input">Instance of DynamicResourceDescriptorListBase to be compared</param>
+        /// <param name="input">Instance of ComponentMethodTargetIdentifier to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(DynamicResourceDescriptorListBase input)
+        public bool Equals(ComponentMethodTargetIdentifier input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
+                    this.ComponentAddress == input.ComponentAddress ||
+                    (this.ComponentAddress != null &&
+                    this.ComponentAddress.Equals(input.ComponentAddress))
+                ) && base.Equals(input) && 
+                (
+                    this.MethodName == input.MethodName ||
+                    (this.MethodName != null &&
+                    this.MethodName.Equals(input.MethodName))
                 );
         }
 
@@ -173,8 +205,15 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                int hashCode = base.GetHashCode();
+                if (this.ComponentAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ComponentAddress.GetHashCode();
+                }
+                if (this.MethodName != null)
+                {
+                    hashCode = (hashCode * 59) + this.MethodName.GetHashCode();
+                }
                 return hashCode;
             }
         }

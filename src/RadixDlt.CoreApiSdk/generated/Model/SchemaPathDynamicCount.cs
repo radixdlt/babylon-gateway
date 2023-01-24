@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,11 @@ namespace RadixDlt.CoreApiSdk.Model
     /// SchemaPathDynamicCount
     /// </summary>
     [DataContract(Name = "SchemaPathDynamicCount")]
-    public partial class SchemaPathDynamicCount : IEquatable<SchemaPathDynamicCount>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(CountDynamicCount), "Count")]
+    [JsonSubtypes.KnownSubType(typeof(SchemaPathDynamicCount), "SchemaPath")]
+    public partial class SchemaPathDynamicCount : DynamicCount, IEquatable<SchemaPathDynamicCount>
     {
-
-        /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public DynamicCountType Type { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="SchemaPathDynamicCount" /> class.
         /// </summary>
@@ -109,11 +107,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="SchemaPathDynamicCount" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
         /// <param name="schemaPath">schemaPath (required).</param>
-        public SchemaPathDynamicCount(DynamicCountType type = default(DynamicCountType), List<SchemaSubpath> schemaPath = default(List<SchemaSubpath>))
+        /// <param name="type">type (required) (default to &quot;SchemaPathDynamicCount&quot;).</param>
+        public SchemaPathDynamicCount(List<SchemaSubpath> schemaPath = default(List<SchemaSubpath>), DynamicCountType type = "SchemaPathDynamicCount") : base(type)
         {
-            this.Type = type;
             // to ensure "schemaPath" is required (not null)
             if (schemaPath == null)
             {
@@ -136,7 +133,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class SchemaPathDynamicCount {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  SchemaPath: ").Append(SchemaPath).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -146,7 +143,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -172,11 +169,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.SchemaPath == input.SchemaPath ||
                     this.SchemaPath != null &&
@@ -193,8 +186,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                int hashCode = base.GetHashCode();
                 if (this.SchemaPath != null)
                 {
                     hashCode = (hashCode * 59) + this.SchemaPath.GetHashCode();

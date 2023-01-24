@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,12 @@ namespace RadixDlt.CoreApiSdk.Model
     /// NonFungibleDynamicResourceDescriptor
     /// </summary>
     [DataContract(Name = "NonFungibleDynamicResourceDescriptor")]
-    public partial class NonFungibleDynamicResourceDescriptor : IEquatable<NonFungibleDynamicResourceDescriptor>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleDynamicResourceDescriptor), "NonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceDynamicResourceDescriptor), "Resource")]
+    [JsonSubtypes.KnownSubType(typeof(SchemaPathDynamicResourceDescriptor), "SchemaPath")]
+    public partial class NonFungibleDynamicResourceDescriptor : DynamicResourceDescriptor, IEquatable<NonFungibleDynamicResourceDescriptor>
     {
-
-        /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public DynamicResourceDescriptorType Type { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleDynamicResourceDescriptor" /> class.
         /// </summary>
@@ -109,12 +108,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleDynamicResourceDescriptor" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
         /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
         /// <param name="nonFungibleId">nonFungibleId (required).</param>
-        public NonFungibleDynamicResourceDescriptor(DynamicResourceDescriptorType type = default(DynamicResourceDescriptorType), string resourceAddress = default(string), NonFungibleId nonFungibleId = default(NonFungibleId))
+        /// <param name="type">type (required) (default to &quot;NonFungibleDynamicResourceDescriptor&quot;).</param>
+        public NonFungibleDynamicResourceDescriptor(string resourceAddress = default(string), NonFungibleId nonFungibleId = default(NonFungibleId), DynamicResourceDescriptorType type = "NonFungibleDynamicResourceDescriptor") : base(type)
         {
-            this.Type = type;
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
             {
@@ -150,7 +148,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleDynamicResourceDescriptor {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("}\n");
@@ -161,7 +159,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -187,16 +185,12 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.ResourceAddress == input.ResourceAddress ||
                     (this.ResourceAddress != null &&
                     this.ResourceAddress.Equals(input.ResourceAddress))
-                ) && 
+                ) && base.Equals(input) && 
                 (
                     this.NonFungibleId == input.NonFungibleId ||
                     (this.NonFungibleId != null &&
@@ -212,8 +206,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                int hashCode = base.GetHashCode();
                 if (this.ResourceAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();

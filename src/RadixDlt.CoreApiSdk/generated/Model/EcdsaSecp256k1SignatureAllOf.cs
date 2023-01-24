@@ -90,30 +90,36 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// SubstateBase
+    /// EcdsaSecp256k1SignatureAllOf
     /// </summary>
-    [DataContract(Name = "SubstateBase")]
-    public partial class SubstateBase : IEquatable<SubstateBase>
+    [DataContract(Name = "EcdsaSecp256k1Signature_allOf")]
+    public partial class EcdsaSecp256k1SignatureAllOf : IEquatable<EcdsaSecp256k1SignatureAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets SubstateType
-        /// </summary>
-        [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
-        public SubstateType SubstateType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SubstateBase" /> class.
+        /// Initializes a new instance of the <see cref="EcdsaSecp256k1SignatureAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected SubstateBase() { }
+        protected EcdsaSecp256k1SignatureAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="SubstateBase" /> class.
+        /// Initializes a new instance of the <see cref="EcdsaSecp256k1SignatureAllOf" /> class.
         /// </summary>
-        /// <param name="substateType">substateType (required).</param>
-        public SubstateBase(SubstateType substateType = default(SubstateType))
+        /// <param name="signatureHex">A hex-encoded recoverable ECDSA Secp256k1 signature (65 bytes). The first byte is the recovery id, the remaining 64 bytes are the compact signature, ie &#x60;CONCAT(R, s)&#x60; where &#x60;R&#x60; and &#x60;s&#x60; are each 32-bytes in padded big-endian format. (required).</param>
+        public EcdsaSecp256k1SignatureAllOf(string signatureHex = default(string))
         {
-            this.SubstateType = substateType;
+            // to ensure "signatureHex" is required (not null)
+            if (signatureHex == null)
+            {
+                throw new ArgumentNullException("signatureHex is a required property for EcdsaSecp256k1SignatureAllOf and cannot be null");
+            }
+            this.SignatureHex = signatureHex;
         }
+
+        /// <summary>
+        /// A hex-encoded recoverable ECDSA Secp256k1 signature (65 bytes). The first byte is the recovery id, the remaining 64 bytes are the compact signature, ie &#x60;CONCAT(R, s)&#x60; where &#x60;R&#x60; and &#x60;s&#x60; are each 32-bytes in padded big-endian format.
+        /// </summary>
+        /// <value>A hex-encoded recoverable ECDSA Secp256k1 signature (65 bytes). The first byte is the recovery id, the remaining 64 bytes are the compact signature, ie &#x60;CONCAT(R, s)&#x60; where &#x60;R&#x60; and &#x60;s&#x60; are each 32-bytes in padded big-endian format.</value>
+        [DataMember(Name = "signature_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string SignatureHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -122,8 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class SubstateBase {\n");
-            sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
+            sb.Append("class EcdsaSecp256k1SignatureAllOf {\n");
+            sb.Append("  SignatureHex: ").Append(SignatureHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -144,15 +150,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as SubstateBase);
+            return this.Equals(input as EcdsaSecp256k1SignatureAllOf);
         }
 
         /// <summary>
-        /// Returns true if SubstateBase instances are equal
+        /// Returns true if EcdsaSecp256k1SignatureAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of SubstateBase to be compared</param>
+        /// <param name="input">Instance of EcdsaSecp256k1SignatureAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(SubstateBase input)
+        public bool Equals(EcdsaSecp256k1SignatureAllOf input)
         {
             if (input == null)
             {
@@ -160,8 +166,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.SubstateType == input.SubstateType ||
-                    this.SubstateType.Equals(input.SubstateType)
+                    this.SignatureHex == input.SignatureHex ||
+                    (this.SignatureHex != null &&
+                    this.SignatureHex.Equals(input.SignatureHex))
                 );
         }
 
@@ -174,7 +181,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
+                if (this.SignatureHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.SignatureHex.GetHashCode();
+                }
                 return hashCode;
             }
         }

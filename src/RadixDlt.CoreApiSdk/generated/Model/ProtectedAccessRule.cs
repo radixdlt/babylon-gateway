@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,12 @@ namespace RadixDlt.CoreApiSdk.Model
     /// ProtectedAccessRule
     /// </summary>
     [DataContract(Name = "ProtectedAccessRule")]
-    public partial class ProtectedAccessRule : IEquatable<ProtectedAccessRule>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(AllowAllAccessRule), "AllowAll")]
+    [JsonSubtypes.KnownSubType(typeof(DenyAllAccessRule), "DenyAll")]
+    [JsonSubtypes.KnownSubType(typeof(ProtectedAccessRule), "Protected")]
+    public partial class ProtectedAccessRule : AccessRule, IEquatable<ProtectedAccessRule>
     {
-
-        /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public AccessRuleType Type { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ProtectedAccessRule" /> class.
         /// </summary>
@@ -109,11 +108,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ProtectedAccessRule" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
         /// <param name="accessRule">accessRule (required).</param>
-        public ProtectedAccessRule(AccessRuleType type = default(AccessRuleType), AccessRuleNode accessRule = default(AccessRuleNode))
+        /// <param name="type">type (required) (default to &quot;ProtectedAccessRule&quot;).</param>
+        public ProtectedAccessRule(AccessRuleNode accessRule = default(AccessRuleNode), AccessRuleType type = "ProtectedAccessRule") : base(type)
         {
-            this.Type = type;
             // to ensure "accessRule" is required (not null)
             if (accessRule == null)
             {
@@ -136,7 +134,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ProtectedAccessRule {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  AccessRule: ").Append(AccessRule).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -146,7 +144,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -172,11 +170,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.AccessRule == input.AccessRule ||
                     (this.AccessRule != null &&
@@ -192,8 +186,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                int hashCode = base.GetHashCode();
                 if (this.AccessRule != null)
                 {
                     hashCode = (hashCode * 59) + this.AccessRule.GetHashCode();

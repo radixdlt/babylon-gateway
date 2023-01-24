@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,14 @@ namespace RadixDlt.CoreApiSdk.Model
     /// AmountOfProofRule
     /// </summary>
     [DataContract(Name = "AmountOfProofRule")]
-    public partial class AmountOfProofRule : IEquatable<AmountOfProofRule>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(AllOfProofRule), "AllOf")]
+    [JsonSubtypes.KnownSubType(typeof(AmountOfProofRule), "AmountOf")]
+    [JsonSubtypes.KnownSubType(typeof(AnyOfProofRule), "AnyOf")]
+    [JsonSubtypes.KnownSubType(typeof(CountOfProofRule), "CountOf")]
+    [JsonSubtypes.KnownSubType(typeof(RequireProofRule), "Require")]
+    public partial class AmountOfProofRule : ProofRule, IEquatable<AmountOfProofRule>
     {
-
-        /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public ProofRuleType Type { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="AmountOfProofRule" /> class.
         /// </summary>
@@ -109,12 +110,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AmountOfProofRule" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
         /// <param name="amount">amount (required).</param>
         /// <param name="resource">resource (required).</param>
-        public AmountOfProofRule(ProofRuleType type = default(ProofRuleType), DynamicAmount amount = default(DynamicAmount), DynamicResourceDescriptor resource = default(DynamicResourceDescriptor))
+        /// <param name="type">type (required) (default to &quot;AmountOfProofRule&quot;).</param>
+        public AmountOfProofRule(DynamicAmount amount = default(DynamicAmount), DynamicResourceDescriptor resource = default(DynamicResourceDescriptor), ProofRuleType type = "AmountOfProofRule") : base(type)
         {
-            this.Type = type;
             // to ensure "amount" is required (not null)
             if (amount == null)
             {
@@ -149,7 +149,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class AmountOfProofRule {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("  Resource: ").Append(Resource).Append("\n");
             sb.Append("}\n");
@@ -160,7 +160,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -186,16 +186,12 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.Amount == input.Amount ||
                     (this.Amount != null &&
                     this.Amount.Equals(input.Amount))
-                ) && 
+                ) && base.Equals(input) && 
                 (
                     this.Resource == input.Resource ||
                     (this.Resource != null &&
@@ -211,8 +207,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                int hashCode = base.GetHashCode();
                 if (this.Amount != null)
                 {
                     hashCode = (hashCode * 59) + this.Amount.GetHashCode();

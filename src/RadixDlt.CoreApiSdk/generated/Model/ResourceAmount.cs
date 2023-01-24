@@ -87,89 +87,53 @@ using Newtonsoft.Json.Linq;
 using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
-using System.Reflection;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
     /// ResourceAmount
     /// </summary>
-    [JsonConverter(typeof(ResourceAmountJsonConverter))]
     [DataContract(Name = "ResourceAmount")]
-    public partial class ResourceAmount : AbstractOpenAPISchema, IEquatable<ResourceAmount>
+    [JsonConverter(typeof(JsonSubtypes), "ResourceType")]
+    [JsonSubtypes.KnownSubType(typeof(FungibleResourceAmount), "Fungible")]
+    [JsonSubtypes.KnownSubType(typeof(FungibleResourceAmount), "FungibleResourceAmount")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceAmount), "NonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceAmount), "NonFungibleResourceAmount")]
+    public partial class ResourceAmount : IEquatable<ResourceAmount>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceAmount" /> class
-        /// with the <see cref="FungibleResourceAmount" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of FungibleResourceAmount.</param>
-        public ResourceAmount(FungibleResourceAmount actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceAmount" /> class
-        /// with the <see cref="NonFungibleResourceAmount" /> class
+        /// Gets or Sets ResourceType
         /// </summary>
-        /// <param name="actualInstance">An instance of NonFungibleResourceAmount.</param>
-        public ResourceAmount(NonFungibleResourceAmount actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-
-        private Object _actualInstance;
-
+        [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
+        public ResourceType ResourceType { get; set; }
         /// <summary>
-        /// Gets or Sets ActualInstance
+        /// Initializes a new instance of the <see cref="ResourceAmount" /> class.
         /// </summary>
-        public override Object ActualInstance
+        [JsonConstructorAttribute]
+        protected ResourceAmount() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResourceAmount" /> class.
+        /// </summary>
+        /// <param name="resourceType">resourceType (required).</param>
+        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        public ResourceAmount(ResourceType resourceType = default(ResourceType), string resourceAddress = default(string))
         {
-            get
+            this.ResourceType = resourceType;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                return _actualInstance;
+                throw new ArgumentNullException("resourceAddress is a required property for ResourceAmount and cannot be null");
             }
-            set
-            {
-                if (value.GetType() == typeof(FungibleResourceAmount))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(NonFungibleResourceAmount))
-                {
-                    this._actualInstance = value;
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid instance found. Must be the following types: FungibleResourceAmount, NonFungibleResourceAmount");
-                }
-            }
+            this.ResourceAddress = resourceAddress;
         }
 
         /// <summary>
-        /// Get the actual instance of `FungibleResourceAmount`. If the actual instance is not `FungibleResourceAmount`,
-        /// the InvalidClassException will be thrown
+        /// The Bech32m-encoded human readable version of the resource address
         /// </summary>
-        /// <returns>An instance of FungibleResourceAmount</returns>
-        public FungibleResourceAmount GetFungibleResourceAmount()
-        {
-            return (FungibleResourceAmount)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `NonFungibleResourceAmount`. If the actual instance is not `NonFungibleResourceAmount`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of NonFungibleResourceAmount</returns>
-        public NonFungibleResourceAmount GetNonFungibleResourceAmount()
-        {
-            return (NonFungibleResourceAmount)this.ActualInstance;
-        }
+        /// <value>The Bech32m-encoded human readable version of the resource address</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -177,9 +141,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
-            var sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             sb.Append("class ResourceAmount {\n");
-            sb.Append("  ActualInstance: ").Append(this.ActualInstance).Append("\n");
+            sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -188,107 +153,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
-            return JsonConvert.SerializeObject(this.ActualInstance, ResourceAmount.SerializerSettings);
-        }
-
-        /// <summary>
-        /// Converts the JSON string into an instance of ResourceAmount
-        /// </summary>
-        /// <param name="jsonString">JSON string</param>
-        /// <returns>An instance of ResourceAmount</returns>
-        public static ResourceAmount FromJson(string jsonString)
-        {
-            ResourceAmount newResourceAmount = null;
-
-            if (string.IsNullOrEmpty(jsonString))
-            {
-                return newResourceAmount;
-            }
-
-            try
-            {
-                var discriminatorObj = JObject.Parse(jsonString)["resource_type"];
-                string discriminatorValue =  discriminatorObj == null ?string.Empty :discriminatorObj.ToString();
-                switch (discriminatorValue)
-                {
-                    case "Fungible":
-                        newResourceAmount = new ResourceAmount(JsonConvert.DeserializeObject<FungibleResourceAmount>(jsonString, ResourceAmount.AdditionalPropertiesSerializerSettings));
-                        return newResourceAmount;
-                    case "FungibleResourceAmount":
-                        newResourceAmount = new ResourceAmount(JsonConvert.DeserializeObject<FungibleResourceAmount>(jsonString, ResourceAmount.AdditionalPropertiesSerializerSettings));
-                        return newResourceAmount;
-                    case "NonFungible":
-                        newResourceAmount = new ResourceAmount(JsonConvert.DeserializeObject<NonFungibleResourceAmount>(jsonString, ResourceAmount.AdditionalPropertiesSerializerSettings));
-                        return newResourceAmount;
-                    case "NonFungibleResourceAmount":
-                        newResourceAmount = new ResourceAmount(JsonConvert.DeserializeObject<NonFungibleResourceAmount>(jsonString, ResourceAmount.AdditionalPropertiesSerializerSettings));
-                        return newResourceAmount;
-                    default:
-                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for ResourceAmount. Possible values: Fungible FungibleResourceAmount NonFungible NonFungibleResourceAmount", discriminatorValue));
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to parse the json data : `{0}` {1}", jsonString, ex.ToString()));
-            }
-
-            int match = 0;
-            List<string> matchedTypes = new List<string>();
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(FungibleResourceAmount).GetProperty("AdditionalProperties") == null)
-                {
-                    newResourceAmount = new ResourceAmount(JsonConvert.DeserializeObject<FungibleResourceAmount>(jsonString, ResourceAmount.SerializerSettings));
-                }
-                else
-                {
-                    newResourceAmount = new ResourceAmount(JsonConvert.DeserializeObject<FungibleResourceAmount>(jsonString, ResourceAmount.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("FungibleResourceAmount");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into FungibleResourceAmount: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(NonFungibleResourceAmount).GetProperty("AdditionalProperties") == null)
-                {
-                    newResourceAmount = new ResourceAmount(JsonConvert.DeserializeObject<NonFungibleResourceAmount>(jsonString, ResourceAmount.SerializerSettings));
-                }
-                else
-                {
-                    newResourceAmount = new ResourceAmount(JsonConvert.DeserializeObject<NonFungibleResourceAmount>(jsonString, ResourceAmount.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("NonFungibleResourceAmount");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into NonFungibleResourceAmount: {1}", jsonString, exception.ToString()));
-            }
-
-            if (match == 0)
-            {
-                throw new InvalidDataException("The JSON string `" + jsonString + "` cannot be deserialized into any schema defined.");
-            }
-            else if (match > 1)
-            {
-                throw new InvalidDataException("The JSON string `" + jsonString + "` incorrectly matches more than one schema (should be exactly one match): " + matchedTypes);
-            }
-
-            // deserialization is considered successful at this point if no exception has been thrown.
-            return newResourceAmount;
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
 
         /// <summary>
@@ -309,9 +176,19 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool Equals(ResourceAmount input)
         {
             if (input == null)
+            {
                 return false;
-
-            return this.ActualInstance.Equals(input.ActualInstance);
+            }
+            return 
+                (
+                    this.ResourceType == input.ResourceType ||
+                    this.ResourceType.Equals(input.ResourceType)
+                ) && 
+                (
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
+                );
         }
 
         /// <summary>
@@ -323,56 +200,15 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ActualInstance != null)
-                    hashCode = hashCode * 59 + this.ActualInstance.GetHashCode();
+                hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
+                if (this.ResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
                 return hashCode;
             }
         }
 
-    }
-
-    /// <summary>
-    /// Custom JSON converter for ResourceAmount
-    /// </summary>
-    public class ResourceAmountJsonConverter : JsonConverter
-    {
-        /// <summary>
-        /// To write the JSON string
-        /// </summary>
-        /// <param name="writer">JSON writer</param>
-        /// <param name="value">Object to be converted into a JSON string</param>
-        /// <param name="serializer">JSON Serializer</param>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        {
-            writer.WriteRawValue((string)(typeof(ResourceAmount).GetMethod("ToJson").Invoke(value, null)));
-        }
-
-        /// <summary>
-        /// To convert a JSON string into an object
-        /// </summary>
-        /// <param name="reader">JSON reader</param>
-        /// <param name="objectType">Object type</param>
-        /// <param name="existingValue">Existing value</param>
-        /// <param name="serializer">JSON Serializer</param>
-        /// <returns>The object converted from the JSON string</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            if(reader.TokenType != JsonToken.Null)
-            {
-                return ResourceAmount.FromJson(JObject.Load(reader).ToString(Formatting.None));
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Check if the object can be converted
-        /// </summary>
-        /// <param name="objectType">Object type</param>
-        /// <returns>True if the object can be converted</returns>
-        public override bool CanConvert(Type objectType)
-        {
-            return false;
-        }
     }
 
 }

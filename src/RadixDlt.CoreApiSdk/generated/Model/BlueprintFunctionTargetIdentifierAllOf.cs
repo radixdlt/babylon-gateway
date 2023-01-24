@@ -90,30 +90,62 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// LocalMethodReferenceBase
+    /// BlueprintFunctionTargetIdentifierAllOf
     /// </summary>
-    [DataContract(Name = "LocalMethodReferenceBase")]
-    public partial class LocalMethodReferenceBase : IEquatable<LocalMethodReferenceBase>
+    [DataContract(Name = "BlueprintFunctionTargetIdentifier_allOf")]
+    public partial class BlueprintFunctionTargetIdentifierAllOf : IEquatable<BlueprintFunctionTargetIdentifierAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public LocalMethodReferenceType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LocalMethodReferenceBase" /> class.
+        /// Initializes a new instance of the <see cref="BlueprintFunctionTargetIdentifierAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected LocalMethodReferenceBase() { }
+        protected BlueprintFunctionTargetIdentifierAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalMethodReferenceBase" /> class.
+        /// Initializes a new instance of the <see cref="BlueprintFunctionTargetIdentifierAllOf" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        public LocalMethodReferenceBase(LocalMethodReferenceType type = default(LocalMethodReferenceType))
+        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
+        /// <param name="blueprintName">blueprintName (required).</param>
+        /// <param name="functionName">functionName (required).</param>
+        public BlueprintFunctionTargetIdentifierAllOf(string packageAddress = default(string), string blueprintName = default(string), string functionName = default(string))
         {
-            this.Type = type;
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
+            {
+                throw new ArgumentNullException("packageAddress is a required property for BlueprintFunctionTargetIdentifierAllOf and cannot be null");
+            }
+            this.PackageAddress = packageAddress;
+            // to ensure "blueprintName" is required (not null)
+            if (blueprintName == null)
+            {
+                throw new ArgumentNullException("blueprintName is a required property for BlueprintFunctionTargetIdentifierAllOf and cannot be null");
+            }
+            this.BlueprintName = blueprintName;
+            // to ensure "functionName" is required (not null)
+            if (functionName == null)
+            {
+                throw new ArgumentNullException("functionName is a required property for BlueprintFunctionTargetIdentifierAllOf and cannot be null");
+            }
+            this.FunctionName = functionName;
         }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the package address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the package address</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets BlueprintName
+        /// </summary>
+        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
+        public string BlueprintName { get; set; }
+
+        /// <summary>
+        /// Gets or Sets FunctionName
+        /// </summary>
+        [DataMember(Name = "function_name", IsRequired = true, EmitDefaultValue = true)]
+        public string FunctionName { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -122,8 +154,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class LocalMethodReferenceBase {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("class BlueprintFunctionTargetIdentifierAllOf {\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
+            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
+            sb.Append("  FunctionName: ").Append(FunctionName).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -144,15 +178,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as LocalMethodReferenceBase);
+            return this.Equals(input as BlueprintFunctionTargetIdentifierAllOf);
         }
 
         /// <summary>
-        /// Returns true if LocalMethodReferenceBase instances are equal
+        /// Returns true if BlueprintFunctionTargetIdentifierAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of LocalMethodReferenceBase to be compared</param>
+        /// <param name="input">Instance of BlueprintFunctionTargetIdentifierAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(LocalMethodReferenceBase input)
+        public bool Equals(BlueprintFunctionTargetIdentifierAllOf input)
         {
             if (input == null)
             {
@@ -160,8 +194,19 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
+                ) && 
+                (
+                    this.BlueprintName == input.BlueprintName ||
+                    (this.BlueprintName != null &&
+                    this.BlueprintName.Equals(input.BlueprintName))
+                ) && 
+                (
+                    this.FunctionName == input.FunctionName ||
+                    (this.FunctionName != null &&
+                    this.FunctionName.Equals(input.FunctionName))
                 );
         }
 
@@ -174,7 +219,18 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                if (this.PackageAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
+                }
+                if (this.BlueprintName != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                }
+                if (this.FunctionName != null)
+                {
+                    hashCode = (hashCode * 59) + this.FunctionName.GetHashCode();
+                }
                 return hashCode;
             }
         }

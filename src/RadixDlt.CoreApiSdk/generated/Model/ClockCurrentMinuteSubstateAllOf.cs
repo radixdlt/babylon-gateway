@@ -103,18 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ClockCurrentMinuteSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="timestampMsRoundedDownToMinute">An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the ledger unix timestamp in ms (rounded down to the current minute) (required).</param>
-        public ClockCurrentMinuteSubstateAllOf(long timestampMsRoundedDownToMinute = default(long))
+        /// <param name="timestampRoundedDownToMinute">timestampRoundedDownToMinute (required).</param>
+        public ClockCurrentMinuteSubstateAllOf(Instant timestampRoundedDownToMinute = default(Instant))
         {
-            this.TimestampMsRoundedDownToMinute = timestampMsRoundedDownToMinute;
+            // to ensure "timestampRoundedDownToMinute" is required (not null)
+            if (timestampRoundedDownToMinute == null)
+            {
+                throw new ArgumentNullException("timestampRoundedDownToMinute is a required property for ClockCurrentMinuteSubstateAllOf and cannot be null");
+            }
+            this.TimestampRoundedDownToMinute = timestampRoundedDownToMinute;
         }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the ledger unix timestamp in ms (rounded down to the current minute)
+        /// Gets or Sets TimestampRoundedDownToMinute
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the ledger unix timestamp in ms (rounded down to the current minute)</value>
-        [DataMember(Name = "timestamp_ms_rounded_down_to_minute", IsRequired = true, EmitDefaultValue = true)]
-        public long TimestampMsRoundedDownToMinute { get; set; }
+        [DataMember(Name = "timestamp_rounded_down_to_minute", IsRequired = true, EmitDefaultValue = true)]
+        public Instant TimestampRoundedDownToMinute { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -124,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ClockCurrentMinuteSubstateAllOf {\n");
-            sb.Append("  TimestampMsRoundedDownToMinute: ").Append(TimestampMsRoundedDownToMinute).Append("\n");
+            sb.Append("  TimestampRoundedDownToMinute: ").Append(TimestampRoundedDownToMinute).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -161,8 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.TimestampMsRoundedDownToMinute == input.TimestampMsRoundedDownToMinute ||
-                    this.TimestampMsRoundedDownToMinute.Equals(input.TimestampMsRoundedDownToMinute)
+                    this.TimestampRoundedDownToMinute == input.TimestampRoundedDownToMinute ||
+                    (this.TimestampRoundedDownToMinute != null &&
+                    this.TimestampRoundedDownToMinute.Equals(input.TimestampRoundedDownToMinute))
                 );
         }
 
@@ -175,7 +180,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.TimestampMsRoundedDownToMinute.GetHashCode();
+                if (this.TimestampRoundedDownToMinute != null)
+                {
+                    hashCode = (hashCode * 59) + this.TimestampRoundedDownToMinute.GetHashCode();
+                }
                 return hashCode;
             }
         }

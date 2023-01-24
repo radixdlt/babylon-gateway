@@ -90,30 +90,36 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// AccessRuleReferenceBase
+    /// EddsaEd25519PublicKeyAllOf
     /// </summary>
-    [DataContract(Name = "AccessRuleReferenceBase")]
-    public partial class AccessRuleReferenceBase : IEquatable<AccessRuleReferenceBase>
+    [DataContract(Name = "EddsaEd25519PublicKey_allOf")]
+    public partial class EddsaEd25519PublicKeyAllOf : IEquatable<EddsaEd25519PublicKeyAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public AccessRuleReferenceType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRuleReferenceBase" /> class.
+        /// Initializes a new instance of the <see cref="EddsaEd25519PublicKeyAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccessRuleReferenceBase() { }
+        protected EddsaEd25519PublicKeyAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRuleReferenceBase" /> class.
+        /// Initializes a new instance of the <see cref="EddsaEd25519PublicKeyAllOf" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        public AccessRuleReferenceBase(AccessRuleReferenceType type = default(AccessRuleReferenceType))
+        /// <param name="keyHex">The hex-encoded compressed EdDSA Ed25519 public key (32 bytes) (required).</param>
+        public EddsaEd25519PublicKeyAllOf(string keyHex = default(string))
         {
-            this.Type = type;
+            // to ensure "keyHex" is required (not null)
+            if (keyHex == null)
+            {
+                throw new ArgumentNullException("keyHex is a required property for EddsaEd25519PublicKeyAllOf and cannot be null");
+            }
+            this.KeyHex = keyHex;
         }
+
+        /// <summary>
+        /// The hex-encoded compressed EdDSA Ed25519 public key (32 bytes)
+        /// </summary>
+        /// <value>The hex-encoded compressed EdDSA Ed25519 public key (32 bytes)</value>
+        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -122,8 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccessRuleReferenceBase {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("class EddsaEd25519PublicKeyAllOf {\n");
+            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -144,15 +150,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccessRuleReferenceBase);
+            return this.Equals(input as EddsaEd25519PublicKeyAllOf);
         }
 
         /// <summary>
-        /// Returns true if AccessRuleReferenceBase instances are equal
+        /// Returns true if EddsaEd25519PublicKeyAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccessRuleReferenceBase to be compared</param>
+        /// <param name="input">Instance of EddsaEd25519PublicKeyAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccessRuleReferenceBase input)
+        public bool Equals(EddsaEd25519PublicKeyAllOf input)
         {
             if (input == null)
             {
@@ -160,8 +166,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
+                    this.KeyHex == input.KeyHex ||
+                    (this.KeyHex != null &&
+                    this.KeyHex.Equals(input.KeyHex))
                 );
         }
 
@@ -174,7 +181,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                if (this.KeyHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
+                }
                 return hashCode;
             }
         }

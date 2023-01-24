@@ -84,33 +84,39 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// SchemaSubpathBase
+    /// TargetIdentifier
     /// </summary>
-    [DataContract(Name = "SchemaSubpathBase")]
-    public partial class SchemaSubpathBase : IEquatable<SchemaSubpathBase>
+    [DataContract(Name = "TargetIdentifier")]
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(BlueprintFunctionTargetIdentifier), "BlueprintFunctionTargetIdentifier")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentMethodTargetIdentifier), "ComponentMethodTargetIdentifier")]
+    [JsonSubtypes.KnownSubType(typeof(BlueprintFunctionTargetIdentifier), "Function")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentMethodTargetIdentifier), "Method")]
+    public partial class TargetIdentifier : IEquatable<TargetIdentifier>
     {
 
         /// <summary>
         /// Gets or Sets Type
         /// </summary>
         [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public SchemaSubpathType Type { get; set; }
+        public TargetIdentifierType Type { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="SchemaSubpathBase" /> class.
+        /// Initializes a new instance of the <see cref="TargetIdentifier" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected SchemaSubpathBase() { }
+        protected TargetIdentifier() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="SchemaSubpathBase" /> class.
+        /// Initializes a new instance of the <see cref="TargetIdentifier" /> class.
         /// </summary>
         /// <param name="type">type (required).</param>
-        public SchemaSubpathBase(SchemaSubpathType type = default(SchemaSubpathType))
+        public TargetIdentifier(TargetIdentifierType type = default(TargetIdentifierType))
         {
             this.Type = type;
         }
@@ -122,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class SchemaSubpathBase {\n");
+            sb.Append("class TargetIdentifier {\n");
             sb.Append("  Type: ").Append(Type).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -144,15 +150,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as SchemaSubpathBase);
+            return this.Equals(input as TargetIdentifier);
         }
 
         /// <summary>
-        /// Returns true if SchemaSubpathBase instances are equal
+        /// Returns true if TargetIdentifier instances are equal
         /// </summary>
-        /// <param name="input">Instance of SchemaSubpathBase to be compared</param>
+        /// <param name="input">Instance of TargetIdentifier to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(SchemaSubpathBase input)
+        public bool Equals(TargetIdentifier input)
         {
             if (input == null)
             {

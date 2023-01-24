@@ -90,30 +90,48 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ProofRuleBase
+    /// The EdDSA public key and signature
     /// </summary>
-    [DataContract(Name = "ProofRuleBase")]
-    public partial class ProofRuleBase : IEquatable<ProofRuleBase>
+    [DataContract(Name = "EddsaEd25519SignatureWithPublicKey_allOf")]
+    public partial class EddsaEd25519SignatureWithPublicKeyAllOf : IEquatable<EddsaEd25519SignatureWithPublicKeyAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public ProofRuleType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ProofRuleBase" /> class.
+        /// Initializes a new instance of the <see cref="EddsaEd25519SignatureWithPublicKeyAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ProofRuleBase() { }
+        protected EddsaEd25519SignatureWithPublicKeyAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProofRuleBase" /> class.
+        /// Initializes a new instance of the <see cref="EddsaEd25519SignatureWithPublicKeyAllOf" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        public ProofRuleBase(ProofRuleType type = default(ProofRuleType))
+        /// <param name="publicKey">publicKey (required).</param>
+        /// <param name="signature">signature (required).</param>
+        public EddsaEd25519SignatureWithPublicKeyAllOf(EddsaEd25519PublicKey publicKey = default(EddsaEd25519PublicKey), EddsaEd25519Signature signature = default(EddsaEd25519Signature))
         {
-            this.Type = type;
+            // to ensure "publicKey" is required (not null)
+            if (publicKey == null)
+            {
+                throw new ArgumentNullException("publicKey is a required property for EddsaEd25519SignatureWithPublicKeyAllOf and cannot be null");
+            }
+            this.PublicKey = publicKey;
+            // to ensure "signature" is required (not null)
+            if (signature == null)
+            {
+                throw new ArgumentNullException("signature is a required property for EddsaEd25519SignatureWithPublicKeyAllOf and cannot be null");
+            }
+            this.Signature = signature;
         }
+
+        /// <summary>
+        /// Gets or Sets PublicKey
+        /// </summary>
+        [DataMember(Name = "public_key", IsRequired = true, EmitDefaultValue = true)]
+        public EddsaEd25519PublicKey PublicKey { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Signature
+        /// </summary>
+        [DataMember(Name = "signature", IsRequired = true, EmitDefaultValue = true)]
+        public EddsaEd25519Signature Signature { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -122,8 +140,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ProofRuleBase {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("class EddsaEd25519SignatureWithPublicKeyAllOf {\n");
+            sb.Append("  PublicKey: ").Append(PublicKey).Append("\n");
+            sb.Append("  Signature: ").Append(Signature).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -144,15 +163,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ProofRuleBase);
+            return this.Equals(input as EddsaEd25519SignatureWithPublicKeyAllOf);
         }
 
         /// <summary>
-        /// Returns true if ProofRuleBase instances are equal
+        /// Returns true if EddsaEd25519SignatureWithPublicKeyAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of ProofRuleBase to be compared</param>
+        /// <param name="input">Instance of EddsaEd25519SignatureWithPublicKeyAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ProofRuleBase input)
+        public bool Equals(EddsaEd25519SignatureWithPublicKeyAllOf input)
         {
             if (input == null)
             {
@@ -160,8 +179,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
+                    this.PublicKey == input.PublicKey ||
+                    (this.PublicKey != null &&
+                    this.PublicKey.Equals(input.PublicKey))
+                ) && 
+                (
+                    this.Signature == input.Signature ||
+                    (this.Signature != null &&
+                    this.Signature.Equals(input.Signature))
                 );
         }
 
@@ -174,7 +199,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                if (this.PublicKey != null)
+                {
+                    hashCode = (hashCode * 59) + this.PublicKey.GetHashCode();
+                }
+                if (this.Signature != null)
+                {
+                    hashCode = (hashCode * 59) + this.Signature.GetHashCode();
+                }
                 return hashCode;
             }
         }

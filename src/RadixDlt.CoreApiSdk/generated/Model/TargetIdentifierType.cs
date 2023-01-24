@@ -90,94 +90,22 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// DynamicResourceDescriptorBase
+    /// Defines TargetIdentifierType
     /// </summary>
-    [DataContract(Name = "DynamicResourceDescriptorBase")]
-    public partial class DynamicResourceDescriptorBase : IEquatable<DynamicResourceDescriptorBase>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum TargetIdentifierType
     {
+        /// <summary>
+        /// Enum Method for value: Method
+        /// </summary>
+        [EnumMember(Value = "Method")]
+        Method = 1,
 
         /// <summary>
-        /// Gets or Sets Type
+        /// Enum Function for value: Function
         /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public DynamicResourceDescriptorType Type { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicResourceDescriptorBase" /> class.
-        /// </summary>
-        [JsonConstructorAttribute]
-        protected DynamicResourceDescriptorBase() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicResourceDescriptorBase" /> class.
-        /// </summary>
-        /// <param name="type">type (required).</param>
-        public DynamicResourceDescriptorBase(DynamicResourceDescriptorType type = default(DynamicResourceDescriptorType))
-        {
-            this.Type = type;
-        }
-
-        /// <summary>
-        /// Returns the string presentation of the object
-        /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class DynamicResourceDescriptorBase {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Returns the JSON string presentation of the object
-        /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Returns true if objects are equal
-        /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as DynamicResourceDescriptorBase);
-        }
-
-        /// <summary>
-        /// Returns true if DynamicResourceDescriptorBase instances are equal
-        /// </summary>
-        /// <param name="input">Instance of DynamicResourceDescriptorBase to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(DynamicResourceDescriptorBase input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "Function")]
+        Function = 2
 
     }
 

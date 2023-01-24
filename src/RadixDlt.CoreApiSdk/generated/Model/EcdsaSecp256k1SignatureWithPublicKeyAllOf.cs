@@ -90,44 +90,35 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ResourceAmountBase
+    /// Because ECDSA has recoverable signatures, this only includes a signature
     /// </summary>
-    [DataContract(Name = "ResourceAmountBase")]
-    public partial class ResourceAmountBase : IEquatable<ResourceAmountBase>
+    [DataContract(Name = "EcdsaSecp256k1SignatureWithPublicKey_allOf")]
+    public partial class EcdsaSecp256k1SignatureWithPublicKeyAllOf : IEquatable<EcdsaSecp256k1SignatureWithPublicKeyAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets ResourceType
-        /// </summary>
-        [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
-        public ResourceType ResourceType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceAmountBase" /> class.
+        /// Initializes a new instance of the <see cref="EcdsaSecp256k1SignatureWithPublicKeyAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ResourceAmountBase() { }
+        protected EcdsaSecp256k1SignatureWithPublicKeyAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceAmountBase" /> class.
+        /// Initializes a new instance of the <see cref="EcdsaSecp256k1SignatureWithPublicKeyAllOf" /> class.
         /// </summary>
-        /// <param name="resourceType">resourceType (required).</param>
-        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
-        public ResourceAmountBase(ResourceType resourceType = default(ResourceType), string resourceAddress = default(string))
+        /// <param name="recoverableSignature">recoverableSignature (required).</param>
+        public EcdsaSecp256k1SignatureWithPublicKeyAllOf(EcdsaSecp256k1Signature recoverableSignature = default(EcdsaSecp256k1Signature))
         {
-            this.ResourceType = resourceType;
-            // to ensure "resourceAddress" is required (not null)
-            if (resourceAddress == null)
+            // to ensure "recoverableSignature" is required (not null)
+            if (recoverableSignature == null)
             {
-                throw new ArgumentNullException("resourceAddress is a required property for ResourceAmountBase and cannot be null");
+                throw new ArgumentNullException("recoverableSignature is a required property for EcdsaSecp256k1SignatureWithPublicKeyAllOf and cannot be null");
             }
-            this.ResourceAddress = resourceAddress;
+            this.RecoverableSignature = recoverableSignature;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the resource address
+        /// Gets or Sets RecoverableSignature
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the resource address</value>
-        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string ResourceAddress { get; set; }
+        [DataMember(Name = "recoverable_signature", IsRequired = true, EmitDefaultValue = true)]
+        public EcdsaSecp256k1Signature RecoverableSignature { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -136,9 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceAmountBase {\n");
-            sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
-            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("class EcdsaSecp256k1SignatureWithPublicKeyAllOf {\n");
+            sb.Append("  RecoverableSignature: ").Append(RecoverableSignature).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -159,15 +149,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResourceAmountBase);
+            return this.Equals(input as EcdsaSecp256k1SignatureWithPublicKeyAllOf);
         }
 
         /// <summary>
-        /// Returns true if ResourceAmountBase instances are equal
+        /// Returns true if EcdsaSecp256k1SignatureWithPublicKeyAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResourceAmountBase to be compared</param>
+        /// <param name="input">Instance of EcdsaSecp256k1SignatureWithPublicKeyAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResourceAmountBase input)
+        public bool Equals(EcdsaSecp256k1SignatureWithPublicKeyAllOf input)
         {
             if (input == null)
             {
@@ -175,13 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ResourceType == input.ResourceType ||
-                    this.ResourceType.Equals(input.ResourceType)
-                ) && 
-                (
-                    this.ResourceAddress == input.ResourceAddress ||
-                    (this.ResourceAddress != null &&
-                    this.ResourceAddress.Equals(input.ResourceAddress))
+                    this.RecoverableSignature == input.RecoverableSignature ||
+                    (this.RecoverableSignature != null &&
+                    this.RecoverableSignature.Equals(input.RecoverableSignature))
                 );
         }
 
@@ -194,10 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
-                if (this.ResourceAddress != null)
+                if (this.RecoverableSignature != null)
                 {
-                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RecoverableSignature.GetHashCode();
                 }
                 return hashCode;
             }

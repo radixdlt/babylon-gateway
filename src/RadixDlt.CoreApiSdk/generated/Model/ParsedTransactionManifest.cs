@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,13 +94,25 @@ namespace RadixDlt.CoreApiSdk.Model
     /// ParsedTransactionManifest
     /// </summary>
     [DataContract(Name = "ParsedTransactionManifest")]
-    public partial class ParsedTransactionManifest : IEquatable<ParsedTransactionManifest>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(ParsedLedgerTransaction), "LedgerTransaction")]
+    [JsonSubtypes.KnownSubType(typeof(ParsedNotarizedTransaction), "NotarizedTransaction")]
+    [JsonSubtypes.KnownSubType(typeof(ParsedSignedTransactionIntent), "SignedTransactionIntent")]
+    [JsonSubtypes.KnownSubType(typeof(ParsedTransactionIntent), "TransactionIntent")]
+    [JsonSubtypes.KnownSubType(typeof(ParsedTransactionManifest), "TransactionManifest")]
+    public partial class ParsedTransactionManifest : ParsedTransaction, IEquatable<ParsedTransactionManifest>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ParsedTransactionManifest" /> class.
         /// </summary>
+        [JsonConstructorAttribute]
+        protected ParsedTransactionManifest() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ParsedTransactionManifest" /> class.
+        /// </summary>
         /// <param name="manifest">manifest.</param>
-        public ParsedTransactionManifest(TransactionManifest manifest = default(TransactionManifest))
+        /// <param name="type">type (required) (default to &quot;ParsedTransactionManifest&quot;).</param>
+        public ParsedTransactionManifest(TransactionManifest manifest = default(TransactionManifest), ParsedTransactionType type = "ParsedTransactionManifest") : base(type)
         {
             this.Manifest = manifest;
         }
@@ -118,6 +131,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ParsedTransactionManifest {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Manifest: ").Append(Manifest).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -127,7 +141,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -153,7 +167,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
                     this.Manifest == input.Manifest ||
                     (this.Manifest != null &&
@@ -169,7 +183,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
+                int hashCode = base.GetHashCode();
                 if (this.Manifest != null)
                 {
                     hashCode = (hashCode * 59) + this.Manifest.GetHashCode();

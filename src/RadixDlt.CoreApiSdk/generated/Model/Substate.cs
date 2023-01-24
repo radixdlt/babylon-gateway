@@ -87,478 +87,68 @@ using Newtonsoft.Json.Linq;
 using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
-using System.Reflection;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
     /// Substate
     /// </summary>
-    [JsonConverter(typeof(SubstateJsonConverter))]
     [DataContract(Name = "Substate")]
-    public partial class Substate : AbstractOpenAPISchema, IEquatable<Substate>
+    [JsonConverter(typeof(JsonSubtypes), "SubstateType")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChainSubstate")]
+    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
+    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinuteSubstate")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentInfoSubstate), "ComponentInfo")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentInfoSubstate), "ComponentInfoSubstate")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulatorSubstate")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfigSubstate")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentStateSubstate")]
+    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
+    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManagerSubstate")]
+    [JsonSubtypes.KnownSubType(typeof(GlobalAddressSubstate), "GlobalAddress")]
+    [JsonSubtypes.KnownSubType(typeof(GlobalAddressSubstate), "GlobalAddressSubstate")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntrySubstate")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "Metadata")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "MetadataSubstate")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntrySubstate")]
+    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
+    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfoSubstate")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulatorSubstate")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfigSubstate")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManagerSubstate")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSetSubstate")]
+    [JsonSubtypes.KnownSubType(typeof(VaultSubstate), "Vault")]
+    [JsonSubtypes.KnownSubType(typeof(VaultSubstate), "VaultSubstate")]
+    public partial class Substate : IEquatable<Substate>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="MetadataSubstate" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of MetadataSubstate.</param>
-        public Substate(MetadataSubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="AccessRulesChainSubstate" /> class
+        /// Gets or Sets SubstateType
         /// </summary>
-        /// <param name="actualInstance">An instance of AccessRulesChainSubstate.</param>
-        public Substate(AccessRulesChainSubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
+        [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateType SubstateType { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="GlobalAddressSubstate" /> class
+        /// Initializes a new instance of the <see cref="Substate" /> class.
         /// </summary>
-        /// <param name="actualInstance">An instance of GlobalAddressSubstate.</param>
-        public Substate(GlobalAddressSubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
+        [JsonConstructorAttribute]
+        protected Substate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="ComponentInfoSubstate" /> class
+        /// Initializes a new instance of the <see cref="Substate" /> class.
         /// </summary>
-        /// <param name="actualInstance">An instance of ComponentInfoSubstate.</param>
-        public Substate(ComponentInfoSubstate actualInstance)
+        /// <param name="substateType">substateType (required).</param>
+        public Substate(SubstateType substateType = default(SubstateType))
         {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="ComponentStateSubstate" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of ComponentStateSubstate.</param>
-        public Substate(ComponentStateSubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="ComponentRoyaltyConfigSubstate" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of ComponentRoyaltyConfigSubstate.</param>
-        public Substate(ComponentRoyaltyConfigSubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="ComponentRoyaltyAccumulatorSubstate" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of ComponentRoyaltyAccumulatorSubstate.</param>
-        public Substate(ComponentRoyaltyAccumulatorSubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="PackageInfoSubstate" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of PackageInfoSubstate.</param>
-        public Substate(PackageInfoSubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="PackageRoyaltyConfigSubstate" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of PackageRoyaltyConfigSubstate.</param>
-        public Substate(PackageRoyaltyConfigSubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="PackageRoyaltyAccumulatorSubstate" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of PackageRoyaltyAccumulatorSubstate.</param>
-        public Substate(PackageRoyaltyAccumulatorSubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="ResourceManagerSubstate" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of ResourceManagerSubstate.</param>
-        public Substate(ResourceManagerSubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="EpochManagerSubstate" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of EpochManagerSubstate.</param>
-        public Substate(EpochManagerSubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="ValidatorSetSubstate" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of ValidatorSetSubstate.</param>
-        public Substate(ValidatorSetSubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="ClockCurrentMinuteSubstate" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of ClockCurrentMinuteSubstate.</param>
-        public Substate(ClockCurrentMinuteSubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="KeyValueStoreEntrySubstate" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of KeyValueStoreEntrySubstate.</param>
-        public Substate(KeyValueStoreEntrySubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="VaultSubstate" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of VaultSubstate.</param>
-        public Substate(VaultSubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="NonFungibleStoreEntrySubstate" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of NonFungibleStoreEntrySubstate.</param>
-        public Substate(NonFungibleStoreEntrySubstate actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-
-        private Object _actualInstance;
-
-        /// <summary>
-        /// Gets or Sets ActualInstance
-        /// </summary>
-        public override Object ActualInstance
-        {
-            get
-            {
-                return _actualInstance;
-            }
-            set
-            {
-                if (value.GetType() == typeof(AccessRulesChainSubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(ClockCurrentMinuteSubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(ComponentInfoSubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(ComponentRoyaltyAccumulatorSubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(ComponentRoyaltyConfigSubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(ComponentStateSubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(EpochManagerSubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(GlobalAddressSubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(KeyValueStoreEntrySubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(MetadataSubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(NonFungibleStoreEntrySubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(PackageInfoSubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(PackageRoyaltyAccumulatorSubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(PackageRoyaltyConfigSubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(ResourceManagerSubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(ValidatorSetSubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(VaultSubstate))
-                {
-                    this._actualInstance = value;
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid instance found. Must be the following types: AccessRulesChainSubstate, ClockCurrentMinuteSubstate, ComponentInfoSubstate, ComponentRoyaltyAccumulatorSubstate, ComponentRoyaltyConfigSubstate, ComponentStateSubstate, EpochManagerSubstate, GlobalAddressSubstate, KeyValueStoreEntrySubstate, MetadataSubstate, NonFungibleStoreEntrySubstate, PackageInfoSubstate, PackageRoyaltyAccumulatorSubstate, PackageRoyaltyConfigSubstate, ResourceManagerSubstate, ValidatorSetSubstate, VaultSubstate");
-                }
-            }
-        }
-
-        /// <summary>
-        /// Get the actual instance of `MetadataSubstate`. If the actual instance is not `MetadataSubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of MetadataSubstate</returns>
-        public MetadataSubstate GetMetadataSubstate()
-        {
-            return (MetadataSubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `AccessRulesChainSubstate`. If the actual instance is not `AccessRulesChainSubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of AccessRulesChainSubstate</returns>
-        public AccessRulesChainSubstate GetAccessRulesChainSubstate()
-        {
-            return (AccessRulesChainSubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `GlobalAddressSubstate`. If the actual instance is not `GlobalAddressSubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of GlobalAddressSubstate</returns>
-        public GlobalAddressSubstate GetGlobalAddressSubstate()
-        {
-            return (GlobalAddressSubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `ComponentInfoSubstate`. If the actual instance is not `ComponentInfoSubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of ComponentInfoSubstate</returns>
-        public ComponentInfoSubstate GetComponentInfoSubstate()
-        {
-            return (ComponentInfoSubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `ComponentStateSubstate`. If the actual instance is not `ComponentStateSubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of ComponentStateSubstate</returns>
-        public ComponentStateSubstate GetComponentStateSubstate()
-        {
-            return (ComponentStateSubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `ComponentRoyaltyConfigSubstate`. If the actual instance is not `ComponentRoyaltyConfigSubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of ComponentRoyaltyConfigSubstate</returns>
-        public ComponentRoyaltyConfigSubstate GetComponentRoyaltyConfigSubstate()
-        {
-            return (ComponentRoyaltyConfigSubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `ComponentRoyaltyAccumulatorSubstate`. If the actual instance is not `ComponentRoyaltyAccumulatorSubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of ComponentRoyaltyAccumulatorSubstate</returns>
-        public ComponentRoyaltyAccumulatorSubstate GetComponentRoyaltyAccumulatorSubstate()
-        {
-            return (ComponentRoyaltyAccumulatorSubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `PackageInfoSubstate`. If the actual instance is not `PackageInfoSubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of PackageInfoSubstate</returns>
-        public PackageInfoSubstate GetPackageInfoSubstate()
-        {
-            return (PackageInfoSubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `PackageRoyaltyConfigSubstate`. If the actual instance is not `PackageRoyaltyConfigSubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of PackageRoyaltyConfigSubstate</returns>
-        public PackageRoyaltyConfigSubstate GetPackageRoyaltyConfigSubstate()
-        {
-            return (PackageRoyaltyConfigSubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `PackageRoyaltyAccumulatorSubstate`. If the actual instance is not `PackageRoyaltyAccumulatorSubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of PackageRoyaltyAccumulatorSubstate</returns>
-        public PackageRoyaltyAccumulatorSubstate GetPackageRoyaltyAccumulatorSubstate()
-        {
-            return (PackageRoyaltyAccumulatorSubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `ResourceManagerSubstate`. If the actual instance is not `ResourceManagerSubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of ResourceManagerSubstate</returns>
-        public ResourceManagerSubstate GetResourceManagerSubstate()
-        {
-            return (ResourceManagerSubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `EpochManagerSubstate`. If the actual instance is not `EpochManagerSubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of EpochManagerSubstate</returns>
-        public EpochManagerSubstate GetEpochManagerSubstate()
-        {
-            return (EpochManagerSubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `ValidatorSetSubstate`. If the actual instance is not `ValidatorSetSubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of ValidatorSetSubstate</returns>
-        public ValidatorSetSubstate GetValidatorSetSubstate()
-        {
-            return (ValidatorSetSubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `ClockCurrentMinuteSubstate`. If the actual instance is not `ClockCurrentMinuteSubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of ClockCurrentMinuteSubstate</returns>
-        public ClockCurrentMinuteSubstate GetClockCurrentMinuteSubstate()
-        {
-            return (ClockCurrentMinuteSubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `KeyValueStoreEntrySubstate`. If the actual instance is not `KeyValueStoreEntrySubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of KeyValueStoreEntrySubstate</returns>
-        public KeyValueStoreEntrySubstate GetKeyValueStoreEntrySubstate()
-        {
-            return (KeyValueStoreEntrySubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `VaultSubstate`. If the actual instance is not `VaultSubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of VaultSubstate</returns>
-        public VaultSubstate GetVaultSubstate()
-        {
-            return (VaultSubstate)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `NonFungibleStoreEntrySubstate`. If the actual instance is not `NonFungibleStoreEntrySubstate`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of NonFungibleStoreEntrySubstate</returns>
-        public NonFungibleStoreEntrySubstate GetNonFungibleStoreEntrySubstate()
-        {
-            return (NonFungibleStoreEntrySubstate)this.ActualInstance;
+            this.SubstateType = substateType;
         }
 
         /// <summary>
@@ -567,9 +157,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
-            var sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             sb.Append("class Substate {\n");
-            sb.Append("  ActualInstance: ").Append(this.ActualInstance).Append("\n");
+            sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -578,497 +168,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
-            return JsonConvert.SerializeObject(this.ActualInstance, Substate.SerializerSettings);
-        }
-
-        /// <summary>
-        /// Converts the JSON string into an instance of Substate
-        /// </summary>
-        /// <param name="jsonString">JSON string</param>
-        /// <returns>An instance of Substate</returns>
-        public static Substate FromJson(string jsonString)
-        {
-            Substate newSubstate = null;
-
-            if (string.IsNullOrEmpty(jsonString))
-            {
-                return newSubstate;
-            }
-
-            try
-            {
-                var discriminatorObj = JObject.Parse(jsonString)["substate_type"];
-                string discriminatorValue =  discriminatorObj == null ?string.Empty :discriminatorObj.ToString();
-                switch (discriminatorValue)
-                {
-                    case "AccessRulesChain":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<AccessRulesChainSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "AccessRulesChainSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<AccessRulesChainSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "ClockCurrentMinute":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<ClockCurrentMinuteSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "ClockCurrentMinuteSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<ClockCurrentMinuteSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "ComponentInfo":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentInfoSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "ComponentInfoSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentInfoSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "ComponentRoyaltyAccumulator":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyAccumulatorSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "ComponentRoyaltyAccumulatorSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyAccumulatorSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "ComponentRoyaltyConfig":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyConfigSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "ComponentRoyaltyConfigSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyConfigSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "ComponentState":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentStateSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "ComponentStateSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentStateSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "EpochManager":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<EpochManagerSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "EpochManagerSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<EpochManagerSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "GlobalAddress":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalAddressSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "GlobalAddressSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalAddressSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "KeyValueStoreEntry":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<KeyValueStoreEntrySubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "KeyValueStoreEntrySubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<KeyValueStoreEntrySubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "Metadata":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<MetadataSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "MetadataSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<MetadataSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "NonFungibleStoreEntry":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<NonFungibleStoreEntrySubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "NonFungibleStoreEntrySubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<NonFungibleStoreEntrySubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "PackageInfo":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageInfoSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "PackageInfoSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageInfoSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "PackageRoyaltyAccumulator":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyAccumulatorSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "PackageRoyaltyAccumulatorSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyAccumulatorSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "PackageRoyaltyConfig":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyConfigSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "PackageRoyaltyConfigSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyConfigSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "ResourceManager":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<ResourceManagerSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "ResourceManagerSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<ResourceManagerSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "ValidatorSet":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<ValidatorSetSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "ValidatorSetSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<ValidatorSetSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "Vault":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<VaultSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "VaultSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<VaultSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    default:
-                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for Substate. Possible values: AccessRulesChain AccessRulesChainSubstate ClockCurrentMinute ClockCurrentMinuteSubstate ComponentInfo ComponentInfoSubstate ComponentRoyaltyAccumulator ComponentRoyaltyAccumulatorSubstate ComponentRoyaltyConfig ComponentRoyaltyConfigSubstate ComponentState ComponentStateSubstate EpochManager EpochManagerSubstate GlobalAddress GlobalAddressSubstate KeyValueStoreEntry KeyValueStoreEntrySubstate Metadata MetadataSubstate NonFungibleStoreEntry NonFungibleStoreEntrySubstate PackageInfo PackageInfoSubstate PackageRoyaltyAccumulator PackageRoyaltyAccumulatorSubstate PackageRoyaltyConfig PackageRoyaltyConfigSubstate ResourceManager ResourceManagerSubstate ValidatorSet ValidatorSetSubstate Vault VaultSubstate", discriminatorValue));
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to parse the json data : `{0}` {1}", jsonString, ex.ToString()));
-            }
-
-            int match = 0;
-            List<string> matchedTypes = new List<string>();
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(AccessRulesChainSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<AccessRulesChainSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<AccessRulesChainSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("AccessRulesChainSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into AccessRulesChainSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(ClockCurrentMinuteSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<ClockCurrentMinuteSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<ClockCurrentMinuteSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("ClockCurrentMinuteSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ClockCurrentMinuteSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(ComponentInfoSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentInfoSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentInfoSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("ComponentInfoSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ComponentInfoSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(ComponentRoyaltyAccumulatorSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyAccumulatorSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyAccumulatorSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("ComponentRoyaltyAccumulatorSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ComponentRoyaltyAccumulatorSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(ComponentRoyaltyConfigSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyConfigSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentRoyaltyConfigSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("ComponentRoyaltyConfigSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ComponentRoyaltyConfigSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(ComponentStateSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentStateSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentStateSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("ComponentStateSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ComponentStateSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(EpochManagerSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<EpochManagerSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<EpochManagerSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("EpochManagerSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into EpochManagerSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(GlobalAddressSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalAddressSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalAddressSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("GlobalAddressSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into GlobalAddressSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(KeyValueStoreEntrySubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<KeyValueStoreEntrySubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<KeyValueStoreEntrySubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("KeyValueStoreEntrySubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into KeyValueStoreEntrySubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(MetadataSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<MetadataSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<MetadataSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("MetadataSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into MetadataSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(NonFungibleStoreEntrySubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<NonFungibleStoreEntrySubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<NonFungibleStoreEntrySubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("NonFungibleStoreEntrySubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into NonFungibleStoreEntrySubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(PackageInfoSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<PackageInfoSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<PackageInfoSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("PackageInfoSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into PackageInfoSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(PackageRoyaltyAccumulatorSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyAccumulatorSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyAccumulatorSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("PackageRoyaltyAccumulatorSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into PackageRoyaltyAccumulatorSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(PackageRoyaltyConfigSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyConfigSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<PackageRoyaltyConfigSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("PackageRoyaltyConfigSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into PackageRoyaltyConfigSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(ResourceManagerSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<ResourceManagerSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<ResourceManagerSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("ResourceManagerSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ResourceManagerSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(ValidatorSetSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<ValidatorSetSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<ValidatorSetSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("ValidatorSetSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ValidatorSetSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(VaultSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<VaultSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<VaultSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("VaultSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into VaultSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            if (match == 0)
-            {
-                throw new InvalidDataException("The JSON string `" + jsonString + "` cannot be deserialized into any schema defined.");
-            }
-            else if (match > 1)
-            {
-                throw new InvalidDataException("The JSON string `" + jsonString + "` incorrectly matches more than one schema (should be exactly one match): " + matchedTypes);
-            }
-
-            // deserialization is considered successful at this point if no exception has been thrown.
-            return newSubstate;
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
 
         /// <summary>
@@ -1089,9 +191,14 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool Equals(Substate input)
         {
             if (input == null)
+            {
                 return false;
-
-            return this.ActualInstance.Equals(input.ActualInstance);
+            }
+            return 
+                (
+                    this.SubstateType == input.SubstateType ||
+                    this.SubstateType.Equals(input.SubstateType)
+                );
         }
 
         /// <summary>
@@ -1103,56 +210,11 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ActualInstance != null)
-                    hashCode = hashCode * 59 + this.ActualInstance.GetHashCode();
+                hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
                 return hashCode;
             }
         }
 
-    }
-
-    /// <summary>
-    /// Custom JSON converter for Substate
-    /// </summary>
-    public class SubstateJsonConverter : JsonConverter
-    {
-        /// <summary>
-        /// To write the JSON string
-        /// </summary>
-        /// <param name="writer">JSON writer</param>
-        /// <param name="value">Object to be converted into a JSON string</param>
-        /// <param name="serializer">JSON Serializer</param>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        {
-            writer.WriteRawValue((string)(typeof(Substate).GetMethod("ToJson").Invoke(value, null)));
-        }
-
-        /// <summary>
-        /// To convert a JSON string into an object
-        /// </summary>
-        /// <param name="reader">JSON reader</param>
-        /// <param name="objectType">Object type</param>
-        /// <param name="existingValue">Existing value</param>
-        /// <param name="serializer">JSON Serializer</param>
-        /// <returns>The object converted from the JSON string</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            if(reader.TokenType != JsonToken.Null)
-            {
-                return Substate.FromJson(JObject.Load(reader).ToString(Formatting.None));
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Check if the object can be converted
-        /// </summary>
-        /// <param name="objectType">Object type</param>
-        /// <returns>True if the object can be converted</returns>
-        public override bool CanConvert(Type objectType)
-        {
-            return false;
-        }
     }
 
 }

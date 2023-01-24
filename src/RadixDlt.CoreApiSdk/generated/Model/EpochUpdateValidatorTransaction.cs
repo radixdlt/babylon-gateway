@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,11 @@ namespace RadixDlt.CoreApiSdk.Model
     /// EpochUpdateValidatorTransaction
     /// </summary>
     [DataContract(Name = "EpochUpdateValidatorTransaction")]
-    public partial class EpochUpdateValidatorTransaction : IEquatable<EpochUpdateValidatorTransaction>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(EpochUpdateValidatorTransaction), "EpochUpdate")]
+    [JsonSubtypes.KnownSubType(typeof(TimeUpdateValidatorTransaction), "TimeUpdate")]
+    public partial class EpochUpdateValidatorTransaction : ValidatorTransaction, IEquatable<EpochUpdateValidatorTransaction>
     {
-
-        /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public ValidatorTransactionType Type { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="EpochUpdateValidatorTransaction" /> class.
         /// </summary>
@@ -109,11 +107,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EpochUpdateValidatorTransaction" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
         /// <param name="scryptoEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch. Note that currently this is not the same as &#x60;consensus_epoch&#x60;, but eventually will be.  (required).</param>
-        public EpochUpdateValidatorTransaction(ValidatorTransactionType type = default(ValidatorTransactionType), long scryptoEpoch = default(long))
+        /// <param name="type">type (required) (default to &quot;EpochUpdateValidatorTransaction&quot;).</param>
+        public EpochUpdateValidatorTransaction(long scryptoEpoch = default(long), ValidatorTransactionType type = "EpochUpdateValidatorTransaction") : base(type)
         {
-            this.Type = type;
             this.ScryptoEpoch = scryptoEpoch;
         }
 
@@ -132,7 +129,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EpochUpdateValidatorTransaction {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  ScryptoEpoch: ").Append(ScryptoEpoch).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -142,7 +139,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -168,11 +165,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.ScryptoEpoch == input.ScryptoEpoch ||
                     this.ScryptoEpoch.Equals(input.ScryptoEpoch)
@@ -187,8 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                int hashCode = base.GetHashCode();
                 hashCode = (hashCode * 59) + this.ScryptoEpoch.GetHashCode();
                 return hashCode;
             }

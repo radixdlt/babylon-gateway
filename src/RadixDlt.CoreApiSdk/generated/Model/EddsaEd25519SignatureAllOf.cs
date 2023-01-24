@@ -90,62 +90,36 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// BlueprintFunctionIdentifier
+    /// EddsaEd25519SignatureAllOf
     /// </summary>
-    [DataContract(Name = "BlueprintFunctionIdentifier")]
-    public partial class BlueprintFunctionIdentifier : IEquatable<BlueprintFunctionIdentifier>
+    [DataContract(Name = "EddsaEd25519Signature_allOf")]
+    public partial class EddsaEd25519SignatureAllOf : IEquatable<EddsaEd25519SignatureAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="BlueprintFunctionIdentifier" /> class.
+        /// Initializes a new instance of the <see cref="EddsaEd25519SignatureAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected BlueprintFunctionIdentifier() { }
+        protected EddsaEd25519SignatureAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="BlueprintFunctionIdentifier" /> class.
+        /// Initializes a new instance of the <see cref="EddsaEd25519SignatureAllOf" /> class.
         /// </summary>
-        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
-        /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="functionName">functionName (required).</param>
-        public BlueprintFunctionIdentifier(string packageAddress = default(string), string blueprintName = default(string), string functionName = default(string))
+        /// <param name="signatureHex">A hex-encoded EdDSA Ed25519 signature (64 bytes). This is &#x60;CONCAT(R, s)&#x60; where &#x60;R&#x60; and &#x60;s&#x60; are each 32-bytes in padded big-endian format. (required).</param>
+        public EddsaEd25519SignatureAllOf(string signatureHex = default(string))
         {
-            // to ensure "packageAddress" is required (not null)
-            if (packageAddress == null)
+            // to ensure "signatureHex" is required (not null)
+            if (signatureHex == null)
             {
-                throw new ArgumentNullException("packageAddress is a required property for BlueprintFunctionIdentifier and cannot be null");
+                throw new ArgumentNullException("signatureHex is a required property for EddsaEd25519SignatureAllOf and cannot be null");
             }
-            this.PackageAddress = packageAddress;
-            // to ensure "blueprintName" is required (not null)
-            if (blueprintName == null)
-            {
-                throw new ArgumentNullException("blueprintName is a required property for BlueprintFunctionIdentifier and cannot be null");
-            }
-            this.BlueprintName = blueprintName;
-            // to ensure "functionName" is required (not null)
-            if (functionName == null)
-            {
-                throw new ArgumentNullException("functionName is a required property for BlueprintFunctionIdentifier and cannot be null");
-            }
-            this.FunctionName = functionName;
+            this.SignatureHex = signatureHex;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the package address
+        /// A hex-encoded EdDSA Ed25519 signature (64 bytes). This is &#x60;CONCAT(R, s)&#x60; where &#x60;R&#x60; and &#x60;s&#x60; are each 32-bytes in padded big-endian format.
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the package address</value>
-        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
-        public string PackageAddress { get; set; }
-
-        /// <summary>
-        /// Gets or Sets BlueprintName
-        /// </summary>
-        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
-        public string BlueprintName { get; set; }
-
-        /// <summary>
-        /// Gets or Sets FunctionName
-        /// </summary>
-        [DataMember(Name = "function_name", IsRequired = true, EmitDefaultValue = true)]
-        public string FunctionName { get; set; }
+        /// <value>A hex-encoded EdDSA Ed25519 signature (64 bytes). This is &#x60;CONCAT(R, s)&#x60; where &#x60;R&#x60; and &#x60;s&#x60; are each 32-bytes in padded big-endian format.</value>
+        [DataMember(Name = "signature_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string SignatureHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -154,10 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class BlueprintFunctionIdentifier {\n");
-            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
-            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
-            sb.Append("  FunctionName: ").Append(FunctionName).Append("\n");
+            sb.Append("class EddsaEd25519SignatureAllOf {\n");
+            sb.Append("  SignatureHex: ").Append(SignatureHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -178,15 +150,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as BlueprintFunctionIdentifier);
+            return this.Equals(input as EddsaEd25519SignatureAllOf);
         }
 
         /// <summary>
-        /// Returns true if BlueprintFunctionIdentifier instances are equal
+        /// Returns true if EddsaEd25519SignatureAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of BlueprintFunctionIdentifier to be compared</param>
+        /// <param name="input">Instance of EddsaEd25519SignatureAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(BlueprintFunctionIdentifier input)
+        public bool Equals(EddsaEd25519SignatureAllOf input)
         {
             if (input == null)
             {
@@ -194,19 +166,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.PackageAddress == input.PackageAddress ||
-                    (this.PackageAddress != null &&
-                    this.PackageAddress.Equals(input.PackageAddress))
-                ) && 
-                (
-                    this.BlueprintName == input.BlueprintName ||
-                    (this.BlueprintName != null &&
-                    this.BlueprintName.Equals(input.BlueprintName))
-                ) && 
-                (
-                    this.FunctionName == input.FunctionName ||
-                    (this.FunctionName != null &&
-                    this.FunctionName.Equals(input.FunctionName))
+                    this.SignatureHex == input.SignatureHex ||
+                    (this.SignatureHex != null &&
+                    this.SignatureHex.Equals(input.SignatureHex))
                 );
         }
 
@@ -219,17 +181,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.PackageAddress != null)
+                if (this.SignatureHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
-                }
-                if (this.BlueprintName != null)
-                {
-                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
-                }
-                if (this.FunctionName != null)
-                {
-                    hashCode = (hashCode * 59) + this.FunctionName.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SignatureHex.GetHashCode();
                 }
                 return hashCode;
             }

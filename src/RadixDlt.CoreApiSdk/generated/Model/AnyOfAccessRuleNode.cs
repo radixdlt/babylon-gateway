@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,12 @@ namespace RadixDlt.CoreApiSdk.Model
     /// AnyOfAccessRuleNode
     /// </summary>
     [DataContract(Name = "AnyOfAccessRuleNode")]
-    public partial class AnyOfAccessRuleNode : IEquatable<AnyOfAccessRuleNode>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(AllOfAccessRuleNode), "AllOf")]
+    [JsonSubtypes.KnownSubType(typeof(AnyOfAccessRuleNode), "AnyOf")]
+    [JsonSubtypes.KnownSubType(typeof(ProofAccessRuleNode), "ProofRule")]
+    public partial class AnyOfAccessRuleNode : AccessRuleNode, IEquatable<AnyOfAccessRuleNode>
     {
-
-        /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public AccessRuleNodeType Type { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="AnyOfAccessRuleNode" /> class.
         /// </summary>
@@ -109,11 +108,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AnyOfAccessRuleNode" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
         /// <param name="accessRules">accessRules (required).</param>
-        public AnyOfAccessRuleNode(AccessRuleNodeType type = default(AccessRuleNodeType), List<AccessRuleNode> accessRules = default(List<AccessRuleNode>))
+        /// <param name="type">type (required) (default to &quot;AnyOfAccessRuleNode&quot;).</param>
+        public AnyOfAccessRuleNode(List<AccessRuleNode> accessRules = default(List<AccessRuleNode>), AccessRuleNodeType type = "AnyOfAccessRuleNode") : base(type)
         {
-            this.Type = type;
             // to ensure "accessRules" is required (not null)
             if (accessRules == null)
             {
@@ -136,7 +134,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class AnyOfAccessRuleNode {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -146,7 +144,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -172,11 +170,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.AccessRules == input.AccessRules ||
                     this.AccessRules != null &&
@@ -193,8 +187,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                int hashCode = base.GetHashCode();
                 if (this.AccessRules != null)
                 {
                     hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();

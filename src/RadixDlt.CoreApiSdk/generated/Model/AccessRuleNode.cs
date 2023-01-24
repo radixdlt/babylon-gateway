@@ -87,114 +87,40 @@ using Newtonsoft.Json.Linq;
 using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
-using System.Reflection;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
     /// AccessRuleNode
     /// </summary>
-    [JsonConverter(typeof(AccessRuleNodeJsonConverter))]
     [DataContract(Name = "AccessRuleNode")]
-    public partial class AccessRuleNode : AbstractOpenAPISchema, IEquatable<AccessRuleNode>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(AllOfAccessRuleNode), "AllOf")]
+    [JsonSubtypes.KnownSubType(typeof(AllOfAccessRuleNode), "AllOfAccessRuleNode")]
+    [JsonSubtypes.KnownSubType(typeof(AnyOfAccessRuleNode), "AnyOf")]
+    [JsonSubtypes.KnownSubType(typeof(AnyOfAccessRuleNode), "AnyOfAccessRuleNode")]
+    [JsonSubtypes.KnownSubType(typeof(ProofAccessRuleNode), "ProofAccessRuleNode")]
+    [JsonSubtypes.KnownSubType(typeof(ProofAccessRuleNode), "ProofRule")]
+    public partial class AccessRuleNode : IEquatable<AccessRuleNode>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRuleNode" /> class
-        /// with the <see cref="ProofAccessRuleNode" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of ProofAccessRuleNode.</param>
-        public AccessRuleNode(ProofAccessRuleNode actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRuleNode" /> class
-        /// with the <see cref="AnyOfAccessRuleNode" /> class
+        /// Gets or Sets Type
         /// </summary>
-        /// <param name="actualInstance">An instance of AnyOfAccessRuleNode.</param>
-        public AccessRuleNode(AnyOfAccessRuleNode actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public AccessRuleNodeType Type { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRuleNode" /> class
-        /// with the <see cref="AllOfAccessRuleNode" /> class
+        /// Initializes a new instance of the <see cref="AccessRuleNode" /> class.
         /// </summary>
-        /// <param name="actualInstance">An instance of AllOfAccessRuleNode.</param>
-        public AccessRuleNode(AllOfAccessRuleNode actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-
-        private Object _actualInstance;
-
+        [JsonConstructorAttribute]
+        protected AccessRuleNode() { }
         /// <summary>
-        /// Gets or Sets ActualInstance
+        /// Initializes a new instance of the <see cref="AccessRuleNode" /> class.
         /// </summary>
-        public override Object ActualInstance
+        /// <param name="type">type (required).</param>
+        public AccessRuleNode(AccessRuleNodeType type = default(AccessRuleNodeType))
         {
-            get
-            {
-                return _actualInstance;
-            }
-            set
-            {
-                if (value.GetType() == typeof(AllOfAccessRuleNode))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(AnyOfAccessRuleNode))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(ProofAccessRuleNode))
-                {
-                    this._actualInstance = value;
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid instance found. Must be the following types: AllOfAccessRuleNode, AnyOfAccessRuleNode, ProofAccessRuleNode");
-                }
-            }
-        }
-
-        /// <summary>
-        /// Get the actual instance of `ProofAccessRuleNode`. If the actual instance is not `ProofAccessRuleNode`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of ProofAccessRuleNode</returns>
-        public ProofAccessRuleNode GetProofAccessRuleNode()
-        {
-            return (ProofAccessRuleNode)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `AnyOfAccessRuleNode`. If the actual instance is not `AnyOfAccessRuleNode`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of AnyOfAccessRuleNode</returns>
-        public AnyOfAccessRuleNode GetAnyOfAccessRuleNode()
-        {
-            return (AnyOfAccessRuleNode)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `AllOfAccessRuleNode`. If the actual instance is not `AllOfAccessRuleNode`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of AllOfAccessRuleNode</returns>
-        public AllOfAccessRuleNode GetAllOfAccessRuleNode()
-        {
-            return (AllOfAccessRuleNode)this.ActualInstance;
+            this.Type = type;
         }
 
         /// <summary>
@@ -203,9 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
-            var sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             sb.Append("class AccessRuleNode {\n");
-            sb.Append("  ActualInstance: ").Append(this.ActualInstance).Append("\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -214,133 +140,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
-            return JsonConvert.SerializeObject(this.ActualInstance, AccessRuleNode.SerializerSettings);
-        }
-
-        /// <summary>
-        /// Converts the JSON string into an instance of AccessRuleNode
-        /// </summary>
-        /// <param name="jsonString">JSON string</param>
-        /// <returns>An instance of AccessRuleNode</returns>
-        public static AccessRuleNode FromJson(string jsonString)
-        {
-            AccessRuleNode newAccessRuleNode = null;
-
-            if (string.IsNullOrEmpty(jsonString))
-            {
-                return newAccessRuleNode;
-            }
-
-            try
-            {
-                var discriminatorObj = JObject.Parse(jsonString)["type"];
-                string discriminatorValue =  discriminatorObj == null ?string.Empty :discriminatorObj.ToString();
-                switch (discriminatorValue)
-                {
-                    case "AllOf":
-                        newAccessRuleNode = new AccessRuleNode(JsonConvert.DeserializeObject<AllOfAccessRuleNode>(jsonString, AccessRuleNode.AdditionalPropertiesSerializerSettings));
-                        return newAccessRuleNode;
-                    case "AllOfAccessRuleNode":
-                        newAccessRuleNode = new AccessRuleNode(JsonConvert.DeserializeObject<AllOfAccessRuleNode>(jsonString, AccessRuleNode.AdditionalPropertiesSerializerSettings));
-                        return newAccessRuleNode;
-                    case "AnyOf":
-                        newAccessRuleNode = new AccessRuleNode(JsonConvert.DeserializeObject<AnyOfAccessRuleNode>(jsonString, AccessRuleNode.AdditionalPropertiesSerializerSettings));
-                        return newAccessRuleNode;
-                    case "AnyOfAccessRuleNode":
-                        newAccessRuleNode = new AccessRuleNode(JsonConvert.DeserializeObject<AnyOfAccessRuleNode>(jsonString, AccessRuleNode.AdditionalPropertiesSerializerSettings));
-                        return newAccessRuleNode;
-                    case "ProofAccessRuleNode":
-                        newAccessRuleNode = new AccessRuleNode(JsonConvert.DeserializeObject<ProofAccessRuleNode>(jsonString, AccessRuleNode.AdditionalPropertiesSerializerSettings));
-                        return newAccessRuleNode;
-                    case "ProofRule":
-                        newAccessRuleNode = new AccessRuleNode(JsonConvert.DeserializeObject<ProofAccessRuleNode>(jsonString, AccessRuleNode.AdditionalPropertiesSerializerSettings));
-                        return newAccessRuleNode;
-                    default:
-                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for AccessRuleNode. Possible values: AllOf AllOfAccessRuleNode AnyOf AnyOfAccessRuleNode ProofAccessRuleNode ProofRule", discriminatorValue));
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to parse the json data : `{0}` {1}", jsonString, ex.ToString()));
-            }
-
-            int match = 0;
-            List<string> matchedTypes = new List<string>();
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(AllOfAccessRuleNode).GetProperty("AdditionalProperties") == null)
-                {
-                    newAccessRuleNode = new AccessRuleNode(JsonConvert.DeserializeObject<AllOfAccessRuleNode>(jsonString, AccessRuleNode.SerializerSettings));
-                }
-                else
-                {
-                    newAccessRuleNode = new AccessRuleNode(JsonConvert.DeserializeObject<AllOfAccessRuleNode>(jsonString, AccessRuleNode.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("AllOfAccessRuleNode");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into AllOfAccessRuleNode: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(AnyOfAccessRuleNode).GetProperty("AdditionalProperties") == null)
-                {
-                    newAccessRuleNode = new AccessRuleNode(JsonConvert.DeserializeObject<AnyOfAccessRuleNode>(jsonString, AccessRuleNode.SerializerSettings));
-                }
-                else
-                {
-                    newAccessRuleNode = new AccessRuleNode(JsonConvert.DeserializeObject<AnyOfAccessRuleNode>(jsonString, AccessRuleNode.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("AnyOfAccessRuleNode");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into AnyOfAccessRuleNode: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(ProofAccessRuleNode).GetProperty("AdditionalProperties") == null)
-                {
-                    newAccessRuleNode = new AccessRuleNode(JsonConvert.DeserializeObject<ProofAccessRuleNode>(jsonString, AccessRuleNode.SerializerSettings));
-                }
-                else
-                {
-                    newAccessRuleNode = new AccessRuleNode(JsonConvert.DeserializeObject<ProofAccessRuleNode>(jsonString, AccessRuleNode.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("ProofAccessRuleNode");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ProofAccessRuleNode: {1}", jsonString, exception.ToString()));
-            }
-
-            if (match == 0)
-            {
-                throw new InvalidDataException("The JSON string `" + jsonString + "` cannot be deserialized into any schema defined.");
-            }
-            else if (match > 1)
-            {
-                throw new InvalidDataException("The JSON string `" + jsonString + "` incorrectly matches more than one schema (should be exactly one match): " + matchedTypes);
-            }
-
-            // deserialization is considered successful at this point if no exception has been thrown.
-            return newAccessRuleNode;
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
 
         /// <summary>
@@ -361,9 +163,14 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool Equals(AccessRuleNode input)
         {
             if (input == null)
+            {
                 return false;
-
-            return this.ActualInstance.Equals(input.ActualInstance);
+            }
+            return 
+                (
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
+                );
         }
 
         /// <summary>
@@ -375,56 +182,11 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ActualInstance != null)
-                    hashCode = hashCode * 59 + this.ActualInstance.GetHashCode();
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
                 return hashCode;
             }
         }
 
-    }
-
-    /// <summary>
-    /// Custom JSON converter for AccessRuleNode
-    /// </summary>
-    public class AccessRuleNodeJsonConverter : JsonConverter
-    {
-        /// <summary>
-        /// To write the JSON string
-        /// </summary>
-        /// <param name="writer">JSON writer</param>
-        /// <param name="value">Object to be converted into a JSON string</param>
-        /// <param name="serializer">JSON Serializer</param>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        {
-            writer.WriteRawValue((string)(typeof(AccessRuleNode).GetMethod("ToJson").Invoke(value, null)));
-        }
-
-        /// <summary>
-        /// To convert a JSON string into an object
-        /// </summary>
-        /// <param name="reader">JSON reader</param>
-        /// <param name="objectType">Object type</param>
-        /// <param name="existingValue">Existing value</param>
-        /// <param name="serializer">JSON Serializer</param>
-        /// <returns>The object converted from the JSON string</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            if(reader.TokenType != JsonToken.Null)
-            {
-                return AccessRuleNode.FromJson(JObject.Load(reader).ToString(Formatting.None));
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Check if the object can be converted
-        /// </summary>
-        /// <param name="objectType">Object type</param>
-        /// <returns>True if the object can be converted</returns>
-        public override bool CanConvert(Type objectType)
-        {
-            return false;
-        }
     }
 
 }

@@ -87,88 +87,38 @@ using Newtonsoft.Json.Linq;
 using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
-using System.Reflection;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
     /// TransactionSubmitErrorDetails
     /// </summary>
-    [JsonConverter(typeof(TransactionSubmitErrorDetailsJsonConverter))]
     [DataContract(Name = "TransactionSubmitErrorDetails")]
-    public partial class TransactionSubmitErrorDetails : AbstractOpenAPISchema, IEquatable<TransactionSubmitErrorDetails>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitMempoolFullErrorDetails), "MempoolFull")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitRejectedErrorDetails), "Rejected")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitMempoolFullErrorDetails), "TransactionSubmitMempoolFullErrorDetails")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitRejectedErrorDetails), "TransactionSubmitRejectedErrorDetails")]
+    public partial class TransactionSubmitErrorDetails : IEquatable<TransactionSubmitErrorDetails>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitErrorDetails" /> class
-        /// with the <see cref="TransactionSubmitMempoolFullErrorDetails" /> class
-        /// </summary>
-        /// <param name="actualInstance">An instance of TransactionSubmitMempoolFullErrorDetails.</param>
-        public TransactionSubmitErrorDetails(TransactionSubmitMempoolFullErrorDetails actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitErrorDetails" /> class
-        /// with the <see cref="TransactionSubmitRejectedErrorDetails" /> class
+        /// Gets or Sets Type
         /// </summary>
-        /// <param name="actualInstance">An instance of TransactionSubmitRejectedErrorDetails.</param>
-        public TransactionSubmitErrorDetails(TransactionSubmitRejectedErrorDetails actualInstance)
-        {
-            this.IsNullable = false;
-            this.SchemaType= "oneOf";
-            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
-        }
-
-
-        private Object _actualInstance;
-
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionSubmitErrorDetailsType Type { get; set; }
         /// <summary>
-        /// Gets or Sets ActualInstance
+        /// Initializes a new instance of the <see cref="TransactionSubmitErrorDetails" /> class.
         /// </summary>
-        public override Object ActualInstance
-        {
-            get
-            {
-                return _actualInstance;
-            }
-            set
-            {
-                if (value.GetType() == typeof(TransactionSubmitMempoolFullErrorDetails))
-                {
-                    this._actualInstance = value;
-                }
-                else if (value.GetType() == typeof(TransactionSubmitRejectedErrorDetails))
-                {
-                    this._actualInstance = value;
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid instance found. Must be the following types: TransactionSubmitMempoolFullErrorDetails, TransactionSubmitRejectedErrorDetails");
-                }
-            }
-        }
-
+        [JsonConstructorAttribute]
+        protected TransactionSubmitErrorDetails() { }
         /// <summary>
-        /// Get the actual instance of `TransactionSubmitMempoolFullErrorDetails`. If the actual instance is not `TransactionSubmitMempoolFullErrorDetails`,
-        /// the InvalidClassException will be thrown
+        /// Initializes a new instance of the <see cref="TransactionSubmitErrorDetails" /> class.
         /// </summary>
-        /// <returns>An instance of TransactionSubmitMempoolFullErrorDetails</returns>
-        public TransactionSubmitMempoolFullErrorDetails GetTransactionSubmitMempoolFullErrorDetails()
+        /// <param name="type">type (required).</param>
+        public TransactionSubmitErrorDetails(TransactionSubmitErrorDetailsType type = default(TransactionSubmitErrorDetailsType))
         {
-            return (TransactionSubmitMempoolFullErrorDetails)this.ActualInstance;
-        }
-
-        /// <summary>
-        /// Get the actual instance of `TransactionSubmitRejectedErrorDetails`. If the actual instance is not `TransactionSubmitRejectedErrorDetails`,
-        /// the InvalidClassException will be thrown
-        /// </summary>
-        /// <returns>An instance of TransactionSubmitRejectedErrorDetails</returns>
-        public TransactionSubmitRejectedErrorDetails GetTransactionSubmitRejectedErrorDetails()
-        {
-            return (TransactionSubmitRejectedErrorDetails)this.ActualInstance;
+            this.Type = type;
         }
 
         /// <summary>
@@ -177,9 +127,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
-            var sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionSubmitErrorDetails {\n");
-            sb.Append("  ActualInstance: ").Append(this.ActualInstance).Append("\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -188,107 +138,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
-            return JsonConvert.SerializeObject(this.ActualInstance, TransactionSubmitErrorDetails.SerializerSettings);
-        }
-
-        /// <summary>
-        /// Converts the JSON string into an instance of TransactionSubmitErrorDetails
-        /// </summary>
-        /// <param name="jsonString">JSON string</param>
-        /// <returns>An instance of TransactionSubmitErrorDetails</returns>
-        public static TransactionSubmitErrorDetails FromJson(string jsonString)
-        {
-            TransactionSubmitErrorDetails newTransactionSubmitErrorDetails = null;
-
-            if (string.IsNullOrEmpty(jsonString))
-            {
-                return newTransactionSubmitErrorDetails;
-            }
-
-            try
-            {
-                var discriminatorObj = JObject.Parse(jsonString)["type"];
-                string discriminatorValue =  discriminatorObj == null ?string.Empty :discriminatorObj.ToString();
-                switch (discriminatorValue)
-                {
-                    case "MempoolFull":
-                        newTransactionSubmitErrorDetails = new TransactionSubmitErrorDetails(JsonConvert.DeserializeObject<TransactionSubmitMempoolFullErrorDetails>(jsonString, TransactionSubmitErrorDetails.AdditionalPropertiesSerializerSettings));
-                        return newTransactionSubmitErrorDetails;
-                    case "Rejected":
-                        newTransactionSubmitErrorDetails = new TransactionSubmitErrorDetails(JsonConvert.DeserializeObject<TransactionSubmitRejectedErrorDetails>(jsonString, TransactionSubmitErrorDetails.AdditionalPropertiesSerializerSettings));
-                        return newTransactionSubmitErrorDetails;
-                    case "TransactionSubmitMempoolFullErrorDetails":
-                        newTransactionSubmitErrorDetails = new TransactionSubmitErrorDetails(JsonConvert.DeserializeObject<TransactionSubmitMempoolFullErrorDetails>(jsonString, TransactionSubmitErrorDetails.AdditionalPropertiesSerializerSettings));
-                        return newTransactionSubmitErrorDetails;
-                    case "TransactionSubmitRejectedErrorDetails":
-                        newTransactionSubmitErrorDetails = new TransactionSubmitErrorDetails(JsonConvert.DeserializeObject<TransactionSubmitRejectedErrorDetails>(jsonString, TransactionSubmitErrorDetails.AdditionalPropertiesSerializerSettings));
-                        return newTransactionSubmitErrorDetails;
-                    default:
-                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for TransactionSubmitErrorDetails. Possible values: MempoolFull Rejected TransactionSubmitMempoolFullErrorDetails TransactionSubmitRejectedErrorDetails", discriminatorValue));
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to parse the json data : `{0}` {1}", jsonString, ex.ToString()));
-            }
-
-            int match = 0;
-            List<string> matchedTypes = new List<string>();
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(TransactionSubmitMempoolFullErrorDetails).GetProperty("AdditionalProperties") == null)
-                {
-                    newTransactionSubmitErrorDetails = new TransactionSubmitErrorDetails(JsonConvert.DeserializeObject<TransactionSubmitMempoolFullErrorDetails>(jsonString, TransactionSubmitErrorDetails.SerializerSettings));
-                }
-                else
-                {
-                    newTransactionSubmitErrorDetails = new TransactionSubmitErrorDetails(JsonConvert.DeserializeObject<TransactionSubmitMempoolFullErrorDetails>(jsonString, TransactionSubmitErrorDetails.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("TransactionSubmitMempoolFullErrorDetails");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into TransactionSubmitMempoolFullErrorDetails: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(TransactionSubmitRejectedErrorDetails).GetProperty("AdditionalProperties") == null)
-                {
-                    newTransactionSubmitErrorDetails = new TransactionSubmitErrorDetails(JsonConvert.DeserializeObject<TransactionSubmitRejectedErrorDetails>(jsonString, TransactionSubmitErrorDetails.SerializerSettings));
-                }
-                else
-                {
-                    newTransactionSubmitErrorDetails = new TransactionSubmitErrorDetails(JsonConvert.DeserializeObject<TransactionSubmitRejectedErrorDetails>(jsonString, TransactionSubmitErrorDetails.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("TransactionSubmitRejectedErrorDetails");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into TransactionSubmitRejectedErrorDetails: {1}", jsonString, exception.ToString()));
-            }
-
-            if (match == 0)
-            {
-                throw new InvalidDataException("The JSON string `" + jsonString + "` cannot be deserialized into any schema defined.");
-            }
-            else if (match > 1)
-            {
-                throw new InvalidDataException("The JSON string `" + jsonString + "` incorrectly matches more than one schema (should be exactly one match): " + matchedTypes);
-            }
-
-            // deserialization is considered successful at this point if no exception has been thrown.
-            return newTransactionSubmitErrorDetails;
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
 
         /// <summary>
@@ -309,9 +161,14 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool Equals(TransactionSubmitErrorDetails input)
         {
             if (input == null)
+            {
                 return false;
-
-            return this.ActualInstance.Equals(input.ActualInstance);
+            }
+            return 
+                (
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
+                );
         }
 
         /// <summary>
@@ -323,56 +180,11 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ActualInstance != null)
-                    hashCode = hashCode * 59 + this.ActualInstance.GetHashCode();
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
                 return hashCode;
             }
         }
 
-    }
-
-    /// <summary>
-    /// Custom JSON converter for TransactionSubmitErrorDetails
-    /// </summary>
-    public class TransactionSubmitErrorDetailsJsonConverter : JsonConverter
-    {
-        /// <summary>
-        /// To write the JSON string
-        /// </summary>
-        /// <param name="writer">JSON writer</param>
-        /// <param name="value">Object to be converted into a JSON string</param>
-        /// <param name="serializer">JSON Serializer</param>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        {
-            writer.WriteRawValue((string)(typeof(TransactionSubmitErrorDetails).GetMethod("ToJson").Invoke(value, null)));
-        }
-
-        /// <summary>
-        /// To convert a JSON string into an object
-        /// </summary>
-        /// <param name="reader">JSON reader</param>
-        /// <param name="objectType">Object type</param>
-        /// <param name="existingValue">Existing value</param>
-        /// <param name="serializer">JSON Serializer</param>
-        /// <returns>The object converted from the JSON string</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            if(reader.TokenType != JsonToken.Null)
-            {
-                return TransactionSubmitErrorDetails.FromJson(JObject.Load(reader).ToString(Formatting.None));
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Check if the object can be converted
-        /// </summary>
-        /// <param name="objectType">Object type</param>
-        /// <returns>True if the object can be converted</returns>
-        public override bool CanConvert(Type objectType)
-        {
-            return false;
-        }
     }
 
 }

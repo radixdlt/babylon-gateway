@@ -106,7 +106,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="network">The logical name of the network (required).</param>
         /// <param name="target">target (required).</param>
         /// <param name="arguments">Argument list (required).</param>
-        public TransactionCallPreviewRequest(string network = default(string), TransactionCallPreviewRequestTarget target = default(TransactionCallPreviewRequestTarget), List<string> arguments = default(List<string>))
+        public TransactionCallPreviewRequest(string network = default(string), TargetIdentifier target = default(TargetIdentifier), List<string> arguments = default(List<string>))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -139,7 +139,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Target
         /// </summary>
         [DataMember(Name = "target", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionCallPreviewRequestTarget Target { get; set; }
+        public TargetIdentifier Target { get; set; }
 
         /// <summary>
         /// Argument list

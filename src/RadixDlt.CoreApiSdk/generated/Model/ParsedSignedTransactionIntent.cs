@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,7 +94,13 @@ namespace RadixDlt.CoreApiSdk.Model
     /// ParsedSignedTransactionIntent
     /// </summary>
     [DataContract(Name = "ParsedSignedTransactionIntent")]
-    public partial class ParsedSignedTransactionIntent : IEquatable<ParsedSignedTransactionIntent>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(ParsedLedgerTransaction), "LedgerTransaction")]
+    [JsonSubtypes.KnownSubType(typeof(ParsedNotarizedTransaction), "NotarizedTransaction")]
+    [JsonSubtypes.KnownSubType(typeof(ParsedSignedTransactionIntent), "SignedTransactionIntent")]
+    [JsonSubtypes.KnownSubType(typeof(ParsedTransactionIntent), "TransactionIntent")]
+    [JsonSubtypes.KnownSubType(typeof(ParsedTransactionManifest), "TransactionManifest")]
+    public partial class ParsedSignedTransactionIntent : ParsedTransaction, IEquatable<ParsedSignedTransactionIntent>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ParsedSignedTransactionIntent" /> class.
@@ -105,7 +112,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="signedIntent">signedIntent.</param>
         /// <param name="identifiers">identifiers (required).</param>
-        public ParsedSignedTransactionIntent(SignedTransactionIntent signedIntent = default(SignedTransactionIntent), ParsedSignedTransactionIntentAllOfIdentifiers identifiers = default(ParsedSignedTransactionIntentAllOfIdentifiers))
+        /// <param name="type">type (required) (default to &quot;ParsedSignedTransactionIntent&quot;).</param>
+        public ParsedSignedTransactionIntent(SignedTransactionIntent signedIntent = default(SignedTransactionIntent), ParsedSignedTransactionIntentAllOfIdentifiers identifiers = default(ParsedSignedTransactionIntentAllOfIdentifiers), ParsedTransactionType type = "ParsedSignedTransactionIntent") : base(type)
         {
             // to ensure "identifiers" is required (not null)
             if (identifiers == null)
@@ -136,6 +144,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ParsedSignedTransactionIntent {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  SignedIntent: ").Append(SignedIntent).Append("\n");
             sb.Append("  Identifiers: ").Append(Identifiers).Append("\n");
             sb.Append("}\n");
@@ -146,7 +155,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -172,12 +181,12 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
                     this.SignedIntent == input.SignedIntent ||
                     (this.SignedIntent != null &&
                     this.SignedIntent.Equals(input.SignedIntent))
-                ) && 
+                ) && base.Equals(input) && 
                 (
                     this.Identifiers == input.Identifiers ||
                     (this.Identifiers != null &&
@@ -193,7 +202,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
+                int hashCode = base.GetHashCode();
                 if (this.SignedIntent != null)
                 {
                     hashCode = (hashCode * 59) + this.SignedIntent.GetHashCode();

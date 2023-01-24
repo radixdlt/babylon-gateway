@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,11 @@ namespace RadixDlt.CoreApiSdk.Model
     /// IndexSchemaSubpath
     /// </summary>
     [DataContract(Name = "IndexSchemaSubpath")]
-    public partial class IndexSchemaSubpath : IEquatable<IndexSchemaSubpath>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(FieldSchemaSubpath), "Field")]
+    [JsonSubtypes.KnownSubType(typeof(IndexSchemaSubpath), "Index")]
+    public partial class IndexSchemaSubpath : SchemaSubpath, IEquatable<IndexSchemaSubpath>
     {
-
-        /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public SchemaSubpathType Type { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="IndexSchemaSubpath" /> class.
         /// </summary>
@@ -109,11 +107,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="IndexSchemaSubpath" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
         /// <param name="index">A decimal-string-encoded integer between 0 and 2^64 - 1, which captures the index of the schema sub-path (required).</param>
-        public IndexSchemaSubpath(SchemaSubpathType type = default(SchemaSubpathType), string index = default(string))
+        /// <param name="type">type (required) (default to &quot;IndexSchemaSubpath&quot;).</param>
+        public IndexSchemaSubpath(string index = default(string), SchemaSubpathType type = "IndexSchemaSubpath") : base(type)
         {
-            this.Type = type;
             // to ensure "index" is required (not null)
             if (index == null)
             {
@@ -137,7 +134,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class IndexSchemaSubpath {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Index: ").Append(Index).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -147,7 +144,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -173,11 +170,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.Index == input.Index ||
                     (this.Index != null &&
@@ -193,8 +186,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                int hashCode = base.GetHashCode();
                 if (this.Index != null)
                 {
                     hashCode = (hashCode * 59) + this.Index.GetHashCode();

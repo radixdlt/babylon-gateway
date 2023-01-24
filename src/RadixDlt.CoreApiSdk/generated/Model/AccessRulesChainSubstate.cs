@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,26 @@ namespace RadixDlt.CoreApiSdk.Model
     /// AccessRulesChainSubstate
     /// </summary>
     [DataContract(Name = "AccessRulesChainSubstate")]
-    public partial class AccessRulesChainSubstate : IEquatable<AccessRulesChainSubstate>
+    [JsonConverter(typeof(JsonSubtypes), "SubstateType")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
+    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentInfoSubstate), "ComponentInfo")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
+    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
+    [JsonSubtypes.KnownSubType(typeof(GlobalAddressSubstate), "GlobalAddress")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "Metadata")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
+    [JsonSubtypes.KnownSubType(typeof(VaultSubstate), "Vault")]
+    public partial class AccessRulesChainSubstate : Substate, IEquatable<AccessRulesChainSubstate>
     {
-
-        /// <summary>
-        /// Gets or Sets SubstateType
-        /// </summary>
-        [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
-        public SubstateType SubstateType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="AccessRulesChainSubstate" /> class.
         /// </summary>
@@ -109,11 +122,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccessRulesChainSubstate" /> class.
         /// </summary>
-        /// <param name="substateType">substateType (required).</param>
         /// <param name="chain">The layers of access rules applied.  (required).</param>
-        public AccessRulesChainSubstate(SubstateType substateType = default(SubstateType), List<AccessRules> chain = default(List<AccessRules>))
+        /// <param name="substateType">substateType (required) (default to &quot;AccessRulesChainSubstate&quot;).</param>
+        public AccessRulesChainSubstate(List<AccessRules> chain = default(List<AccessRules>), SubstateType substateType = "AccessRulesChainSubstate") : base(substateType)
         {
-            this.SubstateType = substateType;
             // to ensure "chain" is required (not null)
             if (chain == null)
             {
@@ -137,7 +149,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccessRulesChainSubstate {\n");
-            sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Chain: ").Append(Chain).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -147,7 +159,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -173,11 +185,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.SubstateType == input.SubstateType ||
-                    this.SubstateType.Equals(input.SubstateType)
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.Chain == input.Chain ||
                     this.Chain != null &&
@@ -194,8 +202,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
+                int hashCode = base.GetHashCode();
                 if (this.Chain != null)
                 {
                     hashCode = (hashCode * 59) + this.Chain.GetHashCode();

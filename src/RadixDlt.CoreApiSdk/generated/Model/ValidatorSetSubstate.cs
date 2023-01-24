@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,26 @@ namespace RadixDlt.CoreApiSdk.Model
     /// ValidatorSetSubstate
     /// </summary>
     [DataContract(Name = "ValidatorSetSubstate")]
-    public partial class ValidatorSetSubstate : IEquatable<ValidatorSetSubstate>
+    [JsonConverter(typeof(JsonSubtypes), "SubstateType")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
+    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentInfoSubstate), "ComponentInfo")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
+    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
+    [JsonSubtypes.KnownSubType(typeof(GlobalAddressSubstate), "GlobalAddress")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "Metadata")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
+    [JsonSubtypes.KnownSubType(typeof(VaultSubstate), "Vault")]
+    public partial class ValidatorSetSubstate : Substate, IEquatable<ValidatorSetSubstate>
     {
-
-        /// <summary>
-        /// Gets or Sets SubstateType
-        /// </summary>
-        [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
-        public SubstateType SubstateType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorSetSubstate" /> class.
         /// </summary>
@@ -109,12 +122,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorSetSubstate" /> class.
         /// </summary>
-        /// <param name="substateType">substateType (required).</param>
         /// <param name="validatorSet">validatorSet (required).</param>
         /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch the validator set is a part of (required).</param>
-        public ValidatorSetSubstate(SubstateType substateType = default(SubstateType), List<EcdsaSecp256k1PublicKey> validatorSet = default(List<EcdsaSecp256k1PublicKey>), long epoch = default(long))
+        /// <param name="substateType">substateType (required) (default to &quot;ValidatorSetSubstate&quot;).</param>
+        public ValidatorSetSubstate(List<EcdsaSecp256k1PublicKey> validatorSet = default(List<EcdsaSecp256k1PublicKey>), long epoch = default(long), SubstateType substateType = "ValidatorSetSubstate") : base(substateType)
         {
-            this.SubstateType = substateType;
             // to ensure "validatorSet" is required (not null)
             if (validatorSet == null)
             {
@@ -145,7 +157,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ValidatorSetSubstate {\n");
-            sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  ValidatorSet: ").Append(ValidatorSet).Append("\n");
             sb.Append("  Epoch: ").Append(Epoch).Append("\n");
             sb.Append("}\n");
@@ -156,7 +168,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -182,17 +194,13 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.SubstateType == input.SubstateType ||
-                    this.SubstateType.Equals(input.SubstateType)
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.ValidatorSet == input.ValidatorSet ||
                     this.ValidatorSet != null &&
                     input.ValidatorSet != null &&
                     this.ValidatorSet.SequenceEqual(input.ValidatorSet)
-                ) && 
+                ) && base.Equals(input) && 
                 (
                     this.Epoch == input.Epoch ||
                     this.Epoch.Equals(input.Epoch)
@@ -207,8 +215,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
+                int hashCode = base.GetHashCode();
                 if (this.ValidatorSet != null)
                 {
                     hashCode = (hashCode * 59) + this.ValidatorSet.GetHashCode();

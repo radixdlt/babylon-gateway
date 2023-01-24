@@ -108,9 +108,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="isPayloadRejectionPermanent">Whether the rejection of this payload is known to be permanent.  (required).</param>
         /// <param name="isIntentRejectionPermanent">Whether the rejection of this intent is known to be permanent - this is a stronger statement than the payload rejection being permanent, as it implies any payloads containing the intent will also be permanently rejected.  (required).</param>
         /// <param name="isRejectedBecauseIntentAlreadyCommitted">Whether the cached rejection of this intent is due to the intent already having been committed. If so, see the /transaction/receipt endpoint for further information.  (required).</param>
-        /// <param name="recalculationDue">An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the unix timestamp in milliseconds after which the node will consider recalculating the validity of the transaction. Only present if the rejection isn&#39;t permanent. .</param>
+        /// <param name="recalculationDue">recalculationDue.</param>
         /// <param name="invalidFromEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the rejection isn&#39;t permanent. .</param>
-        public TransactionSubmitRejectedErrorDetailsAllOf(string errorMessage = default(string), bool isFresh = default(bool), bool isPayloadRejectionPermanent = default(bool), bool isIntentRejectionPermanent = default(bool), bool isRejectedBecauseIntentAlreadyCommitted = default(bool), long recalculationDue = default(long), long invalidFromEpoch = default(long))
+        public TransactionSubmitRejectedErrorDetailsAllOf(string errorMessage = default(string), bool isFresh = default(bool), bool isPayloadRejectionPermanent = default(bool), bool isIntentRejectionPermanent = default(bool), bool isRejectedBecauseIntentAlreadyCommitted = default(bool), Instant recalculationDue = default(Instant), long invalidFromEpoch = default(long))
         {
             // to ensure "errorMessage" is required (not null)
             if (errorMessage == null)
@@ -162,11 +162,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool IsRejectedBecauseIntentAlreadyCommitted { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the unix timestamp in milliseconds after which the node will consider recalculating the validity of the transaction. Only present if the rejection isn&#39;t permanent. 
+        /// Gets or Sets RecalculationDue
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^14&#x60;, marking the unix timestamp in milliseconds after which the node will consider recalculating the validity of the transaction. Only present if the rejection isn&#39;t permanent. </value>
         [DataMember(Name = "recalculation_due", EmitDefaultValue = true)]
-        public long RecalculationDue { get; set; }
+        public Instant RecalculationDue { get; set; }
 
         /// <summary>
         /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the rejection isn&#39;t permanent. 
@@ -248,7 +247,8 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.RecalculationDue == input.RecalculationDue ||
-                    this.RecalculationDue.Equals(input.RecalculationDue)
+                    (this.RecalculationDue != null &&
+                    this.RecalculationDue.Equals(input.RecalculationDue))
                 ) && 
                 (
                     this.InvalidFromEpoch == input.InvalidFromEpoch ||
@@ -273,7 +273,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 hashCode = (hashCode * 59) + this.IsPayloadRejectionPermanent.GetHashCode();
                 hashCode = (hashCode * 59) + this.IsIntentRejectionPermanent.GetHashCode();
                 hashCode = (hashCode * 59) + this.IsRejectedBecauseIntentAlreadyCommitted.GetHashCode();
-                hashCode = (hashCode * 59) + this.RecalculationDue.GetHashCode();
+                if (this.RecalculationDue != null)
+                {
+                    hashCode = (hashCode * 59) + this.RecalculationDue.GetHashCode();
+                }
                 hashCode = (hashCode * 59) + this.InvalidFromEpoch.GetHashCode();
                 return hashCode;
             }

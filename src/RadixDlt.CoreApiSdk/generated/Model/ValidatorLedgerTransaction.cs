@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,12 @@ namespace RadixDlt.CoreApiSdk.Model
     /// ValidatorLedgerTransaction
     /// </summary>
     [DataContract(Name = "ValidatorLedgerTransaction")]
-    public partial class ValidatorLedgerTransaction : IEquatable<ValidatorLedgerTransaction>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(SystemLedgerTransaction), "System")]
+    [JsonSubtypes.KnownSubType(typeof(UserLedgerTransaction), "User")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorLedgerTransaction), "Validator")]
+    public partial class ValidatorLedgerTransaction : LedgerTransaction, IEquatable<ValidatorLedgerTransaction>
     {
-
-        /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public LedgerTransactionType Type { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorLedgerTransaction" /> class.
         /// </summary>
@@ -109,18 +108,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorLedgerTransaction" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        /// <param name="payloadHex">The hex-encoded full ledger transaction payload (required).</param>
         /// <param name="validatorTransaction">validatorTransaction (required).</param>
-        public ValidatorLedgerTransaction(LedgerTransactionType type = default(LedgerTransactionType), string payloadHex = default(string), ValidatorTransaction validatorTransaction = default(ValidatorTransaction))
+        /// <param name="type">type (required) (default to &quot;ValidatorLedgerTransaction&quot;).</param>
+        /// <param name="payloadHex">The hex-encoded full ledger transaction payload (required).</param>
+        public ValidatorLedgerTransaction(ValidatorTransaction validatorTransaction = default(ValidatorTransaction), LedgerTransactionType type = "ValidatorLedgerTransaction", string payloadHex = default(string)) : base(type, payloadHex)
         {
-            this.Type = type;
-            // to ensure "payloadHex" is required (not null)
-            if (payloadHex == null)
-            {
-                throw new ArgumentNullException("payloadHex is a required property for ValidatorLedgerTransaction and cannot be null");
-            }
-            this.PayloadHex = payloadHex;
             // to ensure "validatorTransaction" is required (not null)
             if (validatorTransaction == null)
             {
@@ -128,13 +120,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.ValidatorTransaction = validatorTransaction;
         }
-
-        /// <summary>
-        /// The hex-encoded full ledger transaction payload
-        /// </summary>
-        /// <value>The hex-encoded full ledger transaction payload</value>
-        [DataMember(Name = "payload_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string PayloadHex { get; set; }
 
         /// <summary>
         /// Gets or Sets ValidatorTransaction
@@ -150,8 +135,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ValidatorLedgerTransaction {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
-            sb.Append("  PayloadHex: ").Append(PayloadHex).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  ValidatorTransaction: ").Append(ValidatorTransaction).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -161,7 +145,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -187,16 +171,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
-                ) && 
-                (
-                    this.PayloadHex == input.PayloadHex ||
-                    (this.PayloadHex != null &&
-                    this.PayloadHex.Equals(input.PayloadHex))
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.ValidatorTransaction == input.ValidatorTransaction ||
                     (this.ValidatorTransaction != null &&
@@ -212,12 +187,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
-                if (this.PayloadHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.PayloadHex.GetHashCode();
-                }
+                int hashCode = base.GetHashCode();
                 if (this.ValidatorTransaction != null)
                 {
                     hashCode = (hashCode * 59) + this.ValidatorTransaction.GetHashCode();

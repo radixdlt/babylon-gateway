@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,8 +94,19 @@ namespace RadixDlt.CoreApiSdk.Model
     /// ErrorResponse
     /// </summary>
     [DataContract(Name = "ErrorResponse")]
+    [JsonConverter(typeof(JsonSubtypes), "ErrorType")]
+    [JsonSubtypes.KnownSubType(typeof(BasicErrorResponse), "Basic")]
+    [JsonSubtypes.KnownSubType(typeof(BasicErrorResponse), "BasicErrorResponse")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitErrorResponse), "TransactionSubmit")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitErrorResponse), "TransactionSubmitErrorResponse")]
     public partial class ErrorResponse : IEquatable<ErrorResponse>
     {
+
+        /// <summary>
+        /// Gets or Sets ErrorType
+        /// </summary>
+        [DataMember(Name = "error_type", IsRequired = true, EmitDefaultValue = true)]
+        public ErrorResponseType ErrorType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ErrorResponse" /> class.
         /// </summary>
@@ -103,11 +115,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ErrorResponse" /> class.
         /// </summary>
+        /// <param name="errorType">errorType (required).</param>
         /// <param name="code">A numeric code corresponding to the given HTTP error code. (required).</param>
         /// <param name="message">A human-readable error message. (required).</param>
         /// <param name="traceId">A GUID to be used when reporting errors, to allow correlation with the Core API&#39;s error logs, in the case where the Core API details are hidden..</param>
-        public ErrorResponse(int code = default(int), string message = default(string), string traceId = default(string))
+        public ErrorResponse(ErrorResponseType errorType = default(ErrorResponseType), int code = default(int), string message = default(string), string traceId = default(string))
         {
+            this.ErrorType = errorType;
             this.Code = code;
             // to ensure "message" is required (not null)
             if (message == null)
@@ -147,6 +161,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ErrorResponse {\n");
+            sb.Append("  ErrorType: ").Append(ErrorType).Append("\n");
             sb.Append("  Code: ").Append(Code).Append("\n");
             sb.Append("  Message: ").Append(Message).Append("\n");
             sb.Append("  TraceId: ").Append(TraceId).Append("\n");
@@ -186,6 +201,10 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.ErrorType == input.ErrorType ||
+                    this.ErrorType.Equals(input.ErrorType)
+                ) && 
+                (
                     this.Code == input.Code ||
                     this.Code.Equals(input.Code)
                 ) && 
@@ -210,6 +229,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                hashCode = (hashCode * 59) + this.ErrorType.GetHashCode();
                 hashCode = (hashCode * 59) + this.Code.GetHashCode();
                 if (this.Message != null)
                 {

@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,14 @@ namespace RadixDlt.CoreApiSdk.Model
     /// RequireProofRule
     /// </summary>
     [DataContract(Name = "RequireProofRule")]
-    public partial class RequireProofRule : IEquatable<RequireProofRule>
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(AllOfProofRule), "AllOf")]
+    [JsonSubtypes.KnownSubType(typeof(AmountOfProofRule), "AmountOf")]
+    [JsonSubtypes.KnownSubType(typeof(AnyOfProofRule), "AnyOf")]
+    [JsonSubtypes.KnownSubType(typeof(CountOfProofRule), "CountOf")]
+    [JsonSubtypes.KnownSubType(typeof(RequireProofRule), "Require")]
+    public partial class RequireProofRule : ProofRule, IEquatable<RequireProofRule>
     {
-
-        /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public ProofRuleType Type { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="RequireProofRule" /> class.
         /// </summary>
@@ -109,11 +110,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="RequireProofRule" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
         /// <param name="resource">resource (required).</param>
-        public RequireProofRule(ProofRuleType type = default(ProofRuleType), DynamicResourceDescriptor resource = default(DynamicResourceDescriptor))
+        /// <param name="type">type (required) (default to &quot;RequireProofRule&quot;).</param>
+        public RequireProofRule(DynamicResourceDescriptor resource = default(DynamicResourceDescriptor), ProofRuleType type = "RequireProofRule") : base(type)
         {
-            this.Type = type;
             // to ensure "resource" is required (not null)
             if (resource == null)
             {
@@ -136,7 +136,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class RequireProofRule {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Resource: ").Append(Resource).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -146,7 +146,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -172,11 +172,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.Resource == input.Resource ||
                     (this.Resource != null &&
@@ -192,8 +188,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                int hashCode = base.GetHashCode();
                 if (this.Resource != null)
                 {
                     hashCode = (hashCode * 59) + this.Resource.GetHashCode();

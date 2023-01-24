@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,14 +94,11 @@ namespace RadixDlt.CoreApiSdk.Model
     /// EddsaEd25519Signature
     /// </summary>
     [DataContract(Name = "EddsaEd25519Signature")]
-    public partial class EddsaEd25519Signature : IEquatable<EddsaEd25519Signature>
+    [JsonConverter(typeof(JsonSubtypes), "KeyType")]
+    [JsonSubtypes.KnownSubType(typeof(EcdsaSecp256k1Signature), "EcdsaSecp256k1")]
+    [JsonSubtypes.KnownSubType(typeof(EddsaEd25519Signature), "EddsaEd25519")]
+    public partial class EddsaEd25519Signature : Signature, IEquatable<EddsaEd25519Signature>
     {
-
-        /// <summary>
-        /// Gets or Sets KeyType
-        /// </summary>
-        [DataMember(Name = "key_type", IsRequired = true, EmitDefaultValue = true)]
-        public PublicKeyType KeyType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="EddsaEd25519Signature" /> class.
         /// </summary>
@@ -109,11 +107,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EddsaEd25519Signature" /> class.
         /// </summary>
-        /// <param name="keyType">keyType (required).</param>
         /// <param name="signatureHex">A hex-encoded EdDSA Ed25519 signature (64 bytes). This is &#x60;CONCAT(R, s)&#x60; where &#x60;R&#x60; and &#x60;s&#x60; are each 32-bytes in padded big-endian format. (required).</param>
-        public EddsaEd25519Signature(PublicKeyType keyType = default(PublicKeyType), string signatureHex = default(string))
+        /// <param name="keyType">keyType (required) (default to &quot;EddsaEd25519Signature&quot;).</param>
+        public EddsaEd25519Signature(string signatureHex = default(string), PublicKeyType keyType = "EddsaEd25519Signature") : base(keyType)
         {
-            this.KeyType = keyType;
             // to ensure "signatureHex" is required (not null)
             if (signatureHex == null)
             {
@@ -137,7 +134,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EddsaEd25519Signature {\n");
-            sb.Append("  KeyType: ").Append(KeyType).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  SignatureHex: ").Append(SignatureHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -147,7 +144,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -173,11 +170,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return false;
             }
-            return 
-                (
-                    this.KeyType == input.KeyType ||
-                    this.KeyType.Equals(input.KeyType)
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.SignatureHex == input.SignatureHex ||
                     (this.SignatureHex != null &&
@@ -193,8 +186,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.KeyType.GetHashCode();
+                int hashCode = base.GetHashCode();
                 if (this.SignatureHex != null)
                 {
                     hashCode = (hashCode * 59) + this.SignatureHex.GetHashCode();
