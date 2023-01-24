@@ -70,7 +70,7 @@ public partial class LedgerTransaction
 {
     public byte[] GetPayloadBytes()
     {
-        return ActualInstance switch
+        return this switch
         {
             UserLedgerTransaction ult => ult.GetPayloadBytes(),
             ValidatorLedgerTransaction vlt => vlt.GetPayloadBytes(),

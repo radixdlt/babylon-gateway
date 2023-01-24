@@ -95,7 +95,7 @@ public static class DataAggregatorBuilderExtensions
             .AddSingleton<IPendingTransactionPrunerService, PendingTransactionPrunerService>();
 
         builder.Services
-            .AddTypedNpgsqlDataSource<ReadWriteDbContext>(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName)
+            .AddNpgsqlDataSourceHolder<ReadWriteDbContext>(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName)
             .AddDbContextFactory<ReadWriteDbContext>((serviceProvider, options) =>
             {
                 options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadWriteDbContext>>().NpgsqlDataSource);

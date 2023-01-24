@@ -210,9 +210,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var rawUserTransactionStatusByPayloadHash = new Dictionary<ValueBytes, CoreModel.TransactionStatus>();
             var rawUserTransactionByPayloadHash = new Dictionary<ValueBytes, RawUserTransaction>();
 
-            foreach (var ct in ledgerExtension.CommittedTransactions.Where(ct => ct.LedgerTransaction.ActualInstance is CoreModel.UserLedgerTransaction))
+            foreach (var ct in ledgerExtension.CommittedTransactions.Where(ct => ct.LedgerTransaction is CoreModel.UserLedgerTransaction))
             {
-                var nt = ct.LedgerTransaction.GetUserLedgerTransaction().NotarizedTransaction;
+                var nt = ((CoreModel.UserLedgerTransaction)ct.LedgerTransaction).NotarizedTransaction;
 
                 rawUserTransactionStatusByPayloadHash[nt.GetHashBytes()] = ct.Receipt.Status;
                 rawUserTransactionByPayloadHash[nt.GetHashBytes()] = new RawUserTransaction
@@ -323,18 +323,18 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     nextEpoch = ct.Receipt.NextEpoch.Epoch;
                 }
 
-                if (ct.LedgerTransaction.ActualInstance is CoreModel.ValidatorLedgerTransaction vlt)
+                if (ct.LedgerTransaction is CoreModel.ValidatorLedgerTransaction vlt)
                 {
-                    switch (vlt.ValidatorTransaction.ActualInstance)
+                    switch (vlt.ValidatorTransaction)
                     {
                         case CoreModel.TimeUpdateValidatorTransaction timeUpdate:
                             newRoundInEpoch = timeUpdate.RoundInEpoch;
-                            newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(timeUpdate.ProposerTimestampMs).UtcDateTime;
+                            newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(timeUpdate.ProposerTimestamp.UnixTimestampMs).UtcDateTime;
                             break;
                     }
                 }
 
-                if (ct.LedgerTransaction.ActualInstance is CoreModel.SystemLedgerTransaction)
+                if (ct.LedgerTransaction is CoreModel.SystemLedgerTransaction)
                 {
                     // no-op so far
                 }
@@ -342,7 +342,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 foreach (var newSubstate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
                 {
                     var sid = newSubstate.SubstateId;
-                    var sd = newSubstate.SubstateData.ActualInstance;
+                    var sd = newSubstate.SubstateData;
 
                     if (sd is CoreModel.GlobalAddressSubstate globalAddress)
                     {
@@ -405,8 +405,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             re.PostResolveConfigure((NonFungibleResourceManagerEntity e) => e.NonFungibleIdType = type switch
                             {
                                 CoreModel.NonFungibleIdType.String => NonFungibleIdType.String,
-                                CoreModel.NonFungibleIdType.U32 => NonFungibleIdType.U32,
-                                CoreModel.NonFungibleIdType.U64 => NonFungibleIdType.U64,
+                                CoreModel.NonFungibleIdType.Number => NonFungibleIdType.Number,
                                 CoreModel.NonFungibleIdType.Bytes => NonFungibleIdType.Bytes,
                                 CoreModel.NonFungibleIdType.UUID => NonFungibleIdType.UUID,
                                 _ => throw new ArgumentOutOfRangeException(),
@@ -466,7 +465,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     IsEndOfEpoch: nextEpoch != null,
                     TransactionAccumulator: ct.LedgerTransaction.GetPayloadBytes());
 
-                LedgerTransaction ledgerTransaction = ct.LedgerTransaction.ActualInstance switch
+                LedgerTransaction ledgerTransaction = ct.LedgerTransaction switch
                 {
                     CoreModel.UserLedgerTransaction ult => new UserLedgerTransaction
                     {
@@ -642,7 +641,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 foreach (var newSubstate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
                 {
                     var sid = newSubstate.SubstateId;
-                    var sd = newSubstate.SubstateData.ActualInstance;
+                    var sd = newSubstate.SubstateData;
 
                     if (sd is CoreModel.GlobalAddressSubstate)
                     {
@@ -665,9 +664,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (sd is CoreModel.VaultSubstate vault)
                     {
-                        var resourceAmount = vault.ResourceAmount.ActualInstance;
-
-                        switch (resourceAmount)
+                        switch (vault.ResourceAmount)
                         {
                             case CoreModel.FungibleResourceAmount fra:
                             {
@@ -691,7 +688,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             }
 
                             default:
-                                throw new ArgumentOutOfRangeException(nameof(resourceAmount), resourceAmount.GetType().Name);
+                                throw new UnreachableException();
                         }
                     }
 

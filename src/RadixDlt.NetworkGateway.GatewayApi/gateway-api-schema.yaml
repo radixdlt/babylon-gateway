@@ -805,8 +805,7 @@ components:
       type: string
       enum:
         - string
-        - u32
-        - u64
+        - number
         - bytes
         - uuid
 

@@ -71,12 +71,12 @@ public partial class VaultSubstate : IGlobalResourcePointer
 {
     public IEnumerable<GlobalResourcePointer> GetPointers()
     {
-        if (ResourceAmount.ActualInstance is FungibleResourceAmount fra)
+        if (ResourceAmount is FungibleResourceAmount fra)
         {
             yield return new GlobalResourcePointer(fra.ResourceType, fra.ResourceAddress);
         }
 
-        if (ResourceAmount.ActualInstance is NonFungibleResourceAmount nfra)
+        if (ResourceAmount is NonFungibleResourceAmount nfra)
         {
             yield return new GlobalResourcePointer(nfra.ResourceType, nfra.ResourceAddress);
         }

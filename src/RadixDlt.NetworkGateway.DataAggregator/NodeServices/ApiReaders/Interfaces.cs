@@ -93,7 +93,7 @@ public interface INetworkStatusReader
 
 public interface ITransactionStreamReader
 {
-    Task<CoreModel.CommittedTransactionsResponse> GetTransactionStream(long fromStateVersion, int count, CancellationToken token);
+    Task<CoreModel.StreamTransactionsResponse> GetTransactionStream(long fromStateVersion, int count, CancellationToken token);
 }
 
 public interface INetworkConfigurationReaderObserver

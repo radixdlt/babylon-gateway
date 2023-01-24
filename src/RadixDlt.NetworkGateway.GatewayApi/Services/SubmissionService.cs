@@ -163,7 +163,7 @@ internal class SubmissionService : ISubmissionService
                     responseMode: CoreModel.TransactionParseRequest.ResponseModeEnum.Full),
                 token);
 
-            if (response.Parsed.ActualInstance is not CoreModel.ParsedNotarizedTransaction parsed)
+            if (response.Parsed is not CoreModel.ParsedNotarizedTransaction parsed)
             {
                 await _observers.ForEachAsync(x => x.ParsedTransactionUnsupportedPayloadType(request, response));
 

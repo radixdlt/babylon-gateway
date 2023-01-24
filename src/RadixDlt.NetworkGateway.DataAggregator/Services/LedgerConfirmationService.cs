@@ -500,7 +500,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
                     accumulator: transaction.GetAccumulatorHashBytes(),
                     payload: transaction.LedgerTransaction.GetPayloadBytes());
 
-                if (transaction.LedgerTransaction.ActualInstance is CoreModel.UserLedgerTransaction ult)
+                if (transaction.LedgerTransaction is CoreModel.UserLedgerTransaction ult)
                 {
                     TransactionConsistency.AssertTransactionHashCorrect(ult.NotarizedTransaction.GetPayloadBytes(), ult.NotarizedTransaction.GetHashBytes());
                 }
