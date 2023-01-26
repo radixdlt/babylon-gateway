@@ -174,28 +174,34 @@ namespace RadixDlt.CoreApiSdk.Model
         ValidatorSet = 13,
 
         /// <summary>
+        /// Enum Validator for value: Validator
+        /// </summary>
+        [EnumMember(Value = "Validator")]
+        Validator = 14,
+
+        /// <summary>
         /// Enum ClockCurrentMinute for value: ClockCurrentMinute
         /// </summary>
         [EnumMember(Value = "ClockCurrentMinute")]
-        ClockCurrentMinute = 14,
+        ClockCurrentMinute = 15,
 
         /// <summary>
         /// Enum KeyValueStoreEntry for value: KeyValueStoreEntry
         /// </summary>
         [EnumMember(Value = "KeyValueStoreEntry")]
-        KeyValueStoreEntry = 15,
+        KeyValueStoreEntry = 16,
 
         /// <summary>
         /// Enum NonFungibleStoreEntry for value: NonFungibleStoreEntry
         /// </summary>
         [EnumMember(Value = "NonFungibleStoreEntry")]
-        NonFungibleStoreEntry = 16,
+        NonFungibleStoreEntry = 17,
 
         /// <summary>
         /// Enum Vault for value: Vault
         /// </summary>
         [EnumMember(Value = "Vault")]
-        Vault = 17
+        Vault = 18
 
     }
 

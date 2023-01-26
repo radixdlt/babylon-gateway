@@ -105,7 +105,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum Resource for value: Resource
         /// </summary>
         [EnumMember(Value = "Resource")]
-        Resource = 2
+        Resource = 2,
+
+        /// <summary>
+        /// Enum SchemaPath for value: SchemaPath
+        /// </summary>
+        [EnumMember(Value = "SchemaPath")]
+        SchemaPath = 3
 
     }
 

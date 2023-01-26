@@ -103,15 +103,29 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EpochManagerSubstateAllOf" /> class.
         /// </summary>
+        /// <param name="address">The Bech32m-encoded human readable version of the system address (required).</param>
         /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch (required).</param>
         /// <param name="round">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch (required).</param>
         /// <param name="roundsPerEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the number of rounds per epoch (required).</param>
-        public EpochManagerSubstateAllOf(long epoch = default(long), long round = default(long), long roundsPerEpoch = default(long))
+        public EpochManagerSubstateAllOf(string address = default(string), long epoch = default(long), long round = default(long), long roundsPerEpoch = default(long))
         {
+            // to ensure "address" is required (not null)
+            if (address == null)
+            {
+                throw new ArgumentNullException("address is a required property for EpochManagerSubstateAllOf and cannot be null");
+            }
+            this.Address = address;
             this.Epoch = epoch;
             this.Round = round;
             this.RoundsPerEpoch = roundsPerEpoch;
         }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the system address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the system address</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
         /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch
@@ -142,6 +156,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EpochManagerSubstateAllOf {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  Epoch: ").Append(Epoch).Append("\n");
             sb.Append("  Round: ").Append(Round).Append("\n");
             sb.Append("  RoundsPerEpoch: ").Append(RoundsPerEpoch).Append("\n");
@@ -181,6 +196,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
+                ) && 
+                (
                     this.Epoch == input.Epoch ||
                     this.Epoch.Equals(input.Epoch)
                 ) && 
@@ -203,6 +223,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.Address != null)
+                {
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                }
                 hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
                 hashCode = (hashCode * 59) + this.Round.GetHashCode();
                 hashCode = (hashCode * 59) + this.RoundsPerEpoch.GetHashCode();

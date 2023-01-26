@@ -84,64 +84,55 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TimeUpdateValidatorTransaction
+    /// Validator
     /// </summary>
-    [DataContract(Name = "TimeUpdateValidatorTransaction")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(EpochUpdateValidatorTransaction), "EpochUpdate")]
-    [JsonSubtypes.KnownSubType(typeof(TimeUpdateValidatorTransaction), "TimeUpdate")]
-    public partial class TimeUpdateValidatorTransaction : ValidatorTransaction, IEquatable<TimeUpdateValidatorTransaction>
+    [DataContract(Name = "Validator")]
+    public partial class Validator : IEquatable<Validator>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TimeUpdateValidatorTransaction" /> class.
+        /// Initializes a new instance of the <see cref="Validator" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TimeUpdateValidatorTransaction() { }
+        protected Validator() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TimeUpdateValidatorTransaction" /> class.
+        /// Initializes a new instance of the <see cref="Validator" /> class.
         /// </summary>
-        /// <param name="proposerTimestamp">proposerTimestamp (required).</param>
-        /// <param name="consensusEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. Note that currently this is not the same as &#x60;scrypto_epoch&#x60;, but eventually will be.  (required).</param>
-        /// <param name="roundInEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus round in the epoch (required).</param>
-        /// <param name="type">type (required) (default to ValidatorTransactionType.TimeUpdate).</param>
-        public TimeUpdateValidatorTransaction(Instant proposerTimestamp = default(Instant), long consensusEpoch = default(long), long roundInEpoch = default(long), ValidatorTransactionType type = ValidatorTransactionType.TimeUpdate) : base(type)
+        /// <param name="address">The Bech32m-encoded human readable version of the system address (required).</param>
+        /// <param name="key">key (required).</param>
+        public Validator(string address = default(string), EcdsaSecp256k1PublicKey key = default(EcdsaSecp256k1PublicKey))
         {
-            // to ensure "proposerTimestamp" is required (not null)
-            if (proposerTimestamp == null)
+            // to ensure "address" is required (not null)
+            if (address == null)
             {
-                throw new ArgumentNullException("proposerTimestamp is a required property for TimeUpdateValidatorTransaction and cannot be null");
+                throw new ArgumentNullException("address is a required property for Validator and cannot be null");
             }
-            this.ProposerTimestamp = proposerTimestamp;
-            this.ConsensusEpoch = consensusEpoch;
-            this.RoundInEpoch = roundInEpoch;
+            this.Address = address;
+            // to ensure "key" is required (not null)
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is a required property for Validator and cannot be null");
+            }
+            this.Key = key;
         }
 
         /// <summary>
-        /// Gets or Sets ProposerTimestamp
+        /// The Bech32m-encoded human readable version of the system address
         /// </summary>
-        [DataMember(Name = "proposer_timestamp", IsRequired = true, EmitDefaultValue = true)]
-        public Instant ProposerTimestamp { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the system address</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. Note that currently this is not the same as &#x60;scrypto_epoch&#x60;, but eventually will be. 
+        /// Gets or Sets Key
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. Note that currently this is not the same as &#x60;scrypto_epoch&#x60;, but eventually will be. </value>
-        [DataMember(Name = "consensus_epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long ConsensusEpoch { get; set; }
-
-        /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus round in the epoch
-        /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus round in the epoch</value>
-        [DataMember(Name = "round_in_epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long RoundInEpoch { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public EcdsaSecp256k1PublicKey Key { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,11 +141,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TimeUpdateValidatorTransaction {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  ProposerTimestamp: ").Append(ProposerTimestamp).Append("\n");
-            sb.Append("  ConsensusEpoch: ").Append(ConsensusEpoch).Append("\n");
-            sb.Append("  RoundInEpoch: ").Append(RoundInEpoch).Append("\n");
+            sb.Append("class Validator {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -163,7 +152,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -175,33 +164,30 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TimeUpdateValidatorTransaction);
+            return this.Equals(input as Validator);
         }
 
         /// <summary>
-        /// Returns true if TimeUpdateValidatorTransaction instances are equal
+        /// Returns true if Validator instances are equal
         /// </summary>
-        /// <param name="input">Instance of TimeUpdateValidatorTransaction to be compared</param>
+        /// <param name="input">Instance of Validator to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TimeUpdateValidatorTransaction input)
+        public bool Equals(Validator input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.ProposerTimestamp == input.ProposerTimestamp ||
-                    (this.ProposerTimestamp != null &&
-                    this.ProposerTimestamp.Equals(input.ProposerTimestamp))
-                ) && base.Equals(input) && 
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
+                ) && 
                 (
-                    this.ConsensusEpoch == input.ConsensusEpoch ||
-                    this.ConsensusEpoch.Equals(input.ConsensusEpoch)
-                ) && base.Equals(input) && 
-                (
-                    this.RoundInEpoch == input.RoundInEpoch ||
-                    this.RoundInEpoch.Equals(input.RoundInEpoch)
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 );
         }
 
@@ -213,13 +199,15 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.ProposerTimestamp != null)
+                int hashCode = 41;
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.ProposerTimestamp.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.ConsensusEpoch.GetHashCode();
-                hashCode = (hashCode * 59) + this.RoundInEpoch.GetHashCode();
+                if (this.Key != null)
+                {
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                }
                 return hashCode;
             }
         }

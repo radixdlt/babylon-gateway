@@ -144,10 +144,16 @@ namespace RadixDlt.CoreApiSdk.Model
             EpochManager = 7,
 
             /// <summary>
+            /// Enum Validator for value: Validator
+            /// </summary>
+            [EnumMember(Value = "Validator")]
+            Validator = 8,
+
+            /// <summary>
             /// Enum Clock for value: Clock
             /// </summary>
             [EnumMember(Value = "Clock")]
-            Clock = 8
+            Clock = 9
 
         }
 
