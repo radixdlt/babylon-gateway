@@ -10,7 +10,7 @@ The links above link to the ReDocly docs, reading the schemas on the `main` bran
 
 ## Gateway API
 
-As the Gateway API is exposed by the Gateway Service, the Gateway API specification source-of-truth lives in the [Open API Schema in the Network Gateway repository](../gateway-api-schema.yaml).
+As the Gateway API is exposed by the Gateway Service, the Gateway API specification source-of-truth lives in the [Open API Schema in the Network Gateway repository](../src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-schema.yaml).
 
 The Open API specification should be kept up to date with the interface that the Gateway API service exposes.
 
