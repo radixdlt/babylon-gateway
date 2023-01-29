@@ -62,21 +62,15 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.Collections.Generic;
+using System;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+namespace RadixDlt.NetworkGateway.Abstractions.Extensions;
 
-internal class AccessRulesChainSubtypeValueConverter : EnumTypeValueConverterBase<AccessRulesChainSubtype>
+public static class ValueBytesExtensions
 {
-    private static readonly Dictionary<AccessRulesChainSubtype, string> _conversion = new()
+    public static string ToHex(this ValueBytes bytes)
     {
-        { AccessRulesChainSubtype.None, "NONE" },
-        { AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain, "ResourceManagerVaultAccessRulesChain" },
-    };
-
-    public AccessRulesChainSubtypeValueConverter()
-        : base(_conversion, Invert(_conversion))
-    {
+        // The Gateway spec assumes lower case
+        return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 }

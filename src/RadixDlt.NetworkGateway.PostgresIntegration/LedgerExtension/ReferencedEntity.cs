@@ -62,39 +62,22 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal static class DictionaryExtensions
-{
-    public static TVal GetOrAdd<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> factory)
-        where TKey : notnull
-    {
-        if (dictionary.ContainsKey(key))
-        {
-            return dictionary[key];
-        }
-
-        var value = factory(key);
-
-        dictionary[key] = value;
-
-        return value;
-    }
-}
-
 internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long StateVersion)
 {
+    private readonly IList<Action> _postResolveActions = new List<Action>();
+
     private Entity? _databaseEntity;
     private ReferencedEntity? _immediateParentReference;
+    private bool _resolved;
+    private bool _postResolveConfigurationInvoked;
 
     public string? GlobalAddressHex { get; private set; }
 
@@ -130,6 +113,8 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
         {
             GlobalAddressHex = entity.GlobalAddress.ToHex();
         }
+
+        _resolved = true;
     }
 
     public void IsImmediateChildOf(ReferencedEntity parent)
@@ -174,17 +159,41 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
         return instance;
     }
 
-    public void ConfigureDatabaseEntity<T>(Action<T> action)
+    public void PostResolveConfigure<T>(Action<T> action)
         where T : Entity
     {
-        var dbEntity = GetDatabaseEntity();
-
-        if (dbEntity is not T typedDbEntity)
+        _postResolveActions.Add(() =>
         {
-            throw new ArgumentException($"Action argument type does not match underlying entity type for {this}.", nameof(action));
+            var dbEntity = GetDatabaseEntity();
+
+            if (dbEntity is not T typedDbEntity)
+            {
+                throw new ArgumentException($"Action argument type does not match underlying entity type for {this}.", nameof(action));
+            }
+
+            action.Invoke(typedDbEntity);
+        });
+    }
+
+    public void InvokePostResolveConfiguration()
+    {
+        if (!_resolved)
+        {
+            throw new InvalidOperationException("Not resolved yet");
         }
 
-        action.Invoke(typedDbEntity);
+        if (_postResolveConfigurationInvoked)
+        {
+            throw new InvalidOperationException("Already configured");
+        }
+
+        foreach (var action in _postResolveActions)
+        {
+            action.Invoke();
+        }
+
+        _postResolveActions.Clear();
+        _postResolveConfigurationInvoked = true;
     }
 
     private Entity GetDatabaseEntity()
@@ -206,174 +215,5 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
     public override string ToString()
     {
         return $"{nameof(ReferencedEntity)} {{ {nameof(IdHex)}: {IdHex}, {nameof(Type)}: {Type}, {nameof(StateVersion)}: {StateVersion}, {nameof(_databaseEntity)}: {_databaseEntity?.ToString() ?? "null"} }}";
-    }
-}
-
-internal record FungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion);
-
-internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, List<string> NonFungibleIds, long StateVersion);
-
-internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
-
-internal record NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, long StateVersion);
-
-internal record NonFungibleIdLookup(long ResourceManagerEntityId, string NonFungibleId);
-
-internal record AccessRulesChainLookup(string EntityIdHex, AccessRulesChainSubtype Subtype);
-
-internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
-
-internal record ResourceManagerSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);
-
-internal record AggregateChange
-{
-    public long StateVersion { get; }
-
-    public List<long> FungibleIds { get; } = new();
-
-    public List<long> NonFungibleIds { get; } = new();
-
-    public bool Persistable { get; }
-
-    public AggregateChange(long stateVersion)
-        : this(stateVersion, Array.Empty<long>(), Array.Empty<long>())
-    {
-        Persistable = true;
-    }
-
-    public AggregateChange(long stateVersion, IEnumerable<long> fungibleIds, IEnumerable<long> nonFungibleIds)
-    {
-        StateVersion = stateVersion;
-        FungibleIds = new List<long>(fungibleIds);
-        NonFungibleIds = new List<long>(nonFungibleIds);
-    }
-
-    public void AppendFungible(long id)
-    {
-        if (!FungibleIds.Contains(id))
-        {
-            FungibleIds.Add(id);
-        }
-    }
-
-    public void AppendNonFungible(long id)
-    {
-        if (!NonFungibleIds.Contains(id))
-        {
-            NonFungibleIds.Add(id);
-        }
-    }
-
-    public void Apply(AggregateChange? previous)
-    {
-        if (previous == null)
-        {
-            return;
-        }
-
-        var finalFungibleIds = new List<long>(previous.FungibleIds);
-        var finalNonFungibleIds = new List<long>(previous.NonFungibleIds);
-
-        foreach (var id in FungibleIds.Where(id => !finalFungibleIds.Contains(id)))
-        {
-            finalFungibleIds.Add(id);
-        }
-
-        foreach (var id in NonFungibleIds.Where(id => !finalNonFungibleIds.Contains(id)))
-        {
-            finalNonFungibleIds.Add(id);
-        }
-
-        // TODO add support for NonFungibleIds removal (separate collections + foreach + finalNonFungibleIds.Remove(id)
-
-        FungibleIds.Clear();
-        FungibleIds.AddRange(finalFungibleIds);
-        NonFungibleIds.Clear();
-        NonFungibleIds.AddRange(finalNonFungibleIds);
-    }
-
-    public bool ShouldBePersisted(AggregateChange? previous)
-    {
-        if (!Persistable)
-        {
-            return false;
-        }
-
-        if (previous == null)
-        {
-            return true;
-        }
-
-        if (FungibleIds.SequenceEqual(previous.FungibleIds) && NonFungibleIds.SequenceEqual(previous.NonFungibleIds))
-        {
-            return false;
-        }
-
-        return true;
-    }
-}
-
-internal class ReferencedEntityDictionary
-{
-    private readonly Dictionary<string, ReferencedEntity> _storage = new();
-    private readonly Dictionary<long, List<ReferencedEntity>> _atStateVersion = new();
-    private readonly Dictionary<string, ReferencedEntity> _globalsCache = new();
-    private readonly Dictionary<long, ReferencedEntity> _dbIdCache = new();
-
-    public ICollection<string> Addresses => _storage.Keys;
-
-    public ICollection<ReferencedEntity> All => _storage.Values;
-
-    public void OnAllEntitiesAreResolved()
-    {
-        foreach (var referencedEntity in All)
-        {
-            _dbIdCache[referencedEntity.DatabaseId] = referencedEntity;
-        }
-    }
-
-    public ReferencedEntity GetOrAdd(string addressHex, Func<string, ReferencedEntity> factory)
-    {
-        if (_storage.ContainsKey(addressHex))
-        {
-            return _storage[addressHex];
-        }
-
-        var value = factory(addressHex);
-
-        if (!_atStateVersion.ContainsKey(value.StateVersion))
-        {
-            _atStateVersion[value.StateVersion] = new List<ReferencedEntity>();
-        }
-
-        _storage[addressHex] = value;
-        _atStateVersion[value.StateVersion].Add(value);
-
-        return value;
-    }
-
-    public ReferencedEntity Get(string addressHex)
-    {
-        return _storage[addressHex];
-    }
-
-    public ReferencedEntity GetByGlobal(string globalAddressHex)
-    {
-        return _globalsCache.GetOrAdd(globalAddressHex, _ => _storage.Values.First(re => re.GlobalAddressHex == globalAddressHex));
-    }
-
-    public ReferencedEntity GetByDatabaseId(long id)
-    {
-        return _dbIdCache[id];
-    }
-
-    public IEnumerable<ReferencedEntity> OfStateVersion(long stateVersion)
-    {
-        if (_atStateVersion.ContainsKey(stateVersion))
-        {
-            return _atStateVersion[stateVersion];
-        }
-
-        return Array.Empty<ReferencedEntity>();
     }
 }

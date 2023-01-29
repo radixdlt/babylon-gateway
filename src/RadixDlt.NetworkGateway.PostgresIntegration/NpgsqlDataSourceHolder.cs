@@ -62,27 +62,24 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System.Collections.Generic;
-using System.Linq;
+using Npgsql;
+using System;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-internal class EnumTypeValueConverterBase<TEnum> : ValueConverter<TEnum, string>
-    where TEnum : notnull
+// ReSharper disable once UnusedTypeParameter
+internal class NpgsqlDataSourceHolder<T> : IAsyncDisposable
 {
-    public EnumTypeValueConverterBase(IReadOnlyDictionary<TEnum, string> conversion, IReadOnlyDictionary<string, TEnum> inverseConversion)
-        : base(
-            value => conversion[value],
-            value => inverseConversion[value]
-        )
+    public NpgsqlDataSourceHolder(NpgsqlDataSource npgsqlDataSource)
     {
+        NpgsqlDataSource = npgsqlDataSource;
     }
 
-    protected static Dictionary<TOut, TIn> Invert<TIn, TOut>(IReadOnlyDictionary<TIn, TOut> conversion)
-        where TIn : notnull
-        where TOut : notnull
+    public NpgsqlDataSource NpgsqlDataSource { get; }
+
+    public ValueTask DisposeAsync()
     {
-        return conversion.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
+        return NpgsqlDataSource.DisposeAsync();
     }
 }

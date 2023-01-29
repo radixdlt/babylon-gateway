@@ -62,28 +62,22 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.Collections.Generic;
-using System.Collections.Immutable;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class PendingTransactionStatusValueConverter : EnumTypeValueConverterBase<PendingTransactionStatus>
-{
-    public static readonly ImmutableDictionary<PendingTransactionStatus, string> Conversion =
-        new Dictionary<PendingTransactionStatus, string>
-        {
-            { PendingTransactionStatus.SubmittedOrKnownInNodeMempool, "SUBMITTED_OR_KNOWN_IN_NODE_MEMPOOL" },
-            { PendingTransactionStatus.Missing, "MISSING" },
-            { PendingTransactionStatus.ResolvedButUnknownTillSyncedUp, "RESOLVED_BUT_UNKNOWN_TILL_SYNCED_UP" },
-            { PendingTransactionStatus.RejectedTemporarily, "REJECTED_TEMPORARILY" },
-            { PendingTransactionStatus.RejectedPermanently, "REJECTED_PERMANENTLY" },
-            { PendingTransactionStatus.CommittedSuccess, "COMMITTED_SUCCESS" },
-            { PendingTransactionStatus.CommittedFailure, "COMMITTED_FAILURE" },
-        }.ToImmutableDictionary();
+internal record FungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion);
 
-    public PendingTransactionStatusValueConverter()
-        : base(Conversion, Invert(Conversion))
-    {
-    }
-}
+internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, List<string> NonFungibleIds, long StateVersion);
+
+internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
+
+internal record struct NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, long StateVersion);
+
+internal record struct NonFungibleIdLookup(long ResourceManagerEntityId, string NonFungibleId);
+
+internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
+
+internal record ResourceManagerSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);

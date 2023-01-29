@@ -87,7 +87,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record FungiblesViewModel(byte[] ResourceEntityGlobalAddress, string Balance, int TotalCount);
 
-    private record NonFungiblesViewModel(byte[] ResourceEntityGlobalAddress, long NonFungibleIdsCount, int TotalCount);
+    private record NonFungiblesViewModel(byte[] ResourceEntityGlobalAddress, int NonFungibleIdsCount, int TotalCount);
 
     private record NonFungibleIdsViewModel(string NonFungibleId, int TotalCount);
 
@@ -522,7 +522,7 @@ aggregate_history AS (
 SELECT final.global_address AS ResourceEntityGlobalAddress, final.non_fungible_ids_count AS NonFungibleIdsCount, ah.TotalCount
 FROM aggregate_history ah
 INNER JOIN LATERAL (
-    SELECT e.global_address, erh.non_fungible_ids_count
+    SELECT e.global_address, array_length(erh.non_fungible_ids, 1) AS non_fungible_ids_count
     FROM entity_resource_history erh
     INNER JOIN entities e ON erh.resource_entity_id = e.id
     WHERE erh.from_state_version <= @stateVersion AND erh.global_entity_id = @entityId AND erh.resource_entity_id = ah.non_fungible_resource_entity_id
@@ -568,15 +568,19 @@ INNER JOIN LATERAL (
     {
         var cd = new CommandDefinition(
             commandText: @"
-SELECT UNNEST(non_fungible_ids[@offset:@limit]) AS NonFungibleId, array_length(non_fungible_ids, 1) AS TotalCount
-FROM entity_resource_history
-WHERE id = (
-    SELECT id
+SELECT nfid.non_fungible_id AS NonFungibleId, final.total_count AS TotalCount
+FROM (
+    SELECT UNNEST(non_fungible_ids[@offset:@limit]) AS non_fungible_id_data_id, array_length(non_fungible_ids, 1) AS total_count
     FROM entity_resource_history
-    WHERE from_state_version <= @stateVersion AND global_entity_id = @entityId AND resource_entity_id = @resourceEntityId
-    ORDER BY from_state_version DESC
-    LIMIT 1
-)
+    WHERE id = (
+        SELECT id
+        FROM entity_resource_history
+        WHERE from_state_version <= @stateVersion AND global_entity_id = @entityId AND resource_entity_id = @resourceEntityId
+        ORDER BY from_state_version DESC
+        LIMIT 1
+    )
+) final
+INNER JOIN non_fungible_id_data nfid ON nfid.id = final.non_fungible_id_data_id
 ",
             parameters: new
             {

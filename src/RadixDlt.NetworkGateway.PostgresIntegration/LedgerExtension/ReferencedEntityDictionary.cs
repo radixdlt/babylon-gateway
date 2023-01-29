@@ -62,53 +62,89 @@
  * permissions under this License.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
-namespace RadixDlt.NetworkGateway.Abstractions.Utilities;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-public sealed class ByteArrayEqualityComparer : IEqualityComparer<byte[]>
+internal class ReferencedEntityDictionary
 {
-    public static readonly ByteArrayEqualityComparer Default = new();
+    private readonly Dictionary<string, ReferencedEntity> _storage = new();
+    private readonly Dictionary<long, List<ReferencedEntity>> _entitiesAtStateVersion = new();
+    private readonly Dictionary<string, ReferencedEntity> _globalsCache = new();
+    private readonly Dictionary<long, ReferencedEntity> _dbIdCache = new();
+    private readonly HashSet<string> _knownGlobalAddressesToLoad = new();
 
-    public bool Equals(byte[]? first, byte[]? second)
+    public ICollection<string> KnownGlobalAddresses => _knownGlobalAddressesToLoad;
+
+    public ICollection<string> Addresses => _storage.Keys;
+
+    public ICollection<ReferencedEntity> All => _storage.Values;
+
+    public ReferencedEntity GetOrAdd(string addressHex, Func<string, ReferencedEntity> factory)
     {
-        if (first == second)
+        if (_storage.TryGetValue(addressHex, out var existing))
         {
-            return true;
+            return existing;
         }
 
-        if (first == null || second == null)
+        var value = factory(addressHex);
+
+        if (!_entitiesAtStateVersion.ContainsKey(value.StateVersion))
         {
-            return false;
+            _entitiesAtStateVersion[value.StateVersion] = new List<ReferencedEntity>();
         }
 
-        if (first.Length != second.Length)
-        {
-            return false;
-        }
+        _storage[addressHex] = value;
+        _entitiesAtStateVersion[value.StateVersion].Add(value);
 
-        for (int i = 0; i < first.Length; i++)
-        {
-            if (first[i] != second[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return value;
     }
 
-    public int GetHashCode(byte[] array)
+    public ReferencedEntity Get(string addressHex)
     {
-        unchecked
-        {
-            int hash = 17;
-            foreach (byte element in array)
-            {
-                hash = (hash * 31) + element; // byte.GetHashCode() = byte
-            }
+        return _storage[addressHex];
+    }
 
-            return hash;
+    public ReferencedEntity GetByGlobal(string globalAddressHex)
+    {
+        return _globalsCache.GetOrAdd(globalAddressHex, _ => _storage.Values.First(re => re.GlobalAddressHex == globalAddressHex));
+    }
+
+    public ReferencedEntity GetByDatabaseId(long id)
+    {
+        return _dbIdCache[id];
+    }
+
+    public IEnumerable<ReferencedEntity> OfStateVersion(long stateVersion)
+    {
+        if (_entitiesAtStateVersion.TryGetValue(stateVersion, out var existing))
+        {
+            return existing;
         }
+
+        return Array.Empty<ReferencedEntity>();
+    }
+
+    public void OnAllEntitiesResolved()
+    {
+        foreach (var referencedEntity in All)
+        {
+            _dbIdCache[referencedEntity.DatabaseId] = referencedEntity;
+        }
+    }
+
+    public void InvokePostResolveConfiguration()
+    {
+        foreach (var re in All)
+        {
+            re.InvokePostResolveConfiguration();
+        }
+    }
+
+    public void MarkSeenGlobalAddress(string globalAddress)
+    {
+        _knownGlobalAddressesToLoad.Add(globalAddress);
     }
 }

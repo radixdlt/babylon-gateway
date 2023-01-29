@@ -62,21 +62,25 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
+using System;
 using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal class LedgerTransactionStatusValueConverter : EnumTypeValueConverterBase<LedgerTransactionStatus>
+internal static class DictionaryExtensions
 {
-    private static readonly Dictionary<LedgerTransactionStatus, string> _conversion = new()
+    public static TVal GetOrAdd<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> factory)
+        where TKey : notnull
     {
-        { LedgerTransactionStatus.Succeeded, "SUCCEEDED" },
-        { LedgerTransactionStatus.Failed, "FAILED" },
-    };
+        if (dictionary.TryGetValue(key, out var existingValue))
+        {
+            return existingValue;
+        }
 
-    public LedgerTransactionStatusValueConverter()
-        : base(_conversion, Invert(_conversion))
-    {
+        var value = factory(key);
+
+        dictionary[key] = value;
+
+        return value;
     }
 }
