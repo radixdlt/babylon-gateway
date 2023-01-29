@@ -553,7 +553,7 @@ WHERE id IN(
 
             dbReadDuration += sw.Elapsed;
 
-            foreach (var knownDbEntity in knownDbEntities.Values.Where(e => e.GlobalAddress != null))
+            foreach (var knownDbEntity in knownDbEntities.Values)
             {
                 var entityType = knownDbEntity switch
                 {
@@ -606,6 +606,8 @@ WHERE id IN(
                 re.Resolve(dbEntity);
                 entitiesToAdd.Add(dbEntity);
             }
+
+            referencedEntities.OnAllEntitiesAreResolved();
 
             foreach (var (childAddress, parentAddress) in childToParentEntities)
             {
