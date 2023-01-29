@@ -316,13 +316,21 @@ internal record AggregateChange
 internal class ReferencedEntityDictionary
 {
     private readonly Dictionary<string, ReferencedEntity> _storage = new();
-    private readonly Dictionary<long, List<ReferencedEntity>> _inversed = new();
+    private readonly Dictionary<long, List<ReferencedEntity>> _atStateVersion = new();
     private readonly Dictionary<string, ReferencedEntity> _globalsCache = new();
     private readonly Dictionary<long, ReferencedEntity> _dbIdCache = new();
 
     public ICollection<string> Addresses => _storage.Keys;
 
     public ICollection<ReferencedEntity> All => _storage.Values;
+
+    public void OnAllEntitiesAreResolved()
+    {
+        foreach (var referencedEntity in All)
+        {
+            _dbIdCache[referencedEntity.DatabaseId] = referencedEntity;
+        }
+    }
 
     public ReferencedEntity GetOrAdd(string addressHex, Func<string, ReferencedEntity> factory)
     {
@@ -333,13 +341,13 @@ internal class ReferencedEntityDictionary
 
         var value = factory(addressHex);
 
-        if (!_inversed.ContainsKey(value.StateVersion))
+        if (!_atStateVersion.ContainsKey(value.StateVersion))
         {
-            _inversed[value.StateVersion] = new List<ReferencedEntity>();
+            _atStateVersion[value.StateVersion] = new List<ReferencedEntity>();
         }
 
         _storage[addressHex] = value;
-        _inversed[value.StateVersion].Add(value);
+        _atStateVersion[value.StateVersion].Add(value);
 
         return value;
     }
@@ -356,14 +364,14 @@ internal class ReferencedEntityDictionary
 
     public ReferencedEntity GetByDatabaseId(long id)
     {
-        return _dbIdCache.GetOrAdd(id, _ => _storage.Values.First(re => re.DatabaseId == id));
+        return _dbIdCache[id];
     }
 
     public IEnumerable<ReferencedEntity> OfStateVersion(long stateVersion)
     {
-        if (_inversed.ContainsKey(stateVersion))
+        if (_atStateVersion.ContainsKey(stateVersion))
         {
-            return _inversed[stateVersion];
+            return _atStateVersion[stateVersion];
         }
 
         return Array.Empty<ReferencedEntity>();
