@@ -40,7 +40,7 @@ rm -rf "$dummyApiDirectory"
 mkdir "$dummyApiDirectory"
 
 # We're using our own build/package as OpenAPITools hasn't released develop version with few critical bugfixes yet!
-java -jar ./openapi-generator-cli-6.1.0.jar \
+java -jar ./openapi-generator-cli-6.1.1-custom.jar \
     generate \
     -i "$specLocation" \
     -g csharp-netcore \

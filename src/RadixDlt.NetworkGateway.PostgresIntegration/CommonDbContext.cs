@@ -62,7 +62,9 @@
  * permissions under this License.
  */
 
+using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
@@ -115,6 +117,11 @@ internal abstract class CommonDbContext : DbContext
     // So secondary indexes might benefit from the inclusion of columns for faster lookups
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresEnum<AccessRulesChainSubtype>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
+        modelBuilder.HasPostgresEnum<NonFungibleIdType>();
+        modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
+
         HookupSingleEntries(modelBuilder);
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
@@ -131,18 +138,6 @@ internal abstract class CommonDbContext : DbContext
 
         configurationBuilder.Properties<RadixAddress>()
             .HaveConversion<RadixAddressToByteArrayConverter>();
-
-        configurationBuilder.Properties<PendingTransactionStatus>()
-            .HaveConversion<PendingTransactionStatusValueConverter>();
-
-        configurationBuilder.Properties<LedgerTransactionStatus>()
-            .HaveConversion<LedgerTransactionStatusValueConverter>();
-
-        configurationBuilder.Properties<NonFungibleIdType>()
-            .HaveConversion<NonFungibleIdTypeValueConverter>();
-
-        configurationBuilder.Properties<AccessRulesChainSubtype>()
-            .HaveConversion<AccessRulesChainSubtypeValueConverter>();
     }
 
     private static void HookupSingleEntries(ModelBuilder modelBuilder)
@@ -159,7 +154,8 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<LedgerTransaction>()
             .HasDiscriminator<string>("discriminator")
             .HasValue<UserLedgerTransaction>("user")
-            .HasValue<ValidatorLedgerTransaction>("validator");
+            .HasValue<ValidatorLedgerTransaction>("validator")
+            .HasValue<SystemLedgerTransaction>("system");
 
         modelBuilder.Entity<UserLedgerTransaction>()
             .HasIndex(lt => lt.PayloadHash)
@@ -187,7 +183,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<LedgerTransaction>()
             .HasIndex(lt => new { lt.Epoch, lt.RoundInEpoch })
             .IsUnique()
-            .HasFilter("is_start_of_round = true");
+            .HasFilter("index_in_round = 0");
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)
@@ -213,6 +209,7 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<NonFungibleResourceManagerEntity>("non_fungible_resource_manager")
             .HasValue<NormalComponentEntity>("normal_component")
             .HasValue<AccountComponentEntity>("account_component")
+            .HasValue<ValidatorComponentEntity>("validator_component")
             .HasValue<PackageEntity>("package")
             .HasValue<KeyValueStoreEntity>("key_value_store")
             .HasValue<VaultEntity>("vault")
@@ -235,10 +232,6 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityResourceAggregateHistory>()
-            .HasIndex(e => new { e.IsMostRecent, e.EntityId })
-            .HasFilter("is_most_recent IS TRUE");
-
-        modelBuilder.Entity<EntityResourceAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityResourceHistory>()
@@ -259,7 +252,7 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleIdData>()
-            .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.NonFungibleId });
+            .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.NonFungibleId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleIdMutableDataHistory>()
             .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });

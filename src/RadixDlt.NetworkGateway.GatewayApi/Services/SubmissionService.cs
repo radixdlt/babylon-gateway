@@ -163,7 +163,7 @@ internal class SubmissionService : ISubmissionService
                     responseMode: CoreModel.TransactionParseRequest.ResponseModeEnum.Full),
                 token);
 
-            if (response.Parsed.ActualInstance is not CoreModel.ParsedNotarizedTransaction parsed)
+            if (response.Parsed is not CoreModel.ParsedNotarizedTransaction parsed)
             {
                 await _observers.ForEachAsync(x => x.ParsedTransactionUnsupportedPayloadType(request, response));
 
@@ -176,6 +176,8 @@ internal class SubmissionService : ISubmissionService
 
                 throw InvalidTransactionException.FromStaticallyInvalid(parsed.ValidationError.Reason);
             }
+
+            // TODO replace CoreApi call with RadixEngineToolkit.RadixEngineToolkit.DecompileNotarizedTransactionIntent(request.GetNotarizedTransactionBytes());
 
             return parsed.NotarizedTransaction;
         }
@@ -231,7 +233,7 @@ internal class SubmissionService : ISubmissionService
 
             await _submissionTrackingService.MarkAsFailed(
                 true,
-                parsedTransaction.HashBytes,
+                parsedTransaction.GetHashBytes(),
                 ex.Error.Message,
                 token
             );
@@ -245,7 +247,7 @@ internal class SubmissionService : ISubmissionService
 
             await _submissionTrackingService.MarkAsFailed(
                 false,
-                parsedTransaction.HashBytes,
+                parsedTransaction.GetHashBytes(),
                 ex.Error.Message,
                 token
             );

@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.Abstractions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -72,14 +73,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class QueryableExtensions
 {
-    public static async Task<HashSet<TSource>> ToHashSetAsync<TSource>(
-        this IQueryable<TSource> source,
-        IEqualityComparer<TSource> equalityComparer,
-        CancellationToken cancellationToken = default
-    )
+    public static async Task<HashSet<ValueBytes>> ToValueBytesHashSetAsync(this IQueryable<byte[]> source, CancellationToken token)
     {
-        var hashSet = new HashSet<TSource>(equalityComparer);
-        await foreach (var element in source.AsAsyncEnumerable().WithCancellation(cancellationToken))
+        var hashSet = new HashSet<ValueBytes>();
+
+        await foreach (var element in source.AsAsyncEnumerable().WithCancellation(token))
         {
             hashSet.Add(element);
         }

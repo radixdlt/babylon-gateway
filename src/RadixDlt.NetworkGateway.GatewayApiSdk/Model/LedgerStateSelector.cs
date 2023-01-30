@@ -63,26 +63,20 @@
  */
 
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Serialization;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 public partial class LedgerStateSelector
 {
-    [IgnoreDataMember]
     [MemberNotNullWhen(true, nameof(StateVersion))]
-    public bool HasStateVersion => StateVersion != null;
+    public bool HasStateVersion() => StateVersion != null;
 
-    [IgnoreDataMember]
     [MemberNotNullWhen(true, nameof(Timestamp))]
-    public bool HasTimestamp => Timestamp != null;
+    public bool HasTimestamp() => Timestamp != null;
 
-    [IgnoreDataMember]
     [MemberNotNullWhen(true, nameof(Epoch))]
-    public bool HasEpoch => Epoch != null;
+    public bool HasEpoch() => Epoch != null;
 
-    [IgnoreDataMember]
-    [MemberNotNullWhen(true, nameof(Epoch))]
-    [MemberNotNullWhen(true, nameof(Round))]
-    public bool HasEpochAndRound => Epoch != null && Round != null;
+    [MemberNotNullWhen(true, nameof(Epoch), nameof(Round))]
+    public bool HasEpochAndRound() => Epoch != null && Round != null;
 }

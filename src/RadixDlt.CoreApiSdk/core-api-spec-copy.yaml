@@ -43,33 +43,112 @@ openapi: 3.0.0
 # => Hex-encoded hashes should end _hash
 # => Hex-encoded bytes/payload should end _hex and not include _bytes
 info:
-  version: '0.1.0'
+  version: '0.2.0'
   title: 'Babylon Core API'
   license:
     name: The Radix License, Version 1.0
-    url: https://www.radixfoundation.org/licenses/LICENSE-v1
+    url: https://www.radixfoundation.org/licenses/license-v1
+  x-logo:
+    url: https://docs.radixdlt.com/main/_images/radix-logo-banner.png
+    href: https://docs.radixdlt.com
+  description: |
+    This API is exposed by the Babylon Radix node to give clients access to the Radix Engine, Mempool and State in the node.
+    It is intended for use by node-runners on a private network, and is not intended to be exposed publicly.
+    Heavy load may impact the node's function.
+
+    If you require queries against historical ledger state, you may also wish to consider using the [Gateway API](https://betanet-gateway.redoc.ly/).
 servers:
   - url: 'localhost:3333/core'
+# See https://redocly.com/docs/api-reference-docs/specification-extensions/x-tag-groups/ for details
+x-tagGroups:
+  - name: Overview
+    tags:
+      - SubAPIs
+      - Concepts
+  - name: Endpoints
+    tags:
+      - Status
+      - Transaction
+      - Mempool
+      - State
+      - Stream
 tags:
+  - name: SubAPIs
+    x-displayName: Sub-APIs
+    x-traitTag: true # Don't display endpoints under this tag
+    description: |
+      The API is split into 5 sub apis:
+      - **Status** (`/status/*`) - For status and configuration details for the node / engine.
+      - **Transaction** (`/transaction/*`) - For transaction construction, preview, submission, and monitoring the status of an individual transaction.
+      - **Mempool** (`/mempool/*`) - For information on the contents of the node's mempool.
+      - **Current State** (`/state/*`) - For reading the state of entities. At present, we only support reading details from the top of the currently committed ledger.
+      - **Stream** (`/stream/*`) - For reading the committed transactions.
+  - name: Concepts
+    x-displayName: Concepts
+    x-traitTag: true # Don't display endpoints under this tag
+    description: |
+      Interacting with this API effectively may require knowledge about the Radix Babylon Transaction Model and the State Model.
+
+      We share some very high-level details below, but please see the [official documentation](http://docs.radixdlt.com) for more details on this.
+
+      ## Transactions
+
+      User transactions are formed of a core "intent", which is then signed by 0+ signatories, before being notarized. The output is called a notarized payload.
+      It is this notarized transaction payload which is submitted to the network.
+
+      For most users, this construction process will generally happen in their Radix Wallet. If you wish to construct transactions programmatically or offline,
+      you will need to integrate the Radix Engine Toolkit into your application for construction and finalization.
+
+      Once submitted, a transaction payload can end up being either rejected or committed. Transactions get rejected if they fail to pass certain criteria at the given time.
+      A transaction payload can be marked as a:
+      - **Permanent Rejection** if it is never possible for it to be committed (eg it's statically invalid, or only valid up until epoch 100 and it's now epoch 101)
+      - **Temporary Rejection** if it still may be possible that the transaction payload could be committed
+
+      A given intent typically is only part of one submitted notarized payload, but it's possible for a notary to notarize and submit multiple payloads for the same intent.
+      The Radix Engine ensures that any intent can only be committed once.
+
+      A committed transaction is either committed with an outcome of "Success" or "Failure":
+      - **Committed Failure** will result in fees being paid up until the failure point, but all other changes will be discarded.
+      - **Committed Success** will result in all changes being committed.
+
+      Only committed transactions appear on ledger. The status of rejected transactions can be read at submission time or from the transaction status endpoint - by virtue of
+      a rejection cache on the node. This cache is limited in size, so rejected statuses may no longer be tracked after a period of time.
+
+      For a more robust handling of transaction rejections, consider running your own Gateway.
+
+      ## State Model
+
+      The Radix Engine State Model can be thought of as a forest of state sub-trees.
+      A state sub-tree consists of "entities". These entities have an ID, and 0 or more "substates" at keys underneath them.
+      These substates are typed, and can own other entities, forming a tree of ownership.
+
+      Each state sub-tree has a root entity, and a single Bech32M Global Address, with a human-readable-prefix (and prefix byte) matching the root entity type.
+
+      As an example, entities include concepts like Components, Packages, Vaults, Resource Managers and Key-Value Stores.
+      Substates under a component include the Component Struct, Component Data, and Access Rules substates.
   - name: Status
     x-displayName: Status Endpoints
-    description: To query information about the Node / Ledger status.
+    description: |
+      For status and configuration details for the node / engine.
   - name: Transaction
-    x-displayName: Transaction Submission Endpoints
-    description: To submit transactions to the network.
+    x-displayName: Transaction Endpoints
+    description: |
+      For transaction construction, preview, submission, and monitoring the status of an individual transaction.
   - name: Mempool
     x-displayName: Mempool Endpoints
-    description: To query mempool status.
-  - name: Ledger State
-    x-displayName: Ledger State Endpoints
-    description: To query the current ledger state.
-  - name: History Stream
-    x-displayName: History Stream Endpoints
-    description: To query the history of the ledger.
-  - name: Key
-    x-displayName: Key Endpoints
-    description: To sign certain transactions with the node's own key.
+    description: |
+      For information on the contents of the node's mempool.
+  - name: State
+    x-displayName: State Endpoints
+    description: |
+      For reading the state of entities. At present, we only support reading details from the top of the currently committed ledger.
+  - name: Stream
+    x-displayName: Stream Endpoints
+    description: To query the transaction stream of the ledger.
 paths:
+  ##################
+  # Status Sub-API #
+  ##################
   "/status/network-configuration":
     post:
       summary: Get Network Configuration
@@ -88,7 +167,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
   "/status/network-status":
     post:
       summary: Get Network Status
@@ -113,7 +192,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
+  ###################
+  # Mempool Sub-API #
+  ###################
   "/mempool/list":
     post:
       summary: Get Mempool List
@@ -138,7 +220,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
   "/mempool/transaction":
     post:
       summary: Get Mempool Transaction
@@ -163,17 +245,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
         '500':
           description: Server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
+  #######################
+  # Transaction Sub-API #
+  #######################
   "/transaction/parse":
     post:
-      summary: Parse a transaction payload
-      description: Returns the contents and hashes of a notarized transaction, signed transaction or transaction intent.
+      summary: Parse Transaction Payload
+      description: Extracts the contents and hashes of various types of transaction payloads, or sub-payloads.
       tags:
         - Transaction
       requestBody:
@@ -194,17 +279,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
         '500':
           description: Server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
   "/transaction/submit":
     post:
-      summary: Submit transaction to the network
-      description: Returns whether the transaction submission was accepted.
+      summary: Transaction Submit
+      description: |
+        Submits a notarized transaction to the network. Returns whether the transaction submission was already included in the node's mempool.
       tags:
         - Transaction
       requestBody:
@@ -225,17 +311,92 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/TransactionSubmitErrorResponse"
         '500':
           description: Server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/TransactionSubmitErrorResponse"
+  "/transaction/status":
+    post:
+      summary: Get Transaction Status
+      description: |
+        Shares the node's knowledge of any payloads associated with the given intent hash.
+        Generally there will be a single payload for a given intent, but it's theoretically possible there may be multiple.
+        This knowledge is summarised into a status for the intent. This summarised status in the response is likely sufficient
+        for most clients.
+      tags:
+        - Transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionStatusRequest"
+      responses:
+        '200':
+          description: Transaction status response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionStatusResponse"
+        '400':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicErrorResponse"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicErrorResponse"
+  "/transaction/receipt":
+    post:
+      summary: Get Transaction Receipt
+      description: |
+        Gets the transaction receipt for a committed transaction.
+      tags:
+        - Transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionReceiptRequest"
+      responses:
+        '200':
+          description: Committed transaction found response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionReceiptResponse"
+        '400':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicErrorResponse"
+        '404':
+          description: Committed transaction not found response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicErrorResponse"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicErrorResponse"
   "/transaction/call-preview":
     post:
-      summary: Preview a scrypto function or method call against the latest network state
-      description: Returns the result of the scrypto function or method call
+      summary: Scrypto Call Preview
+      description: |
+        Preview a scrypto function or method call against the latest network state.
+        Returns the result of the scrypto function or method call.
       tags:
         - Transaction
       requestBody:
@@ -263,17 +424,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
         '500':
           description: Server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
   "/transaction/preview":
     post:
-      summary: Preview a transaction against the latest network state
-      description: Returns the preview response
+      summary: Transaction Preview
+      description: |
+        Preview a transaction against the latest network state, and returns the preview receipt.
       tags:
         - Transaction
       requestBody:
@@ -294,362 +456,268 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
         '500':
           description: Server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  "/transaction/stream":
+                $ref: "#/components/schemas/BasicErrorResponse"
+  ##################
+  # Stream Sub-API #
+  ##################
+  "/stream/transactions":
     post:
-      summary: Get committed transactions
+      summary: Get Committed Transactions
+      description: |
+        Returns the list of committed transactions.
       tags:
-        - Transaction
+        - Stream
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CommittedTransactionsRequest"
+              $ref: "#/components/schemas/StreamTransactionsRequest"
       responses:
         '200':
           description: Committed transactions response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CommittedTransactionsResponse"
+                $ref: "#/components/schemas/StreamTransactionsResponse"
         '400':
           description: Client error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
         '500':
           description: Server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  ####################
-  # v0 API Responses #
-  ####################
-  "/v0/status/network-configuration":
+                $ref: "#/components/schemas/BasicErrorResponse"
+  #################
+  # State Sub-API #
+  #################
+  "/state/epoch":
     post:
-      summary: Get Network Configuration
-      description: Returns the network configuration.
-      tags:
-        - Status
-      responses:
-        '200':
-          description: Network Configuration
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/NetworkConfigurationResponse"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  "/v0/transaction/submit":
-    post:
-      summary: Transaction Submit
-      tags:
-        - Transaction
-        - V0
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/V0TransactionSubmitRequest"
-      responses:
-        '200':
-          description: Transaction submit response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/V0TransactionSubmitResponse"
-        '400':
-          description: Client error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  "/v0/transaction/status":
-    post:
-      summary: Read Transaction Status
-      tags:
-        - Transaction
-        - V0
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/V0TransactionStatusRequest"
-      responses:
-        '200':
-          description: Transaction status response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/V0TransactionStatusResponse"
-        '400':
-          description: Client error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  "/v0/transaction/receipt":
-    post:
-      summary: Read Committed Transaction
-      tags:
-        - Transaction
-        - V0
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/V0CommittedTransactionRequest"
-      responses:
-        '200':
-          description: Committed transaction found response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/V0CommittedTransactionResponse"
-        '400':
-          description: Client error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        '404':
-          description: Committed transaction not found response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  "/v0/state/epoch":
-    post:
-      summary: Read current epoch data
+      summary: Get Epoch Details
+      description: |
+        Reads the epoch manager's substate/s from the top of the current ledger.
       tags:
         - State
-        - V0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateEpochRequest"
       responses:
         '200':
           description: Current state response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/V0StateEpochResponse"
+                $ref: "#/components/schemas/StateEpochResponse"
         '400':
           description: Client error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
         '500':
           description: Server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  "/v0/state/clock":
+                $ref: "#/components/schemas/BasicErrorResponse"
+  "/state/clock":
     post:
-      summary: Read current clock data
+      summary: Get Clock Details
+      description: |
+        Reads the clock's substate/s from the top of the current ledger.
       tags:
         - State
-        - V0
-      responses:
-        '200':
-          description: Current state response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/V0StateClockResponse"
-        '400':
-          description: Client error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  "/v0/state/component":
-    post:
-      summary: Read component data
-      tags:
-        - State
-        - V0
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/V0StateComponentRequest"
+              $ref: "#/components/schemas/StateClockRequest"
       responses:
         '200':
           description: Current state response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/V0StateComponentResponse"
+                $ref: "#/components/schemas/StateClockResponse"
         '400':
           description: Client error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicErrorResponse"
+  "/state/component":
+    post:
+      summary: Get Component Details
+      description: |
+        Reads the component's substate/s from the top of the current ledger.
+        Also recursively extracts vault balance totals from the component's entity subtree.
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateComponentRequest"
+      responses:
+        '200':
+          description: Current state response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateComponentResponse"
+        '400':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicErrorResponse"
         '404':
           description: Not found error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
         '500':
           description: Server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  "/v0/state/resource":
+                $ref: "#/components/schemas/BasicErrorResponse"
+  "/state/resource":
     post:
-      summary: Read resource data
+      summary: Get Resource Details
+      description: |
+        Reads the resource manager's substate/s from the top of the current ledger.
       tags:
         - State
-        - V0
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/V0StateResourceRequest"
+              $ref: "#/components/schemas/StateResourceRequest"
       responses:
         '200':
           description: Current state response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/V0StateResourceResponse"
+                $ref: "#/components/schemas/StateResourceResponse"
         '400':
           description: Client error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
         '404':
           description: Not found error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
         '500':
           description: Server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  "/v0/state/non-fungible":
+                $ref: "#/components/schemas/BasicErrorResponse"
+  "/state/non-fungible":
     post:
-      summary: Read non-fungible data
+      summary: Get Non-Fungible Details
+      description: |
+        Reads the data associated with a single Non-Fungible Unit under a Non-Fungible Resource.
       tags:
         - State
-        - V0
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/V0StateNonFungibleRequest"
+              $ref: "#/components/schemas/StateNonFungibleRequest"
       responses:
         '200':
           description: Current state response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/V0StateNonFungibleResponse"
+                $ref: "#/components/schemas/StateNonFungibleResponse"
         '400':
           description: Client error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
         '404':
           description: Not found error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
         '500':
           description: Server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  "/v0/state/package":
+                $ref: "#/components/schemas/BasicErrorResponse"
+  "/state/package":
     post:
-      summary: Read package data
+      summary: Get Package Details
+      description: |
+        Reads the package's substate/s from the top of the current ledger.
       tags:
         - State
-        - V0
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/V0StatePackageRequest"
+              $ref: "#/components/schemas/StatePackageRequest"
       responses:
         '200':
           description: Current state response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/V0StatePackageResponse"
+                $ref: "#/components/schemas/StatePackageResponse"
         '400':
           description: Client error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
         '404':
           description: Not found error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
         '500':
           description: Server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/BasicErrorResponse"
 #############################################################################################
 components:
   schemas:
@@ -677,6 +745,8 @@ components:
           $ref: "#/components/schemas/FeeSummary"
         state_updates:
           $ref: "#/components/schemas/StateUpdates"
+        next_epoch:
+          $ref: "#/components/schemas/NextEpoch"
         output:
           type: array
           description: The manifest line-by-line engine return data (only present if status is Succeeded)
@@ -856,12 +926,27 @@ components:
       minLength: 64
       maxLength: 64
       description: The hex-encoded ledger-wrapped transaction hash. This is known as the Ledger Hash. This hash is `SHA256(SHA256(ledger_transaction_bytes))`
+    ErrorResponseType:
+      type: string
+      enum:
+        - Basic
+        - TransactionSubmit
     ErrorResponse:
       type: object
+      discriminator:
+        propertyName: error_type
+        mapping:
+          # The discriminator values on the left side need to match ErrorResponseType
+          # NOTE: To ease
+          Basic: "#/components/schemas/BasicErrorResponse"
+          TransactionSubmit: "#/components/schemas/TransactionSubmitErrorResponse"
       required:
+        - error_type
         - code
         - message
       properties:
+        error_type:
+          $ref: "#/components/schemas/ErrorResponseType"
         code:
           type: integer
           description: A numeric code corresponding to the given HTTP error code.
@@ -871,6 +956,10 @@ components:
         trace_id:
           description: A GUID to be used when reporting errors, to allow correlation with the Core API's error logs, in the case where the Core API details are hidden.
           type: string
+    BasicErrorResponse:
+      allOf:
+        - $ref: "#/components/schemas/ErrorResponse"
+        - type: object
     ######################################
     # GENERAL / SHARED MODELS - Receipts #
     ######################################
@@ -1000,6 +1089,22 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/GlobalEntityAssignment"
+    NextEpoch:
+      type: object
+      required:
+        - epoch
+        - validators
+      properties:
+        epoch:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 10000000000
+          description: An integer between `0` and `10^10`
+        validators:
+          type: array
+          items:
+            $ref: '#/components/schemas/Validator'
     NewSubstateVersion:
       type: object
       required:
@@ -1099,6 +1204,26 @@ components:
     PackageAddress:
       type: string
       description: The Bech32m-encoded human readable version of the package address
+    SystemAddress:
+      type: string
+      description: The Bech32m-encoded human readable version of the system address
+    Instant:
+      type: object
+      required:
+        - unix_timestamp_ms
+        - date_time
+      properties:
+        unix_timestamp_ms:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 100000000000000
+          description: An integer between `0` and `10^14`, marking the unix timestamp in ms.
+        date_time:
+          type: string
+          description: |
+            The RFC 3339 / ISO 8601 string representation of the timestamp. Will always use "Z" denoting UTC and include milliseconds.
+            EG: `2023-01-26T18:30:09.453Z`.
     ResourceChange:
       type: object
       required:
@@ -1121,38 +1246,18 @@ components:
     #################################################
     # GENERAL / SHARED MODELS - keys and signatures #
     #################################################
-    BlueprintFunctionIdentifier:
-      type: object
-      required:
-        - package_address
-        - blueprint_name
-        - function_name
-      properties:
-        package_address:
-          $ref: "#/components/schemas/PackageAddress"
-        blueprint_name:
-          type: string
-        function_name:
-          type: string
-    ComponentMethodIdentifier:
-      type: object
-      required:
-        - component_address
-        - method_name
-      properties:
-        component_address:
-          $ref: "#/components/schemas/ComponentAddress"
-        method_name:
-          type: string
     PublicKeyType:
       type: string
       enum:
         - EcdsaSecp256k1
         - EddsaEd25519
     PublicKey:
-      oneOf:
-        - $ref: '#/components/schemas/EcdsaSecp256k1PublicKey'
-        - $ref: '#/components/schemas/EddsaEd25519PublicKey'
+      type: object
+      required:
+        - key_type
+      properties:
+        key_type:
+          $ref: "#/components/schemas/PublicKeyType"
       discriminator:
         propertyName: key_type
         mapping:
@@ -1160,35 +1265,36 @@ components:
           EcdsaSecp256k1: '#/components/schemas/EcdsaSecp256k1PublicKey'
           EddsaEd25519: '#/components/schemas/EddsaEd25519PublicKey'
     EcdsaSecp256k1PublicKey:
-      type: object
-      required:
-        - key_type
-        - key_hex
-      properties:
-        key_type:
-          $ref: '#/components/schemas/PublicKeyType'
-        key_hex:
-          type: string
-          minLength: 66
-          maxLength: 66
-          description: The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes)
+      allOf:
+        - $ref: "#/components/schemas/PublicKey"
+        - type: object
+          required:
+            - key_hex
+          properties:
+            key_hex:
+              type: string
+              minLength: 66
+              maxLength: 66
+              description: The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes)
     EddsaEd25519PublicKey:
+      allOf:
+        - $ref: "#/components/schemas/PublicKey"
+        - type: object
+          required:
+            - key_hex
+          properties:
+            key_hex:
+              type: string
+              minLength: 64
+              maxLength: 64
+              description: The hex-encoded compressed EdDSA Ed25519 public key (32 bytes)
+    Signature:
       type: object
       required:
         - key_type
-        - key_hex
       properties:
         key_type:
-          $ref: '#/components/schemas/PublicKeyType'
-        key_hex:
-          type: string
-          minLength: 64
-          maxLength: 64
-          description: The hex-encoded compressed EdDSA Ed25519 public key (32 bytes)
-    Signature:
-      oneOf:
-        - $ref: '#/components/schemas/EcdsaSecp256k1Signature'
-        - $ref: '#/components/schemas/EddsaEd25519Signature'
+          $ref: "#/components/schemas/PublicKeyType"
       discriminator:
         propertyName: key_type
         mapping:
@@ -1196,35 +1302,36 @@ components:
           EcdsaSecp256k1: '#/components/schemas/EcdsaSecp256k1Signature'
           EddsaEd25519: '#/components/schemas/EddsaEd25519Signature'
     EcdsaSecp256k1Signature:
-      type: object
-      required:
-        - key_type
-        - signature_hex
-      properties:
-        key_type:
-          $ref: '#/components/schemas/PublicKeyType'
-        signature_hex:
-          type: string
-          minLength: 130
-          maxLength: 130
-          description: A hex-encoded recoverable ECDSA Secp256k1 signature (65 bytes). The first byte is the recovery id, the remaining 64 bytes are the compact signature, ie `CONCAT(R, s)` where `R` and `s` are each 32-bytes in padded big-endian format.
+      allOf:
+        - $ref: "#/components/schemas/Signature"
+        - type: object
+          required:
+            - signature_hex
+          properties:
+            signature_hex:
+              type: string
+              minLength: 130
+              maxLength: 130
+              description: A hex-encoded recoverable ECDSA Secp256k1 signature (65 bytes). The first byte is the recovery id, the remaining 64 bytes are the compact signature, ie `CONCAT(R, s)` where `R` and `s` are each 32-bytes in padded big-endian format.
     EddsaEd25519Signature:
+      allOf:
+        - $ref: "#/components/schemas/Signature"
+        - type: object
+          required:
+            - signature_hex
+          properties:
+            signature_hex:
+              type: string
+              minLength: 128
+              maxLength: 128
+              description: A hex-encoded EdDSA Ed25519 signature (64 bytes). This is `CONCAT(R, s)` where `R` and `s` are each 32-bytes in padded big-endian format.
+    SignatureWithPublicKey:
       type: object
       required:
         - key_type
-        - signature_hex
       properties:
         key_type:
-          $ref: '#/components/schemas/PublicKeyType'
-        signature_hex:
-          type: string
-          minLength: 128
-          maxLength: 128
-          description: A hex-encoded EdDSA Ed25519 signature (64 bytes). This is `CONCAT(R, s)` where `R` and `s` are each 32-bytes in padded big-endian format.
-    SignatureWithPublicKey:
-      oneOf:
-        - $ref: '#/components/schemas/EcdsaSecp256k1SignatureWithPublicKey'
-        - $ref: '#/components/schemas/EddsaEd25519SignatureWithPublicKey'
+          $ref: "#/components/schemas/PublicKeyType"
       discriminator:
         propertyName: key_type
         mapping:
@@ -1232,30 +1339,28 @@ components:
           EcdsaSecp256k1: '#/components/schemas/EcdsaSecp256k1SignatureWithPublicKey'
           EddsaEd25519: '#/components/schemas/EddsaEd25519SignatureWithPublicKey'
     EcdsaSecp256k1SignatureWithPublicKey:
-      type: object
-      required:
-        - key_type
-        - recoverable_signature
-      description: Because ECDSA has recoverable signatures, this only includes a signature
-      properties:
-        key_type:
-          $ref: '#/components/schemas/PublicKeyType'
-        recoverable_signature:
-          $ref: '#/components/schemas/EcdsaSecp256k1Signature'
+      allOf:
+        - $ref: "#/components/schemas/SignatureWithPublicKey"
+        - type: object
+          required:
+            - recoverable_signature
+          description: Because ECDSA has recoverable signatures, this only includes a signature
+          properties:
+            recoverable_signature:
+              $ref: '#/components/schemas/EcdsaSecp256k1Signature'
     EddsaEd25519SignatureWithPublicKey:
-      type: object
-      required:
-        - key_type
-        - public_key
-        - signature
-      description: The EDDSA public key and signature
-      properties:
-        key_type:
-          $ref: '#/components/schemas/PublicKeyType'
-        public_key:
-          $ref: '#/components/schemas/EddsaEd25519PublicKey'
-        signature:
-          $ref: '#/components/schemas/EddsaEd25519Signature'
+      allOf:
+        - $ref: "#/components/schemas/SignatureWithPublicKey"
+        - type: object
+          required:
+            - public_key
+            - signature
+          description: The EdDSA public key and signature
+          properties:
+            public_key:
+              $ref: '#/components/schemas/EddsaEd25519PublicKey'
+            signature:
+              $ref: '#/components/schemas/EddsaEd25519Signature'
     ################################################
     # GENERAL / SHARED MODELS - Dynamic auth rules #
     ################################################
@@ -1313,39 +1418,23 @@ components:
       type: string
       enum:
         - NativeMethod
-        - NativeFunction
         - ScryptoMethod
     LocalMethodReference:
-      oneOf:
-        - $ref: '#/components/schemas/LocalNativeMethodReference'
-        - $ref: '#/components/schemas/LocalNativeFunctionReference'
-        - $ref: '#/components/schemas/LocalScryptoMethodReference'
-      discriminator:
-        propertyName: type
-        mapping:
-          # NOTE: These need to match LocalMethodReferenceType options above
-          NativeMethod: '#/components/schemas/LocalNativeMethodReference'
-          NativeFunction: '#/components/schemas/LocalNativeFunctionReference'
-          ScryptoMethod: '#/components/schemas/LocalScryptoMethodReference'
-    LocalMethodReferenceBase:
       type: object
       required:
         - type
       properties:
         type:
           $ref: '#/components/schemas/LocalMethodReferenceType'
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match LocalMethodReferenceType options above
+          NativeMethod: '#/components/schemas/LocalNativeMethodReference'
+          ScryptoMethod: '#/components/schemas/LocalScryptoMethodReference'
     LocalNativeMethodReference:
       allOf:
-        - $ref: '#/components/schemas/LocalMethodReferenceBase'
-        - type: object
-          required:
-            - name
-          properties:
-            name:
-              type: string
-    LocalNativeFunctionReference:
-      allOf:
-        - $ref: '#/components/schemas/LocalMethodReferenceBase'
+        - $ref: '#/components/schemas/LocalMethodReference'
         - type: object
           required:
             - name
@@ -1354,7 +1443,7 @@ components:
               type: string
     LocalScryptoMethodReference:
       allOf:
-        - $ref: '#/components/schemas/LocalMethodReferenceBase'
+        - $ref: '#/components/schemas/LocalMethodReference'
         - type: object
           required:
             - name
@@ -1367,25 +1456,21 @@ components:
         - Group
         - Rule
     AccessRuleReference:
-      oneOf:
-        - $ref: '#/components/schemas/GroupAccessRuleReference'
-        - $ref: '#/components/schemas/RuleAccessRuleReference'
-      discriminator:
-        propertyName: type
-        mapping:
-          # NOTE: These need to match AccessRuleReferenceType options above
-          Group: '#/components/schemas/GroupAccessRuleReference'
-          Rule: '#/components/schemas/RuleAccessRuleReference'
-    AccessRuleReferenceBase:
       type: object
       required:
         - type
       properties:
         type:
           $ref: '#/components/schemas/AccessRuleReferenceType'
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match AccessRuleReferenceType options above
+          Group: '#/components/schemas/GroupAccessRuleReference'
+          Rule: '#/components/schemas/RuleAccessRuleReference'
     GroupAccessRuleReference:
       allOf:
-        - $ref: '#/components/schemas/AccessRuleReferenceBase'
+        - $ref: '#/components/schemas/AccessRuleReference'
         - type: object
           required:
             - group_name
@@ -1394,7 +1479,7 @@ components:
               type: string
     RuleAccessRuleReference:
       allOf:
-        - $ref: '#/components/schemas/AccessRuleReferenceBase'
+        - $ref: '#/components/schemas/AccessRuleReference'
         - type: object
           required:
             - access_rule
@@ -1418,10 +1503,12 @@ components:
         - AllowAll
         - DenyAll
     AccessRule:
-      oneOf:
-        - $ref: '#/components/schemas/ProtectedAccessRule'
-        - $ref: '#/components/schemas/AllowAllAccessRule'
-        - $ref: '#/components/schemas/DenyAllAccessRule'
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/AccessRuleType'
       discriminator:
         propertyName: type
         mapping:
@@ -1429,16 +1516,9 @@ components:
           Protected: '#/components/schemas/ProtectedAccessRule'
           AllowAll: '#/components/schemas/AllowAllAccessRule'
           DenyAll: '#/components/schemas/DenyAllAccessRule'
-    AccessRuleBase:
-      type: object
-      required:
-        - type
-      properties:
-        type:
-          $ref: '#/components/schemas/AccessRuleType'
     ProtectedAccessRule:
       allOf:
-        - $ref: '#/components/schemas/AccessRuleBase'
+        - $ref: '#/components/schemas/AccessRule'
         - type: object
           required:
             - access_rule
@@ -1447,11 +1527,11 @@ components:
               $ref: '#/components/schemas/AccessRuleNode'
     AllowAllAccessRule:
       allOf:
-        - $ref: '#/components/schemas/AccessRuleBase'
+        - $ref: '#/components/schemas/AccessRule'
         - type: object
     DenyAllAccessRule:
       allOf:
-        - $ref: '#/components/schemas/AccessRuleBase'
+        - $ref: '#/components/schemas/AccessRule'
         - type: object
     AccessRuleNodeType:
       type: string
@@ -1460,10 +1540,12 @@ components:
         - AnyOf
         - AllOf
     AccessRuleNode:
-      oneOf:
-        - $ref: '#/components/schemas/ProofAccessRuleNode'
-        - $ref: '#/components/schemas/AnyOfAccessRuleNode'
-        - $ref: '#/components/schemas/AllOfAccessRuleNode'
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/AccessRuleNodeType'
       discriminator:
         propertyName: type
         mapping:
@@ -1471,16 +1553,9 @@ components:
           ProofRule: '#/components/schemas/ProofAccessRuleNode'
           AnyOf: '#/components/schemas/AnyOfAccessRuleNode'
           AllOf: '#/components/schemas/AllOfAccessRuleNode'
-    AccessRuleNodeBase:
-      type: object
-      required:
-        - type
-      properties:
-        type:
-          $ref: '#/components/schemas/AccessRuleNodeType'
     ProofAccessRuleNode:
       allOf:
-        - $ref: '#/components/schemas/AccessRuleNodeBase'
+        - $ref: '#/components/schemas/AccessRuleNode'
         - type: object
           required:
             - proof_rule
@@ -1489,7 +1564,7 @@ components:
               $ref: '#/components/schemas/ProofRule'
     AnyOfAccessRuleNode:
       allOf:
-        - $ref: '#/components/schemas/AccessRuleNodeBase'
+        - $ref: '#/components/schemas/AccessRuleNode'
         - type: object
           required:
             - access_rules
@@ -1500,7 +1575,7 @@ components:
                 $ref: '#/components/schemas/AccessRuleNode'
     AllOfAccessRuleNode:
       allOf:
-        - $ref: '#/components/schemas/AccessRuleNodeBase'
+        - $ref: '#/components/schemas/AccessRuleNode'
         - type: object
           required:
             - access_rules
@@ -1518,12 +1593,12 @@ components:
         - AnyOf
         - CountOf
     ProofRule:
-      oneOf:
-        - $ref: '#/components/schemas/RequireProofRule'
-        - $ref: '#/components/schemas/AmountOfProofRule'
-        - $ref: '#/components/schemas/AllOfProofRule'
-        - $ref: '#/components/schemas/AnyOfProofRule'
-        - $ref: '#/components/schemas/CountOfProofRule'
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/ProofRuleType'
       discriminator:
         propertyName: type
         mapping:
@@ -1533,16 +1608,9 @@ components:
           AllOf: '#/components/schemas/AllOfProofRule'
           AnyOf: '#/components/schemas/AnyOfProofRule'
           CountOf: '#/components/schemas/CountOfProofRule'
-    ProofRuleBase:
-      type: object
-      required:
-        - type
-      properties:
-        type:
-          $ref: '#/components/schemas/ProofRuleType'
     RequireProofRule:
       allOf:
-        - $ref: '#/components/schemas/ProofRuleBase'
+        - $ref: '#/components/schemas/ProofRule'
         - type: object
           required:
             - resource
@@ -1551,7 +1619,7 @@ components:
               $ref: '#/components/schemas/DynamicResourceDescriptor'
     AmountOfProofRule:
       allOf:
-        - $ref: '#/components/schemas/ProofRuleBase'
+        - $ref: '#/components/schemas/ProofRule'
         - type: object
           required:
             - amount
@@ -1563,7 +1631,7 @@ components:
               $ref: '#/components/schemas/DynamicResourceDescriptor'
     AllOfProofRule:
       allOf:
-        - $ref: '#/components/schemas/ProofRuleBase'
+        - $ref: '#/components/schemas/ProofRule'
         - type: object
           required:
             - list
@@ -1572,7 +1640,7 @@ components:
               $ref: '#/components/schemas/DynamicResourceDescriptorList'
     AnyOfProofRule:
       allOf:
-        - $ref: '#/components/schemas/ProofRuleBase'
+        - $ref: '#/components/schemas/ProofRule'
         - type: object
           required:
             - list
@@ -1581,7 +1649,7 @@ components:
               $ref: '#/components/schemas/DynamicResourceDescriptorList'
     CountOfProofRule:
       allOf:
-        - $ref: '#/components/schemas/ProofRuleBase'
+        - $ref: '#/components/schemas/ProofRule'
         - type: object
           required:
             - count
@@ -1597,25 +1665,21 @@ components:
         - Amount
         - SchemaPath
     DynamicAmount:
-      oneOf:
-        - $ref: '#/components/schemas/AmountDynamicAmount'
-        - $ref: '#/components/schemas/SchemaPathDynamicAmount'
-      discriminator:
-        propertyName: type
-        mapping:
-          # NOTE: These need to match DynamicAmountType options above
-          Amount: '#/components/schemas/AmountDynamicAmount'
-          SchemaPath: '#/components/schemas/SchemaPathDynamicAmount'
-    DynamicAmountBase:
       type: object
       required:
         - type
       properties:
         type:
           $ref: '#/components/schemas/DynamicAmountType'
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match DynamicAmountType options above
+          Amount: '#/components/schemas/AmountDynamicAmount'
+          SchemaPath: '#/components/schemas/SchemaPathDynamicAmount'
     AmountDynamicAmount:
       allOf:
-        - $ref: '#/components/schemas/DynamicAmountBase'
+        - $ref: '#/components/schemas/DynamicAmount'
         - type: object
           required:
             - amount
@@ -1627,7 +1691,7 @@ components:
                 A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(256 - 1) <= m < 2^(256 - 1)`.
     SchemaPathDynamicAmount:
       allOf:
-        - $ref: '#/components/schemas/DynamicAmountBase'
+        - $ref: '#/components/schemas/DynamicAmount'
         - type: object
           required:
             - schema_path
@@ -1640,25 +1704,21 @@ components:
         - Count
         - SchemaPath
     DynamicCount:
-      oneOf:
-        - $ref: '#/components/schemas/CountDynamicCount'
-        - $ref: '#/components/schemas/SchemaPathDynamicCount'
-      discriminator:
-        propertyName: type
-        mapping:
-          # NOTE: These need to match DynamicCountType options above
-          Count: '#/components/schemas/CountDynamicCount'
-          SchemaPath: '#/components/schemas/SchemaPathDynamicCount'
-    DynamicCountBase:
       type: object
       required:
         - type
       properties:
         type:
           $ref: '#/components/schemas/DynamicCountType'
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match DynamicCountType options above
+          Count: '#/components/schemas/CountDynamicCount'
+          SchemaPath: '#/components/schemas/SchemaPathDynamicCount'
     CountDynamicCount:
       allOf:
-        - $ref: '#/components/schemas/DynamicCountBase'
+        - $ref: '#/components/schemas/DynamicCount'
         - type: object
           required:
             - count
@@ -1669,7 +1729,7 @@ components:
               maximum: 255
     SchemaPathDynamicCount:
       allOf:
-        - $ref: '#/components/schemas/DynamicCountBase'
+        - $ref: '#/components/schemas/DynamicCount'
         - type: object
           required:
             - schema_path
@@ -1682,25 +1742,21 @@ components:
         - List
         - SchemaPath
     DynamicResourceDescriptorList:
-      oneOf:
-        - $ref: '#/components/schemas/ListDynamicResourceDescriptorList'
-        - $ref: '#/components/schemas/SchemaPathDynamicResourceDescriptorList'
-      discriminator:
-        propertyName: type
-        mapping:
-          # NOTE: These need to match DynamicResourceDescriptorListType options above
-          List: '#/components/schemas/ListDynamicResourceDescriptorList'
-          SchemaPath: '#/components/schemas/SchemaPathDynamicResourceDescriptorList'
-    DynamicResourceDescriptorListBase:
       type: object
       required:
         - type
       properties:
         type:
           $ref: '#/components/schemas/DynamicResourceDescriptorListType'
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match DynamicResourceDescriptorListType options above
+          List: '#/components/schemas/ListDynamicResourceDescriptorList'
+          SchemaPath: '#/components/schemas/SchemaPathDynamicResourceDescriptorList'
     ListDynamicResourceDescriptorList:
       allOf:
-        - $ref: '#/components/schemas/DynamicResourceDescriptorListBase'
+        - $ref: '#/components/schemas/DynamicResourceDescriptorList'
         - type: object
           required:
             - resources
@@ -1711,7 +1767,7 @@ components:
                 $ref: '#/components/schemas/DynamicResourceDescriptor'
     SchemaPathDynamicResourceDescriptorList:
       allOf:
-        - $ref: '#/components/schemas/DynamicResourceDescriptorListBase'
+        - $ref: '#/components/schemas/DynamicResourceDescriptorList'
         - type: object
           required:
             - schema_path
@@ -1723,11 +1779,14 @@ components:
       enum:
         - NonFungible
         - Resource
+        - SchemaPath
     DynamicResourceDescriptor:
-      oneOf:
-        - $ref: '#/components/schemas/NonFungibleDynamicResourceDescriptor'
-        - $ref: '#/components/schemas/ResourceDynamicResourceDescriptor'
-        - $ref: '#/components/schemas/SchemaPathDynamicResourceDescriptor'
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/DynamicResourceDescriptorType'
       discriminator:
         propertyName: type
         mapping:
@@ -1735,16 +1794,9 @@ components:
           NonFungible: '#/components/schemas/NonFungibleDynamicResourceDescriptor'
           Resource: '#/components/schemas/ResourceDynamicResourceDescriptor'
           SchemaPath: '#/components/schemas/SchemaPathDynamicResourceDescriptor'
-    DynamicResourceDescriptorBase:
-      type: object
-      required:
-        - type
-      properties:
-        type:
-          $ref: '#/components/schemas/DynamicResourceDescriptorType'
     NonFungibleDynamicResourceDescriptor:
       allOf:
-        - $ref: '#/components/schemas/DynamicResourceDescriptorBase'
+        - $ref: '#/components/schemas/DynamicResourceDescriptor'
         - type: object
           required:
             - resource_address
@@ -1756,7 +1808,7 @@ components:
               $ref: '#/components/schemas/NonFungibleId'
     ResourceDynamicResourceDescriptor:
       allOf:
-        - $ref: '#/components/schemas/DynamicResourceDescriptorBase'
+        - $ref: '#/components/schemas/DynamicResourceDescriptor'
         - type: object
           required:
             - resource_address
@@ -1765,7 +1817,7 @@ components:
               $ref: '#/components/schemas/ResourceAddress'
     SchemaPathDynamicResourceDescriptor:
       allOf:
-        - $ref: '#/components/schemas/DynamicResourceDescriptorBase'
+        - $ref: '#/components/schemas/DynamicResourceDescriptor'
         - type: object
           required:
             - schema_path
@@ -1782,25 +1834,21 @@ components:
         - Index
         - Field
     SchemaSubpath:
-      oneOf:
-        - $ref: '#/components/schemas/IndexSchemaSubpath'
-        - $ref: '#/components/schemas/FieldSchemaSubpath'
-      discriminator:
-        propertyName: type
-        mapping:
-          # NOTE: These need to match SchemaSubpathType options above
-          Index: '#/components/schemas/IndexSchemaSubpath'
-          Field: '#/components/schemas/FieldSchemaSubpath'
-    SchemaSubpathBase:
       type: object
       required:
         - type
       properties:
         type:
           $ref: '#/components/schemas/SchemaSubpathType'
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match SchemaSubpathType options above
+          Index: '#/components/schemas/IndexSchemaSubpath'
+          Field: '#/components/schemas/FieldSchemaSubpath'
     IndexSchemaSubpath:
       allOf:
-        - $ref: '#/components/schemas/SchemaSubpathBase'
+        - $ref: '#/components/schemas/SchemaSubpath'
         - type: object
           required:
             - index
@@ -1810,7 +1858,7 @@ components:
               description: A decimal-string-encoded integer between 0 and 2^64 - 1, which captures the index of the schema sub-path
     FieldSchemaSubpath:
       allOf:
-        - $ref: '#/components/schemas/SchemaSubpathBase'
+        - $ref: '#/components/schemas/SchemaSubpath'
         - type: object
           required:
             - field
@@ -1830,8 +1878,7 @@ components:
       type: string
       enum:
         - String
-        - U32
-        - U64
+        - Number
         - Bytes
         - UUID
     NonFungibleId:
@@ -1856,16 +1903,6 @@ components:
         A non-fungible resource has a fixed `NonFungibleIdType`, so this representation uniquely identifies this non-fungible
         under the given resource address.
     ResourceAmount:
-      oneOf:
-        - $ref: '#/components/schemas/FungibleResourceAmount'
-        - $ref: '#/components/schemas/NonFungibleResourceAmount'
-      discriminator:
-        propertyName: resource_type
-        mapping:
-          # NOTE: These need to match ResourceType options
-          Fungible: '#/components/schemas/FungibleResourceAmount'
-          NonFungible: '#/components/schemas/NonFungibleResourceAmount'
-    ResourceAmountBase:
       type: object
       required:
         - resource_type
@@ -1875,9 +1912,15 @@ components:
           $ref: '#/components/schemas/ResourceType'
         resource_address:
           $ref: '#/components/schemas/ResourceAddress'
+      discriminator:
+        propertyName: resource_type
+        mapping:
+          # NOTE: These need to match ResourceType options
+          Fungible: '#/components/schemas/FungibleResourceAmount'
+          NonFungible: '#/components/schemas/NonFungibleResourceAmount'
     FungibleResourceAmount:
       allOf:
-        - $ref: '#/components/schemas/ResourceAmountBase'
+        - $ref: '#/components/schemas/ResourceAmount'
         - type: object
           required:
             - amount
@@ -1889,7 +1932,7 @@ components:
                 A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(256 - 1) <= m < 2^(256 - 1)`.
     NonFungibleResourceAmount:
       allOf:
-        - $ref: '#/components/schemas/ResourceAmountBase'
+        - $ref: '#/components/schemas/ResourceAmount'
         - type: object
           required:
             - non_fungible_ids
@@ -1973,12 +2016,26 @@ components:
       maximum: 4294967295
       description: An integer between `0` and `2^32 - 1`, representing the number of cost units required to access this method.
     #######################################
+    # GENERAL / SHARED MODELS - validators #
+    #######################################
+    Validator:
+      type: object
+      required:
+        - address
+        - key
+      properties:
+        address:
+          $ref: '#/components/schemas/SystemAddress'
+        key:
+          $ref: '#/components/schemas/EcdsaSecp256k1PublicKey'
+    #######################################
     # GENERAL / SHARED MODELS - substates #
     #######################################
     EntityType:
       type: string
       enum:
         - EpochManager
+        - Validator
         - ResourceManager
         - Component
         - Package
@@ -1988,23 +2045,12 @@ components:
         - NonFungibleStore
         - Clock
     Substate:
-      oneOf:
-        - $ref: '#/components/schemas/MetadataSubstate'
-        - $ref: '#/components/schemas/AccessRulesChainSubstate'
-        - $ref: '#/components/schemas/GlobalAddressSubstate'
-        - $ref: '#/components/schemas/ComponentInfoSubstate'
-        - $ref: '#/components/schemas/ComponentStateSubstate'
-        - $ref: '#/components/schemas/ComponentRoyaltyConfigSubstate'
-        - $ref: '#/components/schemas/ComponentRoyaltyAccumulatorSubstate'
-        - $ref: '#/components/schemas/PackageInfoSubstate'
-        - $ref: '#/components/schemas/PackageRoyaltyConfigSubstate'
-        - $ref: '#/components/schemas/PackageRoyaltyAccumulatorSubstate'
-        - $ref: '#/components/schemas/ResourceManagerSubstate'
-        - $ref: '#/components/schemas/EpochManagerSubstate'
-        - $ref: '#/components/schemas/ClockCurrentMinuteSubstate'
-        - $ref: '#/components/schemas/KeyValueStoreEntrySubstate'
-        - $ref: '#/components/schemas/VaultSubstate'
-        - $ref: '#/components/schemas/NonFungibleStoreEntrySubstate'
+      type: object
+      required:
+        - substate_type
+      properties:
+        substate_type:
+          $ref: '#/components/schemas/SubstateType'
       discriminator:
         propertyName: substate_type
         mapping:
@@ -2021,6 +2067,8 @@ components:
           PackageRoyaltyAccumulator: '#/components/schemas/PackageRoyaltyAccumulatorSubstate'
           ResourceManager: '#/components/schemas/ResourceManagerSubstate'
           EpochManager: '#/components/schemas/EpochManagerSubstate'
+          ValidatorSet: '#/components/schemas/ValidatorSetSubstate'
+          Validator: '#/components/schemas/ValidatorSubstate'
           ClockCurrentMinute: '#/components/schemas/ClockCurrentMinuteSubstate'
           KeyValueStoreEntry: '#/components/schemas/KeyValueStoreEntrySubstate'
           Vault: '#/components/schemas/VaultSubstate'
@@ -2042,6 +2090,8 @@ components:
         - PackageRoyaltyAccumulator
         - ResourceManager
         - EpochManager
+        - ValidatorSet
+        - Validator
         - ClockCurrentMinute
         - KeyValueStoreEntry
         - NonFungibleStoreEntry
@@ -2069,21 +2119,17 @@ components:
         - ResourceManager
         - ResourceManagerVaultAccessRulesChain
         - EpochManager
+        - CurrentValidatorSet
+        - PreparingValidatorSet
+        - Validator
         - ClockCurrentMinute
         - KeyValueStoreEntry
         - NonFungibleStoreEntry
         - Vault
-    SubstateBase:
-      type: object
-      required:
-        - substate_type
-      properties:
-        substate_type:
-          $ref: '#/components/schemas/SubstateType'
     ### COMMON SUBSTATES
     AccessRulesChainSubstate:
       allOf:
-        - $ref: '#/components/schemas/SubstateBase'
+        - $ref: '#/components/schemas/Substate'
         - type: object
           required:
             - chain
@@ -2096,7 +2142,7 @@ components:
                 $ref: '#/components/schemas/AccessRules'
     MetadataSubstate:
       allOf:
-        - $ref: '#/components/schemas/SubstateBase'
+        - $ref: '#/components/schemas/Substate'
         - type: object
           required:
             - metadata
@@ -2116,7 +2162,7 @@ components:
     ### SPECIFIC SUBSTATES
     GlobalAddressSubstate:
       allOf:
-        - $ref: '#/components/schemas/SubstateBase'
+        - $ref: '#/components/schemas/Substate'
         - type: object
           required:
             - target_entity
@@ -2148,7 +2194,7 @@ components:
           description: The Bech32m-encoded human readable version of the assigned global address
     ComponentInfoSubstate:
       allOf:
-        - $ref: '#/components/schemas/SubstateBase'
+        - $ref: '#/components/schemas/Substate'
         - type: object
           required:
             - package_address
@@ -2160,7 +2206,7 @@ components:
               type: string
     ComponentStateSubstate:
       allOf:
-        - $ref: '#/components/schemas/SubstateBase'
+        - $ref: '#/components/schemas/Substate'
         - type: object
           required:
             - data_struct
@@ -2169,7 +2215,7 @@ components:
               $ref: '#/components/schemas/DataStruct'
     ComponentRoyaltyConfigSubstate:
       allOf:
-        - $ref: '#/components/schemas/SubstateBase'
+        - $ref: '#/components/schemas/Substate'
         - type: object
           required:
             - royalty_config
@@ -2178,19 +2224,16 @@ components:
               $ref: '#/components/schemas/RoyaltyConfig'
     ComponentRoyaltyAccumulatorSubstate:
       allOf:
-        - $ref: '#/components/schemas/SubstateBase'
+        - $ref: '#/components/schemas/Substate'
         - type: object
           required:
-            - xrd_amount
+            - vault_entity
           properties:
-            xrd_amount:
-              type: string
-              description: |
-                The string-encoded decimal representing the amount of XRD available for claim in the royalty accumulator.
-                A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(256 - 1) <= m < 2^(256 - 1)`.
+            vault_entity:
+              $ref: "#/components/schemas/EntityReference"
     PackageInfoSubstate:
       allOf:
-        - $ref: '#/components/schemas/SubstateBase'
+        - $ref: '#/components/schemas/Substate'
         - type: object
           required:
             - code_hex
@@ -2214,7 +2257,7 @@ components:
           description: The abi data
     PackageRoyaltyConfigSubstate:
       allOf:
-        - $ref: '#/components/schemas/SubstateBase'
+        - $ref: '#/components/schemas/Substate'
         - type: object
           required:
             - blueprint_royalties
@@ -2225,19 +2268,16 @@ components:
                 $ref: '#/components/schemas/BlueprintRoyaltyConfig'
     PackageRoyaltyAccumulatorSubstate:
       allOf:
-        - $ref: '#/components/schemas/SubstateBase'
+        - $ref: '#/components/schemas/Substate'
         - type: object
           required:
-            - xrd_amount
+            - vault_entity
           properties:
-            xrd_amount:
-              type: string
-              description: |
-                The string-encoded decimal representing the amount of XRD available for claim in the royalty accumulator.
-                A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(256 - 1) <= m < 2^(256 - 1)`.
+            vault_entity:
+              $ref: "#/components/schemas/EntityReference"
     ResourceManagerSubstate:
       allOf:
-        - $ref: '#/components/schemas/SubstateBase'
+        - $ref: '#/components/schemas/Substate'
         - type: object
           required:
             - resource_type
@@ -2261,33 +2301,80 @@ components:
               $ref: '#/components/schemas/EntityReference'
     EpochManagerSubstate:
       allOf:
-        - $ref: '#/components/schemas/SubstateBase'
+        - $ref: '#/components/schemas/Substate'
         - type: object
           required:
+            - address
             - epoch
+            - round
+            - rounds_per_epoch
           properties:
+            address:
+              $ref: '#/components/schemas/SystemAddress'
             epoch:
               type: integer
               format: int64
               minimum: 0
               maximum: 10000000000
               description: An integer between `0` and `10^10`, marking the current epoch
-    ClockCurrentMinuteSubstate:
-      allOf:
-        - $ref: '#/components/schemas/SubstateBase'
-        - type: object
-          required:
-            - timestamp_ms_rounded_down_to_minute
-          properties:
-            timestamp_ms_rounded_down_to_minute:
+            round:
               type: integer
               format: int64
               minimum: 0
-              maximum: 100000000000000
-              description: An integer between `0` and `10^14`, marking the ledger unix timestamp in ms (rounded down to the current minute)
+              maximum: 10000000000
+              description: An integer between `0` and `10^10`, marking the current round in an epoch
+            rounds_per_epoch:
+              type: integer
+              format: int64
+              minimum: 0
+              maximum: 10000000000
+              description: An integer between `0` and `10^10`, specifying the number of rounds per epoch
+    ValidatorSetSubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+        - type: object
+          required:
+            - validator_set
+            - epoch
+          properties:
+            validator_set:
+              type: array
+              items:
+                $ref: '#/components/schemas/Validator'
+            epoch:
+              type: integer
+              format: int64
+              minimum: 0
+              maximum: 10000000000
+              description: An integer between `0` and `10^10`, marking the epoch the validator set is a part of
+    ValidatorSubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+        - type: object
+          required:
+            - epoch_manager_address
+            - validator_address
+            - key
+          properties:
+            epoch_manager_address:
+              $ref: '#/components/schemas/SystemAddress'
+            validator_address:
+              $ref: '#/components/schemas/SystemAddress'
+            key:
+              $ref: '#/components/schemas/EcdsaSecp256k1PublicKey'
+    ClockCurrentMinuteSubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+        - type: object
+          required:
+            - timestamp_rounded_down_to_minute
+          properties:
+            timestamp_rounded_down_to_minute:
+              $ref: '#/components/schemas/Instant'
+              description: The latest round proposer's timestamp (rounded down to the current minute).
     KeyValueStoreEntrySubstate:
       allOf:
-        - $ref: '#/components/schemas/SubstateBase'
+        - $ref: '#/components/schemas/Substate'
         - type: object
           required:
             - key_hex
@@ -2302,7 +2389,7 @@ components:
               $ref: '#/components/schemas/DataStruct'
     VaultSubstate:
       allOf:
-        - $ref: '#/components/schemas/SubstateBase'
+        - $ref: '#/components/schemas/Substate'
         - type: object
           required:
             - resource_amount
@@ -2311,7 +2398,7 @@ components:
               $ref: '#/components/schemas/ResourceAmount'
     NonFungibleStoreEntrySubstate:
       allOf:
-        - $ref: '#/components/schemas/SubstateBase'
+        - $ref: '#/components/schemas/Substate'
         - type: object
           required:
             - non_fungible_id
@@ -2424,6 +2511,7 @@ components:
             - EcdsaSecp256k1VirtualAccountComponent
             - EddsaEd25519VirtualAccountComponent
             - EpochManager
+            - Validator
             - Clock
         hrp_prefix:
           type: string
@@ -2580,12 +2668,12 @@ components:
         - TransactionManifest
         - LedgerTransaction
     ParsedTransaction:
-      oneOf:
-        - $ref: '#/components/schemas/ParsedNotarizedTransaction'
-        - $ref: '#/components/schemas/ParsedSignedTransactionIntent'
-        - $ref: '#/components/schemas/ParsedTransactionIntent'
-        - $ref: '#/components/schemas/ParsedTransactionManifest'
-        - $ref: '#/components/schemas/ParsedLedgerTransaction'
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/ParsedTransactionType"
       discriminator:
         propertyName: type
         mapping:
@@ -2595,16 +2683,9 @@ components:
           TransactionIntent: '#/components/schemas/ParsedTransactionIntent'
           TransactionManifest: '#/components/schemas/ParsedTransactionManifest'
           LedgerTransaction: '#/components/schemas/ParsedLedgerTransaction'
-    ParsedTransactionBase:
-      type: object
-      required:
-        - type
-      properties:
-        type:
-          $ref: "#/components/schemas/ParsedTransactionType"
     ParsedNotarizedTransaction:
       allOf:
-        - $ref: "#/components/schemas/ParsedTransactionType"
+        - $ref: "#/components/schemas/ParsedTransaction"
         - type: object
           required:
             - identifiers
@@ -2649,7 +2730,7 @@ components:
                     This relates to whether the transaction would be rejected permanently or temporarily if submitted.
     ParsedSignedTransactionIntent:
       allOf:
-        - $ref: "#/components/schemas/ParsedTransactionType"
+        - $ref: "#/components/schemas/ParsedTransaction"
         - type: object
           required:
             - identifiers
@@ -2668,7 +2749,7 @@ components:
                   $ref: "#/components/schemas/SignaturesHash"
     ParsedTransactionIntent:
       allOf:
-        - $ref: "#/components/schemas/ParsedTransactionType"
+        - $ref: "#/components/schemas/ParsedTransaction"
         - type: object
           required:
             - identifiers
@@ -2684,14 +2765,14 @@ components:
                   $ref: "#/components/schemas/IntentHash"
     ParsedTransactionManifest:
       allOf:
-        - $ref: "#/components/schemas/ParsedTransactionType"
+        - $ref: "#/components/schemas/ParsedTransaction"
         - type: object
           properties:
             manifest:
               $ref: "#/components/schemas/TransactionManifest"
     ParsedLedgerTransaction:
       allOf:
-        - $ref: "#/components/schemas/ParsedTransactionType"
+        - $ref: "#/components/schemas/ParsedTransaction"
         - type: object
           required:
             - identifiers
@@ -2733,30 +2814,245 @@ components:
         duplicate:
           description: Is true if the transaction is a duplicate of an existing transaction in the mempool.
           type: boolean
+    TransactionSubmitErrorResponse:
+      allOf:
+        - $ref: "#/components/schemas/ErrorResponse"
+        - type: object
+          properties:
+            details:
+              $ref: "#/components/schemas/TransactionSubmitErrorDetails"
+    TransactionSubmitErrorDetailsType:
+      type: string
+      enum:
+        - MempoolFull
+        - Rejected
+    TransactionSubmitErrorDetails:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/TransactionSubmitErrorDetailsType"
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match TransactionSubmitErrorDetailsType
+          MempoolFull: '#/components/schemas/TransactionSubmitMempoolFullErrorDetails'
+          Rejected: '#/components/schemas/TransactionSubmitRejectedErrorDetails'
+    TransactionSubmitMempoolFullErrorDetails:
+      allOf:
+        - $ref: "#/components/schemas/TransactionSubmitErrorDetails"
+        - type: object
+          required:
+            - mempool_capacity
+          properties:
+            mempool_capacity:
+              type: integer
+              format: int32
+              minimum: 0
+              maximum: 10000
+    TransactionSubmitRejectedErrorDetails:
+      allOf:
+        - $ref: "#/components/schemas/TransactionSubmitErrorDetails"
+        - type: object
+          required:
+            - error_message
+            - is_fresh
+            - is_payload_rejection_permanent
+            - is_intent_rejection_permanent
+            - is_rejected_because_intent_already_committed
+          properties:
+            error_message:
+              type: string
+              description: An explanation of the error
+            is_fresh:
+              type: boolean
+              description: |
+                Whether (true) this rejected status has just been calculated fresh, or (false) the status is from the pending
+                transaction result cache.
+            is_payload_rejection_permanent:
+              type: boolean
+              description: |
+                Whether the rejection of this payload is known to be permanent.
+            is_intent_rejection_permanent:
+              type: boolean
+              description: |
+                Whether the rejection of this intent is known to be permanent - this is a stronger statement than the payload rejection
+                being permanent, as it implies any payloads containing the intent will also be permanently rejected.
+            is_rejected_because_intent_already_committed:
+              type: boolean
+              description: |
+                Whether the cached rejection of this intent is due to the intent already having been committed.
+                If so, see the /transaction/receipt endpoint for further information.
+            recalculation_due:
+              $ref: "#/components/schemas/Instant"
+              description: |
+                The time after which the node will consider recalculating the validity of the transaction.
+                Only present if the rejection isn't permanent.
+            invalid_from_epoch:
+              type: integer
+              format: int64
+              minimum: 0
+              maximum: 10000000000
+              description: |
+                An integer between `0` and `10^10`, marking the epoch from which the transaction will no longer be valid, and be permanently rejected.
+                Only present if the rejection isn't permanent.
+    ###################################
+    # REQUEST: /transaction/status #
+    ###################################
+    TransactionStatusRequest:
+      type: object
+      required:
+        - network
+        - intent_hash
+      properties:
+        network:
+          $ref: "#/components/schemas/NetworkIdentifier"
+        intent_hash:
+          $ref: "#/components/schemas/IntentHash"
+    TransactionStatusResponse:
+      type: object
+      required:
+        - intent_status
+        - status_description
+        - known_payloads
+      properties:
+        intent_status:
+          type: string
+          description: |
+            The status of the transaction intent, as determined by the node.
+            FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction
+          enum:
+            - CommittedSuccess
+            - CommittedFailure
+            - PermanentRejection
+            - InMempool
+            - NotSeen
+            - FateUncertain
+            - FateUncertainButLikelyRejection
+        status_description:
+          type: string
+          description: |
+            An explanation as to why the intent status is resolved as it is.
+        invalid_from_epoch:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 10000000000
+          description: |
+            An integer between `0` and `10^10`, marking the epoch from which the transaction will no longer be valid, and be permanently rejected.
+            Only present if the intent status is InMempool or Unknown and we know about a payload.
+        known_payloads:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransactionPayloadStatus"
+    TransactionPayloadStatus:
+      type: object
+      required:
+        - payload_hash
+        - status
+      properties:
+        payload_hash:
+          $ref: "#/components/schemas/PayloadHash"
+        status:
+          type: string
+          description: |
+            The status of the transaction payload, as per this node.
+            A NotInMempool status means that it wasn't rejected at last execution attempt, but it's not currently in the mempool either.
+          enum:
+            - CommittedSuccess
+            - CommittedFailure
+            - PermanentlyRejected
+            - TransientlyRejected
+            - InMempool
+            - NotInMempool
+        error_message:
+          description: An explanation for the error, if failed or rejected
+          type: string
+    ####################################
+    # REQUEST: /transaction/receipt #
+    ####################################
+    TransactionReceiptRequest:
+      type: object
+      required:
+        - network
+        - intent_hash
+      properties:
+        network:
+          $ref: "#/components/schemas/NetworkIdentifier"
+        intent_hash:
+          $ref: "#/components/schemas/IntentHash"
+    TransactionReceiptResponse:
+      type: object
+      required:
+        - committed
+      properties:
+        committed:
+          $ref: "#/components/schemas/CommittedTransaction"
     #####################################
     # REQUEST: /transaction/callpreview #
     #####################################
     TransactionCallPreviewRequest:
       type: object
       required:
+        - network
         - target
         - arguments
       properties:
+        network:
+          $ref: "#/components/schemas/NetworkIdentifier"
         target:
-          oneOf:
-            - $ref: '#/components/schemas/ComponentMethodIdentifier'
-            - $ref: '#/components/schemas/BlueprintFunctionIdentifier'
-          discriminator:
-            propertyName: type
-            mapping:
-              method: '#/components/schemas/ComponentMethodIdentifier'
-              function: '#/components/schemas/BlueprintFunctionIdentifier'
+          $ref: "#/components/schemas/TargetIdentifier"
         arguments:
           type: array
           description: Argument list
           items:
             type: string
             description: SBOR-encoded argument, formatted as a hex-string
+    TargetIdentifierType:
+      type: string
+      enum:
+        - Method
+        - Function
+    TargetIdentifier:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/TargetIdentifierType'
+      discriminator:
+        propertyName: type
+        mapping:
+          Method: '#/components/schemas/ComponentMethodTargetIdentifier'
+          Function: '#/components/schemas/BlueprintFunctionTargetIdentifier'
+    ComponentMethodTargetIdentifier:
+      allOf:
+        - $ref: '#/components/schemas/TargetIdentifier'
+        - type: object
+          required:
+            - component_address
+            - method_name
+          properties:
+            component_address:
+              $ref: "#/components/schemas/ComponentAddress"
+            method_name:
+              type: string
+    BlueprintFunctionTargetIdentifier:
+      allOf:
+        - $ref: '#/components/schemas/TargetIdentifier'
+        - type: object
+          required:
+            - package_address
+            - blueprint_name
+            - function_name
+          properties:
+            package_address:
+              $ref: "#/components/schemas/PackageAddress"
+            blueprint_name:
+              type: string
+            function_name:
+              type: string
     TransactionCallPreviewResponse:
       type: object
       required:
@@ -2875,9 +3171,9 @@ components:
               message:
                 type: string
     #################################
-    # REQUEST: /transactions/stream #
+    # REQUEST: /stream/transactions #
     #################################
-    CommittedTransactionsRequest:
+    StreamTransactionsRequest:
       description: |
         A request to retrieve a sublist of committed transactions from the ledger.
       type: object
@@ -2897,7 +3193,7 @@ components:
         limit:
           description: The maximum number of transactions that will be returned.
           type: integer
-    CommittedTransactionsResponse:
+    StreamTransactionsResponse:
       type: object
       required:
         - from_state_version
@@ -2961,17 +3257,8 @@ components:
       enum:
         - User
         - Validator
+        - System
     LedgerTransaction:
-      oneOf:
-        - $ref: '#/components/schemas/UserLedgerTransaction'
-        - $ref: '#/components/schemas/ValidatorLedgerTransaction'
-      discriminator:
-        propertyName: type
-        mapping:
-          # NOTE: These need to match LedgerTransactionType
-          User: '#/components/schemas/UserLedgerTransaction'
-          Validator: '#/components/schemas/ValidatorLedgerTransaction'
-    LedgerTransactionBase:
       type: object
       required:
         - type
@@ -2982,9 +3269,16 @@ components:
         payload_hex:
           type: string
           description: The hex-encoded full ledger transaction payload
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match LedgerTransactionType
+          User: '#/components/schemas/UserLedgerTransaction'
+          Validator: '#/components/schemas/ValidatorLedgerTransaction'
+          System: '#/components/schemas/SystemLedgerTransaction'
     UserLedgerTransaction:
       allOf:
-        - $ref: "#/components/schemas/LedgerTransactionBase"
+        - $ref: "#/components/schemas/LedgerTransaction"
         - type: object
           required:
             - notarized_transaction
@@ -2993,13 +3287,22 @@ components:
               $ref: "#/components/schemas/NotarizedTransaction"
     ValidatorLedgerTransaction:
       allOf:
-        - $ref: "#/components/schemas/LedgerTransactionBase"
+        - $ref: "#/components/schemas/LedgerTransaction"
         - type: object
           required:
             - validator_transaction
           properties:
             validator_transaction:
               $ref: "#/components/schemas/ValidatorTransaction"
+    SystemLedgerTransaction:
+      allOf:
+        - $ref: "#/components/schemas/LedgerTransaction"
+        - type: object
+          required:
+            - system_transaction
+          properties:
+            system_transaction:
+              $ref: "#/components/schemas/SystemTransaction"
     ValidatorTransactionType:
       type: string
       description: The type of the validator transaction
@@ -3007,25 +3310,21 @@ components:
         - EpochUpdate
         - TimeUpdate
     ValidatorTransaction:
-      oneOf:
-        - $ref: '#/components/schemas/EpochUpdateValidatorTransaction'
-        - $ref: '#/components/schemas/TimeUpdateValidatorTransaction'
-      discriminator:
-        propertyName: type
-        mapping:
-          # NOTE: These need to match ValidatorTransactionType
-          EpochUpdate: '#/components/schemas/EpochUpdateValidatorTransaction'
-          TimeUpdate: '#/components/schemas/TimeUpdateValidatorTransaction'
-    ValidatorTransactionBase:
       type: object
       required:
         - type
       properties:
         type:
           $ref: "#/components/schemas/ValidatorTransactionType"
+      discriminator:
+        propertyName: type
+        mapping:
+          # NOTE: These need to match ValidatorTransactionType
+          EpochUpdate: '#/components/schemas/EpochUpdateValidatorTransaction'
+          TimeUpdate: '#/components/schemas/TimeUpdateValidatorTransaction'
     EpochUpdateValidatorTransaction:
       allOf:
-        - $ref: "#/components/schemas/ValidatorTransactionBase"
+        - $ref: "#/components/schemas/ValidatorTransaction"
         - type: object
           required:
             - scrypto_epoch
@@ -3040,19 +3339,16 @@ components:
                 Note that currently this is not the same as `consensus_epoch`, but eventually will be.
     TimeUpdateValidatorTransaction:
       allOf:
-        - $ref: "#/components/schemas/ValidatorTransactionBase"
+        - $ref: "#/components/schemas/ValidatorTransaction"
         - type: object
           required:
-            - proposer_timestamp_ms
+            - proposer_timestamp
             - consensus_epoch
             - round_in_epoch
           properties:
-            proposer_timestamp_ms:
-              type: integer
-              format: int64
-              minimum: 0
-              maximum: 100000000000000
-              description: An integer between `0` and `10^14`, marking the round proposer's unix timestamp in ms
+            proposer_timestamp:
+              $ref: '#/components/schemas/Instant'
+              description: The round proposer's timestamp.
             consensus_epoch:
               type: integer
               format: int64
@@ -3067,98 +3363,25 @@ components:
               minimum: 0
               maximum: 10000000000
               description: An integer between `0` and `10^10`, marking the consensus round in the epoch
-    ############################################################################################################
-    # V0
-    ###################################
-    # REQUEST: /v0/transaction/submit #
-    ###################################
-    V0TransactionSubmitRequest:
+    SystemTransaction:
       type: object
       required:
-        - notarized_transaction_hex
+        - payload_hex
       properties:
-        notarized_transaction_hex:
-          description: A hex-encoded, compiled notarized transaction.
+        payload_hex:
           type: string
-    V0TransactionSubmitResponse:
-      type: object
-      required:
-        - duplicate
-      properties:
-        duplicate:
-          description: Is true if the transaction is a duplicate of an existing transaction in the mempool.
-          type: boolean
-    ###################################
-    # REQUEST: /v0/transaction/status #
-    ###################################
-    V0TransactionStatusRequest:
-      type: object
-      required:
-        - intent_hash
-      properties:
-        intent_hash:
-          $ref: "#/components/schemas/IntentHash"
-    V0TransactionStatusResponse:
-      type: object
-      required:
-        - intent_status
-        - known_payloads
-      properties:
-        intent_status:
-          type: string
-          description: The status of the transaction intent
-          enum:
-            - CommittedSuccess
-            - CommittedFailure
-            - InMempool
-            - Rejected
-            - Unknown
-        known_payloads:
-          type: array
-          items:
-            $ref: "#/components/schemas/V0TransactionPayloadStatus"
-    V0TransactionPayloadStatus:
-      type: object
-      required:
-        - payload_hash
-        - status
-      properties:
-        payload_hash:
-          $ref: "#/components/schemas/PayloadHash"
-        status:
-          type: string
-          description: The status of the transaction payload, as per this node
-          enum:
-            - CommittedSuccess
-            - CommittedFailure
-            - InMempool
-            - TransientlyRejected
-            - PermanentlyRejected
-        error_message:
-          description: An explanation for the error, if failed or rejected
-          type: string
-    ####################################
-    # REQUEST: /v0/transaction/receipt #
-    ####################################
-    V0CommittedTransactionRequest:
-      type: object
-      required:
-        - intent_hash
-      properties:
-        intent_hash:
-          $ref: "#/components/schemas/IntentHash"
-    V0CommittedTransactionResponse:
-      type: object
-      required:
-        - committed
-      properties:
-        committed:
-          $ref: "#/components/schemas/CommittedTransaction"
+          description: The hex-encoded system transaction payload
     ############################
-    # REQUEST: /v0/state/epoch #
+    # REQUEST: /state/epoch #
     ############################
-    # No request body required
-    V0StateEpochResponse:
+    StateEpochRequest:
+      type: object
+      required:
+        - network
+      properties:
+        network:
+          $ref: "#/components/schemas/NetworkIdentifier"
+    StateEpochResponse:
       type: object
       required:
         - epoch
@@ -3170,10 +3393,16 @@ components:
           maximum: 10000000000
           description: An integer between `0` and `10^10`, marking the current epoch
     ############################
-    # REQUEST: /v0/state/clock #
+    # REQUEST: /state/clock #
     ############################
-    # No request body required
-    V0StateClockResponse:
+    StateClockRequest:
+      type: object
+      required:
+        - network
+      properties:
+        network:
+          $ref: "#/components/schemas/NetworkIdentifier"
+    StateClockResponse:
       type: object
       required:
         - current_minute
@@ -3181,17 +3410,20 @@ components:
         current_minute:
           $ref: "#/components/schemas/Substate"
     ################################
-    # REQUEST: /v0/state/component #
+    # REQUEST: /state/component #
     ################################
-    V0StateComponentRequest:
+    StateComponentRequest:
       type: object
       required:
+        - network
         - component_address
       properties:
+        network:
+          $ref: "#/components/schemas/NetworkIdentifier"
         component_address:
           type: string
           description: The Bech32m-encoded human readable version of the component's global address
-    V0StateComponentResponse:
+    StateComponentResponse:
       type: object
       required:
         - info
@@ -3224,8 +3456,8 @@ components:
           type: array
           description: Any descendent nodes owned directly or indirectly by the component
           items:
-            $ref: "#/components/schemas/V0StateComponentDescendentId"
-    V0StateComponentDescendentId:
+            $ref: "#/components/schemas/StateComponentDescendentId"
+    StateComponentDescendentId:
       type: object
       required:
         - parent
@@ -3243,17 +3475,20 @@ components:
           minimum: 0
           maximum: 100
     ###############################
-    # REQUEST: /v0/state/resource #
+    # REQUEST: /state/resource #
     ###############################
-    V0StateResourceRequest:
+    StateResourceRequest:
       type: object
       required:
+        - network
         - resource_address
       properties:
+        network:
+          $ref: "#/components/schemas/NetworkIdentifier"
         resource_address:
           type: string
           description: The Bech32m-encoded human readable version of the resource's global address
-    V0StateResourceResponse:
+    StateResourceResponse:
       type: object
       required:
         - manager
@@ -3270,20 +3505,23 @@ components:
         vault_access_rules:
           $ref: "#/components/schemas/Substate"
     ###################################
-    # REQUEST: /v0/state/non-fungible #
+    # REQUEST: /state/non-fungible #
     ###################################
-    V0StateNonFungibleRequest:
+    StateNonFungibleRequest:
       type: object
       required:
+        - network
         - resource_address
         - non_fungible_id
       properties:
+        network:
+          $ref: "#/components/schemas/NetworkIdentifier"
         resource_address:
           type: string
           description: The Bech32m-encoded human readable version of the resource's global address
         non_fungible_id:
           $ref: '#/components/schemas/NonFungibleIdSimpleRepresentation'
-    V0StateNonFungibleResponse:
+    StateNonFungibleResponse:
       type: object
       required:
         - non_fungible
@@ -3291,17 +3529,20 @@ components:
         non_fungible:
           $ref: "#/components/schemas/Substate"
     ##############################
-    # REQUEST: /v0/state/package #
+    # REQUEST: /state/package #
     ##############################
-    V0StatePackageRequest:
+    StatePackageRequest:
       type: object
       required:
+        - network
         - package_address
       properties:
+        network:
+          $ref: "#/components/schemas/NetworkIdentifier"
         package_address:
           type: string
           description: The Bech32m-encoded human readable version of the package's global address
-    V0StatePackageResponse:
+    StatePackageResponse:
       type: object
       required:
         - info

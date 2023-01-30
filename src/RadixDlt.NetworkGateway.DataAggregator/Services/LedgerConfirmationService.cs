@@ -162,9 +162,9 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     /// <summary>
     /// To be called from the node worker.
     /// </summary>
-    public void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipAccumulator, long targetStateVersion)
+    public void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipAccumulator)
     {
-        _observers.ForEach(x => x.PreSubmitNodeNetworkStatus(nodeName, ledgerTipStateVersion, targetStateVersion));
+        _observers.ForEach(x => x.PreSubmitNodeNetworkStatus(nodeName, ledgerTipStateVersion));
 
         _latestLedgerTipByNode[nodeName] = ledgerTipStateVersion;
 
@@ -181,15 +181,15 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
             // Ledger Tip is too far behind -- so don't report on consistency.
             // We could change this to do a database look-up in future to give a consistency check.
 
-            _observers.ForEach(x => x.SubmitNodeNetworkStatusUnknown(nodeName, ledgerTipStateVersion, targetStateVersion));
+            _observers.ForEach(x => x.SubmitNodeNetworkStatusUnknown(nodeName, ledgerTipStateVersion));
         }
         else if (cachedAccumulator.BytesAreEqual(ledgerTipAccumulator))
         {
-            _observers.ForEach(x => x.SubmitNodeNetworkStatusUpToDate(nodeName, ledgerTipStateVersion, targetStateVersion));
+            _observers.ForEach(x => x.SubmitNodeNetworkStatusUpToDate(nodeName, ledgerTipStateVersion));
         }
         else
         {
-            _observers.ForEach(x => x.SubmitNodeNetworkStatusOutOfDate(nodeName, ledgerTipStateVersion, targetStateVersion));
+            _observers.ForEach(x => x.SubmitNodeNetworkStatusOutOfDate(nodeName, ledgerTipStateVersion));
         }
     }
 
@@ -391,10 +391,10 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         _logger.LogInformation(
             "[TimeSplitsInMs: RawTxns={RawTxnPersistenceMs},Mempool={MempoolTransactionUpdateMs},TxnContentHandling={TxnContentHandlingMs},DbDependencyLoading={DbDependenciesLoadingMs},DbPersistence={DbPersistanceMs}]",
             commitReport.RawTxnPersistenceMs,
-            commitReport.MempoolTransactionUpdateMs,
-            commitReport.TransactionContentHandlingMs,
+            commitReport.PendingTransactionsUpdateMs,
+            commitReport.ContentHandlingMs,
             commitReport.DbDependenciesLoadingMs,
-            commitReport.DbPersistanceMs
+            commitReport.DbPersistenceMs
         );
 
         _logger.LogInformation(
@@ -412,7 +412,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         {
             _quorumAccumulatorCacheByStateVersion.Set(
                 committedTransaction.StateVersion,
-                committedTransaction.AccumulatorHashBytes
+                committedTransaction.GetAccumulatorHashBytes()
             );
         }
     }
@@ -497,16 +497,16 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
                     previousStateVersion: previousStateVersion,
                     previousAccumulator: previousAccumulator,
                     stateVersion: transaction.StateVersion,
-                    accumulator: transaction.AccumulatorHashBytes,
-                    payload: transaction.LedgerTransaction.PayloadBytes);
+                    accumulator: transaction.GetAccumulatorHashBytes(),
+                    payload: transaction.LedgerTransaction.GetPayloadBytes());
 
-                if (transaction.LedgerTransaction.ActualInstance is CoreModel.UserLedgerTransaction ult)
+                if (transaction.LedgerTransaction is CoreModel.UserLedgerTransaction ult)
                 {
-                    TransactionConsistency.AssertTransactionHashCorrect(ult.NotarizedTransaction.PayloadBytes, ult.NotarizedTransaction.HashBytes);
+                    TransactionConsistency.AssertTransactionHashCorrect(ult.NotarizedTransaction.GetPayloadBytes(), ult.NotarizedTransaction.GetHashBytes());
                 }
 
                 previousStateVersion = transaction.StateVersion;
-                previousAccumulator = transaction.AccumulatorHashBytes;
+                previousAccumulator = transaction.GetAccumulatorHashBytes();
             }
 
             _observers.ForEach(x => x.QuorumExtensionConsistentGained());

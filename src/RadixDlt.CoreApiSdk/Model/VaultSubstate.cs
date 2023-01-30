@@ -69,20 +69,16 @@ namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class VaultSubstate : IGlobalResourcePointer
 {
-    [JsonIgnore]
-    public IEnumerable<GlobalResourcePointer> Pointers
+    public IEnumerable<GlobalResourcePointer> GetPointers()
     {
-        get
+        if (ResourceAmount is FungibleResourceAmount fra)
         {
-            if (ResourceAmount.ActualInstance is FungibleResourceAmount fra)
-            {
-                yield return new GlobalResourcePointer(fra.ResourceType, fra.ResourceAddress);
-            }
+            yield return new GlobalResourcePointer(fra.ResourceType, fra.ResourceAddress);
+        }
 
-            if (ResourceAmount.ActualInstance is NonFungibleResourceAmount nfra)
-            {
-                yield return new GlobalResourcePointer(nfra.ResourceType, nfra.ResourceAddress);
-            }
+        if (ResourceAmount is NonFungibleResourceAmount nfra)
+        {
+            yield return new GlobalResourcePointer(nfra.ResourceType, nfra.ResourceAddress);
         }
     }
 }
