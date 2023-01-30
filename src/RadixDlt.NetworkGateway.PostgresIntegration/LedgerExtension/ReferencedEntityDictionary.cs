@@ -71,7 +71,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 internal class ReferencedEntityDictionary
 {
     private readonly Dictionary<string, ReferencedEntity> _storage = new();
-    private readonly Dictionary<long, List<ReferencedEntity>> _inversed = new();
+    private readonly Dictionary<long, List<ReferencedEntity>> _entitiesAtStateVersion = new();
     private readonly Dictionary<string, ReferencedEntity> _globalsCache = new();
     private readonly Dictionary<long, ReferencedEntity> _dbIdCache = new();
     private readonly HashSet<string> _knownGlobalAddressesToLoad = new();
@@ -91,13 +91,13 @@ internal class ReferencedEntityDictionary
 
         var value = factory(addressHex);
 
-        if (!_inversed.ContainsKey(value.StateVersion))
+        if (!_entitiesAtStateVersion.ContainsKey(value.StateVersion))
         {
-            _inversed[value.StateVersion] = new List<ReferencedEntity>();
+            _entitiesAtStateVersion[value.StateVersion] = new List<ReferencedEntity>();
         }
 
         _storage[addressHex] = value;
-        _inversed[value.StateVersion].Add(value);
+        _entitiesAtStateVersion[value.StateVersion].Add(value);
 
         return value;
     }
@@ -114,17 +114,25 @@ internal class ReferencedEntityDictionary
 
     public ReferencedEntity GetByDatabaseId(long id)
     {
-        return _dbIdCache.GetOrAdd(id, _ => _storage.Values.First(re => re.DatabaseId == id));
+        return _dbIdCache[id];
     }
 
     public IEnumerable<ReferencedEntity> OfStateVersion(long stateVersion)
     {
-        if (_inversed.TryGetValue(stateVersion, out var existing))
+        if (_entitiesAtStateVersion.TryGetValue(stateVersion, out var existing))
         {
             return existing;
         }
 
         return Array.Empty<ReferencedEntity>();
+    }
+
+    public void OnAllEntitiesResolved()
+    {
+        foreach (var referencedEntity in All)
+        {
+            _dbIdCache[referencedEntity.DatabaseId] = referencedEntity;
+        }
     }
 
     public void InvokePostResolveConfiguration()

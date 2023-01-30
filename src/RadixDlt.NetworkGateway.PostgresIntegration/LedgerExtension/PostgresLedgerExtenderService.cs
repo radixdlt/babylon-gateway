@@ -509,7 +509,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
             dbReadDuration += sw.Elapsed;
 
-            foreach (var knownDbEntity in knownDbEntities.Values.Where(e => e.GlobalAddress != null))
+            foreach (var knownDbEntity in knownDbEntities.Values)
             {
                 var entityType = knownDbEntity switch
                 {
@@ -560,6 +560,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 re.Resolve(dbEntity);
                 entitiesToAdd.Add(dbEntity);
             }
+
+            referencedEntities.OnAllEntitiesResolved();
 
             foreach (var (childAddress, parentAddress) in childToParentEntities)
             {
