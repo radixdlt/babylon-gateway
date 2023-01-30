@@ -62,27 +62,20 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json;
-using System;
+using System.Diagnostics;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class LedgerTransaction
 {
-    [JsonIgnore]
-    public byte[] PayloadBytes
+    public byte[] GetPayloadBytes()
     {
-        get
+        return this switch
         {
-            switch (ActualInstance)
-            {
-                case UserLedgerTransaction ult:
-                    return ult.PayloadBytes;
-                case ValidatorLedgerTransaction vlt:
-                    return vlt.PayloadBytes;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(ActualInstance), ActualInstance, null);
-            }
-        }
+            UserLedgerTransaction ult => ult.GetPayloadBytes(),
+            ValidatorLedgerTransaction vlt => vlt.GetPayloadBytes(),
+            SystemLedgerTransaction slt => slt.GetPayloadBytes(),
+            _ => throw new UnreachableException(),
+        };
     }
 }

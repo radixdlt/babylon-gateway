@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json;
 using System;
 
 namespace RadixDlt.CoreApiSdk.Model;
@@ -72,9 +71,7 @@ public partial class NotarizedTransaction
     private byte[] _payloadBytes;
     private byte[] _hashBytes;
 
-    [JsonIgnore]
-    public byte[] PayloadBytes => _payloadBytes ??= Convert.FromHexString(PayloadHex);
+    public byte[] GetPayloadBytes() => _payloadBytes ??= Convert.FromHexString(PayloadHex);
 
-    [JsonIgnore]
-    public byte[] HashBytes => _hashBytes ??= Convert.FromHexString(Hash);
+    public byte[] GetHashBytes() => _hashBytes ??= Convert.FromHexString(Hash);
 }

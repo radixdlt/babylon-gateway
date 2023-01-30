@@ -93,6 +93,7 @@ public enum AddressSubtype
     EddsaEd25519VirtualAccountComponent,
     EpochManager,
     Clock,
+    Validator,
 }
 
 public sealed record AddressTypeDefinition(

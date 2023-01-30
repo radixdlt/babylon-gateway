@@ -119,7 +119,7 @@ internal static class DbQueryExtensions
         where TDbContext : CommonDbContext
     {
         return dbContext.LedgerTransactions
-            .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch <= round && lt.IsStartOfRound)
+            .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch >= round && lt.IndexInRound == 0)
             .OrderByDescending(lt => lt.StateVersion)
             .Take(1);
     }
@@ -128,7 +128,7 @@ internal static class DbQueryExtensions
         where TDbContext : CommonDbContext
     {
         return dbContext.LedgerTransactions
-            .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch >= round && lt.IsStartOfRound)
+            .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch >= round && lt.IndexInRound == 0)
             .OrderBy(lt => lt.StateVersion)
             .Take(1);
     }

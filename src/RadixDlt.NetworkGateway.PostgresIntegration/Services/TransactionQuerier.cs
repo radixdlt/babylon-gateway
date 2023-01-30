@@ -114,7 +114,7 @@ internal class TransactionQuerier : ITransactionQuerier
 
     public async Task<DetailsLookupResult?> LookupCommittedTransaction(GatewayModel.TransactionCommittedDetailsRequestIdentifier identifier, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
     {
-        var hash = identifier.ValueBytes;
+        var hash = identifier.GetValueBytes();
         var query = _dbContext.LedgerTransactions
             .OfType<UserLedgerTransaction>()
             .Where(ult => ult.StateVersion <= ledgerState.StateVersion);
@@ -169,11 +169,7 @@ internal class TransactionQuerier : ITransactionQuerier
             var topStateVersionBoundary = atLedgerState.StateVersion;
 
             return await _dbContext.LedgerTransactions
-                .Where(lt =>
-                    lt.StateVersion >= bottomStateVersionBoundary && lt.StateVersion <= topStateVersionBoundary
-                    && !lt.IsStartOfEpoch
-                    && !lt.IsStartOfRound
-                )
+                .Where(lt => lt.StateVersion >= bottomStateVersionBoundary && lt.StateVersion <= topStateVersionBoundary)
                 .OrderBy(at => at.StateVersion)
                 .Take(request.PageSize + 1)
                 .Select(at => at.StateVersion)

@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.AspNetCore" />
+    <PackageReference Include="RadixDlt.RadixEngineToolkit" />
   </ItemGroup>
 
   <ItemGroup>

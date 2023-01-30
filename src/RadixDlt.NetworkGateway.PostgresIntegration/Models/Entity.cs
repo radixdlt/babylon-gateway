@@ -155,6 +155,10 @@ internal class NormalComponentEntity : ComponentEntity
 {
 }
 
+internal class ValidatorComponentEntity : ComponentEntity
+{
+}
+
 internal class AccountComponentEntity : ComponentEntity
 {
 }

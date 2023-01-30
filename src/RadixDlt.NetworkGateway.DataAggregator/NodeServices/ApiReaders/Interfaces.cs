@@ -74,6 +74,8 @@ public interface ICoreApiProvider
 {
     CoreApi.TransactionApi TransactionsApi { get; }
 
+    CoreApi.StreamApi StreamApi { get; }
+
     CoreApi.StatusApi StatusApi { get; }
 
     CoreApi.MempoolApi MempoolApi { get; }
@@ -91,7 +93,7 @@ public interface INetworkStatusReader
 
 public interface ITransactionStreamReader
 {
-    Task<CoreModel.CommittedTransactionsResponse> GetTransactionStream(long fromStateVersion, int count, CancellationToken token);
+    Task<CoreModel.StreamTransactionsResponse> GetTransactionStream(long fromStateVersion, int count, CancellationToken token);
 }
 
 public interface INetworkConfigurationReaderObserver
