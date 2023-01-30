@@ -102,52 +102,58 @@ namespace RadixDlt.CoreApiSdk.Model
         EpochManager = 1,
 
         /// <summary>
+        /// Enum Validator for value: Validator
+        /// </summary>
+        [EnumMember(Value = "Validator")]
+        Validator = 2,
+
+        /// <summary>
         /// Enum ResourceManager for value: ResourceManager
         /// </summary>
         [EnumMember(Value = "ResourceManager")]
-        ResourceManager = 2,
+        ResourceManager = 3,
 
         /// <summary>
         /// Enum Component for value: Component
         /// </summary>
         [EnumMember(Value = "Component")]
-        Component = 3,
+        Component = 4,
 
         /// <summary>
         /// Enum Package for value: Package
         /// </summary>
         [EnumMember(Value = "Package")]
-        Package = 4,
+        Package = 5,
 
         /// <summary>
         /// Enum Vault for value: Vault
         /// </summary>
         [EnumMember(Value = "Vault")]
-        Vault = 5,
+        Vault = 6,
 
         /// <summary>
         /// Enum KeyValueStore for value: KeyValueStore
         /// </summary>
         [EnumMember(Value = "KeyValueStore")]
-        KeyValueStore = 6,
+        KeyValueStore = 7,
 
         /// <summary>
         /// Enum Global for value: Global
         /// </summary>
         [EnumMember(Value = "Global")]
-        Global = 7,
+        Global = 8,
 
         /// <summary>
         /// Enum NonFungibleStore for value: NonFungibleStore
         /// </summary>
         [EnumMember(Value = "NonFungibleStore")]
-        NonFungibleStore = 8,
+        NonFungibleStore = 9,
 
         /// <summary>
         /// Enum Clock for value: Clock
         /// </summary>
         [EnumMember(Value = "Clock")]
-        Clock = 9
+        Clock = 10
 
     }
 

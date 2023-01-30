@@ -105,7 +105,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60; (required).</param>
         /// <param name="validators">validators (required).</param>
-        public NextEpoch(long epoch = default(long), List<EcdsaSecp256k1PublicKey> validators = default(List<EcdsaSecp256k1PublicKey>))
+        public NextEpoch(long epoch = default(long), List<Validator> validators = default(List<Validator>))
         {
             this.Epoch = epoch;
             // to ensure "validators" is required (not null)
@@ -127,7 +127,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Validators
         /// </summary>
         [DataMember(Name = "validators", IsRequired = true, EmitDefaultValue = true)]
-        public List<EcdsaSecp256k1PublicKey> Validators { get; set; }
+        public List<Validator> Validators { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
