@@ -291,6 +291,52 @@ internal class WriteHelper
         return entities.Count;
     }
 
+    public async Task<int> CopyValidatorKeyHistory(ICollection<ValidatorKeyHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY validator_key_history (id, from_state_version, validator_entity_id, key_type, key) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ValidatorEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.KeyType, "public_key_type", token);
+            await writer.WriteAsync(e.Key, NpgsqlDbType.Bytea, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
+    public async Task<int> CopyValidatorActiveSetHistory(ICollection<ValidatorActiveSetHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY validator_active_set_history (id, from_state_version, validator_key_ids) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ValidatorKeyIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
     public async Task<int> CopyResourceManagerEntitySupplyHistory(ICollection<ResourceManagerEntitySupplyHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -470,7 +516,9 @@ SELECT
     setval('resource_manager_entity_supply_history_id_seq', @resourceManagerEntitySupplyHistorySequence),
     setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
     setval('non_fungible_id_mutable_data_history_id_seq', @nonFungibleIdMutableDataHistorySequence),
-    setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence)",
+    setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence),
+    setval('validator_key_history_id_seq', @validatorKeyHistorySequence),
+    setval('validator_set_history_id_seq', @validatorSetHistorySequence)",
             parameters: new
             {
                 componentEntityStateHistorySequence = sequences.ComponentEntityStateHistorySequence,
@@ -483,6 +531,8 @@ SELECT
                 nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
                 nonFungibleIdMutableDataHistorySequence = sequences.NonFungibleIdMutableDataHistorySequence,
                 nonFungibleIdStoreHistorySequence = sequences.NonFungibleIdStoreHistorySequence,
+                validatorKeyHistorySequence = sequences.ValidatorKeyHistorySequence,
+                validatorSetHistorySequence = sequences.ValidatorSetHistorySequence,
             },
             cancellationToken: token);
 

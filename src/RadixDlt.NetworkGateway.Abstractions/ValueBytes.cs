@@ -72,6 +72,8 @@ public readonly struct ValueBytes : IEquatable<ValueBytes>
 
     public ValueBytes(byte[] value)
     {
+        ArgumentNullException.ThrowIfNull(value);
+
         _value = value;
     }
 
@@ -82,6 +84,12 @@ public readonly struct ValueBytes : IEquatable<ValueBytes>
     public static implicit operator byte[](ValueBytes vb) => vb._value;
 
     public static implicit operator ValueBytes(byte[] bytes) => new(bytes);
+
+    public static implicit operator Span<byte>(ValueBytes vb) => vb._value;
+
+    public static implicit operator ValueBytes(Span<byte> bytes) => new(bytes.ToArray());
+
+    public int Length => _value.Length;
 
     public bool Equals(ValueBytes other)
     {

@@ -120,6 +120,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         // - replace with proper Activity at some point to eliminate stopwatches and primitive counters
         // - when it comes to fungibles and nonFungibles and their respective xxxResourceHistory we should change that to VaultHistory
         // - avoid dbContextFactory - just make sure we use scoped services with single dbContext (UoW) passed through .ctor
+        // - quite a few sequential database reads could be done in parallel once with ditch EF Core (dbContext)
+        // - read helpers could immediately return empty collections on empty inputs
         // - ProcessTransactions should be divided into smaller methods invoked in chain
 
         // Create own context for ledger extension unit of work
@@ -374,9 +376,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         }
                     }
 
-                    if (sd is CoreModel.IGlobalResourcePointer globalResourcePointer)
+                    if (sd is CoreModel.IGlobalEntityPointer globalEntityPointer)
                     {
-                        foreach (var pointer in globalResourcePointer.GetPointers())
+                        foreach (var pointer in globalEntityPointer.GetPointers())
                         {
                             referencedEntities.MarkSeenGlobalAddress(pointer.GlobalAddress);
                         }
@@ -633,8 +635,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var nonFungibleIdStoreChanges = new List<NonFungibleIdChange>();
         var metadataChanges = new List<MetadataChange>();
         var resourceManagerSupplyChanges = new List<ResourceManagerSupplyChange>();
+        var validatorSetChanges = new List<ValidatorSetChange>();
         var entityAccessRulesChainHistoryToAdd = new List<EntityAccessRulesChainHistory>();
         var componentEntityStateToAdd = new List<ComponentEntityStateHistory>();
+        var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorKeyHistory>();
 
         // step: scan all substates to figure out changes
         {
@@ -733,6 +737,34 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             AccessRulesChain = JsonConvert.SerializeObject(accessRulesChain.Chain),
                         });
                     }
+
+                    if (sd is CoreModel.ValidatorSubstate validator)
+                    {
+                        var lookup = new ValidatorKeyLookup(referencedEntities.Get(sid.EntityIdHex).DatabaseId, validator.Key.KeyType.ToModel(), validator.Key.GetKeyBytes());
+
+                        validatorKeyHistoryToAdd[lookup] = new ValidatorKeyHistory
+                        {
+                            Id = sequences.ValidatorKeyHistorySequence++,
+                            FromStateVersion = stateVersion,
+                            ValidatorEntityId = lookup.ValidatorEntityId,
+                            KeyType = lookup.KeyType,
+                            Key = lookup.Key,
+                        };
+                    }
+
+                    if (sd is CoreModel.ValidatorSetSubstate validatorSet && sid.SubstateKeyType == CoreModel.SubstateKeyType.CurrentValidatorSet)
+                    {
+                        var change = validatorSet.ValidatorSet
+                            .Select(v =>
+                            {
+                                var vid = referencedEntities.GetByGlobal(RadixAddressCodec.Decode(v.Address).Data.ToHex()).DatabaseId;
+
+                                return new ValidatorKeyLookup(vid, v.Key.KeyType.ToModel(), v.Key.GetKeyBytes());
+                            })
+                            .ToList();
+
+                        validatorSetChanges.Add(new ValidatorSetChange(validatorSet.Epoch, change, stateVersion));
+                    }
                 }
             }
         }
@@ -745,6 +777,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var mostRecentNonFungibleIdStoreHistory = await readHelper.MostRecentNonFungibleIdStoreHistoryFor(nonFungibleIdStoreChanges, token);
             var mostRecentResourceManagerEntitySupplyHistory = await readHelper.MostRecentResourceManagerEntitySupplyHistoryFor(resourceManagerSupplyChanges, token);
             var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdStoreChanges, nonFungibleVaultChanges, token);
+            var existingValidatorKeys = await readHelper.ExistingValidatorKeysFor(validatorSetChanges, token);
 
             dbReadDuration += sw.Elapsed;
 
@@ -945,6 +978,20 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 })
                 .ToList();
 
+            var validatorActiveSetHistoryToAdd = validatorSetChanges
+                .Select(e =>
+                {
+                    return new ValidatorActiveSetHistory
+                    {
+                        Id = sequences.ValidatorSetHistorySequence++,
+                        FromStateVersion = e.StateVersion,
+                        ValidatorKeyIds = e.ValidatorSet
+                            .Select(v => existingValidatorKeys.GetOrAdd(v, _ => validatorKeyHistoryToAdd[v]).Id)
+                            .ToArray(),
+                    };
+                })
+                .ToList();
+
             sw = Stopwatch.StartNew();
 
             rowsInserted += await writeHelper.CopyComponentEntityStateHistory(componentEntityStateToAdd, token);
@@ -956,6 +1003,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyNonFungibleIdMutableDataHistory(nonFungibleIdsMutableDataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(nonFungibleIdStoreHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyResourceManagerEntitySupplyHistory(resourceManagerEntitySupplyHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyValidatorKeyHistory(validatorKeyHistoryToAdd.Values, token);
+            rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);
 
             dbWriteDuration += sw.Elapsed;

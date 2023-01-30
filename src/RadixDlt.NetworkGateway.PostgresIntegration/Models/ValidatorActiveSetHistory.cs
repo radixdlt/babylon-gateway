@@ -67,8 +67,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("component_entity_state_history")]
-internal class ComponentEntityStateHistory // TODO rename to ComponentStateHistory?
+[Table("validator_active_set_history")]
+internal class ValidatorActiveSetHistory
 {
     [Key]
     [Column("id")]
@@ -77,9 +77,6 @@ internal class ComponentEntityStateHistory // TODO rename to ComponentStateHisto
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("component_entity_id")]
-    public long ComponentEntityId { get; set; }
-
-    [Column("state", TypeName = "jsonb")]
-    public string State { get; set; }
+    [Column("validator_key_ids")]
+    public long[] ValidatorKeyIds { get; set; }
 }

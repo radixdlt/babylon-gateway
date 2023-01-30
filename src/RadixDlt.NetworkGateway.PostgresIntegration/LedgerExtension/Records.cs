@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.Collections.Generic;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -74,10 +76,14 @@ internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, Referen
 
 internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
 
+internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
+
+internal record ResourceManagerSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);
+
+internal record ValidatorSetChange(long Epoch, ICollection<ValidatorKeyLookup> ValidatorSet, long StateVersion);
+
 internal record struct NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, long StateVersion);
 
 internal record struct NonFungibleIdLookup(long ResourceManagerEntityId, string NonFungibleId);
 
-internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
-
-internal record ResourceManagerSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);
+internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType KeyType, ValueBytes Key);

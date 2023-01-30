@@ -62,24 +62,15 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.CoreApiSdk.Model;
 
-[Table("component_entity_state_history")]
-internal class ComponentEntityStateHistory // TODO rename to ComponentStateHistory?
+public partial class ValidatorSetSubstate : IGlobalEntityPointer
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("component_entity_id")]
-    public long ComponentEntityId { get; set; }
-
-    [Column("state", TypeName = "jsonb")]
-    public string State { get; set; }
+    public IEnumerable<GlobalEntityPointer> GetPointers()
+    {
+        return ValidatorSet.Select(validator => new GlobalEntityPointer(validator.Address));
+    }
 }

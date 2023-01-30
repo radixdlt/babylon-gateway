@@ -62,13 +62,14 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("component_entity_state_history")]
-internal class ComponentEntityStateHistory // TODO rename to ComponentStateHistory?
+[Table("validator_key_history")]
+internal class ValidatorKeyHistory
 {
     [Key]
     [Column("id")]
@@ -77,9 +78,12 @@ internal class ComponentEntityStateHistory // TODO rename to ComponentStateHisto
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("component_entity_id")]
-    public long ComponentEntityId { get; set; }
+    [Column("validator_entity_id")]
+    public long ValidatorEntityId { get; set; }
 
-    [Column("state", TypeName = "jsonb")]
-    public string State { get; set; }
+    [Column("key_type")]
+    public PublicKeyType KeyType { get; set; }
+
+    [Column("key")]
+    public byte[] Key { get; set; }
 }

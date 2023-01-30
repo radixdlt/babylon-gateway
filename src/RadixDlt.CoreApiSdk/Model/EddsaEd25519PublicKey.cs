@@ -62,24 +62,13 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.CoreApiSdk.Model;
 
-[Table("component_entity_state_history")]
-internal class ComponentEntityStateHistory // TODO rename to ComponentStateHistory?
+public partial class EddsaEd25519PublicKey
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    private byte[] _keyBytes;
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("component_entity_id")]
-    public long ComponentEntityId { get; set; }
-
-    [Column("state", TypeName = "jsonb")]
-    public string State { get; set; }
+    public byte[] GetKeyBytes() => _keyBytes ??= Convert.FromHexString(KeyHex);
 }
