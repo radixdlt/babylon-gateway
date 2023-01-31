@@ -123,12 +123,16 @@ jobs:
     needs: publish-docker
     runs-on: ubuntu-22.04
     steps:
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - name: Export branch name in github's environment
         run: |
           echo "GATEWAY_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
+      - name: Process ci.env
+        run: |
+          export $(grep -v '^#' ./deployment/ci.env | xargs)
+          echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
+          echo "POSTGRES_VERSION=$POSTGRES_VERSION" >> $GITHUB_ENV
       - name: Deploy and test on an ephemeral network
-        env:
-          NODE_DOCKER_TAG: develop
         uses: toptal/jenkins-job-trigger-action@649c04c83c099c759aba134bf78138a303ec095f
         with:
           jenkins_url: "${{ secrets.JENKINS_URL }}"
@@ -139,6 +143,7 @@ jobs:
             {
               "gatewayDockerTag": "${{ needs.publish-docker.outputs.gateway-api-tag }}",
               "gatewayBranch": "${{ env.GATEWAY_BRANCH }}",
-              "nodeDockerTag": "${{ env.NODE_DOCKER_TAG }}"
+              "nodeDockerTag": "${{ env.FULLNODE_VERSION }}",
+              "postgresVersion": "${{ env.POSTGRES_VERSION }}"
             }
           job_timeout: "3600"
