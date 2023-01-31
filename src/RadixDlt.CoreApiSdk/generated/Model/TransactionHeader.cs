@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionHeader" /> class.
         /// </summary>
         /// <param name="version">version (required).</param>
-        /// <param name="networkId">networkId (required).</param>
+        /// <param name="networkId">The logical id of the network (required).</param>
         /// <param name="startEpochInclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction can be submitted (required).</param>
         /// <param name="endEpochExclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be rejected (required).</param>
         /// <param name="nonce">A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, chosen to be unique to allow replay of transaction intents (required).</param>
@@ -142,8 +142,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public int _Version { get; set; }
 
         /// <summary>
-        /// Gets or Sets NetworkId
+        /// The logical id of the network
         /// </summary>
+        /// <value>The logical id of the network</value>
         [DataMember(Name = "network_id", IsRequired = true, EmitDefaultValue = true)]
         public int NetworkId { get; set; }
 

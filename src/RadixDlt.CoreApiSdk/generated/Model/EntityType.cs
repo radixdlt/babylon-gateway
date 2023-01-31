@@ -153,7 +153,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum Clock for value: Clock
         /// </summary>
         [EnumMember(Value = "Clock")]
-        Clock = 10
+        Clock = 10,
+
+        /// <summary>
+        /// Enum AccessController for value: AccessController
+        /// </summary>
+        [EnumMember(Value = "AccessController")]
+        AccessController = 11
 
     }
 

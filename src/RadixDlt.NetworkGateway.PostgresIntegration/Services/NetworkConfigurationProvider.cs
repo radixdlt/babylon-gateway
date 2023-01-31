@@ -148,6 +148,11 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return true;
     }
 
+    public byte GetNetworkId()
+    {
+        return GetCapturedConfig().NetworkId;
+    }
+
     public string GetNetworkName()
     {
         return GetCapturedConfig().NetworkName;
@@ -175,6 +180,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 
         return new NetworkConfiguration
         {
+            NetworkId = (byte)networkConfiguration.NetworkId,
             NetworkName = networkConfiguration.Network,
             HrpDefinition = new HrpDefinition(
                 Package: GetHrpPrefix(at, AddressSubtype.Package),

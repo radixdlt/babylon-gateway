@@ -103,11 +103,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EpochManagerSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the system address (required).</param>
+        /// <param name="address">The Bech32m-encoded human readable version of the component address (required).</param>
         /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch (required).</param>
         /// <param name="round">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch (required).</param>
         /// <param name="roundsPerEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the number of rounds per epoch (required).</param>
-        public EpochManagerSubstateAllOf(string address = default(string), long epoch = default(long), long round = default(long), long roundsPerEpoch = default(long))
+        /// <param name="numUnstakeEpochs">numUnstakeEpochs (required).</param>
+        public EpochManagerSubstateAllOf(string address = default(string), long epoch = default(long), long round = default(long), long roundsPerEpoch = default(long), long numUnstakeEpochs = default(long))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -118,12 +119,13 @@ namespace RadixDlt.CoreApiSdk.Model
             this.Epoch = epoch;
             this.Round = round;
             this.RoundsPerEpoch = roundsPerEpoch;
+            this.NumUnstakeEpochs = numUnstakeEpochs;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the system address
+        /// The Bech32m-encoded human readable version of the component address
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the system address</value>
+        /// <value>The Bech32m-encoded human readable version of the component address</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 
@@ -149,6 +151,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public long RoundsPerEpoch { get; set; }
 
         /// <summary>
+        /// Gets or Sets NumUnstakeEpochs
+        /// </summary>
+        [DataMember(Name = "num_unstake_epochs", IsRequired = true, EmitDefaultValue = true)]
+        public long NumUnstakeEpochs { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -160,6 +168,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  Epoch: ").Append(Epoch).Append("\n");
             sb.Append("  Round: ").Append(Round).Append("\n");
             sb.Append("  RoundsPerEpoch: ").Append(RoundsPerEpoch).Append("\n");
+            sb.Append("  NumUnstakeEpochs: ").Append(NumUnstakeEpochs).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -211,6 +220,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.RoundsPerEpoch == input.RoundsPerEpoch ||
                     this.RoundsPerEpoch.Equals(input.RoundsPerEpoch)
+                ) && 
+                (
+                    this.NumUnstakeEpochs == input.NumUnstakeEpochs ||
+                    this.NumUnstakeEpochs.Equals(input.NumUnstakeEpochs)
                 );
         }
 
@@ -230,6 +243,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
                 hashCode = (hashCode * 59) + this.Round.GetHashCode();
                 hashCode = (hashCode * 59) + this.RoundsPerEpoch.GetHashCode();
+                hashCode = (hashCode * 59) + this.NumUnstakeEpochs.GetHashCode();
                 return hashCode;
             }
         }

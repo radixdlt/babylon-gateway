@@ -105,10 +105,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="version">version (required).</param>
         /// <param name="network">The logical name of the network (required).</param>
+        /// <param name="networkId">The logical id of the network (required).</param>
         /// <param name="networkHrpSuffix">The network suffix used for Bech32m HRPs used for addressing. (required).</param>
         /// <param name="addressTypes">addressTypes (required).</param>
         /// <param name="wellKnownAddresses">wellKnownAddresses (required).</param>
-        public NetworkConfigurationResponse(NetworkConfigurationResponseVersion version = default(NetworkConfigurationResponseVersion), string network = default(string), string networkHrpSuffix = default(string), List<AddressType> addressTypes = default(List<AddressType>), NetworkConfigurationResponseWellKnownAddresses wellKnownAddresses = default(NetworkConfigurationResponseWellKnownAddresses))
+        public NetworkConfigurationResponse(NetworkConfigurationResponseVersion version = default(NetworkConfigurationResponseVersion), string network = default(string), int networkId = default(int), string networkHrpSuffix = default(string), List<AddressType> addressTypes = default(List<AddressType>), NetworkConfigurationResponseWellKnownAddresses wellKnownAddresses = default(NetworkConfigurationResponseWellKnownAddresses))
         {
             // to ensure "version" is required (not null)
             if (version == null)
@@ -122,6 +123,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("network is a required property for NetworkConfigurationResponse and cannot be null");
             }
             this.Network = network;
+            this.NetworkId = networkId;
             // to ensure "networkHrpSuffix" is required (not null)
             if (networkHrpSuffix == null)
             {
@@ -156,6 +158,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public string Network { get; set; }
 
         /// <summary>
+        /// The logical id of the network
+        /// </summary>
+        /// <value>The logical id of the network</value>
+        [DataMember(Name = "network_id", IsRequired = true, EmitDefaultValue = true)]
+        public int NetworkId { get; set; }
+
+        /// <summary>
         /// The network suffix used for Bech32m HRPs used for addressing.
         /// </summary>
         /// <value>The network suffix used for Bech32m HRPs used for addressing.</value>
@@ -184,6 +193,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class NetworkConfigurationResponse {\n");
             sb.Append("  _Version: ").Append(_Version).Append("\n");
             sb.Append("  Network: ").Append(Network).Append("\n");
+            sb.Append("  NetworkId: ").Append(NetworkId).Append("\n");
             sb.Append("  NetworkHrpSuffix: ").Append(NetworkHrpSuffix).Append("\n");
             sb.Append("  AddressTypes: ").Append(AddressTypes).Append("\n");
             sb.Append("  WellKnownAddresses: ").Append(WellKnownAddresses).Append("\n");
@@ -233,6 +243,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Network.Equals(input.Network))
                 ) && 
                 (
+                    this.NetworkId == input.NetworkId ||
+                    this.NetworkId.Equals(input.NetworkId)
+                ) && 
+                (
                     this.NetworkHrpSuffix == input.NetworkHrpSuffix ||
                     (this.NetworkHrpSuffix != null &&
                     this.NetworkHrpSuffix.Equals(input.NetworkHrpSuffix))
@@ -267,6 +281,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Network.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.NetworkId.GetHashCode();
                 if (this.NetworkHrpSuffix != null)
                 {
                     hashCode = (hashCode * 59) + this.NetworkHrpSuffix.GetHashCode();

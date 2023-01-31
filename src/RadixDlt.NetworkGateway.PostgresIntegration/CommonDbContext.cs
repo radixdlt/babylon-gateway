@@ -210,6 +210,7 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<NormalComponentEntity>("normal_component")
             .HasValue<AccountComponentEntity>("account_component")
             .HasValue<ValidatorComponentEntity>("validator_component")
+            .HasValue<AccessControllerComponentEntity>("access_controller_component")
             .HasValue<PackageEntity>("package")
             .HasValue<KeyValueStoreEntity>("key_value_store")
             .HasValue<VaultEntity>("vault")

@@ -71,6 +71,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 [Table("network_configuration")]
 internal class NetworkConfiguration : SingleEntryBase
 {
+    [Column("network_id")]
+    public byte NetworkId { get; set; }
+
     [Column("network_name")]
     public string NetworkName { get; set; }
 
@@ -85,7 +88,8 @@ internal class NetworkConfiguration : SingleEntryBase
 
     public bool HasEqualConfiguration(NetworkConfiguration other)
     {
-        return NetworkName == other.NetworkName
+        return NetworkId == other.NetworkId
+               && NetworkName == other.NetworkName
                && HrpDefinition == other.HrpDefinition
                && WellKnownAddresses == other.WellKnownAddresses
                && AddressTypeDefinitions.SequenceEqual(other.AddressTypeDefinitions);

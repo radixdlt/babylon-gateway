@@ -103,10 +103,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="epochManagerAddress">The Bech32m-encoded human readable version of the system address (required).</param>
-        /// <param name="validatorAddress">The Bech32m-encoded human readable version of the system address (required).</param>
+        /// <param name="epochManagerAddress">The Bech32m-encoded human readable version of the component address (required).</param>
+        /// <param name="validatorAddress">The Bech32m-encoded human readable version of the component address (required).</param>
         /// <param name="key">key (required).</param>
-        public ValidatorSubstateAllOf(string epochManagerAddress = default(string), string validatorAddress = default(string), EcdsaSecp256k1PublicKey key = default(EcdsaSecp256k1PublicKey))
+        /// <param name="stakeVault">stakeVault (required).</param>
+        /// <param name="unstakeVault">unstakeVault (required).</param>
+        /// <param name="liquidStakeUnitResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        /// <param name="unstakeClaimTokenResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        /// <param name="isRegistered">isRegistered (required).</param>
+        public ValidatorSubstateAllOf(string epochManagerAddress = default(string), string validatorAddress = default(string), EcdsaSecp256k1PublicKey key = default(EcdsaSecp256k1PublicKey), EntityReference stakeVault = default(EntityReference), EntityReference unstakeVault = default(EntityReference), string liquidStakeUnitResourceAddress = default(string), string unstakeClaimTokenResourceAddress = default(string), bool isRegistered = default(bool))
         {
             // to ensure "epochManagerAddress" is required (not null)
             if (epochManagerAddress == null)
@@ -126,19 +131,44 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for ValidatorSubstateAllOf and cannot be null");
             }
             this.Key = key;
+            // to ensure "stakeVault" is required (not null)
+            if (stakeVault == null)
+            {
+                throw new ArgumentNullException("stakeVault is a required property for ValidatorSubstateAllOf and cannot be null");
+            }
+            this.StakeVault = stakeVault;
+            // to ensure "unstakeVault" is required (not null)
+            if (unstakeVault == null)
+            {
+                throw new ArgumentNullException("unstakeVault is a required property for ValidatorSubstateAllOf and cannot be null");
+            }
+            this.UnstakeVault = unstakeVault;
+            // to ensure "liquidStakeUnitResourceAddress" is required (not null)
+            if (liquidStakeUnitResourceAddress == null)
+            {
+                throw new ArgumentNullException("liquidStakeUnitResourceAddress is a required property for ValidatorSubstateAllOf and cannot be null");
+            }
+            this.LiquidStakeUnitResourceAddress = liquidStakeUnitResourceAddress;
+            // to ensure "unstakeClaimTokenResourceAddress" is required (not null)
+            if (unstakeClaimTokenResourceAddress == null)
+            {
+                throw new ArgumentNullException("unstakeClaimTokenResourceAddress is a required property for ValidatorSubstateAllOf and cannot be null");
+            }
+            this.UnstakeClaimTokenResourceAddress = unstakeClaimTokenResourceAddress;
+            this.IsRegistered = isRegistered;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the system address
+        /// The Bech32m-encoded human readable version of the component address
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the system address</value>
+        /// <value>The Bech32m-encoded human readable version of the component address</value>
         [DataMember(Name = "epoch_manager_address", IsRequired = true, EmitDefaultValue = true)]
         public string EpochManagerAddress { get; set; }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the system address
+        /// The Bech32m-encoded human readable version of the component address
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the system address</value>
+        /// <value>The Bech32m-encoded human readable version of the component address</value>
         [DataMember(Name = "validator_address", IsRequired = true, EmitDefaultValue = true)]
         public string ValidatorAddress { get; set; }
 
@@ -147,6 +177,38 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
         public EcdsaSecp256k1PublicKey Key { get; set; }
+
+        /// <summary>
+        /// Gets or Sets StakeVault
+        /// </summary>
+        [DataMember(Name = "stake_vault", IsRequired = true, EmitDefaultValue = true)]
+        public EntityReference StakeVault { get; set; }
+
+        /// <summary>
+        /// Gets or Sets UnstakeVault
+        /// </summary>
+        [DataMember(Name = "unstake_vault", IsRequired = true, EmitDefaultValue = true)]
+        public EntityReference UnstakeVault { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the resource address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the resource address</value>
+        [DataMember(Name = "liquid_stake_unit_resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string LiquidStakeUnitResourceAddress { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the resource address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the resource address</value>
+        [DataMember(Name = "unstake_claim_token_resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string UnstakeClaimTokenResourceAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IsRegistered
+        /// </summary>
+        [DataMember(Name = "is_registered", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsRegistered { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -159,6 +221,11 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  EpochManagerAddress: ").Append(EpochManagerAddress).Append("\n");
             sb.Append("  ValidatorAddress: ").Append(ValidatorAddress).Append("\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("  StakeVault: ").Append(StakeVault).Append("\n");
+            sb.Append("  UnstakeVault: ").Append(UnstakeVault).Append("\n");
+            sb.Append("  LiquidStakeUnitResourceAddress: ").Append(LiquidStakeUnitResourceAddress).Append("\n");
+            sb.Append("  UnstakeClaimTokenResourceAddress: ").Append(UnstakeClaimTokenResourceAddress).Append("\n");
+            sb.Append("  IsRegistered: ").Append(IsRegistered).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -208,6 +275,30 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key == input.Key ||
                     (this.Key != null &&
                     this.Key.Equals(input.Key))
+                ) && 
+                (
+                    this.StakeVault == input.StakeVault ||
+                    (this.StakeVault != null &&
+                    this.StakeVault.Equals(input.StakeVault))
+                ) && 
+                (
+                    this.UnstakeVault == input.UnstakeVault ||
+                    (this.UnstakeVault != null &&
+                    this.UnstakeVault.Equals(input.UnstakeVault))
+                ) && 
+                (
+                    this.LiquidStakeUnitResourceAddress == input.LiquidStakeUnitResourceAddress ||
+                    (this.LiquidStakeUnitResourceAddress != null &&
+                    this.LiquidStakeUnitResourceAddress.Equals(input.LiquidStakeUnitResourceAddress))
+                ) && 
+                (
+                    this.UnstakeClaimTokenResourceAddress == input.UnstakeClaimTokenResourceAddress ||
+                    (this.UnstakeClaimTokenResourceAddress != null &&
+                    this.UnstakeClaimTokenResourceAddress.Equals(input.UnstakeClaimTokenResourceAddress))
+                ) && 
+                (
+                    this.IsRegistered == input.IsRegistered ||
+                    this.IsRegistered.Equals(input.IsRegistered)
                 );
         }
 
@@ -232,6 +323,23 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
+                if (this.StakeVault != null)
+                {
+                    hashCode = (hashCode * 59) + this.StakeVault.GetHashCode();
+                }
+                if (this.UnstakeVault != null)
+                {
+                    hashCode = (hashCode * 59) + this.UnstakeVault.GetHashCode();
+                }
+                if (this.LiquidStakeUnitResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.LiquidStakeUnitResourceAddress.GetHashCode();
+                }
+                if (this.UnstakeClaimTokenResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.UnstakeClaimTokenResourceAddress.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.IsRegistered.GetHashCode();
                 return hashCode;
             }
         }

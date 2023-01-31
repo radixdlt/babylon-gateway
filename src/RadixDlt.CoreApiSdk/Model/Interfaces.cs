@@ -79,4 +79,4 @@ public interface IGlobalResourcePointer
     public IEnumerable<GlobalResourcePointer> GetPointers();
 }
 
-public record GlobalResourcePointer(ResourceType Type, string GlobalAddress);
+public record GlobalResourcePointer(string GlobalAddress);

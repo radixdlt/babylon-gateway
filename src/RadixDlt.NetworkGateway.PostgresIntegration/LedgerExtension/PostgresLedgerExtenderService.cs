@@ -515,6 +515,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 {
                     EpochManagerEntity => CoreModel.EntityType.EpochManager,
                     ResourceManagerEntity => CoreModel.EntityType.ResourceManager,
+                    AccessControllerComponentEntity => CoreModel.EntityType.AccessController,
                     ComponentEntity => CoreModel.EntityType.Component,
                     PackageEntity => CoreModel.EntityType.Package,
                     KeyValueStoreEntity => CoreModel.EntityType.KeyValueStore,
@@ -542,8 +543,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     CoreModel.EntityType.ResourceManager => re.CreateUsingTypeHint<ResourceManagerEntity>(),
                     // If the component is a local / owned component, it doesn't have a Component/Account type hint
                     // from the address, so assume it's a normal component for now until we can do better from the ComponentInfo
-                    CoreModel.EntityType.Component => re.CreateUsingTypeHintOrDefault<ComponentEntity>(typeof(NormalComponentEntity)),
+                    CoreModel.EntityType.AccessController => new AccessControllerComponentEntity(),
                     CoreModel.EntityType.Validator => new ValidatorComponentEntity(),
+                    CoreModel.EntityType.Component => re.CreateUsingTypeHintOrDefault<ComponentEntity>(typeof(NormalComponentEntity)),
                     CoreModel.EntityType.Package => new PackageEntity(),
                     CoreModel.EntityType.Vault => new VaultEntity(),
                     CoreModel.EntityType.KeyValueStore => new KeyValueStoreEntity(),

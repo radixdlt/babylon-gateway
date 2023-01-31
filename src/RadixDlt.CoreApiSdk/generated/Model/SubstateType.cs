@@ -201,7 +201,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum Vault for value: Vault
         /// </summary>
         [EnumMember(Value = "Vault")]
-        Vault = 18
+        Vault = 18,
+
+        /// <summary>
+        /// Enum AccessController for value: AccessController
+        /// </summary>
+        [EnumMember(Value = "AccessController")]
+        AccessController = 19
 
     }
 
