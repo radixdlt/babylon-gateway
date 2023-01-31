@@ -74,7 +74,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -107,7 +106,7 @@ internal class SubmissionService : ISubmissionService
 
     public async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
-        var parsedTransaction = await HandlePreSubmissionParseTransaction(request);
+        var parsedTransaction = await HandlePreSubmissionParseTransaction(request, token);
         var submittedTimestamp = _clock.UtcNow;
 
         var trackingGuidance = await _submissionTrackingService.TrackInitialSubmission(
@@ -151,28 +150,42 @@ internal class SubmissionService : ISubmissionService
         }
     }
 
-    private async Task<ToolkitModel.Transaction.NotarizedTransaction> HandlePreSubmissionParseTransaction(GatewayModel.TransactionSubmitRequest request)
+    private async Task<CoreModel.NotarizedTransaction> HandlePreSubmissionParseTransaction(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
     {
         try
         {
-            var notarizedTransaction = ToolkitModel.Transaction.NotarizedTransaction.Decompile(request.GetNotarizedTransactionBytes());
-            var validationConfig = new ToolkitModel.Exchange.ValidationConfig(_coreApiHandler.GetNetworkId());
-            var staticValidationResult = notarizedTransaction.StaticallyValidate(validationConfig);
+            var response = await _coreApiHandler.ParseTransaction(
+                new CoreModel.TransactionParseRequest(
+                    network: _coreApiHandler.GetNetworkIdentifier(),
+                    payloadHex: request.NotarizedTransactionHex,
+                    parseMode: CoreModel.TransactionParseRequest.ParseModeEnum.Notarized,
+                    validationMode: CoreModel.TransactionParseRequest.ValidationModeEnum.Static,
+                    responseMode: CoreModel.TransactionParseRequest.ResponseModeEnum.Full),
+                token);
 
-            if (staticValidationResult is ToolkitModel.Exchange.StaticallyValidateTransactionResponse.Invalid invalid)
+            if (response.Parsed is not CoreModel.ParsedNotarizedTransaction parsed)
             {
-                await _observers.ForEachAsync(x => x.ParsedTransactionStaticallyInvalid(request, invalid.Error));
+                await _observers.ForEachAsync(x => x.ParsedTransactionUnsupportedPayloadType(request, response));
 
-                throw InvalidTransactionException.FromStaticallyInvalid(staticValidationResult.ToString());
+                throw InvalidTransactionException.FromUnsupportedPayloadType();
             }
 
-            return notarizedTransaction;
-        }
-        catch (RadixEngineToolkit.Exceptions.EngineToolkitRequestError ex)
-        {
-            await _observers.ForEachAsync(x => x.ParsedTransactionUnsupportedPayloadType(request, ex));
+            if (parsed.ValidationError != null)
+            {
+                await _observers.ForEachAsync(x => x.ParsedTransactionStaticallyInvalid(request, response));
 
-            throw InvalidTransactionException.FromUnsupportedPayloadType();
+                throw InvalidTransactionException.FromStaticallyInvalid(parsed.ValidationError.Reason);
+            }
+
+            // TODO replace CoreApi call with RadixEngineToolkit.RadixEngineToolkit.DecompileNotarizedTransactionIntent(request.GetNotarizedTransactionBytes());
+
+            return parsed.NotarizedTransaction;
+        }
+        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Permanent)
+        {
+            await _observers.ForEachAsync(x => x.ParseTransactionFailedInvalidTransaction(request, ex));
+
+            throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(ex);
         }
         catch (Exception ex)
         {
@@ -184,7 +197,7 @@ internal class SubmissionService : ISubmissionService
 
     private async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitAndCreateResponse(
         GatewayModel.TransactionSubmitRequest request,
-        ToolkitModel.Transaction.NotarizedTransaction parsedTransaction,
+        CoreModel.NotarizedTransaction parsedTransaction,
         CancellationToken token)
     {
         using var timeoutTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3)); // TODO configurable
@@ -194,7 +207,7 @@ internal class SubmissionService : ISubmissionService
         {
             var result = await _coreApiHandler.SubmitTransaction(
                 new CoreModel.TransactionSubmitRequest(
-                    _coreApiHandler.GetNetworkName(),
+                    _coreApiHandler.GetNetworkIdentifier(),
                     request.NotarizedTransactionHex
                 ),
                 finalTokenSource.Token
@@ -220,7 +233,7 @@ internal class SubmissionService : ISubmissionService
 
             await _submissionTrackingService.MarkAsFailed(
                 true,
-                parsedTransaction.TransactionHash(),
+                parsedTransaction.GetHashBytes(),
                 ex.Error.Message,
                 token
             );
@@ -234,7 +247,7 @@ internal class SubmissionService : ISubmissionService
 
             await _submissionTrackingService.MarkAsFailed(
                 false,
-                parsedTransaction.TransactionHash(),
+                parsedTransaction.GetHashBytes(),
                 ex.Error.Message,
                 token
             );

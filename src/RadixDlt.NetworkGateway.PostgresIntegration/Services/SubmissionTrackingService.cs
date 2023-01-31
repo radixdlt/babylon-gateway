@@ -75,7 +75,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
-using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -97,12 +96,12 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
 
     public async Task<TackingGuidance> TrackInitialSubmission(
         DateTime submittedTimestamp,
-        ToolkitModel.Transaction.NotarizedTransaction notarizedTransaction,
+        CoreModel.NotarizedTransaction notarizedTransaction,
         string submittedToNodeName,
         CancellationToken token = default
     )
     {
-        var existingPendingTransaction = await GetPendingTransaction(notarizedTransaction.TransactionHash(), token);
+        var existingPendingTransaction = await GetPendingTransaction(notarizedTransaction.GetHashBytes(), token);
 
         if (existingPendingTransaction != null)
         {
@@ -119,10 +118,10 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         }
 
         var pendingTransaction = PendingTransaction.NewAsSubmittedForFirstTimeByGateway(
-            notarizedTransaction.TransactionHash(),
-            notarizedTransaction.SignedIntent.Intent.Hash(),
-            notarizedTransaction.SignedIntent.Hash(),
-            notarizedTransaction.Compile(),
+            notarizedTransaction.GetHashBytes(),
+            notarizedTransaction.SignedIntent.Intent.GetHashBytes(),
+            notarizedTransaction.SignedIntent.GetHashBytes(),
+            notarizedTransaction.GetPayloadBytes(),
             submittedToNodeName,
             submittedTimestamp
         );
