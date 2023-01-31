@@ -267,7 +267,7 @@ SELECT
     nextval('non_fungible_id_mutable_data_history_id_seq') AS NonFungibleIdMutableDataHistorySequence,
     nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence,
     nextval('validator_key_history_id_seq') AS ValidatorKeyHistorySequence,
-    nextval('validator_set_history_id_seq') AS ValidatorSetHistorySequence",
+    nextval('validator_active_set_history_id_seq') AS ValidatorActiveSetHistorySequence",
             cancellationToken: token);
 
         return await _connection.QueryFirstAsync<SequencesHolder>(cd);

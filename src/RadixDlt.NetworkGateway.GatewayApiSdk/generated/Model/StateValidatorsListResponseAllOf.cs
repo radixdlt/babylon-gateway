@@ -84,52 +84,41 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// InvalidEntityError
+    /// StateValidatorsListResponseAllOf
     /// </summary>
-    [DataContract(Name = "InvalidEntityError")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(EntityNotFoundError), "EntityNotFoundError")]
-    [JsonSubtypes.KnownSubType(typeof(InternalServerError), "InternalServerError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidEntityError), "InvalidEntityError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidRequestError), "InvalidRequestError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidTransactionError), "InvalidTransactionError")]
-    [JsonSubtypes.KnownSubType(typeof(NotSyncedUpError), "NotSyncedUpError")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionNotFoundError), "TransactionNotFoundError")]
-    public partial class InvalidEntityError : GatewayError, IEquatable<InvalidEntityError>
+    [DataContract(Name = "StateValidatorsListResponse_allOf")]
+    public partial class StateValidatorsListResponseAllOf : IEquatable<StateValidatorsListResponseAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="InvalidEntityError" /> class.
+        /// Initializes a new instance of the <see cref="StateValidatorsListResponseAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected InvalidEntityError() { }
+        protected StateValidatorsListResponseAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="InvalidEntityError" /> class.
+        /// Initializes a new instance of the <see cref="StateValidatorsListResponseAllOf" /> class.
         /// </summary>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="type">The type of error. Each subtype may have its own additional structured fields. (required) (default to &quot;InvalidEntityError&quot;).</param>
-        public InvalidEntityError(string address = default(string), string type = "InvalidEntityError") : base(type)
+        /// <param name="validators">validators (required).</param>
+        public StateValidatorsListResponseAllOf(ValidatorCollection validators = default(ValidatorCollection))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "validators" is required (not null)
+            if (validators == null)
             {
-                throw new ArgumentNullException("address is a required property for InvalidEntityError and cannot be null");
+                throw new ArgumentNullException("validators is a required property for StateValidatorsListResponseAllOf and cannot be null");
             }
-            this.Address = address;
+            this.Validators = validators;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// Gets or Sets Validators
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        [DataMember(Name = "validators", IsRequired = true, EmitDefaultValue = true)]
+        public ValidatorCollection Validators { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -138,9 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class InvalidEntityError {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("class StateValidatorsListResponseAllOf {\n");
+            sb.Append("  Validators: ").Append(Validators).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,7 +137,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -161,25 +149,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as InvalidEntityError);
+            return this.Equals(input as StateValidatorsListResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if InvalidEntityError instances are equal
+        /// Returns true if StateValidatorsListResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of InvalidEntityError to be compared</param>
+        /// <param name="input">Instance of StateValidatorsListResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(InvalidEntityError input)
+        public bool Equals(StateValidatorsListResponseAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.Validators == input.Validators ||
+                    (this.Validators != null &&
+                    this.Validators.Equals(input.Validators))
                 );
         }
 
@@ -191,10 +179,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.Address != null)
+                int hashCode = 41;
+                if (this.Validators != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Validators.GetHashCode();
                 }
                 return hashCode;
             }

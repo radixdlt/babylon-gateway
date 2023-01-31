@@ -91,45 +91,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// InvalidEntityError
+    /// PublicKey
     /// </summary>
-    [DataContract(Name = "InvalidEntityError")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(EntityNotFoundError), "EntityNotFoundError")]
-    [JsonSubtypes.KnownSubType(typeof(InternalServerError), "InternalServerError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidEntityError), "InvalidEntityError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidRequestError), "InvalidRequestError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidTransactionError), "InvalidTransactionError")]
-    [JsonSubtypes.KnownSubType(typeof(NotSyncedUpError), "NotSyncedUpError")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionNotFoundError), "TransactionNotFoundError")]
-    public partial class InvalidEntityError : GatewayError, IEquatable<InvalidEntityError>
+    [DataContract(Name = "PublicKey")]
+    [JsonConverter(typeof(JsonSubtypes), "key_type")]
+    [JsonSubtypes.KnownSubType(typeof(PublicKeyEcdsaSecp256k1), "EcdsaSecp256k1")]
+    [JsonSubtypes.KnownSubType(typeof(PublicKeyEddsaEd25519), "EddsaEd25519")]
+    [JsonSubtypes.KnownSubType(typeof(PublicKeyEcdsaSecp256k1), "PublicKeyEcdsaSecp256k1")]
+    [JsonSubtypes.KnownSubType(typeof(PublicKeyEddsaEd25519), "PublicKeyEddsaEd25519")]
+    public partial class PublicKey : IEquatable<PublicKey>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InvalidEntityError" /> class.
-        /// </summary>
-        [JsonConstructorAttribute]
-        protected InvalidEntityError() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InvalidEntityError" /> class.
-        /// </summary>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="type">The type of error. Each subtype may have its own additional structured fields. (required) (default to &quot;InvalidEntityError&quot;).</param>
-        public InvalidEntityError(string address = default(string), string type = "InvalidEntityError") : base(type)
-        {
-            // to ensure "address" is required (not null)
-            if (address == null)
-            {
-                throw new ArgumentNullException("address is a required property for InvalidEntityError and cannot be null");
-            }
-            this.Address = address;
-        }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// Gets or Sets KeyType
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        [DataMember(Name = "key_type", IsRequired = true, EmitDefaultValue = true)]
+        public PublicKeyType KeyType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PublicKey" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected PublicKey() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PublicKey" /> class.
+        /// </summary>
+        /// <param name="keyType">keyType (required).</param>
+        public PublicKey(PublicKeyType keyType = default(PublicKeyType))
+        {
+            this.KeyType = keyType;
+        }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -138,9 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class InvalidEntityError {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("class PublicKey {\n");
+            sb.Append("  KeyType: ").Append(KeyType).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,7 +138,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -161,25 +150,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as InvalidEntityError);
+            return this.Equals(input as PublicKey);
         }
 
         /// <summary>
-        /// Returns true if InvalidEntityError instances are equal
+        /// Returns true if PublicKey instances are equal
         /// </summary>
-        /// <param name="input">Instance of InvalidEntityError to be compared</param>
+        /// <param name="input">Instance of PublicKey to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(InvalidEntityError input)
+        public bool Equals(PublicKey input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.KeyType == input.KeyType ||
+                    this.KeyType.Equals(input.KeyType)
                 );
         }
 
@@ -191,11 +179,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.Address != null)
-                {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
-                }
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.KeyType.GetHashCode();
                 return hashCode;
             }
         }

@@ -518,7 +518,7 @@ SELECT
     setval('non_fungible_id_mutable_data_history_id_seq', @nonFungibleIdMutableDataHistorySequence),
     setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence),
     setval('validator_key_history_id_seq', @validatorKeyHistorySequence),
-    setval('validator_set_history_id_seq', @validatorSetHistorySequence)",
+    setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence)",
             parameters: new
             {
                 componentEntityStateHistorySequence = sequences.ComponentEntityStateHistorySequence,
@@ -532,7 +532,7 @@ SELECT
                 nonFungibleIdMutableDataHistorySequence = sequences.NonFungibleIdMutableDataHistorySequence,
                 nonFungibleIdStoreHistorySequence = sequences.NonFungibleIdStoreHistorySequence,
                 validatorKeyHistorySequence = sequences.ValidatorKeyHistorySequence,
-                validatorSetHistorySequence = sequences.ValidatorSetHistorySequence,
+                validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,
             },
             cancellationToken: token);
 

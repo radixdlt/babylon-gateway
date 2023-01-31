@@ -80,11 +80,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-<<<<<<<< HEAD:src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/20230131135010_InitialCreate.Designer.cs
-    [Migration("20230131135010_InitialCreate")]
-========
-    [Migration("20230131115709_InitialCreate")]
->>>>>>>> f9fd7fa1 (feat: added ValidatorKeyHistory and ValidatorActiveSetHistory):src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/20230131115709_InitialCreate.Designer.cs
+    [Migration("20230131140234_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -748,26 +744,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("resource_manager_entity_supply_history");
                 });
 
-<<<<<<<< HEAD:src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/20230131135010_InitialCreate.Designer.cs
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccessControllerComponentEntity", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
-
-                    b.Property<string>("BlueprintName")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("text")
-                        .HasColumnName("blueprint_name");
-
-                    b.Property<long>("PackageId")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("bigint")
-                        .HasColumnName("package_id");
-
-                    b.ToTable("entities");
-
-                    b.HasDiscriminator().HasValue("access_controller_component");
-========
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorActiveSetHistory", b =>
                 {
                     b.Property<long>("Id")
@@ -826,7 +802,26 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("ValidatorEntityId", "KeyType", "Key");
 
                     b.ToTable("validator_key_history");
->>>>>>>> f9fd7fa1 (feat: added ValidatorKeyHistory and ValidatorActiveSetHistory):src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/20230131115709_InitialCreate.Designer.cs
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccessControllerComponentEntity", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.Property<string>("BlueprintName")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_name");
+
+                    b.Property<long>("PackageId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("package_id");
+
+                    b.ToTable("entities");
+
+                    b.HasDiscriminator().HasValue("access_controller_component");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountComponentEntity", b =>

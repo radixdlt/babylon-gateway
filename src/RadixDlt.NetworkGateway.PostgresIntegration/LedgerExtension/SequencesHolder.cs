@@ -88,5 +88,5 @@ internal class SequencesHolder
 
     public long ValidatorKeyHistorySequence { get; set; }
 
-    public long ValidatorSetHistorySequence { get; set; }
+    public long ValidatorActiveSetHistorySequence { get; set; }
 }

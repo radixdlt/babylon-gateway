@@ -62,35 +62,23 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Runtime.Serialization;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public interface IEntityStateQuerier
+[DataContract]
+public sealed record StateValidatorsListCursor(long? StateVersionBoundary)
 {
-    public sealed record PageRequest(DecodedRadixAddress Address, int Offset, int Limit);
+    [DataMember(Name = "v", EmitDefaultValue = false)]
+    public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
 
-    Task<GatewayModel.EntityResourcesResponse> EntityResourcesSnapshot(DecodedRadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    public static StateValidatorsListCursor FromCursorString(string cursorString)
+    {
+        return Serializations.FromBase64JsonOrDefault<StateValidatorsListCursor>(cursorString);
+    }
 
-    Task<GatewayModel.EntityDetailsResponse> EntityDetailsSnapshot(DecodedRadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<GatewayModel.EntityOverviewResponse> EntityOverview(ICollection<DecodedRadixAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<GatewayModel.EntityMetadataResponse> EntityMetadata(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<GatewayModel.EntityFungiblesResponse> EntityFungibles(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<GatewayModel.EntityNonFungiblesResponse> EntityNonFungibles(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<GatewayModel.EntityNonFungibleIdsResponse> EntityNonFungibleIds(PageRequest request, DecodedRadixAddress resourceAddress, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<GatewayModel.NonFungibleIdsResponse> NonFungibleIds(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<GatewayModel.NonFungibleDataResponse> NonFungibleIdData(DecodedRadixAddress address, string nonFungibleId, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    public string ToCursorString()
+    {
+        return Serializations.AsBase64Json(this);
+    }
 }

@@ -708,17 +708,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         nonFungibleIdStoreChanges.Add(new NonFungibleIdChange(re, resourceManagerEntity, nonFungibleStoreEntry.NonFungibleId.SimpleRep, nonFungibleStoreEntry.IsDeleted, nonFungibleStoreEntry.NonFungibleData, stateVersion));
                     }
 
-                    if (sd is CoreModel.ComponentStateSubstate componentState)
-                    {
-                        componentEntityStateToAdd.Add(new ComponentEntityStateHistory
-                        {
-                            Id = sequences.ComponentEntityStateHistorySequence++,
-                            FromStateVersion = stateVersion,
-                            ComponentEntityId = referencedEntities.Get(sid.EntityIdHex).DatabaseId,
-                            State = componentState.DataStruct.StructData.ToJson(),
-                        });
-                    }
-
                     if (sd is CoreModel.AccessRulesChainSubstate accessRulesChain)
                     {
                         AccessRulesChainSubtype subtype = sid.SubstateKeyType switch
@@ -738,6 +727,17 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         });
                     }
 
+                    if (sd is CoreModel.ComponentStateSubstate componentState)
+                    {
+                        componentEntityStateToAdd.Add(new ComponentEntityStateHistory
+                        {
+                            Id = sequences.ComponentEntityStateHistorySequence++,
+                            FromStateVersion = stateVersion,
+                            ComponentEntityId = referencedEntities.Get(sid.EntityIdHex).DatabaseId,
+                            State = componentState.DataStruct.StructData.ToJson(),
+                        });
+                    }
+
                     if (sd is CoreModel.ValidatorSubstate validator)
                     {
                         var lookup = new ValidatorKeyLookup(referencedEntities.Get(sid.EntityIdHex).DatabaseId, validator.Key.KeyType.ToModel(), validator.Key.GetKeyBytes());
@@ -750,6 +750,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             KeyType = lookup.KeyType,
                             Key = lookup.Key,
                         };
+
+                        componentEntityStateToAdd.Add(new ComponentEntityStateHistory
+                        {
+                            Id = sequences.ComponentEntityStateHistorySequence++,
+                            FromStateVersion = stateVersion,
+                            ComponentEntityId = referencedEntities.Get(sid.EntityIdHex).DatabaseId,
+                            State = validator.ToJson(),
+                        });
                     }
 
                     if (sd is CoreModel.ValidatorSetSubstate validatorSet && sid.SubstateKeyType == CoreModel.SubstateKeyType.CurrentValidatorSet)
@@ -983,7 +991,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 {
                     return new ValidatorActiveSetHistory
                     {
-                        Id = sequences.ValidatorSetHistorySequence++,
+                        Id = sequences.ValidatorActiveSetHistorySequence++,
                         FromStateVersion = e.StateVersion,
                         ValidatorKeyIds = e.ValidatorSet
                             .Select(v => existingValidatorKeys.GetOrAdd(v, _ => validatorKeyHistoryToAdd[v]).Id)

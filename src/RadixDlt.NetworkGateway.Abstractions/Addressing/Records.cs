@@ -68,6 +68,7 @@ public sealed record HrpDefinition(
     string Package,
     string NormalComponent,
     string AccountComponent,
+    string ValidatorComponent,
     string EpochManager,
     string Clock,
     string Resource

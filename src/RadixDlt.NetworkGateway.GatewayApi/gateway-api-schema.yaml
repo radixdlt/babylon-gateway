@@ -511,6 +511,28 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+  /state/validators/list:
+    post:
+      operationId: StateValidatorsList
+      summary: Get Validators List
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateValidatorsListRequest"
+      responses:
+        "200":
+          description: Validators List
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateValidatorsListResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
 components:
   responses:
     ErrorResponse:
@@ -557,6 +579,52 @@ components:
     AccessRulesChain:
       description: Refer to `#/components/schemas/AccessRules` of CoreApi for more details.
       type: object
+
+    #
+    # Keys
+    #
+    PublicKeyType:
+      type: string
+      enum:
+        - EcdsaSecp256k1
+        - EddsaEd25519
+    PublicKey:
+      type: object
+      required:
+        - key_type
+      properties:
+        key_type:
+          $ref: "#/components/schemas/PublicKeyType"
+      discriminator:
+        propertyName: key_type
+        mapping:
+          # NOTE: These need to match PublicKeyType
+          EcdsaSecp256k1: "#/components/schemas/PublicKeyEcdsaSecp256k1"
+          EddsaEd25519: "#/components/schemas/PublicKeyEddsaEd25519"
+    PublicKeyEcdsaSecp256k1:
+      allOf:
+        - $ref: "#/components/schemas/PublicKey"
+        - type: object
+          required:
+            - key_hex
+          properties:
+            key_hex:
+              type: string
+              minLength: 66
+              maxLength: 66
+              description: The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes)
+    PublicKeyEddsaEd25519:
+      allOf:
+        - $ref: "#/components/schemas/PublicKey"
+        - type: object
+          required:
+            - key_hex
+          properties:
+            key_hex:
+              type: string
+              minLength: 64
+              maxLength: 64
+              description: The hex-encoded compressed EdDSA Ed25519 public key (32 bytes)
 
     #
     # Common Request Types
@@ -808,6 +876,46 @@ components:
         - number
         - bytes
         - uuid
+
+    ValidatorCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/ValidatorCollectionItem"
+    ValidatorCollectionItem:
+      type: object
+      required:
+        - address
+        - metadata
+      properties:
+        address:
+          $ref: "#/components/schemas/EntityAddress"
+        state:
+          type: object
+          nullable: true
+        active_in_epoch:
+          $ref: "#/components/schemas/ValidatorCollectionItemActiveInEpoch"
+        metadata:
+          $ref: "#/components/schemas/EntityMetadataCollection"
+    ValidatorCollectionItemActiveInEpoch:
+      type: object
+      nullable: true
+      required:
+        - stake
+        - key
+      properties:
+        stake:
+          type: object
+        key:
+          $ref: "#/components/schemas/PublicKey"
+        metadata:
+          $ref: "#/components/schemas/EntityMetadataCollection"
 
     #
     # /gateway/* Request & Response Types
@@ -1426,6 +1534,29 @@ components:
               $ref: "#/components/schemas/HexString"
             immutable_data_hex:
               $ref: "#/components/schemas/HexString"
+
+    #
+    # /state/validators/* Request & Response Types
+    #
+
+    StateValidatorsListRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - type: object
+          properties:
+            cursor:
+              description: This cursor allows forward pagination, by providing the cursor from the previous request.
+              type: string
+              nullable: true
+    StateValidatorsListResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - validators
+          properties:
+            validators:
+              $ref: "#/components/schemas/ValidatorCollection"
 
     #
     # Errors
