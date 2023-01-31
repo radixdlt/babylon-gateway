@@ -67,7 +67,6 @@ using System;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using ToolkitModel = RadixDlt.RadixEngineToolkit.Models;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -85,7 +84,7 @@ public interface ISubmissionServiceObserver
 
     ValueTask ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, RadixEngineToolkit.Exceptions.EngineToolkitRequestError exception);
 
-    ValueTask ParsedTransactionStaticallyInvalid(GatewayModel.TransactionSubmitRequest request, ToolkitModel.Requests.StaticValidationResult response);
+    ValueTask ParsedTransactionStaticallyInvalid(GatewayModel.TransactionSubmitRequest request, string error);
 
     ValueTask SubmissionAlreadyFailed(GatewayModel.TransactionSubmitRequest request, TackingGuidance tackingGuidance);
 

@@ -75,7 +75,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
-using ToolkitModel = RadixDlt.RadixEngineToolkit.Models;
+using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 

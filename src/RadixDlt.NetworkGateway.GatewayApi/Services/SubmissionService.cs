@@ -74,7 +74,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using ToolkitModel = RadixDlt.RadixEngineToolkit.Models;
+using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -156,12 +156,13 @@ internal class SubmissionService : ISubmissionService
         try
         {
             var notarizedTransaction = ToolkitModel.Transaction.NotarizedTransaction.Decompile(request.GetNotarizedTransactionBytes());
-            var validationConfig = new ToolkitModel.Requests.ValidationConfig(_coreApiHandler.GetNetworkId());
+            var validationConfig = new ToolkitModel.Exchange.ValidationConfig(_coreApiHandler.GetNetworkId());
             var staticValidationResult = notarizedTransaction.StaticallyValidate(validationConfig);
 
-            if (!staticValidationResult.isValid())
+            if (staticValidationResult is ToolkitModel.Exchange.StaticallyValidateTransactionResponse.Invalid invalid)
             {
-                await _observers.ForEachAsync(x => x.ParsedTransactionStaticallyInvalid(request, staticValidationResult));
+                await _observers.ForEachAsync(x => x.ParsedTransactionStaticallyInvalid(request, invalid.Error));
+
                 throw InvalidTransactionException.FromStaticallyInvalid(staticValidationResult.ToString());
             }
 
