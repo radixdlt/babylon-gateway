@@ -82,9 +82,9 @@ public interface ISubmissionServiceObserver
 
     ValueTask ParseTransactionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception);
 
-    ValueTask ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionParseResponse response);
+    ValueTask ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, RadixEngineToolkit.Exceptions.EngineToolkitRequestError exception);
 
-    ValueTask ParsedTransactionStaticallyInvalid(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionParseResponse response);
+    ValueTask ParsedTransactionStaticallyInvalid(GatewayModel.TransactionSubmitRequest request, string error);
 
     ValueTask SubmissionAlreadyFailed(GatewayModel.TransactionSubmitRequest request, TackingGuidance tackingGuidance);
 
