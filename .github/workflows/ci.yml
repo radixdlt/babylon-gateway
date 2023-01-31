@@ -3,6 +3,7 @@ name: main
 on:
   push:
     branches:
+      - main
       - develop
 
 jobs:
@@ -33,7 +34,10 @@ jobs:
       data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag}}
       gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag}}
       database-migrations-tag: ${{ steps.setup_tags.outputs.database-migrations-tag}}
-
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: read
     steps:
       - name: Dump context
         uses: crazy-max/ghaction-dump-context@516dbb0c760f39b4cdd750ae095f1688780f68f4
@@ -41,12 +45,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Login to GCR
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+      - id: auth
+        uses: google-github-actions/auth@a61909d048e0be579b6c15b27088d19668493851
         with:
-          registry: eu.gcr.io
-          username: _json_key
-          password: ${{ secrets.GCR_EU_DEV_JSON_KEY }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: configure-docker
+        run: |
+            gcloud auth configure-docker -q
 
       - name: Setup tags for docker image
         id: setup_tags
@@ -85,12 +91,37 @@ jobs:
 
   deploy-on-gilganet:
     runs-on: ubuntu-22.04
+    if: github.ref == 'refs/heads/main'
     needs: publish-docker
     steps:
       - name: Trigger deployment event ${{ github.ref }}
         env:
           NAMESPACE: "ng-gilganet"
-          EVENT_TYPE: "ng_babylon_dev"
+          EVENT_TYPE: "ng_babylon_gilganet"
+        run: |
+          curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/${{secrets.DISPATCH_REPO}}/dispatches' \
+            --header 'Accept: application/vnd.github.v3+json' \
+            --header 'Authorization: Basic ${{secrets.CF_GITHUB_WORKER_ENCODED_BASIC_AUTH}}' \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+                "event_type": "${{env.EVENT_TYPE}}",
+                "client_payload": {
+                  "namespace_postfix": "${{env.NAMESPACE}}",
+                  "data_aggregator_image_tag": "${{ needs.publish-docker.outputs.data-aggregator-tag }}",
+                  "gateway_api_image_tag": "${{ needs.publish-docker.outputs.gateway-api-tag }}",
+                  "database_migrations_image_tag": "${{ needs.publish-docker.outputs.database-migrations-tag }}"
+                }
+            }'
+
+  deploy-on-mardunet:
+    runs-on: ubuntu-22.04
+    needs: publish-docker
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Trigger deployment event ${{ github.ref }}
+        env:
+          NAMESPACE: "ng-mardunet"
+          EVENT_TYPE: "ng_babylon_mardunet"
         run: |
           curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/${{secrets.DISPATCH_REPO}}/dispatches' \
             --header 'Accept: application/vnd.github.v3+json' \
