@@ -105,7 +105,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="validatorSet">validatorSet (required).</param>
         /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch the validator set is a part of (required).</param>
-        public ValidatorSetSubstateAllOf(List<Validator> validatorSet = default(List<Validator>), long epoch = default(long))
+        public ValidatorSetSubstateAllOf(List<ActiveValidator> validatorSet = default(List<ActiveValidator>), long epoch = default(long))
         {
             // to ensure "validatorSet" is required (not null)
             if (validatorSet == null)
@@ -120,7 +120,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets ValidatorSet
         /// </summary>
         [DataMember(Name = "validator_set", IsRequired = true, EmitDefaultValue = true)]
-        public List<Validator> ValidatorSet { get; set; }
+        public List<ActiveValidator> ValidatorSet { get; set; }
 
         /// <summary>
         /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch the validator set is a part of

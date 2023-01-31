@@ -95,6 +95,8 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [DataContract(Name = "Substate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
+    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
+    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessControllerSubstate")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChainSubstate")]
     [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]

@@ -90,41 +90,48 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Validator
+    /// ActiveValidator
     /// </summary>
-    [DataContract(Name = "Validator")]
-    public partial class Validator : IEquatable<Validator>
+    [DataContract(Name = "ActiveValidator")]
+    public partial class ActiveValidator : IEquatable<ActiveValidator>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Validator" /> class.
+        /// Initializes a new instance of the <see cref="ActiveValidator" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected Validator() { }
+        protected ActiveValidator() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="Validator" /> class.
+        /// Initializes a new instance of the <see cref="ActiveValidator" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the system address (required).</param>
+        /// <param name="address">The Bech32m-encoded human readable version of the component address (required).</param>
         /// <param name="key">key (required).</param>
-        public Validator(string address = default(string), EcdsaSecp256k1PublicKey key = default(EcdsaSecp256k1PublicKey))
+        /// <param name="stake">A string-encoded decimal representing the validator&#39;s voting power for this epoch. This is a snapshot of the amount of XRD staked to the validator at the start of the epoch.  (required).</param>
+        public ActiveValidator(string address = default(string), EcdsaSecp256k1PublicKey key = default(EcdsaSecp256k1PublicKey), string stake = default(string))
         {
             // to ensure "address" is required (not null)
             if (address == null)
             {
-                throw new ArgumentNullException("address is a required property for Validator and cannot be null");
+                throw new ArgumentNullException("address is a required property for ActiveValidator and cannot be null");
             }
             this.Address = address;
             // to ensure "key" is required (not null)
             if (key == null)
             {
-                throw new ArgumentNullException("key is a required property for Validator and cannot be null");
+                throw new ArgumentNullException("key is a required property for ActiveValidator and cannot be null");
             }
             this.Key = key;
+            // to ensure "stake" is required (not null)
+            if (stake == null)
+            {
+                throw new ArgumentNullException("stake is a required property for ActiveValidator and cannot be null");
+            }
+            this.Stake = stake;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the system address
+        /// The Bech32m-encoded human readable version of the component address
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the system address</value>
+        /// <value>The Bech32m-encoded human readable version of the component address</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 
@@ -135,15 +142,23 @@ namespace RadixDlt.CoreApiSdk.Model
         public EcdsaSecp256k1PublicKey Key { get; set; }
 
         /// <summary>
+        /// A string-encoded decimal representing the validator&#39;s voting power for this epoch. This is a snapshot of the amount of XRD staked to the validator at the start of the epoch. 
+        /// </summary>
+        /// <value>A string-encoded decimal representing the validator&#39;s voting power for this epoch. This is a snapshot of the amount of XRD staked to the validator at the start of the epoch. </value>
+        [DataMember(Name = "stake", IsRequired = true, EmitDefaultValue = true)]
+        public string Stake { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class Validator {\n");
+            sb.Append("class ActiveValidator {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("  Stake: ").Append(Stake).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,15 +179,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as Validator);
+            return this.Equals(input as ActiveValidator);
         }
 
         /// <summary>
-        /// Returns true if Validator instances are equal
+        /// Returns true if ActiveValidator instances are equal
         /// </summary>
-        /// <param name="input">Instance of Validator to be compared</param>
+        /// <param name="input">Instance of ActiveValidator to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(Validator input)
+        public bool Equals(ActiveValidator input)
         {
             if (input == null)
             {
@@ -188,6 +203,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key == input.Key ||
                     (this.Key != null &&
                     this.Key.Equals(input.Key))
+                ) && 
+                (
+                    this.Stake == input.Stake ||
+                    (this.Stake != null &&
+                    this.Stake.Equals(input.Stake))
                 );
         }
 
@@ -207,6 +227,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Key != null)
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                }
+                if (this.Stake != null)
+                {
+                    hashCode = (hashCode * 59) + this.Stake.GetHashCode();
                 }
                 return hashCode;
             }

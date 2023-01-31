@@ -95,6 +95,7 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [DataContract(Name = "ValidatorSetSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
+    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
     [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
     [JsonSubtypes.KnownSubType(typeof(ComponentInfoSubstate), "ComponentInfo")]
@@ -126,7 +127,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="validatorSet">validatorSet (required).</param>
         /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch the validator set is a part of (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.ValidatorSet).</param>
-        public ValidatorSetSubstate(List<Validator> validatorSet = default(List<Validator>), long epoch = default(long), SubstateType substateType = SubstateType.ValidatorSet) : base(substateType)
+        public ValidatorSetSubstate(List<ActiveValidator> validatorSet = default(List<ActiveValidator>), long epoch = default(long), SubstateType substateType = SubstateType.ValidatorSet) : base(substateType)
         {
             // to ensure "validatorSet" is required (not null)
             if (validatorSet == null)
@@ -141,7 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets ValidatorSet
         /// </summary>
         [DataMember(Name = "validator_set", IsRequired = true, EmitDefaultValue = true)]
-        public List<Validator> ValidatorSet { get; set; }
+        public List<ActiveValidator> ValidatorSet { get; set; }
 
         /// <summary>
         /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch the validator set is a part of

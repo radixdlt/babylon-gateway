@@ -163,6 +163,10 @@ internal class AccountComponentEntity : ComponentEntity
 {
 }
 
+internal class AccessControllerComponentEntity : ComponentEntity
+{
+}
+
 // This is transient model, not stored in database
 internal class VirtualAccountComponentEntity : AccountComponentEntity
 {

@@ -138,22 +138,46 @@ namespace RadixDlt.CoreApiSdk.Model
             EddsaEd25519VirtualAccountComponent = 6,
 
             /// <summary>
+            /// Enum IdentityComponent for value: IdentityComponent
+            /// </summary>
+            [EnumMember(Value = "IdentityComponent")]
+            IdentityComponent = 7,
+
+            /// <summary>
+            /// Enum EcdsaSecp256k1VirtualIdentityComponent for value: EcdsaSecp256k1VirtualIdentityComponent
+            /// </summary>
+            [EnumMember(Value = "EcdsaSecp256k1VirtualIdentityComponent")]
+            EcdsaSecp256k1VirtualIdentityComponent = 8,
+
+            /// <summary>
+            /// Enum EddsaEd25519VirtualIdentityComponent for value: EddsaEd25519VirtualIdentityComponent
+            /// </summary>
+            [EnumMember(Value = "EddsaEd25519VirtualIdentityComponent")]
+            EddsaEd25519VirtualIdentityComponent = 9,
+
+            /// <summary>
             /// Enum EpochManager for value: EpochManager
             /// </summary>
             [EnumMember(Value = "EpochManager")]
-            EpochManager = 7,
+            EpochManager = 10,
 
             /// <summary>
             /// Enum Validator for value: Validator
             /// </summary>
             [EnumMember(Value = "Validator")]
-            Validator = 8,
+            Validator = 11,
 
             /// <summary>
             /// Enum Clock for value: Clock
             /// </summary>
             [EnumMember(Value = "Clock")]
-            Clock = 9
+            Clock = 12,
+
+            /// <summary>
+            /// Enum AccessController for value: AccessController
+            /// </summary>
+            [EnumMember(Value = "AccessController")]
+            AccessController = 13
 
         }
 

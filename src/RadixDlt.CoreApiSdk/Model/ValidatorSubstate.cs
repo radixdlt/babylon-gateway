@@ -62,47 +62,21 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
+using System.Collections.Generic;
 
-public sealed record HrpDefinition(
-    string Package,
-    string NormalComponent,
-    string AccountComponent,
-    string EpochManager,
-    string Clock,
-    string Resource
-);
+namespace RadixDlt.CoreApiSdk.Model;
 
-public sealed record WellKnownAddresses(
-    string AccountPackage,
-    string Faucet,
-    string EpochManager,
-    string Clock,
-    string EcdsaSecp256k1,
-    string EddsaEd25519,
-    string Xrd
-);
-
-public enum AddressSubtype
+public partial class ValidatorSubstate : IOwner, IGlobalResourcePointer
 {
-    Resource,
-    Package,
-    NormalComponent,
-    AccountComponent,
-    EcdsaSecp256k1VirtualAccountComponent,
-    EddsaEd25519VirtualAccountComponent,
-    EpochManager,
-    Clock,
-    Validator,
-    IdentityComponent,
-    EcdsaSecp256k1VirtualIdentityComponent,
-    EddsaEd25519VirtualIdentityComponent,
-    AccessController,
-}
+    public IEnumerable<EntityReference> GetOwnedEntities()
+    {
+        yield return StakeVault;
+        yield return UnstakeVault;
+    }
 
-public sealed record AddressTypeDefinition(
-    AddressSubtype Subtype,
-    string HrpPrefix,
-    int AddressBytePrefix,
-    int AddressByteLength
-);
+    public IEnumerable<GlobalResourcePointer> GetPointers()
+    {
+        yield return new GlobalResourcePointer(LiquidStakeUnitResourceAddress);
+        yield return new GlobalResourcePointer(UnstakeClaimTokenResourceAddress);
+    }
+}

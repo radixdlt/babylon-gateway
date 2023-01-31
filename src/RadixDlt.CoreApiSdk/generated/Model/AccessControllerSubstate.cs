@@ -91,9 +91,9 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// EpochManagerSubstate
+    /// AccessControllerSubstate
     /// </summary>
-    [DataContract(Name = "EpochManagerSubstate")]
+    [DataContract(Name = "AccessControllerSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
@@ -114,69 +114,33 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
     [JsonSubtypes.KnownSubType(typeof(VaultSubstate), "Vault")]
-    public partial class EpochManagerSubstate : Substate, IEquatable<EpochManagerSubstate>
+    public partial class AccessControllerSubstate : Substate, IEquatable<AccessControllerSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EpochManagerSubstate" /> class.
+        /// Initializes a new instance of the <see cref="AccessControllerSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EpochManagerSubstate() { }
+        protected AccessControllerSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EpochManagerSubstate" /> class.
+        /// Initializes a new instance of the <see cref="AccessControllerSubstate" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the component address (required).</param>
-        /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch (required).</param>
-        /// <param name="round">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch (required).</param>
-        /// <param name="roundsPerEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the number of rounds per epoch (required).</param>
-        /// <param name="numUnstakeEpochs">numUnstakeEpochs (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.EpochManager).</param>
-        public EpochManagerSubstate(string address = default(string), long epoch = default(long), long round = default(long), long roundsPerEpoch = default(long), long numUnstakeEpochs = default(long), SubstateType substateType = SubstateType.EpochManager) : base(substateType)
+        /// <param name="dataStruct">dataStruct (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.AccessController).</param>
+        public AccessControllerSubstate(DataStruct dataStruct = default(DataStruct), SubstateType substateType = SubstateType.AccessController) : base(substateType)
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "dataStruct" is required (not null)
+            if (dataStruct == null)
             {
-                throw new ArgumentNullException("address is a required property for EpochManagerSubstate and cannot be null");
+                throw new ArgumentNullException("dataStruct is a required property for AccessControllerSubstate and cannot be null");
             }
-            this.Address = address;
-            this.Epoch = epoch;
-            this.Round = round;
-            this.RoundsPerEpoch = roundsPerEpoch;
-            this.NumUnstakeEpochs = numUnstakeEpochs;
+            this.DataStruct = dataStruct;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the component address
+        /// Gets or Sets DataStruct
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the component address</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
-
-        /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch
-        /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch</value>
-        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long Epoch { get; set; }
-
-        /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch
-        /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch</value>
-        [DataMember(Name = "round", IsRequired = true, EmitDefaultValue = true)]
-        public long Round { get; set; }
-
-        /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the number of rounds per epoch
-        /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the number of rounds per epoch</value>
-        [DataMember(Name = "rounds_per_epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long RoundsPerEpoch { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NumUnstakeEpochs
-        /// </summary>
-        [DataMember(Name = "num_unstake_epochs", IsRequired = true, EmitDefaultValue = true)]
-        public long NumUnstakeEpochs { get; set; }
+        [DataMember(Name = "data_struct", IsRequired = true, EmitDefaultValue = true)]
+        public DataStruct DataStruct { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -185,13 +149,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EpochManagerSubstate {\n");
+            sb.Append("class AccessControllerSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
-            sb.Append("  Round: ").Append(Round).Append("\n");
-            sb.Append("  RoundsPerEpoch: ").Append(RoundsPerEpoch).Append("\n");
-            sb.Append("  NumUnstakeEpochs: ").Append(NumUnstakeEpochs).Append("\n");
+            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -212,15 +172,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EpochManagerSubstate);
+            return this.Equals(input as AccessControllerSubstate);
         }
 
         /// <summary>
-        /// Returns true if EpochManagerSubstate instances are equal
+        /// Returns true if AccessControllerSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of EpochManagerSubstate to be compared</param>
+        /// <param name="input">Instance of AccessControllerSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EpochManagerSubstate input)
+        public bool Equals(AccessControllerSubstate input)
         {
             if (input == null)
             {
@@ -228,25 +188,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
-                ) && base.Equals(input) && 
-                (
-                    this.Epoch == input.Epoch ||
-                    this.Epoch.Equals(input.Epoch)
-                ) && base.Equals(input) && 
-                (
-                    this.Round == input.Round ||
-                    this.Round.Equals(input.Round)
-                ) && base.Equals(input) && 
-                (
-                    this.RoundsPerEpoch == input.RoundsPerEpoch ||
-                    this.RoundsPerEpoch.Equals(input.RoundsPerEpoch)
-                ) && base.Equals(input) && 
-                (
-                    this.NumUnstakeEpochs == input.NumUnstakeEpochs ||
-                    this.NumUnstakeEpochs.Equals(input.NumUnstakeEpochs)
+                    this.DataStruct == input.DataStruct ||
+                    (this.DataStruct != null &&
+                    this.DataStruct.Equals(input.DataStruct))
                 );
         }
 
@@ -259,14 +203,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Address != null)
+                if (this.DataStruct != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
-                hashCode = (hashCode * 59) + this.Round.GetHashCode();
-                hashCode = (hashCode * 59) + this.RoundsPerEpoch.GetHashCode();
-                hashCode = (hashCode * 59) + this.NumUnstakeEpochs.GetHashCode();
                 return hashCode;
             }
         }

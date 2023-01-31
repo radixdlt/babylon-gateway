@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="NextEpoch" /> class.
         /// </summary>
         /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60; (required).</param>
-        /// <param name="validators">validators (required).</param>
-        public NextEpoch(long epoch = default(long), List<Validator> validators = default(List<Validator>))
+        /// <param name="validators">Validators are sorted by descending stake amount (required).</param>
+        public NextEpoch(long epoch = default(long), List<ActiveValidator> validators = default(List<ActiveValidator>))
         {
             this.Epoch = epoch;
             // to ensure "validators" is required (not null)
@@ -124,10 +124,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public long Epoch { get; set; }
 
         /// <summary>
-        /// Gets or Sets Validators
+        /// Validators are sorted by descending stake amount
         /// </summary>
+        /// <value>Validators are sorted by descending stake amount</value>
         [DataMember(Name = "validators", IsRequired = true, EmitDefaultValue = true)]
-        public List<Validator> Validators { get; set; }
+        public List<ActiveValidator> Validators { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

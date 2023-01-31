@@ -77,5 +77,7 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 
     Task<bool> SaveLedgerNetworkConfigurationToDatabaseOnInitIfNotExists(CancellationToken token);
 
+    byte GetNetworkId();
+
     string GetNetworkName();
 }
