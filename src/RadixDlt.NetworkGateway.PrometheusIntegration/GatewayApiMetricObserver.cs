@@ -246,14 +246,14 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionParseResponse response)
+    ValueTask ISubmissionServiceObserver.ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, RadixEngineToolkit.Exceptions.EngineToolkitRequestError ex)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("parsed_unsupported_payload_type").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.ParsedTransactionStaticallyInvalid(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionParseResponse response)
+    ValueTask ISubmissionServiceObserver.ParsedTransactionStaticallyInvalid(GatewayModel.TransactionSubmitRequest request, string error)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("parsed_statically_invalid").Inc();
 
