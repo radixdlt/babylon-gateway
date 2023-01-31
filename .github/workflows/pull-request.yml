@@ -117,6 +117,7 @@ jobs:
     needs: publish-docker
     runs-on: ubuntu-22.04
     steps:
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - name: Export branch name in github's environment
         run: |
           echo "GATEWAY_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
@@ -136,7 +137,7 @@ jobs:
             {
               "gatewayDockerTag": "${{ needs.publish-docker.outputs.gateway-api-tag }}",
               "gatewayBranch": "${{ env.GATEWAY_BRANCH }}",
-              "nodeDockerTag": "${{ env.FULLNODE_VERSION }}"
+              "nodeDockerTag": "${{ env.FULLNODE_VERSION }}",
               "postgresVersion": "${{ env.POSTGRES_VERSION }}"
             }
           job_timeout: "3600"
