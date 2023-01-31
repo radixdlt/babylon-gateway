@@ -65,20 +65,22 @@
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using ToolkitModel = RadixDlt.RadixEngineToolkit.Models;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 
 public interface ICoreApiHandler
 {
-    string GetNetworkIdentifier();
+    string GetNetworkName();
+
+    byte GetNetworkId();
 
     CoreApiNode GetCoreNodeConnectedTo();
-
-    Task<CoreModel.TransactionParseResponse> ParseTransaction(CoreModel.TransactionParseRequest request, CancellationToken token = default);
 
     Task<CoreModel.TransactionPreviewResponse> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default);
 
@@ -103,7 +105,12 @@ internal class CoreApiHandler : ICoreApiHandler
         _coreApiProvider = ChooseCoreApiProvider(coreNodesSelectorService, httpClient);
     }
 
-    public string GetNetworkIdentifier()
+    public byte GetNetworkId()
+    {
+        return _networkConfigurationProvider.GetNetworkId();
+    }
+
+    public string GetNetworkName()
     {
         return _networkConfigurationProvider.GetNetworkName();
     }
@@ -111,11 +118,6 @@ internal class CoreApiHandler : ICoreApiHandler
     public CoreApiNode GetCoreNodeConnectedTo()
     {
         return _coreApiProvider.CoreApiNode;
-    }
-
-    public async Task<CoreModel.TransactionParseResponse> ParseTransaction(CoreModel.TransactionParseRequest request, CancellationToken token = default)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.TransactionApi.TransactionParsePostAsync(request, token));
     }
 
     public async Task<CoreModel.TransactionPreviewResponse> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default)
