@@ -64,7 +64,6 @@
 
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace RadixDlt.NetworkGateway.Abstractions;

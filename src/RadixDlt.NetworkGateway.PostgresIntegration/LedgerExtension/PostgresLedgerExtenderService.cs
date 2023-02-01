@@ -66,7 +66,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
@@ -219,10 +218,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 rawUserTransactionStatusByPayloadHash[nt.GetHashBytes()] = ct.Receipt.Status;
                 rawUserTransactionByPayloadHash[nt.GetHashBytes()] = new RawUserTransaction
                 {
-                    StateVersion = ct.StateVersion,
-                    PayloadHash = nt.GetHashBytes(),
-                    Payload = nt.GetPayloadBytes(),
-                    Receipt = ct.Receipt.ToJson(),
+                    StateVersion = ct.StateVersion, PayloadHash = nt.GetHashBytes(), Payload = nt.GetPayloadBytes(), Receipt = ct.Receipt.ToJson(),
                 };
             }
 
@@ -351,7 +347,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         var target = globalAddress.TargetEntity;
                         var te = referencedEntities.GetOrAdd(target.TargetEntityIdHex, _ => new ReferencedEntity(target.TargetEntityIdHex, target.TargetEntityType, stateVersion));
 
-                        te.Globalize(target.GlobalAddressHex);
+                        te.Globalize((GlobalAddress)target.GlobalAddress);
 
                         if (target.TargetEntityType == CoreModel.EntityType.Component)
                         {
@@ -421,9 +417,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         re.PostResolveConfigure((ComponentEntity e) =>
                         {
-                            var packageAddress = RadixAddressCodec.Decode(componentInfo.PackageAddress).Data.ToHex();
-
-                            e.PackageId = referencedEntities.GetByGlobal(packageAddress).DatabaseId;
+                            e.PackageId = referencedEntities.GetByGlobal((GlobalAddress)componentInfo.PackageAddress).DatabaseId;
                             e.BlueprintName = componentInfo.BlueprintName;
                         });
                     }
@@ -563,7 +557,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 dbEntity.Id = sequences.EntitySequence++;
                 dbEntity.FromStateVersion = re.StateVersion;
                 dbEntity.Address = re.IdHex.ConvertFromHex();
-                dbEntity.GlobalAddress = re.GlobalAddressHex == null ? null : (RadixAddress)re.GlobalAddressHex.ConvertFromHex();
+                dbEntity.GlobalAddress = re.GlobalAddress;
 
                 re.Resolve(dbEntity);
                 entitiesToAdd.Add(dbEntity);
@@ -681,8 +675,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             case CoreModel.FungibleResourceAmount fra:
                             {
                                 var amount = TokenAmount.FromDecimalString(fra.Amount);
-                                var resourceAddress = RadixAddressCodec.Decode(fra.ResourceAddress).Data.ToHex();
-                                var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
+                                var resourceEntity = referencedEntities.GetByGlobal((GlobalAddress)fra.ResourceAddress);
 
                                 fungibleVaultChanges.Add(new FungibleVaultChange(re, resourceEntity, amount, stateVersion));
 
@@ -691,10 +684,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                             case CoreModel.NonFungibleResourceAmount nfra:
                             {
-                                var resourceAddress = RadixAddressCodec.Decode(nfra.ResourceAddress).Data.ToHex();
-                                var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
+                                var resourceEntity = referencedEntities.GetByGlobal((GlobalAddress)nfra.ResourceAddress);
 
-                                nonFungibleVaultChanges.Add(new NonFungibleVaultChange(re, resourceEntity, nfra.NonFungibleIds.Select(nfid => nfid.SimpleRep).ToList(), stateVersion));
+                                nonFungibleVaultChanges.Add(new NonFungibleVaultChange(re, resourceEntity, nfra.NonFungibleIds.Select(nfid => nfid.SimpleRep).ToList(),
+                                    stateVersion));
 
                                 break;
                             }
@@ -708,7 +701,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         var resourceManagerEntity = referencedEntities.GetByDatabaseId(re.DatabaseGlobalAncestorId);
 
-                        nonFungibleIdStoreChanges.Add(new NonFungibleIdChange(re, resourceManagerEntity, nonFungibleStoreEntry.NonFungibleId.SimpleRep, nonFungibleStoreEntry.IsDeleted, nonFungibleStoreEntry.NonFungibleData, stateVersion));
+                        nonFungibleIdStoreChanges.Add(new NonFungibleIdChange(re, resourceManagerEntity, nonFungibleStoreEntry.NonFungibleId.SimpleRep,
+                            nonFungibleStoreEntry.IsDeleted, nonFungibleStoreEntry.NonFungibleData, stateVersion));
                     }
 
                     if (sd is CoreModel.AccessRulesChainSubstate accessRulesChain)
@@ -743,7 +737,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (sd is CoreModel.ValidatorSubstate validator)
                     {
-                        var lookup = new ValidatorKeyLookup(referencedEntities.Get(sid.EntityIdHex).DatabaseId, validator.PublicKey.KeyType.ToModel(), validator.PublicKey.GetKeyBytes());
+                        var lookup = new ValidatorKeyLookup(referencedEntities.Get(sid.EntityIdHex).DatabaseId, validator.PublicKey.KeyType.ToModel(),
+                            validator.PublicKey.GetKeyBytes());
 
                         validatorKeyHistoryToAdd[lookup] = new ValidatorPublicKeyHistory
                         {
@@ -769,7 +764,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             .ToDictionary(
                                 v =>
                                 {
-                                    var vid = referencedEntities.GetByGlobal(RadixAddressCodec.Decode(v.Address).Data.ToHex()).DatabaseId;
+                                    var vid = referencedEntities.GetByGlobal((GlobalAddress)v.Address).DatabaseId;
 
                                     return new ValidatorKeyLookup(vid, v.Key.KeyType.ToModel(), v.Key.GetKeyBytes());
                                 },
@@ -937,12 +932,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var resourceManagerEntitySupplyHistoryToAdd = resourceManagerSupplyChanges
                 .Select(e =>
                 {
-                    var previous = mostRecentResourceManagerEntitySupplyHistory.GetOrAdd(e.ResourceEntity.DatabaseId, _ => new ResourceManagerEntitySupplyHistory
-                    {
-                        TotalSupply = TokenAmount.Zero,
-                        TotalMinted = TokenAmount.Zero,
-                        TotalBurnt = TokenAmount.Zero,
-                    });
+                    var previous = mostRecentResourceManagerEntitySupplyHistory.GetOrAdd(
+                        e.ResourceEntity.DatabaseId,
+                        _ => new ResourceManagerEntitySupplyHistory { TotalSupply = TokenAmount.Zero, TotalMinted = TokenAmount.Zero, TotalBurnt = TokenAmount.Zero, });
 
                     TokenAmount totalMinted = previous.TotalMinted;
                     TokenAmount totalBurnt = previous.TotalBurnt;
@@ -1062,18 +1054,20 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             .OrderByDescending(lt => lt.StateVersion)
             .FirstOrDefaultAsync(token);
 
-        var lastOverview = lastTransaction == null ? null : new TransactionSummary(
-            StateVersion: lastTransaction.StateVersion,
-            RoundTimestamp: lastTransaction.RoundTimestamp,
-            NormalizedRoundTimestamp: lastTransaction.NormalizedRoundTimestamp,
-            CreatedTimestamp: lastTransaction.CreatedTimestamp,
-            Epoch: lastTransaction.Epoch,
-            RoundInEpoch: lastTransaction.RoundInEpoch,
-            IndexInEpoch: lastTransaction.IndexInEpoch,
-            IndexInRound: lastTransaction.IndexInRound,
-            IsEndOfEpoch: lastTransaction.IsEndOfEpoch,
-            TransactionAccumulator: lastTransaction.TransactionAccumulator
-        );
+        var lastOverview = lastTransaction == null
+            ? null
+            : new TransactionSummary(
+                StateVersion: lastTransaction.StateVersion,
+                RoundTimestamp: lastTransaction.RoundTimestamp,
+                NormalizedRoundTimestamp: lastTransaction.NormalizedRoundTimestamp,
+                CreatedTimestamp: lastTransaction.CreatedTimestamp,
+                Epoch: lastTransaction.Epoch,
+                RoundInEpoch: lastTransaction.RoundInEpoch,
+                IndexInEpoch: lastTransaction.IndexInEpoch,
+                IndexInRound: lastTransaction.IndexInRound,
+                IsEndOfEpoch: lastTransaction.IsEndOfEpoch,
+                TransactionAccumulator: lastTransaction.TransactionAccumulator
+            );
 
         return lastOverview ?? PreGenesisTransactionSummary();
     }

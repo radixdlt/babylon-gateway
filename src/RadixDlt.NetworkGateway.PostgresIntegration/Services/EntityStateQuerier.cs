@@ -65,6 +65,7 @@
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
@@ -116,7 +117,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         _eddsaEd25519VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EddsaEd25519VirtualIdentityComponent).AddressBytePrefix;
     }
 
-    public async Task<GatewayModel.EntityResourcesResponse> EntityResourcesSnapshot(DecodedRadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityResourcesResponse> EntityResourcesSnapshot(GlobalAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity<ComponentEntity>(address, ledgerState, token);
 
@@ -125,10 +126,10 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var fungibles = await GetFungiblesSlice(entity.Id, 0, DefaultResourceLimit, ledgerState, token);
         var nonFungibles = await GetNonFungiblesSlice(entity.Id, 0, DefaultResourceLimit, ledgerState, token);
 
-        return new GatewayModel.EntityResourcesResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), fungibles, nonFungibles);
+        return new GatewayModel.EntityResourcesResponse(ledgerState, entity.GlobalAddress, fungibles, nonFungibles);
     }
 
-    public async Task<GatewayModel.EntityDetailsResponse> EntityDetailsSnapshot(DecodedRadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityDetailsResponse> EntityDetailsSnapshot(GlobalAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity(address, ledgerState, token);
 
@@ -222,7 +223,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseComponentDetails(
                     discriminator: GatewayModel.EntityDetailsResponseDetailsType.Component,
-                    packageAddress: package.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()),
+                    packageAddress: package.GlobalAddress,
                     blueprintName: ce.BlueprintName,
                     state: new JRaw(state.State),
                     accessRulesChain: new JRaw(accessRulesLayers.AccessRulesChain)));
@@ -231,22 +232,20 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         var metadata = await GetMetadataSlice(entity.Id, 0, DefaultMetadataLimit, ledgerState, token);
 
-        return new GatewayModel.EntityDetailsResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata, details);
+        return new GatewayModel.EntityDetailsResponse(ledgerState, entity.GlobalAddress, metadata, details);
     }
 
-    public async Task<GatewayModel.EntityOverviewResponse> EntityOverview(ICollection<DecodedRadixAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityOverviewResponse> EntityOverview(ICollection<GlobalAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
-        var addressesList = addresses.Select(x => x.Data).ToList();
-
         var entities = await _dbContext.Entities
-            .Where(e => e.GlobalAddress != null && addressesList.Contains(e.GlobalAddress))
+            .Where(e => e.GlobalAddress != null && addresses.Contains(e.GlobalAddress.Value))
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
             .ToListAsync(token);
 
         var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, DefaultMetadataLimit, ledgerState, token);
 
         var items = entities
-            .Select(entity => new GatewayModel.EntityOverviewResponseEntityItem(entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata[entity.Id]))
+            .Select(entity => new GatewayModel.EntityOverviewResponseEntityItem(entity.GlobalAddress, metadata[entity.Id]))
             .ToList();
 
         return new GatewayModel.EntityOverviewResponse(ledgerState, items);
@@ -257,7 +256,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var entity = await GetEntity(request.Address, ledgerState, token);
         var metadata = await GetMetadataSlice(entity.Id, request.Offset, request.Limit, ledgerState, token);
 
-        return new GatewayModel.EntityMetadataResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata);
+        return new GatewayModel.EntityMetadataResponse(ledgerState, entity.GlobalAddress, metadata);
     }
 
     public async Task<GatewayModel.EntityFungiblesResponse> EntityFungibles(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
@@ -265,7 +264,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var entity = await GetEntity(request.Address, ledgerState, token);
         var fungibles = await GetFungiblesSlice(entity.Id, request.Offset, request.Limit, ledgerState, token);
 
-        return new GatewayModel.EntityFungiblesResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), fungibles);
+        return new GatewayModel.EntityFungiblesResponse(ledgerState, entity.GlobalAddress, fungibles);
     }
 
     public async Task<GatewayModel.EntityNonFungiblesResponse> EntityNonFungibles(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
@@ -273,10 +272,10 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var entity = await GetEntity(request.Address, ledgerState, token);
         var nonFungibles = await GetNonFungiblesSlice(entity.Id, request.Offset, request.Limit, ledgerState, token);
 
-        return new GatewayModel.EntityNonFungiblesResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), nonFungibles);
+        return new GatewayModel.EntityNonFungiblesResponse(ledgerState, entity.GlobalAddress, nonFungibles);
     }
 
-    public async Task<GatewayModel.EntityNonFungibleIdsResponse> EntityNonFungibleIds(IEntityStateQuerier.PageRequest request, DecodedRadixAddress resourceAddress, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityNonFungibleIdsResponse> EntityNonFungibleIds(IEntityStateQuerier.PageRequest request, GlobalAddress resourceAddress, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity<ComponentEntity>(request.Address, ledgerState, token);
         var resourceEntity = await GetEntity<NonFungibleResourceManagerEntity>(resourceAddress, ledgerState, token);
@@ -345,7 +344,7 @@ WHERE nfd.id IN(
                 items: items.Take(request.Limit).ToList()));
     }
 
-    public async Task<GatewayModel.NonFungibleDataResponse> NonFungibleIdData(DecodedRadixAddress address, string nonFungibleId, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.NonFungibleDataResponse> NonFungibleIdData(GlobalAddress address, string nonFungibleId, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity<NonFungibleResourceManagerEntity>(address, ledgerState, token);
 
@@ -441,8 +440,6 @@ INNER JOIN LATERAL (
             .Take(ValidatorsLimit)
             .Select(v =>
             {
-                var address = v.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition());
-
                 GatewayModel.ValidatorCollectionItemActiveInEpoch? activeInEpoch = null;
 
                 if (activeSetById.TryGetValue(v.Id, out var asv))
@@ -455,7 +452,7 @@ INNER JOIN LATERAL (
                         asv.PublicKey.ToGatewayPublicKey());
                 }
 
-                return new GatewayModel.ValidatorCollectionItem(address, new JRaw(stateById[v.Id].State), activeInEpoch, metadataById[v.Id]);
+                return new GatewayModel.ValidatorCollectionItem(v.GlobalAddress, new JRaw(stateById[v.Id].State), activeInEpoch, metadataById[v.Id]);
             })
             .ToList();
 
@@ -695,33 +692,26 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = final.non_fungible_id_data_id
         return new GatewayModel.NonFungibleIdsCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
     }
 
-    private async Task<Entity> GetEntity(DecodedRadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<Entity> GetEntity(GlobalAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         var entity = await _dbContext.Entities
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .FirstOrDefaultAsync(e => e.GlobalAddress == address.Data, token);
+            .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
 
-        if (entity == null)
+        if (entity != null)
         {
-            var firstByte = address.Data[0];
-
-            if (firstByte == _ecdsaSecp256k1VirtualAccountAddressPrefix || firstByte == _eddsaEd25519VirtualAccountAddressPrefix)
-            {
-                return new VirtualAccountComponentEntity(address.Data);
-            }
-
-            if (firstByte == _ecdsaSecp256k1VirtualIdentityAddressPrefix || firstByte == _eddsaEd25519VirtualIdentityAddressPrefix)
-            {
-                return new VirtualIdentityEntity(address.Data);
-            }
-
-            throw new EntityNotFoundException(address.ToString());
+            return entity;
         }
 
-        return entity;
+        if (address.ToString()[0] == _ecdsaSecp256k1VirtualAccountAddressPrefix || address.ToString()[0] == _eddsaEd25519VirtualAccountAddressPrefix)
+        {
+            return new VirtualAccountComponentEntity(address);
+        }
+
+        throw new EntityNotFoundException(address.ToString());
     }
 
-    private async Task<TEntity> GetEntity<TEntity>(DecodedRadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<TEntity> GetEntity<TEntity>(GlobalAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
         where TEntity : Entity
     {
         var entity = await GetEntity(address, ledgerState, token);

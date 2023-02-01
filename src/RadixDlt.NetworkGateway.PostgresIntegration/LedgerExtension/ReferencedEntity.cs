@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
@@ -79,7 +80,7 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
     private bool _resolved;
     private bool _postResolveConfigurationInvoked;
 
-    public string? GlobalAddressHex { get; private set; }
+    public GlobalAddress? GlobalAddress { get; private set; }
 
     public Type? TypeHint { get; private set; }
 
@@ -93,16 +94,16 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
 
     public bool CanBeOwner => Type is CoreModel.EntityType.Component or CoreModel.EntityType.ResourceManager or CoreModel.EntityType.Package or CoreModel.EntityType.Validator;
 
-    public bool IsGlobal => GlobalAddressHex != null || GetDatabaseEntity().GlobalAddress != null;
+    public bool IsGlobal => GlobalAddress != null || GetDatabaseEntity().GlobalAddress != null;
 
     [MemberNotNullWhen(true, nameof(ImmediateParentReference))]
     public bool HasImmediateParentReference => _immediateParentReference != null;
 
     public ReferencedEntity ImmediateParentReference => _immediateParentReference ?? throw new InvalidOperationException("Parent not set, probably global entity or incorrectly configured one.");
 
-    public void Globalize(string globalAddressHex)
+    public void Globalize(GlobalAddress globalAddress)
     {
-        GlobalAddressHex = globalAddressHex;
+        GlobalAddress = globalAddress;
     }
 
     public void Resolve(Entity entity)
@@ -111,7 +112,7 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
 
         if (entity.GlobalAddress != null)
         {
-            GlobalAddressHex = entity.GlobalAddress.ToHex();
+            GlobalAddress = entity.GlobalAddress;
         }
 
         _resolved = true;

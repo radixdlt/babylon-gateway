@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -110,7 +110,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
                     address = table.Column<byte[]>(type: "bytea", nullable: false),
-                    globaladdress = table.Column<byte[]>(name: "global_address", type: "bytea", nullable: true),
+                    globaladdress = table.Column<string>(name: "global_address", type: "text", nullable: true),
                     ancestorids = table.Column<List<long>>(name: "ancestor_ids", type: "bigint[]", nullable: true),
                     parentancestorid = table.Column<long>(name: "parent_ancestor_id", type: "bigint", nullable: true),
                     ownerancestorid = table.Column<long>(name: "owner_ancestor_id", type: "bigint", nullable: true),
