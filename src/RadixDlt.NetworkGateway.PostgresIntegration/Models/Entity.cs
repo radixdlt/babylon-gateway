@@ -116,6 +116,7 @@ internal abstract class Entity
             AccountComponentEntity => hrp.AccountComponent,
             EpochManagerEntity => hrp.EpochManager,
             ValidatorEntity => hrp.ValidatorComponent,
+            IdentityEntity => hrp.Identity,
             ClockEntity => hrp.Clock,
             ResourceManagerEntity => hrp.Resource,
             _ => throw new InvalidOperationException("Unable to build HRP address on entity of type " + GetType().Name),
@@ -197,4 +198,17 @@ internal class AccessControllerEntity : Entity
 
 internal class ValidatorEntity : Entity
 {
+}
+
+internal class IdentityEntity : Entity
+{
+}
+
+// This is transient model, not stored in database
+internal class VirtualIdentityEntity : IdentityEntity
+{
+    public VirtualIdentityEntity(byte[] globalAddress)
+    {
+        GlobalAddress = globalAddress;
+    }
 }

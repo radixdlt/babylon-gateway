@@ -187,6 +187,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 NormalComponent: GetHrpPrefix(at, AddressSubtype.NormalComponent),
                 AccountComponent: GetHrpPrefix(at, AddressSubtype.AccountComponent),
                 ValidatorComponent: GetHrpPrefix(at, AddressSubtype.Validator),
+                Identity: GetHrpPrefix(at, AddressSubtype.IdentityComponent),
                 EpochManager: GetHrpPrefix(at, AddressSubtype.EpochManager),
                 Clock: GetHrpPrefix(at, AddressSubtype.Clock),
                 Resource: GetHrpPrefix(at, AddressSubtype.Resource)

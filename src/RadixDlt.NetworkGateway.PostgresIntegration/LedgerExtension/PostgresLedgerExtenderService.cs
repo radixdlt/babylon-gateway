@@ -525,6 +525,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     ClockEntity => CoreModel.EntityType.Clock,
                     AccessControllerEntity => CoreModel.EntityType.AccessController,
                     ValidatorEntity => CoreModel.EntityType.Validator,
+                    IdentityEntity => CoreModel.EntityType.Identity,
                     _ => throw new ArgumentOutOfRangeException(nameof(knownDbEntity), knownDbEntity.GetType().Name),
                 };
 
@@ -555,6 +556,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     CoreModel.EntityType.Clock => new ClockEntity(),
                     CoreModel.EntityType.AccessController => new AccessControllerEntity(),
                     CoreModel.EntityType.Validator => new ValidatorEntity(),
+                    CoreModel.EntityType.Identity => new IdentityEntity(),
                     _ => throw new ArgumentOutOfRangeException(nameof(re.Type), re.Type, null),
                 };
 

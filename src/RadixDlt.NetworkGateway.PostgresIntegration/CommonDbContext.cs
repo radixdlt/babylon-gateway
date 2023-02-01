@@ -220,7 +220,8 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<NonFungibleStoreEntity>("non_fungible_store")
             .HasValue<ClockEntity>("clock")
             .HasValue<ValidatorEntity>("validator")
-            .HasValue<AccessControllerEntity>("access_controller");
+            .HasValue<AccessControllerEntity>("access_controller")
+            .HasValue<IdentityEntity>("identity");
 
         modelBuilder.Entity<Entity>()
             .HasIndex(e => e.Address)

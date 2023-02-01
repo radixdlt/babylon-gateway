@@ -101,6 +101,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly byte _ecdsaSecp256k1VirtualAccountAddressPrefix;
     private readonly byte _eddsaEd25519VirtualAccountAddressPrefix;
+    private readonly byte _ecdsaSecp256k1VirtualIdentityAddressPrefix;
+    private readonly byte _eddsaEd25519VirtualIdentityAddressPrefix;
 
     public EntityStateQuerier(INetworkConfigurationProvider networkConfigurationProvider, ReadOnlyDbContext dbContext)
     {
@@ -109,6 +111,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         _ecdsaSecp256k1VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EcdsaSecp256k1VirtualAccountComponent).AddressBytePrefix;
         _eddsaEd25519VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EddsaEd25519VirtualAccountComponent).AddressBytePrefix;
+        _ecdsaSecp256k1VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EcdsaSecp256k1VirtualIdentityComponent).AddressBytePrefix;
+        _eddsaEd25519VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EddsaEd25519VirtualIdentityComponent).AddressBytePrefix;
     }
 
     public async Task<GatewayModel.EntityResourcesResponse> EntityResourcesSnapshot(DecodedRadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
@@ -692,9 +696,16 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = final.non_fungible_id_data_id
 
         if (entity == null)
         {
-            if (address.Data[0] == _ecdsaSecp256k1VirtualAccountAddressPrefix || address.Data[0] == _eddsaEd25519VirtualAccountAddressPrefix)
+            var firstByte = address.Data[0];
+
+            if (firstByte == _ecdsaSecp256k1VirtualAccountAddressPrefix || firstByte == _eddsaEd25519VirtualAccountAddressPrefix)
             {
                 return new VirtualAccountComponentEntity(address.Data);
+            }
+
+            if (firstByte == _ecdsaSecp256k1VirtualIdentityAddressPrefix || firstByte == _eddsaEd25519VirtualIdentityAddressPrefix)
+            {
+                return new VirtualIdentityEntity(address.Data);
             }
 
             throw new EntityNotFoundException(address.ToString());
