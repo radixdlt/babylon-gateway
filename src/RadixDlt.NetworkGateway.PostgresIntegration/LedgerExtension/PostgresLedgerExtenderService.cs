@@ -517,13 +517,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 {
                     EpochManagerEntity => CoreModel.EntityType.EpochManager,
                     ResourceManagerEntity => CoreModel.EntityType.ResourceManager,
-                    AccessControllerComponentEntity => CoreModel.EntityType.AccessController,
                     ComponentEntity => CoreModel.EntityType.Component,
                     PackageEntity => CoreModel.EntityType.Package,
                     KeyValueStoreEntity => CoreModel.EntityType.KeyValueStore,
                     VaultEntity => CoreModel.EntityType.Vault,
                     NonFungibleStoreEntity => CoreModel.EntityType.NonFungibleStore,
                     ClockEntity => CoreModel.EntityType.Clock,
+                    AccessControllerEntity => CoreModel.EntityType.AccessController,
+                    ValidatorEntity => CoreModel.EntityType.Validator,
                     _ => throw new ArgumentOutOfRangeException(nameof(knownDbEntity), knownDbEntity.GetType().Name),
                 };
 
@@ -545,8 +546,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     CoreModel.EntityType.ResourceManager => re.CreateUsingTypeHint<ResourceManagerEntity>(),
                     // If the component is a local / owned component, it doesn't have a Component/Account type hint
                     // from the address, so assume it's a normal component for now until we can do better from the ComponentInfo
-                    CoreModel.EntityType.AccessController => new AccessControllerComponentEntity(),
-                    CoreModel.EntityType.Validator => new ValidatorComponentEntity(),
                     CoreModel.EntityType.Component => re.CreateUsingTypeHintOrDefault<ComponentEntity>(typeof(NormalComponentEntity)),
                     CoreModel.EntityType.Package => new PackageEntity(),
                     CoreModel.EntityType.Vault => new VaultEntity(),
@@ -554,6 +553,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     CoreModel.EntityType.Global => throw new ArgumentOutOfRangeException(nameof(re.Type), re.Type, "Global entities should be filtered out"),
                     CoreModel.EntityType.NonFungibleStore => new NonFungibleStoreEntity(),
                     CoreModel.EntityType.Clock => new ClockEntity(),
+                    CoreModel.EntityType.AccessController => new AccessControllerEntity(),
+                    CoreModel.EntityType.Validator => new ValidatorEntity(),
                     _ => throw new ArgumentOutOfRangeException(nameof(re.Type), re.Type, null),
                 };
 

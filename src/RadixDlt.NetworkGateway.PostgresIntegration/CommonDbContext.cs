@@ -214,13 +214,13 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<NonFungibleResourceManagerEntity>("non_fungible_resource_manager")
             .HasValue<NormalComponentEntity>("normal_component")
             .HasValue<AccountComponentEntity>("account_component")
-            .HasValue<ValidatorComponentEntity>("validator_component")
-            .HasValue<AccessControllerComponentEntity>("access_controller_component")
             .HasValue<PackageEntity>("package")
             .HasValue<KeyValueStoreEntity>("key_value_store")
             .HasValue<VaultEntity>("vault")
             .HasValue<NonFungibleStoreEntity>("non_fungible_store")
-            .HasValue<ClockEntity>("clock");
+            .HasValue<ClockEntity>("clock")
+            .HasValue<ValidatorEntity>("validator")
+            .HasValue<AccessControllerEntity>("access_controller");
 
         modelBuilder.Entity<Entity>()
             .HasIndex(e => e.Address)

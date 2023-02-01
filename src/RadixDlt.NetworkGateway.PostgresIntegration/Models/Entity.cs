@@ -115,7 +115,7 @@ internal abstract class Entity
             NormalComponentEntity => hrp.NormalComponent,
             AccountComponentEntity => hrp.AccountComponent,
             EpochManagerEntity => hrp.EpochManager,
-            ValidatorComponentEntity => hrp.ValidatorComponent,
+            ValidatorEntity => hrp.ValidatorComponent,
             ClockEntity => hrp.Clock,
             ResourceManagerEntity => hrp.Resource,
             _ => throw new InvalidOperationException("Unable to build HRP address on entity of type " + GetType().Name),
@@ -156,15 +156,7 @@ internal class NormalComponentEntity : ComponentEntity
 {
 }
 
-internal class ValidatorComponentEntity : ComponentEntity
-{
-}
-
 internal class AccountComponentEntity : ComponentEntity
-{
-}
-
-internal class AccessControllerComponentEntity : ComponentEntity
 {
 }
 
@@ -196,5 +188,13 @@ internal class NonFungibleStoreEntity : Entity
 }
 
 internal class ClockEntity : Entity
+{
+}
+
+internal class AccessControllerEntity : Entity
+{
+}
+
+internal class ValidatorEntity : Entity
 {
 }

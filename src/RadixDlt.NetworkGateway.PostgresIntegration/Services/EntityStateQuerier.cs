@@ -391,7 +391,7 @@ LIMIT 1
         var fromStateVersion = cursor?.StateVersionBoundary ?? 0;
 
         var validatorsAndOneMore = await _dbContext.Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.GetType() == typeof(ValidatorComponentEntity))
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.GetType() == typeof(ValidatorEntity))
             .Where(e => e.FromStateVersion > fromStateVersion)
             .OrderBy(e => e.FromStateVersion)
             .Take(ValidatorsLimit + 1)
@@ -412,6 +412,7 @@ WHERE id = ANY(
 
         var validatorIds = validatorsAndOneMore.Take(ValidatorsLimit).Select(e => e.Id).ToArray();
 
+        // TODO Validators are currently not a derived type of ComponentEntity but this is only temporary solution, remove this comment once they regain their Component-status
         var stateById = await _dbContext.ComponentEntityStateHistory
             .FromSqlInterpolated($@"
 WITH variables (validator_entity_id) AS (
