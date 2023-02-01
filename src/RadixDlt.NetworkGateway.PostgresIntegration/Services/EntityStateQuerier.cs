@@ -441,12 +441,12 @@ INNER JOIN LATERAL (
 
                 if (activeSetById.TryGetValue(v.Id, out var vk))
                 {
-                    object stake = new { Xxx = "zzzz" }; // TODO fix me!
+                    object stake = new { }; // TODO NG-239 missing validator stake
 
                     activeInEpoch = new GatewayModel.ValidatorCollectionItemActiveInEpoch(stake, vk.ToGatewayPublicKey());
                 }
 
-                return new GatewayModel.ValidatorCollectionItem(address, new JRaw(stateById[v.Id]), activeInEpoch, metadataById[v.Id]);
+                return new GatewayModel.ValidatorCollectionItem(address, new JRaw(stateById[v.Id].State), activeInEpoch, metadataById[v.Id]);
             })
             .ToList();
 
