@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="metadata">metadata (required).</param>
-        /// <param name="details">details (required).</param>
+        /// <param name="details">details.</param>
         public EntityDetailsResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), EntityMetadataCollection metadata = default(EntityMetadataCollection), EntityDetailsResponseDetails details = default(EntityDetailsResponseDetails))
         {
             // to ensure "ledgerState" is required (not null)
@@ -127,11 +127,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("metadata is a required property for EntityDetailsResponse and cannot be null");
             }
             this.Metadata = metadata;
-            // to ensure "details" is required (not null)
-            if (details == null)
-            {
-                throw new ArgumentNullException("details is a required property for EntityDetailsResponse and cannot be null");
-            }
             this.Details = details;
         }
 
@@ -157,7 +152,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets Details
         /// </summary>
-        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "details", EmitDefaultValue = true)]
         public EntityDetailsResponseDetails Details { get; set; }
 
         /// <summary>

@@ -127,7 +127,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
     {
         var entity = await GetEntity(address, ledgerState, token);
 
-        GatewayModel.EntityDetailsResponseDetails details;
+        GatewayModel.EntityDetailsResponseDetails? details = null;
 
         switch (entity)
         {
@@ -222,9 +222,6 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     state: new JRaw(state.State),
                     accessRulesChain: new JRaw(accessRulesLayers.AccessRulesChain)));
                 break;
-
-            default:
-                throw new InvalidEntityException(address.ToString());
         }
 
         var metadata = await GetMetadataSlice(entity.Id, 0, DefaultMetadataLimit, ledgerState, token);

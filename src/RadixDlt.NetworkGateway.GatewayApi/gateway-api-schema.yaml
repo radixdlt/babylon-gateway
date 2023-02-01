@@ -1187,7 +1187,6 @@ components:
           required:
             - address
             - metadata
-            - details
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
@@ -1548,6 +1547,8 @@ components:
               description: This cursor allows forward pagination, by providing the cursor from the previous request.
               type: string
               nullable: true
+      example:
+        at_ledger_state: null
     StateValidatorsListResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
