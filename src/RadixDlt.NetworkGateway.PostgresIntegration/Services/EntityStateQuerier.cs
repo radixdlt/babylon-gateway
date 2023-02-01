@@ -402,7 +402,7 @@ LIMIT 1
 SELECT *
 FROM validator_key_history
 WHERE id = ANY(
-    SELECT UNNEST(validator_key_ids)
+    SELECT UNNEST(validator_key_history_ids)
     FROM validator_active_set_history
     WHERE from_state_version <= {ledgerState.StateVersion}
     ORDER BY from_state_version DESC

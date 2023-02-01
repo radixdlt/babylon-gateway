@@ -993,7 +993,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         Id = sequences.ValidatorActiveSetHistorySequence++,
                         FromStateVersion = e.StateVersion,
-                        ValidatorKeyIds = e.ValidatorSet
+                        ValidatorKeyHistoryIds = e.ValidatorSet
                             .Select(v => existingValidatorKeys.GetOrAdd(v, _ => validatorKeyHistoryToAdd[v]).Id)
                             .ToArray(),
                     };

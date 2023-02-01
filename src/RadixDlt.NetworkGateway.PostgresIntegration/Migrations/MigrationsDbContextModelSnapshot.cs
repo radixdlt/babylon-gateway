@@ -754,10 +754,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
 
-                    b.Property<long[]>("ValidatorKeyIds")
+                    b.Property<long[]>("ValidatorKeyHistoryIds")
                         .IsRequired()
                         .HasColumnType("bigint[]")
-                        .HasColumnName("validator_key_ids");
+                        .HasColumnName("validator_key_history_ids");
 
                     b.HasKey("Id");
 

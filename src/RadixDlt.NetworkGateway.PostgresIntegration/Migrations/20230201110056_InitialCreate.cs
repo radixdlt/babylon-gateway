@@ -355,7 +355,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
-                    validatorkeyids = table.Column<long[]>(name: "validator_key_ids", type: "bigint[]", nullable: false)
+                    validatorkeyhistoryids = table.Column<long[]>(name: "validator_key_history_ids", type: "bigint[]", nullable: false)
                 },
                 constraints: table =>
                 {
