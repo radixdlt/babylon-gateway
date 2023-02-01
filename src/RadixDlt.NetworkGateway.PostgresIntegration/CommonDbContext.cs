@@ -64,12 +64,14 @@
 
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Npgsql;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+using System.Numerics;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
@@ -278,6 +280,9 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<ValidatorActiveSetHistory>()
             .HasIndex(e => e.FromStateVersion);
+
+        modelBuilder.Entity<ValidatorActiveSetHistory>()
+            .HasIndex(e => e.Epoch);
 
         modelBuilder.Entity<EntityAccessRulesChainHistory>()
             .HasIndex(e => new { e.EntityId, e.Subtype, e.FromStateVersion });

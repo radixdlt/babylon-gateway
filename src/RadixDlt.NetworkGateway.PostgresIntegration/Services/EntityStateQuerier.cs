@@ -97,6 +97,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
     private const int DefaultResourceLimit = 20; // TODO make it configurable
     private const int ValidatorsLimit = 1000; // TODO make it configurable
 
+    private readonly TokenAmount _tokenAmount100 = TokenAmount.FromDecimalString("100");
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ReadOnlyDbContext _dbContext;
     private readonly byte _ecdsaSecp256k1VirtualAccountAddressPrefix;
@@ -398,18 +399,21 @@ LIMIT 1
             .Take(ValidatorsLimit + 1)
             .ToListAsync(token);
 
-        var activeSetById = await _dbContext.ValidatorKeyHistory
-            .FromSqlInterpolated($@"
-SELECT *
-FROM validator_public_key_history
-WHERE id = ANY(
-    SELECT UNNEST(validator_public_key_history_ids)
-    FROM validator_active_set_history
-    WHERE from_state_version <= {ledgerState.StateVersion}
-    ORDER BY from_state_version DESC
-    LIMIT 1
-)")
-            .ToDictionaryAsync(e => e.ValidatorEntityId, token);
+        var findEpochSubquery = _dbContext.ValidatorActiveSetHistory
+            .AsQueryable()
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
+            .OrderByDescending(e => e.FromStateVersion)
+            .Take(1)
+            .Select(e => e.Epoch);
+
+        var activeSetById = await _dbContext.ValidatorActiveSetHistory
+            .Include(e => e.PublicKey)
+            .Where(e => e.Epoch == findEpochSubquery.First())
+            .ToDictionaryAsync(e => e.PublicKey.ValidatorEntityId, token);
+
+        var totalStake = activeSetById.Values
+            .Select(asv => asv.Stake)
+            .Aggregate(TokenAmount.Zero, (current, x) => current + x);
 
         var validatorIds = validatorsAndOneMore.Take(ValidatorsLimit).Select(e => e.Id).ToArray();
 
@@ -441,11 +445,14 @@ INNER JOIN LATERAL (
 
                 GatewayModel.ValidatorCollectionItemActiveInEpoch? activeInEpoch = null;
 
-                if (activeSetById.TryGetValue(v.Id, out var vk))
+                if (activeSetById.TryGetValue(v.Id, out var asv))
                 {
-                    object stake = new { }; // TODO NG-239 missing validator stake
+                    var stake = new GatewayModel.TokenAmount(asv.Stake.ToString(), _networkConfigurationProvider.GetWellKnownAddresses().Xrd);
+                    var stakePercentage = double.Parse((asv.Stake * _tokenAmount100 / totalStake).ToString());
 
-                    activeInEpoch = new GatewayModel.ValidatorCollectionItemActiveInEpoch(stake, vk.ToGatewayPublicKey());
+                    activeInEpoch = new GatewayModel.ValidatorCollectionItemActiveInEpoch(
+                        new GatewayModel.ValidatorCollectionItemActiveInEpochStake(stake, stakePercentage),
+                        asv.PublicKey.ToGatewayPublicKey());
                 }
 
                 return new GatewayModel.ValidatorCollectionItem(address, new JRaw(stateById[v.Id].State), activeInEpoch, metadataById[v.Id]);

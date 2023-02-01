@@ -766,13 +766,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     if (sd is CoreModel.ValidatorSetSubstate validatorSet && sid.SubstateKeyType == CoreModel.SubstateKeyType.CurrentValidatorSet)
                     {
                         var change = validatorSet.ValidatorSet
-                            .Select(v =>
-                            {
-                                var vid = referencedEntities.GetByGlobal(RadixAddressCodec.Decode(v.Address).Data.ToHex()).DatabaseId;
+                            .ToDictionary(
+                                v =>
+                                {
+                                    var vid = referencedEntities.GetByGlobal(RadixAddressCodec.Decode(v.Address).Data.ToHex()).DatabaseId;
 
-                                return new ValidatorKeyLookup(vid, v.Key.KeyType.ToModel(), v.Key.GetKeyBytes());
-                            })
-                            .ToList();
+                                    return new ValidatorKeyLookup(vid, v.Key.KeyType.ToModel(), v.Key.GetKeyBytes());
+                                },
+                                v => TokenAmount.FromDecimalString(v.Stake));
 
                         validatorSetChanges.Add(new ValidatorSetChange(validatorSet.Epoch, change, stateVersion));
                     }
@@ -990,16 +991,16 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 .ToList();
 
             var validatorActiveSetHistoryToAdd = validatorSetChanges
-                .Select(e =>
+                .SelectMany(e =>
                 {
-                    return new ValidatorActiveSetHistory
+                    return e.ValidatorSet.Select(vs => new ValidatorActiveSetHistory
                     {
                         Id = sequences.ValidatorActiveSetHistorySequence++,
                         FromStateVersion = e.StateVersion,
-                        ValidatorPublicKeyHistoryIds = e.ValidatorSet
-                            .Select(v => existingValidatorKeys.GetOrAdd(v, _ => validatorKeyHistoryToAdd[v]).Id)
-                            .ToArray(),
-                    };
+                        Epoch = e.Epoch,
+                        ValidatorPublicKeyHistoryId = existingValidatorKeys.GetOrAdd(vs.Key, _ => validatorKeyHistoryToAdd[vs.Key]).Id,
+                        Stake = vs.Value,
+                    });
                 })
                 .ToList();
 

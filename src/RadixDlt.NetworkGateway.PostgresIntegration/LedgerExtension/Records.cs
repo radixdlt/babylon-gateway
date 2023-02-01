@@ -80,7 +80,7 @@ internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<strin
 
 internal record ResourceManagerSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);
 
-internal record ValidatorSetChange(long Epoch, ICollection<ValidatorKeyLookup> ValidatorSet, long StateVersion);
+internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
 
 internal record struct NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, long StateVersion);
 

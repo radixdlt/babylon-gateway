@@ -230,7 +230,7 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_manager_entity_i
 
         var lookupSet = new HashSet<ValidatorKeyLookup>();
 
-        foreach (var lookup in validatorKeyLookups.SelectMany(change => change.ValidatorSet))
+        foreach (var (lookup, _) in validatorKeyLookups.SelectMany(change => change.ValidatorSet))
         {
             lookupSet.Add(lookup);
         }
