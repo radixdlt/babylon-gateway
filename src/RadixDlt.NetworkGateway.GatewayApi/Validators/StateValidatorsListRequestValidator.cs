@@ -74,6 +74,7 @@ internal class StateValidatorsListRequestValidator : AbstractValidator<GatewayMo
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
 
-        RuleFor(x => x.Cursor);
+        RuleFor(x => x.Cursor)
+            .Base64();
     }
 }

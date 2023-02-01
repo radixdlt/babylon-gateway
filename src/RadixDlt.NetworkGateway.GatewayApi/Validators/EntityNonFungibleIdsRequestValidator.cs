@@ -84,7 +84,8 @@ internal class EntityNonFungibleIdsRequestValidator : AbstractValidator<GatewayM
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
 
-        RuleFor(x => x.Cursor);
+        RuleFor(x => x.Cursor)
+            .Base64();
 
         RuleFor(x => x.Limit)
             .GreaterThan(0)
