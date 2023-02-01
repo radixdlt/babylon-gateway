@@ -115,6 +115,7 @@ internal abstract class Entity
             NormalComponentEntity => hrp.NormalComponent,
             AccountComponentEntity => hrp.AccountComponent,
             EpochManagerEntity => hrp.EpochManager,
+            ValidatorComponentEntity => hrp.ValidatorComponent,
             ClockEntity => hrp.Clock,
             ResourceManagerEntity => hrp.Resource,
             _ => throw new InvalidOperationException("Unable to build HRP address on entity of type " + GetType().Name),

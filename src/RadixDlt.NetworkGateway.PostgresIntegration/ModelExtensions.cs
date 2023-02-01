@@ -79,4 +79,14 @@ internal static class ModelExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
         };
     }
+
+    public static PublicKeyType ToModel(this CoreModel.PublicKeyType input)
+    {
+        return input switch
+        {
+            CoreModel.PublicKeyType.EcdsaSecp256k1 => PublicKeyType.EcdsaSecp256k1,
+            CoreModel.PublicKeyType.EddsaEd25519 => PublicKeyType.EddsaEd25519,
+            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
+        };
+    }
 }

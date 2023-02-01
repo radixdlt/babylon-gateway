@@ -68,7 +68,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("component_entity_state_history")]
-internal class ComponentEntityStateHistory
+internal class ComponentEntityStateHistory // TODO rename to ComponentStateHistory?
 {
     [Key]
     [Column("id")]

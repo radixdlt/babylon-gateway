@@ -79,7 +79,8 @@ internal class RecentTransactionsRequestValidator : AbstractValidator<GatewayMod
         RuleFor(x => x.FromLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
 
-        RuleFor(x => x.Cursor);
+        RuleFor(x => x.Cursor)
+            .Base64();
 
         RuleFor(x => x.Limit)
             .GreaterThan(0)

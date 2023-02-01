@@ -92,6 +92,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "non_fungible_id_type", new[] { "string", "number", "bytes", "uuid" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_status", new[] { "submitted_or_known_in_node_mempool", "missing", "resolved_but_unknown_till_synced_up", "rejected_temporarily", "rejected_permanently", "committed_success", "committed_failure" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public_key_type", new[] { "ecdsa_secp256k1", "eddsa_ed25519" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentEntityStateHistory", b =>
@@ -738,6 +739,66 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("ResourceManagerEntityId", "FromStateVersion");
 
                     b.ToTable("resource_manager_entity_supply_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorActiveSetHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long[]>("ValidatorKeyHistoryIds")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("validator_key_history_ids");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FromStateVersion");
+
+                    b.ToTable("validator_active_set_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorKeyHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<byte[]>("Key")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("key");
+
+                    b.Property<PublicKeyType>("KeyType")
+                        .HasColumnType("public_key_type")
+                        .HasColumnName("key_type");
+
+                    b.Property<long>("ValidatorEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("validator_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ValidatorEntityId", "FromStateVersion");
+
+                    b.HasIndex("ValidatorEntityId", "KeyType", "Key");
+
+                    b.ToTable("validator_key_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccessControllerComponentEntity", b =>

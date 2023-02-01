@@ -94,7 +94,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// InvalidRequestError
     /// </summary>
     [DataContract(Name = "InvalidRequestError")]
-    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
     [JsonSubtypes.KnownSubType(typeof(EntityNotFoundError), "EntityNotFoundError")]
     [JsonSubtypes.KnownSubType(typeof(InternalServerError), "InternalServerError")]
     [JsonSubtypes.KnownSubType(typeof(InvalidEntityError), "InvalidEntityError")]

@@ -64,6 +64,7 @@
 
 using FluentAssertions;
 using RadixDlt.NetworkGateway.Abstractions;
+using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -115,5 +116,19 @@ public class ValueBytesTests
         };
 
         hashSet.Count.Should().Be(2);
+    }
+
+    [Fact]
+    public void GivenNullArray_ShouldThrow()
+    {
+        Assert.Throws<ArgumentNullException>(() => new ValueBytes(null!));
+    }
+
+    [Fact]
+    public void Length_ShouldReturnArrayLength()
+    {
+        var valueBytes = new ValueBytes(new byte[] { 1, 2, 3, 4 });
+
+        Assert.Equal(4, valueBytes.Length);
     }
 }

@@ -109,7 +109,7 @@ internal class ReferencedEntityDictionary
 
     public ReferencedEntity GetByGlobal(string globalAddressHex)
     {
-        return _globalsCache.GetOrAdd(globalAddressHex, _ => _storage.Values.First(re => re.GlobalAddressHex == globalAddressHex));
+        return _globalsCache.GetOrAdd(globalAddressHex, _ => All.First(re => re.GlobalAddressHex == globalAddressHex));
     }
 
     public ReferencedEntity GetByDatabaseId(long id)

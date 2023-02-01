@@ -62,8 +62,11 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
+using System.Diagnostics;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
@@ -94,6 +97,18 @@ internal static class GatewayModelExtensions
             PendingTransactionStatus.CommittedSuccess => GatewayModel.TransactionStatus.CommittedSuccess,
             PendingTransactionStatus.CommittedFailure => GatewayModel.TransactionStatus.CommittedFailure,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
+        };
+    }
+
+    public static GatewayModel.PublicKey ToGatewayPublicKey(this ValidatorKeyHistory validatorKey)
+    {
+        var keyHex = validatorKey.Key.ToHex();
+
+        return validatorKey.KeyType switch
+        {
+            PublicKeyType.EcdsaSecp256k1 => new GatewayModel.PublicKeyEcdsaSecp256k1(keyHex),
+            PublicKeyType.EddsaEd25519 => new GatewayModel.PublicKeyEddsaEd25519(keyHex),
+            _ => throw new UnreachableException(),
         };
     }
 }

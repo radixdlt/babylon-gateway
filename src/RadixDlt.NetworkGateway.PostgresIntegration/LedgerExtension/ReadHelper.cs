@@ -68,6 +68,7 @@ using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 using System.Linq;
@@ -221,6 +222,35 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_manager_entity_i
             .ToDictionaryAsync(e => new NonFungibleIdLookup(e.NonFungibleResourceManagerEntityId, e.NonFungibleId), token);
     }
 
+    public async Task<Dictionary<ValidatorKeyLookup, ValidatorKeyHistory>> ExistingValidatorKeysFor(List<ValidatorSetChange> validatorKeyLookups, CancellationToken token)
+    {
+        var validatorEntityIds = new List<long>();
+        var validatorKeyTypes = new List<PublicKeyType>();
+        var validatorKeys = new List<byte[]>();
+
+        var lookupSet = new HashSet<ValidatorKeyLookup>();
+
+        foreach (var lookup in validatorKeyLookups.SelectMany(change => change.ValidatorSet))
+        {
+            lookupSet.Add(lookup);
+        }
+
+        foreach (var lookup in lookupSet)
+        {
+            validatorEntityIds.Add(lookup.ValidatorEntityId);
+            validatorKeyTypes.Add(lookup.KeyType);
+            validatorKeys.Add(lookup.Key);
+        }
+
+        return await _dbContext.ValidatorKeyHistory
+            .FromSqlInterpolated(@$"
+SELECT * FROM validator_key_history WHERE (validator_entity_id, key_type, key) IN (
+    SELECT UNNEST({validatorEntityIds}), UNNEST({validatorKeyTypes}), UNNEST({validatorKeys})
+)")
+            .AsNoTracking()
+            .ToDictionaryAsync(e => new ValidatorKeyLookup(e.ValidatorEntityId, e.KeyType, e.Key), token);
+    }
+
     public async Task<SequencesHolder> LoadSequences(CancellationToken token)
     {
         var cd = new CommandDefinition(
@@ -235,7 +265,9 @@ SELECT
     nextval('resource_manager_entity_supply_history_id_seq') AS ResourceManagerEntitySupplyHistorySequence,
     nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
     nextval('non_fungible_id_mutable_data_history_id_seq') AS NonFungibleIdMutableDataHistorySequence,
-    nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence",
+    nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence,
+    nextval('validator_key_history_id_seq') AS ValidatorKeyHistorySequence,
+    nextval('validator_active_set_history_id_seq') AS ValidatorActiveSetHistorySequence",
             cancellationToken: token);
 
         return await _connection.QueryFirstAsync<SequencesHolder>(cd);

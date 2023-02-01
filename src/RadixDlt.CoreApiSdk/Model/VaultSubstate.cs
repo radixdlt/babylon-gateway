@@ -62,23 +62,22 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class VaultSubstate : IGlobalResourcePointer
+public partial class VaultSubstate : IGlobalEntityPointer
 {
-    public IEnumerable<GlobalResourcePointer> GetPointers()
+    public IEnumerable<GlobalEntityPointer> GetPointers()
     {
         if (ResourceAmount is FungibleResourceAmount fra)
         {
-            yield return new GlobalResourcePointer(fra.ResourceAddress);
+            yield return new GlobalEntityPointer(fra.ResourceAddress);
         }
 
         if (ResourceAmount is NonFungibleResourceAmount nfra)
         {
-            yield return new GlobalResourcePointer(nfra.ResourceAddress);
+            yield return new GlobalEntityPointer(nfra.ResourceAddress);
         }
     }
 }

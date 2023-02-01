@@ -74,9 +74,9 @@ public interface IOwner
     public IEnumerable<EntityReference> GetOwnedEntities();
 }
 
-public interface IGlobalResourcePointer
+public interface IGlobalEntityPointer
 {
-    public IEnumerable<GlobalResourcePointer> GetPointers();
+    public IEnumerable<GlobalEntityPointer> GetPointers();
 }
 
-public record GlobalResourcePointer(string GlobalAddress);
+public record GlobalEntityPointer(string GlobalAddress);

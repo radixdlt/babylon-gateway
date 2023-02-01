@@ -95,6 +95,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private const int DefaultMetadataLimit = 100; // TODO make it configurable
     private const int DefaultResourceLimit = 20; // TODO make it configurable
+    private const int ValidatorsLimit = 1000; // TODO make it configurable
 
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ReadOnlyDbContext _dbContext;
@@ -383,6 +384,77 @@ LIMIT 1
             nonFungibleId: data.NonFungibleId,
             mutableDataHex: data.MutableData.ToHex(),
             immutableDataHex: data.ImmutableData.ToHex());
+    }
+
+    public async Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    {
+        var fromStateVersion = cursor?.StateVersionBoundary ?? 0;
+
+        var validatorsAndOneMore = await _dbContext.Entities
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.GetType() == typeof(ValidatorComponentEntity))
+            .Where(e => e.FromStateVersion > fromStateVersion)
+            .OrderBy(e => e.FromStateVersion)
+            .Take(ValidatorsLimit + 1)
+            .ToListAsync(token);
+
+        var activeSetById = await _dbContext.ValidatorKeyHistory
+            .FromSqlInterpolated($@"
+SELECT *
+FROM validator_key_history
+WHERE id = ANY(
+    SELECT UNNEST(validator_key_history_ids)
+    FROM validator_active_set_history
+    WHERE from_state_version <= {ledgerState.StateVersion}
+    ORDER BY from_state_version DESC
+    LIMIT 1
+)")
+            .ToDictionaryAsync(e => e.ValidatorEntityId, token);
+
+        var validatorIds = validatorsAndOneMore.Take(ValidatorsLimit).Select(e => e.Id).ToArray();
+
+        var stateById = await _dbContext.ComponentEntityStateHistory
+            .FromSqlInterpolated($@"
+WITH variables (validator_entity_id) AS (
+    SELECT UNNEST({validatorIds})
+)
+SELECT cesh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM component_entity_state_history
+    WHERE component_entity_id = variables.validator_entity_id AND from_state_version <= {ledgerState.StateVersion}
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) cesh ON true;
+")
+            .ToDictionaryAsync(e => e.ComponentEntityId, token);
+
+        var metadataById = await GetMetadataSlices(validatorIds, 0, DefaultMetadataLimit, ledgerState, token);
+
+        var items = validatorsAndOneMore
+            .Take(ValidatorsLimit)
+            .Select(v =>
+            {
+                var address = v.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition());
+
+                GatewayModel.ValidatorCollectionItemActiveInEpoch? activeInEpoch = null;
+
+                if (activeSetById.TryGetValue(v.Id, out var vk))
+                {
+                    object stake = new { Xxx = "zzzz" }; // TODO fix me!
+
+                    activeInEpoch = new GatewayModel.ValidatorCollectionItemActiveInEpoch(stake, vk.ToGatewayPublicKey());
+                }
+
+                return new GatewayModel.ValidatorCollectionItem(address, new JRaw(stateById[v.Id]), activeInEpoch, metadataById[v.Id]);
+            })
+            .ToList();
+
+        var nextCursor = validatorsAndOneMore.Count == ValidatorsLimit + 1
+            ? new GatewayModel.StateValidatorsListCursor(validatorsAndOneMore.Last().Id).ToCursorString()
+            : null;
+
+        return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(null, null, nextCursor, items));
     }
 
     private async Task<GatewayModel.EntityMetadataCollection> GetMetadataSlice(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)

@@ -91,6 +91,7 @@ internal static class CustomTypes
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<PublicKeyType>();
 #pragma warning restore CS0618
 
         _configured = true;

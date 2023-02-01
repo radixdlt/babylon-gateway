@@ -106,6 +106,10 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ComponentEntityStateHistory> ComponentEntityStateHistory => Set<ComponentEntityStateHistory>();
 
+    public DbSet<ValidatorKeyHistory> ValidatorKeyHistory => Set<ValidatorKeyHistory>();
+
+    public DbSet<ValidatorActiveSetHistory> ValidatorActiveSetHistory => Set<ValidatorActiveSetHistory>();
+
     public DbSet<EntityAccessRulesChainHistory> EntityAccessRulesLayersHistory => Set<EntityAccessRulesChainHistory>();
 
     public CommonDbContext(DbContextOptions options)
@@ -121,6 +125,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
         modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
+        modelBuilder.HasPostgresEnum<PublicKeyType>();
 
         HookupSingleEntries(modelBuilder);
         HookupTransactions(modelBuilder);
@@ -263,6 +268,15 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<ComponentEntityStateHistory>()
             .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<ValidatorKeyHistory>()
+            .HasIndex(e => new { e.ValidatorEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<ValidatorKeyHistory>()
+            .HasIndex(e => new { e.ValidatorEntityId, e.KeyType, e.Key });
+
+        modelBuilder.Entity<ValidatorActiveSetHistory>()
+            .HasIndex(e => e.FromStateVersion);
 
         modelBuilder.Entity<EntityAccessRulesChainHistory>()
             .HasIndex(e => new { e.EntityId, e.Subtype, e.FromStateVersion });
