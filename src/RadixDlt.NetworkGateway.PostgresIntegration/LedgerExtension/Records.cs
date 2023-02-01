@@ -86,4 +86,4 @@ internal record struct NonFungibleStoreLookup(long NonFungibleResourceManagerEnt
 
 internal record struct NonFungibleIdLookup(long ResourceManagerEntityId, string NonFungibleId);
 
-internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType KeyType, ValueBytes Key);
+internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);

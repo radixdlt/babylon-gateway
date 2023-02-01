@@ -639,7 +639,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var validatorSetChanges = new List<ValidatorSetChange>();
         var entityAccessRulesChainHistoryToAdd = new List<EntityAccessRulesChainHistory>();
         var componentEntityStateToAdd = new List<ComponentEntityStateHistory>();
-        var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorKeyHistory>();
+        var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>();
 
         // step: scan all substates to figure out changes
         {
@@ -741,15 +741,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (sd is CoreModel.ValidatorSubstate validator)
                     {
-                        var lookup = new ValidatorKeyLookup(referencedEntities.Get(sid.EntityIdHex).DatabaseId, validator.Key.KeyType.ToModel(), validator.Key.GetKeyBytes());
+                        var lookup = new ValidatorKeyLookup(referencedEntities.Get(sid.EntityIdHex).DatabaseId, validator.PublicKey.KeyType.ToModel(), validator.PublicKey.GetKeyBytes());
 
-                        validatorKeyHistoryToAdd[lookup] = new ValidatorKeyHistory
+                        validatorKeyHistoryToAdd[lookup] = new ValidatorPublicKeyHistory
                         {
-                            Id = sequences.ValidatorKeyHistorySequence++,
+                            Id = sequences.ValidatorPublicKeyHistorySequence++,
                             FromStateVersion = stateVersion,
                             ValidatorEntityId = lookup.ValidatorEntityId,
-                            KeyType = lookup.KeyType,
-                            Key = lookup.Key,
+                            KeyType = lookup.PublicKeyType,
+                            Key = lookup.PublicKey,
                         };
 
                         componentEntityStateToAdd.Add(new ComponentEntityStateHistory
@@ -994,7 +994,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         Id = sequences.ValidatorActiveSetHistorySequence++,
                         FromStateVersion = e.StateVersion,
-                        ValidatorKeyHistoryIds = e.ValidatorSet
+                        ValidatorPublicKeyHistoryIds = e.ValidatorSet
                             .Select(v => existingValidatorKeys.GetOrAdd(v, _ => validatorKeyHistoryToAdd[v]).Id)
                             .ToArray(),
                     };

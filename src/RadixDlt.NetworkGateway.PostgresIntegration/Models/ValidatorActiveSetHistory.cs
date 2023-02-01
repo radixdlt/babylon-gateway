@@ -77,6 +77,6 @@ internal class ValidatorActiveSetHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("validator_key_history_ids")]
-    public long[] ValidatorKeyHistoryIds { get; set; }
+    [Column("validator_public_key_history_ids")]
+    public long[] ValidatorPublicKeyHistoryIds { get; set; }
 }

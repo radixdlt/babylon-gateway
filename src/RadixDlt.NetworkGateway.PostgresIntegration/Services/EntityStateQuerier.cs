@@ -397,9 +397,9 @@ LIMIT 1
         var activeSetById = await _dbContext.ValidatorKeyHistory
             .FromSqlInterpolated($@"
 SELECT *
-FROM validator_key_history
+FROM validator_public_key_history
 WHERE id = ANY(
-    SELECT UNNEST(validator_key_history_ids)
+    SELECT UNNEST(validator_public_key_history_ids)
     FROM validator_active_set_history
     WHERE from_state_version <= {ledgerState.StateVersion}
     ORDER BY from_state_version DESC

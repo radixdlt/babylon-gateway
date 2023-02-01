@@ -106,7 +106,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ComponentEntityStateHistory> ComponentEntityStateHistory => Set<ComponentEntityStateHistory>();
 
-    public DbSet<ValidatorKeyHistory> ValidatorKeyHistory => Set<ValidatorKeyHistory>();
+    public DbSet<ValidatorPublicKeyHistory> ValidatorKeyHistory => Set<ValidatorPublicKeyHistory>();
 
     public DbSet<ValidatorActiveSetHistory> ValidatorActiveSetHistory => Set<ValidatorActiveSetHistory>();
 
@@ -269,10 +269,10 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<ComponentEntityStateHistory>()
             .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<ValidatorKeyHistory>()
+        modelBuilder.Entity<ValidatorPublicKeyHistory>()
             .HasIndex(e => new { e.ValidatorEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<ValidatorKeyHistory>()
+        modelBuilder.Entity<ValidatorPublicKeyHistory>()
             .HasIndex(e => new { e.ValidatorEntityId, e.KeyType, e.Key });
 
         modelBuilder.Entity<ValidatorActiveSetHistory>()
