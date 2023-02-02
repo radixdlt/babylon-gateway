@@ -65,6 +65,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Npgsql;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
@@ -265,16 +266,31 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
     private async Task<LedgerStatus> GetLedgerStatus(CancellationToken token)
     {
-        var ledgerStatus = await _dbContext.LedgerStatus
-            .Include(ls => ls.TopOfLedgerTransaction)
-            .SingleOrDefaultAsync(token);
-
-        if (ledgerStatus == null)
+        try
         {
-            throw new InvalidStateException("There are no transactions in the database");
-        }
+            var ledgerStatus = await _dbContext.LedgerStatus
+                .Include(ls => ls.TopOfLedgerTransaction)
+                .SingleOrDefaultAsync(token);
 
-        return ledgerStatus;
+            if (ledgerStatus == null)
+            {
+                throw new InvalidStateException("There are no transactions in the database");
+            }
+
+            return ledgerStatus;
+        }
+        catch (Exception ex)
+        {
+            // TODO NG-256 fix it permanently
+            if (ex.Message.Contains("Can't cast"))
+            {
+                await _dbContext.Database.OpenConnectionAsync(token);
+                await ((NpgsqlConnection)_dbContext.Database.GetDbConnection()).ReloadTypesAsync();
+                await _dbContext.Database.CloseConnectionAsync();
+            }
+
+            throw;
+        }
     }
 
     private record LedgerStateReport(GatewayModel.LedgerState LedgerState, DateTime RoundTimestamp, bool TopOfLedgerResolved);
