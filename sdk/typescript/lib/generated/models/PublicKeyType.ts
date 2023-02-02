@@ -17,24 +17,22 @@
  * 
  * @export
  */
-export const NonFungibleIdType = {
-    String: 'string',
-    Number: 'number',
-    Bytes: 'bytes',
-    Uuid: 'uuid'
+export const PublicKeyType = {
+    EcdsaSecp256k1: 'EcdsaSecp256k1',
+    EddsaEd25519: 'EddsaEd25519'
 } as const;
-export type NonFungibleIdType = typeof NonFungibleIdType[keyof typeof NonFungibleIdType];
+export type PublicKeyType = typeof PublicKeyType[keyof typeof PublicKeyType];
 
 
-export function NonFungibleIdTypeFromJSON(json: any): NonFungibleIdType {
-    return NonFungibleIdTypeFromJSONTyped(json, false);
+export function PublicKeyTypeFromJSON(json: any): PublicKeyType {
+    return PublicKeyTypeFromJSONTyped(json, false);
 }
 
-export function NonFungibleIdTypeFromJSONTyped(json: any, ignoreDiscriminator: boolean): NonFungibleIdType {
-    return json as NonFungibleIdType;
+export function PublicKeyTypeFromJSONTyped(json: any, ignoreDiscriminator: boolean): PublicKeyType {
+    return json as PublicKeyType;
 }
 
-export function NonFungibleIdTypeToJSON(value?: NonFungibleIdType | null): any {
+export function PublicKeyTypeToJSON(value?: PublicKeyType | null): any {
     return value as any;
 }
 

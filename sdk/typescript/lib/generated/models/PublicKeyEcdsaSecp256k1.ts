@@ -13,45 +13,58 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { PublicKey } from './PublicKey';
+import {
+    PublicKeyFromJSON,
+    PublicKeyFromJSONTyped,
+    PublicKeyToJSON,
+} from './PublicKey';
+import type { PublicKeyType } from './PublicKeyType';
+import {
+    PublicKeyTypeFromJSON,
+    PublicKeyTypeFromJSONTyped,
+    PublicKeyTypeToJSON,
+} from './PublicKeyType';
+
 /**
  * 
  * @export
- * @interface TransactionStatusRequest
+ * @interface PublicKeyEcdsaSecp256k1
  */
-export interface TransactionStatusRequest {
+export interface PublicKeyEcdsaSecp256k1 extends PublicKey {
     /**
-     * Hex-encoded SHA-256 hash.
+     * The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes)
      * @type {string}
-     * @memberof TransactionStatusRequest
+     * @memberof PublicKeyEcdsaSecp256k1
      */
-    intent_hash_hex: string;
+    key_hex: string;
 }
 
 /**
- * Check if a given object implements the TransactionStatusRequest interface.
+ * Check if a given object implements the PublicKeyEcdsaSecp256k1 interface.
  */
-export function instanceOfTransactionStatusRequest(value: object): boolean {
+export function instanceOfPublicKeyEcdsaSecp256k1(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "intent_hash_hex" in value;
+    isInstance = isInstance && "key_hex" in value;
 
     return isInstance;
 }
 
-export function TransactionStatusRequestFromJSON(json: any): TransactionStatusRequest {
-    return TransactionStatusRequestFromJSONTyped(json, false);
+export function PublicKeyEcdsaSecp256k1FromJSON(json: any): PublicKeyEcdsaSecp256k1 {
+    return PublicKeyEcdsaSecp256k1FromJSONTyped(json, false);
 }
 
-export function TransactionStatusRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionStatusRequest {
+export function PublicKeyEcdsaSecp256k1FromJSONTyped(json: any, ignoreDiscriminator: boolean): PublicKeyEcdsaSecp256k1 {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
-        
-        'intent_hash_hex': json['intent_hash_hex'],
+        ...PublicKeyFromJSONTyped(json, ignoreDiscriminator),
+        'key_hex': json['key_hex'],
     };
 }
 
-export function TransactionStatusRequestToJSON(value?: TransactionStatusRequest | null): any {
+export function PublicKeyEcdsaSecp256k1ToJSON(value?: PublicKeyEcdsaSecp256k1 | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -59,8 +72,8 @@ export function TransactionStatusRequestToJSON(value?: TransactionStatusRequest 
         return null;
     }
     return {
-        
-        'intent_hash_hex': value.intent_hash_hex,
+        ...PublicKeyToJSON(value),
+        'key_hex': value.key_hex,
     };
 }
 

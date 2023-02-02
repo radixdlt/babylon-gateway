@@ -61,7 +61,7 @@ export interface EntityDetailsResponse {
      * @type {EntityDetailsResponseDetails}
      * @memberof EntityDetailsResponse
      */
-    details: EntityDetailsResponseDetails;
+    details?: EntityDetailsResponseDetails;
 }
 
 /**
@@ -72,7 +72,6 @@ export function instanceOfEntityDetailsResponse(value: object): boolean {
     isInstance = isInstance && "ledger_state" in value;
     isInstance = isInstance && "address" in value;
     isInstance = isInstance && "metadata" in value;
-    isInstance = isInstance && "details" in value;
 
     return isInstance;
 }
@@ -90,7 +89,7 @@ export function EntityDetailsResponseFromJSONTyped(json: any, ignoreDiscriminato
         'ledger_state': LedgerStateFromJSON(json['ledger_state']),
         'address': json['address'],
         'metadata': EntityMetadataCollectionFromJSON(json['metadata']),
-        'details': EntityDetailsResponseDetailsFromJSON(json['details']),
+        'details': !exists(json, 'details') ? undefined : EntityDetailsResponseDetailsFromJSON(json['details']),
     };
 }
 
