@@ -72,11 +72,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 public static class GatewayApiBuilderExtensions
 {
-    static GatewayApiBuilderExtensions()
-    {
-        CustomTypes.EnsureConfigured();
-    }
-
     public static GatewayApiBuilder AddPostgresPersistence(this GatewayApiBuilder builder)
     {
         return builder
@@ -93,6 +88,8 @@ public static class GatewayApiBuilderExtensions
             .AddScoped<IEntityStateQuerier, EntityStateQuerier>()
             .AddScoped<ISubmissionTrackingService, SubmissionTrackingService>()
             .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
+
+        CustomTypes.EnsureConfigured();
 
         builder.Services
             .AddNpgsqlDataSourceHolder<ReadOnlyDbContext>(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName)

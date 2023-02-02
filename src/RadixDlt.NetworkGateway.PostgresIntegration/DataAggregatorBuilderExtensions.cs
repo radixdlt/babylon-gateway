@@ -73,11 +73,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 public static class DataAggregatorBuilderExtensions
 {
-    static DataAggregatorBuilderExtensions()
-    {
-        CustomTypes.EnsureConfigured();
-    }
-
     public static DataAggregatorBuilder AddPostgresPersistence(this DataAggregatorBuilder builder)
     {
         return builder
@@ -93,6 +88,8 @@ public static class DataAggregatorBuilderExtensions
             .AddSingleton<IPendingTransactionTrackerService, PendingTransactionTrackerService>()
             .AddSingleton<IPendingTransactionResubmissionService, PendingTransactionResubmissionService>()
             .AddSingleton<IPendingTransactionPrunerService, PendingTransactionPrunerService>();
+
+        CustomTypes.EnsureConfigured();
 
         builder.Services
             .AddNpgsqlDataSourceHolder<ReadWriteDbContext>(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName)
