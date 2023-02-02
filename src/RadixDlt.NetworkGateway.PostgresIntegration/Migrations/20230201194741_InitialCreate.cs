@@ -349,21 +349,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "validator_active_set_history",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
-                    validatorkeyhistoryids = table.Column<long[]>(name: "validator_key_history_ids", type: "bigint[]", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_validator_active_set_history", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "validator_key_history",
+                name: "validator_public_key_history",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -375,7 +361,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_validator_key_history", x => x.id);
+                    table.PrimaryKey("PK_validator_public_key_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -395,6 +381,28 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         column: x => x.topofledgerstateversion,
                         principalTable: "ledger_transactions",
                         principalColumn: "state_version");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "validator_active_set_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
+                    epoch = table.Column<long>(type: "bigint", nullable: false),
+                    validatorpublickeyhistoryid = table.Column<long>(name: "validator_public_key_history_id", type: "bigint", nullable: false),
+                    stake = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_validator_active_set_history", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_validator_active_set_history_validator_public_key_history_v~",
+                        column: x => x.validatorpublickeyhistoryid,
+                        principalTable: "validator_public_key_history",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -521,18 +529,28 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "resource_manager_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_validator_active_set_history_epoch",
+                table: "validator_active_set_history",
+                column: "epoch");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_validator_active_set_history_from_state_version",
                 table: "validator_active_set_history",
                 column: "from_state_version");
 
             migrationBuilder.CreateIndex(
-                name: "IX_validator_key_history_validator_entity_id_from_state_version",
-                table: "validator_key_history",
+                name: "IX_validator_active_set_history_validator_public_key_history_id",
+                table: "validator_active_set_history",
+                column: "validator_public_key_history_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_validator_public_key_history_validator_entity_id_from_state~",
+                table: "validator_public_key_history",
                 columns: new[] { "validator_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_validator_key_history_validator_entity_id_key_type_key",
-                table: "validator_key_history",
+                name: "IX_validator_public_key_history_validator_entity_id_key_type_k~",
+                table: "validator_public_key_history",
                 columns: new[] { "validator_entity_id", "key_type", "key" });
         }
 
@@ -585,10 +603,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "validator_active_set_history");
 
             migrationBuilder.DropTable(
-                name: "validator_key_history");
+                name: "ledger_transactions");
 
             migrationBuilder.DropTable(
-                name: "ledger_transactions");
+                name: "validator_public_key_history");
         }
     }
 }

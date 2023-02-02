@@ -80,7 +80,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230201110056_InitialCreate")]
+    [Migration("20230201194741_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -753,23 +753,35 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<long>("Epoch")
+                        .HasColumnType("bigint")
+                        .HasColumnName("epoch");
+
                     b.Property<long>("FromStateVersion")
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
 
-                    b.Property<long[]>("ValidatorKeyHistoryIds")
-                        .IsRequired()
-                        .HasColumnType("bigint[]")
-                        .HasColumnName("validator_key_history_ids");
+                    b.Property<BigInteger>("Stake")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric")
+                        .HasColumnName("stake");
+
+                    b.Property<long>("ValidatorPublicKeyHistoryId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("validator_public_key_history_id");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Epoch");
+
                     b.HasIndex("FromStateVersion");
+
+                    b.HasIndex("ValidatorPublicKeyHistoryId");
 
                     b.ToTable("validator_active_set_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorKeyHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorPublicKeyHistory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -801,27 +813,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("ValidatorEntityId", "KeyType", "Key");
 
-                    b.ToTable("validator_key_history");
+                    b.ToTable("validator_public_key_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccessControllerComponentEntity", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccessControllerEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
-                    b.Property<string>("BlueprintName")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("text")
-                        .HasColumnName("blueprint_name");
-
-                    b.Property<long>("PackageId")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("bigint")
-                        .HasColumnName("package_id");
-
                     b.ToTable("entities");
 
-                    b.HasDiscriminator().HasValue("access_controller_component");
+                    b.HasDiscriminator().HasValue("access_controller");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountComponentEntity", b =>
@@ -873,6 +874,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("fungible_resource_manager");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.IdentityEntity", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.ToTable("entities");
+
+                    b.HasDiscriminator().HasValue("identity");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.KeyValueStoreEntity", b =>
@@ -940,24 +950,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue("package");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorComponentEntity", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
-                    b.Property<string>("BlueprintName")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("text")
-                        .HasColumnName("blueprint_name");
-
-                    b.Property<long>("PackageId")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("bigint")
-                        .HasColumnName("package_id");
-
                     b.ToTable("entities");
 
-                    b.HasDiscriminator().HasValue("validator_component");
+                    b.HasDiscriminator().HasValue("validator");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.VaultEntity", b =>
@@ -1063,6 +1062,17 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired();
 
                     b.Navigation("TopOfLedgerTransaction");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorActiveSetHistory", b =>
+                {
+                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorPublicKeyHistory", "PublicKey")
+                        .WithMany()
+                        .HasForeignKey("ValidatorPublicKeyHistoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PublicKey");
                 });
 #pragma warning restore 612, 618
         }

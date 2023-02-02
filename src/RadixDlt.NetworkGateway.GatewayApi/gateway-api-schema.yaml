@@ -905,17 +905,27 @@ components:
           $ref: "#/components/schemas/EntityMetadataCollection"
     ValidatorCollectionItemActiveInEpoch:
       type: object
-      nullable: true
       required:
         - stake
         - key
       properties:
         stake:
-          type: object
+          $ref: "#/components/schemas/ValidatorCollectionItemActiveInEpochStake"
         key:
           $ref: "#/components/schemas/PublicKey"
         metadata:
           $ref: "#/components/schemas/EntityMetadataCollection"
+    ValidatorCollectionItemActiveInEpochStake:
+      type: object
+      required:
+        - stake
+        - stake_percentage
+      properties:
+        stake:
+          $ref: "#/components/schemas/TokenAmount"
+        stake_percentage:
+          type: number
+          format: double
 
     #
     # /gateway/* Request & Response Types
@@ -1187,7 +1197,6 @@ components:
           required:
             - address
             - metadata
-            - details
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
@@ -1548,6 +1557,8 @@ components:
               description: This cursor allows forward pagination, by providing the cursor from the previous request.
               type: string
               nullable: true
+      example:
+        at_ledger_state: null
     StateValidatorsListResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"

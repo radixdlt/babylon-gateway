@@ -517,13 +517,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 {
                     EpochManagerEntity => CoreModel.EntityType.EpochManager,
                     ResourceManagerEntity => CoreModel.EntityType.ResourceManager,
-                    AccessControllerComponentEntity => CoreModel.EntityType.AccessController,
                     ComponentEntity => CoreModel.EntityType.Component,
                     PackageEntity => CoreModel.EntityType.Package,
                     KeyValueStoreEntity => CoreModel.EntityType.KeyValueStore,
                     VaultEntity => CoreModel.EntityType.Vault,
                     NonFungibleStoreEntity => CoreModel.EntityType.NonFungibleStore,
                     ClockEntity => CoreModel.EntityType.Clock,
+                    AccessControllerEntity => CoreModel.EntityType.AccessController,
+                    ValidatorEntity => CoreModel.EntityType.Validator,
+                    IdentityEntity => CoreModel.EntityType.Identity,
                     _ => throw new ArgumentOutOfRangeException(nameof(knownDbEntity), knownDbEntity.GetType().Name),
                 };
 
@@ -545,8 +547,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     CoreModel.EntityType.ResourceManager => re.CreateUsingTypeHint<ResourceManagerEntity>(),
                     // If the component is a local / owned component, it doesn't have a Component/Account type hint
                     // from the address, so assume it's a normal component for now until we can do better from the ComponentInfo
-                    CoreModel.EntityType.AccessController => new AccessControllerComponentEntity(),
-                    CoreModel.EntityType.Validator => new ValidatorComponentEntity(),
                     CoreModel.EntityType.Component => re.CreateUsingTypeHintOrDefault<ComponentEntity>(typeof(NormalComponentEntity)),
                     CoreModel.EntityType.Package => new PackageEntity(),
                     CoreModel.EntityType.Vault => new VaultEntity(),
@@ -554,6 +554,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     CoreModel.EntityType.Global => throw new ArgumentOutOfRangeException(nameof(re.Type), re.Type, "Global entities should be filtered out"),
                     CoreModel.EntityType.NonFungibleStore => new NonFungibleStoreEntity(),
                     CoreModel.EntityType.Clock => new ClockEntity(),
+                    CoreModel.EntityType.AccessController => new AccessControllerEntity(),
+                    CoreModel.EntityType.Validator => new ValidatorEntity(),
+                    CoreModel.EntityType.Identity => new IdentityEntity(),
                     _ => throw new ArgumentOutOfRangeException(nameof(re.Type), re.Type, null),
                 };
 
@@ -638,7 +641,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var validatorSetChanges = new List<ValidatorSetChange>();
         var entityAccessRulesChainHistoryToAdd = new List<EntityAccessRulesChainHistory>();
         var componentEntityStateToAdd = new List<ComponentEntityStateHistory>();
-        var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorKeyHistory>();
+        var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>();
 
         // step: scan all substates to figure out changes
         {
@@ -740,15 +743,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (sd is CoreModel.ValidatorSubstate validator)
                     {
-                        var lookup = new ValidatorKeyLookup(referencedEntities.Get(sid.EntityIdHex).DatabaseId, validator.Key.KeyType.ToModel(), validator.Key.GetKeyBytes());
+                        var lookup = new ValidatorKeyLookup(referencedEntities.Get(sid.EntityIdHex).DatabaseId, validator.PublicKey.KeyType.ToModel(), validator.PublicKey.GetKeyBytes());
 
-                        validatorKeyHistoryToAdd[lookup] = new ValidatorKeyHistory
+                        validatorKeyHistoryToAdd[lookup] = new ValidatorPublicKeyHistory
                         {
-                            Id = sequences.ValidatorKeyHistorySequence++,
+                            Id = sequences.ValidatorPublicKeyHistorySequence++,
                             FromStateVersion = stateVersion,
                             ValidatorEntityId = lookup.ValidatorEntityId,
-                            KeyType = lookup.KeyType,
-                            Key = lookup.Key,
+                            KeyType = lookup.PublicKeyType,
+                            Key = lookup.PublicKey,
                         };
 
                         componentEntityStateToAdd.Add(new ComponentEntityStateHistory
@@ -763,13 +766,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     if (sd is CoreModel.ValidatorSetSubstate validatorSet && sid.SubstateKeyType == CoreModel.SubstateKeyType.CurrentValidatorSet)
                     {
                         var change = validatorSet.ValidatorSet
-                            .Select(v =>
-                            {
-                                var vid = referencedEntities.GetByGlobal(RadixAddressCodec.Decode(v.Address).Data.ToHex()).DatabaseId;
+                            .ToDictionary(
+                                v =>
+                                {
+                                    var vid = referencedEntities.GetByGlobal(RadixAddressCodec.Decode(v.Address).Data.ToHex()).DatabaseId;
 
-                                return new ValidatorKeyLookup(vid, v.Key.KeyType.ToModel(), v.Key.GetKeyBytes());
-                            })
-                            .ToList();
+                                    return new ValidatorKeyLookup(vid, v.Key.KeyType.ToModel(), v.Key.GetKeyBytes());
+                                },
+                                v => TokenAmount.FromDecimalString(v.Stake));
 
                         validatorSetChanges.Add(new ValidatorSetChange(validatorSet.Epoch, change, stateVersion));
                     }
@@ -987,16 +991,16 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 .ToList();
 
             var validatorActiveSetHistoryToAdd = validatorSetChanges
-                .Select(e =>
+                .SelectMany(e =>
                 {
-                    return new ValidatorActiveSetHistory
+                    return e.ValidatorSet.Select(vs => new ValidatorActiveSetHistory
                     {
                         Id = sequences.ValidatorActiveSetHistorySequence++,
                         FromStateVersion = e.StateVersion,
-                        ValidatorKeyHistoryIds = e.ValidatorSet
-                            .Select(v => existingValidatorKeys.GetOrAdd(v, _ => validatorKeyHistoryToAdd[v]).Id)
-                            .ToArray(),
-                    };
+                        Epoch = e.Epoch,
+                        ValidatorPublicKeyHistoryId = existingValidatorKeys.GetOrAdd(vs.Key, _ => validatorKeyHistoryToAdd[vs.Key]).Id,
+                        Stake = vs.Value,
+                    });
                 })
                 .ToList();
 

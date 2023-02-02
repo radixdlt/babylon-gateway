@@ -100,11 +100,11 @@ internal static class GatewayModelExtensions
         };
     }
 
-    public static GatewayModel.PublicKey ToGatewayPublicKey(this ValidatorKeyHistory validatorKey)
+    public static GatewayModel.PublicKey ToGatewayPublicKey(this ValidatorPublicKeyHistory validatorPublicKey)
     {
-        var keyHex = validatorKey.Key.ToHex();
+        var keyHex = validatorPublicKey.Key.ToHex();
 
-        return validatorKey.KeyType switch
+        return validatorPublicKey.KeyType switch
         {
             PublicKeyType.EcdsaSecp256k1 => new GatewayModel.PublicKeyEcdsaSecp256k1(keyHex),
             PublicKeyType.EddsaEd25519 => new GatewayModel.PublicKeyEddsaEd25519(keyHex),

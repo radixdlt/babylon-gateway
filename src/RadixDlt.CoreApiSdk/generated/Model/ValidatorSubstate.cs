@@ -126,14 +126,14 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="epochManagerAddress">The Bech32m-encoded human readable version of the component address (required).</param>
         /// <param name="validatorAddress">The Bech32m-encoded human readable version of the component address (required).</param>
-        /// <param name="key">key (required).</param>
+        /// <param name="publicKey">publicKey (required).</param>
         /// <param name="stakeVault">stakeVault (required).</param>
         /// <param name="unstakeVault">unstakeVault (required).</param>
         /// <param name="liquidStakeUnitResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
         /// <param name="unstakeClaimTokenResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
         /// <param name="isRegistered">isRegistered (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.Validator).</param>
-        public ValidatorSubstate(string epochManagerAddress = default(string), string validatorAddress = default(string), EcdsaSecp256k1PublicKey key = default(EcdsaSecp256k1PublicKey), EntityReference stakeVault = default(EntityReference), EntityReference unstakeVault = default(EntityReference), string liquidStakeUnitResourceAddress = default(string), string unstakeClaimTokenResourceAddress = default(string), bool isRegistered = default(bool), SubstateType substateType = SubstateType.Validator) : base(substateType)
+        public ValidatorSubstate(string epochManagerAddress = default(string), string validatorAddress = default(string), EcdsaSecp256k1PublicKey publicKey = default(EcdsaSecp256k1PublicKey), EntityReference stakeVault = default(EntityReference), EntityReference unstakeVault = default(EntityReference), string liquidStakeUnitResourceAddress = default(string), string unstakeClaimTokenResourceAddress = default(string), bool isRegistered = default(bool), SubstateType substateType = SubstateType.Validator) : base(substateType)
         {
             // to ensure "epochManagerAddress" is required (not null)
             if (epochManagerAddress == null)
@@ -147,12 +147,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("validatorAddress is a required property for ValidatorSubstate and cannot be null");
             }
             this.ValidatorAddress = validatorAddress;
-            // to ensure "key" is required (not null)
-            if (key == null)
+            // to ensure "publicKey" is required (not null)
+            if (publicKey == null)
             {
-                throw new ArgumentNullException("key is a required property for ValidatorSubstate and cannot be null");
+                throw new ArgumentNullException("publicKey is a required property for ValidatorSubstate and cannot be null");
             }
-            this.Key = key;
+            this.PublicKey = publicKey;
             // to ensure "stakeVault" is required (not null)
             if (stakeVault == null)
             {
@@ -195,10 +195,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public string ValidatorAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets Key
+        /// Gets or Sets PublicKey
         /// </summary>
-        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
-        public EcdsaSecp256k1PublicKey Key { get; set; }
+        [DataMember(Name = "public_key", IsRequired = true, EmitDefaultValue = true)]
+        public EcdsaSecp256k1PublicKey PublicKey { get; set; }
 
         /// <summary>
         /// Gets or Sets StakeVault
@@ -243,7 +243,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  EpochManagerAddress: ").Append(EpochManagerAddress).Append("\n");
             sb.Append("  ValidatorAddress: ").Append(ValidatorAddress).Append("\n");
-            sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("  PublicKey: ").Append(PublicKey).Append("\n");
             sb.Append("  StakeVault: ").Append(StakeVault).Append("\n");
             sb.Append("  UnstakeVault: ").Append(UnstakeVault).Append("\n");
             sb.Append("  LiquidStakeUnitResourceAddress: ").Append(LiquidStakeUnitResourceAddress).Append("\n");
@@ -295,9 +295,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.ValidatorAddress.Equals(input.ValidatorAddress))
                 ) && base.Equals(input) && 
                 (
-                    this.Key == input.Key ||
-                    (this.Key != null &&
-                    this.Key.Equals(input.Key))
+                    this.PublicKey == input.PublicKey ||
+                    (this.PublicKey != null &&
+                    this.PublicKey.Equals(input.PublicKey))
                 ) && base.Equals(input) && 
                 (
                     this.StakeVault == input.StakeVault ||
@@ -342,9 +342,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ValidatorAddress.GetHashCode();
                 }
-                if (this.Key != null)
+                if (this.PublicKey != null)
                 {
-                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PublicKey.GetHashCode();
                 }
                 if (this.StakeVault != null)
                 {

@@ -64,12 +64,14 @@
 
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Npgsql;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+using System.Numerics;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
@@ -106,7 +108,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ComponentEntityStateHistory> ComponentEntityStateHistory => Set<ComponentEntityStateHistory>();
 
-    public DbSet<ValidatorKeyHistory> ValidatorKeyHistory => Set<ValidatorKeyHistory>();
+    public DbSet<ValidatorPublicKeyHistory> ValidatorKeyHistory => Set<ValidatorPublicKeyHistory>();
 
     public DbSet<ValidatorActiveSetHistory> ValidatorActiveSetHistory => Set<ValidatorActiveSetHistory>();
 
@@ -214,13 +216,14 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<NonFungibleResourceManagerEntity>("non_fungible_resource_manager")
             .HasValue<NormalComponentEntity>("normal_component")
             .HasValue<AccountComponentEntity>("account_component")
-            .HasValue<ValidatorComponentEntity>("validator_component")
-            .HasValue<AccessControllerComponentEntity>("access_controller_component")
             .HasValue<PackageEntity>("package")
             .HasValue<KeyValueStoreEntity>("key_value_store")
             .HasValue<VaultEntity>("vault")
             .HasValue<NonFungibleStoreEntity>("non_fungible_store")
-            .HasValue<ClockEntity>("clock");
+            .HasValue<ClockEntity>("clock")
+            .HasValue<ValidatorEntity>("validator")
+            .HasValue<AccessControllerEntity>("access_controller")
+            .HasValue<IdentityEntity>("identity");
 
         modelBuilder.Entity<Entity>()
             .HasIndex(e => e.Address)
@@ -269,14 +272,17 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<ComponentEntityStateHistory>()
             .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<ValidatorKeyHistory>()
+        modelBuilder.Entity<ValidatorPublicKeyHistory>()
             .HasIndex(e => new { e.ValidatorEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<ValidatorKeyHistory>()
+        modelBuilder.Entity<ValidatorPublicKeyHistory>()
             .HasIndex(e => new { e.ValidatorEntityId, e.KeyType, e.Key });
 
         modelBuilder.Entity<ValidatorActiveSetHistory>()
             .HasIndex(e => e.FromStateVersion);
+
+        modelBuilder.Entity<ValidatorActiveSetHistory>()
+            .HasIndex(e => e.Epoch);
 
         modelBuilder.Entity<EntityAccessRulesChainHistory>()
             .HasIndex(e => new { e.EntityId, e.Subtype, e.FromStateVersion });

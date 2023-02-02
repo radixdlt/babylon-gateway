@@ -86,7 +86,7 @@ internal class SequencesHolder
 
     public long NonFungibleIdStoreHistorySequence { get; set; }
 
-    public long ValidatorKeyHistorySequence { get; set; }
+    public long ValidatorPublicKeyHistorySequence { get; set; }
 
     public long ValidatorActiveSetHistorySequence { get; set; }
 }

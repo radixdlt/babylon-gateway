@@ -90,57 +90,43 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityDetailsResponseAllOf
+    /// ValidatorCollectionItemActiveInEpochStake
     /// </summary>
-    [DataContract(Name = "EntityDetailsResponse_allOf")]
-    public partial class EntityDetailsResponseAllOf : IEquatable<EntityDetailsResponseAllOf>
+    [DataContract(Name = "ValidatorCollectionItemActiveInEpochStake")]
+    public partial class ValidatorCollectionItemActiveInEpochStake : IEquatable<ValidatorCollectionItemActiveInEpochStake>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ValidatorCollectionItemActiveInEpochStake" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityDetailsResponseAllOf() { }
+        protected ValidatorCollectionItemActiveInEpochStake() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ValidatorCollectionItemActiveInEpochStake" /> class.
         /// </summary>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="metadata">metadata (required).</param>
-        /// <param name="details">details.</param>
-        public EntityDetailsResponseAllOf(string address = default(string), EntityMetadataCollection metadata = default(EntityMetadataCollection), EntityDetailsResponseDetails details = default(EntityDetailsResponseDetails))
+        /// <param name="stake">stake (required).</param>
+        /// <param name="stakePercentage">stakePercentage (required).</param>
+        public ValidatorCollectionItemActiveInEpochStake(TokenAmount stake = default(TokenAmount), double stakePercentage = default(double))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "stake" is required (not null)
+            if (stake == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityDetailsResponseAllOf and cannot be null");
+                throw new ArgumentNullException("stake is a required property for ValidatorCollectionItemActiveInEpochStake and cannot be null");
             }
-            this.Address = address;
-            // to ensure "metadata" is required (not null)
-            if (metadata == null)
-            {
-                throw new ArgumentNullException("metadata is a required property for EntityDetailsResponseAllOf and cannot be null");
-            }
-            this.Metadata = metadata;
-            this.Details = details;
+            this.Stake = stake;
+            this.StakePercentage = stakePercentage;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// Gets or Sets Stake
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        [DataMember(Name = "stake", IsRequired = true, EmitDefaultValue = true)]
+        public TokenAmount Stake { get; set; }
 
         /// <summary>
-        /// Gets or Sets Metadata
+        /// Gets or Sets StakePercentage
         /// </summary>
-        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public EntityMetadataCollection Metadata { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Details
-        /// </summary>
-        [DataMember(Name = "details", EmitDefaultValue = true)]
-        public EntityDetailsResponseDetails Details { get; set; }
+        [DataMember(Name = "stake_percentage", IsRequired = true, EmitDefaultValue = true)]
+        public double StakePercentage { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -149,10 +135,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityDetailsResponseAllOf {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
-            sb.Append("  Details: ").Append(Details).Append("\n");
+            sb.Append("class ValidatorCollectionItemActiveInEpochStake {\n");
+            sb.Append("  Stake: ").Append(Stake).Append("\n");
+            sb.Append("  StakePercentage: ").Append(StakePercentage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -173,15 +158,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityDetailsResponseAllOf);
+            return this.Equals(input as ValidatorCollectionItemActiveInEpochStake);
         }
 
         /// <summary>
-        /// Returns true if EntityDetailsResponseAllOf instances are equal
+        /// Returns true if ValidatorCollectionItemActiveInEpochStake instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityDetailsResponseAllOf to be compared</param>
+        /// <param name="input">Instance of ValidatorCollectionItemActiveInEpochStake to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityDetailsResponseAllOf input)
+        public bool Equals(ValidatorCollectionItemActiveInEpochStake input)
         {
             if (input == null)
             {
@@ -189,19 +174,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.Stake == input.Stake ||
+                    (this.Stake != null &&
+                    this.Stake.Equals(input.Stake))
                 ) && 
                 (
-                    this.Metadata == input.Metadata ||
-                    (this.Metadata != null &&
-                    this.Metadata.Equals(input.Metadata))
-                ) && 
-                (
-                    this.Details == input.Details ||
-                    (this.Details != null &&
-                    this.Details.Equals(input.Details))
+                    this.StakePercentage == input.StakePercentage ||
+                    this.StakePercentage.Equals(input.StakePercentage)
                 );
         }
 
@@ -214,18 +193,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                if (this.Stake != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Stake.GetHashCode();
                 }
-                if (this.Metadata != null)
-                {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
-                }
-                if (this.Details != null)
-                {
-                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.StakePercentage.GetHashCode();
                 return hashCode;
             }
         }

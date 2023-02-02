@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -77,6 +78,15 @@ internal class ValidatorActiveSetHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("validator_key_history_ids")]
-    public long[] ValidatorKeyHistoryIds { get; set; }
+    [Column("epoch")]
+    public long Epoch { get; set; }
+
+    [Column("validator_public_key_history_id")]
+    public long ValidatorPublicKeyHistoryId { get; set; }
+
+    [Column("stake")]
+    public TokenAmount Stake { get; set; }
+
+    [ForeignKey(nameof(ValidatorPublicKeyHistoryId))]
+    public ValidatorPublicKeyHistory PublicKey { get; set; }
 }

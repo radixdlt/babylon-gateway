@@ -222,7 +222,7 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_manager_entity_i
             .ToDictionaryAsync(e => new NonFungibleIdLookup(e.NonFungibleResourceManagerEntityId, e.NonFungibleId), token);
     }
 
-    public async Task<Dictionary<ValidatorKeyLookup, ValidatorKeyHistory>> ExistingValidatorKeysFor(List<ValidatorSetChange> validatorKeyLookups, CancellationToken token)
+    public async Task<Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>> ExistingValidatorKeysFor(List<ValidatorSetChange> validatorKeyLookups, CancellationToken token)
     {
         var validatorEntityIds = new List<long>();
         var validatorKeyTypes = new List<PublicKeyType>();
@@ -230,7 +230,7 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_manager_entity_i
 
         var lookupSet = new HashSet<ValidatorKeyLookup>();
 
-        foreach (var lookup in validatorKeyLookups.SelectMany(change => change.ValidatorSet))
+        foreach (var (lookup, _) in validatorKeyLookups.SelectMany(change => change.ValidatorSet))
         {
             lookupSet.Add(lookup);
         }
@@ -238,13 +238,13 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_manager_entity_i
         foreach (var lookup in lookupSet)
         {
             validatorEntityIds.Add(lookup.ValidatorEntityId);
-            validatorKeyTypes.Add(lookup.KeyType);
-            validatorKeys.Add(lookup.Key);
+            validatorKeyTypes.Add(lookup.PublicKeyType);
+            validatorKeys.Add(lookup.PublicKey);
         }
 
         return await _dbContext.ValidatorKeyHistory
             .FromSqlInterpolated(@$"
-SELECT * FROM validator_key_history WHERE (validator_entity_id, key_type, key) IN (
+SELECT * FROM validator_public_key_history WHERE (validator_entity_id, key_type, key) IN (
     SELECT UNNEST({validatorEntityIds}), UNNEST({validatorKeyTypes}), UNNEST({validatorKeys})
 )")
             .AsNoTracking()
@@ -266,7 +266,7 @@ SELECT
     nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
     nextval('non_fungible_id_mutable_data_history_id_seq') AS NonFungibleIdMutableDataHistorySequence,
     nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence,
-    nextval('validator_key_history_id_seq') AS ValidatorKeyHistorySequence,
+    nextval('validator_public_key_history_id_seq') AS ValidatorPublicKeyHistorySequence,
     nextval('validator_active_set_history_id_seq') AS ValidatorActiveSetHistorySequence",
             cancellationToken: token);
 

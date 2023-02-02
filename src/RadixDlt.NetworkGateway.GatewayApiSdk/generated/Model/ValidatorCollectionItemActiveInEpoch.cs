@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="stake">stake (required).</param>
         /// <param name="key">key (required).</param>
         /// <param name="metadata">metadata.</param>
-        public ValidatorCollectionItemActiveInEpoch(Object stake = default(Object), PublicKey key = default(PublicKey), EntityMetadataCollection metadata = default(EntityMetadataCollection))
+        public ValidatorCollectionItemActiveInEpoch(ValidatorCollectionItemActiveInEpochStake stake = default(ValidatorCollectionItemActiveInEpochStake), PublicKey key = default(PublicKey), EntityMetadataCollection metadata = default(EntityMetadataCollection))
         {
             // to ensure "stake" is required (not null)
             if (stake == null)
@@ -127,7 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Stake
         /// </summary>
         [DataMember(Name = "stake", IsRequired = true, EmitDefaultValue = true)]
-        public Object Stake { get; set; }
+        public ValidatorCollectionItemActiveInEpochStake Stake { get; set; }
 
         /// <summary>
         /// Gets or Sets Key

@@ -97,10 +97,13 @@ internal class EntityStateQuerier : IEntityStateQuerier
     private const int DefaultResourceLimit = 20; // TODO make it configurable
     private const int ValidatorsLimit = 1000; // TODO make it configurable
 
+    private readonly TokenAmount _tokenAmount100 = TokenAmount.FromDecimalString("100");
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ReadOnlyDbContext _dbContext;
     private readonly byte _ecdsaSecp256k1VirtualAccountAddressPrefix;
     private readonly byte _eddsaEd25519VirtualAccountAddressPrefix;
+    private readonly byte _ecdsaSecp256k1VirtualIdentityAddressPrefix;
+    private readonly byte _eddsaEd25519VirtualIdentityAddressPrefix;
 
     public EntityStateQuerier(INetworkConfigurationProvider networkConfigurationProvider, ReadOnlyDbContext dbContext)
     {
@@ -109,6 +112,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         _ecdsaSecp256k1VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EcdsaSecp256k1VirtualAccountComponent).AddressBytePrefix;
         _eddsaEd25519VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EddsaEd25519VirtualAccountComponent).AddressBytePrefix;
+        _ecdsaSecp256k1VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EcdsaSecp256k1VirtualIdentityComponent).AddressBytePrefix;
+        _eddsaEd25519VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EddsaEd25519VirtualIdentityComponent).AddressBytePrefix;
     }
 
     public async Task<GatewayModel.EntityResourcesResponse> EntityResourcesSnapshot(DecodedRadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
@@ -127,7 +132,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
     {
         var entity = await GetEntity(address, ledgerState, token);
 
-        GatewayModel.EntityDetailsResponseDetails details;
+        GatewayModel.EntityDetailsResponseDetails? details = null;
 
         switch (entity)
         {
@@ -222,9 +227,6 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     state: new JRaw(state.State),
                     accessRulesChain: new JRaw(accessRulesLayers.AccessRulesChain)));
                 break;
-
-            default:
-                throw new InvalidEntityException(address.ToString());
         }
 
         var metadata = await GetMetadataSlice(entity.Id, 0, DefaultMetadataLimit, ledgerState, token);
@@ -391,27 +393,31 @@ LIMIT 1
         var fromStateVersion = cursor?.StateVersionBoundary ?? 0;
 
         var validatorsAndOneMore = await _dbContext.Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.GetType() == typeof(ValidatorComponentEntity))
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.GetType() == typeof(ValidatorEntity))
             .Where(e => e.FromStateVersion > fromStateVersion)
             .OrderBy(e => e.FromStateVersion)
             .Take(ValidatorsLimit + 1)
             .ToListAsync(token);
 
-        var activeSetById = await _dbContext.ValidatorKeyHistory
-            .FromSqlInterpolated($@"
-SELECT *
-FROM validator_key_history
-WHERE id = ANY(
-    SELECT UNNEST(validator_key_history_ids)
-    FROM validator_active_set_history
-    WHERE from_state_version <= {ledgerState.StateVersion}
-    ORDER BY from_state_version DESC
-    LIMIT 1
-)")
-            .ToDictionaryAsync(e => e.ValidatorEntityId, token);
+        var findEpochSubquery = _dbContext.ValidatorActiveSetHistory
+            .AsQueryable()
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
+            .OrderByDescending(e => e.FromStateVersion)
+            .Take(1)
+            .Select(e => e.Epoch);
+
+        var activeSetById = await _dbContext.ValidatorActiveSetHistory
+            .Include(e => e.PublicKey)
+            .Where(e => e.Epoch == findEpochSubquery.First())
+            .ToDictionaryAsync(e => e.PublicKey.ValidatorEntityId, token);
+
+        var totalStake = activeSetById.Values
+            .Select(asv => asv.Stake)
+            .Aggregate(TokenAmount.Zero, (current, x) => current + x);
 
         var validatorIds = validatorsAndOneMore.Take(ValidatorsLimit).Select(e => e.Id).ToArray();
 
+        // TODO Validators are currently not a derived type of ComponentEntity but this is only temporary solution, remove this comment once they regain their Component-status
         var stateById = await _dbContext.ComponentEntityStateHistory
             .FromSqlInterpolated($@"
 WITH variables (validator_entity_id) AS (
@@ -439,14 +445,17 @@ INNER JOIN LATERAL (
 
                 GatewayModel.ValidatorCollectionItemActiveInEpoch? activeInEpoch = null;
 
-                if (activeSetById.TryGetValue(v.Id, out var vk))
+                if (activeSetById.TryGetValue(v.Id, out var asv))
                 {
-                    object stake = new { Xxx = "zzzz" }; // TODO fix me!
+                    var stake = new GatewayModel.TokenAmount(asv.Stake.ToString(), _networkConfigurationProvider.GetWellKnownAddresses().Xrd);
+                    var stakePercentage = double.Parse((asv.Stake * _tokenAmount100 / totalStake).ToString());
 
-                    activeInEpoch = new GatewayModel.ValidatorCollectionItemActiveInEpoch(stake, vk.ToGatewayPublicKey());
+                    activeInEpoch = new GatewayModel.ValidatorCollectionItemActiveInEpoch(
+                        new GatewayModel.ValidatorCollectionItemActiveInEpochStake(stake, stakePercentage),
+                        asv.PublicKey.ToGatewayPublicKey());
                 }
 
-                return new GatewayModel.ValidatorCollectionItem(address, new JRaw(stateById[v.Id]), activeInEpoch, metadataById[v.Id]);
+                return new GatewayModel.ValidatorCollectionItem(address, new JRaw(stateById[v.Id].State), activeInEpoch, metadataById[v.Id]);
             })
             .ToList();
 
@@ -694,9 +703,16 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = final.non_fungible_id_data_id
 
         if (entity == null)
         {
-            if (address.Data[0] == _ecdsaSecp256k1VirtualAccountAddressPrefix || address.Data[0] == _eddsaEd25519VirtualAccountAddressPrefix)
+            var firstByte = address.Data[0];
+
+            if (firstByte == _ecdsaSecp256k1VirtualAccountAddressPrefix || firstByte == _eddsaEd25519VirtualAccountAddressPrefix)
             {
                 return new VirtualAccountComponentEntity(address.Data);
+            }
+
+            if (firstByte == _ecdsaSecp256k1VirtualIdentityAddressPrefix || firstByte == _eddsaEd25519VirtualIdentityAddressPrefix)
+            {
+                return new VirtualIdentityEntity(address.Data);
             }
 
             throw new EntityNotFoundException(address.ToString());
