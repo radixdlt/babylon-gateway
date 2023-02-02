@@ -16,42 +16,41 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TransactionStatusRequest
+ * @interface StateValidatorsListRequestAllOf
  */
-export interface TransactionStatusRequest {
+export interface StateValidatorsListRequestAllOf {
     /**
-     * Hex-encoded SHA-256 hash.
+     * This cursor allows forward pagination, by providing the cursor from the previous request.
      * @type {string}
-     * @memberof TransactionStatusRequest
+     * @memberof StateValidatorsListRequestAllOf
      */
-    intent_hash_hex: string;
+    cursor?: string | null;
 }
 
 /**
- * Check if a given object implements the TransactionStatusRequest interface.
+ * Check if a given object implements the StateValidatorsListRequestAllOf interface.
  */
-export function instanceOfTransactionStatusRequest(value: object): boolean {
+export function instanceOfStateValidatorsListRequestAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "intent_hash_hex" in value;
 
     return isInstance;
 }
 
-export function TransactionStatusRequestFromJSON(json: any): TransactionStatusRequest {
-    return TransactionStatusRequestFromJSONTyped(json, false);
+export function StateValidatorsListRequestAllOfFromJSON(json: any): StateValidatorsListRequestAllOf {
+    return StateValidatorsListRequestAllOfFromJSONTyped(json, false);
 }
 
-export function TransactionStatusRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionStatusRequest {
+export function StateValidatorsListRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateValidatorsListRequestAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'intent_hash_hex': json['intent_hash_hex'],
+        'cursor': !exists(json, 'cursor') ? undefined : json['cursor'],
     };
 }
 
-export function TransactionStatusRequestToJSON(value?: TransactionStatusRequest | null): any {
+export function StateValidatorsListRequestAllOfToJSON(value?: StateValidatorsListRequestAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -60,7 +59,7 @@ export function TransactionStatusRequestToJSON(value?: TransactionStatusRequest 
     }
     return {
         
-        'intent_hash_hex': value.intent_hash_hex,
+        'cursor': value.cursor,
     };
 }
 

@@ -13,49 +13,55 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { EntityDetailsResponseDetails } from './EntityDetailsResponseDetails';
-import {
-    EntityDetailsResponseDetailsFromJSON,
-    EntityDetailsResponseDetailsFromJSONTyped,
-    EntityDetailsResponseDetailsToJSON,
-} from './EntityDetailsResponseDetails';
 import type { EntityMetadataCollection } from './EntityMetadataCollection';
 import {
     EntityMetadataCollectionFromJSON,
     EntityMetadataCollectionFromJSONTyped,
     EntityMetadataCollectionToJSON,
 } from './EntityMetadataCollection';
+import type { ValidatorCollectionItemActiveInEpoch } from './ValidatorCollectionItemActiveInEpoch';
+import {
+    ValidatorCollectionItemActiveInEpochFromJSON,
+    ValidatorCollectionItemActiveInEpochFromJSONTyped,
+    ValidatorCollectionItemActiveInEpochToJSON,
+} from './ValidatorCollectionItemActiveInEpoch';
 
 /**
  * 
  * @export
- * @interface EntityDetailsResponseAllOf
+ * @interface ValidatorCollectionItem
  */
-export interface EntityDetailsResponseAllOf {
+export interface ValidatorCollectionItem {
     /**
      * Bech32m-encoded human readable version of the entity's global address.
      * @type {string}
-     * @memberof EntityDetailsResponseAllOf
+     * @memberof ValidatorCollectionItem
      */
     address: string;
     /**
      * 
-     * @type {EntityMetadataCollection}
-     * @memberof EntityDetailsResponseAllOf
+     * @type {object}
+     * @memberof ValidatorCollectionItem
      */
-    metadata: EntityMetadataCollection;
+    state?: object | null;
     /**
      * 
-     * @type {EntityDetailsResponseDetails}
-     * @memberof EntityDetailsResponseAllOf
+     * @type {ValidatorCollectionItemActiveInEpoch}
+     * @memberof ValidatorCollectionItem
      */
-    details?: EntityDetailsResponseDetails;
+    active_in_epoch?: ValidatorCollectionItemActiveInEpoch;
+    /**
+     * 
+     * @type {EntityMetadataCollection}
+     * @memberof ValidatorCollectionItem
+     */
+    metadata: EntityMetadataCollection;
 }
 
 /**
- * Check if a given object implements the EntityDetailsResponseAllOf interface.
+ * Check if a given object implements the ValidatorCollectionItem interface.
  */
-export function instanceOfEntityDetailsResponseAllOf(value: object): boolean {
+export function instanceOfValidatorCollectionItem(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "address" in value;
     isInstance = isInstance && "metadata" in value;
@@ -63,23 +69,24 @@ export function instanceOfEntityDetailsResponseAllOf(value: object): boolean {
     return isInstance;
 }
 
-export function EntityDetailsResponseAllOfFromJSON(json: any): EntityDetailsResponseAllOf {
-    return EntityDetailsResponseAllOfFromJSONTyped(json, false);
+export function ValidatorCollectionItemFromJSON(json: any): ValidatorCollectionItem {
+    return ValidatorCollectionItemFromJSONTyped(json, false);
 }
 
-export function EntityDetailsResponseAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): EntityDetailsResponseAllOf {
+export function ValidatorCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): ValidatorCollectionItem {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
         'address': json['address'],
+        'state': !exists(json, 'state') ? undefined : json['state'],
+        'active_in_epoch': !exists(json, 'active_in_epoch') ? undefined : ValidatorCollectionItemActiveInEpochFromJSON(json['active_in_epoch']),
         'metadata': EntityMetadataCollectionFromJSON(json['metadata']),
-        'details': !exists(json, 'details') ? undefined : EntityDetailsResponseDetailsFromJSON(json['details']),
     };
 }
 
-export function EntityDetailsResponseAllOfToJSON(value?: EntityDetailsResponseAllOf | null): any {
+export function ValidatorCollectionItemToJSON(value?: ValidatorCollectionItem | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -89,8 +96,9 @@ export function EntityDetailsResponseAllOfToJSON(value?: EntityDetailsResponseAl
     return {
         
         'address': value.address,
+        'state': value.state,
+        'active_in_epoch': ValidatorCollectionItemActiveInEpochToJSON(value.active_in_epoch),
         'metadata': EntityMetadataCollectionToJSON(value.metadata),
-        'details': EntityDetailsResponseDetailsToJSON(value.details),
     };
 }
 

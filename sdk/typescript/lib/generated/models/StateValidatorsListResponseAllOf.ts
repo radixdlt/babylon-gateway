@@ -13,45 +13,52 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { ValidatorCollection } from './ValidatorCollection';
+import {
+    ValidatorCollectionFromJSON,
+    ValidatorCollectionFromJSONTyped,
+    ValidatorCollectionToJSON,
+} from './ValidatorCollection';
+
 /**
  * 
  * @export
- * @interface TransactionStatusRequest
+ * @interface StateValidatorsListResponseAllOf
  */
-export interface TransactionStatusRequest {
+export interface StateValidatorsListResponseAllOf {
     /**
-     * Hex-encoded SHA-256 hash.
-     * @type {string}
-     * @memberof TransactionStatusRequest
+     * 
+     * @type {ValidatorCollection}
+     * @memberof StateValidatorsListResponseAllOf
      */
-    intent_hash_hex: string;
+    validators: ValidatorCollection;
 }
 
 /**
- * Check if a given object implements the TransactionStatusRequest interface.
+ * Check if a given object implements the StateValidatorsListResponseAllOf interface.
  */
-export function instanceOfTransactionStatusRequest(value: object): boolean {
+export function instanceOfStateValidatorsListResponseAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "intent_hash_hex" in value;
+    isInstance = isInstance && "validators" in value;
 
     return isInstance;
 }
 
-export function TransactionStatusRequestFromJSON(json: any): TransactionStatusRequest {
-    return TransactionStatusRequestFromJSONTyped(json, false);
+export function StateValidatorsListResponseAllOfFromJSON(json: any): StateValidatorsListResponseAllOf {
+    return StateValidatorsListResponseAllOfFromJSONTyped(json, false);
 }
 
-export function TransactionStatusRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionStatusRequest {
+export function StateValidatorsListResponseAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateValidatorsListResponseAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'intent_hash_hex': json['intent_hash_hex'],
+        'validators': ValidatorCollectionFromJSON(json['validators']),
     };
 }
 
-export function TransactionStatusRequestToJSON(value?: TransactionStatusRequest | null): any {
+export function StateValidatorsListResponseAllOfToJSON(value?: StateValidatorsListResponseAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -60,7 +67,7 @@ export function TransactionStatusRequestToJSON(value?: TransactionStatusRequest 
     }
     return {
         
-        'intent_hash_hex': value.intent_hash_hex,
+        'validators': ValidatorCollectionToJSON(value.validators),
     };
 }
 

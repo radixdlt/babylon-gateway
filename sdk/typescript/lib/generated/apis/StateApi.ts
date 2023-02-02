@@ -34,6 +34,8 @@ import type {
   NonFungibleDataResponse,
   NonFungibleIdsRequest,
   NonFungibleIdsResponse,
+  StateValidatorsListRequest,
+  StateValidatorsListResponse,
 } from '../models';
 import {
     EntityDetailsRequestFromJSON,
@@ -74,6 +76,10 @@ import {
     NonFungibleIdsRequestToJSON,
     NonFungibleIdsResponseFromJSON,
     NonFungibleIdsResponseToJSON,
+    StateValidatorsListRequestFromJSON,
+    StateValidatorsListRequestToJSON,
+    StateValidatorsListResponseFromJSON,
+    StateValidatorsListResponseToJSON,
 } from '../models';
 
 export interface EntityDetailsOperationRequest {
@@ -110,6 +116,10 @@ export interface NonFungibleIdDataRequest {
 
 export interface NonFungibleIdsOperationRequest {
     nonFungibleIdsRequest: NonFungibleIdsRequest;
+}
+
+export interface StateValidatorsListOperationRequest {
+    stateValidatorsListRequest: StateValidatorsListRequest;
 }
 
 /**
@@ -429,6 +439,39 @@ export class StateApi extends runtime.BaseAPI {
      */
     async nonFungibleIds(requestParameters: NonFungibleIdsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<NonFungibleIdsResponse> {
         const response = await this.nonFungibleIdsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Get Validators List
+     */
+    async stateValidatorsListRaw(requestParameters: StateValidatorsListOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateValidatorsListResponse>> {
+        if (requestParameters.stateValidatorsListRequest === null || requestParameters.stateValidatorsListRequest === undefined) {
+            throw new runtime.RequiredError('stateValidatorsListRequest','Required parameter requestParameters.stateValidatorsListRequest was null or undefined when calling stateValidatorsList.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/state/validators/list`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: StateValidatorsListRequestToJSON(requestParameters.stateValidatorsListRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => StateValidatorsListResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get Validators List
+     */
+    async stateValidatorsList(requestParameters: StateValidatorsListOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateValidatorsListResponse> {
+        const response = await this.stateValidatorsListRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -16,42 +16,42 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TransactionStatusRequest
+ * @interface PublicKeyEcdsaSecp256k1AllOf
  */
-export interface TransactionStatusRequest {
+export interface PublicKeyEcdsaSecp256k1AllOf {
     /**
-     * Hex-encoded SHA-256 hash.
+     * The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes)
      * @type {string}
-     * @memberof TransactionStatusRequest
+     * @memberof PublicKeyEcdsaSecp256k1AllOf
      */
-    intent_hash_hex: string;
+    key_hex: string;
 }
 
 /**
- * Check if a given object implements the TransactionStatusRequest interface.
+ * Check if a given object implements the PublicKeyEcdsaSecp256k1AllOf interface.
  */
-export function instanceOfTransactionStatusRequest(value: object): boolean {
+export function instanceOfPublicKeyEcdsaSecp256k1AllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "intent_hash_hex" in value;
+    isInstance = isInstance && "key_hex" in value;
 
     return isInstance;
 }
 
-export function TransactionStatusRequestFromJSON(json: any): TransactionStatusRequest {
-    return TransactionStatusRequestFromJSONTyped(json, false);
+export function PublicKeyEcdsaSecp256k1AllOfFromJSON(json: any): PublicKeyEcdsaSecp256k1AllOf {
+    return PublicKeyEcdsaSecp256k1AllOfFromJSONTyped(json, false);
 }
 
-export function TransactionStatusRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionStatusRequest {
+export function PublicKeyEcdsaSecp256k1AllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): PublicKeyEcdsaSecp256k1AllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'intent_hash_hex': json['intent_hash_hex'],
+        'key_hex': json['key_hex'],
     };
 }
 
-export function TransactionStatusRequestToJSON(value?: TransactionStatusRequest | null): any {
+export function PublicKeyEcdsaSecp256k1AllOfToJSON(value?: PublicKeyEcdsaSecp256k1AllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -60,7 +60,7 @@ export function TransactionStatusRequestToJSON(value?: TransactionStatusRequest 
     }
     return {
         
-        'intent_hash_hex': value.intent_hash_hex,
+        'key_hex': value.key_hex,
     };
 }
 
