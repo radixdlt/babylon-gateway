@@ -97,7 +97,7 @@ public static class ServiceCollectionExtensions
             sp =>
             {
                 var connectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString(connectionStringName);
-                var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+                var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString + ";Include Error Detail=true"); // TODO marudnet testing only
 
                 dataSourceBuilder.UseLoggerFactory(sp.GetService<ILoggerFactory>());
                 dataSourceBuilder.MapEnum<AccessRulesChainSubtype>();
