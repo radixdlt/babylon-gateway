@@ -145,6 +145,9 @@ internal abstract class CommonDbContext : DbContext
 
         configurationBuilder.Properties<RadixAddress>()
             .HaveConversion<RadixAddressToByteArrayConverter>();
+
+        configurationBuilder.Properties<GlobalAddress>()
+            .HaveConversion<GlobalAddressToStringConverter>();
     }
 
     private static void HookupSingleEntries(ModelBuilder modelBuilder)

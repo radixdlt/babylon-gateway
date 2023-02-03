@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,128 +62,15 @@
  * permissions under this License.
  */
 
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
-[Table("entities")]
-internal abstract class Entity
+internal class GlobalAddressToStringConverter : ValueConverter<GlobalAddress, string>
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("address")]
-    public RadixAddress Address { get; set; }
-
-    [Column("global_address")]
-    public GlobalAddress? GlobalAddress { get; set; }
-
-    [Column("ancestor_ids")]
-    public List<long>? AncestorIds { get; set; }
-
-    [Column("parent_ancestor_id")]
-    public long? ParentAncestorId { get; set; }
-
-    [Column("owner_ancestor_id")]
-    public long? OwnerAncestorId { get; set; }
-
-    [Column("global_ancestor_id")]
-    public long? GlobalAncestorId { get; set; }
-}
-
-internal class EpochManagerEntity : Entity
-{
-}
-
-internal abstract class ResourceManagerEntity : Entity
-{
-}
-
-internal class FungibleResourceManagerEntity : ResourceManagerEntity
-{
-    [Column("divisibility")]
-    public int Divisibility { get; set; }
-}
-
-internal class NonFungibleResourceManagerEntity : ResourceManagerEntity
-{
-    [Column("non_fungible_id_type")]
-    public NonFungibleIdType NonFungibleIdType { get; set; }
-}
-
-internal abstract class ComponentEntity : Entity
-{
-    [Column("package_id")]
-    public long PackageId { get; set; }
-
-    [Column("blueprint_name")]
-    public string BlueprintName { get; set; }
-}
-
-internal class NormalComponentEntity : ComponentEntity
-{
-}
-
-internal class AccountComponentEntity : ComponentEntity
-{
-}
-
-// This is transient model, not stored in database
-internal class VirtualAccountComponentEntity : AccountComponentEntity
-{
-    public VirtualAccountComponentEntity(GlobalAddress globalAddress)
+    public GlobalAddressToStringConverter()
+        : base(ra => ra, @string => (GlobalAddress)@string)
     {
-        GlobalAddress = globalAddress;
-    }
-}
-
-internal class PackageEntity : Entity
-{
-    [Column("code")]
-    public byte[] Code { get; set; }
-}
-
-internal class KeyValueStoreEntity : Entity
-{
-}
-
-internal class VaultEntity : Entity
-{
-}
-
-internal class NonFungibleStoreEntity : Entity
-{
-}
-
-internal class ClockEntity : Entity
-{
-}
-
-internal class AccessControllerEntity : Entity
-{
-}
-
-internal class ValidatorEntity : Entity
-{
-}
-
-internal class IdentityEntity : Entity
-{
-}
-
-// This is transient model, not stored in database
-internal class VirtualIdentityEntity : IdentityEntity
-{
-    public VirtualIdentityEntity(GlobalAddress globalAddress)
-    {
-        GlobalAddress = globalAddress;
     }
 }

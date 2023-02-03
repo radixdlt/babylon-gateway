@@ -66,7 +66,6 @@ using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -171,9 +170,9 @@ INNER JOIN LATERAL (
     public async Task<Dictionary<string, Entity>> ExistingEntitiesFor(ReferencedEntityDictionary referencedEntities, CancellationToken token)
     {
         var entityAddresses = referencedEntities.Addresses.Select(x => x.ConvertFromHex()).ToList();
-        var globalEntityAddresses = referencedEntities.KnownGlobalAddresses.Select(x => RadixAddressCodec.Decode(x).Data).ToList();
+        var globalEntityAddresses = referencedEntities.KnownGlobalAddresses.ToList();
         var entityAddressesParameter = new NpgsqlParameter("@entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = entityAddresses };
-        var globalEntityAddressesParameter = new NpgsqlParameter("@global_entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = globalEntityAddresses };
+        var globalEntityAddressesParameter = new NpgsqlParameter("@global_entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Text) { Value = globalEntityAddresses };
 
         return await _dbContext.Entities
             .FromSqlInterpolated($@"

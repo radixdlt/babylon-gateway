@@ -68,7 +68,6 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
@@ -130,7 +129,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Address.AsByteArray(), NpgsqlDbType.Bytea, token);
-            await writer.WriteNullableAsync(e.GlobalAddress.AsByteArray(), NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.GlobalAddress?.ToString(), NpgsqlDbType.Text, token);
             await writer.WriteNullableAsync(e.AncestorIds?.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteNullableAsync(e.ParentAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteNullableAsync(e.OwnerAncestorId, NpgsqlDbType.Bigint, token);

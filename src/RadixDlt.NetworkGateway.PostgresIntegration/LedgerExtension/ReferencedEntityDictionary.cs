@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -107,9 +108,9 @@ internal class ReferencedEntityDictionary
         return _storage[addressHex];
     }
 
-    public ReferencedEntity GetByGlobal(string globalAddressHex)
+    public ReferencedEntity GetByGlobal(GlobalAddress globalAddress)
     {
-        return _globalsCache.GetOrAdd(globalAddressHex, _ => All.First(re => re.GlobalAddressHex == globalAddressHex));
+        return _globalsCache.GetOrAdd(globalAddress, _ => All.First(re => re.GlobalAddress == globalAddress));
     }
 
     public ReferencedEntity GetByDatabaseId(long id)
