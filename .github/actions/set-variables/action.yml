@@ -65,15 +65,15 @@ runs:
             echo "DATABASE_MIGRATIONS_TAGS: $DATABASE_MIGRATIONS_TAGS"
             echo "GATEWAY_API_TAGS: $GATEWAY_API_TAGS"
 
-            echo "version-tag=$DOCKER_TAG" >> $GITHUB_STATE
+            echo "version-tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
 
-            echo "data_aggregator_tags=$DATA_AGGREGATOR_TAGS" >> $GITHUB_STATE
-            echo "gateway_api_tags=$GATEWAY_API_TAGS" >> $GITHUB_STATE
-            echo "database_migrations_tags=$DATA_AGGREGATOR_TAGS" >> $GITHUB_STATE
+            echo "data_aggregator_tags=$DATA_AGGREGATOR_TAGS" >> $GITHUB_OUTPUT
+            echo "gateway_api_tags=$GATEWAY_API_TAGS" >> $GITHUB_OUTPUT
+            echo "database_migrations_tags=$DATA_AGGREGATOR_TAGS" >> $GITHUB_OUTPUT
 
-            echo "data-aggregator-tags=$DOCKER_TAG" >> $GITHUB_STATE
-            echo "database-migrations-tag=$DOCKER_TAG" >> $GITHUB_STATE
-            echo "gateway-api-tag=$DOCKER_TAG" >> $GITHUB_STATE
+            echo "data-aggregator-tags=$DOCKER_TAG" >> $GITHUB_OUTPUT
+            echo "database-migrations-tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
+            echo "gateway-api-tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
 
         else
             DOCKER_REPO_DATA_AGGREGATOR="eu.gcr.io/dev-container-repo/babylon-ng-data-aggregator"
@@ -88,14 +88,14 @@ runs:
             echo "DATABASE_MIGRATIONS_TAGS: $DATABASE_MIGRATIONS_TAGS"
             echo "GATEWAY_API_TAGS: $GATEWAY_API_TAGS"
 
-            echo "version-tag=$DOCKER_TAG" >> $GITHUB_STATE
+            echo "version-tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
 
-            echo "data_aggregator_tags=$DATA_AGGREGATOR_TAGS" >> $GITHUB_STATE
-            echo "database_migrations_tags=$DATABASE_MIGRATIONS_TAGS" >> $GITHUB_STATE
-            echo "gateway_api_tags=$GATEWAY_API_TAGS" >> $GITHUB_STATE
+            echo "data_aggregator_tags=$DATA_AGGREGATOR_TAGS" >> $GITHUB_OUTPUT
+            echo "database_migrations_tags=$DATABASE_MIGRATIONS_TAGS" >> $GITHUB_OUTPUT
+            echo "gateway_api_tags=$GATEWAY_API_TAGS" >> $GITHUB_OUTPUT
 
-            echo "data-aggregator-tags=$DOCKER_TAG" >> $GITHUB_STATE
-            echo "database-migrations-tag=$DOCKER_TAG" >> $GITHUB_STATE
-            echo "gateway-api-tag=$DOCKER_TAG" >> $GITHUB_STATE
+            echo "data-aggregator-tags=$DOCKER_TAG" >> $GITHUB_OUTPUT
+            echo "database-migrations-tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
+            echo "gateway-api-tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
         fi
       shell: bash
