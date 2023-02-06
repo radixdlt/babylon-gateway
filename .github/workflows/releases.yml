@@ -68,6 +68,10 @@ jobs:
 
   publish-docker:
     runs-on: ubuntu-22.04
+    outputs:
+      data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag }}
+      database-migrations-tag: ${{ steps.setup_tags.outputs.database-migrations-tag }}
+      gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag }}
     permissions:
       id-token: write
       contents: read
