@@ -119,9 +119,9 @@ jobs:
 
       - name: Setup application version
         run: |
-          echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/DataAggregator/appsettings.json )" > src/DataAggregator/appsettings.json
-          echo "$( jq '.+{DatabaseMigrationsVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/DatabaseMigrations/appsettings.json )" > src/DatabaseMigrations/appsettings.json
-          echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/GatewayApi/appsettings.json )" > src/GatewayAPI/appsettings.json
+          echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/DataAggregator/appsettings.json )" > apps/DataAggregator/appsettings.json
+          echo "$( jq '.+{DatabaseMigrationsVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/DatabaseMigrations/appsettings.json )" > apps/DatabaseMigrations/appsettings.json
+          echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/GatewayApi/appsettings.json )" > apps/GatewayAPI/appsettings.json
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
