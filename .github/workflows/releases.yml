@@ -66,6 +66,10 @@ jobs:
   publish-docker:
     runs-on: ubuntu-22.04
     environment: release
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
     steps:
       - name: Dump context
         uses: crazy-max/ghaction-dump-context@516dbb0c760f39b4cdd750ae095f1688780f68f4
@@ -80,11 +84,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Login to Dockerhub (release)
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+      - name: "Configure AWS credentials"
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          role-to-assume: arn:aws:iam::308190735829:role/gh-dockerhub-releaser
+          aws-region: eu-west-2
+
+      - name: Read secrets from AWS Secrets Manager into environment variables
+        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        with:
+          secret-ids: |
+            DOCKERHUB, github-actions/rdxworks/dockerhub-images/release-credentials
+          parse-json-secrets: true
+          
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{env.DOCKERHUB_USERNAME}}
+          password: ${{env.DOCKERHUB_TOKEN}}
 
       - name: Setup tags for docker image
         id: setup_tags
