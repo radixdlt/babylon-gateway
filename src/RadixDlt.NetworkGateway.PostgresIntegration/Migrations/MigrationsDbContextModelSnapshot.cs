@@ -302,6 +302,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("global_entity_id");
 
+                    b.Property<bool>("IsRoyaltyVault")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_royalty_vault");
+
                     b.Property<long>("OwnerEntityId")
                         .HasColumnType("bigint")
                         .HasColumnName("owner_entity_id");
@@ -309,6 +313,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<long>("ResourceEntityId")
                         .HasColumnType("bigint")
                         .HasColumnName("resource_entity_id");
+
+                    b.Property<long>("VaultEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("vault_entity_id");
 
                     b.Property<string>("discriminator")
                         .IsRequired()
@@ -837,6 +845,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("package_id");
 
+                    b.Property<long?>("RoyaltyVaultEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("royalty_vault_entity_id");
+
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("account_component");
@@ -928,6 +941,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("package_id");
 
+                    b.Property<long?>("RoyaltyVaultEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("royalty_vault_entity_id");
+
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("normal_component");
@@ -941,6 +959,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("code");
+
+                    b.Property<long?>("RoyaltyVaultEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("royalty_vault_entity_id");
 
                     b.ToTable("entities");
 
@@ -959,6 +982,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.VaultEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.Property<long?>("RoyaltyVaultOfEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("royalty_vault_of_entity_id");
 
                     b.ToTable("entities");
 

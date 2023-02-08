@@ -66,18 +66,18 @@ using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class VaultSubstate : IGlobalEntityPointer
+public partial class VaultSubstate : IGlobalAddressPointer
 {
-    public IEnumerable<GlobalEntityPointer> GetPointers()
+    public IEnumerable<string> GetGlobalAddresses()
     {
         if (ResourceAmount is FungibleResourceAmount fra)
         {
-            yield return new GlobalEntityPointer(fra.ResourceAddress);
+            yield return fra.ResourceAddress;
         }
 
         if (ResourceAmount is NonFungibleResourceAmount nfra)
         {
-            yield return new GlobalEntityPointer(nfra.ResourceAddress);
+            yield return nfra.ResourceAddress;
         }
     }
 }

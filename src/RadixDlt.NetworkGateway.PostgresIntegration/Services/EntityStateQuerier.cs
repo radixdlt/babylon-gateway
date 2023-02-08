@@ -546,7 +546,7 @@ INNER JOIN LATERAL (
     SELECT e.global_address, erh.balance
     FROM entity_resource_history erh
     INNER JOIN entities e ON erh.resource_entity_id = e.id
-    WHERE erh.from_state_version <= @stateVersion AND erh.global_entity_id = @entityId AND erh.resource_entity_id = ah.fungible_resource_entity_id
+    WHERE erh.from_state_version <= @stateVersion AND erh.global_entity_id = @entityId AND erh.resource_entity_id = ah.fungible_resource_entity_id AND erh.is_royalty_vault = false
     ORDER BY erh.from_state_version DESC
     LIMIT 1
 ) final ON true;
@@ -606,7 +606,7 @@ INNER JOIN LATERAL (
     SELECT e.global_address, array_length(erh.non_fungible_ids, 1) AS non_fungible_ids_count
     FROM entity_resource_history erh
     INNER JOIN entities e ON erh.resource_entity_id = e.id
-    WHERE erh.from_state_version <= @stateVersion AND erh.global_entity_id = @entityId AND erh.resource_entity_id = ah.non_fungible_resource_entity_id
+    WHERE erh.from_state_version <= @stateVersion AND erh.global_entity_id = @entityId AND erh.resource_entity_id = ah.non_fungible_resource_entity_id AND erh.is_royalty_vault = false
     ORDER BY erh.from_state_version DESC
     LIMIT 1
 ) final ON true;

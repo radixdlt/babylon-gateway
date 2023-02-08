@@ -120,7 +120,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, blueprint_name, divisibility, non_fungible_id_type, code) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, blueprint_name, divisibility, non_fungible_id_type, code, royalty_vault_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -150,6 +150,24 @@ internal class WriteHelper
             }
 
             await writer.WriteNullableAsync(e is PackageEntity pe ? pe.Code : null, NpgsqlDbType.Bytea, token);
+
+            if (e is IRoyaltyVaultHolder rvh && rvh.RoyaltyVaultEntityId.HasValue)
+            {
+                await writer.WriteAsync(rvh.RoyaltyVaultEntityId.Value, token);
+            }
+            else
+            {
+                await writer.WriteNullAsync(token);
+            }
+
+            if (e is VaultEntity ve && ve.RoyaltyVaultOfEntityId.HasValue)
+            {
+                await writer.WriteAsync(ve.RoyaltyVaultOfEntityId.Value, token);
+            }
+            else
+            {
+                await writer.WriteNullAsync(token);
+            }
         }
 
         await writer.CompleteAsync(token);
@@ -398,7 +416,7 @@ internal class WriteHelper
         var fungibleDiscriminator = GetDiscriminator(typeof(EntityFungibleResourceHistory));
         var nonFungibleDiscriminator = GetDiscriminator(typeof(EntityNonFungibleResourceHistory));
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_resource_history (id, from_state_version, owner_entity_id, global_entity_id, resource_entity_id, discriminator, balance, non_fungible_ids) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_resource_history (id, from_state_version, owner_entity_id, global_entity_id, resource_entity_id, vault_entity_id, is_royalty_vault, discriminator, balance, non_fungible_ids) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in fungibleEntities)
         {
@@ -408,6 +426,8 @@ internal class WriteHelper
             await writer.WriteAsync(e.OwnerEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.GlobalEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.IsRoyaltyVault, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(fungibleDiscriminator, NpgsqlDbType.Text, token);
             await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
             await writer.WriteNullAsync(token);
@@ -421,6 +441,8 @@ internal class WriteHelper
             await writer.WriteAsync(e.OwnerEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.GlobalEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.IsRoyaltyVault, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(nonFungibleDiscriminator, NpgsqlDbType.Text, token);
             await writer.WriteNullAsync(token);
             await writer.WriteAsync(e.NonFungibleIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);

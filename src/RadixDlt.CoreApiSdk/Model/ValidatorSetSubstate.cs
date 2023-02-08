@@ -67,10 +67,10 @@ using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class ValidatorSetSubstate : IGlobalEntityPointer
+public partial class ValidatorSetSubstate : IGlobalAddressPointer
 {
-    public IEnumerable<GlobalEntityPointer> GetPointers()
+    public IEnumerable<string> GetGlobalAddresses()
     {
-        return ValidatorSet.Select(validator => new GlobalEntityPointer(validator.Address));
+        return ValidatorSet.Select(vs => vs.Address);
     }
 }

@@ -67,7 +67,7 @@ using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class ResourceManagerSubstate : IOwner
+public partial class ResourceManagerSubstate : IEntityOwner
 {
     public IEnumerable<EntityReference> GetOwnedEntities()
     {

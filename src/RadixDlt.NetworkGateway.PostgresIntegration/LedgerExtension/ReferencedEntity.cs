@@ -83,17 +83,17 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
 
     public Type? TypeHint { get; private set; }
 
-    public long DatabaseId => GetDatabaseEntity().Id;
+    public long DatabaseId => GetDatabaseEntityInternal().Id;
 
-    public long? DatabaseParentAncestorId => GetDatabaseEntity().ParentAncestorId;
+    public long? DatabaseParentAncestorId => GetDatabaseEntityInternal().ParentAncestorId;
 
-    public long DatabaseOwnerAncestorId => GetDatabaseEntity().OwnerAncestorId ?? throw new InvalidOperationException("OwnerAncestorId not set, probably global entity or incorrectly configured one.");
+    public long DatabaseOwnerAncestorId => GetDatabaseEntityInternal().OwnerAncestorId ?? throw new InvalidOperationException("OwnerAncestorId not set, probably global entity or incorrectly configured one.");
 
-    public long DatabaseGlobalAncestorId => GetDatabaseEntity().GlobalAncestorId ?? throw new InvalidOperationException("GlobalAncestorId not set, probably global entity or incorrectly configured one.");
+    public long DatabaseGlobalAncestorId => GetDatabaseEntityInternal().GlobalAncestorId ?? throw new InvalidOperationException("GlobalAncestorId not set, probably global entity or incorrectly configured one.");
 
     public bool CanBeOwner => Type is CoreModel.EntityType.Component or CoreModel.EntityType.ResourceManager or CoreModel.EntityType.Package or CoreModel.EntityType.Validator;
 
-    public bool IsGlobal => GlobalAddressHex != null || GetDatabaseEntity().GlobalAddress != null;
+    public bool IsGlobal => GlobalAddressHex != null || GetDatabaseEntityInternal().GlobalAddress != null;
 
     [MemberNotNullWhen(true, nameof(ImmediateParentReference))]
     public bool HasImmediateParentReference => _immediateParentReference != null;
@@ -160,18 +160,10 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
     }
 
     public void PostResolveConfigure<T>(Action<T> action)
-        where T : Entity
     {
         _postResolveActions.Add(() =>
         {
-            var dbEntity = GetDatabaseEntity();
-
-            if (dbEntity is not T typedDbEntity)
-            {
-                throw new ArgumentException($"Action argument type does not match underlying entity type for {this}.", nameof(action));
-            }
-
-            action.Invoke(typedDbEntity);
+            action.Invoke(GetDatabaseEntity<T>());
         });
     }
 
@@ -196,7 +188,19 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
         _postResolveConfigurationInvoked = true;
     }
 
-    private Entity GetDatabaseEntity()
+    public T GetDatabaseEntity<T>()
+    {
+        var dbEntity = GetDatabaseEntityInternal();
+
+        if (dbEntity is not T typedDbEntity)
+        {
+            throw new ArgumentException($"Action argument type does not match underlying entity type.");
+        }
+
+        return typedDbEntity;
+    }
+
+    private Entity GetDatabaseEntityInternal()
     {
         var de = _databaseEntity ?? throw new InvalidOperationException($"Database entity not loaded yet for {this}.");
 

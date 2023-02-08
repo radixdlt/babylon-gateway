@@ -87,6 +87,12 @@ internal abstract class EntityResourceHistory
 
     [Column("resource_entity_id")]
     public long ResourceEntityId { get; set; }
+
+    [Column("vault_entity_id")]
+    public long VaultEntityId { get; set; }
+
+    [Column("is_royalty_vault")]
+    public bool IsRoyaltyVault { get; set; }
 }
 
 internal class EntityFungibleResourceHistory : EntityResourceHistory

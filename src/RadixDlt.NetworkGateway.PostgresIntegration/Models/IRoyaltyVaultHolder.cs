@@ -62,22 +62,9 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-
-namespace RadixDlt.CoreApiSdk.Model;
-
-public interface IEntityOwner
-{
-    public IEnumerable<EntityReference> GetOwnedEntities();
-}
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 public interface IRoyaltyVaultHolder
 {
-    public bool TryGetRoyaltyVault([NotNullWhen(true)] out EntityReference royaltyVault);
-}
-
-public interface IGlobalAddressPointer
-{
-    public IEnumerable<string> GetGlobalAddresses();
+    public long? RoyaltyVaultEntityId { get; set; }
 }
