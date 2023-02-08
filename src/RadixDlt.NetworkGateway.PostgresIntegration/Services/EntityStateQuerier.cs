@@ -366,7 +366,7 @@ LEFT JOIN LATERAL (
     SELECT *
     FROM non_fungible_id_mutable_data_history nfidmdh
     WHERE nfidmdh.non_fungible_id_data_id = nfid.id AND nfidmdh.from_state_version <= @stateVersion
-    ORDER BY nfidmdh.non_fungible_id_data_id DESC
+    ORDER BY nfidmdh.from_state_version DESC
     LIMIT 1
 ) md ON TRUE
 WHERE nfid.from_state_version <= @stateVersion AND nfid.non_fungible_resource_manager_entity_id = @entityId AND nfid.non_fungible_id = @nonFungibleId
