@@ -66,7 +66,7 @@ using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class ComponentStateSubstate : IOwner
+public partial class ComponentStateSubstate : IEntityOwner
 {
     public IEnumerable<EntityReference> GetOwnedEntities() => DataStruct.OwnedEntities;
 }

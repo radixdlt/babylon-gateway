@@ -119,13 +119,16 @@ internal class NonFungibleResourceManagerEntity : ResourceManagerEntity
     public NonFungibleIdType NonFungibleIdType { get; set; }
 }
 
-internal abstract class ComponentEntity : Entity
+internal abstract class ComponentEntity : Entity, IRoyaltyVaultHolder
 {
     [Column("package_id")]
     public long PackageId { get; set; }
 
     [Column("blueprint_name")]
     public string BlueprintName { get; set; }
+
+    [Column("royalty_vault_entity_id")]
+    public long? RoyaltyVaultEntityId { get; set; }
 }
 
 internal class NormalComponentEntity : ComponentEntity
@@ -145,10 +148,13 @@ internal class VirtualAccountComponentEntity : AccountComponentEntity
     }
 }
 
-internal class PackageEntity : Entity
+internal class PackageEntity : Entity, IRoyaltyVaultHolder
 {
     [Column("code")]
     public byte[] Code { get; set; }
+
+    [Column("royalty_vault_entity_id")]
+    public long? RoyaltyVaultEntityId { get; set; }
 }
 
 internal class KeyValueStoreEntity : Entity
@@ -157,6 +163,10 @@ internal class KeyValueStoreEntity : Entity
 
 internal class VaultEntity : Entity
 {
+    [Column("royalty_vault_of_entity_id")]
+    public long? RoyaltyVaultOfEntityId { get; set; }
+
+    public bool IsRoyaltyVault => RoyaltyVaultOfEntityId != null;
 }
 
 internal class NonFungibleStoreEntity : Entity
