@@ -96,7 +96,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityResourceAggregateHistory> EntityResourceAggregateHistory => Set<EntityResourceAggregateHistory>();
 
-    public DbSet<EntityResourceHistory> EntityResourceHistory => Set<EntityResourceHistory>();
+    public DbSet<EntityVaultHistory> EntityVaultHistory => Set<EntityVaultHistory>();
 
     public DbSet<ResourceManagerEntitySupplyHistory> ResourceManagerEntitySupplyHistory => Set<ResourceManagerEntitySupplyHistory>();
 
@@ -246,15 +246,15 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<EntityResourceAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityResourceHistory>()
+        modelBuilder.Entity<EntityVaultHistory>()
             .HasDiscriminator<string>("discriminator")
-            .HasValue<EntityFungibleResourceHistory>("fungible")
-            .HasValue<EntityNonFungibleResourceHistory>("non_fungible");
+            .HasValue<EntityFungibleVaultHistory>("fungible")
+            .HasValue<EntityNonFungibleVaultHistory>("non_fungible");
 
-        modelBuilder.Entity<EntityResourceHistory>()
+        modelBuilder.Entity<EntityVaultHistory>()
             .HasIndex(e => new { e.OwnerEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityResourceHistory>()
+        modelBuilder.Entity<EntityVaultHistory>()
             .HasIndex(e => new { e.GlobalEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<ResourceManagerEntitySupplyHistory>()

@@ -69,8 +69,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entity_resource_history")]
-internal abstract class EntityResourceHistory
+[Table("entity_vault_history")]
+internal abstract class EntityVaultHistory
 {
     [Key]
     [Column("id")]
@@ -85,23 +85,23 @@ internal abstract class EntityResourceHistory
     [Column("global_entity_id")]
     public long GlobalEntityId { get; set; }
 
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-
     [Column("vault_entity_id")]
     public long VaultEntityId { get; set; }
+
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+}
+
+internal class EntityFungibleVaultHistory : EntityVaultHistory
+{
+    [Column("balance")]
+    public TokenAmount Balance { get; set; }
 
     [Column("is_royalty_vault")]
     public bool IsRoyaltyVault { get; set; }
 }
 
-internal class EntityFungibleResourceHistory : EntityResourceHistory
-{
-    [Column("balance")]
-    public TokenAmount Balance { get; set; }
-}
-
-internal class EntityNonFungibleResourceHistory : EntityResourceHistory
+internal class EntityNonFungibleVaultHistory : EntityVaultHistory
 {
     [Column("non_fungible_ids")]
     public List<long> NonFungibleIds { get; set; }

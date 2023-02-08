@@ -545,11 +545,11 @@ aggregate_history AS (
 SELECT final.global_address AS ResourceEntityGlobalAddress, final.balance::text AS Balance, ah.TotalCount
 FROM aggregate_history ah
 INNER JOIN LATERAL (
-    SELECT e.global_address, erh.balance
-    FROM entity_resource_history erh
-    INNER JOIN entities e ON erh.resource_entity_id = e.id
-    WHERE erh.from_state_version <= @stateVersion AND erh.global_entity_id = @entityId AND erh.resource_entity_id = ah.fungible_resource_entity_id AND erh.is_royalty_vault = false
-    ORDER BY erh.from_state_version DESC
+    SELECT e.global_address, evh.balance
+    FROM entity_vault_history evh
+    INNER JOIN entities e ON evh.resource_entity_id = e.id
+    WHERE evh.from_state_version <= @stateVersion AND evh.global_entity_id = @entityId AND evh.resource_entity_id = ah.fungible_resource_entity_id AND evh.is_royalty_vault = false
+    ORDER BY evh.from_state_version DESC
     LIMIT 1
 ) final ON true;
 ",
@@ -602,11 +602,11 @@ aggregate_history AS (
 SELECT final.global_address AS ResourceEntityGlobalAddress, final.non_fungible_ids_count AS NonFungibleIdsCount, ah.TotalCount
 FROM aggregate_history ah
 INNER JOIN LATERAL (
-    SELECT e.global_address, array_length(erh.non_fungible_ids, 1) AS non_fungible_ids_count
-    FROM entity_resource_history erh
-    INNER JOIN entities e ON erh.resource_entity_id = e.id
-    WHERE erh.from_state_version <= @stateVersion AND erh.global_entity_id = @entityId AND erh.resource_entity_id = ah.non_fungible_resource_entity_id AND erh.is_royalty_vault = false
-    ORDER BY erh.from_state_version DESC
+    SELECT e.global_address, array_length(evh.non_fungible_ids, 1) AS non_fungible_ids_count
+    FROM entity_vault_history evh
+    INNER JOIN entities e ON evh.resource_entity_id = e.id
+    WHERE evh.from_state_version <= @stateVersion AND evh.global_entity_id = @entityId AND evh.resource_entity_id = ah.non_fungible_resource_entity_id
+    ORDER BY evh.from_state_version DESC
     LIMIT 1
 ) final ON true;
 ",
@@ -646,10 +646,10 @@ INNER JOIN LATERAL (
 SELECT nfid.non_fungible_id AS NonFungibleId, final.total_count AS TotalCount
 FROM (
     SELECT UNNEST(non_fungible_ids[@offset:@limit]) AS non_fungible_id_data_id, array_length(non_fungible_ids, 1) AS total_count
-    FROM entity_resource_history
+    FROM entity_vault_history
     WHERE id = (
         SELECT id
-        FROM entity_resource_history
+        FROM entity_vault_history
         WHERE from_state_version <= @stateVersion AND global_entity_id = @entityId AND resource_entity_id = @resourceEntityId
         ORDER BY from_state_version DESC
         LIMIT 1
