@@ -62,24 +62,54 @@
  * permissions under this License.
  */
 
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
+namespace GatewayApi.Controllers;
 
-internal class DefaultGatewayHandler : IGatewayHandler
+[ApiController]
+[Route("status")]
+[ServiceFilter(typeof(ExceptionFilter))]
+[ServiceFilter(typeof(InvalidModelStateFilter))]
+public sealed class StatusController : ControllerBase
 {
-    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly IStatusHandler _statusHandler;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
-    public DefaultGatewayHandler(ILedgerStateQuerier ledgerStateQuerier)
+    public StatusController(IStatusHandler statusHandler, INetworkConfigurationProvider networkConfigurationProvider)
     {
-        _ledgerStateQuerier = ledgerStateQuerier;
+        _statusHandler = statusHandler;
+        _networkConfigurationProvider = networkConfigurationProvider;
     }
 
-    public async Task<GatewayModel.GatewayInformationResponse> Information(CancellationToken token)
+    [HttpPost("gateway-status")]
+    public async Task<GatewayModel.GatewayStatusResponse> GatewayStatus(CancellationToken token)
     {
-        return await _ledgerStateQuerier.GetGatewayInformation(token);
+        return await _statusHandler.GatewayStatus(token);
+    }
+
+    [HttpPost("network-configuration")]
+    public GatewayModel.NetworkConfigurationResponse NetworkConfiguration()
+    {
+        var wellKnownAddresses = _networkConfigurationProvider.GetWellKnownAddresses();
+
+        return new GatewayModel.NetworkConfigurationResponse(
+            _networkConfigurationProvider.GetNetworkId(),
+            _networkConfigurationProvider.GetNetworkName(),
+            new GatewayModel.NetworkConfigurationResponseWellKnownAddresses(
+                wellKnownAddresses.AccountPackage,
+                wellKnownAddresses.Faucet,
+                wellKnownAddresses.EpochManager,
+                wellKnownAddresses.Clock,
+                wellKnownAddresses.EcdsaSecp256k1,
+                wellKnownAddresses.EddsaEd25519,
+                wellKnownAddresses.Xrd
+            )
+        );
     }
 }
