@@ -18,3 +18,7 @@ For docs giving an overview of the Network Gateway and its place in the Radix Ec
 For docs related to development on the Network Gateway, see the [docs folder](./docs).
 
 For docs related to running a Network Gateway locally, see the instructions about running a local toy deployment in the [deployment folder](./deployment).
+
+## Known Bugs
+
+- `/entity/non-fungible/ids` endpoint returns NFIDs from single Vault only
