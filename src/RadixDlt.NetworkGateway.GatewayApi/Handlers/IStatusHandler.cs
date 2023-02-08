@@ -62,31 +62,13 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace GatewayApi.Controllers;
+namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
-[ApiController]
-[Route("gateway")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
-public sealed class GatewayController : ControllerBase
+public interface IStatusHandler
 {
-    private readonly IGatewayHandler _gatewayHandler;
-
-    public GatewayController(IGatewayHandler gatewayHandler)
-    {
-        _gatewayHandler = gatewayHandler;
-    }
-
-    [HttpPost("information")]
-    public async Task<GatewayModel.GatewayInformationResponse> Information(CancellationToken token)
-    {
-        return await _gatewayHandler.Information(token);
-    }
+    Task<GatewayModel.GatewayStatusResponse> GatewayStatus(CancellationToken token = default);
 }

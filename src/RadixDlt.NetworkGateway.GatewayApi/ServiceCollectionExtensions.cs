@@ -142,7 +142,7 @@ public static class ServiceCollectionExtensions
             .AddScoped<InvalidModelStateFilter>();
 
         services.TryAddScoped<IEntityHandler, DefaultEntityHandler>();
-        services.TryAddScoped<IGatewayHandler, DefaultGatewayHandler>();
+        services.TryAddScoped<IStatusHandler, DefaultStatusHandler>();
         services.TryAddScoped<ITransactionHandler, DefaultTransactionHandler>();
         services.TryAddScoped<IValidatorStateHandler, DefaultValidatorStateHandler>();
         services.TryAddScoped<INonFungibleHandler, DefaultNonFungibleHandler>();
