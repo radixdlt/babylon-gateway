@@ -28,7 +28,6 @@ jobs:
 
   publish-docker:
     runs-on: ubuntu-22.04
-    environment: release
     outputs:
       data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag}}
       gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag}}
