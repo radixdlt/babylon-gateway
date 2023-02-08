@@ -66,7 +66,7 @@ using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class ValidatorSubstate : IOwner, IGlobalEntityPointer
+public partial class ValidatorSubstate : IEntityOwner, IGlobalAddressPointer
 {
     public IEnumerable<EntityReference> GetOwnedEntities()
     {
@@ -74,9 +74,9 @@ public partial class ValidatorSubstate : IOwner, IGlobalEntityPointer
         yield return UnstakeVault;
     }
 
-    public IEnumerable<GlobalEntityPointer> GetPointers()
+    public IEnumerable<string> GetGlobalAddresses()
     {
-        yield return new GlobalEntityPointer(LiquidStakeUnitResourceAddress);
-        yield return new GlobalEntityPointer(UnstakeClaimTokenResourceAddress);
+        yield return LiquidStakeUnitResourceAddress;
+        yield return UnstakeClaimTokenResourceAddress;
     }
 }

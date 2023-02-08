@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -118,9 +118,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     discriminator = table.Column<string>(type: "text", nullable: false),
                     packageid = table.Column<long>(name: "package_id", type: "bigint", nullable: true),
                     blueprintname = table.Column<string>(name: "blueprint_name", type: "text", nullable: true),
+                    royaltyvaultentityid = table.Column<long>(name: "royalty_vault_entity_id", type: "bigint", nullable: true),
                     divisibility = table.Column<int>(type: "integer", nullable: true),
                     nonfungibleidtype = table.Column<NonFungibleIdType>(name: "non_fungible_id_type", type: "non_fungible_id_type", nullable: true),
-                    code = table.Column<byte[]>(type: "bytea", nullable: true)
+                    code = table.Column<byte[]>(type: "bytea", nullable: true),
+                    royaltyvaultofentityid = table.Column<long>(name: "royalty_vault_of_entity_id", type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -185,6 +187,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     ownerentityid = table.Column<long>(name: "owner_entity_id", type: "bigint", nullable: false),
                     globalentityid = table.Column<long>(name: "global_entity_id", type: "bigint", nullable: false),
                     resourceentityid = table.Column<long>(name: "resource_entity_id", type: "bigint", nullable: false),
+                    vaultentityid = table.Column<long>(name: "vault_entity_id", type: "bigint", nullable: false),
+                    isroyaltyvault = table.Column<bool>(name: "is_royalty_vault", type: "boolean", nullable: false),
                     discriminator = table.Column<string>(type: "text", nullable: false),
                     balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
                     nonfungibleids = table.Column<List<long>>(name: "non_fungible_ids", type: "bigint[]", nullable: true)
