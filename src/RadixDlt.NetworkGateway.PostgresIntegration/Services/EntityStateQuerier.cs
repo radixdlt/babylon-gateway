@@ -88,7 +88,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record FungiblesViewModel(GlobalAddress ResourceEntityGlobalAddress, string Balance, int TotalCount);
 
-    private record NonFungiblesViewModel(GlobalAddress ResourceEntityGlobalAddress, int NonFungibleIdsCount, int TotalCount);
+    private record NonFungiblesViewModel(GlobalAddress ResourceEntityGlobalAddress, long NonFungibleIdsCount, int TotalCount);
 
     private record NonFungibleIdsViewModel(string NonFungibleId, int TotalCount);
 
@@ -303,7 +303,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var cd = new CommandDefinition(
             commandText: @"
 WITH store_history (nfids, total_count) AS (
-    SELECT non_fungible_id_data_ids[@offset:@limit], array_length(non_fungible_id_data_ids, 1)
+    SELECT non_fungible_id_data_ids[@offset:@limit], cardinality(non_fungible_id_data_ids)
     FROM non_fungible_id_store_history
     WHERE non_fungible_resource_manager_entity_id = @entityId AND from_state_version < @stateVersion
     ORDER BY from_state_version DESC
@@ -489,7 +489,7 @@ WITH entities (id) AS (
 SELECT emh.*
 FROM entities
 INNER JOIN LATERAL (
-    SELECT entity_id AS EntityId, keys[@offset:@limit] AS Keys, values[@offset:@limit] AS Values, array_length(keys, 1) AS TotalCount
+    SELECT entity_id AS EntityId, keys[@offset:@limit] AS Keys, values[@offset:@limit] AS Values, cardinality(keys) AS TotalCount
     FROM entity_metadata_history
     WHERE entity_id = entities.id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
@@ -531,27 +531,41 @@ INNER JOIN LATERAL (
     {
         var cd = new CommandDefinition(
             commandText: @"
-WITH aggregate_history_resources AS (
+WITH most_recent_entity_resource_aggregate_history_nested AS (
     SELECT fungible_resource_entity_ids
     FROM entity_resource_aggregate_history
     WHERE from_state_version <= @stateVersion AND entity_id = @entityId
     ORDER BY from_state_version DESC
     LIMIT 1
 ),
-aggregate_history AS (
-    SELECT UNNEST(fungible_resource_entity_ids[@offset:@limit]) AS fungible_resource_entity_id, array_length(fungible_resource_entity_ids, 1) AS TotalCount
-    FROM aggregate_history_resources
+most_recent_entity_resource_aggregate_history AS (
+    SELECT UNNEST(fungible_resource_entity_ids[@offset:@limit]) AS fungible_resource_entity_id, cardinality(fungible_resource_entity_ids) AS total_count
+    FROM most_recent_entity_resource_aggregate_history_nested
+),
+entity_resource_vault_projection AS (
+    SELECT rah.*, UNNEST(rvah.vault_entity_ids) AS vault_entity_id
+    FROM most_recent_entity_resource_aggregate_history rah
+    INNER JOIN LATERAL (
+        SELECT vault_entity_ids
+        FROM entity_resource_vault_aggregate_history
+        WHERE from_state_version <= @stateVersion AND entity_id = @entityId AND resource_entity_id = rah.fungible_resource_entity_id
+        ORDER BY from_state_version DESC
+        LIMIT 1
+    ) rvah ON TRUE
 )
-SELECT final.global_address AS ResourceEntityGlobalAddress, final.balance::text AS Balance, ah.TotalCount
-FROM aggregate_history ah
+SELECT e.global_address AS ResourceEntityGlobalAddress,
+    CAST(SUM(evh.balance) AS text) AS Balance,
+    p.total_count AS TotalCount
+FROM entity_resource_vault_projection p
 INNER JOIN LATERAL (
-    SELECT e.global_address, evh.balance
-    FROM entity_vault_history evh
-    INNER JOIN entities e ON evh.resource_entity_id = e.id
-    WHERE evh.from_state_version <= @stateVersion AND evh.global_entity_id = @entityId AND evh.resource_entity_id = ah.fungible_resource_entity_id AND evh.is_royalty_vault = false
-    ORDER BY evh.from_state_version DESC
+    SELECT balance
+    FROM entity_vault_history
+    WHERE from_state_version <= @stateVersion AND global_entity_id = @entityId AND vault_entity_id = p.vault_entity_id
+    ORDER BY from_state_version DESC
     LIMIT 1
-) final ON true;
+) evh ON TRUE
+INNER JOIN entities e ON p.fungible_resource_entity_id = e.id
+GROUP BY ResourceEntityGlobalAddress, TotalCount;
 ",
             parameters: new
             {
@@ -588,27 +602,41 @@ INNER JOIN LATERAL (
     {
         var cd = new CommandDefinition(
             commandText: @"
-WITH aggregate_history_resources AS (
+WITH most_recent_entity_resource_aggregate_history_nested AS (
     SELECT non_fungible_resource_entity_ids
     FROM entity_resource_aggregate_history
     WHERE from_state_version <= @stateVersion AND entity_id = @entityId
     ORDER BY from_state_version DESC
     LIMIT 1
 ),
-aggregate_history AS (
-    SELECT UNNEST(non_fungible_resource_entity_ids[@offset:@limit]) AS non_fungible_resource_entity_id, array_length(non_fungible_resource_entity_ids, 1) AS TotalCount
-    FROM aggregate_history_resources
+most_recent_entity_resource_aggregate_history AS (
+    SELECT UNNEST(non_fungible_resource_entity_ids[@offset:@limit]) AS non_fungible_resource_entity_id, cardinality(non_fungible_resource_entity_ids) AS total_count
+    FROM most_recent_entity_resource_aggregate_history_nested
+),
+entity_resource_vault_projection AS (
+    SELECT rah.*, UNNEST(rvah.vault_entity_ids) AS vault_entity_id
+    FROM most_recent_entity_resource_aggregate_history rah
+    INNER JOIN LATERAL (
+        SELECT vault_entity_ids
+        FROM entity_resource_vault_aggregate_history
+        WHERE from_state_version <= @stateVersion AND entity_id = @entityId AND resource_entity_id = rah.non_fungible_resource_entity_id
+        ORDER BY from_state_version DESC
+        LIMIT 1
+    ) rvah ON TRUE
 )
-SELECT final.global_address AS ResourceEntityGlobalAddress, final.non_fungible_ids_count AS NonFungibleIdsCount, ah.TotalCount
-FROM aggregate_history ah
+SELECT e.global_address AS ResourceEntityGlobalAddress,
+    SUM(cardinality(evh.non_fungible_ids)) AS NonFungibleIdsCount,
+    p.total_count AS TotalCount
+FROM entity_resource_vault_projection p
 INNER JOIN LATERAL (
-    SELECT e.global_address, array_length(evh.non_fungible_ids, 1) AS non_fungible_ids_count
-    FROM entity_vault_history evh
-    INNER JOIN entities e ON evh.resource_entity_id = e.id
-    WHERE evh.from_state_version <= @stateVersion AND evh.global_entity_id = @entityId AND evh.resource_entity_id = ah.non_fungible_resource_entity_id
-    ORDER BY evh.from_state_version DESC
+    SELECT non_fungible_ids
+    FROM entity_vault_history
+    WHERE from_state_version <= @stateVersion AND global_entity_id = @entityId AND vault_entity_id = p.vault_entity_id
+    ORDER BY from_state_version DESC
     LIMIT 1
-) final ON true;
+) evh ON TRUE
+INNER JOIN entities e ON p.non_fungible_resource_entity_id = e.id
+GROUP BY ResourceEntityGlobalAddress, TotalCount;
 ",
             parameters: new
             {
@@ -638,14 +666,15 @@ INNER JOIN LATERAL (
         return new GatewayModel.NonFungibleResourcesCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
     }
 
-    private async Task<GatewayModel.NonFungibleIdsCollection> GetNonFungibleIdsSlice(long entityId, long resourceEntityId, int offset, int limit,
-        GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<GatewayModel.NonFungibleIdsCollection> GetNonFungibleIdsSlice(long entityId, long resourceEntityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
+        // TODO NG-283 this query does not account for multiple Vaults that could store NFIDs
+
         var cd = new CommandDefinition(
             commandText: @"
 SELECT nfid.non_fungible_id AS NonFungibleId, final.total_count AS TotalCount
 FROM (
-    SELECT UNNEST(non_fungible_ids[@offset:@limit]) AS non_fungible_id_data_id, array_length(non_fungible_ids, 1) AS total_count
+    SELECT UNNEST(non_fungible_ids[@offset:@limit]) AS non_fungible_id_data_id, cardinality(non_fungible_ids) AS total_count
     FROM entity_vault_history
     WHERE id = (
         SELECT id

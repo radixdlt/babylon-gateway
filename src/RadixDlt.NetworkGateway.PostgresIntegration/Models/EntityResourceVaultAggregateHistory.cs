@@ -62,33 +62,28 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+
+[Table("entity_resource_vault_aggregate_history")]
+internal class EntityResourceVaultAggregateHistory
 {
-    public long ComponentEntityStateHistorySequence { get; set; }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public long EntitySequence { get; set; }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-    public long EntityAccessRulesChainHistorySequence { get; set; }
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 
-    public long EntityMetadataHistorySequence { get; set; }
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
 
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long ResourceManagerEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdMutableDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
+    [Column("vault_entity_ids")]
+    public List<long> VaultEntityIds { get; set; }
 }
