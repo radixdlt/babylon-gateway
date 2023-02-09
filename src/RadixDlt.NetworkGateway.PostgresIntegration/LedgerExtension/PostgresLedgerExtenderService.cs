@@ -384,7 +384,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         foreach (var ga in globalEntityPointer.GetGlobalAddresses())
                         {
-                            referencedEntities.MarkSeenGlobalAddress(ga);
+                            referencedEntities.MarkSeenGlobalAddress((GlobalAddress)ga);
                         }
                     }
 
@@ -421,8 +421,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (sd is CoreModel.ComponentInfoSubstate componentInfo)
                     {
-                        referencedEntities.MarkSeenGlobalAddress(componentInfo.PackageAddress);
-
                         re.PostResolveConfigure((ComponentEntity e) =>
                         {
                             e.PackageId = referencedEntities.GetByGlobal((GlobalAddress)componentInfo.PackageAddress).DatabaseId;
