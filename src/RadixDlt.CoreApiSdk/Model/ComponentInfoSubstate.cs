@@ -62,90 +62,14 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.CoreApiSdk.Model;
 
-internal class ReferencedEntityDictionary
+public partial class ComponentInfoSubstate : IGlobalAddressPointer
 {
-    private readonly Dictionary<string, ReferencedEntity> _storage = new();
-    private readonly Dictionary<long, List<ReferencedEntity>> _entitiesAtStateVersion = new();
-    private readonly Dictionary<GlobalAddress, ReferencedEntity> _globalsCache = new();
-    private readonly Dictionary<long, ReferencedEntity> _dbIdCache = new();
-    private readonly HashSet<GlobalAddress> _knownGlobalAddressesToLoad = new();
-
-    public ICollection<GlobalAddress> KnownGlobalAddresses => _knownGlobalAddressesToLoad;
-
-    public ICollection<string> Addresses => _storage.Keys;
-
-    public ICollection<ReferencedEntity> All => _storage.Values;
-
-    public ReferencedEntity GetOrAdd(string addressHex, Func<string, ReferencedEntity> factory)
+    public IEnumerable<string> GetGlobalAddresses()
     {
-        if (_storage.TryGetValue(addressHex, out var existing))
-        {
-            return existing;
-        }
-
-        var value = factory(addressHex);
-
-        if (!_entitiesAtStateVersion.ContainsKey(value.StateVersion))
-        {
-            _entitiesAtStateVersion[value.StateVersion] = new List<ReferencedEntity>();
-        }
-
-        _storage[addressHex] = value;
-        _entitiesAtStateVersion[value.StateVersion].Add(value);
-
-        return value;
-    }
-
-    public ReferencedEntity Get(string addressHex)
-    {
-        return _storage[addressHex];
-    }
-
-    public ReferencedEntity GetByGlobal(GlobalAddress globalAddress)
-    {
-        return _globalsCache.GetOrAdd(globalAddress, _ => All.First(re => re.GlobalAddress == globalAddress));
-    }
-
-    public ReferencedEntity GetByDatabaseId(long id)
-    {
-        return _dbIdCache[id];
-    }
-
-    public IEnumerable<ReferencedEntity> OfStateVersion(long stateVersion)
-    {
-        if (_entitiesAtStateVersion.TryGetValue(stateVersion, out var existing))
-        {
-            return existing;
-        }
-
-        return Array.Empty<ReferencedEntity>();
-    }
-
-    public void OnAllEntitiesResolved()
-    {
-        foreach (var referencedEntity in All)
-        {
-            _dbIdCache[referencedEntity.DatabaseId] = referencedEntity;
-        }
-    }
-
-    public void InvokePostResolveConfiguration()
-    {
-        foreach (var re in All)
-        {
-            re.InvokePostResolveConfiguration();
-        }
-    }
-
-    public void MarkSeenGlobalAddress(GlobalAddress globalAddress)
-    {
-        _knownGlobalAddressesToLoad.Add(globalAddress);
+        yield return PackageAddress;
     }
 }
