@@ -63,9 +63,7 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -86,7 +84,7 @@ internal abstract class Entity
     public RadixAddress Address { get; set; }
 
     [Column("global_address")]
-    public RadixAddress? GlobalAddress { get; set; }
+    public GlobalAddress? GlobalAddress { get; set; }
 
     [Column("ancestor_ids")]
     public List<long>? AncestorIds { get; set; }
@@ -99,29 +97,6 @@ internal abstract class Entity
 
     [Column("global_ancestor_id")]
     public long? GlobalAncestorId { get; set; }
-
-    public string? BuildHrpGlobalAddress(HrpDefinition hrp)
-    {
-        return GlobalAddress == null
-            ? null
-            : RadixAddressCodec.Encode(SelectHrp(hrp), GlobalAddress);
-    }
-
-    private string SelectHrp(HrpDefinition hrp)
-    {
-        return this switch
-        {
-            PackageEntity => hrp.Package,
-            NormalComponentEntity => hrp.NormalComponent,
-            AccountComponentEntity => hrp.AccountComponent,
-            EpochManagerEntity => hrp.EpochManager,
-            ValidatorEntity => hrp.ValidatorComponent,
-            IdentityEntity => hrp.Identity,
-            ClockEntity => hrp.Clock,
-            ResourceManagerEntity => hrp.Resource,
-            _ => throw new InvalidOperationException("Unable to build HRP address on entity of type " + GetType().Name),
-        };
-    }
 }
 
 internal class EpochManagerEntity : Entity
@@ -144,13 +119,16 @@ internal class NonFungibleResourceManagerEntity : ResourceManagerEntity
     public NonFungibleIdType NonFungibleIdType { get; set; }
 }
 
-internal abstract class ComponentEntity : Entity
+internal abstract class ComponentEntity : Entity, IRoyaltyVaultHolder
 {
     [Column("package_id")]
     public long PackageId { get; set; }
 
     [Column("blueprint_name")]
     public string BlueprintName { get; set; }
+
+    [Column("royalty_vault_entity_id")]
+    public long? RoyaltyVaultEntityId { get; set; }
 }
 
 internal class NormalComponentEntity : ComponentEntity
@@ -164,16 +142,19 @@ internal class AccountComponentEntity : ComponentEntity
 // This is transient model, not stored in database
 internal class VirtualAccountComponentEntity : AccountComponentEntity
 {
-    public VirtualAccountComponentEntity(byte[] globalAddress)
+    public VirtualAccountComponentEntity(GlobalAddress globalAddress)
     {
         GlobalAddress = globalAddress;
     }
 }
 
-internal class PackageEntity : Entity
+internal class PackageEntity : Entity, IRoyaltyVaultHolder
 {
     [Column("code")]
     public byte[] Code { get; set; }
+
+    [Column("royalty_vault_entity_id")]
+    public long? RoyaltyVaultEntityId { get; set; }
 }
 
 internal class KeyValueStoreEntity : Entity
@@ -182,6 +163,10 @@ internal class KeyValueStoreEntity : Entity
 
 internal class VaultEntity : Entity
 {
+    [Column("royalty_vault_of_entity_id")]
+    public long? RoyaltyVaultOfEntityId { get; set; }
+
+    public bool IsRoyaltyVault => RoyaltyVaultOfEntityId != null;
 }
 
 internal class NonFungibleStoreEntity : Entity
@@ -207,7 +192,7 @@ internal class IdentityEntity : Entity
 // This is transient model, not stored in database
 internal class VirtualIdentityEntity : IdentityEntity
 {
-    public VirtualIdentityEntity(byte[] globalAddress)
+    public VirtualIdentityEntity(GlobalAddress globalAddress)
     {
         GlobalAddress = globalAddress;
     }

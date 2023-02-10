@@ -90,49 +90,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// GatewayInformationResponse
+    /// GatewayStatusResponse
     /// </summary>
-    [DataContract(Name = "GatewayInformationResponse")]
-    public partial class GatewayInformationResponse : IEquatable<GatewayInformationResponse>
+    [DataContract(Name = "GatewayStatusResponse")]
+    public partial class GatewayStatusResponse : IEquatable<GatewayStatusResponse>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayInformationResponse" /> class.
+        /// Initializes a new instance of the <see cref="GatewayStatusResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected GatewayInformationResponse() { }
+        protected GatewayStatusResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayInformationResponse" /> class.
+        /// Initializes a new instance of the <see cref="GatewayStatusResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="knownTarget">knownTarget (required).</param>
         /// <param name="releaseInfo">releaseInfo (required).</param>
-        /// <param name="wellKnownAddresses">wellKnownAddresses (required).</param>
-        public GatewayInformationResponse(LedgerState ledgerState = default(LedgerState), GatewayInfoResponseKnownTarget knownTarget = default(GatewayInfoResponseKnownTarget), GatewayInfoResponseReleaseInfo releaseInfo = default(GatewayInfoResponseReleaseInfo), GatewayInformationResponseAllOfWellKnownAddresses wellKnownAddresses = default(GatewayInformationResponseAllOfWellKnownAddresses))
+        public GatewayStatusResponse(LedgerState ledgerState = default(LedgerState), GatewayInfoResponseReleaseInfo releaseInfo = default(GatewayInfoResponseReleaseInfo))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
             {
-                throw new ArgumentNullException("ledgerState is a required property for GatewayInformationResponse and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for GatewayStatusResponse and cannot be null");
             }
             this.LedgerState = ledgerState;
-            // to ensure "knownTarget" is required (not null)
-            if (knownTarget == null)
-            {
-                throw new ArgumentNullException("knownTarget is a required property for GatewayInformationResponse and cannot be null");
-            }
-            this.KnownTarget = knownTarget;
             // to ensure "releaseInfo" is required (not null)
             if (releaseInfo == null)
             {
-                throw new ArgumentNullException("releaseInfo is a required property for GatewayInformationResponse and cannot be null");
+                throw new ArgumentNullException("releaseInfo is a required property for GatewayStatusResponse and cannot be null");
             }
             this.ReleaseInfo = releaseInfo;
-            // to ensure "wellKnownAddresses" is required (not null)
-            if (wellKnownAddresses == null)
-            {
-                throw new ArgumentNullException("wellKnownAddresses is a required property for GatewayInformationResponse and cannot be null");
-            }
-            this.WellKnownAddresses = wellKnownAddresses;
         }
 
         /// <summary>
@@ -142,22 +128,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// Gets or Sets KnownTarget
-        /// </summary>
-        [DataMember(Name = "known_target", IsRequired = true, EmitDefaultValue = true)]
-        public GatewayInfoResponseKnownTarget KnownTarget { get; set; }
-
-        /// <summary>
         /// Gets or Sets ReleaseInfo
         /// </summary>
         [DataMember(Name = "release_info", IsRequired = true, EmitDefaultValue = true)]
         public GatewayInfoResponseReleaseInfo ReleaseInfo { get; set; }
-
-        /// <summary>
-        /// Gets or Sets WellKnownAddresses
-        /// </summary>
-        [DataMember(Name = "well_known_addresses", IsRequired = true, EmitDefaultValue = true)]
-        public GatewayInformationResponseAllOfWellKnownAddresses WellKnownAddresses { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -166,11 +140,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class GatewayInformationResponse {\n");
+            sb.Append("class GatewayStatusResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
-            sb.Append("  KnownTarget: ").Append(KnownTarget).Append("\n");
             sb.Append("  ReleaseInfo: ").Append(ReleaseInfo).Append("\n");
-            sb.Append("  WellKnownAddresses: ").Append(WellKnownAddresses).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -191,15 +163,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as GatewayInformationResponse);
+            return this.Equals(input as GatewayStatusResponse);
         }
 
         /// <summary>
-        /// Returns true if GatewayInformationResponse instances are equal
+        /// Returns true if GatewayStatusResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of GatewayInformationResponse to be compared</param>
+        /// <param name="input">Instance of GatewayStatusResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(GatewayInformationResponse input)
+        public bool Equals(GatewayStatusResponse input)
         {
             if (input == null)
             {
@@ -212,19 +184,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
-                    this.KnownTarget == input.KnownTarget ||
-                    (this.KnownTarget != null &&
-                    this.KnownTarget.Equals(input.KnownTarget))
-                ) && 
-                (
                     this.ReleaseInfo == input.ReleaseInfo ||
                     (this.ReleaseInfo != null &&
                     this.ReleaseInfo.Equals(input.ReleaseInfo))
-                ) && 
-                (
-                    this.WellKnownAddresses == input.WellKnownAddresses ||
-                    (this.WellKnownAddresses != null &&
-                    this.WellKnownAddresses.Equals(input.WellKnownAddresses))
                 );
         }
 
@@ -241,17 +203,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
-                if (this.KnownTarget != null)
-                {
-                    hashCode = (hashCode * 59) + this.KnownTarget.GetHashCode();
-                }
                 if (this.ReleaseInfo != null)
                 {
                     hashCode = (hashCode * 59) + this.ReleaseInfo.GetHashCode();
-                }
-                if (this.WellKnownAddresses != null)
-                {
-                    hashCode = (hashCode * 59) + this.WellKnownAddresses.GetHashCode();
                 }
                 return hashCode;
             }

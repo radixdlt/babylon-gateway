@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,13 +62,26 @@
  * permissions under this License.
  */
 
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Diagnostics;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
+namespace RadixDlt.NetworkGateway.Abstractions;
 
-public interface IGatewayHandler
+[DebuggerDisplay("{ToString()}")]
+public readonly record struct GlobalAddress
 {
-    Task<GatewayModel.GatewayInformationResponse> Information(CancellationToken token = default);
+    private readonly string _address;
+
+    private GlobalAddress(string address)
+    {
+        _address = address;
+    }
+
+    public static implicit operator string(GlobalAddress ra) => ra._address;
+
+    public static explicit operator GlobalAddress(string text) => new GlobalAddress(text);
+
+    public override string ToString()
+    {
+        return _address;
+    }
 }

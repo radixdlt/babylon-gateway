@@ -66,7 +66,6 @@ using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -124,6 +123,49 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
+    public async Task<Dictionary<EntityResourceVaultLookup, EntityResourceVaultAggregateHistory>> MostRecentEntityResourceVaultAggregateHistoryFor(List<FungibleVaultChange> fungibleVaultChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    {
+        var data = new HashSet<EntityResourceVaultLookup>();
+
+        foreach (var change in fungibleVaultChanges)
+        {
+            data.Add(new EntityResourceVaultLookup(change.ReferencedVault.DatabaseOwnerAncestorId, change.ReferencedResource.DatabaseId));
+            data.Add(new EntityResourceVaultLookup(change.ReferencedVault.DatabaseGlobalAncestorId, change.ReferencedResource.DatabaseId));
+        }
+
+        foreach (var change in nonFungibleVaultChanges)
+        {
+            data.Add(new EntityResourceVaultLookup(change.ReferencedVault.DatabaseOwnerAncestorId, change.ReferencedResource.DatabaseId));
+            data.Add(new EntityResourceVaultLookup(change.ReferencedVault.DatabaseGlobalAncestorId, change.ReferencedResource.DatabaseId));
+        }
+
+        var entityIds = new List<long>();
+        var resourceManagerEntityIds = new List<long>();
+
+        foreach (var d in data)
+        {
+            entityIds.Add(d.EntityId);
+            resourceManagerEntityIds.Add(d.ResourceManagerEntityId);
+        }
+
+        return await _dbContext.EntityResourceVaultAggregateHistory
+            .FromSqlInterpolated(@$"
+WITH variables (entity_id, resource_entity_id) AS (
+    SELECT UNNEST({entityIds}), UNNEST({resourceManagerEntityIds})
+)
+SELECT ervah.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_resource_vault_aggregate_history
+    WHERE entity_id = variables.entity_id AND resource_entity_id = variables.resource_entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) ervah ON true;")
+            .AsNoTracking()
+            .ToDictionaryAsync(e => new EntityResourceVaultLookup(e.EntityId, e.ResourceEntityId), token);
+    }
+
     public async Task<Dictionary<long, NonFungibleIdStoreHistory>> MostRecentNonFungibleIdStoreHistoryFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, CancellationToken token)
     {
         var ids = nonFungibleIdStoreChanges.Select(x => x.ReferencedStore.DatabaseGlobalAncestorId).Distinct().ToList();
@@ -171,9 +213,9 @@ INNER JOIN LATERAL (
     public async Task<Dictionary<string, Entity>> ExistingEntitiesFor(ReferencedEntityDictionary referencedEntities, CancellationToken token)
     {
         var entityAddresses = referencedEntities.Addresses.Select(x => x.ConvertFromHex()).ToList();
-        var globalEntityAddresses = referencedEntities.KnownGlobalAddresses.Select(x => RadixAddressCodec.Decode(x).Data).ToList();
+        var globalEntityAddresses = referencedEntities.KnownGlobalAddresses.Select(x => (string)x).ToList();
         var entityAddressesParameter = new NpgsqlParameter("@entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = entityAddresses };
-        var globalEntityAddressesParameter = new NpgsqlParameter("@global_entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = globalEntityAddresses };
+        var globalEntityAddressesParameter = new NpgsqlParameter("@global_entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Text) { Value = globalEntityAddresses };
 
         return await _dbContext.Entities
             .FromSqlInterpolated($@"
@@ -261,7 +303,8 @@ SELECT
     nextval('entity_access_rules_chain_history_id_seq') AS EntityAccessRulesChainHistorySequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
     nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
-    nextval('entity_resource_history_id_seq') AS EntityResourceHistorySequence,
+    nextval('entity_resource_vault_aggregate_history_id_seq') AS EntityResourceVaultAggregateHistorySequence,
+    nextval('entity_vault_history_id_seq') AS EntityVaultHistorySequence,
     nextval('resource_manager_entity_supply_history_id_seq') AS ResourceManagerEntitySupplyHistorySequence,
     nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
     nextval('non_fungible_id_mutable_data_history_id_seq') AS NonFungibleIdMutableDataHistorySequence,

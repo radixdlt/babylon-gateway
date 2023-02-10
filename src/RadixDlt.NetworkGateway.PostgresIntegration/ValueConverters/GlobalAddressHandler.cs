@@ -62,24 +62,18 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using Dapper;
+using RadixDlt.NetworkGateway.Abstractions;
+using System.Data;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
-internal class DefaultGatewayHandler : IGatewayHandler
+public sealed class GlobalAddressHandler : SqlMapper.TypeHandler<GlobalAddress>
 {
-    private readonly ILedgerStateQuerier _ledgerStateQuerier;
-
-    public DefaultGatewayHandler(ILedgerStateQuerier ledgerStateQuerier)
+    public override void SetValue(IDbDataParameter parameter, GlobalAddress value)
     {
-        _ledgerStateQuerier = ledgerStateQuerier;
+        parameter.Value = value;
     }
 
-    public async Task<GatewayModel.GatewayInformationResponse> Information(CancellationToken token)
-    {
-        return await _ledgerStateQuerier.GetGatewayInformation(token);
-    }
+    public override GlobalAddress Parse(object value) => (GlobalAddress)(string)value;
 }

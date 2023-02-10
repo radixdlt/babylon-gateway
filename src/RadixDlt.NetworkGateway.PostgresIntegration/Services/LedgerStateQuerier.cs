@@ -117,12 +117,11 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         _clock = clock;
     }
 
-    public async Task<GatewayModel.GatewayInformationResponse> GetGatewayInformation(CancellationToken token)
+    public async Task<GatewayModel.GatewayStatusResponse> GetGatewayStatus(CancellationToken token)
     {
         var ledgerStatus = await GetLedgerStatus(token);
-        var wellKnownAddresses = _networkConfigurationProvider.GetWellKnownAddresses();
 
-        return new GatewayModel.GatewayInformationResponse(
+        return new GatewayModel.GatewayStatusResponse(
             new GatewayModel.LedgerState(
                 _networkConfigurationProvider.GetNetworkName(),
                 ledgerStatus.TopOfLedgerTransaction.StateVersion,
@@ -130,17 +129,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
                 ledgerStatus.TopOfLedgerTransaction.Epoch,
                 ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
             ),
-            new GatewayModel.GatewayInfoResponseKnownTarget(ledgerStatus.TargetStateVersion),
-            new GatewayModel.GatewayInfoResponseReleaseInfo(_gatewayVersion, _oasVersion),
-            new GatewayModel.GatewayInformationResponseAllOfWellKnownAddresses(
-                wellKnownAddresses.AccountPackage,
-                wellKnownAddresses.Faucet,
-                wellKnownAddresses.EpochManager,
-                wellKnownAddresses.Clock,
-                wellKnownAddresses.EcdsaSecp256k1,
-                wellKnownAddresses.EddsaEd25519,
-                wellKnownAddresses.Xrd
-            )
+            new GatewayModel.GatewayInfoResponseReleaseInfo(_gatewayVersion, _oasVersion)
         );
     }
 

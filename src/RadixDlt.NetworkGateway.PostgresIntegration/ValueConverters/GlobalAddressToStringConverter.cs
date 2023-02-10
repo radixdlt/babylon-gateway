@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,33 +62,15 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using RadixDlt.NetworkGateway.Abstractions;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+
+internal class GlobalAddressToStringConverter : ValueConverter<GlobalAddress, string>
 {
-    public long ComponentEntityStateHistorySequence { get; set; }
-
-    public long EntitySequence { get; set; }
-
-    public long EntityAccessRulesChainHistorySequence { get; set; }
-
-    public long EntityMetadataHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long ResourceManagerEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdMutableDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
+    public GlobalAddressToStringConverter()
+        : base(ra => ra, @string => (GlobalAddress)@string)
+    {
+    }
 }

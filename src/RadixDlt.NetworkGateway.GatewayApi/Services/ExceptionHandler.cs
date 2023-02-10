@@ -109,7 +109,7 @@ internal class ExceptionHandler : IExceptionHandler
             traceId: traceId
         ))
         {
-            StatusCode = (int)HttpStatusCode.NotImplemented,
+            StatusCode = (int)HttpStatusCode.InternalServerError,
         };
     }
 

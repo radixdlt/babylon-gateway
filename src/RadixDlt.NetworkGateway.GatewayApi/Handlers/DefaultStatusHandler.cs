@@ -62,33 +62,24 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
+
+internal class DefaultStatusHandler : IStatusHandler
 {
-    public long ComponentEntityStateHistorySequence { get; set; }
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
 
-    public long EntitySequence { get; set; }
+    public DefaultStatusHandler(ILedgerStateQuerier ledgerStateQuerier)
+    {
+        _ledgerStateQuerier = ledgerStateQuerier;
+    }
 
-    public long EntityAccessRulesChainHistorySequence { get; set; }
-
-    public long EntityMetadataHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long ResourceManagerEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdMutableDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
+    public async Task<GatewayModel.GatewayStatusResponse> GatewayStatus(CancellationToken token)
+    {
+        return await _ledgerStateQuerier.GetGatewayStatus(token);
+    }
 }

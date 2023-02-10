@@ -62,31 +62,47 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GatewayApi.Controllers;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[ApiController]
-[Route("gateway")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
-public sealed class GatewayController : ControllerBase
+[Table("entity_vault_history")]
+internal abstract class EntityVaultHistory
 {
-    private readonly IGatewayHandler _gatewayHandler;
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public GatewayController(IGatewayHandler gatewayHandler)
-    {
-        _gatewayHandler = gatewayHandler;
-    }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-    [HttpPost("information")]
-    public async Task<GatewayModel.GatewayInformationResponse> Information(CancellationToken token)
-    {
-        return await _gatewayHandler.Information(token);
-    }
+    [Column("owner_entity_id")]
+    public long OwnerEntityId { get; set; }
+
+    [Column("global_entity_id")]
+    public long GlobalEntityId { get; set; }
+
+    [Column("vault_entity_id")]
+    public long VaultEntityId { get; set; }
+
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+}
+
+internal class EntityFungibleVaultHistory : EntityVaultHistory
+{
+    [Column("balance")]
+    public TokenAmount Balance { get; set; }
+
+    [Column("is_royalty_vault")]
+    public bool IsRoyaltyVault { get; set; }
+}
+
+internal class EntityNonFungibleVaultHistory : EntityVaultHistory
+{
+    [Column("non_fungible_ids")]
+    public List<long> NonFungibleIds { get; set; }
 }

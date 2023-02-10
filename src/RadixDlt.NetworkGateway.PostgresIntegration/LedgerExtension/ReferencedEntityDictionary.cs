@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,11 +73,11 @@ internal class ReferencedEntityDictionary
 {
     private readonly Dictionary<string, ReferencedEntity> _storage = new();
     private readonly Dictionary<long, List<ReferencedEntity>> _entitiesAtStateVersion = new();
-    private readonly Dictionary<string, ReferencedEntity> _globalsCache = new();
+    private readonly Dictionary<GlobalAddress, ReferencedEntity> _globalsCache = new();
     private readonly Dictionary<long, ReferencedEntity> _dbIdCache = new();
-    private readonly HashSet<string> _knownGlobalAddressesToLoad = new();
+    private readonly HashSet<GlobalAddress> _knownGlobalAddressesToLoad = new();
 
-    public ICollection<string> KnownGlobalAddresses => _knownGlobalAddressesToLoad;
+    public ICollection<GlobalAddress> KnownGlobalAddresses => _knownGlobalAddressesToLoad;
 
     public ICollection<string> Addresses => _storage.Keys;
 
@@ -107,9 +108,9 @@ internal class ReferencedEntityDictionary
         return _storage[addressHex];
     }
 
-    public ReferencedEntity GetByGlobal(string globalAddressHex)
+    public ReferencedEntity GetByGlobal(GlobalAddress globalAddress)
     {
-        return _globalsCache.GetOrAdd(globalAddressHex, _ => All.First(re => re.GlobalAddressHex == globalAddressHex));
+        return _globalsCache.GetOrAdd(globalAddress, _ => All.First(re => re.GlobalAddress == globalAddress));
     }
 
     public ReferencedEntity GetByDatabaseId(long id)
@@ -143,7 +144,7 @@ internal class ReferencedEntityDictionary
         }
     }
 
-    public void MarkSeenGlobalAddress(string globalAddress)
+    public void MarkSeenGlobalAddress(GlobalAddress globalAddress)
     {
         _knownGlobalAddressesToLoad.Add(globalAddress);
     }

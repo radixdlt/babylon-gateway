@@ -62,33 +62,54 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-internal class SequencesHolder
+namespace GatewayApi.Controllers;
+
+[ApiController]
+[Route("status")]
+[ServiceFilter(typeof(ExceptionFilter))]
+[ServiceFilter(typeof(InvalidModelStateFilter))]
+public sealed class StatusController : ControllerBase
 {
-    public long ComponentEntityStateHistorySequence { get; set; }
+    private readonly IStatusHandler _statusHandler;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
-    public long EntitySequence { get; set; }
+    public StatusController(IStatusHandler statusHandler, INetworkConfigurationProvider networkConfigurationProvider)
+    {
+        _statusHandler = statusHandler;
+        _networkConfigurationProvider = networkConfigurationProvider;
+    }
 
-    public long EntityAccessRulesChainHistorySequence { get; set; }
+    [HttpPost("gateway-status")]
+    public async Task<GatewayModel.GatewayStatusResponse> GatewayStatus(CancellationToken token)
+    {
+        return await _statusHandler.GatewayStatus(token);
+    }
 
-    public long EntityMetadataHistorySequence { get; set; }
+    [HttpPost("network-configuration")]
+    public GatewayModel.NetworkConfigurationResponse NetworkConfiguration()
+    {
+        var wellKnownAddresses = _networkConfigurationProvider.GetWellKnownAddresses();
 
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long ResourceManagerEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdMutableDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
+        return new GatewayModel.NetworkConfigurationResponse(
+            _networkConfigurationProvider.GetNetworkId(),
+            _networkConfigurationProvider.GetNetworkName(),
+            new GatewayModel.NetworkConfigurationResponseWellKnownAddresses(
+                wellKnownAddresses.AccountPackage,
+                wellKnownAddresses.Faucet,
+                wellKnownAddresses.EpochManager,
+                wellKnownAddresses.Clock,
+                wellKnownAddresses.EcdsaSecp256k1,
+                wellKnownAddresses.EddsaEd25519,
+                wellKnownAddresses.Xrd
+            )
+        );
+    }
 }

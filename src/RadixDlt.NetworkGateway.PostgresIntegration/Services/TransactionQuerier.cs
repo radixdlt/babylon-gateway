@@ -250,7 +250,7 @@ internal class TransactionQuerier : ITransactionQuerier
         return new DetailsLookupResult(MapToGatewayAccountTransaction(ult), new GatewayModel.TransactionCommittedDetailsResponseDetails(
             rawHex: rawUserTransaction.Payload.ToHex(),
             receipt: new JRaw(rawUserTransaction.Receipt),
-            referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition())).ToList(),
+            referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.GlobalAddress.ToString()).ToList(),
             messageHex: ult.Message?.ToHex()
         ));
     }
