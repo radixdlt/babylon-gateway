@@ -103,7 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="LedgerState" /> class.
         /// </summary>
-        /// <param name="network">The name of the network against which the request is made. (required).</param>
+        /// <param name="network">The logical name of the network (required).</param>
         /// <param name="stateVersion">The state version of the ledger. Each transaction increments the state version by 1. (required).</param>
         /// <param name="proposerRoundTimestamp">The proposer round timestamp of the consensus round when this transaction was committed to ledger. This is not guaranteed to be strictly increasing, as it is computed as an average across the validator set. If this is significantly behind the current timestamp, the Network Gateway is likely reporting out-dated information, or the network has stalled.  (required).</param>
         /// <param name="epoch">The epoch number of the ledger at this state version. (required).</param>
@@ -128,9 +128,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// The name of the network against which the request is made.
+        /// The logical name of the network
         /// </summary>
-        /// <value>The name of the network against which the request is made.</value>
+        /// <value>The logical name of the network</value>
         [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
         public string Network { get; set; }
 

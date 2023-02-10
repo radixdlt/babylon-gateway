@@ -96,7 +96,7 @@ internal class DefaultEntityHandler : IEntityHandler
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
-        return await _entityStateQuerier.EntityDetailsSnapshot((GlobalAddress)request.Address, ledgerState, token);
+        return await _entityStateQuerier.EntityDetailsSnapshot(request.ReturnValueType, (GlobalAddress)request.Address, ledgerState, token);
     }
 
     public async Task<GatewayModel.EntityOverviewResponse> Overview(GatewayModel.EntityOverviewRequest request, CancellationToken token = default)

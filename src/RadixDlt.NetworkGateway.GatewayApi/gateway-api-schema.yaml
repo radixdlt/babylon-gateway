@@ -559,10 +559,60 @@ components:
 
   schemas:
 
+
+    #
+    # Sbor encoding - PoC
+    #
+    ReturnValueType:
+      type: string
+      enum:
+        - Raw
+        - RawHex
+        - SimpleString
+    ReturnValue:
+      type: object
+      required:
+        - return_value_type
+      properties:
+        return_value_type:
+          $ref: "#/components/schemas/ReturnValueType"
+      discriminator:
+        propertyName: return_value_type
+        mapping:
+          Raw: "#/components/schemas/ReturnValueTypeRaw"
+          RawHex: "#/components/schemas/ReturnValueTypeRawHex"
+          SimpleString: "#/components/schemas/ReturnValueTypeSimpleString"
+    ReturnValueTypeRaw:
+      allOf:
+        - $ref: "#/components/schemas/ReturnValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: object
+    ReturnValueTypeRawHex:
+      allOf:
+        - $ref: "#/components/schemas/ReturnValue"
+        - type: object
+          required:
+            - raw_hex
+          properties:
+            raw_hex:
+              type: string
+    ReturnValueTypeSimpleString:
+      allOf:
+        - $ref: "#/components/schemas/ReturnValue"
+        - type: object
+          required:
+            - simple_string
+          properties:
+            simple_string:
+              type: string
+
     #
     # Aliases
     #
-
     NetworkId:
       description: The logical id of the network
       type: integer
@@ -1219,11 +1269,15 @@ components:
         - type: object
           required:
             - address
+            - return_value_type
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
+            return_value_type:
+              $ref: "#/components/schemas/ReturnValueType"
       example:
         address: "<entity-address>"
+        return_value_type: "RawHex"
     EntityDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1273,7 +1327,7 @@ components:
         discriminator:
           $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
         access_rules_chain:
-          type: object
+          $ref: "#/components/schemas/ReturnValue"
         vault_access_rules_chain:
           type: object
         divisibility:

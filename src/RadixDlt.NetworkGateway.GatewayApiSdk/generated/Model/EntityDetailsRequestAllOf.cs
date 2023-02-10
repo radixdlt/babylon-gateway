@@ -90,10 +90,10 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityDetailsRequest
+    /// EntityDetailsRequestAllOf
     /// </summary>
-    [DataContract(Name = "EntityDetailsRequest")]
-    public partial class EntityDetailsRequest : IEquatable<EntityDetailsRequest>
+    [DataContract(Name = "EntityDetailsRequest_allOf")]
+    public partial class EntityDetailsRequestAllOf : IEquatable<EntityDetailsRequestAllOf>
     {
 
         /// <summary>
@@ -102,33 +102,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         [DataMember(Name = "return_value_type", IsRequired = true, EmitDefaultValue = true)]
         public ReturnValueType ReturnValueType { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsRequest" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsRequestAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityDetailsRequest() { }
+        protected EntityDetailsRequestAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsRequest" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsRequestAllOf" /> class.
         /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="returnValueType">returnValueType (required).</param>
-        public EntityDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string address = default(string), ReturnValueType returnValueType = default(ReturnValueType))
+        public EntityDetailsRequestAllOf(string address = default(string), ReturnValueType returnValueType = default(ReturnValueType))
         {
             // to ensure "address" is required (not null)
             if (address == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityDetailsRequest and cannot be null");
+                throw new ArgumentNullException("address is a required property for EntityDetailsRequestAllOf and cannot be null");
             }
             this.Address = address;
             this.ReturnValueType = returnValueType;
-            this.AtLedgerState = atLedgerState;
         }
-
-        /// <summary>
-        /// Gets or Sets AtLedgerState
-        /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the entity&#39;s global address.
@@ -144,8 +136,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityDetailsRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
+            sb.Append("class EntityDetailsRequestAllOf {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  ReturnValueType: ").Append(ReturnValueType).Append("\n");
             sb.Append("}\n");
@@ -168,26 +159,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityDetailsRequest);
+            return this.Equals(input as EntityDetailsRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityDetailsRequest instances are equal
+        /// Returns true if EntityDetailsRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityDetailsRequest to be compared</param>
+        /// <param name="input">Instance of EntityDetailsRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityDetailsRequest input)
+        public bool Equals(EntityDetailsRequestAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
             return 
-                (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
-                ) && 
                 (
                     this.Address == input.Address ||
                     (this.Address != null &&
@@ -208,10 +194,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtLedgerState != null)
-                {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
-                }
                 if (this.Address != null)
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();

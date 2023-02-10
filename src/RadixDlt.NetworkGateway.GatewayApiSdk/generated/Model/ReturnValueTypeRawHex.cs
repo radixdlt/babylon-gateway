@@ -84,58 +84,47 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityDetailsRequest
+    /// ReturnValueTypeRawHex
     /// </summary>
-    [DataContract(Name = "EntityDetailsRequest")]
-    public partial class EntityDetailsRequest : IEquatable<EntityDetailsRequest>
+    [DataContract(Name = "ReturnValueTypeRawHex")]
+    [JsonConverter(typeof(JsonSubtypes), "return_value_type")]
+    [JsonSubtypes.KnownSubType(typeof(ReturnValueTypeRaw), "Raw")]
+    [JsonSubtypes.KnownSubType(typeof(ReturnValueTypeRawHex), "RawHex")]
+    [JsonSubtypes.KnownSubType(typeof(ReturnValueTypeSimpleString), "SimpleString")]
+    public partial class ReturnValueTypeRawHex : ReturnValue, IEquatable<ReturnValueTypeRawHex>
     {
-
         /// <summary>
-        /// Gets or Sets ReturnValueType
-        /// </summary>
-        [DataMember(Name = "return_value_type", IsRequired = true, EmitDefaultValue = true)]
-        public ReturnValueType ReturnValueType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsRequest" /> class.
+        /// Initializes a new instance of the <see cref="ReturnValueTypeRawHex" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityDetailsRequest() { }
+        protected ReturnValueTypeRawHex() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsRequest" /> class.
+        /// Initializes a new instance of the <see cref="ReturnValueTypeRawHex" /> class.
         /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="returnValueType">returnValueType (required).</param>
-        public EntityDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string address = default(string), ReturnValueType returnValueType = default(ReturnValueType))
+        /// <param name="rawHex">rawHex (required).</param>
+        /// <param name="returnValueType">returnValueType (required) (default to ReturnValueType.RawHex).</param>
+        public ReturnValueTypeRawHex(string rawHex = default(string), ReturnValueType returnValueType = ReturnValueType.RawHex) : base(returnValueType)
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "rawHex" is required (not null)
+            if (rawHex == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityDetailsRequest and cannot be null");
+                throw new ArgumentNullException("rawHex is a required property for ReturnValueTypeRawHex and cannot be null");
             }
-            this.Address = address;
-            this.ReturnValueType = returnValueType;
-            this.AtLedgerState = atLedgerState;
+            this.RawHex = rawHex;
         }
 
         /// <summary>
-        /// Gets or Sets AtLedgerState
+        /// Gets or Sets RawHex
         /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        [DataMember(Name = "raw_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string RawHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,10 +133,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityDetailsRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  ReturnValueType: ").Append(ReturnValueType).Append("\n");
+            sb.Append("class ReturnValueTypeRawHex {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  RawHex: ").Append(RawHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -156,7 +144,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -168,34 +156,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityDetailsRequest);
+            return this.Equals(input as ReturnValueTypeRawHex);
         }
 
         /// <summary>
-        /// Returns true if EntityDetailsRequest instances are equal
+        /// Returns true if ReturnValueTypeRawHex instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityDetailsRequest to be compared</param>
+        /// <param name="input">Instance of ReturnValueTypeRawHex to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityDetailsRequest input)
+        public bool Equals(ReturnValueTypeRawHex input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
-                ) && 
-                (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
-                ) && 
-                (
-                    this.ReturnValueType == input.ReturnValueType ||
-                    this.ReturnValueType.Equals(input.ReturnValueType)
+                    this.RawHex == input.RawHex ||
+                    (this.RawHex != null &&
+                    this.RawHex.Equals(input.RawHex))
                 );
         }
 
@@ -207,16 +186,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.AtLedgerState != null)
+                int hashCode = base.GetHashCode();
+                if (this.RawHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
                 }
-                if (this.Address != null)
-                {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.ReturnValueType.GetHashCode();
                 return hashCode;
             }
         }

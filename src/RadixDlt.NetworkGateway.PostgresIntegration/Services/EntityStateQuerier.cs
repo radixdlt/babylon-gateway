@@ -133,7 +133,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         return new GatewayModel.EntityResourcesResponse(ledgerState, entity.GlobalAddress, fungibles, nonFungibles);
     }
 
-    public async Task<GatewayModel.EntityDetailsResponse> EntityDetailsSnapshot(GlobalAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityDetailsResponse> EntityDetailsSnapshot(GatewayModel.ReturnValueType returnValueType, GlobalAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity(address, ledgerState, token);
 
@@ -161,9 +161,26 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
+                GatewayModel.ReturnValue returnValue;
+
+                switch (returnValueType)
+                {
+                    case GatewayModel.ReturnValueType.Raw:
+                        returnValue = new GatewayModel.ReturnValueTypeRaw(new JRaw(accessRulesChain.AccessRulesChain));
+                        break;
+                    case GatewayModel.ReturnValueType.RawHex:
+                        returnValue = new GatewayModel.ReturnValueTypeRawHex(Convert.ToHexString(accessRulesChain.AccessRulesChainSBOR));
+                        break;
+                    case GatewayModel.ReturnValueType.SimpleString:
+                        returnValue = new GatewayModel.ReturnValueTypeSimpleString("not really implemented now");
+                        break;
+                    default:
+                        throw new NotImplementedException("Not implemented");
+                }
+
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseFungibleResourceDetails(
                     discriminator: GatewayModel.EntityDetailsResponseDetailsType.FungibleResource,
-                    accessRulesChain: new JRaw(accessRulesChain.AccessRulesChain),
+                    accessRulesChain: returnValue,
                     vaultAccessRulesChain: new JRaw(vaultAccessRulesChain.AccessRulesChain),
                     divisibility: frme.Divisibility,
                     totalSupply: supplyHistory.TotalSupply.ToString(),

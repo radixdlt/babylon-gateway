@@ -86,4 +86,7 @@ internal class EntityAccessRulesChainHistory
 
     [Column("access_rules_chain", TypeName = "jsonb")]
     public string AccessRulesChain { get; set; }
+
+    [Column("access_rules_chain_sbor")]
+    public byte[] AccessRulesChainSBOR { get; set; }
 }

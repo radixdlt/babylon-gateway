@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -138,7 +138,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
                     entityid = table.Column<long>(name: "entity_id", type: "bigint", nullable: false),
                     subtype = table.Column<AccessRulesChainSubtype>(type: "access_rules_chain_subtype", nullable: false),
-                    accessruleschain = table.Column<string>(name: "access_rules_chain", type: "jsonb", nullable: false)
+                    accessruleschain = table.Column<string>(name: "access_rules_chain", type: "jsonb", nullable: false),
+                    accessruleschainsbor = table.Column<byte[]>(name: "access_rules_chain_sbor", type: "bytea", nullable: false)
                 },
                 constraints: table =>
                 {

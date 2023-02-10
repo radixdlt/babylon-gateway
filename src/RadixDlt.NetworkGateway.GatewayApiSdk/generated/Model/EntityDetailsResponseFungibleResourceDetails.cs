@@ -116,7 +116,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="totalSupply">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="totalMinted">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="totalBurnt">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), Object accessRulesChain = default(Object), Object vaultAccessRulesChain = default(Object), int divisibility = default(int), string totalSupply = default(string), string totalMinted = default(string), string totalBurnt = default(string))
+        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), ReturnValue accessRulesChain = default(ReturnValue), Object vaultAccessRulesChain = default(Object), int divisibility = default(int), string totalSupply = default(string), string totalMinted = default(string), string totalBurnt = default(string))
         {
             this.Discriminator = discriminator;
             // to ensure "accessRulesChain" is required (not null)
@@ -156,7 +156,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets AccessRulesChain
         /// </summary>
         [DataMember(Name = "access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
-        public Object AccessRulesChain { get; set; }
+        public ReturnValue AccessRulesChain { get; set; }
 
         /// <summary>
         /// Gets or Sets VaultAccessRulesChain

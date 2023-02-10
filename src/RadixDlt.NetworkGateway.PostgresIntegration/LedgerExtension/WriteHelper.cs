@@ -268,7 +268,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_access_rules_chain_history (id, from_state_version, entity_id, subtype, access_rules_chain) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_access_rules_chain_history (id, from_state_version, entity_id, subtype, access_rules_chain, access_rules_chain_sbor) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -278,6 +278,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Subtype, "access_rules_chain_subtype", token);
             await writer.WriteAsync(e.AccessRulesChain, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.AccessRulesChainSBOR, NpgsqlDbType.Bytea, token);
         }
 
         await writer.CompleteAsync(token);
