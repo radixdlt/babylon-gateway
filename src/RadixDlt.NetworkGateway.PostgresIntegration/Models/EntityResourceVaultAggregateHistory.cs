@@ -62,15 +62,14 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entity_resource_history")]
-internal abstract class EntityResourceHistory
+[Table("entity_resource_vault_aggregate_history")]
+internal class EntityResourceVaultAggregateHistory
 {
     [Key]
     [Column("id")]
@@ -79,24 +78,12 @@ internal abstract class EntityResourceHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("owner_entity_id")]
-    public long OwnerEntityId { get; set; }
-
-    [Column("global_entity_id")]
-    public long GlobalEntityId { get; set; }
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 
     [Column("resource_entity_id")]
     public long ResourceEntityId { get; set; }
-}
 
-internal class EntityFungibleResourceHistory : EntityResourceHistory
-{
-    [Column("balance")]
-    public TokenAmount Balance { get; set; }
-}
-
-internal class EntityNonFungibleResourceHistory : EntityResourceHistory
-{
-    [Column("non_fungible_ids")]
-    public List<long> NonFungibleIds { get; set; }
+    [Column("vault_entity_ids")]
+    public List<long> VaultEntityIds { get; set; }
 }

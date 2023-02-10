@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,33 +62,26 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using System.Diagnostics;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.Abstractions;
+
+[DebuggerDisplay("{ToString()}")]
+public readonly record struct GlobalAddress
 {
-    public long ComponentEntityStateHistorySequence { get; set; }
+    private readonly string _address;
 
-    public long EntitySequence { get; set; }
+    private GlobalAddress(string address)
+    {
+        _address = address;
+    }
 
-    public long EntityAccessRulesChainHistorySequence { get; set; }
+    public static implicit operator string(GlobalAddress ra) => ra._address;
 
-    public long EntityMetadataHistorySequence { get; set; }
+    public static explicit operator GlobalAddress(string text) => new GlobalAddress(text);
 
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long ResourceManagerEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdMutableDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
+    public override string ToString()
+    {
+        return _address;
+    }
 }

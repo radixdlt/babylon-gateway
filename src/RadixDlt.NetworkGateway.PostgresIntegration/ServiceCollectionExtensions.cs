@@ -69,7 +69,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using System;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
