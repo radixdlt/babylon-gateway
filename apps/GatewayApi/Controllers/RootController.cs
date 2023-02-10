@@ -86,7 +86,7 @@ public class RootController : ControllerBase
         {
             docs = "https://docs.radixdlt.com",
             repo = "https://github.com/radixdlt/babylon-gateway",
-            gateway = await _ledgerStateQuerier.GetGatewayStatus(),
+            gateway = await _ledgerStateQuerier.GetGatewayInformation(),
         });
     }
 }

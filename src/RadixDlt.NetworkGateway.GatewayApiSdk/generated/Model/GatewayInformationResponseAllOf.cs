@@ -90,29 +90,49 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// GatewayStatusResponseAllOf
+    /// GatewayInformationResponseAllOf
     /// </summary>
-    [DataContract(Name = "GatewayStatusResponse_allOf")]
-    public partial class GatewayStatusResponseAllOf : IEquatable<GatewayStatusResponseAllOf>
+    [DataContract(Name = "GatewayInformationResponse_allOf")]
+    public partial class GatewayInformationResponseAllOf : IEquatable<GatewayInformationResponseAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayStatusResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInformationResponseAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected GatewayStatusResponseAllOf() { }
+        protected GatewayInformationResponseAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayStatusResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInformationResponseAllOf" /> class.
         /// </summary>
+        /// <param name="knownTarget">knownTarget (required).</param>
         /// <param name="releaseInfo">releaseInfo (required).</param>
-        public GatewayStatusResponseAllOf(GatewayInfoResponseReleaseInfo releaseInfo = default(GatewayInfoResponseReleaseInfo))
+        /// <param name="wellKnownAddresses">wellKnownAddresses (required).</param>
+        public GatewayInformationResponseAllOf(GatewayInfoResponseKnownTarget knownTarget = default(GatewayInfoResponseKnownTarget), GatewayInfoResponseReleaseInfo releaseInfo = default(GatewayInfoResponseReleaseInfo), GatewayInformationResponseAllOfWellKnownAddresses wellKnownAddresses = default(GatewayInformationResponseAllOfWellKnownAddresses))
         {
+            // to ensure "knownTarget" is required (not null)
+            if (knownTarget == null)
+            {
+                throw new ArgumentNullException("knownTarget is a required property for GatewayInformationResponseAllOf and cannot be null");
+            }
+            this.KnownTarget = knownTarget;
             // to ensure "releaseInfo" is required (not null)
             if (releaseInfo == null)
             {
-                throw new ArgumentNullException("releaseInfo is a required property for GatewayStatusResponseAllOf and cannot be null");
+                throw new ArgumentNullException("releaseInfo is a required property for GatewayInformationResponseAllOf and cannot be null");
             }
             this.ReleaseInfo = releaseInfo;
+            // to ensure "wellKnownAddresses" is required (not null)
+            if (wellKnownAddresses == null)
+            {
+                throw new ArgumentNullException("wellKnownAddresses is a required property for GatewayInformationResponseAllOf and cannot be null");
+            }
+            this.WellKnownAddresses = wellKnownAddresses;
         }
+
+        /// <summary>
+        /// Gets or Sets KnownTarget
+        /// </summary>
+        [DataMember(Name = "known_target", IsRequired = true, EmitDefaultValue = true)]
+        public GatewayInfoResponseKnownTarget KnownTarget { get; set; }
 
         /// <summary>
         /// Gets or Sets ReleaseInfo
@@ -121,14 +141,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public GatewayInfoResponseReleaseInfo ReleaseInfo { get; set; }
 
         /// <summary>
+        /// Gets or Sets WellKnownAddresses
+        /// </summary>
+        [DataMember(Name = "well_known_addresses", IsRequired = true, EmitDefaultValue = true)]
+        public GatewayInformationResponseAllOfWellKnownAddresses WellKnownAddresses { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class GatewayStatusResponseAllOf {\n");
+            sb.Append("class GatewayInformationResponseAllOf {\n");
+            sb.Append("  KnownTarget: ").Append(KnownTarget).Append("\n");
             sb.Append("  ReleaseInfo: ").Append(ReleaseInfo).Append("\n");
+            sb.Append("  WellKnownAddresses: ").Append(WellKnownAddresses).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +177,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as GatewayStatusResponseAllOf);
+            return this.Equals(input as GatewayInformationResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if GatewayStatusResponseAllOf instances are equal
+        /// Returns true if GatewayInformationResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of GatewayStatusResponseAllOf to be compared</param>
+        /// <param name="input">Instance of GatewayInformationResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(GatewayStatusResponseAllOf input)
+        public bool Equals(GatewayInformationResponseAllOf input)
         {
             if (input == null)
             {
@@ -165,9 +193,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.KnownTarget == input.KnownTarget ||
+                    (this.KnownTarget != null &&
+                    this.KnownTarget.Equals(input.KnownTarget))
+                ) && 
+                (
                     this.ReleaseInfo == input.ReleaseInfo ||
                     (this.ReleaseInfo != null &&
                     this.ReleaseInfo.Equals(input.ReleaseInfo))
+                ) && 
+                (
+                    this.WellKnownAddresses == input.WellKnownAddresses ||
+                    (this.WellKnownAddresses != null &&
+                    this.WellKnownAddresses.Equals(input.WellKnownAddresses))
                 );
         }
 
@@ -180,9 +218,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.KnownTarget != null)
+                {
+                    hashCode = (hashCode * 59) + this.KnownTarget.GetHashCode();
+                }
                 if (this.ReleaseInfo != null)
                 {
                     hashCode = (hashCode * 59) + this.ReleaseInfo.GetHashCode();
+                }
+                if (this.WellKnownAddresses != null)
+                {
+                    hashCode = (hashCode * 59) + this.WellKnownAddresses.GetHashCode();
                 }
                 return hashCode;
             }

@@ -112,8 +112,7 @@ public static class OpenApiDocumentHandler
         response = OptionalReplace(response, "<entity-address>", placeholderReplacements.ResourceAddress);
         response = OptionalReplace(response, "<component-entity-address>", placeholderReplacements.ComponentAddress);
         response = OptionalReplace(response, "<transaction-payload-hash>", placeholderReplacements.TransactionPayloadHex);
-        response = OptionalReplace(response, "<network-id>", placeholderReplacements.NetworkId?.ToString());
-        response = OptionalReplace(response, "<network-name>", placeholderReplacements.NetworkName);
+
         await context.Response.WriteAsync(response, Encoding.UTF8, token);
     }
 
@@ -129,23 +128,16 @@ public static class OpenApiDocumentHandler
         public string? ComponentAddress { get; set; }
 
         public string? TransactionPayloadHex { get; set; }
-
-        public byte? NetworkId { get; set; }
-
-        public string? NetworkName { get; set; }
     }
 
     private static async Task<PlaceholderReplacements> GetPlaceholderReplacements(INetworkConfigurationProvider networkConfigurationProvider, ITransactionHandler transactionHandler, CancellationToken token)
     {
         var placeholderReplacements = new PlaceholderReplacements();
-
         try
         {
             var wellKnownAddresses = networkConfigurationProvider.GetWellKnownAddresses();
             placeholderReplacements.ResourceAddress = wellKnownAddresses.Xrd;
             placeholderReplacements.ComponentAddress = wellKnownAddresses.Faucet;
-            placeholderReplacements.NetworkId = networkConfigurationProvider.GetNetworkId();
-            placeholderReplacements.NetworkName = networkConfigurationProvider.GetNetworkName();
         }
         catch (Exception)
         {

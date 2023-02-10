@@ -136,12 +136,12 @@ tags:
     x-displayName: State Endpoints
     description: Query information snapshot about state of ledger entities at present or past time.
 paths:
-  "/status/gateway-status":
+  "/gateway/information":
     post:
-      operationId: GatewayStatus
-      summary: Get Gateway Status
+      operationId: GatewayInformation
+      summary: Get Gateway Information
       description: |
-        Returns the Gateway API version and current ledger state.
+        Returns the Gateway API version, current ledger state and well-known network addresses.
       tags:
         - Status
       responses:
@@ -150,22 +150,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GatewayStatusResponse"
-  "/status/network-configuration":
-    post:
-      operationId: NetworkConfiguration
-      summary: Get Network Configuration
-      description: |
-        Returns network identifier, network name and well-known network addresses.
-      tags:
-        - Status
-      responses:
-        "200":
-          description: Network Configuration
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/NetworkConfigurationResponse"
+                $ref: "#/components/schemas/GatewayInformationResponse"
 
   "/transaction/recent":
     post:
@@ -563,19 +548,6 @@ components:
     # Aliases
     #
 
-    NetworkId:
-      description: The logical id of the network
-      type: integer
-      format: int32
-      minimum: 0
-      maximum: 255
-      example: "<network-id>"
-
-    NetworkName:
-      description: The logical name of the network
-      type: string
-      example: "<network-name>"
-
     EntityAddress:
       description: Bech32m-encoded human readable version of the entity's global address.
       type: string
@@ -734,7 +706,8 @@ components:
         - round
       properties:
         network:
-          $ref: "#/components/schemas/NetworkName"
+          description: The name of the network against which the request is made.
+          type: string
         state_version:
           description: The state version of the ledger. Each transaction increments the state version by 1.
           type: integer
@@ -955,54 +928,47 @@ components:
           format: double
 
     #
-    # /status/* Request & Response Types
+    # /gateway/* Request & Response Types
     #
-    NetworkConfigurationResponse:
-      type: object
-      required:
-        - network_id
-        - network_name
-        - well_known_addresses
-      properties:
-        network_id:
-          $ref: "#/components/schemas/NetworkId"
-        network_name:
-          $ref: "#/components/schemas/NetworkName"
-        well_known_addresses:
-          type: object
-          required:
-            - account_package
-            - faucet
-            - epoch_manager
-            - clock
-            - ecdsa_secp256k1
-            - eddsa_ed25519
-            - xrd
-          properties:
-            account_package:
-              $ref: "#/components/schemas/EntityAddress"
-            faucet:
-              $ref: "#/components/schemas/ComponentAddress"
-            epoch_manager:
-              $ref: "#/components/schemas/EntityAddress"
-            clock:
-              $ref: "#/components/schemas/EntityAddress"
-            ecdsa_secp256k1:
-              $ref: "#/components/schemas/ResourceAddress"
-            eddsa_ed25519:
-              $ref: "#/components/schemas/ResourceAddress"
-            xrd:
-              $ref: "#/components/schemas/ResourceAddress"
 
-    GatewayStatusResponse:
+    GatewayInformationResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
         - type: object
           required:
+            - known_target
             - release_info
+            - well_known_addresses
           properties:
+            known_target:
+              $ref: "#/components/schemas/GatewayInfoResponseKnownTarget"
             release_info:
               $ref: "#/components/schemas/GatewayInfoResponseReleaseInfo"
+            well_known_addresses:
+              type: object
+              required:
+                - account_package
+                - faucet
+                - epoch_manager
+                - clock
+                - ecdsa_secp256k1
+                - eddsa_ed25519
+                - xrd
+              properties:
+                account_package:
+                  $ref: "#/components/schemas/EntityAddress"
+                faucet:
+                  $ref: "#/components/schemas/ComponentAddress"
+                epoch_manager:
+                  $ref: "#/components/schemas/EntityAddress"
+                clock:
+                  $ref: "#/components/schemas/EntityAddress"
+                ecdsa_secp256k1:
+                  $ref: "#/components/schemas/ResourceAddress"
+                eddsa_ed25519:
+                  $ref: "#/components/schemas/ResourceAddress"
+                xrd:
+                  $ref: "#/components/schemas/ResourceAddress"
     GatewayInfoResponseKnownTarget:
       type: object
       required:
@@ -1357,15 +1323,15 @@ components:
               items:
                 $ref: "#/components/schemas/EntityOverviewResponseEntityItem"
     EntityOverviewResponseEntityItem:
-      type: object
-      required:
-        - address
-        - metadata
-      properties:
-        address:
-          $ref: "#/components/schemas/EntityAddress"
-        metadata:
-          $ref: "#/components/schemas/EntityMetadataCollection"
+       type: object
+       required:
+         - address
+         - metadata
+       properties:
+         address:
+           $ref: "#/components/schemas/EntityAddress"
+         metadata:
+           $ref: "#/components/schemas/EntityMetadataCollection"
 
     EntityMetadataRequest:
       allOf:

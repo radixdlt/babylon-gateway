@@ -90,18 +90,18 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// NetworkConfigurationResponseWellKnownAddresses
+    /// GatewayInformationResponseAllOfWellKnownAddresses
     /// </summary>
-    [DataContract(Name = "NetworkConfigurationResponse_well_known_addresses")]
-    public partial class NetworkConfigurationResponseWellKnownAddresses : IEquatable<NetworkConfigurationResponseWellKnownAddresses>
+    [DataContract(Name = "GatewayInformationResponse_allOf_well_known_addresses")]
+    public partial class GatewayInformationResponseAllOfWellKnownAddresses : IEquatable<GatewayInformationResponseAllOfWellKnownAddresses>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NetworkConfigurationResponseWellKnownAddresses" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInformationResponseAllOfWellKnownAddresses" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NetworkConfigurationResponseWellKnownAddresses() { }
+        protected GatewayInformationResponseAllOfWellKnownAddresses() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NetworkConfigurationResponseWellKnownAddresses" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInformationResponseAllOfWellKnownAddresses" /> class.
         /// </summary>
         /// <param name="accountPackage">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="faucet">Bech32m-encoded human readable version of the component (normal, account, system) global address. (required).</param>
@@ -110,48 +110,48 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="ecdsaSecp256k1">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
         /// <param name="eddsaEd25519">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
         /// <param name="xrd">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
-        public NetworkConfigurationResponseWellKnownAddresses(string accountPackage = default(string), string faucet = default(string), string epochManager = default(string), string clock = default(string), string ecdsaSecp256k1 = default(string), string eddsaEd25519 = default(string), string xrd = default(string))
+        public GatewayInformationResponseAllOfWellKnownAddresses(string accountPackage = default(string), string faucet = default(string), string epochManager = default(string), string clock = default(string), string ecdsaSecp256k1 = default(string), string eddsaEd25519 = default(string), string xrd = default(string))
         {
             // to ensure "accountPackage" is required (not null)
             if (accountPackage == null)
             {
-                throw new ArgumentNullException("accountPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+                throw new ArgumentNullException("accountPackage is a required property for GatewayInformationResponseAllOfWellKnownAddresses and cannot be null");
             }
             this.AccountPackage = accountPackage;
             // to ensure "faucet" is required (not null)
             if (faucet == null)
             {
-                throw new ArgumentNullException("faucet is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+                throw new ArgumentNullException("faucet is a required property for GatewayInformationResponseAllOfWellKnownAddresses and cannot be null");
             }
             this.Faucet = faucet;
             // to ensure "epochManager" is required (not null)
             if (epochManager == null)
             {
-                throw new ArgumentNullException("epochManager is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+                throw new ArgumentNullException("epochManager is a required property for GatewayInformationResponseAllOfWellKnownAddresses and cannot be null");
             }
             this.EpochManager = epochManager;
             // to ensure "clock" is required (not null)
             if (clock == null)
             {
-                throw new ArgumentNullException("clock is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+                throw new ArgumentNullException("clock is a required property for GatewayInformationResponseAllOfWellKnownAddresses and cannot be null");
             }
             this.Clock = clock;
             // to ensure "ecdsaSecp256k1" is required (not null)
             if (ecdsaSecp256k1 == null)
             {
-                throw new ArgumentNullException("ecdsaSecp256k1 is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+                throw new ArgumentNullException("ecdsaSecp256k1 is a required property for GatewayInformationResponseAllOfWellKnownAddresses and cannot be null");
             }
             this.EcdsaSecp256k1 = ecdsaSecp256k1;
             // to ensure "eddsaEd25519" is required (not null)
             if (eddsaEd25519 == null)
             {
-                throw new ArgumentNullException("eddsaEd25519 is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+                throw new ArgumentNullException("eddsaEd25519 is a required property for GatewayInformationResponseAllOfWellKnownAddresses and cannot be null");
             }
             this.EddsaEd25519 = eddsaEd25519;
             // to ensure "xrd" is required (not null)
             if (xrd == null)
             {
-                throw new ArgumentNullException("xrd is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+                throw new ArgumentNullException("xrd is a required property for GatewayInformationResponseAllOfWellKnownAddresses and cannot be null");
             }
             this.Xrd = xrd;
         }
@@ -212,7 +212,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NetworkConfigurationResponseWellKnownAddresses {\n");
+            sb.Append("class GatewayInformationResponseAllOfWellKnownAddresses {\n");
             sb.Append("  AccountPackage: ").Append(AccountPackage).Append("\n");
             sb.Append("  Faucet: ").Append(Faucet).Append("\n");
             sb.Append("  EpochManager: ").Append(EpochManager).Append("\n");
@@ -240,15 +240,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NetworkConfigurationResponseWellKnownAddresses);
+            return this.Equals(input as GatewayInformationResponseAllOfWellKnownAddresses);
         }
 
         /// <summary>
-        /// Returns true if NetworkConfigurationResponseWellKnownAddresses instances are equal
+        /// Returns true if GatewayInformationResponseAllOfWellKnownAddresses instances are equal
         /// </summary>
-        /// <param name="input">Instance of NetworkConfigurationResponseWellKnownAddresses to be compared</param>
+        /// <param name="input">Instance of GatewayInformationResponseAllOfWellKnownAddresses to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NetworkConfigurationResponseWellKnownAddresses input)
+        public bool Equals(GatewayInformationResponseAllOfWellKnownAddresses input)
         {
             if (input == null)
             {
