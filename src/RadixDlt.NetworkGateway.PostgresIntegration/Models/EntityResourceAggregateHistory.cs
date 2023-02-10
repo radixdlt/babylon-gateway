@@ -84,6 +84,12 @@ internal class EntityResourceAggregateHistory
     [Column("fungible_resource_entity_ids")]
     public List<long> FungibleResourceEntityIds { get; set; }
 
+    [Column("fungible_resource_last_update_state_versions")]
+    public List<long> FungibleResourceLastUpdateStateVersions { get; set; }
+
     [Column("non_fungible_resource_entity_ids")]
     public List<long> NonFungibleResourceEntityIds { get; set; }
+
+    [Column("non_fungible_resource_last_update_state_versions")]
+    public List<long> NonFungibleResourceLastUpdateStateVersions { get; set; }
 }

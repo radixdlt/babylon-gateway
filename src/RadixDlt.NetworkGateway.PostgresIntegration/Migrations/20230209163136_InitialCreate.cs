@@ -170,7 +170,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
                     entityid = table.Column<long>(name: "entity_id", type: "bigint", nullable: false),
                     fungibleresourceentityids = table.Column<List<long>>(name: "fungible_resource_entity_ids", type: "bigint[]", nullable: false),
-                    nonfungibleresourceentityids = table.Column<List<long>>(name: "non_fungible_resource_entity_ids", type: "bigint[]", nullable: false)
+                    fungibleresourcelastupdatestateversions = table.Column<List<long>>(name: "fungible_resource_last_update_state_versions", type: "bigint[]", nullable: false),
+                    nonfungibleresourceentityids = table.Column<List<long>>(name: "non_fungible_resource_entity_ids", type: "bigint[]", nullable: false),
+                    nonfungibleresourcelastupdatestateversions = table.Column<List<long>>(name: "non_fungible_resource_last_update_state_versions", type: "bigint[]", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -178,7 +180,23 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "entity_resource_history",
+                name: "entity_resource_vault_aggregate_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
+                    entityid = table.Column<long>(name: "entity_id", type: "bigint", nullable: false),
+                    resourceentityid = table.Column<long>(name: "resource_entity_id", type: "bigint", nullable: false),
+                    vaultentityids = table.Column<List<long>>(name: "vault_entity_ids", type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_entity_resource_vault_aggregate_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "entity_vault_history",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -186,16 +204,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
                     ownerentityid = table.Column<long>(name: "owner_entity_id", type: "bigint", nullable: false),
                     globalentityid = table.Column<long>(name: "global_entity_id", type: "bigint", nullable: false),
-                    resourceentityid = table.Column<long>(name: "resource_entity_id", type: "bigint", nullable: false),
                     vaultentityid = table.Column<long>(name: "vault_entity_id", type: "bigint", nullable: false),
-                    isroyaltyvault = table.Column<bool>(name: "is_royalty_vault", type: "boolean", nullable: false),
+                    resourceentityid = table.Column<long>(name: "resource_entity_id", type: "bigint", nullable: false),
                     discriminator = table.Column<string>(type: "text", nullable: false),
                     balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
+                    isroyaltyvault = table.Column<bool>(name: "is_royalty_vault", type: "boolean", nullable: true),
                     nonfungibleids = table.Column<List<long>>(name: "non_fungible_ids", type: "bigint[]", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_entity_resource_history", x => x.id);
+                    table.PrimaryKey("PK_entity_vault_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -443,14 +461,19 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_entity_resource_history_global_entity_id_from_state_version",
-                table: "entity_resource_history",
-                columns: new[] { "global_entity_id", "from_state_version" });
+                name: "IX_entity_resource_vault_aggregate_history_entity_id_resource_~",
+                table: "entity_resource_vault_aggregate_history",
+                columns: new[] { "entity_id", "resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_entity_resource_history_owner_entity_id_from_state_version",
-                table: "entity_resource_history",
-                columns: new[] { "owner_entity_id", "from_state_version" });
+                name: "IX_entity_vault_history_global_entity_id_vault_entity_id_from_~",
+                table: "entity_vault_history",
+                columns: new[] { "global_entity_id", "vault_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_vault_history_owner_entity_id_vault_entity_id_from_s~",
+                table: "entity_vault_history",
+                columns: new[] { "owner_entity_id", "vault_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_status_top_of_ledger_state_version",
@@ -577,7 +600,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "entity_resource_aggregate_history");
 
             migrationBuilder.DropTable(
-                name: "entity_resource_history");
+                name: "entity_resource_vault_aggregate_history");
+
+            migrationBuilder.DropTable(
+                name: "entity_vault_history");
 
             migrationBuilder.DropTable(
                 name: "ledger_status");

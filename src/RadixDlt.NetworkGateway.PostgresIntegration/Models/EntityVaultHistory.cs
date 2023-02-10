@@ -62,33 +62,47 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+
+[Table("entity_vault_history")]
+internal abstract class EntityVaultHistory
 {
-    public long ComponentEntityStateHistorySequence { get; set; }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public long EntitySequence { get; set; }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-    public long EntityAccessRulesChainHistorySequence { get; set; }
+    [Column("owner_entity_id")]
+    public long OwnerEntityId { get; set; }
 
-    public long EntityMetadataHistorySequence { get; set; }
+    [Column("global_entity_id")]
+    public long GlobalEntityId { get; set; }
 
-    public long EntityResourceAggregateHistorySequence { get; set; }
+    [Column("vault_entity_id")]
+    public long VaultEntityId { get; set; }
 
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+}
 
-    public long EntityVaultHistorySequence { get; set; }
+internal class EntityFungibleVaultHistory : EntityVaultHistory
+{
+    [Column("balance")]
+    public TokenAmount Balance { get; set; }
 
-    public long ResourceManagerEntitySupplyHistorySequence { get; set; }
+    [Column("is_royalty_vault")]
+    public bool IsRoyaltyVault { get; set; }
+}
 
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdMutableDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
+internal class EntityNonFungibleVaultHistory : EntityVaultHistory
+{
+    [Column("non_fungible_ids")]
+    public List<long> NonFungibleIds { get; set; }
 }

@@ -273,10 +273,20 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint[]")
                         .HasColumnName("fungible_resource_entity_ids");
 
+                    b.Property<List<long>>("FungibleResourceLastUpdateStateVersions")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("fungible_resource_last_update_state_versions");
+
                     b.Property<List<long>>("NonFungibleResourceEntityIds")
                         .IsRequired()
                         .HasColumnType("bigint[]")
                         .HasColumnName("non_fungible_resource_entity_ids");
+
+                    b.Property<List<long>>("NonFungibleResourceLastUpdateStateVersions")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("non_fungible_resource_last_update_state_versions");
 
                     b.HasKey("Id");
 
@@ -285,7 +295,40 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entity_resource_aggregate_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceVaultAggregateHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("ResourceEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_entity_id");
+
+                    b.Property<List<long>>("VaultEntityIds")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("vault_entity_ids");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "ResourceEntityId", "FromStateVersion");
+
+                    b.ToTable("entity_resource_vault_aggregate_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityVaultHistory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -301,10 +344,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<long>("GlobalEntityId")
                         .HasColumnType("bigint")
                         .HasColumnName("global_entity_id");
-
-                    b.Property<bool>("IsRoyaltyVault")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_royalty_vault");
 
                     b.Property<long>("OwnerEntityId")
                         .HasColumnType("bigint")
@@ -324,13 +363,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GlobalEntityId", "FromStateVersion");
+                    b.HasIndex("GlobalEntityId", "VaultEntityId", "FromStateVersion");
 
-                    b.HasIndex("OwnerEntityId", "FromStateVersion");
+                    b.HasIndex("OwnerEntityId", "VaultEntityId", "FromStateVersion");
 
-                    b.ToTable("entity_resource_history");
+                    b.ToTable("entity_vault_history");
 
-                    b.HasDiscriminator<string>("discriminator").HasValue("EntityResourceHistory");
+                    b.HasDiscriminator<string>("discriminator").HasValue("EntityVaultHistory");
 
                     b.UseTphMappingStrategy();
                 });
@@ -992,30 +1031,34 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue("vault");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityFungibleResourceHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityFungibleVaultHistory", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceHistory");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityVaultHistory");
 
                     b.Property<BigInteger>("Balance")
                         .HasPrecision(1000)
                         .HasColumnType("numeric")
                         .HasColumnName("balance");
 
-                    b.ToTable("entity_resource_history");
+                    b.Property<bool>("IsRoyaltyVault")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_royalty_vault");
+
+                    b.ToTable("entity_vault_history");
 
                     b.HasDiscriminator().HasValue("fungible");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityNonFungibleResourceHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityNonFungibleVaultHistory", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceHistory");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityVaultHistory");
 
                     b.Property<List<long>>("NonFungibleIds")
                         .IsRequired()
                         .HasColumnType("bigint[]")
                         .HasColumnName("non_fungible_ids");
 
-                    b.ToTable("entity_resource_history");
+                    b.ToTable("entity_vault_history");
 
                     b.HasDiscriminator().HasValue("non_fungible");
                 });

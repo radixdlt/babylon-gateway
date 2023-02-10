@@ -96,7 +96,9 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityResourceAggregateHistory> EntityResourceAggregateHistory => Set<EntityResourceAggregateHistory>();
 
-    public DbSet<EntityResourceHistory> EntityResourceHistory => Set<EntityResourceHistory>();
+    public DbSet<EntityResourceVaultAggregateHistory> EntityResourceVaultAggregateHistory => Set<EntityResourceVaultAggregateHistory>();
+
+    public DbSet<EntityVaultHistory> EntityVaultHistory => Set<EntityVaultHistory>();
 
     public DbSet<ResourceManagerEntitySupplyHistory> ResourceManagerEntitySupplyHistory => Set<ResourceManagerEntitySupplyHistory>();
 
@@ -246,16 +248,19 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<EntityResourceAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityResourceHistory>()
+        modelBuilder.Entity<EntityResourceVaultAggregateHistory>()
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityVaultHistory>()
             .HasDiscriminator<string>("discriminator")
-            .HasValue<EntityFungibleResourceHistory>("fungible")
-            .HasValue<EntityNonFungibleResourceHistory>("non_fungible");
+            .HasValue<EntityFungibleVaultHistory>("fungible")
+            .HasValue<EntityNonFungibleVaultHistory>("non_fungible");
 
-        modelBuilder.Entity<EntityResourceHistory>()
-            .HasIndex(e => new { e.OwnerEntityId, e.FromStateVersion });
+        modelBuilder.Entity<EntityVaultHistory>()
+            .HasIndex(e => new { e.OwnerEntityId, e.VaultEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityResourceHistory>()
-            .HasIndex(e => new { e.GlobalEntityId, e.FromStateVersion });
+        modelBuilder.Entity<EntityVaultHistory>()
+            .HasIndex(e => new { e.GlobalEntityId, e.VaultEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<ResourceManagerEntitySupplyHistory>()
             .HasIndex(e => new { e.ResourceManagerEntityId, e.FromStateVersion });
