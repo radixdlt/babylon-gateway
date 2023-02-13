@@ -736,9 +736,16 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = final.non_fungible_id_data_id
             return entity;
         }
 
-        if (address.ToString()[0] == _ecdsaSecp256k1VirtualAccountAddressPrefix || address.ToString()[0] == _eddsaEd25519VirtualAccountAddressPrefix)
+        var firstAddressByte = RadixAddressCodec.Decode(address).Data[0];
+
+        if (firstAddressByte == _ecdsaSecp256k1VirtualAccountAddressPrefix || firstAddressByte == _eddsaEd25519VirtualAccountAddressPrefix)
         {
             return new VirtualAccountComponentEntity(address);
+        }
+
+        if (firstAddressByte == _ecdsaSecp256k1VirtualIdentityAddressPrefix || firstAddressByte == _eddsaEd25519VirtualIdentityAddressPrefix)
+        {
+            return new VirtualIdentityEntity(address);
         }
 
         throw new EntityNotFoundException(address.ToString());
