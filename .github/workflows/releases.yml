@@ -5,17 +5,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        dotnet-version: ['7.0.x']
     environment: release
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-      - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+      - name: Setup .NET SDK
         uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a
         with:
-          dotnet-version: ${{ matrix.dotnet-version }}
-          include-prerelease: true
+          dotnet-version: 7.0.x
       - name: Get release
         id: get_release
         uses: bruceadams/get-release@f589ce0779c7bef1faf175f7488c972eb47dc046
@@ -96,7 +92,7 @@ jobs:
           secret-ids: |
             DOCKERHUB, github-actions/rdxworks/dockerhub-images/release-credentials
           parse-json-secrets: true
-          
+
       - name: Login to Docker Hub
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
         with:
