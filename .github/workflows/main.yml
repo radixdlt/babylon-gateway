@@ -5,20 +5,22 @@ on:
     branches:
       - main
       - develop
+      - release\/*
+  pull_request:
+    branches:
+      - main
+      - develop
+      - release\/*
 
 jobs:
   build:
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        dotnet-version: ['7.0.x']
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-      - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+      - name: Setup .NET SDK
         uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a
         with:
-          dotnet-version: ${{ matrix.dotnet-version }}
-          include-prerelease: true
+          dotnet-version: 7.0.x
       - name: Install dependencies
         run: dotnet restore
       - name: Build
@@ -29,11 +31,10 @@ jobs:
 
   publish-docker:
     runs-on: ubuntu-22.04
-    environment: release
     outputs:
-      data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag}}
-      gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag}}
-      database-migrations-tag: ${{ steps.setup_tags.outputs.database-migrations-tag}}
+      database-migrations-tag: ${{ steps.setup_tags.outputs.database-migrations-tag }}
+      data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag }}
+      gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag }}
     permissions:
       id-token: write
       contents: read
@@ -44,74 +45,41 @@ jobs:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
         with:
           fetch-depth: 0
-
+#          ref: ${{ github.event.pull_request.head.ref }} # TODO do we want to restore that?
       - id: auth
         uses: google-github-actions/auth@a61909d048e0be579b6c15b27088d19668493851
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - name: configure-docker
-        run: |
-            gcloud auth configure-docker -q
-
+        run: gcloud auth configure-docker -q
       - name: Setup tags for docker image
         id: setup_tags
         uses: ./.github/actions/set-variables
         with:
           github_event_name: ${{ github.event_name }}
           github_action_name: ${{ github.event.action}}
-
-      - name: Docker build and push DataAggregator
-        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
-        with:
-          file: ./apps/DataAggregator/Dockerfile
-          TAGS: |
-            ${{ steps.setup_tags.outputs.data_aggregator_tags }}
-          push: true
-          context: ./
-
-      - name: Docker build and push Gateway API
-        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
-        with:
-          file: ./apps/GatewayApi/Dockerfile
-          TAGS: |
-            ${{ steps.setup_tags.outputs.gateway_api_tags }}
-          push: true
-          context: ./
-
-
       - name: Docker build and push Database Migrations
         uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
         with:
           file: ./apps/DatabaseMigrations/Dockerfile
-          TAGS: |
-            ${{ steps.setup_tags.outputs.database_migrations_tags }}
+          tags: ${{ steps.setup_tags.outputs.database_migrations_tags }}
           push: true
           context: ./
-
-  deploy-on-gilganet:
-    runs-on: ubuntu-22.04
-    if: github.ref == 'refs/heads/main'
-    needs: publish-docker
-    steps:
-      - name: Trigger deployment event ${{ github.ref }}
-        env:
-          NAMESPACE: "ng-gilganet"
-          EVENT_TYPE: "ng_babylon_gilganet"
-        run: |
-          curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/${{secrets.DISPATCH_REPO}}/dispatches' \
-            --header 'Accept: application/vnd.github.v3+json' \
-            --header 'Authorization: Basic ${{secrets.CF_GITHUB_WORKER_ENCODED_BASIC_AUTH}}' \
-            --header 'Content-Type: application/json' \
-            --data-raw '{
-                "event_type": "${{env.EVENT_TYPE}}",
-                "client_payload": {
-                  "namespace_postfix": "${{env.NAMESPACE}}",
-                  "data_aggregator_image_tag": "${{ needs.publish-docker.outputs.data-aggregator-tag }}",
-                  "gateway_api_image_tag": "${{ needs.publish-docker.outputs.gateway-api-tag }}",
-                  "database_migrations_image_tag": "${{ needs.publish-docker.outputs.database-migrations-tag }}"
-                }
-            }'
+      - name: Docker build and push DataAggregator
+        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
+        with:
+          file: ./apps/DataAggregator/Dockerfile
+          tags: ${{ steps.setup_tags.outputs.data_aggregator_tags }}
+          push: true
+          context: ./
+      - name: Docker build and push Gateway API
+        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
+        with:
+          file: ./apps/GatewayApi/Dockerfile
+          tags: ${{ steps.setup_tags.outputs.gateway_api_tags }}
+          push: true
+          context: ./
 
   deploy-on-mardunet:
     runs-on: ubuntu-22.04
@@ -142,3 +110,78 @@ jobs:
                   "feature_branch_name": "${{env.FULLNODE_COMMIT}}"
                 }
             }'
+
+  deploy-pr:
+    runs-on: ubuntu-22.04
+    needs: publish-docker
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: setup "namespace_postfix"
+        run: |
+          pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          echo "NAMESPACE=pr-$pull_number" >> $GITHUB_ENV
+      - name: Trigger pull request deployment event ${{ github.ref }}
+        env:
+          EVENT_TYPE: "ng_babylon_pr"
+        run: |
+          curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/${{secrets.DISPATCH_REPO}}/dispatches' \
+            --header 'Accept: application/vnd.github.v3+json' \
+            --header 'Authorization:  Basic ${{secrets.CF_GITHUB_WORKER_ENCODED_BASIC_AUTH}}' \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+                "event_type": "${{env.EVENT_TYPE}}",
+                "client_payload": {
+                    "namespace_postfix": "${{env.NAMESPACE}}",
+                    "data_aggregator_image_tag": "${{ needs.publish-docker.outputs.data-aggregator-tag }}",
+                    "gateway_api_image_tag": "${{ needs.publish-docker.outputs.gateway-api-tag }}",
+                    "database_migrations_image_tag": "${{ needs.publish-docker.outputs.database-migrations-tag }}"
+                }
+            }'
+
+  ephemeral-deploy-and-test:
+    runs-on: ubuntu-22.04
+    needs: publish-docker
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - name: Export branch name in github's environment
+        run: |
+          echo "GATEWAY_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
+      - name: Process ci.env
+        run: |
+          export $(grep -v '^#' ./deployment/ci.env | xargs)
+          echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
+          echo "POSTGRES_VERSION=$POSTGRES_VERSION" >> $GITHUB_ENV
+      - name: Deploy and test on an ephemeral network
+        uses: toptal/jenkins-job-trigger-action@649c04c83c099c759aba134bf78138a303ec095f
+        with:
+          jenkins_url: "${{ secrets.JENKINS_URL }}"
+          jenkins_user: ${{ secrets.JENKINS_USER }}
+          jenkins_token: ${{ secrets.BABYLON_NODE_JENKINS_API_TOKEN }}
+          job_name: "ephemeral-deployments/job/ephemeral-gateway-env-deploy-and-test"
+          job_params: |
+            {
+              "gatewayDockerTag": "${{ needs.publish-docker.outputs.gateway-api-tag }}",
+              "gatewayBranch": "${{ env.GATEWAY_BRANCH }}",
+              "nodeDockerTag": "${{ env.FULLNODE_VERSION }}",
+              "postgresVersion": "${{ env.POSTGRES_VERSION }}"
+            }
+          job_timeout: "3600"
+
+  sonarcloud:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarScanner for .NET
+        uses: highbyte/sonarscan-dotnet@8410b6452e036aff2fb830831e508e723b8af60d
+        with:
+          sonarProjectKey: radixdlt_babylon-gateway
+          sonarProjectName: babylon-gateway
+          sonarOrganization: radixdlt-github
+          dotnetTestArguments: --filter RadixDlt.NetworkGateway.UnitTests --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" -d:sonar.cs.vstest.reportsPaths="**/TestResults/*.trx"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

@@ -302,25 +302,24 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         var cd = new CommandDefinition(
             commandText: @"
-WITH store_history (nfids, total_count) AS (
+WITH most_recent_non_fungible_id_store_history_slice (non_fungible_id_data_ids, total_count) AS (
     SELECT non_fungible_id_data_ids[@offset:@limit], cardinality(non_fungible_id_data_ids)
     FROM non_fungible_id_store_history
-    WHERE non_fungible_resource_manager_entity_id = @entityId AND from_state_version < @stateVersion
+    WHERE from_state_version <= @stateVersion AND non_fungible_resource_manager_entity_id = @entityId
     ORDER BY from_state_version DESC
     LIMIT 1
-),
-non_fungible_data_ids (id) AS (
-    SELECT UNNEST(nfids)
-    FROM store_history
 )
-SELECT nfd.non_fungible_id AS NonFungibleId, store_history.total_count AS TotalCount
-FROM non_fungible_id_data nfd, store_history
-WHERE nfd.id IN(
-    SELECT id FROM non_fungible_data_ids
-)",
+SELECT nfid.non_fungible_id AS NonFungibleId, hs.total_count AS TotalCount
+FROM most_recent_non_fungible_id_store_history_slice hs
+INNER JOIN non_fungible_id_data nfid ON nfid.id = ANY(hs.non_fungible_id_data_ids)
+ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
+",
             parameters: new
             {
-                stateVersion = ledgerState.StateVersion, entityId = entity.Id, offset = request.Offset + 1, limit = request.Offset + request.Limit + 1,
+                stateVersion = ledgerState.StateVersion,
+                entityId = entity.Id,
+                offset = request.Offset + 1,
+                limit = request.Offset + request.Limit + 1,
             },
             cancellationToken: token);
 
@@ -392,8 +391,7 @@ LIMIT 1
             immutableDataHex: data.ImmutableData.ToHex());
     }
 
-    public async Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default)
+    public async Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var fromStateVersion = cursor?.StateVersionBoundary ?? 0;
 
@@ -497,7 +495,10 @@ INNER JOIN LATERAL (
 ) emh ON true;",
             parameters: new
             {
-                entityIds = entityIds, stateVersion = ledgerState.StateVersion, offset = offset + 1, limit = offset + limit,
+                entityIds = entityIds,
+                stateVersion = ledgerState.StateVersion,
+                offset = offset + 1,
+                limit = offset + limit + 1,
             },
             cancellationToken: token);
 
@@ -511,11 +512,11 @@ INNER JOIN LATERAL (
                 ? new GatewayModel.EntityMetadataRequestCursor(Math.Max(offset - limit, 0)).ToCursorString()
                 : null;
 
-            var nextCursor = offset + limit < vm.TotalCount
+            var nextCursor = items.Count > limit
                 ? new GatewayModel.EntityMetadataRequestCursor(offset + limit).ToCursorString()
                 : null;
 
-            result[vm.EntityId] = new GatewayModel.EntityMetadataCollection(vm.TotalCount, previousCursor, nextCursor, items);
+            result[vm.EntityId] = new GatewayModel.EntityMetadataCollection(vm.TotalCount, previousCursor, nextCursor, items.Take(limit).ToList());
         }
 
         foreach (var missing in entityIds.Except(result.Keys))
@@ -569,7 +570,10 @@ GROUP BY ResourceEntityGlobalAddress, TotalCount;
 ",
             parameters: new
             {
-                stateVersion = ledgerState.StateVersion, entityId = entityId, offset = offset + 1, limit = offset + 1 + limit,
+                stateVersion = ledgerState.StateVersion,
+                entityId = entityId,
+                offset = offset + 1,
+                limit = offset + limit + 1,
             },
             cancellationToken: token);
 
@@ -640,7 +644,10 @@ GROUP BY ResourceEntityGlobalAddress, TotalCount;
 ",
             parameters: new
             {
-                stateVersion = ledgerState.StateVersion, entityId = entityId, offset = offset + 1, limit = offset + 1 + limit,
+                stateVersion = ledgerState.StateVersion,
+                entityId = entityId,
+                offset = offset + 1,
+                limit = offset + limit + 1,
             },
             cancellationToken: token);
 
@@ -692,7 +699,7 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = final.non_fungible_id_data_id
                 entityId = entityId,
                 resourceEntityId = resourceEntityId,
                 offset = offset + 1,
-                limit = offset + 1 + limit,
+                limit = offset + limit + 1,
             },
             cancellationToken: token);
 
