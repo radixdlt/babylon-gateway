@@ -108,6 +108,11 @@ jobs:
 
       - name: Setup application version
         run: |
+          pwd 
+          ls -la
+          mkdir -p apps/DataAggregator
+          mkdir -p apps/DatabaseMigrations
+          mkdir -p apps/GatewayApi
           echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/DataAggregator/appsettings.json )" > src/DataAggregator/appsettings.json
           echo "$( jq '.+{DatabaseMigrationsVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/DatabaseMigrations/appsettings.json )" > src/DatabaseMigrations/appsettings.json
           echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/GatewayApi/appsettings.json )" > src/GatewayAPI/appsettings.json
