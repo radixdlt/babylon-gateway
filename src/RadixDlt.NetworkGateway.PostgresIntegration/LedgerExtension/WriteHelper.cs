@@ -100,7 +100,7 @@ internal class WriteHelper
 
         foreach (var e in entities)
         {
-            var discriminator = GetDiscriminator(e.GetType());
+            var discriminator = GetDiscriminator<Abstractions.Model.EntityType>(e.GetType());
 
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
@@ -111,7 +111,7 @@ internal class WriteHelper
             await writer.WriteNullableAsync(e.ParentAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteNullableAsync(e.OwnerAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteNullableAsync(e.GlobalAncestorId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(discriminator, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(discriminator, "entity_type", token);
             await writer.WriteNullableAsync(e is ComponentEntity ce1 ? ce1.PackageId : null, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e is ComponentEntity ce2 ? ce2.BlueprintName : null, NpgsqlDbType.Text, token);
             await writer.WriteNullableAsync(e is FungibleResourceManagerEntity frme ? frme.Divisibility : null, NpgsqlDbType.Integer, token);
@@ -158,14 +158,12 @@ internal class WriteHelper
             return 0;
         }
 
-        var userDiscriminator = GetDiscriminator(typeof(UserLedgerTransaction));
-        var validatorDiscriminator = GetDiscriminator(typeof(ValidatorLedgerTransaction));
-        var systemDiscriminator = GetDiscriminator(typeof(SystemLedgerTransaction));
-
         await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, error_message, transaction_accumulator, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, raw_payload, engine_receipt, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var lt in entities)
         {
+            var discriminator = GetDiscriminator<Abstractions.Model.LedgerTransactionType>(lt.GetType());
+
             await writer.StartRowAsync(token);
             await writer.WriteAsync(lt.StateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.Status, "ledger_transaction_status", token);
@@ -189,19 +187,19 @@ internal class WriteHelper
             switch (lt)
             {
                 case UserLedgerTransaction ult:
-                    await writer.WriteAsync(userDiscriminator, NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(discriminator, "ledger_transaction_type", token);
                     await writer.WriteAsync(ult.PayloadHash, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(ult.IntentHash, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(ult.SignedIntentHash, NpgsqlDbType.Bytea, token);
                     break;
                 case ValidatorLedgerTransaction:
-                    await writer.WriteAsync(validatorDiscriminator, NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(discriminator, "ledger_transaction_type", token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     break;
                 case SystemLedgerTransaction:
-                    await writer.WriteAsync(systemDiscriminator, NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(discriminator, "ledger_transaction_type", token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
@@ -417,9 +415,6 @@ internal class WriteHelper
             return 0;
         }
 
-        var fungibleDiscriminator = GetDiscriminator(typeof(EntityFungibleVaultHistory));
-        var nonFungibleDiscriminator = GetDiscriminator(typeof(EntityNonFungibleVaultHistory));
-
         await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_vault_history (id, from_state_version, owner_entity_id, global_entity_id, vault_entity_id, resource_entity_id, discriminator, balance, is_royalty_vault, non_fungible_ids) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in fungibleEntities)
@@ -431,7 +426,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.GlobalEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(fungibleDiscriminator, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(GetDiscriminator<Abstractions.Model.VaultType>(e.GetType()), "vault_type", token);
             await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
             await writer.WriteAsync(e.IsRoyaltyVault, NpgsqlDbType.Boolean, token);
             await writer.WriteNullAsync(token);
@@ -446,7 +441,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.GlobalEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(nonFungibleDiscriminator, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(GetDiscriminator<Abstractions.Model.VaultType>(e.GetType()), "vault_type", token);
             await writer.WriteNullAsync(token);
             await writer.WriteNullAsync(token);
             await writer.WriteAsync(e.NonFungibleIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
@@ -569,9 +564,9 @@ SELECT
         await _connection.ExecuteAsync(cd);
     }
 
-    private string GetDiscriminator(Type type)
+    private T GetDiscriminator<T>(Type type)
     {
-        if (_model.FindEntityType(type)?.GetDiscriminatorValue() is not string discriminator)
+        if (_model.FindEntityType(type)?.GetDiscriminatorValue() is not T discriminator)
         {
             throw new InvalidOperationException($"Unable to determine discriminator of {type.Name}");
         }

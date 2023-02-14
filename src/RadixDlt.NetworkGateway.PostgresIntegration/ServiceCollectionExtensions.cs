@@ -100,10 +100,13 @@ public static class ServiceCollectionExtensions
 
                 dataSourceBuilder.UseLoggerFactory(sp.GetService<ILoggerFactory>());
                 dataSourceBuilder.MapEnum<AccessRulesChainSubtype>();
+                dataSourceBuilder.MapEnum<EntityType>();
                 dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
+                dataSourceBuilder.MapEnum<LedgerTransactionType>();
                 dataSourceBuilder.MapEnum<NonFungibleIdType>();
                 dataSourceBuilder.MapEnum<PendingTransactionStatus>();
                 dataSourceBuilder.MapEnum<PublicKeyType>();
+                dataSourceBuilder.MapEnum<VaultType>();
 
                 return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
             },

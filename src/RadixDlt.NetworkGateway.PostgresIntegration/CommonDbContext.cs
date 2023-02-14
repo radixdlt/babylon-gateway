@@ -78,6 +78,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 /// </summary>
 internal abstract class CommonDbContext : DbContext
 {
+    private const string DiscriminatorColumnName = "discriminator";
+
     public DbSet<NetworkConfiguration> NetworkConfiguration => Set<NetworkConfiguration>();
 
     public DbSet<LedgerStatus> LedgerStatus => Set<LedgerStatus>();
@@ -120,10 +122,13 @@ internal abstract class CommonDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresEnum<AccessRulesChainSubtype>();
+        modelBuilder.HasPostgresEnum<EntityType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionType>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
         modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();
+        modelBuilder.HasPostgresEnum<VaultType>();
 
         HookupSingleEntries(modelBuilder);
         HookupTransactions(modelBuilder);
@@ -158,10 +163,10 @@ internal abstract class CommonDbContext : DbContext
     private static void HookupTransactions(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<LedgerTransaction>()
-            .HasDiscriminator<string>("discriminator")
-            .HasValue<UserLedgerTransaction>("user")
-            .HasValue<ValidatorLedgerTransaction>("validator")
-            .HasValue<SystemLedgerTransaction>("system");
+            .HasDiscriminator<LedgerTransactionType>(DiscriminatorColumnName)
+            .HasValue<UserLedgerTransaction>(LedgerTransactionType.User)
+            .HasValue<ValidatorLedgerTransaction>(LedgerTransactionType.Validator)
+            .HasValue<SystemLedgerTransaction>(LedgerTransactionType.System);
 
         modelBuilder.Entity<UserLedgerTransaction>()
             .HasIndex(lt => lt.PayloadHash)
@@ -209,20 +214,20 @@ internal abstract class CommonDbContext : DbContext
     private static void HookupEntities(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Entity>()
-            .HasDiscriminator<string>("discriminator")
-            .HasValue<EpochManagerEntity>("epoch_manager")
-            .HasValue<FungibleResourceManagerEntity>("fungible_resource_manager")
-            .HasValue<NonFungibleResourceManagerEntity>("non_fungible_resource_manager")
-            .HasValue<NormalComponentEntity>("normal_component")
-            .HasValue<AccountComponentEntity>("account_component")
-            .HasValue<PackageEntity>("package")
-            .HasValue<KeyValueStoreEntity>("key_value_store")
-            .HasValue<VaultEntity>("vault")
-            .HasValue<NonFungibleStoreEntity>("non_fungible_store")
-            .HasValue<ClockEntity>("clock")
-            .HasValue<ValidatorEntity>("validator")
-            .HasValue<AccessControllerEntity>("access_controller")
-            .HasValue<IdentityEntity>("identity");
+            .HasDiscriminator<EntityType>(DiscriminatorColumnName)
+            .HasValue<EpochManagerEntity>(EntityType.EpochManager)
+            .HasValue<FungibleResourceManagerEntity>(EntityType.FungibleResourceManager)
+            .HasValue<NonFungibleResourceManagerEntity>(EntityType.NonFungibleResourceManager)
+            .HasValue<NormalComponentEntity>(EntityType.NormalComponent)
+            .HasValue<AccountComponentEntity>(EntityType.AccountComponent)
+            .HasValue<PackageEntity>(EntityType.Package)
+            .HasValue<KeyValueStoreEntity>(EntityType.KeyValueStore)
+            .HasValue<VaultEntity>(EntityType.Vault)
+            .HasValue<NonFungibleStoreEntity>(EntityType.NonFungibleStore)
+            .HasValue<ClockEntity>(EntityType.Clock)
+            .HasValue<ValidatorEntity>(EntityType.Validator)
+            .HasValue<AccessControllerEntity>(EntityType.AccessController)
+            .HasValue<IdentityEntity>(EntityType.Identity);
 
         modelBuilder.Entity<Entity>()
             .HasIndex(e => e.Address)
@@ -246,9 +251,9 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityVaultHistory>()
-            .HasDiscriminator<string>("discriminator")
-            .HasValue<EntityFungibleVaultHistory>("fungible")
-            .HasValue<EntityNonFungibleVaultHistory>("non_fungible");
+            .HasDiscriminator<VaultType>(DiscriminatorColumnName)
+            .HasValue<EntityFungibleVaultHistory>(VaultType.Fungible)
+            .HasValue<EntityNonFungibleVaultHistory>(VaultType.NonFungible);
 
         modelBuilder.Entity<EntityVaultHistory>()
             .HasIndex(e => new { e.OwnerEntityId, e.VaultEntityId, e.FromStateVersion });
