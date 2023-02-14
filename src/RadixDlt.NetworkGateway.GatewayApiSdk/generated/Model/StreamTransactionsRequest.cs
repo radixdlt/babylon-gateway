@@ -96,18 +96,84 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     public partial class StreamTransactionsRequest : IEquatable<StreamTransactionsRequest>
     {
         /// <summary>
+        /// Limit returned transactions by their kind. Defaults to &#x60;user&#x60;.
+        /// </summary>
+        /// <value>Limit returned transactions by their kind. Defaults to &#x60;user&#x60;.</value>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum KindFilterEnum
+        {
+            /// <summary>
+            /// Enum User for value: user
+            /// </summary>
+            [EnumMember(Value = "user")]
+            User = 1,
+
+            /// <summary>
+            /// Enum EpochChange for value: epoch_change
+            /// </summary>
+            [EnumMember(Value = "epoch_change")]
+            EpochChange = 2,
+
+            /// <summary>
+            /// Enum All for value: all
+            /// </summary>
+            [EnumMember(Value = "all")]
+            All = 3
+
+        }
+
+
+        /// <summary>
+        /// Limit returned transactions by their kind. Defaults to &#x60;user&#x60;.
+        /// </summary>
+        /// <value>Limit returned transactions by their kind. Defaults to &#x60;user&#x60;.</value>
+        [DataMember(Name = "kind_filter", EmitDefaultValue = true)]
+        public KindFilterEnum? KindFilter { get; set; }
+        /// <summary>
+        /// Configures the order of returned result set. Defaults to &#x60;desc&#x60;.
+        /// </summary>
+        /// <value>Configures the order of returned result set. Defaults to &#x60;desc&#x60;.</value>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum OrderEnum
+        {
+            /// <summary>
+            /// Enum Asc for value: asc
+            /// </summary>
+            [EnumMember(Value = "asc")]
+            Asc = 1,
+
+            /// <summary>
+            /// Enum Desc for value: desc
+            /// </summary>
+            [EnumMember(Value = "desc")]
+            Desc = 2
+
+        }
+
+
+        /// <summary>
+        /// Configures the order of returned result set. Defaults to &#x60;desc&#x60;.
+        /// </summary>
+        /// <value>Configures the order of returned result set. Defaults to &#x60;desc&#x60;.</value>
+        [DataMember(Name = "order", EmitDefaultValue = true)]
+        public OrderEnum? Order { get; set; }
+        /// <summary>
         /// Initializes a new instance of the <see cref="StreamTransactionsRequest" /> class.
         /// </summary>
         /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limitPerPage">The page size requested..</param>
         /// <param name="fromLedgerState">fromLedgerState.</param>
-        public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), LedgerStateSelector fromLedgerState = default(LedgerStateSelector))
+        /// <param name="kindFilter">Limit returned transactions by their kind. Defaults to &#x60;user&#x60;..</param>
+        /// <param name="order">Configures the order of returned result set. Defaults to &#x60;desc&#x60;..</param>
+        public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), KindFilterEnum? kindFilter = default(KindFilterEnum?), OrderEnum? order = default(OrderEnum?))
         {
             this.AtLedgerState = atLedgerState;
             this.Cursor = cursor;
             this.LimitPerPage = limitPerPage;
             this.FromLedgerState = fromLedgerState;
+            this.KindFilter = kindFilter;
+            this.Order = order;
         }
 
         /// <summary>
@@ -148,6 +214,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
             sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
             sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
+            sb.Append("  KindFilter: ").Append(KindFilter).Append("\n");
+            sb.Append("  Order: ").Append(Order).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -202,6 +270,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.FromLedgerState == input.FromLedgerState ||
                     (this.FromLedgerState != null &&
                     this.FromLedgerState.Equals(input.FromLedgerState))
+                ) && 
+                (
+                    this.KindFilter == input.KindFilter ||
+                    this.KindFilter.Equals(input.KindFilter)
+                ) && 
+                (
+                    this.Order == input.Order ||
+                    this.Order.Equals(input.Order)
                 );
         }
 
@@ -230,6 +306,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.KindFilter.GetHashCode();
+                hashCode = (hashCode * 59) + this.Order.GetHashCode();
                 return hashCode;
             }
         }

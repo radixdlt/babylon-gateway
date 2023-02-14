@@ -76,14 +76,20 @@ internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayMod
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
 
-        RuleFor(x => x.FromLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
-
         RuleFor(x => x.Cursor)
             .Base64();
 
         RuleFor(x => x.LimitPerPage)
             .GreaterThan(0)
             .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
+
+        RuleFor(x => x.FromLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
+
+        RuleFor(x => x.KindFilter)
+            .IsInEnum();
+
+        RuleFor(x => x.Order)
+            .IsInEnum();
     }
 }

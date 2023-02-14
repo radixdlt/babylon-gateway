@@ -286,7 +286,6 @@ paths:
       summary: Get Transactions Stream
       description: |
         Returns transactions which have been committed to the ledger.
-        The returned response is in a paginated format, ordered by most recently committed.
       tags:
         - Stream
       requestBody:
@@ -864,8 +863,6 @@ components:
       required:
         - state_version
         - transaction_status
-        - payload_hash_hex
-        - intent_hash_hex
       properties:
         state_version:
           nullable: true
@@ -1175,6 +1172,19 @@ components:
           properties:
             from_ledger_state:
               $ref: "#/components/schemas/LedgerStateSelector"
+            kind_filter:
+              description: Limit returned transactions by their kind. Defaults to `user`.
+              type: string
+              enum:
+                - user
+                - epoch_change
+                - all
+            order:
+              description: Configures the order of returned result set. Defaults to `desc`.
+              type: string
+              enum:
+                - asc
+                - desc
       example:
         limit_per_page: 5
     StreamTransactionsResponse:

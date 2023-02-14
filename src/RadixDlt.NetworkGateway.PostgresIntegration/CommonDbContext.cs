@@ -123,6 +123,7 @@ internal abstract class CommonDbContext : DbContext
     {
         modelBuilder.HasPostgresEnum<AccessRulesChainSubtype>();
         modelBuilder.HasPostgresEnum<EntityType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionKindFilterConstraint>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
@@ -195,6 +196,11 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(lt => new { lt.Epoch, lt.RoundInEpoch })
             .IsUnique()
             .HasFilter("index_in_round = 0");
+
+        // This index lets you quickly filter out transaction stream
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasIndex(lt => new { FilterType = lt.KindFilterConstraint, lt.StateVersion })
+            .HasFilter("kind_filter_constraint IS NOT NULL");
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)

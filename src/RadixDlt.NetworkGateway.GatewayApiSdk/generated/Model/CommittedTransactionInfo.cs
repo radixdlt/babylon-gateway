@@ -111,8 +111,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="stateVersion">stateVersion (required).</param>
         /// <param name="transactionStatus">transactionStatus (required).</param>
-        /// <param name="payloadHashHex">Hex-encoded SHA-256 hash. (required).</param>
-        /// <param name="intentHashHex">Hex-encoded SHA-256 hash. (required).</param>
+        /// <param name="payloadHashHex">Hex-encoded SHA-256 hash..</param>
+        /// <param name="intentHashHex">Hex-encoded SHA-256 hash..</param>
         /// <param name="feePaid">feePaid.</param>
         /// <param name="confirmedAt">confirmedAt.</param>
         /// <param name="errorMessage">errorMessage.</param>
@@ -125,17 +125,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.StateVersion = stateVersion;
             this.TransactionStatus = transactionStatus;
-            // to ensure "payloadHashHex" is required (not null)
-            if (payloadHashHex == null)
-            {
-                throw new ArgumentNullException("payloadHashHex is a required property for CommittedTransactionInfo and cannot be null");
-            }
             this.PayloadHashHex = payloadHashHex;
-            // to ensure "intentHashHex" is required (not null)
-            if (intentHashHex == null)
-            {
-                throw new ArgumentNullException("intentHashHex is a required property for CommittedTransactionInfo and cannot be null");
-            }
             this.IntentHashHex = intentHashHex;
             this.FeePaid = feePaid;
             this.ConfirmedAt = confirmedAt;
@@ -152,14 +142,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Hex-encoded SHA-256 hash.
         /// </summary>
         /// <value>Hex-encoded SHA-256 hash.</value>
-        [DataMember(Name = "payload_hash_hex", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "payload_hash_hex", EmitDefaultValue = true)]
         public string PayloadHashHex { get; set; }
 
         /// <summary>
         /// Hex-encoded SHA-256 hash.
         /// </summary>
         /// <value>Hex-encoded SHA-256 hash.</value>
-        [DataMember(Name = "intent_hash_hex", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "intent_hash_hex", EmitDefaultValue = true)]
         public string IntentHashHex { get; set; }
 
         /// <summary>

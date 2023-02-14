@@ -69,6 +69,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 #nullable disable
 
@@ -83,6 +84,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:access_rules_chain_subtype", "none,resource_manager_vault_access_rules_chain")
                 .Annotation("Npgsql:Enum:entity_type", "epoch_manager,fungible_resource_manager,non_fungible_resource_manager,normal_component,account_component,package,key_value_store,vault,non_fungible_store,clock,validator,access_controller,identity")
+                .Annotation("Npgsql:Enum:ledger_transaction_kind_filter_constraint", "user,epoch_change")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "user,validator,system")
                 .Annotation("Npgsql:Enum:non_fungible_id_type", "string,number,bytes,uuid")
@@ -239,6 +241,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     roundtimestamp = table.Column<DateTime>(name: "round_timestamp", type: "timestamp with time zone", nullable: false),
                     createdtimestamp = table.Column<DateTime>(name: "created_timestamp", type: "timestamp with time zone", nullable: false),
                     normalizedroundtimestamp = table.Column<DateTime>(name: "normalized_round_timestamp", type: "timestamp with time zone", nullable: false),
+                    kindfilterconstraint = table.Column<LedgerTransactionKindFilterConstraint>(name: "kind_filter_constraint", type: "ledger_transaction_kind_filter_constraint", nullable: true),
                     rawpayload = table.Column<byte[]>(name: "raw_payload", type: "bytea", nullable: false),
                     enginereceipt = table.Column<string>(name: "engine_receipt", type: "jsonb", nullable: false),
                     discriminator = table.Column<LedgerTransactionType>(type: "ledger_transaction_type", nullable: false),
@@ -484,6 +487,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 column: "intent_hash",
                 filter: "intent_hash IS NOT NULL")
                 .Annotation("Npgsql:IndexMethod", "hash");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transactions_kind_filter_constraint_state_version",
+                table: "ledger_transactions",
+                columns: new[] { "kind_filter_constraint", "state_version" },
+                filter: "kind_filter_constraint IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_payload_hash",

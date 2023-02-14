@@ -91,23 +91,14 @@ internal class TransactionQuerier : ITransactionQuerier
         _networkConfigurationProvider = networkConfigurationProvider;
     }
 
-    public async Task<TransactionPageWithoutTotal> GetRecentUserTransactions(
-        RecentTransactionPageRequest request,
-        GatewayModel.LedgerState atLedgerState,
-        GatewayModel.LedgerState? fromLedgerState,
-        CancellationToken token = default)
+    public async Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
     {
-        var transactionStateVersionsAndOneMore = await GetRecentUserTransactionStateVersions(request, atLedgerState, fromLedgerState, token);
+        var transactionStateVersionsAndOneMore = await GetTransactionStreamPageStateVersions(request, atLedgerState, token);
+        var transactions = await GetTransactions(transactionStateVersionsAndOneMore.Take(request.PageSize).ToList(), token);
+
         var nextCursor = transactionStateVersionsAndOneMore.Count == request.PageSize + 1
             ? new GatewayModel.LedgerTransactionsCursor(transactionStateVersionsAndOneMore.Last())
             : null;
-
-        var transactions = await GetTransactions(transactionStateVersionsAndOneMore.Take(request.PageSize).ToList(), token);
-
-        if (fromLedgerState != null)
-        {
-            transactions.Reverse();
-        }
 
         return new TransactionPageWithoutTotal(nextCursor, transactions);
     }
@@ -157,47 +148,52 @@ internal class TransactionQuerier : ITransactionQuerier
         return pendingTransactions.Select(pt => new StatusLookupResult(pt.PayloadHash.ToHex(), pt.Status.ToGatewayModel(), pt.FailureReason)).ToArray();
     }
 
-    private async Task<List<long>> GetRecentUserTransactionStateVersions(
-        RecentTransactionPageRequest request,
-        GatewayModel.LedgerState atLedgerState,
-        GatewayModel.LedgerState? fromLedgerState,
-        CancellationToken token)
+    private async Task<List<long>> GetTransactionStreamPageStateVersions(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token)
     {
-        if (fromLedgerState != null)
-        {
-            var bottomStateVersionBoundary = request.Cursor?.StateVersionBoundary ?? fromLedgerState.StateVersion;
-            var topStateVersionBoundary = atLedgerState.StateVersion;
+        var stateVersionBoundary = request.Cursor?.StateVersionBoundary ?? request.FromStateVersion;
 
-            return await _dbContext.LedgerTransactions
-                .Where(lt => lt.StateVersion >= bottomStateVersionBoundary && lt.StateVersion <= topStateVersionBoundary)
-                .OrderBy(at => at.StateVersion)
-                .Take(request.PageSize + 1)
-                .Select(at => at.StateVersion)
-                .ToListAsync(token);
+        var query = _dbContext.LedgerTransactions
+            .Where(lt => lt.StateVersion <= atLedgerState.StateVersion);
+
+        if (request.AscendingOrder)
+        {
+            query = query.Where(lt => lt.StateVersion >= stateVersionBoundary)
+                .OrderBy(lt => lt.StateVersion);
         }
         else
         {
-            var topStateVersionBoundary = request.Cursor?.StateVersionBoundary ?? atLedgerState.StateVersion;
-
-            return await _dbContext.LedgerTransactions
-                .OfType<UserLedgerTransaction>()
-                .Where(ult => ult.StateVersion <= topStateVersionBoundary)
-                .OrderByDescending(ult => ult.StateVersion)
-                .Take(request.PageSize + 1)
-                .Select(ult => ult.StateVersion)
-                .ToListAsync(token);
+            query = query.Where(lt => lt.StateVersion <= stateVersionBoundary)
+                .OrderByDescending(lt => lt.StateVersion);
         }
+
+        if (request.KindFilter == LedgerTransactionKindFilter.UserOnly)
+        {
+            query = query.Where(lt => lt.KindFilterConstraint == LedgerTransactionKindFilterConstraint.User);
+        }
+        else if (request.KindFilter == LedgerTransactionKindFilter.EpochChangeOnly)
+        {
+            query = query.Where(lt => lt.KindFilterConstraint == LedgerTransactionKindFilterConstraint.EpochChange);
+        }
+        else
+        {
+            query = query.Where(lt => lt.KindFilterConstraint != null);
+        }
+
+        return await query.Take(request.PageSize + 1)
+            .Select(at => at.StateVersion)
+            .ToListAsync(token);
     }
 
     private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(List<long> transactionStateVersions, CancellationToken token)
     {
         var transactions = await _dbContext.LedgerTransactions
-            .OfType<UserLedgerTransaction>()
             .Where(ult => transactionStateVersions.Contains(ult.StateVersion))
-            .OrderByDescending(ult => ult.StateVersion)
             .ToListAsync(token);
 
-        return transactions.Select(MapToGatewayAccountTransaction).ToList();
+        return transactions
+            .OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion))
+            .Select(MapToGatewayAccountTransaction)
+            .ToList();
     }
 
     private async Task<DetailsLookupResult> GetTransactionWithDetails(long stateVersion, CancellationToken token)
@@ -222,23 +218,32 @@ internal class TransactionQuerier : ITransactionQuerier
         return MapToGatewayAccountTransactionWithDetails(transaction, referencedEntities);
     }
 
-    private GatewayModel.CommittedTransactionInfo MapToGatewayAccountTransaction(UserLedgerTransaction ult)
+    private GatewayModel.CommittedTransactionInfo MapToGatewayAccountTransaction(LedgerTransaction lt)
     {
-        var status = ult.Status switch
+        var status = lt.Status switch
         {
             LedgerTransactionStatus.Succeeded => GatewayModel.TransactionStatus.CommittedSuccess,
             LedgerTransactionStatus.Failed => GatewayModel.TransactionStatus.CommittedFailure,
             _ => throw new UnreachableException(),
         };
 
+        string? payloadHashHex = null;
+        string? intentHashHex = null;
+
+        if (lt is UserLedgerTransaction ult)
+        {
+            payloadHashHex = ult.PayloadHash.ToHex();
+            intentHashHex = ult.IntentHash.ToHex();
+        }
+
         return new GatewayModel.CommittedTransactionInfo(
-            stateVersion: ult.StateVersion,
+            stateVersion: lt.StateVersion,
             transactionStatus: status,
-            payloadHashHex: ult.PayloadHash.ToHex(),
-            intentHashHex: ult.IntentHash.ToHex(),
-            feePaid: new GatewayModel.TokenAmount(ult.FeePaid.ToString(), _networkConfigurationProvider.GetWellKnownAddresses().Xrd),
-            confirmedAt: ult.RoundTimestamp,
-            errorMessage: ult.ErrorMessage
+            payloadHashHex: payloadHashHex,
+            intentHashHex: intentHashHex,
+            feePaid: new GatewayModel.TokenAmount(lt.FeePaid.ToString(), _networkConfigurationProvider.GetWellKnownAddresses().Xrd),
+            confirmedAt: lt.RoundTimestamp,
+            errorMessage: lt.ErrorMessage
         );
     }
 

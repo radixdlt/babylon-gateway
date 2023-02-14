@@ -62,44 +62,14 @@
  * permissions under this License.
  */
 
-using Dapper;
-using Npgsql;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
-
-internal static class CustomTypes
+/// <summary>
+/// Defines the kind filter applied to some ledger transactions. Used to filter out unwanted transactions from the transaction stream endpoint.
+/// </summary>
+public enum LedgerTransactionKindFilter
 {
-    private static bool _configured;
-
-    public static void EnsureConfigured()
-    {
-        if (_configured)
-        {
-            return;
-        }
-
-        // needed to read int[], bigint[] and text[] columns using Dapper
-        SqlMapper.AddTypeHandler(new GlobalAddressHandler());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<int>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
-
-#pragma warning disable CS0618
-        // needed to support custom enums in postgres
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccessRulesChainSubtype>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionKindFilterConstraint>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PublicKeyType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<VaultType>();
-#pragma warning restore CS0618
-
-        _configured = true;
-    }
+    AllAnnotated,
+    UserOnly,
+    EpochChangeOnly,
 }

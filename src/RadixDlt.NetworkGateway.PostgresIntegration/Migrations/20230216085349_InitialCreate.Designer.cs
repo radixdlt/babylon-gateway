@@ -74,13 +74,14 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 #nullable disable
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230214163934_InitialCreate")]
+    [Migration("20230216085349_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -93,6 +94,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "access_rules_chain_subtype", new[] { "none", "resource_manager_vault_access_rules_chain" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_type", new[] { "epoch_manager", "fungible_resource_manager", "non_fungible_resource_manager", "normal_component", "account_component", "package", "key_value_store", "vault", "non_fungible_store", "clock", "validator", "access_controller", "identity" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_kind_filter_constraint", new[] { "user", "epoch_change" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_type", new[] { "user", "validator", "system" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "non_fungible_id_type", new[] { "string", "number", "bytes", "uuid" });
@@ -444,6 +446,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_end_of_epoch");
 
+                    b.Property<LedgerTransactionKindFilterConstraint?>("KindFilterConstraint")
+                        .HasColumnType("ledger_transaction_kind_filter_constraint")
+                        .HasColumnName("kind_filter_constraint");
+
                     b.Property<byte[]>("Message")
                         .HasColumnType("bytea")
                         .HasColumnName("message");
@@ -494,6 +500,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("Epoch", "RoundInEpoch")
                         .IsUnique()
                         .HasFilter("index_in_round = 0");
+
+                    b.HasIndex("KindFilterConstraint", "StateVersion")
+                        .HasFilter("kind_filter_constraint IS NOT NULL");
 
                     b.ToTable("ledger_transactions");
 

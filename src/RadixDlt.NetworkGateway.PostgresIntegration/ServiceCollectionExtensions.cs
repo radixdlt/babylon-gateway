@@ -69,6 +69,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
@@ -101,6 +102,7 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.UseLoggerFactory(sp.GetService<ILoggerFactory>());
                 dataSourceBuilder.MapEnum<AccessRulesChainSubtype>();
                 dataSourceBuilder.MapEnum<EntityType>();
+                dataSourceBuilder.MapEnum<LedgerTransactionKindFilterConstraint>();
                 dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
                 dataSourceBuilder.MapEnum<LedgerTransactionType>();
                 dataSourceBuilder.MapEnum<NonFungibleIdType>();

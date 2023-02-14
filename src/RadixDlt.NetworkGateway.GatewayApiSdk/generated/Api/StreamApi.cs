@@ -95,7 +95,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Transactions Stream
         /// </summary>
         /// <remarks>
-        /// Returns transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Returns transactions which have been committed to the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="streamTransactionsRequest"></param>
@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Transactions Stream
         /// </summary>
         /// <remarks>
-        /// Returns transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Returns transactions which have been committed to the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="streamTransactionsRequest"></param>
@@ -125,7 +125,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Transactions Stream
         /// </summary>
         /// <remarks>
-        /// Returns transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Returns transactions which have been committed to the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="streamTransactionsRequest"></param>
@@ -137,7 +137,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Transactions Stream
         /// </summary>
         /// <remarks>
-        /// Returns transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Returns transactions which have been committed to the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="streamTransactionsRequest"></param>
@@ -358,7 +358,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Transactions Stream Returns transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Get Transactions Stream Returns transactions which have been committed to the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="streamTransactionsRequest"></param>
@@ -370,7 +370,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Transactions Stream Returns transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Get Transactions Stream Returns transactions which have been committed to the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="streamTransactionsRequest"></param>
@@ -414,7 +414,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Transactions Stream Returns transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Get Transactions Stream Returns transactions which have been committed to the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="streamTransactionsRequest"></param>
@@ -427,7 +427,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Transactions Stream Returns transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Get Transactions Stream Returns transactions which have been committed to the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="streamTransactionsRequest"></param>

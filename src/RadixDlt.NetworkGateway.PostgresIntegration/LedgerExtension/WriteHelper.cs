@@ -158,7 +158,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, error_message, transaction_accumulator, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, raw_payload, engine_receipt, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, error_message, transaction_accumulator, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, kind_filter_constraint, raw_payload, engine_receipt, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var lt in entities)
         {
@@ -181,6 +181,7 @@ internal class WriteHelper
             await writer.WriteAsync(lt.RoundTimestamp, NpgsqlDbType.TimestampTz, token);
             await writer.WriteAsync(lt.CreatedTimestamp, NpgsqlDbType.TimestampTz, token);
             await writer.WriteAsync(lt.NormalizedRoundTimestamp, NpgsqlDbType.TimestampTz, token);
+            await writer.WriteNullableAsync(lt.KindFilterConstraint, "ledger_transaction_kind_filter_constraint", token);
             await writer.WriteAsync(lt.RawPayload, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(lt.EngineReceipt, NpgsqlDbType.Jsonb, token);
 

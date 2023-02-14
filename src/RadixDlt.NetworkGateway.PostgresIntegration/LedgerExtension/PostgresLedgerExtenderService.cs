@@ -269,10 +269,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 long? nextEpoch = null;
                 long? newRoundInEpoch = null;
                 DateTime? newRoundTimestamp = null;
+                LedgerTransactionKindFilterConstraint? kindFilterConstraint = null;
 
                 if (ct.Receipt.NextEpoch != null)
                 {
                     nextEpoch = ct.Receipt.NextEpoch.Epoch;
+                    kindFilterConstraint = LedgerTransactionKindFilterConstraint.EpochChange;
                 }
 
                 if (ct.LedgerTransaction is CoreModel.ValidatorLedgerTransaction vlt)
@@ -289,6 +291,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 if (ct.LedgerTransaction is CoreModel.SystemLedgerTransaction)
                 {
                     // no-op so far
+                }
+
+                if (ct.LedgerTransaction is CoreModel.UserLedgerTransaction)
+                {
+                    kindFilterConstraint = LedgerTransactionKindFilterConstraint.User;
                 }
 
                 foreach (var newSubstate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
@@ -450,6 +457,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
                 ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
                 ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
+                ledgerTransaction.KindFilterConstraint = kindFilterConstraint;
                 ledgerTransaction.RawPayload = ct.LedgerTransaction.GetPayloadBytes();
                 ledgerTransaction.EngineReceipt = ct.Receipt.ToJson();
 

@@ -63,9 +63,12 @@
  */
 
 using Newtonsoft.Json.Linq;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -75,6 +78,8 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 internal class DefaultTransactionHandler : ITransactionHandler
 {
+    private const int DefaultPageLimit = 10; // TODO make it configurable
+
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly ITransactionQuerier _transactionQuerier;
     private readonly IPreviewService _previewService;
@@ -160,14 +165,26 @@ internal class DefaultTransactionHandler : ITransactionHandler
     public async Task<GatewayModel.StreamTransactionsResponse> StreamTransactions(GatewayModel.StreamTransactionsRequest request, CancellationToken token = default)
     {
         var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromLedgerState, token);
+        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromLedgerState, token) ?? atLedgerState;
 
-        var transactionsPageRequest = new RecentTransactionPageRequest(
+        var kindFilter = request.KindFilter switch
+        {
+            GatewayModel.StreamTransactionsRequest.KindFilterEnum.All => LedgerTransactionKindFilter.AllAnnotated,
+            GatewayModel.StreamTransactionsRequest.KindFilterEnum.User => LedgerTransactionKindFilter.UserOnly,
+            GatewayModel.StreamTransactionsRequest.KindFilterEnum.EpochChange => LedgerTransactionKindFilter.EpochChangeOnly,
+            null => LedgerTransactionKindFilter.UserOnly,
+            _ => throw new UnreachableException(),
+        };
+
+        var transactionsPageRequest = new TransactionStreamPageRequest(
+            FromStateVersion: fromLedgerState.StateVersion,
             Cursor: GatewayModel.LedgerTransactionsCursor.FromCursorString(request.Cursor),
-            PageSize: request.LimitPerPage ?? 10
+            PageSize: request.LimitPerPage ?? DefaultPageLimit,
+            AscendingOrder: request.Order == GatewayModel.StreamTransactionsRequest.OrderEnum.Asc,
+            KindFilter: kindFilter
         );
 
-        var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState, token);
+        var results = await _transactionQuerier.GetTransactionStream(transactionsPageRequest, atLedgerState, token);
 
         // NB - We don't return a total here as we don't have an index on user transactions
         return new GatewayModel.StreamTransactionsResponse(

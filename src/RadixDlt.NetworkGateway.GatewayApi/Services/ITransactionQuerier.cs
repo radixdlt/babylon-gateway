@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -71,11 +72,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ITransactionQuerier
 {
-    Task<TransactionPageWithoutTotal> GetRecentUserTransactions(
-        RecentTransactionPageRequest request,
-        GatewayModel.LedgerState atLedgerState,
-        GatewayModel.LedgerState? fromLedgerState,
-        CancellationToken token = default);
+    Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default);
 
     Task<DetailsLookupResult?> LookupCommittedTransaction(GatewayModel.TransactionCommittedDetailsRequestIdentifier identifier, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default);
 
@@ -88,4 +85,4 @@ public sealed record StatusLookupResult(string PayloadHashHex, GatewayModel.Tran
 
 public sealed record TransactionPageWithoutTotal(GatewayModel.LedgerTransactionsCursor? NextPageCursor, List<GatewayModel.CommittedTransactionInfo> Transactions);
 
-public sealed record RecentTransactionPageRequest(GatewayModel.LedgerTransactionsCursor? Cursor, int PageSize);
+public sealed record TransactionStreamPageRequest(long FromStateVersion, GatewayModel.LedgerTransactionsCursor? Cursor, int PageSize, bool AscendingOrder, LedgerTransactionKindFilter KindFilter);
