@@ -700,7 +700,7 @@ components:
           description: This cursor allows forward pagination, by providing the cursor from the previous request.
           type: string
           nullable: true
-        limit:
+        limit_per_page:
           description: The page size requested.
           type: integer
           nullable: true
@@ -1176,7 +1176,7 @@ components:
             from_ledger_state:
               $ref: "#/components/schemas/LedgerStateSelector"
       example:
-        limit: 5
+        limit_per_page: 5
     StreamTransactionsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"

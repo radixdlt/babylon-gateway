@@ -164,7 +164,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
 
         var transactionsPageRequest = new RecentTransactionPageRequest(
             Cursor: GatewayModel.LedgerTransactionsCursor.FromCursorString(request.Cursor),
-            PageSize: request.Limit ?? 10
+            PageSize: request.LimitPerPage ?? 10
         );
 
         var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState, token);

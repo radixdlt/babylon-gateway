@@ -83,7 +83,7 @@ internal class EntityFungiblesRequestValidator : AbstractValidator<GatewayModel.
         RuleFor(x => x.Cursor)
             .Base64();
 
-        RuleFor(x => x.Limit)
+        RuleFor(x => x.LimitPerPage)
             .GreaterThan(0)
             .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
     }
