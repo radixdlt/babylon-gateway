@@ -1,6 +1,8 @@
 ## 0.2.0 - RCNet
 _Release Date: ???_
 
+- `/transaction/recent` endpoint replaced with `/stream/transactions` returning user and non-user transactions.
+
 ### 0.1.1 - Betanet V2
 _Release Date: 14.02.2022_
 

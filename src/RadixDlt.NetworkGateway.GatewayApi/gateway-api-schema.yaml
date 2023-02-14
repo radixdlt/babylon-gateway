@@ -167,31 +167,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/NetworkConfigurationResponse"
 
-  "/transaction/recent":
-    post:
-      operationId: TransactionRecent
-      summary: Get Recent Transactions
-      description: |
-        Returns user-initiated transactions which have been committed to the ledger.
-        The returned response is in a paginated format, ordered by most recently committed.
-      tags:
-        - Stream
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TransactionRecentRequest"
-      responses:
-        "200":
-          description: Recent Transactions (paginated)
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TransactionRecentResponse"
-        "4XX":
-          $ref: "#/components/responses/ErrorResponse"
-
   "/transaction/construction":
     post:
       operationId: TransactionConstruction
@@ -302,6 +277,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TransactionStatusResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+  "/stream/transactions":
+    post:
+      operationId: StreamTransactions
+      summary: Get Transactions Stream
+      description: |
+        Returns transactions which have been committed to the ledger.
+        The returned response is in a paginated format, ordered by most recently committed.
+      tags:
+        - Stream
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StreamTransactionsRequest"
+      responses:
+        "200":
+          description: Transactions (paginated)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StreamTransactionsResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
@@ -1034,37 +1034,6 @@ components:
       allOf:
         - type: object
         - $ref: "#/components/schemas/LedgerStateMixin"
-    TransactionRecentRequest:
-      allOf:
-        - $ref: "#/components/schemas/AtLedgerStateMixin"
-        - type: object
-          properties:
-            from_ledger_state:
-              $ref: "#/components/schemas/LedgerStateSelector"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-            limit:
-              description: The page size requested.
-              type: integer
-              nullable: true
-      example:
-        limit: 5
-    TransactionRecentResponse:
-      allOf:
-        - $ref: "#/components/schemas/LedgerStateMixin"
-        - allOf:
-            - $ref: "#/components/schemas/ResultSetCursorMixin"
-            - type: object
-              required:
-                - items
-              properties:
-                items:
-                  description: The page of user transactions.
-                  type: array
-                  items:
-                    $ref: "#/components/schemas/CommittedTransactionInfo"
 
     TransactionSubmitRequest:
       type: object
@@ -1181,6 +1150,42 @@ components:
             type: string
         message_hex:
           $ref: "#/components/schemas/HexString"
+
+    #
+    # /stream/* Request & Response Types
+    #
+
+    StreamTransactionsRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - type: object
+          properties:
+            from_ledger_state:
+              $ref: "#/components/schemas/LedgerStateSelector"
+            cursor:
+              description: This cursor allows forward pagination, by providing the cursor from the previous request.
+              type: string
+              nullable: true
+            limit:
+              description: The page size requested.
+              type: integer
+              nullable: true
+      example:
+        limit: 5
+    StreamTransactionsResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - allOf:
+            - $ref: "#/components/schemas/ResultSetCursorMixin"
+            - type: object
+              required:
+                - items
+              properties:
+                items:
+                  description: The page of user transactions.
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/CommittedTransactionInfo"
 
     #
     # /entity/* Request & Response Types

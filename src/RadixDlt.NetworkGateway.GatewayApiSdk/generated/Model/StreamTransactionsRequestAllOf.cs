@@ -90,76 +90,43 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionRecentResponse
+    /// StreamTransactionsRequestAllOf
     /// </summary>
-    [DataContract(Name = "TransactionRecentResponse")]
-    public partial class TransactionRecentResponse : IEquatable<TransactionRecentResponse>
+    [DataContract(Name = "StreamTransactionsRequest_allOf")]
+    public partial class StreamTransactionsRequestAllOf : IEquatable<StreamTransactionsRequestAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionRecentResponse" /> class.
+        /// Initializes a new instance of the <see cref="StreamTransactionsRequestAllOf" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected TransactionRecentResponse() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionRecentResponse" /> class.
-        /// </summary>
-        /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
-        /// <param name="previousCursor">If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection..</param>
-        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
-        /// <param name="items">The page of user transactions. (required).</param>
-        public TransactionRecentResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<CommittedTransactionInfo> items = default(List<CommittedTransactionInfo>))
+        /// <param name="fromLedgerState">fromLedgerState.</param>
+        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
+        /// <param name="limit">The page size requested..</param>
+        public StreamTransactionsRequestAllOf(LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limit = default(int?))
         {
-            // to ensure "ledgerState" is required (not null)
-            if (ledgerState == null)
-            {
-                throw new ArgumentNullException("ledgerState is a required property for TransactionRecentResponse and cannot be null");
-            }
-            this.LedgerState = ledgerState;
-            // to ensure "items" is required (not null)
-            if (items == null)
-            {
-                throw new ArgumentNullException("items is a required property for TransactionRecentResponse and cannot be null");
-            }
-            this.Items = items;
-            this.TotalCount = totalCount;
-            this.PreviousCursor = previousCursor;
-            this.NextCursor = nextCursor;
+            this.FromLedgerState = fromLedgerState;
+            this.Cursor = cursor;
+            this.Limit = limit;
         }
 
         /// <summary>
-        /// Gets or Sets LedgerState
+        /// Gets or Sets FromLedgerState
         /// </summary>
-        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
-        public LedgerState LedgerState { get; set; }
+        [DataMember(Name = "from_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector FromLedgerState { get; set; }
 
         /// <summary>
-        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
+        /// This cursor allows forward pagination, by providing the cursor from the previous request.
         /// </summary>
-        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public long? TotalCount { get; set; }
+        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
+        [DataMember(Name = "cursor", EmitDefaultValue = true)]
+        public string Cursor { get; set; }
 
         /// <summary>
-        /// If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.
+        /// The page size requested.
         /// </summary>
-        /// <value>If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
-        public string PreviousCursor { get; set; }
-
-        /// <summary>
-        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
-        /// </summary>
-        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
-
-        /// <summary>
-        /// The page of user transactions.
-        /// </summary>
-        /// <value>The page of user transactions.</value>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<CommittedTransactionInfo> Items { get; set; }
+        /// <value>The page size requested.</value>
+        [DataMember(Name = "limit", EmitDefaultValue = true)]
+        public int? Limit { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -168,12 +135,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionRecentResponse {\n");
-            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class StreamTransactionsRequestAllOf {\n");
+            sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
+            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
+            sb.Append("  Limit: ").Append(Limit).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -194,15 +159,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionRecentResponse);
+            return this.Equals(input as StreamTransactionsRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if TransactionRecentResponse instances are equal
+        /// Returns true if StreamTransactionsRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionRecentResponse to be compared</param>
+        /// <param name="input">Instance of StreamTransactionsRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionRecentResponse input)
+        public bool Equals(StreamTransactionsRequestAllOf input)
         {
             if (input == null)
             {
@@ -210,30 +175,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.LedgerState == input.LedgerState ||
-                    (this.LedgerState != null &&
-                    this.LedgerState.Equals(input.LedgerState))
+                    this.FromLedgerState == input.FromLedgerState ||
+                    (this.FromLedgerState != null &&
+                    this.FromLedgerState.Equals(input.FromLedgerState))
                 ) && 
                 (
-                    this.TotalCount == input.TotalCount ||
-                    (this.TotalCount != null &&
-                    this.TotalCount.Equals(input.TotalCount))
+                    this.Cursor == input.Cursor ||
+                    (this.Cursor != null &&
+                    this.Cursor.Equals(input.Cursor))
                 ) && 
                 (
-                    this.PreviousCursor == input.PreviousCursor ||
-                    (this.PreviousCursor != null &&
-                    this.PreviousCursor.Equals(input.PreviousCursor))
-                ) && 
-                (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
-                ) && 
-                (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.Limit == input.Limit ||
+                    (this.Limit != null &&
+                    this.Limit.Equals(input.Limit))
                 );
         }
 
@@ -246,25 +200,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.LedgerState != null)
+                if (this.FromLedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
                 }
-                if (this.TotalCount != null)
+                if (this.Cursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
                 }
-                if (this.PreviousCursor != null)
+                if (this.Limit != null)
                 {
-                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
-                }
-                if (this.NextCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
-                }
-                if (this.Items != null)
-                {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Limit.GetHashCode();
                 }
                 return hashCode;
             }

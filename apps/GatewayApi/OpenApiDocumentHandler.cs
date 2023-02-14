@@ -154,7 +154,7 @@ public static class OpenApiDocumentHandler
 
         try
         {
-            var sampleTransaction = (await transactionHandler.Recent(new TransactionRecentRequest(limit: 1), token)).Items.FirstOrDefault();
+            var sampleTransaction = (await transactionHandler.StreamTransactions(new StreamTransactionsRequest(limit: 1), token)).Items.FirstOrDefault();
             placeholderReplacements.TransactionPayloadHex = sampleTransaction?.PayloadHashHex;
         }
         catch (Exception)

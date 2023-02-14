@@ -99,26 +99,6 @@ internal class DefaultTransactionHandler : ITransactionHandler
         return new GatewayModel.TransactionConstructionResponse(ledgerState);
     }
 
-    public async Task<GatewayModel.TransactionRecentResponse> Recent(GatewayModel.TransactionRecentRequest request, CancellationToken token = default)
-    {
-        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromLedgerState, token);
-
-        var transactionsPageRequest = new RecentTransactionPageRequest(
-            Cursor: GatewayModel.LedgerTransactionsCursor.FromCursorString(request.Cursor),
-            PageSize: request.Limit ?? 10
-        );
-
-        var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState, token);
-
-        // NB - We don't return a total here as we don't have an index on user transactions
-        return new GatewayModel.TransactionRecentResponse(
-            atLedgerState,
-            nextCursor: results.NextPageCursor?.ToCursorString(),
-            items: results.Transactions
-        );
-    }
-
     public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token = default)
     {
         var identifier = new GatewayModel.TransactionCommittedDetailsRequestIdentifier(GatewayModel.TransactionCommittedDetailsRequestIdentifierType.IntentHash, request.IntentHashHex);
@@ -175,5 +155,25 @@ internal class DefaultTransactionHandler : ITransactionHandler
     public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
         return await _submissionService.HandleSubmitRequest(request, token);
+    }
+
+    public async Task<GatewayModel.StreamTransactionsResponse> StreamTransactions(GatewayModel.StreamTransactionsRequest request, CancellationToken token = default)
+    {
+        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromLedgerState, token);
+
+        var transactionsPageRequest = new RecentTransactionPageRequest(
+            Cursor: GatewayModel.LedgerTransactionsCursor.FromCursorString(request.Cursor),
+            PageSize: request.Limit ?? 10
+        );
+
+        var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState, token);
+
+        // NB - We don't return a total here as we don't have an index on user transactions
+        return new GatewayModel.StreamTransactionsResponse(
+            atLedgerState,
+            nextCursor: results.NextPageCursor?.ToCursorString(),
+            items: results.Transactions
+        );
     }
 }

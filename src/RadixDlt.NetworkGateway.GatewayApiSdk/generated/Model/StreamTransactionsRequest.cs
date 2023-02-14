@@ -90,19 +90,19 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionRecentRequest
+    /// StreamTransactionsRequest
     /// </summary>
-    [DataContract(Name = "TransactionRecentRequest")]
-    public partial class TransactionRecentRequest : IEquatable<TransactionRecentRequest>
+    [DataContract(Name = "StreamTransactionsRequest")]
+    public partial class StreamTransactionsRequest : IEquatable<StreamTransactionsRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionRecentRequest" /> class.
+        /// Initializes a new instance of the <see cref="StreamTransactionsRequest" /> class.
         /// </summary>
         /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="fromLedgerState">fromLedgerState.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limit">The page size requested..</param>
-        public TransactionRecentRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limit = default(int?))
+        public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limit = default(int?))
         {
             this.AtLedgerState = atLedgerState;
             this.FromLedgerState = fromLedgerState;
@@ -143,7 +143,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionRecentRequest {\n");
+            sb.Append("class StreamTransactionsRequest {\n");
             sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
@@ -168,15 +168,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionRecentRequest);
+            return this.Equals(input as StreamTransactionsRequest);
         }
 
         /// <summary>
-        /// Returns true if TransactionRecentRequest instances are equal
+        /// Returns true if StreamTransactionsRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionRecentRequest to be compared</param>
+        /// <param name="input">Instance of StreamTransactionsRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionRecentRequest input)
+        public bool Equals(StreamTransactionsRequest input)
         {
             if (input == null)
             {

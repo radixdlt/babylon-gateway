@@ -531,7 +531,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<NetworkConfigurationResponse>("/gateway/network-configuration", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<NetworkConfigurationResponse>("/status/network-configuration", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -584,7 +584,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<NetworkConfigurationResponse>("/gateway/network-configuration", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<NetworkConfigurationResponse>("/status/network-configuration", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {

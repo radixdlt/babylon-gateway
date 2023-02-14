@@ -73,8 +73,6 @@ public interface ITransactionHandler
 {
     Task<GatewayModel.TransactionConstructionResponse> Construction(CancellationToken token = default);
 
-    Task<GatewayModel.TransactionRecentResponse> Recent(GatewayModel.TransactionRecentRequest request, CancellationToken token = default);
-
     Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token = default);
 
     Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token = default);
@@ -82,4 +80,6 @@ public interface ITransactionHandler
     Task<object> Preview(JToken request, CancellationToken token = default);
 
     Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default);
+
+    Task<GatewayModel.StreamTransactionsResponse> StreamTransactions(GatewayModel.StreamTransactionsRequest request, CancellationToken token = default);
 }

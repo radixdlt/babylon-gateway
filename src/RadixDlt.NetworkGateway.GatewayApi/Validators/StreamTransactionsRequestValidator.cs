@@ -62,56 +62,28 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
-using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using System.Threading;
-using System.Threading.Tasks;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace GatewayApi.Controllers;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-[ApiController]
-[Route("transaction")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
-public sealed class TransactionController : ControllerBase
+internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayModel.StreamTransactionsRequest>
 {
-    private readonly ITransactionHandler _transactionHandler;
-
-    public TransactionController(ITransactionHandler transactionHandler)
+    public StreamTransactionsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
-        _transactionHandler = transactionHandler;
-    }
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
 
-    [HttpPost("construction")]
-    public async Task<GatewayModel.TransactionConstructionResponse> Construction(CancellationToken token)
-    {
-        return await _transactionHandler.Construction(token);
-    }
+        RuleFor(x => x.FromLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
 
-    [HttpPost("status")]
-    public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.Status(request, token);
-    }
+        RuleFor(x => x.Cursor)
+            .Base64();
 
-    [HttpPost("committed-details")]
-    public async Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.CommittedDetails(request, token);
-    }
-
-    [HttpPost("preview")]
-    public async Task<object> Preview(JToken request, CancellationToken token)
-    {
-        return await _transactionHandler.Preview(request, token);
-    }
-
-    [HttpPost("submit")]
-    public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.Submit(request, token);
+        RuleFor(x => x.Limit)
+            .GreaterThan(0)
+            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
     }
 }
