@@ -286,9 +286,19 @@ SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_manager_entity_i
 
         return await _dbContext.ValidatorKeyHistory
             .FromSqlInterpolated(@$"
-SELECT * FROM validator_public_key_history WHERE (validator_entity_id, key_type, key) IN (
+WITH variables (validator_entity_id, key_type, key) AS (
     SELECT UNNEST({validatorEntityIds}), UNNEST({validatorKeyTypes}), UNNEST({validatorKeys})
-)")
+)
+SELECT vpkh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM validator_public_key_history
+    WHERE validator_entity_id = variables.validator_entity_id AND key_type = variables.key_type AND key = variables.key
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) vpkh ON true;
+")
             .AsNoTracking()
             .ToDictionaryAsync(e => new ValidatorKeyLookup(e.ValidatorEntityId, e.KeyType, e.Key), token);
     }
