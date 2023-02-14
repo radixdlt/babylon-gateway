@@ -385,13 +385,11 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
             "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms [EntitiesTouched={DbEntriesWritten}]",
             ledgerExtension.CommittedTransactions.Count,
             totalCommitMs,
-            commitReport.DbEntriesWritten
+            commitReport.DbEntriesTouched
         );
 
         _logger.LogInformation(
-            "[TimeSplitsInMs: RawTxns={RawTxnPersistenceMs},Mempool={MempoolTransactionUpdateMs},TxnContentHandling={TxnContentHandlingMs},DbDependencyLoading={DbDependenciesLoadingMs},DbPersistence={DbPersistanceMs}]",
-            commitReport.RawTxnPersistenceMs,
-            commitReport.PendingTransactionsUpdateMs,
+            "[TimeSplitsInMs: TxnContentHandling={TxnContentHandlingMs},DbDependencyLoading={DbDependenciesLoadingMs},DbPersistence={DbPersistanceMs}]",
             commitReport.ContentHandlingMs,
             commitReport.DbDependenciesLoadingMs,
             commitReport.DbPersistenceMs

@@ -210,9 +210,6 @@ internal class TransactionQuerier : ITransactionQuerier
             .OrderByDescending(lt => lt.StateVersion)
             .FirstAsync(token);
 
-        var rawTransaction = await _dbContext.RawUserTransactions
-            .FirstAsync(rt => rt.StateVersion == transaction.StateVersion, token);
-
         List<Entity> referencedEntities = new List<Entity>();
 
         if (transaction.ReferencedEntities.Any())
@@ -222,7 +219,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 .ToListAsync(token);
         }
 
-        return MapToGatewayAccountTransactionWithDetails(transaction, rawTransaction, referencedEntities);
+        return MapToGatewayAccountTransactionWithDetails(transaction, referencedEntities);
     }
 
     private GatewayModel.CommittedTransactionInfo MapToGatewayAccountTransaction(UserLedgerTransaction ult)
@@ -245,11 +242,11 @@ internal class TransactionQuerier : ITransactionQuerier
         );
     }
 
-    private DetailsLookupResult MapToGatewayAccountTransactionWithDetails(UserLedgerTransaction ult, RawUserTransaction rawUserTransaction, List<Entity> referencedEntities)
+    private DetailsLookupResult MapToGatewayAccountTransactionWithDetails(UserLedgerTransaction ult, List<Entity> referencedEntities)
     {
         return new DetailsLookupResult(MapToGatewayAccountTransaction(ult), new GatewayModel.TransactionCommittedDetailsResponseDetails(
-            rawHex: rawUserTransaction.Payload.ToHex(),
-            receipt: new JRaw(rawUserTransaction.Receipt),
+            rawHex: ult.RawPayload.ToHex(),
+            receipt: new JRaw(ult.EngineReceipt),
             referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.GlobalAddress.ToString()).ToList(),
             messageHex: ult.Message?.ToHex()
         ));

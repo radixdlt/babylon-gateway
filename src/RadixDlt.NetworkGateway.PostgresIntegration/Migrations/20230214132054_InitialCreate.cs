@@ -236,6 +236,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     roundtimestamp = table.Column<DateTime>(name: "round_timestamp", type: "timestamp with time zone", nullable: false),
                     createdtimestamp = table.Column<DateTime>(name: "created_timestamp", type: "timestamp with time zone", nullable: false),
                     normalizedroundtimestamp = table.Column<DateTime>(name: "normalized_round_timestamp", type: "timestamp with time zone", nullable: false),
+                    rawpayload = table.Column<byte[]>(name: "raw_payload", type: "bytea", nullable: false),
+                    enginereceipt = table.Column<string>(name: "engine_receipt", type: "jsonb", nullable: false),
                     discriminator = table.Column<string>(type: "text", nullable: false),
                     payloadhash = table.Column<byte[]>(name: "payload_hash", type: "bytea", nullable: true),
                     intenthash = table.Column<byte[]>(name: "intent_hash", type: "bytea", nullable: true),
@@ -337,20 +339,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_pending_transactions", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "raw_user_transactions",
-                columns: table => new
-                {
-                    stateversion = table.Column<long>(name: "state_version", type: "bigint", nullable: false),
-                    payloadhash = table.Column<byte[]>(name: "payload_hash", type: "bytea", nullable: false),
-                    payload = table.Column<byte[]>(type: "bytea", nullable: false),
-                    receipt = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_raw_user_transactions", x => x.stateversion);
                 });
 
             migrationBuilder.CreateTable(
@@ -622,9 +610,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "pending_transactions");
-
-            migrationBuilder.DropTable(
-                name: "raw_user_transactions");
 
             migrationBuilder.DropTable(
                 name: "resource_manager_entity_supply_history");

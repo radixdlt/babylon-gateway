@@ -212,9 +212,9 @@ internal class PendingTransaction
         LastDroppedOutOfMempoolTimestamp = timestamp;
     }
 
-    public void MarkAsCommitted(bool succeeded, DateTime timestamp)
+    public void MarkAsCommitted(PendingTransactionStatus status, DateTime timestamp)
     {
-        Status = succeeded ? PendingTransactionStatus.CommittedSuccess : PendingTransactionStatus.CommittedFailure;
+        Status = status;
         CommitTimestamp = timestamp;
         FailureReason = null;
         FailureTimestamp = null;

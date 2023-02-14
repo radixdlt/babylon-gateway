@@ -140,6 +140,15 @@ internal abstract class LedgerTransaction
     /// </summary>
     [Column("normalized_round_timestamp")]
     public DateTime NormalizedRoundTimestamp { get; set; }
+
+    /// <summary>
+    /// The raw payload of the transaction.
+    /// </summary>
+    [Column("raw_payload")]
+    public byte[] RawPayload { get; set; }
+
+    [Column("engine_receipt", TypeName = "jsonb")]
+    public string EngineReceipt { get; set; }
 }
 
 internal class UserLedgerTransaction : LedgerTransaction

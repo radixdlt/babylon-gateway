@@ -102,10 +102,8 @@ public sealed record ConsistentLedgerExtension(
 public sealed record CommitTransactionsReport(
     int TransactionsCommittedCount,
     TransactionSummary FinalTransaction,
-    long RawTxnPersistenceMs,
-    long PendingTransactionsUpdateMs,
     long ContentHandlingMs,
     long DbDependenciesLoadingMs,
     long DbPersistenceMs,
-    int DbEntriesWritten
+    int DbEntriesTouched
 );

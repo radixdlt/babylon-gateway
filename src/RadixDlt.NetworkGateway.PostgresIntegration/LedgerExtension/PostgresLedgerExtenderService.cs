@@ -69,7 +69,6 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -85,6 +84,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal class PostgresLedgerExtenderService : ILedgerExtenderService
 {
+    private record ExtendLedgerReport(TransactionSummary FinalTransaction, int RowsTouched, TimeSpan DbReadDuration, TimeSpan DbWriteDuration, TimeSpan ContentHandlingDuration);
+
     private readonly ILogger<PostgresLedgerExtenderService> _logger;
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
@@ -140,25 +141,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var extendLedgerReport = await ProcessTransactions(dbContext, ledgerExtension, token);
 
             await CreateOrUpdateLedgerStatus(dbContext, extendLedgerReport.FinalTransaction, latestSyncTarget.TargetStateVersion, token);
-
-            await dbContext.SaveChangesAsync(token);
             await tx.CommitAsync(token);
-
-            var dbEntriesWritten =
-                extendLedgerReport.PreparationReport.RawTxnUpsertTouchedRecords
-                + extendLedgerReport.PreparationReport.PendingTransactionsTouchedRecords
-                + extendLedgerReport.PreparationReport.PreparationEntriesTouched
-                + extendLedgerReport.RowsInserted;
 
             return new CommitTransactionsReport(
                 ledgerExtension.CommittedTransactions.Count,
                 extendLedgerReport.FinalTransaction,
-                extendLedgerReport.PreparationReport.RawTxnPersistenceMs,
-                extendLedgerReport.PreparationReport.PendingTransactionUpdateMs,
                 (long)extendLedgerReport.ContentHandlingDuration.TotalMilliseconds,
                 (long)extendLedgerReport.DbReadDuration.TotalMilliseconds,
                 (long)extendLedgerReport.DbWriteDuration.TotalMilliseconds,
-                dbEntriesWritten
+                extendLedgerReport.RowsTouched
             );
         }
         catch (Exception)
@@ -169,25 +160,68 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         }
     }
 
-    private record PreparationReport(
-        long RawTxnPersistenceMs,
-        int RawTxnUpsertTouchedRecords,
-        long PendingTransactionUpdateMs,
-        int PendingTransactionsTouchedRecords,
-        int PreparationEntriesTouched
-    );
+    private async Task<int> UpdatePendingTransactions(ReadWriteDbContext dbContext, List<CoreModel.CommittedTransaction> committedTransactions, CancellationToken token)
+    {
+        var userTransactionStatusByPayloadHash = new Dictionary<ValueBytes, PendingTransactionStatus>(committedTransactions.Count);
 
-    private record ExtendLedgerReport(
-        TransactionSummary FinalTransaction,
-        PreparationReport PreparationReport,
-        int RowsInserted,
-        TimeSpan DbReadDuration,
-        TimeSpan DbWriteDuration,
-        TimeSpan ContentHandlingDuration);
+        foreach (var ct in committedTransactions.Where(ct => ct.LedgerTransaction is CoreModel.UserLedgerTransaction))
+        {
+            var nt = ((CoreModel.UserLedgerTransaction)ct.LedgerTransaction).NotarizedTransaction;
+
+            userTransactionStatusByPayloadHash[nt.GetHashBytes()] = ct.Receipt.Status switch
+            {
+                CoreModel.TransactionStatus.Succeeded => PendingTransactionStatus.CommittedSuccess,
+                CoreModel.TransactionStatus.Failed => PendingTransactionStatus.CommittedFailure,
+                _ => throw new UnreachableException(),
+            };
+        }
+
+        var payloadHashes = userTransactionStatusByPayloadHash.Keys.Select(x => (byte[])x).ToList();
+
+        var toUpdate = await dbContext.PendingTransactions
+            .Where(pt => pt.Status != PendingTransactionStatus.CommittedSuccess && pt.Status != PendingTransactionStatus.CommittedFailure)
+            .Where(pt => payloadHashes.Contains(pt.PayloadHash))
+            .ToListAsync(token);
+
+        if (toUpdate.Count == 0)
+        {
+            return 0;
+        }
+
+        foreach (var pendingTransaction in toUpdate)
+        {
+            if (pendingTransaction.Status is PendingTransactionStatus.RejectedPermanently or PendingTransactionStatus.RejectedTemporarily)
+            {
+                await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedWhichWasFailed());
+
+                _logger.LogError(
+                    "Transaction with payload hash {PayloadHash} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark {FailureTransiency} at {FailureTime} due to \"{FailureReason}\" but has now been marked committed",
+                    pendingTransaction.PayloadHash.ToHex(),
+                    pendingTransaction.FirstSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                    pendingTransaction.LastSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                    pendingTransaction.LastDroppedOutOfMempoolTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                    pendingTransaction.Status,
+                    pendingTransaction.FailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                    pendingTransaction.FailureReason
+                );
+            }
+
+            pendingTransaction.MarkAsCommitted(userTransactionStatusByPayloadHash[pendingTransaction.PayloadHash], _clock.UtcNow);
+        }
+
+        // If this errors (due to changes to the MempoolTransaction.Status ConcurrencyToken), we may have to consider
+        // something like: https://docs.microsoft.com/en-us/ef/core/saving/concurrency
+        var result = await dbContext.SaveChangesAsync(token);
+
+        await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedCount(toUpdate.Count));
+
+        return result;
+    }
 
     private async Task<ExtendLedgerReport> ProcessTransactions(ReadWriteDbContext dbContext, ConsistentLedgerExtension ledgerExtension, CancellationToken token)
     {
         var rowsInserted = 0;
+        var rowsUpdated = 0;
         var dbReadDuration = TimeSpan.Zero;
         var dbWriteDuration = TimeSpan.Zero;
         var outerStopwatch = Stopwatch.StartNew();
@@ -202,104 +236,25 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var ledgerTransactionsToAdd = new List<LedgerTransaction>();
         var entitiesToAdd = new List<Entity>();
 
-        PreparationReport preparationReport;
         SequencesHolder sequences;
 
-        // step: preparation (previously RawTransactionWriter logic)
+        // fetch the next id of each and every different entity type we manually insert to the database
+        // later on we also manually update their values
         {
-            var rawUserTransactionStatusByPayloadHash = new Dictionary<ValueBytes, CoreModel.TransactionStatus>();
-            var rawUserTransactionByPayloadHash = new Dictionary<ValueBytes, RawUserTransaction>();
+            var sw = Stopwatch.StartNew();
 
-            foreach (var ct in ledgerExtension.CommittedTransactions.Where(ct => ct.LedgerTransaction is CoreModel.UserLedgerTransaction))
-            {
-                var nt = ((CoreModel.UserLedgerTransaction)ct.LedgerTransaction).NotarizedTransaction;
+            sequences = await readHelper.LoadSequences(token);
 
-                rawUserTransactionStatusByPayloadHash[nt.GetHashBytes()] = ct.Receipt.Status;
-                rawUserTransactionByPayloadHash[nt.GetHashBytes()] = new RawUserTransaction
-                {
-                    StateVersion = ct.StateVersion, PayloadHash = nt.GetHashBytes(), Payload = nt.GetPayloadBytes(), Receipt = ct.Receipt.ToJson(),
-                };
-            }
-
-            var rawUserTransactionsToAdd = rawUserTransactionByPayloadHash.Values.ToList();
-
-            var (rawTransactionsTouched, rawTransactionCommitMs) = await CodeStopwatch.TimeInMs(async () =>
-            {
-                rowsInserted += await writeHelper.CopyRawUserTransaction(rawUserTransactionsToAdd, token);
-
-                return rawUserTransactionsToAdd.Count;
-            });
-
-            var (pendingTransactionsTouched, pendingTransactionUpdateMs) = await CodeStopwatch.TimeInMs(async () =>
-            {
-                var transactionPayloadHashList = rawUserTransactionByPayloadHash.Keys.Select(x => (byte[])x).ToList(); // List<> are optimised for PostgreSQL lookups
-
-                var toUpdate = await dbContext.PendingTransactions
-                    .Where(pt => pt.Status != PendingTransactionStatus.CommittedSuccess && pt.Status != PendingTransactionStatus.CommittedFailure)
-                    .Where(pt => transactionPayloadHashList.Contains(pt.PayloadHash))
-                    .ToListAsync(token);
-
-                if (toUpdate.Count == 0)
-                {
-                    return 0;
-                }
-
-                foreach (var pendingTransaction in toUpdate)
-                {
-                    if (pendingTransaction.Status is PendingTransactionStatus.RejectedPermanently or PendingTransactionStatus.RejectedTemporarily)
-                    {
-                        await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedWhichWasFailed());
-
-                        _logger.LogError(
-                            "Transaction with payload hash {PayloadHash} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark {FailureTransiency} at {FailureTime} due to \"{FailureReason}\" but has now been marked committed",
-                            pendingTransaction.PayloadHash.ToHex(),
-                            pendingTransaction.FirstSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                            pendingTransaction.LastSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                            pendingTransaction.LastDroppedOutOfMempoolTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                            pendingTransaction.Status,
-                            pendingTransaction.FailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                            pendingTransaction.FailureReason
-                        );
-                    }
-
-                    switch (rawUserTransactionStatusByPayloadHash[pendingTransaction.PayloadHash])
-                    {
-                        case CoreModel.TransactionStatus.Succeeded:
-                            pendingTransaction.MarkAsCommitted(true, _clock.UtcNow);
-                            break;
-                        case CoreModel.TransactionStatus.Failed:
-                            pendingTransaction.MarkAsCommitted(false, _clock.UtcNow);
-                            break;
-                        default:
-                            throw new UnreachableException();
-                    }
-                }
-
-                // If this errors (due to changes to the MempoolTransaction.Status ConcurrencyToken), we may have to consider
-                // something like: https://docs.microsoft.com/en-us/ef/core/saving/concurrency
-                var result = await dbContext.SaveChangesAsync(token);
-
-                await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedCount(toUpdate.Count));
-
-                return result;
-            });
-
-            var preparationEntriesTouched = await dbContext.SaveChangesAsync(token);
-
-            preparationReport = new PreparationReport(
-                rawTransactionCommitMs,
-                rawTransactionsTouched,
-                pendingTransactionUpdateMs,
-                pendingTransactionsTouched,
-                preparationEntriesTouched
-            );
+            dbReadDuration += sw.Elapsed;
         }
 
-        // step: load current sequences
+        // update the status of all the pending transactions that might have been commited with this ledger extension
         {
-            (sequences, var sequencesInitializeDuration) = await CodeStopwatch.Time(() => readHelper.LoadSequences(token));
+            var sw = Stopwatch.StartNew();
 
-            dbReadDuration += sequencesInitializeDuration;
+            rowsUpdated += await UpdatePendingTransactions(dbContext, ledgerExtension.CommittedTransactions, token);
+
+            dbWriteDuration += sw.Elapsed;
         }
 
         // step: scan for any referenced entities
@@ -476,7 +431,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     },
                     CoreModel.ValidatorLedgerTransaction => new ValidatorLedgerTransaction(),
                     CoreModel.SystemLedgerTransaction => new SystemLedgerTransaction(),
-                    _ => throw new ArgumentOutOfRangeException(nameof(ct.LedgerTransaction), ct.LedgerTransaction, null),
+                    _ => throw new UnreachableException(),
                 };
 
                 ledgerTransaction.StateVersion = ct.StateVersion;
@@ -495,6 +450,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
                 ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
                 ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
+                ledgerTransaction.RawPayload = ct.LedgerTransaction.GetPayloadBytes();
+                ledgerTransaction.EngineReceipt = ct.Receipt.ToJson();
 
                 ledgerTransactionsToAdd.Add(ledgerTransaction);
 
@@ -1069,7 +1026,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         var contentHandlingDuration = outerStopwatch.Elapsed - dbReadDuration - dbWriteDuration;
 
-        return new ExtendLedgerReport(lastTransactionSummary, preparationReport, rowsInserted, dbReadDuration, dbWriteDuration, contentHandlingDuration);
+        return new ExtendLedgerReport(lastTransactionSummary, rowsInserted + rowsUpdated, dbReadDuration, dbWriteDuration, contentHandlingDuration);
     }
 
     private async Task EnsureDbLedgerIsInitialized(CancellationToken token)
@@ -1098,6 +1055,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         ledgerStatus.LastUpdated = _clock.UtcNow;
         ledgerStatus.TopOfLedgerStateVersion = finalTransaction.StateVersion;
         ledgerStatus.TargetStateVersion = latestSyncTarget;
+
+        await dbContext.SaveChangesAsync(token);
     }
 
     private async Task<TransactionSummary> GetTopOfLedger(ReadWriteDbContext dbContext, CancellationToken token)

@@ -410,6 +410,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_timestamp");
 
+                    b.Property<string>("EngineReceipt")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("engine_receipt");
+
                     b.Property<long>("Epoch")
                         .HasColumnType("bigint")
                         .HasColumnName("epoch");
@@ -442,6 +447,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<DateTime>("NormalizedRoundTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("normalized_round_timestamp");
+
+                    b.Property<byte[]>("RawPayload")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("raw_payload");
 
                     b.Property<List<long>>("ReferencedEntities")
                         .IsRequired()
@@ -721,32 +731,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("Status");
 
                     b.ToTable("pending_transactions");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.RawUserTransaction", b =>
-                {
-                    b.Property<long>("StateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("state_version");
-
-                    b.Property<byte[]>("Payload")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("payload");
-
-                    b.Property<byte[]>("PayloadHash")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("payload_hash");
-
-                    b.Property<string>("Receipt")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("receipt");
-
-                    b.HasKey("StateVersion");
-
-                    b.ToTable("raw_user_transactions");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ResourceManagerEntitySupplyHistory", b =>

@@ -89,29 +89,6 @@ internal class WriteHelper
         _model = dbContext.Model;
     }
 
-    public async Task<int> CopyRawUserTransaction(ICollection<RawUserTransaction> entities, CancellationToken token)
-    {
-        if (!entities.Any())
-        {
-            return 0;
-        }
-
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY raw_user_transactions (state_version, payload_hash, payload, receipt) FROM STDIN (FORMAT BINARY)", token);
-
-        foreach (var e in entities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.StateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.PayloadHash, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.Payload, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.Receipt, NpgsqlDbType.Text, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        return entities.Count;
-    }
-
     public async Task<int> CopyEntity(ICollection<Entity> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -185,7 +162,7 @@ internal class WriteHelper
         var validatorDiscriminator = GetDiscriminator(typeof(ValidatorLedgerTransaction));
         var systemDiscriminator = GetDiscriminator(typeof(SystemLedgerTransaction));
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, error_message, transaction_accumulator, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, error_message, transaction_accumulator, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, raw_payload, engine_receipt, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var lt in entities)
         {
@@ -206,6 +183,8 @@ internal class WriteHelper
             await writer.WriteAsync(lt.RoundTimestamp, NpgsqlDbType.TimestampTz, token);
             await writer.WriteAsync(lt.CreatedTimestamp, NpgsqlDbType.TimestampTz, token);
             await writer.WriteAsync(lt.NormalizedRoundTimestamp, NpgsqlDbType.TimestampTz, token);
+            await writer.WriteAsync(lt.RawPayload, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(lt.EngineReceipt, NpgsqlDbType.Jsonb, token);
 
             switch (lt)
             {
