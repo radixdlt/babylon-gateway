@@ -693,6 +693,18 @@ components:
           type: integer
           format: int64
 
+    CursorLimitMixin:
+      type: object
+      properties:
+        cursor:
+          description: This cursor allows forward pagination, by providing the cursor from the previous request.
+          type: string
+          nullable: true
+        limit:
+          description: The page size requested.
+          type: integer
+          nullable: true
+
     #
     # Common Response Types
     #
@@ -1158,18 +1170,11 @@ components:
     StreamTransactionsRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           properties:
             from_ledger_state:
               $ref: "#/components/schemas/LedgerStateSelector"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-            limit:
-              description: The page size requested.
-              type: integer
-              nullable: true
       example:
         limit: 5
     StreamTransactionsResponse:
@@ -1375,20 +1380,13 @@ components:
     EntityMetadataRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
             - address
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-            limit:
-              description: The page size requested.
-              type: integer
-              nullable: true
       example:
         address: "<entity-address>"
     EntityMetadataResponse:
@@ -1407,20 +1405,13 @@ components:
     EntityFungiblesRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
             - address
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-            limit:
-              description: The page size requested.
-              type: integer
-              nullable: true
       example:
         address: "<component-entity-address>"
     EntityFungiblesResponse:
@@ -1439,20 +1430,13 @@ components:
     EntityNonFungiblesRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
             - address
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-            limit:
-              description: The page size requested.
-              type: integer
-              nullable: true
       example:
         address: "<component-entity-address>"
     EntityNonFungiblesResponse:
@@ -1471,6 +1455,7 @@ components:
     EntityNonFungibleIdsRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
             - address
@@ -1479,14 +1464,6 @@ components:
               $ref: "#/components/schemas/EntityAddress"
             resource_address:
               $ref: "#/components/schemas/ResourceAddress"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-            limit:
-              description: The page size requested.
-              type: integer
-              nullable: true
       example:
         address: "<component-entity-address>"
         resource_address: "<non-fungible-resource-entity-address>"
@@ -1509,20 +1486,13 @@ components:
     NonFungibleIdsRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
             - address
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-            limit:
-              description: The page size requested.
-              type: integer
-              nullable: true
       example:
         address: "<non-fungible-entity-address>"
     NonFungibleIdsResponse:
@@ -1541,6 +1511,7 @@ components:
     NonFungibleDataRequest: # TODO rename to NonFungibleIdDataRequest
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
             - address
@@ -1550,14 +1521,6 @@ components:
               $ref: "#/components/schemas/EntityAddress"
             non_fungible_id:
               $ref: "#/components/schemas/NonFungibleId"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-            limit:
-              description: The page size requested.
-              type: integer
-              nullable: true
       example:
         address: "<non-fungible-entity-address>"
         non_fungible_id: "0a0100000000"

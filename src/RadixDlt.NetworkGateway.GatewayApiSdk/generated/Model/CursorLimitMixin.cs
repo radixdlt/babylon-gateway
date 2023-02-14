@@ -90,40 +90,21 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityMetadataRequestAllOf
+    /// CursorLimitMixin
     /// </summary>
-    [DataContract(Name = "EntityMetadataRequest_allOf")]
-    public partial class EntityMetadataRequestAllOf : IEquatable<EntityMetadataRequestAllOf>
+    [DataContract(Name = "CursorLimitMixin")]
+    public partial class CursorLimitMixin : IEquatable<CursorLimitMixin>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataRequestAllOf" /> class.
+        /// Initializes a new instance of the <see cref="CursorLimitMixin" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected EntityMetadataRequestAllOf() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataRequestAllOf" /> class.
-        /// </summary>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limit">The page size requested..</param>
-        public EntityMetadataRequestAllOf(string address = default(string), string cursor = default(string), int? limit = default(int?))
+        public CursorLimitMixin(string cursor = default(string), int? limit = default(int?))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
-            {
-                throw new ArgumentNullException("address is a required property for EntityMetadataRequestAllOf and cannot be null");
-            }
-            this.Address = address;
             this.Cursor = cursor;
             this.Limit = limit;
         }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
 
         /// <summary>
         /// This cursor allows forward pagination, by providing the cursor from the previous request.
@@ -146,8 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityMetadataRequestAllOf {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("class CursorLimitMixin {\n");
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
             sb.Append("  Limit: ").Append(Limit).Append("\n");
             sb.Append("}\n");
@@ -170,26 +150,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityMetadataRequestAllOf);
+            return this.Equals(input as CursorLimitMixin);
         }
 
         /// <summary>
-        /// Returns true if EntityMetadataRequestAllOf instances are equal
+        /// Returns true if CursorLimitMixin instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityMetadataRequestAllOf to be compared</param>
+        /// <param name="input">Instance of CursorLimitMixin to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityMetadataRequestAllOf input)
+        public bool Equals(CursorLimitMixin input)
         {
             if (input == null)
             {
                 return false;
             }
             return 
-                (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
-                ) && 
                 (
                     this.Cursor == input.Cursor ||
                     (this.Cursor != null &&
@@ -211,10 +186,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
-                {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
-                }
                 if (this.Cursor != null)
                 {
                     hashCode = (hashCode * 59) + this.Cursor.GetHashCode();

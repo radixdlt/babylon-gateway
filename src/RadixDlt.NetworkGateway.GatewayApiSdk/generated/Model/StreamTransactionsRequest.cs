@@ -99,15 +99,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StreamTransactionsRequest" /> class.
         /// </summary>
         /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="fromLedgerState">fromLedgerState.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limit">The page size requested..</param>
-        public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limit = default(int?))
+        /// <param name="fromLedgerState">fromLedgerState.</param>
+        public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limit = default(int?), LedgerStateSelector fromLedgerState = default(LedgerStateSelector))
         {
             this.AtLedgerState = atLedgerState;
-            this.FromLedgerState = fromLedgerState;
             this.Cursor = cursor;
             this.Limit = limit;
+            this.FromLedgerState = fromLedgerState;
         }
 
         /// <summary>
@@ -115,12 +115,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
         public LedgerStateSelector AtLedgerState { get; set; }
-
-        /// <summary>
-        /// Gets or Sets FromLedgerState
-        /// </summary>
-        [DataMember(Name = "from_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector FromLedgerState { get; set; }
 
         /// <summary>
         /// This cursor allows forward pagination, by providing the cursor from the previous request.
@@ -137,6 +131,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public int? Limit { get; set; }
 
         /// <summary>
+        /// Gets or Sets FromLedgerState
+        /// </summary>
+        [DataMember(Name = "from_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector FromLedgerState { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -145,9 +145,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StreamTransactionsRequest {\n");
             sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
             sb.Append("  Limit: ").Append(Limit).Append("\n");
+            sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -189,11 +189,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.AtLedgerState.Equals(input.AtLedgerState))
                 ) && 
                 (
-                    this.FromLedgerState == input.FromLedgerState ||
-                    (this.FromLedgerState != null &&
-                    this.FromLedgerState.Equals(input.FromLedgerState))
-                ) && 
-                (
                     this.Cursor == input.Cursor ||
                     (this.Cursor != null &&
                     this.Cursor.Equals(input.Cursor))
@@ -202,6 +197,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Limit == input.Limit ||
                     (this.Limit != null &&
                     this.Limit.Equals(input.Limit))
+                ) && 
+                (
+                    this.FromLedgerState == input.FromLedgerState ||
+                    (this.FromLedgerState != null &&
+                    this.FromLedgerState.Equals(input.FromLedgerState))
                 );
         }
 
@@ -218,10 +218,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
                 }
-                if (this.FromLedgerState != null)
-                {
-                    hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
-                }
                 if (this.Cursor != null)
                 {
                     hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
@@ -229,6 +225,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Limit != null)
                 {
                     hashCode = (hashCode * 59) + this.Limit.GetHashCode();
+                }
+                if (this.FromLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
                 }
                 return hashCode;
             }

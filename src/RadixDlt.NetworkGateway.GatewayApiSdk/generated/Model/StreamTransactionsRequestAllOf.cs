@@ -99,13 +99,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StreamTransactionsRequestAllOf" /> class.
         /// </summary>
         /// <param name="fromLedgerState">fromLedgerState.</param>
-        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
-        /// <param name="limit">The page size requested..</param>
-        public StreamTransactionsRequestAllOf(LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limit = default(int?))
+        public StreamTransactionsRequestAllOf(LedgerStateSelector fromLedgerState = default(LedgerStateSelector))
         {
             this.FromLedgerState = fromLedgerState;
-            this.Cursor = cursor;
-            this.Limit = limit;
         }
 
         /// <summary>
@@ -113,20 +109,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "from_ledger_state", EmitDefaultValue = true)]
         public LedgerStateSelector FromLedgerState { get; set; }
-
-        /// <summary>
-        /// This cursor allows forward pagination, by providing the cursor from the previous request.
-        /// </summary>
-        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
-        [DataMember(Name = "cursor", EmitDefaultValue = true)]
-        public string Cursor { get; set; }
-
-        /// <summary>
-        /// The page size requested.
-        /// </summary>
-        /// <value>The page size requested.</value>
-        [DataMember(Name = "limit", EmitDefaultValue = true)]
-        public int? Limit { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,8 +119,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StreamTransactionsRequestAllOf {\n");
             sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
-            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
-            sb.Append("  Limit: ").Append(Limit).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -178,16 +158,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.FromLedgerState == input.FromLedgerState ||
                     (this.FromLedgerState != null &&
                     this.FromLedgerState.Equals(input.FromLedgerState))
-                ) && 
-                (
-                    this.Cursor == input.Cursor ||
-                    (this.Cursor != null &&
-                    this.Cursor.Equals(input.Cursor))
-                ) && 
-                (
-                    this.Limit == input.Limit ||
-                    (this.Limit != null &&
-                    this.Limit.Equals(input.Limit))
                 );
         }
 
@@ -203,14 +173,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.FromLedgerState != null)
                 {
                     hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
-                }
-                if (this.Cursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
-                }
-                if (this.Limit != null)
-                {
-                    hashCode = (hashCode * 59) + this.Limit.GetHashCode();
                 }
                 return hashCode;
             }
