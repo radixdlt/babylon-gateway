@@ -54,36 +54,6 @@ jobs:
           github_event_name: ${{ github.event_name }}
           github_action_name: ${{ github.event.action}}
 
-      - name: Docker build and push DataAggregator AMD
-        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
-        with:
-          file: ./apps/DataAggregator/Dockerfile
-          tags: |
-            ${{ steps.setup_tags.outputs.data_aggregator_tags }}
-          push: true
-          platforms: linux/amd64
-          context: ./
-      
-      - name: Docker build and push Gateway API AMD
-        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
-        with:
-          file: ./apps/GatewayApi/Dockerfile
-          tags: |
-            ${{ steps.setup_tags.outputs.gateway_api_tags }}
-          push: true
-          platforms: linux/amd64
-          context: ./
-
-      - name: Docker build and push Database Migrations AMD
-        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
-        with:
-          file: ./apps/DatabaseMigrations/Dockerfile
-          tags: |
-            ${{ steps.setup_tags.outputs.database_migrations_tags }}
-          push: true
-          platforms: linux/amd64
-          context: ./
-
       - name: Docker build and push DataAggregator ARM
         uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
         with:
@@ -112,4 +82,34 @@ jobs:
             ${{ steps.setup_tags.outputs.gateway_api_tags }}
           push: true
           platforms: linux/arm64
+          context: ./
+
+      - name: Docker build and push DataAggregator AMD
+        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
+        with:
+          file: ./apps/DataAggregator/Dockerfile
+          tags: |
+            ${{ steps.setup_tags.outputs.data_aggregator_tags }}
+          push: true
+          platforms: linux/amd64
+          context: ./
+      
+      - name: Docker build and push Gateway API AMD
+        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
+        with:
+          file: ./apps/GatewayApi/Dockerfile
+          tags: |
+            ${{ steps.setup_tags.outputs.gateway_api_tags }}
+          push: true
+          platforms: linux/amd64
+          context: ./
+
+      - name: Docker build and push Database Migrations AMD
+        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
+        with:
+          file: ./apps/DatabaseMigrations/Dockerfile
+          tags: |
+            ${{ steps.setup_tags.outputs.database_migrations_tags }}
+          push: true
+          platforms: linux/amd64
           context: ./
