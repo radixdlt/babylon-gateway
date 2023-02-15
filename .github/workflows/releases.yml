@@ -57,6 +57,7 @@ jobs:
           tags: |
             ${{ steps.setup_tags.outputs.data_aggregator_tags }}
           push: true
+          platforms: linux/amd64,linux/arm64
           context: ./
 
       - name: Docker build and push Gateway API
@@ -66,6 +67,7 @@ jobs:
           tags: |
             ${{ steps.setup_tags.outputs.gateway_api_tags }}
           push: true
+          platforms: linux/amd64,linux/arm64
           context: ./
 
       - name: Docker build and push Database Migrations
@@ -75,4 +77,5 @@ jobs:
           tags: |
             ${{ steps.setup_tags.outputs.database_migrations_tags }}
           push: true
+          platforms: linux/amd64,linux/arm64
           context: ./
