@@ -3,62 +3,6 @@ on:
   release:
     types: [published]
 jobs:
-  build:
-    runs-on: ubuntu-22.04
-    environment: release
-    steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a
-        with:
-          dotnet-version: 7.0.x
-      - name: Get release
-        id: get_release
-        uses: bruceadams/get-release@f589ce0779c7bef1faf175f7488c972eb47dc046
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-      - name: Build linux binaries
-        run: |
-          cd apps/DataAggregator
-          dotnet publish --runtime linux-x64 --configuration Release --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false --output ./output
-          cd ../DatabaseMigrations
-          dotnet publish --runtime linux-x64 --configuration Release --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false --output ./output
-          cd ../GatewayApi
-          dotnet publish --runtime linux-x64 --configuration Release --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false --output ./output
-          cd ../..
-          zip -r data-aggregator.zip apps/DataAggregator/output/
-          zip -r database-migrations.zip apps/DatabaseMigrations/output/
-          zip -r gateway-api.zip apps/GatewayApi/output/
-
-      - name: Upload DataAggreagtor zip
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.get_release.outputs.upload_url }}
-          asset_path: ./data-aggregator.zip
-          asset_name: data-aggregator-${{ github.event.release.tag_name }}-linux-x64.zip
-          asset_content_type: application/zip
-      - name: Upload GatewayAPI zip
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.get_release.outputs.upload_url }}
-          asset_path: ./gateway-api.zip
-          asset_name: gateway-api-${{ github.event.release.tag_name }}-linux-x64.zip
-          asset_content_type: application/zip
-      - name: Upload DatabseMigrations zip
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.get_release.outputs.upload_url }}
-          asset_path: ./database-migrations.zip
-          asset_name: database-migrations-${{ github.event.release.tag_name }}-linux-x64.zip
-          asset_content_type: application/zip
-
-
   publish-docker:
     runs-on: ubuntu-22.04
     environment: release
@@ -99,6 +43,10 @@ jobs:
           username: ${{env.DOCKERHUB_USERNAME}}
           password: ${{env.DOCKERHUB_TOKEN}}
 
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@8c0edbc76e98fa90f69d9a2c020dcb50019dc325
+
       - name: Setup tags for docker image
         id: setup_tags
         uses: ./.github/actions/set-variables
@@ -106,44 +54,32 @@ jobs:
           github_event_name: ${{ github.event_name }}
           github_action_name: ${{ github.event.action}}
 
-      - name: Setup application version
-        run: |
-          echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/DataAggregator/appsettings.json )" > src/DataAggregator/appsettings.json
-          echo "$( jq '.+{DatabaseMigrationsVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/DatabaseMigrations/appsettings.json )" > src/DatabaseMigrations/appsettings.json
-          echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/GatewayApi/appsettings.json )" > src/GatewayAPI/appsettings.json
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8c0edbc76e98fa90f69d9a2c020dcb50019dc325
-
-      - name: Docker build and push DataAggregator
+      - name: Docker build and push DataAggregator AMD
         uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
         with:
           file: ./apps/DataAggregator/Dockerfile
           tags: |
             ${{ steps.setup_tags.outputs.data_aggregator_tags }}
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           context: ./
-
-      - name: Docker build and push Gateway API
+      
+      - name: Docker build and push Gateway API AMD
         uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
         with:
           file: ./apps/GatewayApi/Dockerfile
           tags: |
             ${{ steps.setup_tags.outputs.gateway_api_tags }}
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           context: ./
 
-      - name: Docker build and push Database Migrations
+      - name: Docker build and push Database Migrations AMD
         uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
         with:
           file: ./apps/DatabaseMigrations/Dockerfile
           tags: |
             ${{ steps.setup_tags.outputs.database_migrations_tags }}
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           context: ./
