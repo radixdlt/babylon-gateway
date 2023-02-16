@@ -1,0 +1,15 @@
+FROM mcr.microsoft.com/dotnet/sdk:7.0
+
+WORKDIR /sln
+ENV BUILDING_IN_DOCKER=1
+
+COPY ./babylon-gateway.sln ./Directory.Build.props ./Directory.Packages.props ./.editorconfig ./stylecop.json ./
+
+COPY ./apps/*/*.csproj ./
+RUN for file in $(ls *.csproj); do mkdir -p apps/${file%.*}/ && mv $file apps/${file%.*}/; done
+COPY ./src/*/*.csproj ./
+RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
+COPY ./tests/*/*.csproj ./
+RUN for file in $(ls *.csproj); do mkdir -p tests/${file%.*}/ && mv $file tests/${file%.*}/; done
+
+RUN dotnet restore ./babylon-gateway.sln

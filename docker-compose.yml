@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  babylon_gateway_restore:
+    image: babylon_gateway:restore
+    build:
+      dockerfile: Dockerfile.restore
+      context: .
+      cache_from:
+        - babylon_gateway:restore
+
+  babylon_gateway_build:
+    image: babylon_gateway:build
+    build:
+      dockerfile: Dockerfile
+      context: .
+      cache_from:
+        - babylon_gateway:restore
+        - babylon_gateway:build
+    depends_on:
+      - babylon_gateway_restore
+
+  babylon_gateway_runtime:
+    image: babylon_gateway:runtime
+    build:
+      dockerfile: Dockerfile.runtime
+      context: .
+      cache_from:
+        - babylon_gateway:runtime
+
+  babylon_gateway_database_migrations:
+    image: babylon_gateway_database_migrations
+    build:
+      dockerfile: apps/DatabaseMigrations/Dockerfile
+      context: .
+    depends_on:
+      - babylon_gateway_build
+      - babylon_gateway_runtime
+
+  babylon_gateway_data_aggregator:
+    image: babylon_gateway_data_aggregator
+    build:
+      dockerfile: apps/DataAggregator/Dockerfile
+      context: .
+    depends_on:
+      - babylon_gateway_build
+      - babylon_gateway_runtime
+
+  babylon_gateway_api:
+    image: babylon_gateway_api
+    build:
+      dockerfile: apps/GatewayApi/Dockerfile
+      context: .
+    depends_on:
+      - babylon_gateway_build
+      - babylon_gateway_runtime

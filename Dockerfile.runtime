@@ -1,0 +1,7 @@
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
+WORKDIR /app
+ENV COMPlus_ThreadPool_ForceMinWorkerThreads=4
+ENV COMPlus_gcServer=1
+ENV COMPlus_gcConcurrent=1
+ENV COMPlus_EnableDiagnostics=0
+STOPSIGNAL SIGINT
