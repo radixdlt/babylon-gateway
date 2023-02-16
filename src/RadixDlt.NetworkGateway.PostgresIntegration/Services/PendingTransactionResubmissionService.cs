@@ -229,7 +229,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
                 transaction.MarkAsRejected(
                     true,
-                    "The transaction keeps dropping out of the mempool, so we're not resubmitting it",
+                    $"The transaction keeps dropping out of the mempool, so we're not resubmitting it. Initial failure reason: {transaction.FailureReason}",
                     submittedAt
                 );
             }
