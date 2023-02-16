@@ -339,13 +339,29 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         {
             await _observers.ForEachAsync(x => x.ResubmitFailedPermanently(notarizedTransaction, ex));
 
-            return new SubmissionResult(transaction, true, ex.Error.Message, chosenNode.Name);
+            string? failureReason = ex.Error.Message;
+
+            // TODO NG-289: to be replaced with proper error handling.
+            if (ex.Error is CoreModel.TransactionSubmitErrorResponse { Details: CoreModel.TransactionSubmitRejectedErrorDetails transactionSubmitRejectedErrorDetails })
+            {
+                failureReason = $"{ex.Error.Message}: {transactionSubmitRejectedErrorDetails.ErrorMessage}";
+            }
+
+            return new SubmissionResult(transaction, true, failureReason, chosenNode.Name);
         }
         catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Transient)
         {
             await _observers.ForEachAsync(x => x.ResubmitFailedTemporary(notarizedTransaction, ex));
 
-            return new SubmissionResult(transaction, false, ex.Error.Message, chosenNode.Name);
+            string? failureReason = ex.Error.Message;
+
+            // TODO NG-289: to be replaced with proper error handling.
+            if (ex.Error is CoreModel.TransactionSubmitErrorResponse { Details: CoreModel.TransactionSubmitRejectedErrorDetails transactionSubmitRejectedErrorDetails })
+            {
+                failureReason = $"{ex.Error.Message}: {transactionSubmitRejectedErrorDetails.ErrorMessage}";
+            }
+
+            return new SubmissionResult(transaction, false, failureReason, chosenNode.Name);
         }
         catch (OperationCanceledException ex)
         {

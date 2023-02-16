@@ -231,10 +231,18 @@ internal class SubmissionService : ISubmissionService
             // Any other known Core exception which can't result in the transaction being submitted
             await _observers.ForEachAsync(x => x.HandleSubmissionFailedPermanently(request, ex));
 
+            string? failureReason = ex.Error.Message;
+
+            // TODO NG-289: to be replaced with proper error handling.
+            if (ex.Error is CoreModel.TransactionSubmitErrorResponse { Details: CoreModel.TransactionSubmitRejectedErrorDetails transactionSubmitRejectedErrorDetails })
+            {
+                failureReason = $"{ex.Error.Message}: {transactionSubmitRejectedErrorDetails.ErrorMessage}";
+            }
+
             await _submissionTrackingService.MarkAsFailed(
                 true,
                 parsedTransaction.GetHashBytes(),
-                ex.Error.Message,
+                failureReason,
                 token
             );
 
@@ -245,10 +253,18 @@ internal class SubmissionService : ISubmissionService
             // Any other known Core exception which can't result in the transaction being submitted
             await _observers.ForEachAsync(x => x.HandleSubmissionFailedTemporary(request, ex));
 
+            string? failureReason = ex.Error.Message;
+
+            // TODO NG-289: to be replaced with proper error handling.
+            if (ex.Error is CoreModel.TransactionSubmitErrorResponse { Details: CoreModel.TransactionSubmitRejectedErrorDetails transactionSubmitRejectedErrorDetails })
+            {
+                failureReason = $"{ex.Error.Message}: {transactionSubmitRejectedErrorDetails.ErrorMessage}";
+            }
+
             await _submissionTrackingService.MarkAsFailed(
                 false,
                 parsedTransaction.GetHashBytes(),
-                ex.Error.Message,
+                failureReason,
                 token
             );
         }
