@@ -63,9 +63,11 @@
  */
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
@@ -89,6 +91,7 @@ internal class SubmissionService : ISubmissionService
     private readonly ISubmissionTrackingService _submissionTrackingService;
     private readonly IClock _clock;
     private readonly IEnumerable<ISubmissionServiceObserver> _observers;
+    private readonly IOptionsMonitor<EndpointOptions> _endpointOptionsMonitor;
     private readonly ILogger _logger;
 
     public SubmissionService(
@@ -96,13 +99,15 @@ internal class SubmissionService : ISubmissionService
         ISubmissionTrackingService submissionTrackingService,
         IClock clock,
         IEnumerable<ISubmissionServiceObserver> observers,
-        ILogger<SubmissionService> logger)
+        ILogger<SubmissionService> logger,
+        IOptionsMonitor<EndpointOptions> endpointOptionsMonitor)
     {
         _coreApiHandler = coreApiHandler;
         _submissionTrackingService = submissionTrackingService;
         _clock = clock;
         _observers = observers;
         _logger = logger;
+        _endpointOptionsMonitor = endpointOptionsMonitor;
     }
 
     public async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
@@ -187,7 +192,7 @@ internal class SubmissionService : ISubmissionService
         ToolkitModel.Transaction.NotarizedTransaction parsedTransaction,
         CancellationToken token)
     {
-        using var timeoutTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3)); // TODO configurable
+        using var timeoutTokenSource = new CancellationTokenSource(_endpointOptionsMonitor.CurrentValue.SubmitTransactionTimeout);
         using var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutTokenSource.Token, token);
 
         try

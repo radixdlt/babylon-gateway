@@ -76,6 +76,9 @@ public sealed class EndpointOptions
 
     [ConfigurationKeyName("RequestTimeout")]
     public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(10);
+
+    [ConfigurationKeyName("SubmitTransactionTimeout")]
+    public TimeSpan SubmitTransactionTimeout { get; set; } = TimeSpan.FromSeconds(3);
 }
 
 internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptions>
@@ -84,5 +87,6 @@ internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptio
     {
         RuleFor(x => x.MaxPageSize).GreaterThan(0);
         RuleFor(x => x.RequestTimeout).GreaterThan(TimeSpan.Zero);
+        RuleFor(x => x.SubmitTransactionTimeout).GreaterThan(TimeSpan.Zero);
     }
 }
