@@ -92,26 +92,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
-        /// Get Recent Transactions
+        /// Get Transactions Stream
         /// </summary>
         /// <remarks>
-        /// Returns user-initiated transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Returns transactions which have been committed to the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionRecentRequest"></param>
-        /// <returns>TransactionRecentResponse</returns>
-        TransactionRecentResponse TransactionRecent(TransactionRecentRequest transactionRecentRequest);
+        /// <param name="streamTransactionsRequest"></param>
+        /// <returns>StreamTransactionsResponse</returns>
+        StreamTransactionsResponse StreamTransactions(StreamTransactionsRequest streamTransactionsRequest);
 
         /// <summary>
-        /// Get Recent Transactions
+        /// Get Transactions Stream
         /// </summary>
         /// <remarks>
-        /// Returns user-initiated transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Returns transactions which have been committed to the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionRecentRequest"></param>
-        /// <returns>ApiResponse of TransactionRecentResponse</returns>
-        ApiResponse<TransactionRecentResponse> TransactionRecentWithHttpInfo(TransactionRecentRequest transactionRecentRequest);
+        /// <param name="streamTransactionsRequest"></param>
+        /// <returns>ApiResponse of StreamTransactionsResponse</returns>
+        ApiResponse<StreamTransactionsResponse> StreamTransactionsWithHttpInfo(StreamTransactionsRequest streamTransactionsRequest);
         #endregion Synchronous Operations
     }
 
@@ -122,28 +122,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Asynchronous Operations
         /// <summary>
-        /// Get Recent Transactions
+        /// Get Transactions Stream
         /// </summary>
         /// <remarks>
-        /// Returns user-initiated transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Returns transactions which have been committed to the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionRecentRequest"></param>
+        /// <param name="streamTransactionsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionRecentResponse</returns>
-        System.Threading.Tasks.Task<TransactionRecentResponse> TransactionRecentAsync(TransactionRecentRequest transactionRecentRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of StreamTransactionsResponse</returns>
+        System.Threading.Tasks.Task<StreamTransactionsResponse> StreamTransactionsAsync(StreamTransactionsRequest streamTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Get Recent Transactions
+        /// Get Transactions Stream
         /// </summary>
         /// <remarks>
-        /// Returns user-initiated transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Returns transactions which have been committed to the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionRecentRequest"></param>
+        /// <param name="streamTransactionsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionRecentResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<TransactionRecentResponse>> TransactionRecentWithHttpInfoAsync(TransactionRecentRequest transactionRecentRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (StreamTransactionsResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StreamTransactionsResponse>> StreamTransactionsWithHttpInfoAsync(StreamTransactionsRequest streamTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -358,28 +358,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Recent Transactions Returns user-initiated transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Get Transactions Stream Returns transactions which have been committed to the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionRecentRequest"></param>
-        /// <returns>TransactionRecentResponse</returns>
-        public TransactionRecentResponse TransactionRecent(TransactionRecentRequest transactionRecentRequest)
+        /// <param name="streamTransactionsRequest"></param>
+        /// <returns>StreamTransactionsResponse</returns>
+        public StreamTransactionsResponse StreamTransactions(StreamTransactionsRequest streamTransactionsRequest)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionRecentResponse> localVarResponse = TransactionRecentWithHttpInfo(transactionRecentRequest);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StreamTransactionsResponse> localVarResponse = StreamTransactionsWithHttpInfo(streamTransactionsRequest);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Recent Transactions Returns user-initiated transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Get Transactions Stream Returns transactions which have been committed to the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionRecentRequest"></param>
-        /// <returns>ApiResponse of TransactionRecentResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionRecentResponse> TransactionRecentWithHttpInfo(TransactionRecentRequest transactionRecentRequest)
+        /// <param name="streamTransactionsRequest"></param>
+        /// <returns>ApiResponse of StreamTransactionsResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StreamTransactionsResponse> StreamTransactionsWithHttpInfo(StreamTransactionsRequest streamTransactionsRequest)
         {
-            // verify the required parameter 'transactionRecentRequest' is set
-            if (transactionRecentRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionRecentRequest' when calling StreamApi->TransactionRecent");
+            // verify the required parameter 'streamTransactionsRequest' is set
+            if (streamTransactionsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'streamTransactionsRequest' when calling StreamApi->StreamTransactions");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -398,15 +398,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = transactionRecentRequest;
+            localVarRequestOptions.Data = streamTransactionsRequest;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<TransactionRecentResponse>("/transaction/recent", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<StreamTransactionsResponse>("/stream/transactions", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("TransactionRecent", localVarResponse);
+                Exception _exception = this.ExceptionFactory("StreamTransactions", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -414,30 +414,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Recent Transactions Returns user-initiated transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Get Transactions Stream Returns transactions which have been committed to the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionRecentRequest"></param>
+        /// <param name="streamTransactionsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionRecentResponse</returns>
-        public async System.Threading.Tasks.Task<TransactionRecentResponse> TransactionRecentAsync(TransactionRecentRequest transactionRecentRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of StreamTransactionsResponse</returns>
+        public async System.Threading.Tasks.Task<StreamTransactionsResponse> StreamTransactionsAsync(StreamTransactionsRequest streamTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionRecentResponse> localVarResponse = await TransactionRecentWithHttpInfoAsync(transactionRecentRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StreamTransactionsResponse> localVarResponse = await StreamTransactionsWithHttpInfoAsync(streamTransactionsRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Recent Transactions Returns user-initiated transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
+        /// Get Transactions Stream Returns transactions which have been committed to the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionRecentRequest"></param>
+        /// <param name="streamTransactionsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionRecentResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionRecentResponse>> TransactionRecentWithHttpInfoAsync(TransactionRecentRequest transactionRecentRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (StreamTransactionsResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StreamTransactionsResponse>> StreamTransactionsWithHttpInfoAsync(StreamTransactionsRequest streamTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'transactionRecentRequest' is set
-            if (transactionRecentRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionRecentRequest' when calling StreamApi->TransactionRecent");
+            // verify the required parameter 'streamTransactionsRequest' is set
+            if (streamTransactionsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'streamTransactionsRequest' when calling StreamApi->StreamTransactions");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -458,16 +458,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = transactionRecentRequest;
+            localVarRequestOptions.Data = streamTransactionsRequest;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionRecentResponse>("/transaction/recent", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StreamTransactionsResponse>("/stream/transactions", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("TransactionRecent", localVarResponse);
+                Exception _exception = this.ExceptionFactory("StreamTransactions", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

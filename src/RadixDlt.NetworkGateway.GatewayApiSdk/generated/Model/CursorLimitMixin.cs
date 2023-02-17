@@ -90,37 +90,21 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionRecentRequest
+    /// CursorLimitMixin
     /// </summary>
-    [DataContract(Name = "TransactionRecentRequest")]
-    public partial class TransactionRecentRequest : IEquatable<TransactionRecentRequest>
+    [DataContract(Name = "CursorLimitMixin")]
+    public partial class CursorLimitMixin : IEquatable<CursorLimitMixin>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionRecentRequest" /> class.
+        /// Initializes a new instance of the <see cref="CursorLimitMixin" /> class.
         /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="fromLedgerState">fromLedgerState.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
-        /// <param name="limit">The page size requested..</param>
-        public TransactionRecentRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limit = default(int?))
+        /// <param name="limitPerPage">The page size requested..</param>
+        public CursorLimitMixin(string cursor = default(string), int? limitPerPage = default(int?))
         {
-            this.AtLedgerState = atLedgerState;
-            this.FromLedgerState = fromLedgerState;
             this.Cursor = cursor;
-            this.Limit = limit;
+            this.LimitPerPage = limitPerPage;
         }
-
-        /// <summary>
-        /// Gets or Sets AtLedgerState
-        /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
-
-        /// <summary>
-        /// Gets or Sets FromLedgerState
-        /// </summary>
-        [DataMember(Name = "from_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector FromLedgerState { get; set; }
 
         /// <summary>
         /// This cursor allows forward pagination, by providing the cursor from the previous request.
@@ -133,8 +117,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// The page size requested.
         /// </summary>
         /// <value>The page size requested.</value>
-        [DataMember(Name = "limit", EmitDefaultValue = true)]
-        public int? Limit { get; set; }
+        [DataMember(Name = "limit_per_page", EmitDefaultValue = true)]
+        public int? LimitPerPage { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,11 +127,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionRecentRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
+            sb.Append("class CursorLimitMixin {\n");
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
-            sb.Append("  Limit: ").Append(Limit).Append("\n");
+            sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -168,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionRecentRequest);
+            return this.Equals(input as CursorLimitMixin);
         }
 
         /// <summary>
-        /// Returns true if TransactionRecentRequest instances are equal
+        /// Returns true if CursorLimitMixin instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionRecentRequest to be compared</param>
+        /// <param name="input">Instance of CursorLimitMixin to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionRecentRequest input)
+        public bool Equals(CursorLimitMixin input)
         {
             if (input == null)
             {
@@ -184,24 +166,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
-                ) && 
-                (
-                    this.FromLedgerState == input.FromLedgerState ||
-                    (this.FromLedgerState != null &&
-                    this.FromLedgerState.Equals(input.FromLedgerState))
-                ) && 
-                (
                     this.Cursor == input.Cursor ||
                     (this.Cursor != null &&
                     this.Cursor.Equals(input.Cursor))
                 ) && 
                 (
-                    this.Limit == input.Limit ||
-                    (this.Limit != null &&
-                    this.Limit.Equals(input.Limit))
+                    this.LimitPerPage == input.LimitPerPage ||
+                    (this.LimitPerPage != null &&
+                    this.LimitPerPage.Equals(input.LimitPerPage))
                 );
         }
 
@@ -214,21 +186,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtLedgerState != null)
-                {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
-                }
-                if (this.FromLedgerState != null)
-                {
-                    hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
-                }
                 if (this.Cursor != null)
                 {
                     hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
                 }
-                if (this.Limit != null)
+                if (this.LimitPerPage != null)
                 {
-                    hashCode = (hashCode * 59) + this.Limit.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LimitPerPage.GetHashCode();
                 }
                 return hashCode;
             }

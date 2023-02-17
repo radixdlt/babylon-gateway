@@ -63,7 +63,6 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Threading;
 using System.Threading.Tasks;
@@ -92,7 +91,7 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (GlobalAddress)request.Address,
             Offset: cursor?.Offset ?? 0,
-            Limit: request.Limit ?? DefaultPageLimit
+            Limit: request.LimitPerPage ?? DefaultPageLimit
         );
 
         return await _entityStateQuerier.NonFungibleIds(pageRequest, ledgerState, token);

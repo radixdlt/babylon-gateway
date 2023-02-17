@@ -69,21 +69,27 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class RecentTransactionsRequestValidator : AbstractValidator<GatewayModel.TransactionRecentRequest>
+internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayModel.StreamTransactionsRequest>
 {
-    public RecentTransactionsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public StreamTransactionsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
         RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
-
-        RuleFor(x => x.FromLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
 
         RuleFor(x => x.Cursor)
             .Base64();
 
-        RuleFor(x => x.Limit)
+        RuleFor(x => x.LimitPerPage)
             .GreaterThan(0)
             .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
+
+        RuleFor(x => x.FromLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
+
+        RuleFor(x => x.KindFilter)
+            .IsInEnum();
+
+        RuleFor(x => x.Order)
+            .IsInEnum();
     }
 }

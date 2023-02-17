@@ -63,7 +63,6 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Linq;
 using System.Threading;
@@ -113,7 +112,7 @@ internal class DefaultEntityHandler : IEntityHandler
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (GlobalAddress)request.Address,
             Offset: GatewayModel.EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.Limit ?? DefaultPageLimit
+            Limit: request.LimitPerPage ?? DefaultPageLimit
         );
 
         return await _entityStateQuerier.EntityMetadata(pageRequest, ledgerState, token);
@@ -126,7 +125,7 @@ internal class DefaultEntityHandler : IEntityHandler
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (GlobalAddress)request.Address,
             Offset: GatewayModel.EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.Limit ?? DefaultPageLimit
+            Limit: request.LimitPerPage ?? DefaultPageLimit
         );
 
         return await _entityStateQuerier.EntityFungibles(pageRequest, ledgerState, token);
@@ -139,7 +138,7 @@ internal class DefaultEntityHandler : IEntityHandler
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (GlobalAddress)request.Address,
             Offset: GatewayModel.EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.Limit ?? DefaultPageLimit
+            Limit: request.LimitPerPage ?? DefaultPageLimit
         );
 
         return await _entityStateQuerier.EntityNonFungibles(pageRequest, ledgerState, token);
@@ -152,7 +151,7 @@ internal class DefaultEntityHandler : IEntityHandler
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (GlobalAddress)request.Address,
             Offset: GatewayModel.EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.Limit ?? DefaultPageLimit
+            Limit: request.LimitPerPage ?? DefaultPageLimit
         );
 
         return await _entityStateQuerier.EntityNonFungibleIds(pageRequest, (GlobalAddress)request.ResourceAddress, ledgerState, token);

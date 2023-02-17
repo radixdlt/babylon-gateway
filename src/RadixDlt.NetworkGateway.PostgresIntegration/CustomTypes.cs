@@ -65,6 +65,7 @@
 using Dapper;
 using Npgsql;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
@@ -89,10 +90,14 @@ internal static class CustomTypes
 #pragma warning disable CS0618
         // needed to support custom enums in postgres
         NpgsqlConnection.GlobalTypeMapper.MapEnum<AccessRulesChainSubtype>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionKindFilterConstraint>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PublicKeyType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<VaultType>();
 #pragma warning restore CS0618
 
         _configured = true;

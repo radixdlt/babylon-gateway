@@ -62,31 +62,14 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
 /// <summary>
-/// The raw transaction details and payload.
+/// Defines the kind filter applied to some ledger transactions. Used to filter out unwanted transactions from the transaction stream endpoint.
 /// </summary>
-[Table("raw_user_transactions")]
-internal class RawUserTransaction
+public enum LedgerTransactionKindFilter
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    [Column("state_version")]
-    public long StateVersion { get; set; }
-
-    [Column("payload_hash")]
-    public byte[] PayloadHash { get; set; }
-
-    /// <summary>
-    /// The payload of the transaction.
-    /// </summary>
-    [Column("payload")]
-    public byte[] Payload { get; set; }
-
-    [Column("receipt")]
-    public string Receipt { get; set; }
+    AllAnnotated,
+    UserOnly,
+    EpochChangeOnly,
 }

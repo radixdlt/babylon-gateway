@@ -104,10 +104,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="NonFungibleIdsRequest" /> class.
         /// </summary>
         /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
-        /// <param name="limit">The page size requested..</param>
-        public NonFungibleIdsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string address = default(string), string cursor = default(string), int? limit = default(int?))
+        /// <param name="limitPerPage">The page size requested..</param>
+        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
+        public NonFungibleIdsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string address = default(string))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -117,7 +117,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.Address = address;
             this.AtLedgerState = atLedgerState;
             this.Cursor = cursor;
-            this.Limit = limit;
+            this.LimitPerPage = limitPerPage;
         }
 
         /// <summary>
@@ -125,13 +125,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
         public LedgerStateSelector AtLedgerState { get; set; }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
 
         /// <summary>
         /// This cursor allows forward pagination, by providing the cursor from the previous request.
@@ -144,8 +137,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// The page size requested.
         /// </summary>
         /// <value>The page size requested.</value>
-        [DataMember(Name = "limit", EmitDefaultValue = true)]
-        public int? Limit { get; set; }
+        [DataMember(Name = "limit_per_page", EmitDefaultValue = true)]
+        public int? LimitPerPage { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -156,9 +156,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleIdsRequest {\n");
             sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
-            sb.Append("  Limit: ").Append(Limit).Append("\n");
+            sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -200,19 +200,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.AtLedgerState.Equals(input.AtLedgerState))
                 ) && 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
-                ) && 
-                (
                     this.Cursor == input.Cursor ||
                     (this.Cursor != null &&
                     this.Cursor.Equals(input.Cursor))
                 ) && 
                 (
-                    this.Limit == input.Limit ||
-                    (this.Limit != null &&
-                    this.Limit.Equals(input.Limit))
+                    this.LimitPerPage == input.LimitPerPage ||
+                    (this.LimitPerPage != null &&
+                    this.LimitPerPage.Equals(input.LimitPerPage))
+                ) && 
+                (
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
                 );
         }
 
@@ -229,17 +229,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
                 }
-                if (this.Address != null)
-                {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
-                }
                 if (this.Cursor != null)
                 {
                     hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
                 }
-                if (this.Limit != null)
+                if (this.LimitPerPage != null)
                 {
-                    hashCode = (hashCode * 59) + this.Limit.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LimitPerPage.GetHashCode();
+                }
+                if (this.Address != null)
+                {
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
                 return hashCode;
             }

@@ -90,22 +90,84 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionRecentRequestAllOf
+    /// StreamTransactionsRequestAllOf
     /// </summary>
-    [DataContract(Name = "TransactionRecentRequest_allOf")]
-    public partial class TransactionRecentRequestAllOf : IEquatable<TransactionRecentRequestAllOf>
+    [DataContract(Name = "StreamTransactionsRequest_allOf")]
+    public partial class StreamTransactionsRequestAllOf : IEquatable<StreamTransactionsRequestAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionRecentRequestAllOf" /> class.
+        /// Limit returned transactions by their kind. Defaults to &#x60;user&#x60;.
+        /// </summary>
+        /// <value>Limit returned transactions by their kind. Defaults to &#x60;user&#x60;.</value>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum KindFilterEnum
+        {
+            /// <summary>
+            /// Enum User for value: user
+            /// </summary>
+            [EnumMember(Value = "user")]
+            User = 1,
+
+            /// <summary>
+            /// Enum EpochChange for value: epoch_change
+            /// </summary>
+            [EnumMember(Value = "epoch_change")]
+            EpochChange = 2,
+
+            /// <summary>
+            /// Enum All for value: all
+            /// </summary>
+            [EnumMember(Value = "all")]
+            All = 3
+
+        }
+
+
+        /// <summary>
+        /// Limit returned transactions by their kind. Defaults to &#x60;user&#x60;.
+        /// </summary>
+        /// <value>Limit returned transactions by their kind. Defaults to &#x60;user&#x60;.</value>
+        [DataMember(Name = "kind_filter", EmitDefaultValue = true)]
+        public KindFilterEnum? KindFilter { get; set; }
+        /// <summary>
+        /// Configures the order of returned result set. Defaults to &#x60;desc&#x60;.
+        /// </summary>
+        /// <value>Configures the order of returned result set. Defaults to &#x60;desc&#x60;.</value>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum OrderEnum
+        {
+            /// <summary>
+            /// Enum Asc for value: asc
+            /// </summary>
+            [EnumMember(Value = "asc")]
+            Asc = 1,
+
+            /// <summary>
+            /// Enum Desc for value: desc
+            /// </summary>
+            [EnumMember(Value = "desc")]
+            Desc = 2
+
+        }
+
+
+        /// <summary>
+        /// Configures the order of returned result set. Defaults to &#x60;desc&#x60;.
+        /// </summary>
+        /// <value>Configures the order of returned result set. Defaults to &#x60;desc&#x60;.</value>
+        [DataMember(Name = "order", EmitDefaultValue = true)]
+        public OrderEnum? Order { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamTransactionsRequestAllOf" /> class.
         /// </summary>
         /// <param name="fromLedgerState">fromLedgerState.</param>
-        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
-        /// <param name="limit">The page size requested..</param>
-        public TransactionRecentRequestAllOf(LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limit = default(int?))
+        /// <param name="kindFilter">Limit returned transactions by their kind. Defaults to &#x60;user&#x60;..</param>
+        /// <param name="order">Configures the order of returned result set. Defaults to &#x60;desc&#x60;..</param>
+        public StreamTransactionsRequestAllOf(LedgerStateSelector fromLedgerState = default(LedgerStateSelector), KindFilterEnum? kindFilter = default(KindFilterEnum?), OrderEnum? order = default(OrderEnum?))
         {
             this.FromLedgerState = fromLedgerState;
-            this.Cursor = cursor;
-            this.Limit = limit;
+            this.KindFilter = kindFilter;
+            this.Order = order;
         }
 
         /// <summary>
@@ -115,30 +177,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerStateSelector FromLedgerState { get; set; }
 
         /// <summary>
-        /// This cursor allows forward pagination, by providing the cursor from the previous request.
-        /// </summary>
-        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
-        [DataMember(Name = "cursor", EmitDefaultValue = true)]
-        public string Cursor { get; set; }
-
-        /// <summary>
-        /// The page size requested.
-        /// </summary>
-        /// <value>The page size requested.</value>
-        [DataMember(Name = "limit", EmitDefaultValue = true)]
-        public int? Limit { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionRecentRequestAllOf {\n");
+            sb.Append("class StreamTransactionsRequestAllOf {\n");
             sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
-            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
-            sb.Append("  Limit: ").Append(Limit).Append("\n");
+            sb.Append("  KindFilter: ").Append(KindFilter).Append("\n");
+            sb.Append("  Order: ").Append(Order).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -159,15 +207,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionRecentRequestAllOf);
+            return this.Equals(input as StreamTransactionsRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if TransactionRecentRequestAllOf instances are equal
+        /// Returns true if StreamTransactionsRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionRecentRequestAllOf to be compared</param>
+        /// <param name="input">Instance of StreamTransactionsRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionRecentRequestAllOf input)
+        public bool Equals(StreamTransactionsRequestAllOf input)
         {
             if (input == null)
             {
@@ -180,14 +228,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.FromLedgerState.Equals(input.FromLedgerState))
                 ) && 
                 (
-                    this.Cursor == input.Cursor ||
-                    (this.Cursor != null &&
-                    this.Cursor.Equals(input.Cursor))
+                    this.KindFilter == input.KindFilter ||
+                    this.KindFilter.Equals(input.KindFilter)
                 ) && 
                 (
-                    this.Limit == input.Limit ||
-                    (this.Limit != null &&
-                    this.Limit.Equals(input.Limit))
+                    this.Order == input.Order ||
+                    this.Order.Equals(input.Order)
                 );
         }
 
@@ -204,14 +250,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
                 }
-                if (this.Cursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
-                }
-                if (this.Limit != null)
-                {
-                    hashCode = (hashCode * 59) + this.Limit.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.KindFilter.GetHashCode();
+                hashCode = (hashCode * 59) + this.Order.GetHashCode();
                 return hashCode;
             }
         }

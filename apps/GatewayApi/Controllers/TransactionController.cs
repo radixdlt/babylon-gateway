@@ -91,12 +91,6 @@ public sealed class TransactionController : ControllerBase
         return await _transactionHandler.Construction(token);
     }
 
-    [HttpPost("recent")]
-    public async Task<GatewayModel.TransactionRecentResponse> Recent(GatewayModel.TransactionRecentRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.Recent(request, token);
-    }
-
     [HttpPost("status")]
     public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token)
     {

@@ -62,32 +62,11 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
-
-internal class NonFungibleDataRequestValidator : AbstractValidator<GatewayModel.NonFungibleDataRequest>
+public enum LedgerTransactionType
 {
-    public NonFungibleDataRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
-    {
-        RuleFor(x => x.Address)
-            .NotEmpty()
-            .RadixAddress();
-
-        RuleFor(x => x.NonFungibleId)
-            .NotEmpty();
-
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
-
-        RuleFor(x => x.Cursor)
-            .Base64();
-
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
-    }
+    User,
+    Validator,
+    System,
 }

@@ -105,9 +105,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
-        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
-        /// <param name="limit">The page size requested..</param>
-        public NonFungibleDataRequestAllOf(string address = default(string), string nonFungibleId = default(string), string cursor = default(string), int? limit = default(int?))
+        public NonFungibleDataRequestAllOf(string address = default(string), string nonFungibleId = default(string))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -121,8 +119,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("nonFungibleId is a required property for NonFungibleDataRequestAllOf and cannot be null");
             }
             this.NonFungibleId = nonFungibleId;
-            this.Cursor = cursor;
-            this.Limit = limit;
         }
 
         /// <summary>
@@ -140,20 +136,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string NonFungibleId { get; set; }
 
         /// <summary>
-        /// This cursor allows forward pagination, by providing the cursor from the previous request.
-        /// </summary>
-        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
-        [DataMember(Name = "cursor", EmitDefaultValue = true)]
-        public string Cursor { get; set; }
-
-        /// <summary>
-        /// The page size requested.
-        /// </summary>
-        /// <value>The page size requested.</value>
-        [DataMember(Name = "limit", EmitDefaultValue = true)]
-        public int? Limit { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -163,8 +145,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class NonFungibleDataRequestAllOf {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
-            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
-            sb.Append("  Limit: ").Append(Limit).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -209,16 +189,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.NonFungibleId == input.NonFungibleId ||
                     (this.NonFungibleId != null &&
                     this.NonFungibleId.Equals(input.NonFungibleId))
-                ) && 
-                (
-                    this.Cursor == input.Cursor ||
-                    (this.Cursor != null &&
-                    this.Cursor.Equals(input.Cursor))
-                ) && 
-                (
-                    this.Limit == input.Limit ||
-                    (this.Limit != null &&
-                    this.Limit.Equals(input.Limit))
                 );
         }
 
@@ -238,14 +208,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.NonFungibleId != null)
                 {
                     hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
-                }
-                if (this.Cursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
-                }
-                if (this.Limit != null)
-                {
-                    hashCode = (hashCode * 59) + this.Limit.GetHashCode();
                 }
                 return hashCode;
             }

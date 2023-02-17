@@ -62,32 +62,31 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using System.Threading;
+using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+namespace GatewayApi.Controllers;
 
-internal class NonFungibleDataRequestValidator : AbstractValidator<GatewayModel.NonFungibleDataRequest>
+[ApiController]
+[Route("stream")]
+[ServiceFilter(typeof(ExceptionFilter))]
+[ServiceFilter(typeof(InvalidModelStateFilter))]
+public sealed class StreamController : ControllerBase
 {
-    public NonFungibleDataRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    private readonly ITransactionHandler _transactionHandler;
+
+    public StreamController(ITransactionHandler transactionHandler)
     {
-        RuleFor(x => x.Address)
-            .NotEmpty()
-            .RadixAddress();
+        _transactionHandler = transactionHandler;
+    }
 
-        RuleFor(x => x.NonFungibleId)
-            .NotEmpty();
-
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
-
-        RuleFor(x => x.Cursor)
-            .Base64();
-
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
+    [HttpPost("transactions")]
+    public async Task<GatewayModel.StreamTransactionsResponse> Transactions(GatewayModel.StreamTransactionsRequest request, CancellationToken token)
+    {
+        return await _transactionHandler.StreamTransactions(request, token);
     }
 }

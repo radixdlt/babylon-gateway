@@ -167,31 +167,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/NetworkConfigurationResponse"
 
-  "/transaction/recent":
-    post:
-      operationId: TransactionRecent
-      summary: Get Recent Transactions
-      description: |
-        Returns user-initiated transactions which have been committed to the ledger.
-        The returned response is in a paginated format, ordered by most recently committed.
-      tags:
-        - Stream
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TransactionRecentRequest"
-      responses:
-        "200":
-          description: Recent Transactions (paginated)
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TransactionRecentResponse"
-        "4XX":
-          $ref: "#/components/responses/ErrorResponse"
-
   "/transaction/construction":
     post:
       operationId: TransactionConstruction
@@ -302,6 +277,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TransactionStatusResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+  "/stream/transactions":
+    post:
+      operationId: StreamTransactions
+      summary: Get Transactions Stream
+      description: |
+        Returns transactions which have been committed to the ledger.
+      tags:
+        - Stream
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StreamTransactionsRequest"
+      responses:
+        "200":
+          description: Transactions (paginated)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StreamTransactionsResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
@@ -693,6 +692,18 @@ components:
           type: integer
           format: int64
 
+    CursorLimitMixin:
+      type: object
+      properties:
+        cursor:
+          description: This cursor allows forward pagination, by providing the cursor from the previous request.
+          type: string
+          nullable: true
+        limit_per_page:
+          description: The page size requested.
+          type: integer
+          nullable: true
+
     #
     # Common Response Types
     #
@@ -852,8 +863,6 @@ components:
       required:
         - state_version
         - transaction_status
-        - payload_hash_hex
-        - intent_hash_hex
       properties:
         state_version:
           nullable: true
@@ -1034,37 +1043,6 @@ components:
       allOf:
         - type: object
         - $ref: "#/components/schemas/LedgerStateMixin"
-    TransactionRecentRequest:
-      allOf:
-        - $ref: "#/components/schemas/AtLedgerStateMixin"
-        - type: object
-          properties:
-            from_ledger_state:
-              $ref: "#/components/schemas/LedgerStateSelector"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-            limit:
-              description: The page size requested.
-              type: integer
-              nullable: true
-      example:
-        limit: 5
-    TransactionRecentResponse:
-      allOf:
-        - $ref: "#/components/schemas/LedgerStateMixin"
-        - allOf:
-            - $ref: "#/components/schemas/ResultSetCursorMixin"
-            - type: object
-              required:
-                - items
-              properties:
-                items:
-                  description: The page of user transactions.
-                  type: array
-                  items:
-                    $ref: "#/components/schemas/CommittedTransactionInfo"
 
     TransactionSubmitRequest:
       type: object
@@ -1181,6 +1159,48 @@ components:
             type: string
         message_hex:
           $ref: "#/components/schemas/HexString"
+
+    #
+    # /stream/* Request & Response Types
+    #
+
+    StreamTransactionsRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - type: object
+          properties:
+            from_ledger_state:
+              $ref: "#/components/schemas/LedgerStateSelector"
+            kind_filter:
+              description: Limit returned transactions by their kind. Defaults to `user`.
+              type: string
+              enum:
+                - user
+                - epoch_change
+                - all
+            order:
+              description: Configures the order of returned result set. Defaults to `desc`.
+              type: string
+              enum:
+                - asc
+                - desc
+      example:
+        limit_per_page: 5
+    StreamTransactionsResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - allOf:
+            - $ref: "#/components/schemas/ResultSetCursorMixin"
+            - type: object
+              required:
+                - items
+              properties:
+                items:
+                  description: The page of user transactions.
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/CommittedTransactionInfo"
 
     #
     # /entity/* Request & Response Types
@@ -1370,20 +1390,13 @@ components:
     EntityMetadataRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
             - address
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-            limit:
-              description: The page size requested.
-              type: integer
-              nullable: true
       example:
         address: "<entity-address>"
     EntityMetadataResponse:
@@ -1402,20 +1415,13 @@ components:
     EntityFungiblesRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
             - address
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-            limit:
-              description: The page size requested.
-              type: integer
-              nullable: true
       example:
         address: "<component-entity-address>"
     EntityFungiblesResponse:
@@ -1434,20 +1440,13 @@ components:
     EntityNonFungiblesRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
             - address
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-            limit:
-              description: The page size requested.
-              type: integer
-              nullable: true
       example:
         address: "<component-entity-address>"
     EntityNonFungiblesResponse:
@@ -1466,6 +1465,7 @@ components:
     EntityNonFungibleIdsRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
             - address
@@ -1474,14 +1474,6 @@ components:
               $ref: "#/components/schemas/EntityAddress"
             resource_address:
               $ref: "#/components/schemas/ResourceAddress"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-            limit:
-              description: The page size requested.
-              type: integer
-              nullable: true
       example:
         address: "<component-entity-address>"
         resource_address: "<non-fungible-resource-entity-address>"
@@ -1504,20 +1496,13 @@ components:
     NonFungibleIdsRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
             - address
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-            limit:
-              description: The page size requested.
-              type: integer
-              nullable: true
       example:
         address: "<non-fungible-entity-address>"
     NonFungibleIdsResponse:
@@ -1536,6 +1521,7 @@ components:
     NonFungibleDataRequest: # TODO rename to NonFungibleIdDataRequest
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
             - address
@@ -1545,14 +1531,6 @@ components:
               $ref: "#/components/schemas/EntityAddress"
             non_fungible_id:
               $ref: "#/components/schemas/NonFungibleId"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-            limit:
-              description: The page size requested.
-              type: integer
-              nullable: true
       example:
         address: "<non-fungible-entity-address>"
         non_fungible_id: "0a0100000000"

@@ -69,6 +69,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 #nullable disable
 
@@ -82,10 +83,14 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         {
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:access_rules_chain_subtype", "none,resource_manager_vault_access_rules_chain")
+                .Annotation("Npgsql:Enum:entity_type", "epoch_manager,fungible_resource_manager,non_fungible_resource_manager,normal_component,account_component,package,key_value_store,vault,non_fungible_store,clock,validator,access_controller,identity")
+                .Annotation("Npgsql:Enum:ledger_transaction_kind_filter_constraint", "user,epoch_change")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
+                .Annotation("Npgsql:Enum:ledger_transaction_type", "user,validator,system")
                 .Annotation("Npgsql:Enum:non_fungible_id_type", "string,number,bytes,uuid")
                 .Annotation("Npgsql:Enum:pending_transaction_status", "submitted_or_known_in_node_mempool,missing,resolved_but_unknown_till_synced_up,rejected_temporarily,rejected_permanently,committed_success,committed_failure")
-                .Annotation("Npgsql:Enum:public_key_type", "ecdsa_secp256k1,eddsa_ed25519");
+                .Annotation("Npgsql:Enum:public_key_type", "ecdsa_secp256k1,eddsa_ed25519")
+                .Annotation("Npgsql:Enum:vault_type", "fungible,non_fungible");
 
             migrationBuilder.CreateTable(
                 name: "component_entity_state_history",
@@ -115,7 +120,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     parentancestorid = table.Column<long>(name: "parent_ancestor_id", type: "bigint", nullable: true),
                     ownerancestorid = table.Column<long>(name: "owner_ancestor_id", type: "bigint", nullable: true),
                     globalancestorid = table.Column<long>(name: "global_ancestor_id", type: "bigint", nullable: true),
-                    discriminator = table.Column<string>(type: "text", nullable: false),
+                    discriminator = table.Column<EntityType>(type: "entity_type", nullable: false),
                     packageid = table.Column<long>(name: "package_id", type: "bigint", nullable: true),
                     blueprintname = table.Column<string>(name: "blueprint_name", type: "text", nullable: true),
                     royaltyvaultentityid = table.Column<long>(name: "royalty_vault_entity_id", type: "bigint", nullable: true),
@@ -206,7 +211,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     globalentityid = table.Column<long>(name: "global_entity_id", type: "bigint", nullable: false),
                     vaultentityid = table.Column<long>(name: "vault_entity_id", type: "bigint", nullable: false),
                     resourceentityid = table.Column<long>(name: "resource_entity_id", type: "bigint", nullable: false),
-                    discriminator = table.Column<string>(type: "text", nullable: false),
+                    discriminator = table.Column<VaultType>(type: "vault_type", nullable: false),
                     balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
                     isroyaltyvault = table.Column<bool>(name: "is_royalty_vault", type: "boolean", nullable: true),
                     nonfungibleids = table.Column<List<long>>(name: "non_fungible_ids", type: "bigint[]", nullable: true)
@@ -236,7 +241,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     roundtimestamp = table.Column<DateTime>(name: "round_timestamp", type: "timestamp with time zone", nullable: false),
                     createdtimestamp = table.Column<DateTime>(name: "created_timestamp", type: "timestamp with time zone", nullable: false),
                     normalizedroundtimestamp = table.Column<DateTime>(name: "normalized_round_timestamp", type: "timestamp with time zone", nullable: false),
-                    discriminator = table.Column<string>(type: "text", nullable: false),
+                    kindfilterconstraint = table.Column<LedgerTransactionKindFilterConstraint>(name: "kind_filter_constraint", type: "ledger_transaction_kind_filter_constraint", nullable: true),
+                    rawpayload = table.Column<byte[]>(name: "raw_payload", type: "bytea", nullable: false),
+                    enginereceipt = table.Column<string>(name: "engine_receipt", type: "jsonb", nullable: false),
+                    discriminator = table.Column<LedgerTransactionType>(type: "ledger_transaction_type", nullable: false),
                     payloadhash = table.Column<byte[]>(name: "payload_hash", type: "bytea", nullable: true),
                     intenthash = table.Column<byte[]>(name: "intent_hash", type: "bytea", nullable: true),
                     signedintenthash = table.Column<byte[]>(name: "signed_intent_hash", type: "bytea", nullable: true)
@@ -337,20 +345,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_pending_transactions", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "raw_user_transactions",
-                columns: table => new
-                {
-                    stateversion = table.Column<long>(name: "state_version", type: "bigint", nullable: false),
-                    payloadhash = table.Column<byte[]>(name: "payload_hash", type: "bytea", nullable: false),
-                    payload = table.Column<byte[]>(type: "bytea", nullable: false),
-                    receipt = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_raw_user_transactions", x => x.stateversion);
                 });
 
             migrationBuilder.CreateTable(
@@ -495,6 +489,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:IndexMethod", "hash");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ledger_transactions_kind_filter_constraint_state_version",
+                table: "ledger_transactions",
+                columns: new[] { "kind_filter_constraint", "state_version" },
+                filter: "kind_filter_constraint IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_payload_hash",
                 table: "ledger_transactions",
                 column: "payload_hash",
@@ -622,9 +622,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "pending_transactions");
-
-            migrationBuilder.DropTable(
-                name: "raw_user_transactions");
 
             migrationBuilder.DropTable(
                 name: "resource_manager_entity_supply_history");
