@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230216085349_InitialCreate")]
+    [Migration("20230217103352_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -100,7 +100,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "non_fungible_id_type", new[] { "string", "number", "bytes", "uuid" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_status", new[] { "submitted_or_known_in_node_mempool", "missing", "resolved_but_unknown_till_synced_up", "rejected_temporarily", "rejected_permanently", "committed_success", "committed_failure" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public_key_type", new[] { "ecdsa_secp256k1", "eddsa_ed25519" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "vault_type", new[] { "fungible", "non_fungible" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "resource_type", new[] { "fungible", "non_fungible" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentEntityStateHistory", b =>
@@ -302,6 +302,46 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entity_resource_aggregate_history");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceAggregatedVaultsHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("ResourceEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_entity_id");
+
+                    b.Property<string>("TmpTmpRemoveMeOnceTxEventsBecomeAvailable")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("tmp_tmp_remove_me_once_tx_events_become_available");
+
+                    b.Property<ResourceType>("discriminator")
+                        .HasColumnType("resource_type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "ResourceEntityId", "FromStateVersion");
+
+                    b.ToTable("entity_resource_aggregated_vaults_history");
+
+                    b.HasDiscriminator<ResourceType>("discriminator");
+
+                    b.UseTphMappingStrategy();
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceVaultAggregateHistory", b =>
                 {
                     b.Property<long>("Id")
@@ -364,8 +404,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("vault_entity_id");
 
-                    b.Property<VaultType>("discriminator")
-                        .HasColumnType("vault_type");
+                    b.Property<ResourceType>("discriminator")
+                        .HasColumnType("resource_type");
 
                     b.HasKey("Id");
 
@@ -375,7 +415,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("entity_vault_history");
 
-                    b.HasDiscriminator<VaultType>("discriminator");
+                    b.HasDiscriminator<ResourceType>("discriminator");
 
                     b.UseTphMappingStrategy();
                 });
@@ -1027,6 +1067,33 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue(EntityType.Vault);
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityFungibleResourceAggregatedVaultsHistory", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceAggregatedVaultsHistory");
+
+                    b.Property<BigInteger>("Balance")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric")
+                        .HasColumnName("balance");
+
+                    b.ToTable("entity_resource_aggregated_vaults_history");
+
+                    b.HasDiscriminator().HasValue(ResourceType.Fungible);
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityNonFungibleResourceAggregatedVaultsHistory", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceAggregatedVaultsHistory");
+
+                    b.Property<long>("TotalCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("total_count");
+
+                    b.ToTable("entity_resource_aggregated_vaults_history");
+
+                    b.HasDiscriminator().HasValue(ResourceType.NonFungible);
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityFungibleVaultHistory", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityVaultHistory");
@@ -1042,7 +1109,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("entity_vault_history");
 
-                    b.HasDiscriminator().HasValue(VaultType.Fungible);
+                    b.HasDiscriminator().HasValue(ResourceType.Fungible);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityNonFungibleVaultHistory", b =>
@@ -1056,7 +1123,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("entity_vault_history");
 
-                    b.HasDiscriminator().HasValue(VaultType.NonFungible);
+                    b.HasDiscriminator().HasValue(ResourceType.NonFungible);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.SystemLedgerTransaction", b =>

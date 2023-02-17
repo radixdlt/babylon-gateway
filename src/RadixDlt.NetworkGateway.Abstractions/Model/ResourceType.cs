@@ -62,33 +62,10 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using System.Collections.Generic;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
-
-internal record FungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion);
-
-internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, List<string> NonFungibleIds, long StateVersion);
-
-internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
-
-internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
-
-internal record ResourceManagerSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);
-
-internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
-
-internal record struct EntityResourceLookup(long EntityId, long ResourceManagerEntityId);
-
-// TODO drop in favor of EntityResourceLookup?
-internal record struct EntityResourceVaultLookup(long EntityId, long ResourceManagerEntityId);
-
-internal record struct NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, long StateVersion);
-
-internal record struct NonFungibleIdLookup(long ResourceManagerEntityId, string NonFungibleId);
-
-internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);
+public enum ResourceType
+{
+    Fungible,
+    NonFungible,
+}

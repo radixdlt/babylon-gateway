@@ -62,10 +62,41 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public enum VaultType
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+
+[Table("entity_resource_aggregated_vaults_history")]
+internal abstract class EntityResourceAggregatedVaultsHistory
 {
-    Fungible,
-    NonFungible,
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
+
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
+
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+
+    // TODO remove once TX events get available
+    [Column("tmp_tmp_remove_me_once_tx_events_become_available")]
+    public string TmpTmpRemoveMeOnceTxEventsBecomeAvailable { get; set; }
+}
+
+internal class EntityFungibleResourceAggregatedVaultsHistory : EntityResourceAggregatedVaultsHistory
+{
+    [Column("balance")]
+    public TokenAmount Balance { get; set; }
+}
+
+internal class EntityNonFungibleResourceAggregatedVaultsHistory : EntityResourceAggregatedVaultsHistory
+{
+    [Column("total_count")]
+    public long TotalCount { get; set; }
 }
