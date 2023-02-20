@@ -91,7 +91,7 @@ internal class SubmissionService : ISubmissionService
     private readonly ISubmissionTrackingService _submissionTrackingService;
     private readonly IClock _clock;
     private readonly IEnumerable<ISubmissionServiceObserver> _observers;
-    private readonly IOptionsMonitor<EndpointOptions> _endpointOptionsMonitor;
+    private readonly IOptionsMonitor<CoreApiIntegrationOptions> _coreApiIntegrationOptions;
     private readonly ILogger _logger;
 
     public SubmissionService(
@@ -100,14 +100,14 @@ internal class SubmissionService : ISubmissionService
         IClock clock,
         IEnumerable<ISubmissionServiceObserver> observers,
         ILogger<SubmissionService> logger,
-        IOptionsMonitor<EndpointOptions> endpointOptionsMonitor)
+        IOptionsMonitor<CoreApiIntegrationOptions> coreApiIntegrationOptions)
     {
         _coreApiHandler = coreApiHandler;
         _submissionTrackingService = submissionTrackingService;
         _clock = clock;
         _observers = observers;
         _logger = logger;
-        _endpointOptionsMonitor = endpointOptionsMonitor;
+        _coreApiIntegrationOptions = coreApiIntegrationOptions;
     }
 
     public async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
@@ -192,7 +192,7 @@ internal class SubmissionService : ISubmissionService
         ToolkitModel.Transaction.NotarizedTransaction parsedTransaction,
         CancellationToken token)
     {
-        using var timeoutTokenSource = new CancellationTokenSource(_endpointOptionsMonitor.CurrentValue.SubmitTransactionTimeout);
+        using var timeoutTokenSource = new CancellationTokenSource(_coreApiIntegrationOptions.CurrentValue.SubmitTransactionTimeout);
         using var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutTokenSource.Token, token);
 
         try

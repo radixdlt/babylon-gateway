@@ -69,20 +69,16 @@ using System;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
 
-public sealed class EndpointOptions
+public sealed class CoreApiIntegrationOptions
 {
-    [ConfigurationKeyName("MaxPageSize")]
-    public int MaxPageSize { get; set; } = 30;
-
-    [ConfigurationKeyName("RequestTimeout")]
-    public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(10);
+    [ConfigurationKeyName("SubmitTransactionTimeout")]
+    public TimeSpan SubmitTransactionTimeout { get; set; } = TimeSpan.FromSeconds(3);
 }
 
-internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptions>
+internal class CoreApiIntegrationOptionsValidator : AbstractOptionsValidator<CoreApiIntegrationOptions>
 {
-    public EndpointOptionsValidator()
+    public CoreApiIntegrationOptionsValidator()
     {
-        RuleFor(x => x.MaxPageSize).GreaterThan(0);
-        RuleFor(x => x.RequestTimeout).GreaterThan(TimeSpan.Zero);
+        RuleFor(x => x.SubmitTransactionTimeout).GreaterThan(TimeSpan.Zero);
     }
 }
