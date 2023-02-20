@@ -906,14 +906,61 @@ components:
     NonFungibleResourcesCollectionItem:
       type: object
       required:
-        - address
-        - amount
+        - aggregation_level
+        - resource_address
       properties:
-        address:
+        aggregation_level:
+          $ref: "#/components/schemas/ResourceAggregationLevel"
+        resource_address:
           $ref: "#/components/schemas/ResourceAddress"
-        amount:
+      discriminator:
+        propertyName: aggregation_level
+        mapping:
+          # NOTE: These need to match ResourceAggregationLevel
+          Global: '#/components/schemas/NonFungibleResourcesCollectionItemGloballyAggregated'
+          Vault: '#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregated'
+    NonFungibleResourcesCollectionItemGloballyAggregated:
+      allOf:
+        - $ref: "#/components/schemas/NonFungibleResourcesCollectionItem"
+        - type: object
+          required:
+            - amount
+          properties:
+            amount:
+              type: integer
+              format: int64
+    NonFungibleResourcesCollectionItemVaultAggregated:
+      allOf:
+        - $ref: "#/components/schemas/NonFungibleResourcesCollectionItem"
+        - type: object
+          required:
+            - vaults
+          properties:
+            vaults:
+              $ref: "#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregatedVault"
+    NonFungibleResourcesCollectionItemVaultAggregatedVault:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregatedVaultItem"
+    NonFungibleResourcesCollectionItemVaultAggregatedVaultItem:
+      type: object
+      required:
+        - vault_address
+        - total_count
+      properties:
+        vault_address:
+          $ref: "#/components/schemas/EntityAddress"
+        total_count:
           type: integer
           format: int64
+
     NonFungibleIdsCollection:
       description: Non-fungible resource IDs collection.
       allOf:

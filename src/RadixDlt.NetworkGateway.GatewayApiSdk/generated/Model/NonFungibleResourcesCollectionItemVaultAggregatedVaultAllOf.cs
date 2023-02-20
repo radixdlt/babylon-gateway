@@ -84,56 +84,41 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleResourcesCollectionItem
+    /// NonFungibleResourcesCollectionItemVaultAggregatedVaultAllOf
     /// </summary>
-    [DataContract(Name = "NonFungibleResourcesCollectionItem")]
-    [JsonConverter(typeof(JsonSubtypes), "aggregation_level")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourcesCollectionItemGloballyAggregated), "Global")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourcesCollectionItemGloballyAggregated), "NonFungibleResourcesCollectionItemGloballyAggregated")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourcesCollectionItemVaultAggregated), "NonFungibleResourcesCollectionItemVaultAggregated")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourcesCollectionItemVaultAggregated), "Vault")]
-    public partial class NonFungibleResourcesCollectionItem : IEquatable<NonFungibleResourcesCollectionItem>
+    [DataContract(Name = "NonFungibleResourcesCollectionItemVaultAggregatedVault_allOf")]
+    public partial class NonFungibleResourcesCollectionItemVaultAggregatedVaultAllOf : IEquatable<NonFungibleResourcesCollectionItemVaultAggregatedVaultAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets AggregationLevel
-        /// </summary>
-        [DataMember(Name = "aggregation_level", IsRequired = true, EmitDefaultValue = true)]
-        public ResourceAggregationLevel AggregationLevel { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItem" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItemVaultAggregatedVaultAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleResourcesCollectionItem() { }
+        protected NonFungibleResourcesCollectionItemVaultAggregatedVaultAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItem" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItemVaultAggregatedVaultAllOf" /> class.
         /// </summary>
-        /// <param name="aggregationLevel">aggregationLevel (required).</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
-        public NonFungibleResourcesCollectionItem(ResourceAggregationLevel aggregationLevel = default(ResourceAggregationLevel), string resourceAddress = default(string))
+        /// <param name="items">items (required).</param>
+        public NonFungibleResourcesCollectionItemVaultAggregatedVaultAllOf(List<NonFungibleResourcesCollectionItemVaultAggregatedVaultItem> items = default(List<NonFungibleResourcesCollectionItemVaultAggregatedVaultItem>))
         {
-            this.AggregationLevel = aggregationLevel;
-            // to ensure "resourceAddress" is required (not null)
-            if (resourceAddress == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("resourceAddress is a required property for NonFungibleResourcesCollectionItem and cannot be null");
+                throw new ArgumentNullException("items is a required property for NonFungibleResourcesCollectionItemVaultAggregatedVaultAllOf and cannot be null");
             }
-            this.ResourceAddress = resourceAddress;
+            this.Items = items;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
+        /// Gets or Sets Items
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
-        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string ResourceAddress { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<NonFungibleResourcesCollectionItemVaultAggregatedVaultItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,9 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleResourcesCollectionItem {\n");
-            sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
-            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("class NonFungibleResourcesCollectionItemVaultAggregatedVaultAllOf {\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleResourcesCollectionItem);
+            return this.Equals(input as NonFungibleResourcesCollectionItemVaultAggregatedVaultAllOf);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleResourcesCollectionItem instances are equal
+        /// Returns true if NonFungibleResourcesCollectionItemVaultAggregatedVaultAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleResourcesCollectionItem to be compared</param>
+        /// <param name="input">Instance of NonFungibleResourcesCollectionItemVaultAggregatedVaultAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleResourcesCollectionItem input)
+        public bool Equals(NonFungibleResourcesCollectionItemVaultAggregatedVaultAllOf input)
         {
             if (input == null)
             {
@@ -181,13 +165,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AggregationLevel == input.AggregationLevel ||
-                    this.AggregationLevel.Equals(input.AggregationLevel)
-                ) && 
-                (
-                    this.ResourceAddress == input.ResourceAddress ||
-                    (this.ResourceAddress != null &&
-                    this.ResourceAddress.Equals(input.ResourceAddress))
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -200,10 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.AggregationLevel.GetHashCode();
-                if (this.ResourceAddress != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }
