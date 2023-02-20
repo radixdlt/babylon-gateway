@@ -173,7 +173,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
             GatewayModel.StreamTransactionsRequest.KindFilterEnum.User => LedgerTransactionKindFilter.UserOnly,
             GatewayModel.StreamTransactionsRequest.KindFilterEnum.EpochChange => LedgerTransactionKindFilter.EpochChangeOnly,
             null => LedgerTransactionKindFilter.UserOnly,
-            _ => throw new UnreachableException(),
+            _ => throw new UnreachableException($"Didn't expect {request.KindFilter} value"),
         };
 
         var transactionsPageRequest = new TransactionStreamPageRequest(

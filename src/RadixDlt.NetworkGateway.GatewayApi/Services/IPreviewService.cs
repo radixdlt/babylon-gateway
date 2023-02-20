@@ -121,7 +121,7 @@ internal class PreviewService : IPreviewService
         {
             if (request is JObject requestObject)
             {
-                requestObject["network"] = _coreApiHandler.GetNetworkIdentifier();
+                requestObject["network"] = _coreApiHandler.GetNetworkName();
                 coreApiRequest = requestObject.ToObject<CoreModel.TransactionPreviewRequest>();
             }
             else

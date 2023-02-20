@@ -172,7 +172,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             {
                 CoreModel.TransactionStatus.Succeeded => PendingTransactionStatus.CommittedSuccess,
                 CoreModel.TransactionStatus.Failed => PendingTransactionStatus.CommittedFailure,
-                _ => throw new UnreachableException(),
+                _ => throw new UnreachableException($"Didn't expect {ct.Receipt.Status} value"),
             };
         }
 
@@ -663,7 +663,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             }
 
                             default:
-                                throw new UnreachableException();
+                                throw new UnreachableException($"Didn't expect {vault.ResourceAmount.GetType().Name} type");
                         }
                     }
 
@@ -681,7 +681,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         {
                             CoreModel.SubstateKeyType.AccessRulesChain => AccessRulesChainSubtype.None,
                             CoreModel.SubstateKeyType.ResourceManagerVaultAccessRulesChain => AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain,
-                            _ => throw new UnreachableException(),
+                            _ => throw new UnreachableException($"Didn't expect {sid.SubstateKeyType} value"),
                         };
 
                         entityAccessRulesChainHistoryToAdd.Add(new EntityAccessRulesChainHistory

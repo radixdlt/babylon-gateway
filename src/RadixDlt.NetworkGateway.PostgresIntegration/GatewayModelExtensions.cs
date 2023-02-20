@@ -108,7 +108,7 @@ internal static class GatewayModelExtensions
         {
             PublicKeyType.EcdsaSecp256k1 => new GatewayModel.PublicKeyEcdsaSecp256k1(keyHex),
             PublicKeyType.EddsaEd25519 => new GatewayModel.PublicKeyEddsaEd25519(keyHex),
-            _ => throw new UnreachableException(),
+            _ => throw new UnreachableException($"Didn't expect {validatorPublicKey.KeyType} value"),
         };
     }
 }
