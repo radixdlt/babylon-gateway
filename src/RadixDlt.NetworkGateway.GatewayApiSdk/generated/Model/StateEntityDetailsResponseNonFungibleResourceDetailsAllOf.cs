@@ -90,35 +90,56 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityOverviewResponseAllOf
+    /// StateEntityDetailsResponseNonFungibleResourceDetailsAllOf
     /// </summary>
-    [DataContract(Name = "EntityOverviewResponse_allOf")]
-    public partial class EntityOverviewResponseAllOf : IEquatable<EntityOverviewResponseAllOf>
+    [DataContract(Name = "StateEntityDetailsResponseNonFungibleResourceDetails_allOf")]
+    public partial class StateEntityDetailsResponseNonFungibleResourceDetailsAllOf : IEquatable<StateEntityDetailsResponseNonFungibleResourceDetailsAllOf>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityOverviewResponseAllOf" /> class.
+        /// Gets or Sets NonFungibleIdType
+        /// </summary>
+        [DataMember(Name = "non_fungible_id_type", IsRequired = true, EmitDefaultValue = true)]
+        public NonFungibleIdType NonFungibleIdType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseNonFungibleResourceDetailsAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityOverviewResponseAllOf() { }
+        protected StateEntityDetailsResponseNonFungibleResourceDetailsAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityOverviewResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseNonFungibleResourceDetailsAllOf" /> class.
         /// </summary>
-        /// <param name="entities">entities (required).</param>
-        public EntityOverviewResponseAllOf(List<EntityOverviewResponseEntityItem> entities = default(List<EntityOverviewResponseEntityItem>))
+        /// <param name="accessRulesChain">accessRulesChain (required).</param>
+        /// <param name="vaultAccessRulesChain">vaultAccessRulesChain (required).</param>
+        /// <param name="nonFungibleIdType">nonFungibleIdType (required).</param>
+        public StateEntityDetailsResponseNonFungibleResourceDetailsAllOf(Object accessRulesChain = default(Object), Object vaultAccessRulesChain = default(Object), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType))
         {
-            // to ensure "entities" is required (not null)
-            if (entities == null)
+            // to ensure "accessRulesChain" is required (not null)
+            if (accessRulesChain == null)
             {
-                throw new ArgumentNullException("entities is a required property for EntityOverviewResponseAllOf and cannot be null");
+                throw new ArgumentNullException("accessRulesChain is a required property for StateEntityDetailsResponseNonFungibleResourceDetailsAllOf and cannot be null");
             }
-            this.Entities = entities;
+            this.AccessRulesChain = accessRulesChain;
+            // to ensure "vaultAccessRulesChain" is required (not null)
+            if (vaultAccessRulesChain == null)
+            {
+                throw new ArgumentNullException("vaultAccessRulesChain is a required property for StateEntityDetailsResponseNonFungibleResourceDetailsAllOf and cannot be null");
+            }
+            this.VaultAccessRulesChain = vaultAccessRulesChain;
+            this.NonFungibleIdType = nonFungibleIdType;
         }
 
         /// <summary>
-        /// Gets or Sets Entities
+        /// Gets or Sets AccessRulesChain
         /// </summary>
-        [DataMember(Name = "entities", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityOverviewResponseEntityItem> Entities { get; set; }
+        [DataMember(Name = "access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
+        public Object AccessRulesChain { get; set; }
+
+        /// <summary>
+        /// Gets or Sets VaultAccessRulesChain
+        /// </summary>
+        [DataMember(Name = "vault_access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
+        public Object VaultAccessRulesChain { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +148,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityOverviewResponseAllOf {\n");
-            sb.Append("  Entities: ").Append(Entities).Append("\n");
+            sb.Append("class StateEntityDetailsResponseNonFungibleResourceDetailsAllOf {\n");
+            sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
+            sb.Append("  VaultAccessRulesChain: ").Append(VaultAccessRulesChain).Append("\n");
+            sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +172,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityOverviewResponseAllOf);
+            return this.Equals(input as StateEntityDetailsResponseNonFungibleResourceDetailsAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityOverviewResponseAllOf instances are equal
+        /// Returns true if StateEntityDetailsResponseNonFungibleResourceDetailsAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityOverviewResponseAllOf to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponseNonFungibleResourceDetailsAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityOverviewResponseAllOf input)
+        public bool Equals(StateEntityDetailsResponseNonFungibleResourceDetailsAllOf input)
         {
             if (input == null)
             {
@@ -165,10 +188,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Entities == input.Entities ||
-                    this.Entities != null &&
-                    input.Entities != null &&
-                    this.Entities.SequenceEqual(input.Entities)
+                    this.AccessRulesChain == input.AccessRulesChain ||
+                    (this.AccessRulesChain != null &&
+                    this.AccessRulesChain.Equals(input.AccessRulesChain))
+                ) && 
+                (
+                    this.VaultAccessRulesChain == input.VaultAccessRulesChain ||
+                    (this.VaultAccessRulesChain != null &&
+                    this.VaultAccessRulesChain.Equals(input.VaultAccessRulesChain))
+                ) && 
+                (
+                    this.NonFungibleIdType == input.NonFungibleIdType ||
+                    this.NonFungibleIdType.Equals(input.NonFungibleIdType)
                 );
         }
 
@@ -181,10 +212,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Entities != null)
+                if (this.AccessRulesChain != null)
                 {
-                    hashCode = (hashCode * 59) + this.Entities.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccessRulesChain.GetHashCode();
                 }
+                if (this.VaultAccessRulesChain != null)
+                {
+                    hashCode = (hashCode * 59) + this.VaultAccessRulesChain.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
                 return hashCode;
             }
         }

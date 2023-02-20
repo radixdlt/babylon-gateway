@@ -90,57 +90,36 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityDetailsResponseAllOf
+    /// StateEntityDetailsResponsePackageDetailsAllOf
     /// </summary>
-    [DataContract(Name = "EntityDetailsResponse_allOf")]
-    public partial class EntityDetailsResponseAllOf : IEquatable<EntityDetailsResponseAllOf>
+    [DataContract(Name = "StateEntityDetailsResponsePackageDetails_allOf")]
+    public partial class StateEntityDetailsResponsePackageDetailsAllOf : IEquatable<StateEntityDetailsResponsePackageDetailsAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityDetailsResponseAllOf() { }
+        protected StateEntityDetailsResponsePackageDetailsAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsAllOf" /> class.
         /// </summary>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="metadata">metadata (required).</param>
-        /// <param name="details">details.</param>
-        public EntityDetailsResponseAllOf(string address = default(string), EntityMetadataCollection metadata = default(EntityMetadataCollection), EntityDetailsResponseDetails details = default(EntityDetailsResponseDetails))
+        /// <param name="codeHex">Hex-encoded binary blob. (required).</param>
+        public StateEntityDetailsResponsePackageDetailsAllOf(string codeHex = default(string))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "codeHex" is required (not null)
+            if (codeHex == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityDetailsResponseAllOf and cannot be null");
+                throw new ArgumentNullException("codeHex is a required property for StateEntityDetailsResponsePackageDetailsAllOf and cannot be null");
             }
-            this.Address = address;
-            // to ensure "metadata" is required (not null)
-            if (metadata == null)
-            {
-                throw new ArgumentNullException("metadata is a required property for EntityDetailsResponseAllOf and cannot be null");
-            }
-            this.Metadata = metadata;
-            this.Details = details;
+            this.CodeHex = codeHex;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// Hex-encoded binary blob.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Metadata
-        /// </summary>
-        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public EntityMetadataCollection Metadata { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Details
-        /// </summary>
-        [DataMember(Name = "details", EmitDefaultValue = true)]
-        public EntityDetailsResponseDetails Details { get; set; }
+        /// <value>Hex-encoded binary blob.</value>
+        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string CodeHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -149,10 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityDetailsResponseAllOf {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
-            sb.Append("  Details: ").Append(Details).Append("\n");
+            sb.Append("class StateEntityDetailsResponsePackageDetailsAllOf {\n");
+            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -173,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityDetailsResponseAllOf);
+            return this.Equals(input as StateEntityDetailsResponsePackageDetailsAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityDetailsResponseAllOf instances are equal
+        /// Returns true if StateEntityDetailsResponsePackageDetailsAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityDetailsResponseAllOf to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityDetailsResponseAllOf input)
+        public bool Equals(StateEntityDetailsResponsePackageDetailsAllOf input)
         {
             if (input == null)
             {
@@ -189,19 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
-                ) && 
-                (
-                    this.Metadata == input.Metadata ||
-                    (this.Metadata != null &&
-                    this.Metadata.Equals(input.Metadata))
-                ) && 
-                (
-                    this.Details == input.Details ||
-                    (this.Details != null &&
-                    this.Details.Equals(input.Details))
+                    this.CodeHex == input.CodeHex ||
+                    (this.CodeHex != null &&
+                    this.CodeHex.Equals(input.CodeHex))
                 );
         }
 
@@ -214,17 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                if (this.CodeHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
-                }
-                if (this.Metadata != null)
-                {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
-                }
-                if (this.Details != null)
-                {
-                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
+                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
                 }
                 return hashCode;
             }

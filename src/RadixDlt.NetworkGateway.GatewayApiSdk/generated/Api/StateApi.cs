@@ -92,27 +92,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
-        /// Get Entity Details
-        /// </summary>
-        /// <remarks>
-        /// Returns detailed information for a single entity. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityDetailsRequest"></param>
-        /// <returns>EntityDetailsResponse</returns>
-        EntityDetailsResponse EntityDetails(EntityDetailsRequest entityDetailsRequest);
-
-        /// <summary>
-        /// Get Entity Details
-        /// </summary>
-        /// <remarks>
-        /// Returns detailed information for a single entity. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityDetailsRequest"></param>
-        /// <returns>ApiResponse of EntityDetailsResponse</returns>
-        ApiResponse<EntityDetailsResponse> EntityDetailsWithHttpInfo(EntityDetailsRequest entityDetailsRequest);
-        /// <summary>
         /// Get Entity Fungible Resource Totals
         /// </summary>
         /// <remarks>
@@ -197,27 +176,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of EntityNonFungiblesResponse</returns>
         ApiResponse<EntityNonFungiblesResponse> EntityNonFungiblesWithHttpInfo(EntityNonFungiblesRequest entityNonFungiblesRequest);
         /// <summary>
-        /// Get Entities Overview
-        /// </summary>
-        /// <remarks>
-        /// Returns basic information (incomplete metadata) for a given collection of entities. This endpoint is intended to be used for populating screens which contain a small bit of information about multiple entities. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityOverviewRequest"></param>
-        /// <returns>EntityOverviewResponse</returns>
-        EntityOverviewResponse EntityOverview(EntityOverviewRequest entityOverviewRequest);
-
-        /// <summary>
-        /// Get Entities Overview
-        /// </summary>
-        /// <remarks>
-        /// Returns basic information (incomplete metadata) for a given collection of entities. This endpoint is intended to be used for populating screens which contain a small bit of information about multiple entities. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityOverviewRequest"></param>
-        /// <returns>ApiResponse of EntityOverviewResponse</returns>
-        ApiResponse<EntityOverviewResponse> EntityOverviewWithHttpInfo(EntityOverviewRequest entityOverviewRequest);
-        /// <summary>
         /// Get Entity Resource Totals
         /// </summary>
         /// <remarks>
@@ -281,6 +239,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of NonFungibleIdsResponse</returns>
         ApiResponse<NonFungibleIdsResponse> NonFungibleIdsWithHttpInfo(NonFungibleIdsRequest nonFungibleIdsRequest);
         /// <summary>
+        /// Get Entity Details
+        /// </summary>
+        /// <remarks>
+        /// Returns detailed information for collection of entities. Aggregate resources globally by default. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityDetailsRequest"></param>
+        /// <returns>StateEntityDetailsResponse</returns>
+        StateEntityDetailsResponse StateEntityDetails(StateEntityDetailsRequest stateEntityDetailsRequest);
+
+        /// <summary>
+        /// Get Entity Details
+        /// </summary>
+        /// <remarks>
+        /// Returns detailed information for collection of entities. Aggregate resources globally by default. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityDetailsRequest"></param>
+        /// <returns>ApiResponse of StateEntityDetailsResponse</returns>
+        ApiResponse<StateEntityDetailsResponse> StateEntityDetailsWithHttpInfo(StateEntityDetailsRequest stateEntityDetailsRequest);
+        /// <summary>
         /// Get Validators List
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
@@ -307,29 +286,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     public interface IStateApiAsync : IApiAccessor
     {
         #region Asynchronous Operations
-        /// <summary>
-        /// Get Entity Details
-        /// </summary>
-        /// <remarks>
-        /// Returns detailed information for a single entity. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityDetailsRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntityDetailsResponse</returns>
-        System.Threading.Tasks.Task<EntityDetailsResponse> EntityDetailsAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-        /// <summary>
-        /// Get Entity Details
-        /// </summary>
-        /// <remarks>
-        /// Returns detailed information for a single entity. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityDetailsRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntityDetailsResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<EntityDetailsResponse>> EntityDetailsWithHttpInfoAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Entity Fungible Resource Totals
         /// </summary>
@@ -423,29 +379,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>Task of ApiResponse (EntityNonFungiblesResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<EntityNonFungiblesResponse>> EntityNonFungiblesWithHttpInfoAsync(EntityNonFungiblesRequest entityNonFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
-        /// Get Entities Overview
-        /// </summary>
-        /// <remarks>
-        /// Returns basic information (incomplete metadata) for a given collection of entities. This endpoint is intended to be used for populating screens which contain a small bit of information about multiple entities. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityOverviewRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntityOverviewResponse</returns>
-        System.Threading.Tasks.Task<EntityOverviewResponse> EntityOverviewAsync(EntityOverviewRequest entityOverviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-        /// <summary>
-        /// Get Entities Overview
-        /// </summary>
-        /// <remarks>
-        /// Returns basic information (incomplete metadata) for a given collection of entities. This endpoint is intended to be used for populating screens which contain a small bit of information about multiple entities. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityOverviewRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntityOverviewResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<EntityOverviewResponse>> EntityOverviewWithHttpInfoAsync(EntityOverviewRequest entityOverviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-        /// <summary>
         /// Get Entity Resource Totals
         /// </summary>
         /// <remarks>
@@ -514,6 +447,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (NonFungibleIdsResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<NonFungibleIdsResponse>> NonFungibleIdsWithHttpInfoAsync(NonFungibleIdsRequest nonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Entity Details
+        /// </summary>
+        /// <remarks>
+        /// Returns detailed information for collection of entities. Aggregate resources globally by default. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityDetailsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateEntityDetailsResponse</returns>
+        System.Threading.Tasks.Task<StateEntityDetailsResponse> StateEntityDetailsAsync(StateEntityDetailsRequest stateEntityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Entity Details
+        /// </summary>
+        /// <remarks>
+        /// Returns detailed information for collection of entities. Aggregate resources globally by default. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityDetailsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateEntityDetailsResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateEntityDetailsResponse>> StateEntityDetailsWithHttpInfoAsync(StateEntityDetailsRequest stateEntityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Validators List
         /// </summary>
@@ -748,123 +704,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
                 return _exceptionFactory;
             }
             set { _exceptionFactory = value; }
-        }
-
-        /// <summary>
-        /// Get Entity Details Returns detailed information for a single entity. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityDetailsRequest"></param>
-        /// <returns>EntityDetailsResponse</returns>
-        public EntityDetailsResponse EntityDetails(EntityDetailsRequest entityDetailsRequest)
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityDetailsResponse> localVarResponse = EntityDetailsWithHttpInfo(entityDetailsRequest);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get Entity Details Returns detailed information for a single entity. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityDetailsRequest"></param>
-        /// <returns>ApiResponse of EntityDetailsResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityDetailsResponse> EntityDetailsWithHttpInfo(EntityDetailsRequest entityDetailsRequest)
-        {
-            // verify the required parameter 'entityDetailsRequest' is set
-            if (entityDetailsRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityDetailsRequest' when calling StateApi->EntityDetails");
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = entityDetailsRequest;
-
-
-            // make the HTTP request
-            var localVarResponse = this.Client.Post<EntityDetailsResponse>("/entity/details", localVarRequestOptions, this.Configuration);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("EntityDetails", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Get Entity Details Returns detailed information for a single entity. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityDetailsRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntityDetailsResponse</returns>
-        public async System.Threading.Tasks.Task<EntityDetailsResponse> EntityDetailsAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityDetailsResponse> localVarResponse = await EntityDetailsWithHttpInfoAsync(entityDetailsRequest, cancellationToken).ConfigureAwait(false);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get Entity Details Returns detailed information for a single entity. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityDetailsRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntityDetailsResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityDetailsResponse>> EntityDetailsWithHttpInfoAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            // verify the required parameter 'entityDetailsRequest' is set
-            if (entityDetailsRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityDetailsRequest' when calling StateApi->EntityDetails");
-
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = entityDetailsRequest;
-
-
-            // make the HTTP request
-
-            var localVarResponse = await this.AsynchronousClient.PostAsync<EntityDetailsResponse>("/entity/details", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("EntityDetails", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
         }
 
         /// <summary>
@@ -1336,123 +1175,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Entities Overview Returns basic information (incomplete metadata) for a given collection of entities. This endpoint is intended to be used for populating screens which contain a small bit of information about multiple entities. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityOverviewRequest"></param>
-        /// <returns>EntityOverviewResponse</returns>
-        public EntityOverviewResponse EntityOverview(EntityOverviewRequest entityOverviewRequest)
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityOverviewResponse> localVarResponse = EntityOverviewWithHttpInfo(entityOverviewRequest);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get Entities Overview Returns basic information (incomplete metadata) for a given collection of entities. This endpoint is intended to be used for populating screens which contain a small bit of information about multiple entities. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityOverviewRequest"></param>
-        /// <returns>ApiResponse of EntityOverviewResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityOverviewResponse> EntityOverviewWithHttpInfo(EntityOverviewRequest entityOverviewRequest)
-        {
-            // verify the required parameter 'entityOverviewRequest' is set
-            if (entityOverviewRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityOverviewRequest' when calling StateApi->EntityOverview");
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = entityOverviewRequest;
-
-
-            // make the HTTP request
-            var localVarResponse = this.Client.Post<EntityOverviewResponse>("/entity/overview", localVarRequestOptions, this.Configuration);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("EntityOverview", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Get Entities Overview Returns basic information (incomplete metadata) for a given collection of entities. This endpoint is intended to be used for populating screens which contain a small bit of information about multiple entities. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityOverviewRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntityOverviewResponse</returns>
-        public async System.Threading.Tasks.Task<EntityOverviewResponse> EntityOverviewAsync(EntityOverviewRequest entityOverviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityOverviewResponse> localVarResponse = await EntityOverviewWithHttpInfoAsync(entityOverviewRequest, cancellationToken).ConfigureAwait(false);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get Entities Overview Returns basic information (incomplete metadata) for a given collection of entities. This endpoint is intended to be used for populating screens which contain a small bit of information about multiple entities. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityOverviewRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntityOverviewResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityOverviewResponse>> EntityOverviewWithHttpInfoAsync(EntityOverviewRequest entityOverviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            // verify the required parameter 'entityOverviewRequest' is set
-            if (entityOverviewRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityOverviewRequest' when calling StateApi->EntityOverview");
-
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = entityOverviewRequest;
-
-
-            // make the HTTP request
-
-            var localVarResponse = await this.AsynchronousClient.PostAsync<EntityOverviewResponse>("/entity/overview", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("EntityOverview", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
         /// Get Entity Resource Totals Returns the total amount of each fungible and non-fungible resources owned by a given global entity. The response for fungibles and non-fungibles is paginated, and only the first page of each is returned. The returned lists are ordered by the resource&#39;s first appearance on the ledger. For further pages, use the &#x60;entity/fungibles&#x60; and &#x60;entity/non-fungibles&#x60; endpoints. To get the owned non-fungible ids (instead of just the amount), use the &#x60;entity/non-fungible-ids&#x60; endpoint. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
@@ -1797,6 +1519,123 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("NonFungibleIds", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Entity Details Returns detailed information for collection of entities. Aggregate resources globally by default. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityDetailsRequest"></param>
+        /// <returns>StateEntityDetailsResponse</returns>
+        public StateEntityDetailsResponse StateEntityDetails(StateEntityDetailsRequest stateEntityDetailsRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityDetailsResponse> localVarResponse = StateEntityDetailsWithHttpInfo(stateEntityDetailsRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Entity Details Returns detailed information for collection of entities. Aggregate resources globally by default. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityDetailsRequest"></param>
+        /// <returns>ApiResponse of StateEntityDetailsResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityDetailsResponse> StateEntityDetailsWithHttpInfo(StateEntityDetailsRequest stateEntityDetailsRequest)
+        {
+            // verify the required parameter 'stateEntityDetailsRequest' is set
+            if (stateEntityDetailsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntityDetailsRequest' when calling StateApi->StateEntityDetails");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateEntityDetailsRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateEntityDetailsResponse>("/state/entity/details", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("StateEntityDetails", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Entity Details Returns detailed information for collection of entities. Aggregate resources globally by default. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityDetailsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateEntityDetailsResponse</returns>
+        public async System.Threading.Tasks.Task<StateEntityDetailsResponse> StateEntityDetailsAsync(StateEntityDetailsRequest stateEntityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityDetailsResponse> localVarResponse = await StateEntityDetailsWithHttpInfoAsync(stateEntityDetailsRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Entity Details Returns detailed information for collection of entities. Aggregate resources globally by default. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityDetailsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateEntityDetailsResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityDetailsResponse>> StateEntityDetailsWithHttpInfoAsync(StateEntityDetailsRequest stateEntityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateEntityDetailsRequest' is set
+            if (stateEntityDetailsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntityDetailsRequest' when calling StateApi->StateEntityDetails");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateEntityDetailsRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateEntityDetailsResponse>("/state/entity/details", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("StateEntityDetails", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

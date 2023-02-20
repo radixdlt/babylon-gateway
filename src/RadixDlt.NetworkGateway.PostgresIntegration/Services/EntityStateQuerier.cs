@@ -141,22 +141,17 @@ internal class EntityStateQuerier : IEntityStateQuerier
         return new GatewayModel.EntityResourcesResponse(ledgerState, entity.GlobalAddress, fungibles, nonFungibles);
     }
 
-    public async Task<GatewayModel.EntityDetailsResponse> EntityDetailsSnapshot(GlobalAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.StateEntityDetailsResponseItem> EntityDetailsItem(GlobalAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity(address, ledgerState, token);
 
-        GatewayModel.EntityDetailsResponseDetails? details = null;
+        GatewayModel.StateEntityDetailsResponseItemDetails? details = null;
 
         switch (entity)
         {
             case FungibleResourceManagerEntity frme:
             {
                 // TODO ideally we'd like to run those as either single query or separate ones but without await between them
-
-                var supplyHistory = await _dbContext.ResourceManagerEntitySupplyHistory
-                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ResourceManagerEntityId == frme.Id)
-                    .OrderByDescending(e => e.FromStateVersion)
-                    .FirstAsync(token);
 
                 var accessRulesChain = await _dbContext.EntityAccessRulesLayersHistory
                     .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == frme.Id && e.Subtype == AccessRulesChainSubtype.None)
@@ -169,14 +164,10 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
-                details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseFungibleResourceDetails(
-                    discriminator: GatewayModel.EntityDetailsResponseDetailsType.FungibleResource,
+                details = new GatewayModel.StateEntityDetailsResponseFungibleResourceDetails(
                     accessRulesChain: new JRaw(accessRulesChain.AccessRulesChain),
                     vaultAccessRulesChain: new JRaw(vaultAccessRulesChain.AccessRulesChain),
-                    divisibility: frme.Divisibility,
-                    totalSupply: supplyHistory.TotalSupply.ToString(),
-                    totalMinted: supplyHistory.TotalMinted.ToString(),
-                    totalBurnt: supplyHistory.TotalBurnt.ToString()));
+                    divisibility: frme.Divisibility);
 
                 break;
             }
@@ -196,29 +187,26 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
-                details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseNonFungibleResourceDetails(
-                    discriminator: GatewayModel.EntityDetailsResponseDetailsType.NonFungibleResource,
+                details = new GatewayModel.StateEntityDetailsResponseNonFungibleResourceDetails(
                     accessRulesChain: new JRaw(accessRulesChain.AccessRulesChain),
                     vaultAccessRulesChain: new JRaw(vaultAccessRulesChain.AccessRulesChain),
-                    nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel()));
+                    nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel());
                 break;
             }
 
             case PackageEntity pe:
-                details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponsePackageDetails(
-                    discriminator: GatewayModel.EntityDetailsResponseDetailsType.Package,
-                    codeHex: pe.Code.ToHex()));
+                details = new GatewayModel.StateEntityDetailsResponsePackageDetails(
+                    codeHex: pe.Code.ToHex());
                 break;
 
             case VirtualAccountComponentEntity:
                 // TODO - we should better fake the data - eg accessRulesChain when this is possible
-                details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseComponentDetails(
-                    discriminator: GatewayModel.EntityDetailsResponseDetailsType.Component,
+                details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                     packageAddress: _networkConfigurationProvider.GetWellKnownAddresses().AccountPackage,
                     blueprintName: "Account",
                     state: new JObject(),
                     accessRulesChain: new JArray()
-                ));
+                );
                 break;
 
             case ComponentEntity ce:
@@ -235,35 +223,17 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
-                details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseComponentDetails(
-                    discriminator: GatewayModel.EntityDetailsResponseDetailsType.Component,
+                details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                     packageAddress: package.GlobalAddress,
                     blueprintName: ce.BlueprintName,
                     state: new JRaw(state.State),
-                    accessRulesChain: new JRaw(accessRulesLayers.AccessRulesChain)));
+                    accessRulesChain: new JRaw(accessRulesLayers.AccessRulesChain));
                 break;
         }
 
         var metadata = await GetMetadataSlice(entity.Id, 0, DefaultMetadataLimit, ledgerState, token);
 
-        return new GatewayModel.EntityDetailsResponse(ledgerState, entity.GlobalAddress, metadata, details);
-    }
-
-    public async Task<GatewayModel.EntityOverviewResponse> EntityOverview(ICollection<GlobalAddress> addresses, GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default)
-    {
-        var entities = await _dbContext.Entities
-            .Where(e => e.GlobalAddress != null && addresses.Contains(e.GlobalAddress.Value))
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .ToListAsync(token);
-
-        var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, DefaultMetadataLimit, ledgerState, token);
-
-        var items = entities
-            .Select(entity => new GatewayModel.EntityOverviewResponseEntityItem(entity.GlobalAddress, metadata[entity.Id]))
-            .ToList();
-
-        return new GatewayModel.EntityOverviewResponse(ledgerState, items);
+        return new GatewayModel.StateEntityDetailsResponseItem(entity.Address.ToHex(), entity.GlobalAddress, metadata, details);
     }
 
     public async Task<GatewayModel.EntityMetadataResponse> EntityMetadata(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState,

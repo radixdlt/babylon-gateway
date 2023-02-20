@@ -90,43 +90,56 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityOverviewRequest
+    /// StateEntityDetailsResponseFungibleResourceDetailsAllOf
     /// </summary>
-    [DataContract(Name = "EntityOverviewRequest")]
-    public partial class EntityOverviewRequest : IEquatable<EntityOverviewRequest>
+    [DataContract(Name = "StateEntityDetailsResponseFungibleResourceDetails_allOf")]
+    public partial class StateEntityDetailsResponseFungibleResourceDetailsAllOf : IEquatable<StateEntityDetailsResponseFungibleResourceDetailsAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityOverviewRequest" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseFungibleResourceDetailsAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityOverviewRequest() { }
+        protected StateEntityDetailsResponseFungibleResourceDetailsAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityOverviewRequest" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseFungibleResourceDetailsAllOf" /> class.
         /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="addresses">addresses (required).</param>
-        public EntityOverviewRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), List<string> addresses = default(List<string>))
+        /// <param name="accessRulesChain">accessRulesChain (required).</param>
+        /// <param name="vaultAccessRulesChain">vaultAccessRulesChain (required).</param>
+        /// <param name="divisibility">divisibility (required).</param>
+        public StateEntityDetailsResponseFungibleResourceDetailsAllOf(Object accessRulesChain = default(Object), Object vaultAccessRulesChain = default(Object), int divisibility = default(int))
         {
-            // to ensure "addresses" is required (not null)
-            if (addresses == null)
+            // to ensure "accessRulesChain" is required (not null)
+            if (accessRulesChain == null)
             {
-                throw new ArgumentNullException("addresses is a required property for EntityOverviewRequest and cannot be null");
+                throw new ArgumentNullException("accessRulesChain is a required property for StateEntityDetailsResponseFungibleResourceDetailsAllOf and cannot be null");
             }
-            this.Addresses = addresses;
-            this.AtLedgerState = atLedgerState;
+            this.AccessRulesChain = accessRulesChain;
+            // to ensure "vaultAccessRulesChain" is required (not null)
+            if (vaultAccessRulesChain == null)
+            {
+                throw new ArgumentNullException("vaultAccessRulesChain is a required property for StateEntityDetailsResponseFungibleResourceDetailsAllOf and cannot be null");
+            }
+            this.VaultAccessRulesChain = vaultAccessRulesChain;
+            this.Divisibility = divisibility;
         }
 
         /// <summary>
-        /// Gets or Sets AtLedgerState
+        /// Gets or Sets AccessRulesChain
         /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
+        [DataMember(Name = "access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
+        public Object AccessRulesChain { get; set; }
 
         /// <summary>
-        /// Gets or Sets Addresses
+        /// Gets or Sets VaultAccessRulesChain
         /// </summary>
-        [DataMember(Name = "addresses", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> Addresses { get; set; }
+        [DataMember(Name = "vault_access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
+        public Object VaultAccessRulesChain { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Divisibility
+        /// </summary>
+        [DataMember(Name = "divisibility", IsRequired = true, EmitDefaultValue = true)]
+        public int Divisibility { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -135,9 +148,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityOverviewRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  Addresses: ").Append(Addresses).Append("\n");
+            sb.Append("class StateEntityDetailsResponseFungibleResourceDetailsAllOf {\n");
+            sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
+            sb.Append("  VaultAccessRulesChain: ").Append(VaultAccessRulesChain).Append("\n");
+            sb.Append("  Divisibility: ").Append(Divisibility).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -158,15 +172,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityOverviewRequest);
+            return this.Equals(input as StateEntityDetailsResponseFungibleResourceDetailsAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityOverviewRequest instances are equal
+        /// Returns true if StateEntityDetailsResponseFungibleResourceDetailsAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityOverviewRequest to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponseFungibleResourceDetailsAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityOverviewRequest input)
+        public bool Equals(StateEntityDetailsResponseFungibleResourceDetailsAllOf input)
         {
             if (input == null)
             {
@@ -174,15 +188,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
+                    this.AccessRulesChain == input.AccessRulesChain ||
+                    (this.AccessRulesChain != null &&
+                    this.AccessRulesChain.Equals(input.AccessRulesChain))
                 ) && 
                 (
-                    this.Addresses == input.Addresses ||
-                    this.Addresses != null &&
-                    input.Addresses != null &&
-                    this.Addresses.SequenceEqual(input.Addresses)
+                    this.VaultAccessRulesChain == input.VaultAccessRulesChain ||
+                    (this.VaultAccessRulesChain != null &&
+                    this.VaultAccessRulesChain.Equals(input.VaultAccessRulesChain))
+                ) && 
+                (
+                    this.Divisibility == input.Divisibility ||
+                    this.Divisibility.Equals(input.Divisibility)
                 );
         }
 
@@ -195,14 +212,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtLedgerState != null)
+                if (this.AccessRulesChain != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccessRulesChain.GetHashCode();
                 }
-                if (this.Addresses != null)
+                if (this.VaultAccessRulesChain != null)
                 {
-                    hashCode = (hashCode * 59) + this.Addresses.GetHashCode();
+                    hashCode = (hashCode * 59) + this.VaultAccessRulesChain.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.Divisibility.GetHashCode();
                 return hashCode;
             }
         }

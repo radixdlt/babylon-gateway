@@ -90,36 +90,43 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityDetailsRequestAllOf
+    /// StateEntityDetailsRequestAllOf
     /// </summary>
-    [DataContract(Name = "EntityDetailsRequest_allOf")]
-    public partial class EntityDetailsRequestAllOf : IEquatable<EntityDetailsRequestAllOf>
+    [DataContract(Name = "StateEntityDetailsRequest_allOf")]
+    public partial class StateEntityDetailsRequestAllOf : IEquatable<StateEntityDetailsRequestAllOf>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsRequestAllOf" /> class.
+        /// Gets or Sets AggregationLevel
+        /// </summary>
+        [DataMember(Name = "aggregation_level", EmitDefaultValue = true)]
+        public ResourceAggregationLevel? AggregationLevel { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StateEntityDetailsRequestAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityDetailsRequestAllOf() { }
+        protected StateEntityDetailsRequestAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsRequestAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsRequestAllOf" /> class.
         /// </summary>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        public EntityDetailsRequestAllOf(string address = default(string))
+        /// <param name="addresses">addresses (required).</param>
+        /// <param name="aggregationLevel">aggregationLevel.</param>
+        public StateEntityDetailsRequestAllOf(List<string> addresses = default(List<string>), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "addresses" is required (not null)
+            if (addresses == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityDetailsRequestAllOf and cannot be null");
+                throw new ArgumentNullException("addresses is a required property for StateEntityDetailsRequestAllOf and cannot be null");
             }
-            this.Address = address;
+            this.Addresses = addresses;
+            this.AggregationLevel = aggregationLevel;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// Gets or Sets Addresses
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        [DataMember(Name = "addresses", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> Addresses { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +135,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityDetailsRequestAllOf {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("class StateEntityDetailsRequestAllOf {\n");
+            sb.Append("  Addresses: ").Append(Addresses).Append("\n");
+            sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +158,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityDetailsRequestAllOf);
+            return this.Equals(input as StateEntityDetailsRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityDetailsRequestAllOf instances are equal
+        /// Returns true if StateEntityDetailsRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityDetailsRequestAllOf to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityDetailsRequestAllOf input)
+        public bool Equals(StateEntityDetailsRequestAllOf input)
         {
             if (input == null)
             {
@@ -166,9 +174,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.Addresses == input.Addresses ||
+                    this.Addresses != null &&
+                    input.Addresses != null &&
+                    this.Addresses.SequenceEqual(input.Addresses)
+                ) && 
+                (
+                    this.AggregationLevel == input.AggregationLevel ||
+                    this.AggregationLevel.Equals(input.AggregationLevel)
                 );
         }
 
@@ -181,10 +194,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                if (this.Addresses != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Addresses.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.AggregationLevel.GetHashCode();
                 return hashCode;
             }
         }

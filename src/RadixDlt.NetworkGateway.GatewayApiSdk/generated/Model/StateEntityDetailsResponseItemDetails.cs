@@ -84,50 +84,50 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityDetailsResponsePackageDetails
+    /// StateEntityDetailsResponseItemDetails
     /// </summary>
-    [DataContract(Name = "EntityDetailsResponsePackageDetails")]
-    public partial class EntityDetailsResponsePackageDetails : IEquatable<EntityDetailsResponsePackageDetails>
+    [DataContract(Name = "StateEntityDetailsResponseItemDetails")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseComponentDetails), "Component")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleResourceDetails), "FungibleResource")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleVaultDetails), "FungibleVault")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleResourceDetails), "NonFungibleResource")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleVaultDetails), "NonFungibleVault")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponsePackageDetails), "Package")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseComponentDetails), "StateEntityDetailsResponseComponentDetails")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleResourceDetails), "StateEntityDetailsResponseFungibleResourceDetails")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleVaultDetails), "StateEntityDetailsResponseFungibleVaultDetails")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleResourceDetails), "StateEntityDetailsResponseNonFungibleResourceDetails")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleVaultDetails), "StateEntityDetailsResponseNonFungibleVaultDetails")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponsePackageDetails), "StateEntityDetailsResponsePackageDetails")]
+    public partial class StateEntityDetailsResponseItemDetails : IEquatable<StateEntityDetailsResponseItemDetails>
     {
 
         /// <summary>
-        /// Gets or Sets Discriminator
+        /// Gets or Sets Type
         /// </summary>
-        [DataMember(Name = "discriminator", IsRequired = true, EmitDefaultValue = true)]
-        public EntityDetailsResponseDetailsType Discriminator { get; set; }
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public StateEntityDetailsResponseItemDetailsType Type { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponsePackageDetails" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseItemDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityDetailsResponsePackageDetails() { }
+        protected StateEntityDetailsResponseItemDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponsePackageDetails" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseItemDetails" /> class.
         /// </summary>
-        /// <param name="discriminator">discriminator (required).</param>
-        /// <param name="codeHex">Hex-encoded binary blob. (required).</param>
-        public EntityDetailsResponsePackageDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string codeHex = default(string))
+        /// <param name="type">type (required).</param>
+        public StateEntityDetailsResponseItemDetails(StateEntityDetailsResponseItemDetailsType type = default(StateEntityDetailsResponseItemDetailsType))
         {
-            this.Discriminator = discriminator;
-            // to ensure "codeHex" is required (not null)
-            if (codeHex == null)
-            {
-                throw new ArgumentNullException("codeHex is a required property for EntityDetailsResponsePackageDetails and cannot be null");
-            }
-            this.CodeHex = codeHex;
+            this.Type = type;
         }
-
-        /// <summary>
-        /// Hex-encoded binary blob.
-        /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string CodeHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -136,9 +136,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityDetailsResponsePackageDetails {\n");
-            sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
-            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
+            sb.Append("class StateEntityDetailsResponseItemDetails {\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -159,15 +158,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityDetailsResponsePackageDetails);
+            return this.Equals(input as StateEntityDetailsResponseItemDetails);
         }
 
         /// <summary>
-        /// Returns true if EntityDetailsResponsePackageDetails instances are equal
+        /// Returns true if StateEntityDetailsResponseItemDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityDetailsResponsePackageDetails to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponseItemDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityDetailsResponsePackageDetails input)
+        public bool Equals(StateEntityDetailsResponseItemDetails input)
         {
             if (input == null)
             {
@@ -175,13 +174,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Discriminator == input.Discriminator ||
-                    this.Discriminator.Equals(input.Discriminator)
-                ) && 
-                (
-                    this.CodeHex == input.CodeHex ||
-                    (this.CodeHex != null &&
-                    this.CodeHex.Equals(input.CodeHex))
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
                 );
         }
 
@@ -194,11 +188,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
-                if (this.CodeHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
                 return hashCode;
             }
         }

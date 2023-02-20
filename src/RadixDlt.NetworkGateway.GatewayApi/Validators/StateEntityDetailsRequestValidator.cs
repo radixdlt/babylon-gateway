@@ -67,15 +67,23 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class EntityDetailsRequestValidator : AbstractValidator<GatewayModel.EntityDetailsRequest>
+internal class StateEntityDetailsRequestValidator : AbstractValidator<GatewayModel.StateEntityDetailsRequest>
 {
-    public EntityDetailsRequestValidator(LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public StateEntityDetailsRequestValidator(LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
-        RuleFor(x => x.Address)
-            .NotEmpty()
-            .RadixAddress();
-
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
+
+        RuleFor(x => x.Addresses)
+            .NotEmpty()
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.Addresses.Count)
+                    .Equal(1);
+
+                RuleForEach(x => x.Addresses)
+                    .NotNull()
+                    .RadixAddress();
+            });
     }
 }

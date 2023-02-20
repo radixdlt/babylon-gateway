@@ -84,54 +84,90 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityOverviewResponse
+    /// StateEntityDetailsResponseComponentDetails
     /// </summary>
-    [DataContract(Name = "EntityOverviewResponse")]
-    public partial class EntityOverviewResponse : IEquatable<EntityOverviewResponse>
+    [DataContract(Name = "StateEntityDetailsResponseComponentDetails")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseComponentDetails), "Component")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleResourceDetails), "FungibleResource")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleVaultDetails), "FungibleVault")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleResourceDetails), "NonFungibleResource")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleVaultDetails), "NonFungibleVault")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponsePackageDetails), "Package")]
+    public partial class StateEntityDetailsResponseComponentDetails : StateEntityDetailsResponseItemDetails, IEquatable<StateEntityDetailsResponseComponentDetails>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityOverviewResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityOverviewResponse() { }
+        protected StateEntityDetailsResponseComponentDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityOverviewResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetails" /> class.
         /// </summary>
-        /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="entities">entities (required).</param>
-        public EntityOverviewResponse(LedgerState ledgerState = default(LedgerState), List<EntityOverviewResponseEntityItem> entities = default(List<EntityOverviewResponseEntityItem>))
+        /// <param name="packageAddress">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
+        /// <param name="blueprintName">blueprintName (required).</param>
+        /// <param name="state">state (required).</param>
+        /// <param name="accessRulesChain">accessRulesChain (required).</param>
+        /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Component).</param>
+        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), Object accessRulesChain = default(Object), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
         {
-            // to ensure "ledgerState" is required (not null)
-            if (ledgerState == null)
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
             {
-                throw new ArgumentNullException("ledgerState is a required property for EntityOverviewResponse and cannot be null");
+                throw new ArgumentNullException("packageAddress is a required property for StateEntityDetailsResponseComponentDetails and cannot be null");
             }
-            this.LedgerState = ledgerState;
-            // to ensure "entities" is required (not null)
-            if (entities == null)
+            this.PackageAddress = packageAddress;
+            // to ensure "blueprintName" is required (not null)
+            if (blueprintName == null)
             {
-                throw new ArgumentNullException("entities is a required property for EntityOverviewResponse and cannot be null");
+                throw new ArgumentNullException("blueprintName is a required property for StateEntityDetailsResponseComponentDetails and cannot be null");
             }
-            this.Entities = entities;
+            this.BlueprintName = blueprintName;
+            // to ensure "state" is required (not null)
+            if (state == null)
+            {
+                throw new ArgumentNullException("state is a required property for StateEntityDetailsResponseComponentDetails and cannot be null");
+            }
+            this.State = state;
+            // to ensure "accessRulesChain" is required (not null)
+            if (accessRulesChain == null)
+            {
+                throw new ArgumentNullException("accessRulesChain is a required property for StateEntityDetailsResponseComponentDetails and cannot be null");
+            }
+            this.AccessRulesChain = accessRulesChain;
         }
 
         /// <summary>
-        /// Gets or Sets LedgerState
+        /// Bech32m-encoded human readable version of the entity&#39;s global address.
         /// </summary>
-        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
-        public LedgerState LedgerState { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets Entities
+        /// Gets or Sets BlueprintName
         /// </summary>
-        [DataMember(Name = "entities", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityOverviewResponseEntityItem> Entities { get; set; }
+        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
+        public string BlueprintName { get; set; }
+
+        /// <summary>
+        /// Gets or Sets State
+        /// </summary>
+        [DataMember(Name = "state", IsRequired = true, EmitDefaultValue = true)]
+        public Object State { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AccessRulesChain
+        /// </summary>
+        [DataMember(Name = "access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
+        public Object AccessRulesChain { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -140,9 +176,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityOverviewResponse {\n");
-            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
-            sb.Append("  Entities: ").Append(Entities).Append("\n");
+            sb.Append("class StateEntityDetailsResponseComponentDetails {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
+            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
+            sb.Append("  State: ").Append(State).Append("\n");
+            sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -151,7 +190,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -163,31 +202,40 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityOverviewResponse);
+            return this.Equals(input as StateEntityDetailsResponseComponentDetails);
         }
 
         /// <summary>
-        /// Returns true if EntityOverviewResponse instances are equal
+        /// Returns true if StateEntityDetailsResponseComponentDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityOverviewResponse to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponseComponentDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityOverviewResponse input)
+        public bool Equals(StateEntityDetailsResponseComponentDetails input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.LedgerState == input.LedgerState ||
-                    (this.LedgerState != null &&
-                    this.LedgerState.Equals(input.LedgerState))
-                ) && 
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
+                ) && base.Equals(input) && 
                 (
-                    this.Entities == input.Entities ||
-                    this.Entities != null &&
-                    input.Entities != null &&
-                    this.Entities.SequenceEqual(input.Entities)
+                    this.BlueprintName == input.BlueprintName ||
+                    (this.BlueprintName != null &&
+                    this.BlueprintName.Equals(input.BlueprintName))
+                ) && base.Equals(input) && 
+                (
+                    this.State == input.State ||
+                    (this.State != null &&
+                    this.State.Equals(input.State))
+                ) && base.Equals(input) && 
+                (
+                    this.AccessRulesChain == input.AccessRulesChain ||
+                    (this.AccessRulesChain != null &&
+                    this.AccessRulesChain.Equals(input.AccessRulesChain))
                 );
         }
 
@@ -199,14 +247,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.LedgerState != null)
+                int hashCode = base.GetHashCode();
+                if (this.PackageAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
                 }
-                if (this.Entities != null)
+                if (this.BlueprintName != null)
                 {
-                    hashCode = (hashCode * 59) + this.Entities.GetHashCode();
+                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                }
+                if (this.State != null)
+                {
+                    hashCode = (hashCode * 59) + this.State.GetHashCode();
+                }
+                if (this.AccessRulesChain != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccessRulesChain.GetHashCode();
                 }
                 return hashCode;
             }

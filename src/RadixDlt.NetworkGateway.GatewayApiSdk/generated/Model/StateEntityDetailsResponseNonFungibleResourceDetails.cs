@@ -84,72 +84,58 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityDetailsResponseFungibleResourceDetails
+    /// StateEntityDetailsResponseNonFungibleResourceDetails
     /// </summary>
-    [DataContract(Name = "EntityDetailsResponseFungibleResourceDetails")]
-    public partial class EntityDetailsResponseFungibleResourceDetails : IEquatable<EntityDetailsResponseFungibleResourceDetails>
+    [DataContract(Name = "StateEntityDetailsResponseNonFungibleResourceDetails")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseComponentDetails), "Component")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleResourceDetails), "FungibleResource")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleVaultDetails), "FungibleVault")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleResourceDetails), "NonFungibleResource")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleVaultDetails), "NonFungibleVault")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponsePackageDetails), "Package")]
+    public partial class StateEntityDetailsResponseNonFungibleResourceDetails : StateEntityDetailsResponseItemDetails, IEquatable<StateEntityDetailsResponseNonFungibleResourceDetails>
     {
 
         /// <summary>
-        /// Gets or Sets Discriminator
+        /// Gets or Sets NonFungibleIdType
         /// </summary>
-        [DataMember(Name = "discriminator", IsRequired = true, EmitDefaultValue = true)]
-        public EntityDetailsResponseDetailsType Discriminator { get; set; }
+        [DataMember(Name = "non_fungible_id_type", IsRequired = true, EmitDefaultValue = true)]
+        public NonFungibleIdType NonFungibleIdType { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseFungibleResourceDetails" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseNonFungibleResourceDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityDetailsResponseFungibleResourceDetails() { }
+        protected StateEntityDetailsResponseNonFungibleResourceDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseFungibleResourceDetails" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseNonFungibleResourceDetails" /> class.
         /// </summary>
-        /// <param name="discriminator">discriminator (required).</param>
         /// <param name="accessRulesChain">accessRulesChain (required).</param>
         /// <param name="vaultAccessRulesChain">vaultAccessRulesChain (required).</param>
-        /// <param name="divisibility">divisibility (required).</param>
-        /// <param name="totalSupply">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        /// <param name="totalMinted">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        /// <param name="totalBurnt">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), Object accessRulesChain = default(Object), Object vaultAccessRulesChain = default(Object), int divisibility = default(int), string totalSupply = default(string), string totalMinted = default(string), string totalBurnt = default(string))
+        /// <param name="nonFungibleIdType">nonFungibleIdType (required).</param>
+        /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.NonFungibleResource).</param>
+        public StateEntityDetailsResponseNonFungibleResourceDetails(Object accessRulesChain = default(Object), Object vaultAccessRulesChain = default(Object), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.NonFungibleResource) : base(type)
         {
-            this.Discriminator = discriminator;
             // to ensure "accessRulesChain" is required (not null)
             if (accessRulesChain == null)
             {
-                throw new ArgumentNullException("accessRulesChain is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
+                throw new ArgumentNullException("accessRulesChain is a required property for StateEntityDetailsResponseNonFungibleResourceDetails and cannot be null");
             }
             this.AccessRulesChain = accessRulesChain;
             // to ensure "vaultAccessRulesChain" is required (not null)
             if (vaultAccessRulesChain == null)
             {
-                throw new ArgumentNullException("vaultAccessRulesChain is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
+                throw new ArgumentNullException("vaultAccessRulesChain is a required property for StateEntityDetailsResponseNonFungibleResourceDetails and cannot be null");
             }
             this.VaultAccessRulesChain = vaultAccessRulesChain;
-            this.Divisibility = divisibility;
-            // to ensure "totalSupply" is required (not null)
-            if (totalSupply == null)
-            {
-                throw new ArgumentNullException("totalSupply is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
-            }
-            this.TotalSupply = totalSupply;
-            // to ensure "totalMinted" is required (not null)
-            if (totalMinted == null)
-            {
-                throw new ArgumentNullException("totalMinted is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
-            }
-            this.TotalMinted = totalMinted;
-            // to ensure "totalBurnt" is required (not null)
-            if (totalBurnt == null)
-            {
-                throw new ArgumentNullException("totalBurnt is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
-            }
-            this.TotalBurnt = totalBurnt;
+            this.NonFungibleIdType = nonFungibleIdType;
         }
 
         /// <summary>
@@ -165,47 +151,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public Object VaultAccessRulesChain { get; set; }
 
         /// <summary>
-        /// Gets or Sets Divisibility
-        /// </summary>
-        [DataMember(Name = "divisibility", IsRequired = true, EmitDefaultValue = true)]
-        public int Divisibility { get; set; }
-
-        /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
-        /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
-        public string TotalSupply { get; set; }
-
-        /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
-        /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "total_minted", IsRequired = true, EmitDefaultValue = true)]
-        public string TotalMinted { get; set; }
-
-        /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
-        /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "total_burnt", IsRequired = true, EmitDefaultValue = true)]
-        public string TotalBurnt { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityDetailsResponseFungibleResourceDetails {\n");
-            sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
+            sb.Append("class StateEntityDetailsResponseNonFungibleResourceDetails {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
             sb.Append("  VaultAccessRulesChain: ").Append(VaultAccessRulesChain).Append("\n");
-            sb.Append("  Divisibility: ").Append(Divisibility).Append("\n");
-            sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
-            sb.Append("  TotalMinted: ").Append(TotalMinted).Append("\n");
-            sb.Append("  TotalBurnt: ").Append(TotalBurnt).Append("\n");
+            sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -214,7 +170,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -226,53 +182,34 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityDetailsResponseFungibleResourceDetails);
+            return this.Equals(input as StateEntityDetailsResponseNonFungibleResourceDetails);
         }
 
         /// <summary>
-        /// Returns true if EntityDetailsResponseFungibleResourceDetails instances are equal
+        /// Returns true if StateEntityDetailsResponseNonFungibleResourceDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityDetailsResponseFungibleResourceDetails to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponseNonFungibleResourceDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityDetailsResponseFungibleResourceDetails input)
+        public bool Equals(StateEntityDetailsResponseNonFungibleResourceDetails input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
-                (
-                    this.Discriminator == input.Discriminator ||
-                    this.Discriminator.Equals(input.Discriminator)
-                ) && 
+            return base.Equals(input) && 
                 (
                     this.AccessRulesChain == input.AccessRulesChain ||
                     (this.AccessRulesChain != null &&
                     this.AccessRulesChain.Equals(input.AccessRulesChain))
-                ) && 
+                ) && base.Equals(input) && 
                 (
                     this.VaultAccessRulesChain == input.VaultAccessRulesChain ||
                     (this.VaultAccessRulesChain != null &&
                     this.VaultAccessRulesChain.Equals(input.VaultAccessRulesChain))
-                ) && 
+                ) && base.Equals(input) && 
                 (
-                    this.Divisibility == input.Divisibility ||
-                    this.Divisibility.Equals(input.Divisibility)
-                ) && 
-                (
-                    this.TotalSupply == input.TotalSupply ||
-                    (this.TotalSupply != null &&
-                    this.TotalSupply.Equals(input.TotalSupply))
-                ) && 
-                (
-                    this.TotalMinted == input.TotalMinted ||
-                    (this.TotalMinted != null &&
-                    this.TotalMinted.Equals(input.TotalMinted))
-                ) && 
-                (
-                    this.TotalBurnt == input.TotalBurnt ||
-                    (this.TotalBurnt != null &&
-                    this.TotalBurnt.Equals(input.TotalBurnt))
+                    this.NonFungibleIdType == input.NonFungibleIdType ||
+                    this.NonFungibleIdType.Equals(input.NonFungibleIdType)
                 );
         }
 
@@ -284,8 +221,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
+                int hashCode = base.GetHashCode();
                 if (this.AccessRulesChain != null)
                 {
                     hashCode = (hashCode * 59) + this.AccessRulesChain.GetHashCode();
@@ -294,19 +230,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.VaultAccessRulesChain.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.Divisibility.GetHashCode();
-                if (this.TotalSupply != null)
-                {
-                    hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
-                }
-                if (this.TotalMinted != null)
-                {
-                    hashCode = (hashCode * 59) + this.TotalMinted.GetHashCode();
-                }
-                if (this.TotalBurnt != null)
-                {
-                    hashCode = (hashCode * 59) + this.TotalBurnt.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
                 return hashCode;
             }
         }

@@ -62,29 +62,31 @@
  * permissions under this License.
  */
 
-using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using System.Threading;
+using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+namespace GatewayApi.Controllers;
 
-internal class EntityOverviewRequestValidator : AbstractValidator<GatewayModel.EntityOverviewRequest>
+[ApiController]
+[Route("state/entity")]
+[ServiceFilter(typeof(ExceptionFilter))]
+[ServiceFilter(typeof(InvalidModelStateFilter))]
+public class StateController : ControllerBase
 {
-    public EntityOverviewRequestValidator(LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    private readonly IEntityHandler _entityHandler;
+
+    public StateController(IEntityHandler entityHandler)
     {
-        RuleFor(x => x.Addresses)
-            .NotEmpty()
-            .DependentRules(() =>
-            {
-                RuleFor(x => x.Addresses.Count)
-                    .GreaterThan(0)
-                    .LessThan(20);
+        _entityHandler = entityHandler;
+    }
 
-                RuleForEach(x => x.Addresses)
-                    .NotNull()
-                    .RadixAddress();
-            });
-
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
+    [HttpPost("details")]
+    public async Task<IActionResult> Details(GatewayModel.StateEntityDetailsRequest request, CancellationToken token = default)
+    {
+        return Ok(await _entityHandler.Details(request, token));
     }
 }
