@@ -71,11 +71,14 @@ internal class EntityResourcesRequestValidator : AbstractValidator<GatewayModel.
 {
     public EntityResourcesRequestValidator(LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
+
         RuleFor(x => x.Address)
             .NotEmpty()
             .RadixAddress();
 
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
+        RuleFor(x => x.AggregationLevel)
+            .IsInEnum();
     }
 }

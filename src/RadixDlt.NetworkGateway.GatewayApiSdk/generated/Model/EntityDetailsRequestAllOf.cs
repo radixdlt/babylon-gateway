@@ -90,65 +90,29 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityResourcesRequest
+    /// EntityDetailsRequestAllOf
     /// </summary>
-    [DataContract(Name = "EntityResourcesRequest")]
-    public partial class EntityResourcesRequest : IEquatable<EntityResourcesRequest>
+    [DataContract(Name = "EntityDetailsRequest_allOf")]
+    public partial class EntityDetailsRequestAllOf : IEquatable<EntityDetailsRequestAllOf>
     {
         /// <summary>
-        /// Defines AggregationLevel
-        /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum AggregationLevelEnum
-        {
-            /// <summary>
-            /// Enum Resource for value: resource
-            /// </summary>
-            [EnumMember(Value = "resource")]
-            Resource = 1,
-
-            /// <summary>
-            /// Enum Vault for value: vault
-            /// </summary>
-            [EnumMember(Value = "vault")]
-            Vault = 2
-
-        }
-
-
-        /// <summary>
-        /// Gets or Sets AggregationLevel
-        /// </summary>
-        [DataMember(Name = "aggregation_level", EmitDefaultValue = true)]
-        public AggregationLevelEnum? AggregationLevel { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesRequest" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsRequestAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityResourcesRequest() { }
+        protected EntityDetailsRequestAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesRequest" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsRequestAllOf" /> class.
         /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="aggregationLevel">aggregationLevel.</param>
-        public EntityResourcesRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string address = default(string), AggregationLevelEnum? aggregationLevel = default(AggregationLevelEnum?))
+        public EntityDetailsRequestAllOf(string address = default(string))
         {
             // to ensure "address" is required (not null)
             if (address == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityResourcesRequest and cannot be null");
+                throw new ArgumentNullException("address is a required property for EntityDetailsRequestAllOf and cannot be null");
             }
             this.Address = address;
-            this.AtLedgerState = atLedgerState;
-            this.AggregationLevel = aggregationLevel;
         }
-
-        /// <summary>
-        /// Gets or Sets AtLedgerState
-        /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the entity&#39;s global address.
@@ -164,10 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityResourcesRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
+            sb.Append("class EntityDetailsRequestAllOf {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -188,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityResourcesRequest);
+            return this.Equals(input as EntityDetailsRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityResourcesRequest instances are equal
+        /// Returns true if EntityDetailsRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityResourcesRequest to be compared</param>
+        /// <param name="input">Instance of EntityDetailsRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityResourcesRequest input)
+        public bool Equals(EntityDetailsRequestAllOf input)
         {
             if (input == null)
             {
@@ -204,18 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
-                ) && 
-                (
                     this.Address == input.Address ||
                     (this.Address != null &&
                     this.Address.Equals(input.Address))
-                ) && 
-                (
-                    this.AggregationLevel == input.AggregationLevel ||
-                    this.AggregationLevel.Equals(input.AggregationLevel)
                 );
         }
 
@@ -228,15 +181,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtLedgerState != null)
-                {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
-                }
                 if (this.Address != null)
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.AggregationLevel.GetHashCode();
                 return hashCode;
             }
         }

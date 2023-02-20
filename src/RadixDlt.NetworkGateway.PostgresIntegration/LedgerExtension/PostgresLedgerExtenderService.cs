@@ -861,20 +861,23 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (!mostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var aggregate) || aggregate.FromStateVersion != stateVersion)
                     {
+                        var previousTmpTmp = aggregate?.TmpTmpRemoveMeOnceTxEventsBecomeAvailable ?? string.Empty;
+
                         aggregate = new EntityFungibleResourceAggregatedVaultsHistory
                         {
                             Id = sequences.EntityResourceAggregatedVaultsHistorySequence++,
                             FromStateVersion = stateVersion,
                             EntityId = entityId,
                             ResourceEntityId = resourceEntityId,
-                            TmpTmpRemoveMeOnceTxEventsBecomeAvailable = string.Empty,
+                            TmpTmpRemoveMeOnceTxEventsBecomeAvailable = previousTmpTmp,
                         };
 
                         entityResourceAggregatedVaultsHistoryToAdd.Add(aggregate);
+                        mostRecentEntityResourceAggregatedVaultsHistory[lookup] = aggregate;
                     }
 
                     // TODO replace with simple aggregate.Balance += delta once TX events become available
-                    var tmpDiff = tmpBalance;
+                    var tmpSum = TokenAmount.Zero;
                     var tmpExists = false;
                     var tmpColl = aggregate.TmpTmpRemoveMeOnceTxEventsBecomeAvailable
                         .Split(';', StringSplitOptions.RemoveEmptyEntries)
@@ -886,10 +889,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                             if (vaultId == tmpResourceVaultEntityId)
                             {
-                                tmpDiff = tmpBalance - balance;
-                                balance = tmpBalance;
                                 tmpExists = true;
+                                balance = tmpBalance;
                             }
+
+                            tmpSum += balance;
 
                             return $"{vaultId}={balance}";
                         })
@@ -898,11 +902,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     if (tmpExists == false)
                     {
                         tmpColl.Add($"{tmpResourceVaultEntityId}={tmpBalance}");
+                        tmpSum += tmpBalance;
                     }
 
                     aggregate.TmpTmpRemoveMeOnceTxEventsBecomeAvailable = string.Join(";", tmpColl);
 
-                    ((EntityFungibleResourceAggregatedVaultsHistory)aggregate).Balance += tmpDiff;
+                    ((EntityFungibleResourceAggregatedVaultsHistory)aggregate).Balance = tmpSum;
                 }
 
                 // TODO rename tmpTotalCount->delta and drop tmpResourceVaultEntityId once TX events become available
@@ -912,20 +917,23 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (!mostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var aggregate) || aggregate.FromStateVersion != stateVersion)
                     {
+                        var previousTmpTmp = aggregate?.TmpTmpRemoveMeOnceTxEventsBecomeAvailable ?? string.Empty;
+
                         aggregate = new EntityNonFungibleResourceAggregatedVaultsHistory
                         {
                             Id = sequences.EntityResourceAggregatedVaultsHistorySequence++,
                             FromStateVersion = stateVersion,
                             EntityId = entityId,
                             ResourceEntityId = resourceEntityId,
-                            TmpTmpRemoveMeOnceTxEventsBecomeAvailable = string.Empty,
+                            TmpTmpRemoveMeOnceTxEventsBecomeAvailable = previousTmpTmp,
                         };
 
                         entityResourceAggregatedVaultsHistoryToAdd.Add(aggregate);
+                        mostRecentEntityResourceAggregatedVaultsHistory[lookup] = aggregate;
                     }
 
                     // TODO replace with simple aggregate.TotalCount += delta once TX events become available
-                    var tmpDiff = tmpTotalCount;
+                    var tmpSum = 0L;
                     var tmpExists = false;
                     var tmpColl = aggregate.TmpTmpRemoveMeOnceTxEventsBecomeAvailable
                         .Split(';', StringSplitOptions.RemoveEmptyEntries)
@@ -937,9 +945,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                             if (vaultId == tmpResourceVaultEntityId)
                             {
-                                tmpDiff = tmpTotalCount - totalCount;
+                                tmpExists = true;
                                 totalCount = tmpTotalCount;
                             }
+
+                            tmpSum += totalCount;
 
                             return $"{vaultId}={totalCount}";
                         })
@@ -948,11 +958,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     if (tmpExists == false)
                     {
                         tmpColl.Add($"{tmpResourceVaultEntityId}={tmpTotalCount}");
+                        tmpSum += tmpTotalCount;
                     }
 
                     aggregate.TmpTmpRemoveMeOnceTxEventsBecomeAvailable = string.Join(";", tmpColl);
 
-                    ((EntityNonFungibleResourceAggregatedVaultsHistory)aggregate).TotalCount += tmpDiff;
+                    ((EntityNonFungibleResourceAggregatedVaultsHistory)aggregate).TotalCount = tmpSum;
                 }
 
                 void AggregateEntityResourceInternal(long entityId, long resourceEntityId)

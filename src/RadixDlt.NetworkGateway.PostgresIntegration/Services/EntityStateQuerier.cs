@@ -88,6 +88,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record FungiblesViewModel(GlobalAddress ResourceEntityGlobalAddress, string Balance, int TotalCount);
 
+    private record FungibleVaultViewModel(GlobalAddress ResourceEntityGlobalAddress, string VaultAddress, string Balance, int ResourceTotalCount, int VaultTotalCount);
+
     private record NonFungiblesViewModel(GlobalAddress ResourceEntityGlobalAddress, long NonFungibleIdsCount, int TotalCount);
 
     private record NonFungibleIdsViewModel(string NonFungibleId, int TotalCount);
@@ -121,13 +123,15 @@ internal class EntityStateQuerier : IEntityStateQuerier
             (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EddsaEd25519VirtualIdentityComponent).AddressBytePrefix;
     }
 
-    public async Task<GatewayModel.EntityResourcesResponse> EntityResourcesSnapshot(GlobalAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityResourcesResponse> EntityResourcesSnapshot(GlobalAddress address, bool aggregatePerVault, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity<ComponentEntity>(address, ledgerState, token);
 
         // TODO ideally we'd like to run those as either single query or separate ones but without await between them
 
-        var fungibles = await GetFungiblesSlice(entity.Id, 0, DefaultResourceLimit, ledgerState, token);
+        var fungibles = aggregatePerVault
+            ? await GetFungiblesSlicePerVault(entity.Id, DefaultResourceLimit, DefaultResourceLimit, ledgerState, token)
+            : await GetFungiblesSlice(entity.Id, 0, DefaultResourceLimit, ledgerState, token);
         var nonFungibles = await GetNonFungiblesSlice(entity.Id, 0, DefaultResourceLimit, ledgerState, token);
 
         return new GatewayModel.EntityResourcesResponse(ledgerState, entity.GlobalAddress, fungibles, nonFungibles);
@@ -527,8 +531,10 @@ INNER JOIN LATERAL (
         return result;
     }
 
-    private async Task<GatewayModel.FungibleResourcesCollection> GetFungiblesSlice(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState,
-        CancellationToken token)
+    /// <summary>
+    /// Returns a paginable resource collection with total (aggregated) balance per resource.
+    /// </summary>
+    private async Task<GatewayModel.FungibleResourcesCollection> GetFungiblesSlice(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         var cd = new CommandDefinition(
             commandText: @"
@@ -542,31 +548,19 @@ WITH most_recent_entity_resource_aggregate_history_nested AS (
 most_recent_entity_resource_aggregate_history AS (
     SELECT UNNEST(fungible_resource_entity_ids[@offset:@limit]) AS fungible_resource_entity_id, cardinality(fungible_resource_entity_ids) AS total_count
     FROM most_recent_entity_resource_aggregate_history_nested
-),
-entity_resource_vault_projection AS (
-    SELECT rah.*, UNNEST(rvah.vault_entity_ids) AS vault_entity_id
-    FROM most_recent_entity_resource_aggregate_history rah
-    INNER JOIN LATERAL (
-        SELECT vault_entity_ids
-        FROM entity_resource_vault_aggregate_history
-        WHERE from_state_version <= @stateVersion AND entity_id = @entityId AND resource_entity_id = rah.fungible_resource_entity_id
-        ORDER BY from_state_version DESC
-        LIMIT 1
-    ) rvah ON TRUE
 )
 SELECT e.global_address AS ResourceEntityGlobalAddress,
-    CAST(SUM(evh.balance) AS text) AS Balance,
-    p.total_count AS TotalCount
-FROM entity_resource_vault_projection p
+       CAST(eravh.balance AS text) AS Balance,
+       ah.total_count AS TotalCount
+FROM most_recent_entity_resource_aggregate_history ah
 INNER JOIN LATERAL (
     SELECT balance
-    FROM entity_vault_history
-    WHERE from_state_version <= @stateVersion AND global_entity_id = @entityId AND vault_entity_id = p.vault_entity_id
+    FROM entity_resource_aggregated_vaults_history
+    WHERE from_state_version <= @stateVersion AND entity_id = @entityId AND resource_entity_id = ah.fungible_resource_entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
-) evh ON TRUE
-INNER JOIN entities e ON p.fungible_resource_entity_id = e.id
-GROUP BY ResourceEntityGlobalAddress, TotalCount;
+) eravh ON TRUE
+INNER JOIN entities e ON ah.fungible_resource_entity_id = e.id
 ",
             parameters: new
             {
@@ -579,16 +573,16 @@ GROUP BY ResourceEntityGlobalAddress, TotalCount;
 
         long? totalCount = 0;
 
-        var items = (await _dbContext.Database.GetDbConnection().QueryAsync<FungiblesViewModel>(cd)).ToList()
-            .Select(vm =>
-            {
-                totalCount = vm.TotalCount;
+        var items = new List<GatewayModel.FungibleResourcesCollectionItem>();
 
-                return new GatewayModel.FungibleResourcesCollectionItem(
-                    vm.ResourceEntityGlobalAddress,
-                    new GatewayModel.TokenAmount(TokenAmount.FromSubUnitsString(vm.Balance).ToString(), vm.ResourceEntityGlobalAddress));
-            })
-            .ToList();
+        foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<FungiblesViewModel>(cd))
+        {
+            totalCount = vm.TotalCount;
+
+            items.Add(new GatewayModel.FungibleResourcesCollectionItemGloballyAggregated(
+                resourceAddress: vm.ResourceEntityGlobalAddress,
+                amount: TokenAmount.FromSubUnitsString(vm.Balance).ToString()));
+        }
 
         var previousCursor = offset > 0
             ? new GatewayModel.EntityFungiblesCursor(Math.Max(offset - limit, 0)).ToCursorString()
@@ -599,6 +593,100 @@ GROUP BY ResourceEntityGlobalAddress, TotalCount;
             : null;
 
         return new GatewayModel.FungibleResourcesCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
+    }
+
+    /// <summary>
+    /// Returns a first page of paginable resource collection with nested paginable collection of vaults with their balances per resource for a given entity.
+    /// </summary>
+    private async Task<GatewayModel.FungibleResourcesCollection> GetFungiblesSlicePerVault(long entityId, int resourceLimit, int vaultLimit, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    {
+        var cd = new CommandDefinition(
+            commandText: @"
+WITH most_recent_entity_resource_aggregate_history_nested AS (
+    SELECT fungible_resource_entity_ids
+    FROM entity_resource_aggregate_history
+    WHERE from_state_version <= @stateVersion AND entity_id = @entityId
+    ORDER BY from_state_version DESC
+    LIMIT 1
+),
+most_recent_entity_resource_aggregate_history AS (
+    SELECT UNNEST(fungible_resource_entity_ids[1:@resourceLimit]) AS fungible_resource_entity_id, cardinality(fungible_resource_entity_ids) AS resource_total_count
+    FROM most_recent_entity_resource_aggregate_history_nested
+),
+most_recent_entity_resource_vault_aggregate_history_nested AS (
+    SELECT rah.fungible_resource_entity_id, rah.resource_total_count, vah.vault_entity_ids
+    FROM most_recent_entity_resource_aggregate_history rah
+    INNER JOIN LATERAL (
+        SELECT vault_entity_ids
+        FROM entity_resource_vault_aggregate_history
+        WHERE from_state_version <= @stateVersion AND entity_id = @entityId AND resource_entity_id = rah.fungible_resource_entity_id
+        ORDER BY from_state_version DESC
+        LIMIT 1
+    ) vah ON TRUE
+),
+most_recent_entity_resource_vault_aggregate_history AS (
+    SELECT ahn.fungible_resource_entity_id, ahn.resource_total_count, UNNEST(vault_entity_ids[1:@vaultLimit]) AS vault_entity_id, cardinality(vault_entity_ids) AS vault_total_count
+    FROM most_recent_entity_resource_vault_aggregate_history_nested ahn
+)
+SELECT er.global_address AS ResourceEntityGlobalAddress,
+       encode(ev.address, 'hex') AS VaultAddress,
+       cast(vh.balance AS text) AS Balance,
+       vah.resource_total_count AS ResourceTotalCount,
+       vah.vault_total_count AS VaultTotalCount
+FROM most_recent_entity_resource_vault_aggregate_history vah
+INNER JOIN LATERAL (
+    SELECT balance
+    FROM entity_vault_history
+    WHERE from_state_version <= @stateVersion AND global_entity_id = @entityId AND resource_entity_id = vah.fungible_resource_entity_id AND vault_entity_id = vah.vault_entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) vh ON TRUE
+INNER JOIN entities er ON vah.fungible_resource_entity_id = er.id
+INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
+",
+            parameters: new
+            {
+                stateVersion = ledgerState.StateVersion,
+                entityId = entityId,
+                resourceLimit = resourceLimit,
+                vaultLimit = vaultLimit,
+            },
+            cancellationToken: token);
+
+        long? resourcesTotalCount = 0;
+
+        var resources = new Dictionary<GlobalAddress, GatewayModel.FungibleResourcesCollectionItemVaultAggregated>();
+
+        foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<FungibleVaultViewModel>(cd))
+        {
+            resourcesTotalCount = vm.ResourceTotalCount;
+
+            if (!resources.TryGetValue(vm.ResourceEntityGlobalAddress, out var existingRecord))
+            {
+                var vaultNextCursor = vm.VaultTotalCount > vaultLimit
+                    ? new GatewayModel.EntityFungiblesCursor(vaultLimit).ToCursorString()
+                    : null;
+
+                existingRecord = new GatewayModel.FungibleResourcesCollectionItemVaultAggregated(
+                    resourceAddress: vm.ResourceEntityGlobalAddress,
+                    vaults: new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault(
+                        totalCount: vm.VaultTotalCount,
+                        nextCursor: vaultNextCursor,
+                        items: new List<GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem>()));
+
+                resources[vm.ResourceEntityGlobalAddress] = existingRecord;
+            }
+
+            existingRecord.Vaults.Items.Add(new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem(
+                vaultAddress: vm.VaultAddress,
+                amount: TokenAmount.FromSubUnitsString(vm.Balance).ToString()));
+        }
+
+        var nextCursor = resourcesTotalCount > resourceLimit
+            ? new GatewayModel.EntityFungiblesCursor(resourceLimit).ToCursorString()
+            : null;
+
+        return new GatewayModel.FungibleResourcesCollection(resourcesTotalCount, null, nextCursor, resources.Values.Cast<GatewayModel.FungibleResourcesCollectionItem>().ToList());
     }
 
     private async Task<GatewayModel.NonFungibleResourcesCollection> GetNonFungiblesSlice(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState,

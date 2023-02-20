@@ -90,72 +90,36 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityResourcesRequest
+    /// FungibleResourcesCollectionItemGloballyAggregatedAllOf
     /// </summary>
-    [DataContract(Name = "EntityResourcesRequest")]
-    public partial class EntityResourcesRequest : IEquatable<EntityResourcesRequest>
+    [DataContract(Name = "FungibleResourcesCollectionItemGloballyAggregated_allOf")]
+    public partial class FungibleResourcesCollectionItemGloballyAggregatedAllOf : IEquatable<FungibleResourcesCollectionItemGloballyAggregatedAllOf>
     {
         /// <summary>
-        /// Defines AggregationLevel
-        /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum AggregationLevelEnum
-        {
-            /// <summary>
-            /// Enum Resource for value: resource
-            /// </summary>
-            [EnumMember(Value = "resource")]
-            Resource = 1,
-
-            /// <summary>
-            /// Enum Vault for value: vault
-            /// </summary>
-            [EnumMember(Value = "vault")]
-            Vault = 2
-
-        }
-
-
-        /// <summary>
-        /// Gets or Sets AggregationLevel
-        /// </summary>
-        [DataMember(Name = "aggregation_level", EmitDefaultValue = true)]
-        public AggregationLevelEnum? AggregationLevel { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesRequest" /> class.
+        /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItemGloballyAggregatedAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityResourcesRequest() { }
+        protected FungibleResourcesCollectionItemGloballyAggregatedAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesRequest" /> class.
+        /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItemGloballyAggregatedAllOf" /> class.
         /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="aggregationLevel">aggregationLevel.</param>
-        public EntityResourcesRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string address = default(string), AggregationLevelEnum? aggregationLevel = default(AggregationLevelEnum?))
+        /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
+        public FungibleResourcesCollectionItemGloballyAggregatedAllOf(string amount = default(string))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "amount" is required (not null)
+            if (amount == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityResourcesRequest and cannot be null");
+                throw new ArgumentNullException("amount is a required property for FungibleResourcesCollectionItemGloballyAggregatedAllOf and cannot be null");
             }
-            this.Address = address;
-            this.AtLedgerState = atLedgerState;
-            this.AggregationLevel = aggregationLevel;
+            this.Amount = amount;
         }
 
         /// <summary>
-        /// Gets or Sets AtLedgerState
+        /// String-encoded decimal representing the amount of a related fungible resource.
         /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public string Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -164,10 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityResourcesRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
+            sb.Append("class FungibleResourcesCollectionItemGloballyAggregatedAllOf {\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -188,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityResourcesRequest);
+            return this.Equals(input as FungibleResourcesCollectionItemGloballyAggregatedAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityResourcesRequest instances are equal
+        /// Returns true if FungibleResourcesCollectionItemGloballyAggregatedAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityResourcesRequest to be compared</param>
+        /// <param name="input">Instance of FungibleResourcesCollectionItemGloballyAggregatedAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityResourcesRequest input)
+        public bool Equals(FungibleResourcesCollectionItemGloballyAggregatedAllOf input)
         {
             if (input == null)
             {
@@ -204,18 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
-                ) && 
-                (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
-                ) && 
-                (
-                    this.AggregationLevel == input.AggregationLevel ||
-                    this.AggregationLevel.Equals(input.AggregationLevel)
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
                 );
         }
 
@@ -228,15 +181,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtLedgerState != null)
+                if (this.Amount != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 }
-                if (this.Address != null)
-                {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.AggregationLevel.GetHashCode();
                 return hashCode;
             }
         }
