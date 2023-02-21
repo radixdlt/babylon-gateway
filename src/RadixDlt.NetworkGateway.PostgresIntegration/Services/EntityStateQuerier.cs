@@ -133,10 +133,10 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         var fungibles = aggregatePerVault
             ? await GetFungiblesSlicePerVault(entity.Id, DefaultResourceLimit, DefaultResourceLimit, ledgerState, token)
-            : await GetFungiblesSlice(entity.Id, 0, DefaultResourceLimit, ledgerState, token);
+            : await GetFungiblesSlicePerResource(entity.Id, 0, DefaultResourceLimit, ledgerState, token);
         var nonFungibles = aggregatePerVault
             ? await GetNonFungiblesSlicePerVault(entity.Id, DefaultResourceLimit, DefaultResourceLimit, ledgerState, token)
-            : await GetNonFungiblesSlice(entity.Id, 0, DefaultResourceLimit, ledgerState, token);
+            : await GetNonFungiblesSlicePerResource(entity.Id, 0, DefaultResourceLimit, ledgerState, token);
 
         return new GatewayModel.EntityResourcesResponse(ledgerState, entity.GlobalAddress, fungibles, nonFungibles);
     }
@@ -279,7 +279,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         CancellationToken token = default)
     {
         var entity = await GetEntity(request.Address, ledgerState, token);
-        var fungibles = await GetFungiblesSlice(entity.Id, request.Offset, request.Limit, ledgerState, token);
+        var fungibles = await GetFungiblesSlicePerResource(entity.Id, request.Offset, request.Limit, ledgerState, token);
 
         return new GatewayModel.EntityFungiblesResponse(ledgerState, entity.GlobalAddress, fungibles);
     }
@@ -288,7 +288,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         CancellationToken token = default)
     {
         var entity = await GetEntity(request.Address, ledgerState, token);
-        var nonFungibles = await GetNonFungiblesSlice(entity.Id, request.Offset, request.Limit, ledgerState, token);
+        var nonFungibles = await GetNonFungiblesSlicePerResource(entity.Id, request.Offset, request.Limit, ledgerState, token);
 
         return new GatewayModel.EntityNonFungiblesResponse(ledgerState, entity.GlobalAddress, nonFungibles);
     }
@@ -538,7 +538,7 @@ INNER JOIN LATERAL (
     /// <summary>
     /// Returns a paginable resource collection with total (aggregated) balance per resource.
     /// </summary>
-    private async Task<GatewayModel.FungibleResourcesCollection> GetFungiblesSlice(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<GatewayModel.FungibleResourcesCollection> GetFungiblesSlicePerResource(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         var cd = new CommandDefinition(
             commandText: @"
@@ -573,7 +573,7 @@ INNER JOIN entities e ON ah.fungible_resource_entity_id = e.id
             },
             cancellationToken: token);
 
-        long? totalCount = 0;
+        var totalCount = 0;
 
         var items = new List<GatewayModel.FungibleResourcesCollectionItem>();
 
@@ -652,7 +652,7 @@ INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
             },
             cancellationToken: token);
 
-        long? resourcesTotalCount = 0;
+        var resourcesTotalCount = 0;
 
         var resources = new Dictionary<GlobalAddress, GatewayModel.FungibleResourcesCollectionItemVaultAggregated>();
 
@@ -691,7 +691,7 @@ INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
     /// <summary>
     /// Returns a paginable resource collection with total (aggregated) count per resource.
     /// </summary>
-    private async Task<GatewayModel.NonFungibleResourcesCollection> GetNonFungiblesSlice(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<GatewayModel.NonFungibleResourcesCollection> GetNonFungiblesSlicePerResource(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         var cd = new CommandDefinition(
             commandText: @"
@@ -726,7 +726,7 @@ INNER JOIN entities e ON ah.non_fungible_resource_entity_id = e.id;
             },
             cancellationToken: token);
 
-        long? totalCount = 0;
+        var totalCount = 0;
 
         var items = new List<GatewayModel.NonFungibleResourcesCollectionItem>();
 
@@ -805,7 +805,7 @@ INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
             },
             cancellationToken: token);
 
-        long? resourcesTotalCount = 0;
+        var resourcesTotalCount = 0;
 
         var resources = new Dictionary<GlobalAddress, GatewayModel.NonFungibleResourcesCollectionItemVaultAggregated>();
 
@@ -871,7 +871,7 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = final.non_fungible_id_data_id
             },
             cancellationToken: token);
 
-        long? totalCount = 0;
+        var totalCount = 0;
 
         var items = (await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdViewModel>(cd)).ToList()
             .Select(vm =>
