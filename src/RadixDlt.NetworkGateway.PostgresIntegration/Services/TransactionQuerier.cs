@@ -224,7 +224,7 @@ internal class TransactionQuerier : ITransactionQuerier
         {
             LedgerTransactionStatus.Succeeded => GatewayModel.TransactionStatus.CommittedSuccess,
             LedgerTransactionStatus.Failed => GatewayModel.TransactionStatus.CommittedFailure,
-            _ => throw new UnreachableException(),
+            _ => throw new UnreachableException($"Didn't expect {lt.Status} value"),
         };
 
         string? payloadHashHex = null;

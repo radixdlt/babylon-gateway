@@ -62,29 +62,23 @@
  * permissions under this License.
  */
 
+using FluentValidation;
+using Microsoft.Extensions.Configuration;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
 
-public interface ISubmissionTrackingService
+public sealed class CoreApiIntegrationOptions
 {
-    Task<TackingGuidance> TrackInitialSubmission(
-        DateTime submittedTimestamp,
-        ToolkitModel.Transaction.NotarizedTransaction notarizedTransaction,
-        string submittedToNodeName,
-        CancellationToken token = default
-    );
-
-    Task MarkAsFailed(
-        bool permanent,
-        byte[] payloadHash,
-        string failureReason,
-        CancellationToken token = default
-    );
+    [ConfigurationKeyName("SubmitTransactionTimeout")]
+    public TimeSpan SubmitTransactionTimeout { get; set; } = TimeSpan.FromSeconds(3);
 }
 
-public sealed record TackingGuidance(bool ShouldSubmitToNode, string? FailureReason = null);
+internal class CoreApiIntegrationOptionsValidator : AbstractOptionsValidator<CoreApiIntegrationOptions>
+{
+    public CoreApiIntegrationOptionsValidator()
+    {
+        RuleFor(x => x.SubmitTransactionTimeout).GreaterThan(TimeSpan.Zero);
+    }
+}

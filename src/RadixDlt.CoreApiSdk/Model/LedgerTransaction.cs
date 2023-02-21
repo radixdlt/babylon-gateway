@@ -75,7 +75,7 @@ public partial class LedgerTransaction
             UserLedgerTransaction ult => ult.GetPayloadBytes(),
             ValidatorLedgerTransaction vlt => vlt.GetPayloadBytes(),
             SystemLedgerTransaction slt => slt.GetPayloadBytes(),
-            _ => throw new UnreachableException(),
+            _ => throw new UnreachableException($"Didn't expect {this.GetType().Name} type"),
         };
     }
 }
