@@ -767,6 +767,12 @@ components:
           type: integer
           format: int64
 
+    ResourceAggregationLevel:
+      type: string
+      enum:
+        - Global
+        - Vault
+
     EntityMetadataCollection:
       description: Entity metadata collection.
       allOf:
@@ -808,13 +814,83 @@ components:
     FungibleResourcesCollectionItem:
       type: object
       required:
+        - aggregation_level
+        - resource_address
+      properties:
+        aggregation_level:
+          $ref: "#/components/schemas/ResourceAggregationLevel"
+        resource_address:
+          $ref: "#/components/schemas/ResourceAddress"
+      discriminator:
+        propertyName: aggregation_level
+        mapping:
+          # NOTE: These need to match ResourceAggregationLevel
+          Global: '#/components/schemas/FungibleResourcesCollectionItemGloballyAggregated'
+          Vault: '#/components/schemas/FungibleResourcesCollectionItemVaultAggregated'
+    FungibleResourcesCollectionItemGloballyAggregated:
+      allOf:
+        - $ref: "#/components/schemas/FungibleResourcesCollectionItem"
+        - type: object
+          required:
+            - amount
+          properties:
+            amount:
+              $ref: "#/components/schemas/BigDecimal"
+    FungibleResourcesCollectionItemVaultAggregated:
+      allOf:
+        - $ref: "#/components/schemas/FungibleResourcesCollectionItem"
+        - type: object
+          required:
+            - vaults
+          properties:
+            vaults:
+              $ref: "#/components/schemas/FungibleResourcesCollectionItemVaultAggregatedVault"
+    FungibleResourcesCollectionItemVaultAggregatedVault:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/FungibleResourcesCollectionItemVaultAggregatedVaultItem"
+    FungibleResourcesCollectionItemVaultAggregatedVaultItem:
+      type: object
+      required:
+        - vault_address
+        - amount
+      properties:
+        vault_address:
+          $ref: "#/components/schemas/EntityAddress"
+        amount:
+          $ref: "#/components/schemas/BigDecimal"
+
+    FungibleVaultsCollection:
+      description: Fungible vaults collection.
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/FungibleVaultsCollectionItem"
+    FungibleVaultsCollectionItem:
+      type: object
+      required:
         - address
         - amount
       properties:
         address:
-          $ref: "#/components/schemas/ResourceAddress"
+          type: string
+          description: TBA # TODO missing description
         amount:
-          $ref: "#/components/schemas/TokenAmount"
+          $ref: "#/components/schemas/BigDecimal"
+
     NonFungibleResourcesCollection:
       description: Non-fungible resources collection.
       allOf:
@@ -830,14 +906,61 @@ components:
     NonFungibleResourcesCollectionItem:
       type: object
       required:
-        - address
-        - amount
+        - aggregation_level
+        - resource_address
       properties:
-        address:
+        aggregation_level:
+          $ref: "#/components/schemas/ResourceAggregationLevel"
+        resource_address:
           $ref: "#/components/schemas/ResourceAddress"
-        amount:
+      discriminator:
+        propertyName: aggregation_level
+        mapping:
+          # NOTE: These need to match ResourceAggregationLevel
+          Global: '#/components/schemas/NonFungibleResourcesCollectionItemGloballyAggregated'
+          Vault: '#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregated'
+    NonFungibleResourcesCollectionItemGloballyAggregated:
+      allOf:
+        - $ref: "#/components/schemas/NonFungibleResourcesCollectionItem"
+        - type: object
+          required:
+            - amount
+          properties:
+            amount:
+              type: integer
+              format: int64
+    NonFungibleResourcesCollectionItemVaultAggregated:
+      allOf:
+        - $ref: "#/components/schemas/NonFungibleResourcesCollectionItem"
+        - type: object
+          required:
+            - vaults
+          properties:
+            vaults:
+              $ref: "#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregatedVault"
+    NonFungibleResourcesCollectionItemVaultAggregatedVault:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregatedVaultItem"
+    NonFungibleResourcesCollectionItemVaultAggregatedVaultItem:
+      type: object
+      required:
+        - vault_address
+        - total_count
+      properties:
+        vault_address:
+          $ref: "#/components/schemas/EntityAddress"
+        total_count:
           type: integer
           format: int64
+
     NonFungibleIdsCollection:
       description: Non-fungible resource IDs collection.
       allOf:
@@ -887,12 +1010,13 @@ components:
     TransactionStatus:
       type: string
       enum:
-        - unknown
-        - committed_success
-        - committed_failure
-        - pending
-        - rejected
+        - Unknown
+        - CommittedSuccess
+        - CommittedFailure
+        - Pending
+        - Rejected
 
+    # TODO Obsolete - use BigDecimal instead
     TokenAmount:
       description: Represents a decimal amount of a given resource.
       type: object
@@ -908,10 +1032,10 @@ components:
     NonFungibleIdType:
       type: string
       enum:
-        - string
-        - number
-        - bytes
-        - uuid
+        - String
+        - Number
+        - Bytes
+        - Uuid
 
     ValidatorCollection:
       allOf:
@@ -1117,9 +1241,9 @@ components:
     TransactionCommittedDetailsRequestIdentifierType:
       type: string
       enum:
-        - intent_hash
-        - signed_intent_hash
-        - payload_hash
+        - IntentHash
+        - SignedIntentHash
+        - PayloadHash
     TransactionCommittedDetailsRequestIdentifier:
       type: object
       required:
@@ -1176,15 +1300,15 @@ components:
               description: Limit returned transactions by their kind. Defaults to `user`.
               type: string
               enum:
-                - user
-                - epoch_change
-                - all
+                - User
+                - EpochChange
+                - All
             order:
               description: Configures the order of returned result set. Defaults to `desc`.
               type: string
               enum:
-                - asc
-                - desc
+                - Asc
+                - Desc
       example:
         limit_per_page: 5
     StreamTransactionsResponse:
@@ -1215,6 +1339,8 @@ components:
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
+            aggregation_level:
+              $ref: "#/components/schemas/ResourceAggregationLevel"
       example:
         address: "<component-entity-address>"
     EntityResourcesResponse:
@@ -1261,10 +1387,10 @@ components:
     EntityDetailsResponseDetailsType:
       type: string
       enum:
-        - fungible_resource
-        - non_fungible_resource
-        - package
-        - component
+        - FungibleResource
+        - NonFungibleResource
+        - Package
+        - Component
     EntityDetailsResponseDetails:
       oneOf:
         - $ref: "#/components/schemas/EntityDetailsResponseFungibleResourceDetails"

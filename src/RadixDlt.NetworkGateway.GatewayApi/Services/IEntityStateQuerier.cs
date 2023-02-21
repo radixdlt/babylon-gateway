@@ -63,7 +63,6 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -75,7 +74,7 @@ public interface IEntityStateQuerier
 {
     public sealed record PageRequest(GlobalAddress Address, int Offset, int Limit);
 
-    Task<GatewayModel.EntityResourcesResponse> EntityResourcesSnapshot(GlobalAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.EntityResourcesResponse> EntityResourcesSnapshot(GlobalAddress address, bool aggregatePerVault, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
     Task<GatewayModel.EntityDetailsResponse> EntityDetailsSnapshot(GlobalAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 

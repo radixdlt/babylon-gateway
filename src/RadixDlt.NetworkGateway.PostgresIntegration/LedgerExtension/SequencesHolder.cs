@@ -74,6 +74,8 @@ internal class SequencesHolder
 
     public long EntityMetadataHistorySequence { get; set; }
 
+    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
+
     public long EntityResourceAggregateHistorySequence { get; set; }
 
     public long EntityResourceVaultAggregateHistorySequence { get; set; }

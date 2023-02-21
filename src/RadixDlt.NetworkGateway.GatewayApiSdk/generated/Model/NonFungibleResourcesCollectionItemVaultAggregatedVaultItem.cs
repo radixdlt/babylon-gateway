@@ -84,56 +84,50 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleResourcesCollectionItem
+    /// NonFungibleResourcesCollectionItemVaultAggregatedVaultItem
     /// </summary>
-    [DataContract(Name = "NonFungibleResourcesCollectionItem")]
-    [JsonConverter(typeof(JsonSubtypes), "aggregation_level")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourcesCollectionItemGloballyAggregated), "Global")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourcesCollectionItemGloballyAggregated), "NonFungibleResourcesCollectionItemGloballyAggregated")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourcesCollectionItemVaultAggregated), "NonFungibleResourcesCollectionItemVaultAggregated")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourcesCollectionItemVaultAggregated), "Vault")]
-    public partial class NonFungibleResourcesCollectionItem : IEquatable<NonFungibleResourcesCollectionItem>
+    [DataContract(Name = "NonFungibleResourcesCollectionItemVaultAggregatedVaultItem")]
+    public partial class NonFungibleResourcesCollectionItemVaultAggregatedVaultItem : IEquatable<NonFungibleResourcesCollectionItemVaultAggregatedVaultItem>
     {
-
         /// <summary>
-        /// Gets or Sets AggregationLevel
-        /// </summary>
-        [DataMember(Name = "aggregation_level", IsRequired = true, EmitDefaultValue = true)]
-        public ResourceAggregationLevel AggregationLevel { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItem" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItemVaultAggregatedVaultItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleResourcesCollectionItem() { }
+        protected NonFungibleResourcesCollectionItemVaultAggregatedVaultItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItem" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItemVaultAggregatedVaultItem" /> class.
         /// </summary>
-        /// <param name="aggregationLevel">aggregationLevel (required).</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
-        public NonFungibleResourcesCollectionItem(ResourceAggregationLevel aggregationLevel = default(ResourceAggregationLevel), string resourceAddress = default(string))
+        /// <param name="vaultAddress">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
+        /// <param name="totalCount">totalCount (required).</param>
+        public NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(string vaultAddress = default(string), long totalCount = default(long))
         {
-            this.AggregationLevel = aggregationLevel;
-            // to ensure "resourceAddress" is required (not null)
-            if (resourceAddress == null)
+            // to ensure "vaultAddress" is required (not null)
+            if (vaultAddress == null)
             {
-                throw new ArgumentNullException("resourceAddress is a required property for NonFungibleResourcesCollectionItem and cannot be null");
+                throw new ArgumentNullException("vaultAddress is a required property for NonFungibleResourcesCollectionItemVaultAggregatedVaultItem and cannot be null");
             }
-            this.ResourceAddress = resourceAddress;
+            this.VaultAddress = vaultAddress;
+            this.TotalCount = totalCount;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
+        /// Bech32m-encoded human readable version of the entity&#39;s global address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
-        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string ResourceAddress { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        [DataMember(Name = "vault_address", IsRequired = true, EmitDefaultValue = true)]
+        public string VaultAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets TotalCount
+        /// </summary>
+        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
+        public long TotalCount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,9 +136,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleResourcesCollectionItem {\n");
-            sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
-            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("class NonFungibleResourcesCollectionItemVaultAggregatedVaultItem {\n");
+            sb.Append("  VaultAddress: ").Append(VaultAddress).Append("\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,15 +159,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleResourcesCollectionItem);
+            return this.Equals(input as NonFungibleResourcesCollectionItemVaultAggregatedVaultItem);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleResourcesCollectionItem instances are equal
+        /// Returns true if NonFungibleResourcesCollectionItemVaultAggregatedVaultItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleResourcesCollectionItem to be compared</param>
+        /// <param name="input">Instance of NonFungibleResourcesCollectionItemVaultAggregatedVaultItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleResourcesCollectionItem input)
+        public bool Equals(NonFungibleResourcesCollectionItemVaultAggregatedVaultItem input)
         {
             if (input == null)
             {
@@ -181,13 +175,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AggregationLevel == input.AggregationLevel ||
-                    this.AggregationLevel.Equals(input.AggregationLevel)
+                    this.VaultAddress == input.VaultAddress ||
+                    (this.VaultAddress != null &&
+                    this.VaultAddress.Equals(input.VaultAddress))
                 ) && 
                 (
-                    this.ResourceAddress == input.ResourceAddress ||
-                    (this.ResourceAddress != null &&
-                    this.ResourceAddress.Equals(input.ResourceAddress))
+                    this.TotalCount == input.TotalCount ||
+                    this.TotalCount.Equals(input.TotalCount)
                 );
         }
 
@@ -200,11 +194,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.AggregationLevel.GetHashCode();
-                if (this.ResourceAddress != null)
+                if (this.VaultAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.VaultAddress.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
                 return hashCode;
             }
         }

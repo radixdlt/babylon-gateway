@@ -123,6 +123,49 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
+    public async Task<Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>> MostRecentEntityResourceAggregatedVaultsHistoryFor(List<FungibleVaultChange> fungibleVaultChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    {
+        var data = new HashSet<EntityResourceLookup>();
+
+        foreach (var change in fungibleVaultChanges)
+        {
+            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseOwnerAncestorId, change.ReferencedResource.DatabaseId));
+            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseGlobalAncestorId, change.ReferencedResource.DatabaseId));
+        }
+
+        foreach (var change in nonFungibleVaultChanges)
+        {
+            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseOwnerAncestorId, change.ReferencedResource.DatabaseId));
+            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseGlobalAncestorId, change.ReferencedResource.DatabaseId));
+        }
+
+        var entityIds = new List<long>();
+        var resourceManagerEntityIds = new List<long>();
+
+        foreach (var d in data)
+        {
+            entityIds.Add(d.EntityId);
+            resourceManagerEntityIds.Add(d.ResourceManagerEntityId);
+        }
+
+        return await _dbContext.EntityResourceAggregatedVaultsHistory
+            .FromSqlInterpolated(@$"
+WITH variables (entity_id, resource_entity_id) AS (
+    SELECT UNNEST({entityIds}), UNNEST({resourceManagerEntityIds})
+)
+SELECT eravh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_resource_aggregated_vaults_history
+    WHERE entity_id = variables.entity_id AND resource_entity_id = variables.resource_entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) eravh ON true;")
+            .AsNoTracking()
+            .ToDictionaryAsync(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId), token);
+    }
+
     public async Task<Dictionary<EntityResourceVaultLookup, EntityResourceVaultAggregateHistory>> MostRecentEntityResourceVaultAggregateHistoryFor(List<FungibleVaultChange> fungibleVaultChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
     {
         var data = new HashSet<EntityResourceVaultLookup>();
@@ -312,6 +355,7 @@ SELECT
     nextval('entities_id_seq') AS EntitySequence,
     nextval('entity_access_rules_chain_history_id_seq') AS EntityAccessRulesChainHistorySequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
+    nextval('entity_resource_aggregated_vaults_history_id_seq') AS EntityResourceAggregatedVaultsHistorySequence,
     nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
     nextval('entity_resource_vault_aggregate_history_id_seq') AS EntityResourceVaultAggregateHistorySequence,
     nextval('entity_vault_history_id_seq') AS EntityVaultHistorySequence,

@@ -96,33 +96,33 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     public enum TransactionStatus
     {
         /// <summary>
-        /// Enum Unknown for value: unknown
+        /// Enum Unknown for value: Unknown
         /// </summary>
-        [EnumMember(Value = "unknown")]
+        [EnumMember(Value = "Unknown")]
         Unknown = 1,
 
         /// <summary>
-        /// Enum CommittedSuccess for value: committed_success
+        /// Enum CommittedSuccess for value: CommittedSuccess
         /// </summary>
-        [EnumMember(Value = "committed_success")]
+        [EnumMember(Value = "CommittedSuccess")]
         CommittedSuccess = 2,
 
         /// <summary>
-        /// Enum CommittedFailure for value: committed_failure
+        /// Enum CommittedFailure for value: CommittedFailure
         /// </summary>
-        [EnumMember(Value = "committed_failure")]
+        [EnumMember(Value = "CommittedFailure")]
         CommittedFailure = 3,
 
         /// <summary>
-        /// Enum Pending for value: pending
+        /// Enum Pending for value: Pending
         /// </summary>
-        [EnumMember(Value = "pending")]
+        [EnumMember(Value = "Pending")]
         Pending = 4,
 
         /// <summary>
-        /// Enum Rejected for value: rejected
+        /// Enum Rejected for value: Rejected
         /// </summary>
-        [EnumMember(Value = "rejected")]
+        [EnumMember(Value = "Rejected")]
         Rejected = 5
 
     }

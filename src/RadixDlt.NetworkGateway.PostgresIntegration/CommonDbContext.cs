@@ -94,6 +94,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityResourceVaultAggregateHistory> EntityResourceVaultAggregateHistory => Set<EntityResourceVaultAggregateHistory>();
 
+    public DbSet<EntityResourceAggregatedVaultsHistory> EntityResourceAggregatedVaultsHistory => Set<EntityResourceAggregatedVaultsHistory>();
+
     public DbSet<EntityVaultHistory> EntityVaultHistory => Set<EntityVaultHistory>();
 
     public DbSet<ResourceManagerEntitySupplyHistory> ResourceManagerEntitySupplyHistory => Set<ResourceManagerEntitySupplyHistory>();
@@ -129,7 +131,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
         modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();
-        modelBuilder.HasPostgresEnum<VaultType>();
+        modelBuilder.HasPostgresEnum<ResourceType>();
 
         HookupSingleEntries(modelBuilder);
         HookupTransactions(modelBuilder);
@@ -253,13 +255,21 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<EntityResourceAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
+        modelBuilder.Entity<EntityResourceAggregatedVaultsHistory>()
+            .HasDiscriminator<ResourceType>(DiscriminatorColumnName)
+            .HasValue<EntityFungibleResourceAggregatedVaultsHistory>(ResourceType.Fungible)
+            .HasValue<EntityNonFungibleResourceAggregatedVaultsHistory>(ResourceType.NonFungible);
+
+        modelBuilder.Entity<EntityResourceAggregatedVaultsHistory>()
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
+
         modelBuilder.Entity<EntityResourceVaultAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityVaultHistory>()
-            .HasDiscriminator<VaultType>(DiscriminatorColumnName)
-            .HasValue<EntityFungibleVaultHistory>(VaultType.Fungible)
-            .HasValue<EntityNonFungibleVaultHistory>(VaultType.NonFungible);
+            .HasDiscriminator<ResourceType>(DiscriminatorColumnName)
+            .HasValue<EntityFungibleVaultHistory>(ResourceType.Fungible)
+            .HasValue<EntityNonFungibleVaultHistory>(ResourceType.NonFungible);
 
         modelBuilder.Entity<EntityVaultHistory>()
             .HasIndex(e => new { e.OwnerEntityId, e.VaultEntityId, e.FromStateVersion });

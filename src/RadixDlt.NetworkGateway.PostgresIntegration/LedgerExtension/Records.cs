@@ -82,6 +82,9 @@ internal record ResourceManagerSupplyChange(ReferencedEntity ResourceEntity, Tok
 
 internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
 
+internal record struct EntityResourceLookup(long EntityId, long ResourceManagerEntityId);
+
+// TODO drop in favor of EntityResourceLookup?
 internal record struct EntityResourceVaultLookup(long EntityId, long ResourceManagerEntityId);
 
 internal record struct NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, long StateVersion);

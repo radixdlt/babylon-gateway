@@ -2,7 +2,8 @@
 _Release Date: ???_
 
 - `/transaction/recent` endpoint replaced with `/stream/transactions` returning user and non-user transactions.
-- `limit` request parameter has been renamed to `limit_per_page`. 
+- `limit` request parameter has been renamed to `limit_per_page`.
+- All enum values use `PascalCase` naming.
 - `/gateway/information` replaced with two separate endpoints `/status/gateway-status` and `/status/network-configuration`
 - added new configuration section `CoreApiIntegration` where you can configure integration with core API. For now only `SubmitTransactionTimeout` setting is supported.
 

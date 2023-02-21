@@ -95,6 +95,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [DataContract(Name = "EntityResourcesRequest_allOf")]
     public partial class EntityResourcesRequestAllOf : IEquatable<EntityResourcesRequestAllOf>
     {
+
+        /// <summary>
+        /// Gets or Sets AggregationLevel
+        /// </summary>
+        [DataMember(Name = "aggregation_level", EmitDefaultValue = true)]
+        public ResourceAggregationLevel? AggregationLevel { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityResourcesRequestAllOf" /> class.
         /// </summary>
@@ -104,7 +110,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityResourcesRequestAllOf" /> class.
         /// </summary>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        public EntityResourcesRequestAllOf(string address = default(string))
+        /// <param name="aggregationLevel">aggregationLevel.</param>
+        public EntityResourcesRequestAllOf(string address = default(string), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -112,6 +119,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("address is a required property for EntityResourcesRequestAllOf and cannot be null");
             }
             this.Address = address;
+            this.AggregationLevel = aggregationLevel;
         }
 
         /// <summary>
@@ -130,6 +138,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityResourcesRequestAllOf {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,6 +178,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address == input.Address ||
                     (this.Address != null &&
                     this.Address.Equals(input.Address))
+                ) && 
+                (
+                    this.AggregationLevel == input.AggregationLevel ||
+                    this.AggregationLevel.Equals(input.AggregationLevel)
                 );
         }
 
@@ -185,6 +198,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.AggregationLevel.GetHashCode();
                 return hashCode;
             }
         }

@@ -108,7 +108,7 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.MapEnum<NonFungibleIdType>();
                 dataSourceBuilder.MapEnum<PendingTransactionStatus>();
                 dataSourceBuilder.MapEnum<PublicKeyType>();
-                dataSourceBuilder.MapEnum<VaultType>();
+                dataSourceBuilder.MapEnum<ResourceType>();
 
                 return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
             },

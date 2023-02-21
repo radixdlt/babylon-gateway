@@ -103,21 +103,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public enum KindFilterEnum
         {
             /// <summary>
-            /// Enum User for value: user
+            /// Enum User for value: User
             /// </summary>
-            [EnumMember(Value = "user")]
+            [EnumMember(Value = "User")]
             User = 1,
 
             /// <summary>
-            /// Enum EpochChange for value: epoch_change
+            /// Enum EpochChange for value: EpochChange
             /// </summary>
-            [EnumMember(Value = "epoch_change")]
+            [EnumMember(Value = "EpochChange")]
             EpochChange = 2,
 
             /// <summary>
-            /// Enum All for value: all
+            /// Enum All for value: All
             /// </summary>
-            [EnumMember(Value = "all")]
+            [EnumMember(Value = "All")]
             All = 3
 
         }
@@ -137,15 +137,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public enum OrderEnum
         {
             /// <summary>
-            /// Enum Asc for value: asc
+            /// Enum Asc for value: Asc
             /// </summary>
-            [EnumMember(Value = "asc")]
+            [EnumMember(Value = "Asc")]
             Asc = 1,
 
             /// <summary>
-            /// Enum Desc for value: desc
+            /// Enum Desc for value: Desc
             /// </summary>
-            [EnumMember(Value = "desc")]
+            [EnumMember(Value = "Desc")]
             Desc = 2
 
         }

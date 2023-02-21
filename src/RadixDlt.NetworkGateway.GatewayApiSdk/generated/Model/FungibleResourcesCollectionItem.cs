@@ -84,6 +84,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
@@ -93,8 +94,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// FungibleResourcesCollectionItem
     /// </summary>
     [DataContract(Name = "FungibleResourcesCollectionItem")]
+    [JsonConverter(typeof(JsonSubtypes), "aggregation_level")]
+    [JsonSubtypes.KnownSubType(typeof(FungibleResourcesCollectionItemGloballyAggregated), "FungibleResourcesCollectionItemGloballyAggregated")]
+    [JsonSubtypes.KnownSubType(typeof(FungibleResourcesCollectionItemVaultAggregated), "FungibleResourcesCollectionItemVaultAggregated")]
+    [JsonSubtypes.KnownSubType(typeof(FungibleResourcesCollectionItemGloballyAggregated), "Global")]
+    [JsonSubtypes.KnownSubType(typeof(FungibleResourcesCollectionItemVaultAggregated), "Vault")]
     public partial class FungibleResourcesCollectionItem : IEquatable<FungibleResourcesCollectionItem>
     {
+
+        /// <summary>
+        /// Gets or Sets AggregationLevel
+        /// </summary>
+        [DataMember(Name = "aggregation_level", IsRequired = true, EmitDefaultValue = true)]
+        public ResourceAggregationLevel AggregationLevel { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItem" /> class.
         /// </summary>
@@ -103,36 +115,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItem" /> class.
         /// </summary>
-        /// <param name="address">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
-        /// <param name="amount">amount (required).</param>
-        public FungibleResourcesCollectionItem(string address = default(string), TokenAmount amount = default(TokenAmount))
+        /// <param name="aggregationLevel">aggregationLevel (required).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
+        public FungibleResourcesCollectionItem(ResourceAggregationLevel aggregationLevel = default(ResourceAggregationLevel), string resourceAddress = default(string))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            this.AggregationLevel = aggregationLevel;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("address is a required property for FungibleResourcesCollectionItem and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for FungibleResourcesCollectionItem and cannot be null");
             }
-            this.Address = address;
-            // to ensure "amount" is required (not null)
-            if (amount == null)
-            {
-                throw new ArgumentNullException("amount is a required property for FungibleResourcesCollectionItem and cannot be null");
-            }
-            this.Amount = amount;
+            this.ResourceAddress = resourceAddress;
         }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
         /// </summary>
         /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Amount
-        /// </summary>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public TokenAmount Amount { get; set; }
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,8 +143,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class FungibleResourcesCollectionItem {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -180,14 +181,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.AggregationLevel == input.AggregationLevel ||
+                    this.AggregationLevel.Equals(input.AggregationLevel)
                 ) && 
                 (
-                    this.Amount == input.Amount ||
-                    (this.Amount != null &&
-                    this.Amount.Equals(input.Amount))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 );
         }
 
@@ -200,13 +200,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                hashCode = (hashCode * 59) + this.AggregationLevel.GetHashCode();
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
-                }
-                if (this.Amount != null)
-                {
-                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
                 return hashCode;
             }
