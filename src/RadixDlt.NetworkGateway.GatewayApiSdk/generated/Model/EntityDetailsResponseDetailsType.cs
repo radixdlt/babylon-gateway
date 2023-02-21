@@ -96,27 +96,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     public enum EntityDetailsResponseDetailsType
     {
         /// <summary>
-        /// Enum FungibleResource for value: fungible_resource
+        /// Enum FungibleResource for value: FungibleResource
         /// </summary>
-        [EnumMember(Value = "fungible_resource")]
+        [EnumMember(Value = "FungibleResource")]
         FungibleResource = 1,
 
         /// <summary>
-        /// Enum NonFungibleResource for value: non_fungible_resource
+        /// Enum NonFungibleResource for value: NonFungibleResource
         /// </summary>
-        [EnumMember(Value = "non_fungible_resource")]
+        [EnumMember(Value = "NonFungibleResource")]
         NonFungibleResource = 2,
 
         /// <summary>
-        /// Enum Package for value: package
+        /// Enum Package for value: Package
         /// </summary>
-        [EnumMember(Value = "package")]
+        [EnumMember(Value = "Package")]
         Package = 3,
 
         /// <summary>
-        /// Enum Component for value: component
+        /// Enum Component for value: Component
         /// </summary>
-        [EnumMember(Value = "component")]
+        [EnumMember(Value = "Component")]
         Component = 4
 
     }

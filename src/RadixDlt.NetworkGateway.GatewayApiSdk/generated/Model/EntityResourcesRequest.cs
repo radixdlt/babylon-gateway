@@ -95,32 +95,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [DataContract(Name = "EntityResourcesRequest")]
     public partial class EntityResourcesRequest : IEquatable<EntityResourcesRequest>
     {
-        /// <summary>
-        /// Defines AggregationLevel
-        /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum AggregationLevelEnum
-        {
-            /// <summary>
-            /// Enum Resource for value: resource
-            /// </summary>
-            [EnumMember(Value = "resource")]
-            Resource = 1,
-
-            /// <summary>
-            /// Enum Vault for value: vault
-            /// </summary>
-            [EnumMember(Value = "vault")]
-            Vault = 2
-
-        }
-
 
         /// <summary>
         /// Gets or Sets AggregationLevel
         /// </summary>
         [DataMember(Name = "aggregation_level", EmitDefaultValue = true)]
-        public AggregationLevelEnum? AggregationLevel { get; set; }
+        public ResourceAggregationLevel? AggregationLevel { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityResourcesRequest" /> class.
         /// </summary>
@@ -132,7 +112,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="aggregationLevel">aggregationLevel.</param>
-        public EntityResourcesRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string address = default(string), AggregationLevelEnum? aggregationLevel = default(AggregationLevelEnum?))
+        public EntityResourcesRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string address = default(string), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
         {
             // to ensure "address" is required (not null)
             if (address == null)

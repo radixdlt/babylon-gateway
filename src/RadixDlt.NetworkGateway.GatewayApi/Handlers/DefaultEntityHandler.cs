@@ -87,7 +87,7 @@ internal class DefaultEntityHandler : IEntityHandler
     public async Task<GatewayModel.EntityResourcesResponse?> Resources(GatewayModel.EntityResourcesRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var aggregatePerVault = request.AggregationLevel == GatewayModel.EntityResourcesRequest.AggregationLevelEnum.Vault;
+        var aggregatePerVault = request.AggregationLevel == GatewayModel.ResourceAggregationLevel.Vault;
 
         return await _entityStateQuerier.EntityResourcesSnapshot((GlobalAddress)request.Address, aggregatePerVault, ledgerState, token);
     }

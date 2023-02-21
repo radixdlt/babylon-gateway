@@ -96,21 +96,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     public enum TransactionCommittedDetailsRequestIdentifierType
     {
         /// <summary>
-        /// Enum IntentHash for value: intent_hash
+        /// Enum IntentHash for value: IntentHash
         /// </summary>
-        [EnumMember(Value = "intent_hash")]
+        [EnumMember(Value = "IntentHash")]
         IntentHash = 1,
 
         /// <summary>
-        /// Enum SignedIntentHash for value: signed_intent_hash
+        /// Enum SignedIntentHash for value: SignedIntentHash
         /// </summary>
-        [EnumMember(Value = "signed_intent_hash")]
+        [EnumMember(Value = "SignedIntentHash")]
         SignedIntentHash = 2,
 
         /// <summary>
-        /// Enum PayloadHash for value: payload_hash
+        /// Enum PayloadHash for value: PayloadHash
         /// </summary>
-        [EnumMember(Value = "payload_hash")]
+        [EnumMember(Value = "PayloadHash")]
         PayloadHash = 3
 
     }

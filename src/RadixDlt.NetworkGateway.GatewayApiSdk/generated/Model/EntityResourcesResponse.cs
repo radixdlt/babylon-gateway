@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="fungibleResources">fungibleResources (required).</param>
-        /// <param name="nonFungibleResources">nonFungibleResources.</param>
+        /// <param name="nonFungibleResources">nonFungibleResources (required).</param>
         public EntityResourcesResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), FungibleResourcesCollection fungibleResources = default(FungibleResourcesCollection), NonFungibleResourcesCollection nonFungibleResources = default(NonFungibleResourcesCollection))
         {
             // to ensure "ledgerState" is required (not null)
@@ -127,6 +127,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("fungibleResources is a required property for EntityResourcesResponse and cannot be null");
             }
             this.FungibleResources = fungibleResources;
+            // to ensure "nonFungibleResources" is required (not null)
+            if (nonFungibleResources == null)
+            {
+                throw new ArgumentNullException("nonFungibleResources is a required property for EntityResourcesResponse and cannot be null");
+            }
             this.NonFungibleResources = nonFungibleResources;
         }
 
@@ -152,7 +157,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets NonFungibleResources
         /// </summary>
-        [DataMember(Name = "non_fungible_resources", EmitDefaultValue = true)]
+        [DataMember(Name = "non_fungible_resources", IsRequired = true, EmitDefaultValue = true)]
         public NonFungibleResourcesCollection NonFungibleResources { get; set; }
 
         /// <summary>

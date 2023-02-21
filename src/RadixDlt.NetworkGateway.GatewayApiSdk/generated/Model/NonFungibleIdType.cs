@@ -96,27 +96,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     public enum NonFungibleIdType
     {
         /// <summary>
-        /// Enum String for value: string
+        /// Enum String for value: String
         /// </summary>
-        [EnumMember(Value = "string")]
+        [EnumMember(Value = "String")]
         String = 1,
 
         /// <summary>
-        /// Enum Number for value: number
+        /// Enum Number for value: Number
         /// </summary>
-        [EnumMember(Value = "number")]
+        [EnumMember(Value = "Number")]
         Number = 2,
 
         /// <summary>
-        /// Enum Bytes for value: bytes
+        /// Enum Bytes for value: Bytes
         /// </summary>
-        [EnumMember(Value = "bytes")]
+        [EnumMember(Value = "Bytes")]
         Bytes = 3,
 
         /// <summary>
-        /// Enum Uuid for value: uuid
+        /// Enum Uuid for value: Uuid
         /// </summary>
-        [EnumMember(Value = "uuid")]
+        [EnumMember(Value = "Uuid")]
         Uuid = 4
 
     }

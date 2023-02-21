@@ -1010,11 +1010,11 @@ components:
     TransactionStatus:
       type: string
       enum:
-        - unknown
-        - committed_success
-        - committed_failure
-        - pending
-        - rejected
+        - Unknown
+        - CommittedSuccess
+        - CommittedFailure
+        - Pending
+        - Rejected
 
     # TODO Obsolete - use BigDecimal instead
     TokenAmount:
@@ -1032,10 +1032,10 @@ components:
     NonFungibleIdType:
       type: string
       enum:
-        - string
-        - number
-        - bytes
-        - uuid
+        - String
+        - Number
+        - Bytes
+        - Uuid
 
     ValidatorCollection:
       allOf:
@@ -1241,9 +1241,9 @@ components:
     TransactionCommittedDetailsRequestIdentifierType:
       type: string
       enum:
-        - intent_hash
-        - signed_intent_hash
-        - payload_hash
+        - IntentHash
+        - SignedIntentHash
+        - PayloadHash
     TransactionCommittedDetailsRequestIdentifier:
       type: object
       required:
@@ -1300,15 +1300,15 @@ components:
               description: Limit returned transactions by their kind. Defaults to `user`.
               type: string
               enum:
-                - user
-                - epoch_change
-                - all
+                - User
+                - EpochChange
+                - All
             order:
               description: Configures the order of returned result set. Defaults to `desc`.
               type: string
               enum:
-                - asc
-                - desc
+                - Asc
+                - Desc
       example:
         limit_per_page: 5
     StreamTransactionsResponse:
@@ -1340,7 +1340,7 @@ components:
             address:
               $ref: "#/components/schemas/EntityAddress"
             aggregation_level:
-              $ref: "#/component/schemas/ResourceAggregationLevel"
+              $ref: "#/components/schemas/ResourceAggregationLevel"
       example:
         address: "<component-entity-address>"
     EntityResourcesResponse:
@@ -1387,10 +1387,10 @@ components:
     EntityDetailsResponseDetailsType:
       type: string
       enum:
-        - fungible_resource
-        - non_fungible_resource
-        - package
-        - component
+        - FungibleResource
+        - NonFungibleResource
+        - Package
+        - Component
     EntityDetailsResponseDetails:
       oneOf:
         - $ref: "#/components/schemas/EntityDetailsResponseFungibleResourceDetails"
