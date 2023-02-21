@@ -904,6 +904,8 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = final.non_fungible_id_data_id
             return entity;
         }
 
+        // TODO this method should return null/throw on missing, virtual component handling should be done upstream to avoid entity.Id = 0 uses, see https://github.com/radixdlt/babylon-gateway/pull/171#discussion_r1111957627
+
         var firstAddressByte = RadixAddressCodec.Decode(address).Data[0];
 
         if (firstAddressByte == _ecdsaSecp256k1VirtualAccountAddressPrefix || firstAddressByte == _eddsaEd25519VirtualAccountAddressPrefix)
