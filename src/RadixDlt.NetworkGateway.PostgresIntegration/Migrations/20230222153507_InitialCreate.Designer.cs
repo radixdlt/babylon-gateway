@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230217103352_InitialCreate")]
+    [Migration("20230222153507_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -280,20 +280,20 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint[]")
                         .HasColumnName("fungible_resource_entity_ids");
 
-                    b.Property<List<long>>("FungibleResourceLastUpdateStateVersions")
+                    b.Property<List<long>>("FungibleResourceSignificantUpdateStateVersions")
                         .IsRequired()
                         .HasColumnType("bigint[]")
-                        .HasColumnName("fungible_resource_last_update_state_versions");
+                        .HasColumnName("fungible_resource_significant_update_state_versions");
 
                     b.Property<List<long>>("NonFungibleResourceEntityIds")
                         .IsRequired()
                         .HasColumnType("bigint[]")
                         .HasColumnName("non_fungible_resource_entity_ids");
 
-                    b.Property<List<long>>("NonFungibleResourceLastUpdateStateVersions")
+                    b.Property<List<long>>("NonFungibleResourceSignificantUpdateStateVersions")
                         .IsRequired()
                         .HasColumnType("bigint[]")
-                        .HasColumnName("non_fungible_resource_last_update_state_versions");
+                        .HasColumnName("non_fungible_resource_significant_update_state_versions");
 
                     b.HasKey("Id");
 

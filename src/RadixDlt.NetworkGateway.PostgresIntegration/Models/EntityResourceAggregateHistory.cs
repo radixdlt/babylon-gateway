@@ -62,9 +62,11 @@
  * permissions under this License.
  */
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
@@ -84,12 +86,41 @@ internal class EntityResourceAggregateHistory
     [Column("fungible_resource_entity_ids")]
     public List<long> FungibleResourceEntityIds { get; set; }
 
-    [Column("fungible_resource_last_update_state_versions")]
-    public List<long> FungibleResourceLastUpdateStateVersions { get; set; }
+    [Column("fungible_resource_significant_update_state_versions")]
+    public List<long> FungibleResourceSignificantUpdateStateVersions { get; set; }
 
     [Column("non_fungible_resource_entity_ids")]
     public List<long> NonFungibleResourceEntityIds { get; set; }
 
-    [Column("non_fungible_resource_last_update_state_versions")]
-    public List<long> NonFungibleResourceLastUpdateStateVersions { get; set; }
+    [Column("non_fungible_resource_significant_update_state_versions")]
+    public List<long> NonFungibleResourceSignificantUpdateStateVersions { get; set; }
+
+    public void MarkAsCloneOfExistingRecord()
+    {
+        _fungibleResourceEntityIdsOrg = FungibleResourceEntityIds.ToArray();
+        _nonFungibleResourceEntityIdsOrg = NonFungibleResourceEntityIds.ToArray();
+    }
+
+    public bool ShouldBePersisted()
+    {
+        if (_fungibleResourceEntityIdsOrg == null || _nonFungibleResourceEntityIdsOrg == null)
+        {
+            return true;
+        }
+
+        if (!_fungibleResourceEntityIdsOrg.SequenceEqual(FungibleResourceEntityIds.ToArray()))
+        {
+            return true;
+        }
+
+        if (!_nonFungibleResourceEntityIdsOrg.SequenceEqual(NonFungibleResourceEntityIds.ToArray()))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private long[]? _fungibleResourceEntityIdsOrg;
+    private long[]? _nonFungibleResourceEntityIdsOrg;
 }

@@ -759,7 +759,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
             dbReadDuration += sw.Elapsed;
 
-            var entityResourceAggregateHistoryToAdd = new List<EntityResourceAggregateHistory>();
+            var entityResourceAggregateHistoryCandidates = new List<EntityResourceAggregateHistory>();
             var entityResourceAggregatedVaultsHistoryToAdd = new List<EntityResourceAggregatedVaultsHistory>();
             var entityResourceVaultAggregateHistoryToAdd = new List<EntityResourceVaultAggregateHistory>();
             var nonFungibleIdStoreHistoryToAdd = new Dictionary<NonFungibleStoreLookup, NonFungibleIdStoreHistory>();
@@ -968,19 +968,22 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 void AggregateEntityResourceInternal(long entityId, long resourceEntityId)
                 {
+                    // we only want to create new aggregated resource history entry if
+                    // - given resource is seen for the very first time,
+                    // - given resource is already stored but has been updated and this update caused change of order (this is evaluated right before persistance)
+
+                    var currentResourceIndex = -1;
+
                     if (mostRecentEntityResourceAggregateHistory.TryGetValue(entityId, out var existingAggregate))
                     {
                         var existingResourceCollection = fungibleResource
                             ? existingAggregate.FungibleResourceEntityIds
                             : existingAggregate.NonFungibleResourceEntityIds;
 
-                        // TODO add support for [non_]fungible_resource_last_update_state_versions
-                        // so the idea is to update state_version of when each resource has been meaningfully updated*
-                        // and then resort both arrays (entity_ids, last_update_state_versions) - this should give
-                        // us "order by most recently updated" characteristics
-                        // * - meaningfully updated means "it lead to the change of order"
+                        currentResourceIndex = existingResourceCollection.IndexOf(resourceEntityId);
 
-                        if (existingResourceCollection.Contains(resourceEntityId))
+                        // we're already the most recent one, there's nothing more to do
+                        if (currentResourceIndex == 0)
                         {
                             return;
                         }
@@ -996,25 +999,37 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             FromStateVersion = stateVersion,
                             EntityId = entityId,
                             FungibleResourceEntityIds = new List<long>(existingAggregate?.FungibleResourceEntityIds.ToArray() ?? Array.Empty<long>()),
-                            FungibleResourceLastUpdateStateVersions = new List<long>(existingAggregate?.FungibleResourceLastUpdateStateVersions.ToArray() ?? Array.Empty<long>()),
+                            FungibleResourceSignificantUpdateStateVersions = new List<long>(existingAggregate?.FungibleResourceSignificantUpdateStateVersions.ToArray() ?? Array.Empty<long>()),
                             NonFungibleResourceEntityIds = new List<long>(existingAggregate?.NonFungibleResourceEntityIds.ToArray() ?? Array.Empty<long>()),
-                            NonFungibleResourceLastUpdateStateVersions = new List<long>(existingAggregate?.NonFungibleResourceLastUpdateStateVersions.ToArray() ?? Array.Empty<long>()),
+                            NonFungibleResourceSignificantUpdateStateVersions = new List<long>(existingAggregate?.NonFungibleResourceSignificantUpdateStateVersions.ToArray() ?? Array.Empty<long>()),
                         };
 
-                        entityResourceAggregateHistoryToAdd.Add(aggregate);
+                        if (existingAggregate != null)
+                        {
+                            aggregate.MarkAsCloneOfExistingRecord();
+                        }
+
+                        entityResourceAggregateHistoryCandidates.Add(aggregate);
                         mostRecentEntityResourceAggregateHistory[entityId] = aggregate;
                     }
 
-                    if (fungibleResource)
+                    var resourceCollection = fungibleResource
+                        ? aggregate.FungibleResourceEntityIds
+                        : aggregate.NonFungibleResourceEntityIds;
+
+                    var lastRelevantUpdateCollection = fungibleResource
+                        ? aggregate.FungibleResourceSignificantUpdateStateVersions
+                        : aggregate.NonFungibleResourceSignificantUpdateStateVersions;
+
+                    // we're actually updating the position so we must remove old entry first
+                    if (currentResourceIndex != -1)
                     {
-                        aggregate.FungibleResourceEntityIds.Add(resourceEntityId);
-                        aggregate.FungibleResourceLastUpdateStateVersions.Add(-1); // TODO just a placeholder value
+                        resourceCollection.RemoveAt(currentResourceIndex);
+                        lastRelevantUpdateCollection.RemoveAt(currentResourceIndex);
                     }
-                    else
-                    {
-                        aggregate.NonFungibleResourceEntityIds.Add(resourceEntityId);
-                        aggregate.NonFungibleResourceLastUpdateStateVersions.Add(-1); // TODO just a placeholder value
-                    }
+
+                    resourceCollection.Insert(0, resourceEntityId);
+                    lastRelevantUpdateCollection.Insert(0, stateVersion);
                 }
 
                 void AggregateEntityResourceVaultInternal(long entityId, long resourceEntityId, long resourceVaultEntityId)
@@ -1158,6 +1173,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     });
                 })
                 .ToList();
+
+            var entityResourceAggregateHistoryToAdd = entityResourceAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()).ToList();
 
             sw = Stopwatch.StartNew();
 
