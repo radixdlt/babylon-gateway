@@ -78,5 +78,6 @@ public partial class ValidatorSubstate : IEntityOwner, IGlobalAddressPointer
     {
         yield return LiquidStakeUnitResourceAddress;
         yield return UnstakeClaimTokenResourceAddress;
+        yield return EpochManagerAddress;
     }
 }
