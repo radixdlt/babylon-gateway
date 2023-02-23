@@ -96,7 +96,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, blueprint_name, divisibility, non_fungible_id_type, code, royalty_vault_entity_id, royalty_vault_of_entity_id, stake_vault_id) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, blueprint_name, divisibility, non_fungible_id_type, code, royalty_vault_entity_id, royalty_vault_of_entity_id, stake_vault_entity_id, unstake_vault_entity_id, epoch_manager_entity_id) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -147,10 +147,14 @@ internal class WriteHelper
 
             if (e is ValidatorEntity validatorEntity)
             {
-                await writer.WriteAsync(validatorEntity.StakeVaultId, token);
+                await writer.WriteAsync(validatorEntity.StakeVaultEntityId, token);
+                await writer.WriteAsync(validatorEntity.UnstakeVaultEntityId, token);
+                await writer.WriteAsync(validatorEntity.EpochManagerEntityId, token);
             }
             else
             {
+                await writer.WriteNullAsync(token);
+                await writer.WriteNullAsync(token);
                 await writer.WriteNullAsync(token);
             }
         }

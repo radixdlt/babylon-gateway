@@ -86,7 +86,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 {
     private record MetadataViewModel(long EntityId, string[] Keys, string[] Values, int TotalCount);
 
-    private record ValidatorCurrentStakeViewModel(long ValidatorId, string Balance);
+    private record ValidatorCurrentStakeViewModel(long ValidatorId, string Balance, string State);
 
     private record FungibleViewModel(GlobalAddress ResourceEntityGlobalAddress, string Balance, int ResourcesTotalCount);
 
@@ -432,52 +432,31 @@ LIMIT 1
 
         var validatorIds = validatorsAndOneMore.Take(ValidatorsLimit).Select(e => e.Id).ToArray();
 
+        // TODO Validators are currently not a derived type of ComponentEntity but this is only temporary solution, remove this comment once they regain their Component-status
         var cd = new CommandDefinition(
             commandText: @"
-WITH variables (validator_entity_id) AS (
-    SELECT UNNEST(@validatorIds)
-)
-SELECT e.id as ValidatorId, CAST(evh.balance AS text)
+WITH variables (validator_entity_id) AS (SELECT UNNEST(@validatorIds))
+SELECT e.id as ValidatorId, CAST(evh.balance AS text), esh.state
 FROM variables
-    INNER JOIN LATERAL (
-SELECT id, stake_vault_id
-FROM entities
-WHERE id = variables.validator_entity_id AND from_state_version <= @stateVersion
-ORDER BY from_state_version DESC
-LIMIT 1
-) e ON TRUE
-    INNER JOIN LATERAL (
-SELECT balance
-FROM entity_vault_history
-WHERE vault_entity_id = e.stake_vault_id AND from_state_version <= @stateVersion
-ORDER BY from_state_version DESC
-LIMIT 1
-) evh ON TRUE;",
+         INNER JOIN entities e ON e.id = variables.validator_entity_id AND from_state_version <= @stateVersion
+         INNER JOIN LATERAL ( SELECT balance
+                              FROM entity_vault_history
+                              WHERE vault_entity_id = e.stake_vault_entity_id AND from_state_version <= @stateVersion
+                              ORDER BY from_state_version DESC
+                              LIMIT 1 ) evh ON TRUE
+         INNER JOIN LATERAL ( SELECT *
+                              FROM entity_state_history
+                              WHERE entity_id = variables.validator_entity_id AND from_state_version <= @stateVersion
+                            ORDER BY from_state_version DESC
+                            LIMIT 1 ) esh ON true
+;",
             parameters: new
             {
                 validatorIds = validatorIds, stateVersion = ledgerState.StateVersion,
             },
             cancellationToken: token);
 
-        var validatorsCurrentStake = (await _dbContext.Database.GetDbConnection().QueryAsync<ValidatorCurrentStakeViewModel>(cd)).ToList();
-
-        // TODO Validators are currently not a derived type of ComponentEntity but this is only temporary solution, remove this comment once they regain their Component-status
-        var stateById = await _dbContext.EntityStateHistory
-            .FromSqlInterpolated($@"
-WITH variables (validator_entity_id) AS (
-    SELECT UNNEST({validatorIds})
-)
-SELECT esh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_state_history
-    WHERE entity_id = variables.validator_entity_id AND from_state_version <= {ledgerState.StateVersion}
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) esh ON true;
-")
-            .ToDictionaryAsync(e => e.EntityId, token);
+        var validatorsDetails = (await _dbContext.Database.GetDbConnection().QueryAsync<ValidatorCurrentStakeViewModel>(cd)).ToList();
 
         var metadataById = await GetMetadataSlices(validatorIds, 0, DefaultMetadataLimit, ledgerState, token);
 
@@ -495,9 +474,14 @@ INNER JOIN LATERAL (
                         validatorActiveSetHistory.PublicKey.ToGatewayPublicKey());
                 }
 
-                var currentStake = TokenAmount.FromSubUnitsString(validatorsCurrentStake.Single(x => x.ValidatorId == v.Id).Balance).ToString();
+                var details = validatorsDetails.Single(x => x.ValidatorId == v.Id);
 
-                return new GatewayModel.ValidatorCollectionItem(v.GlobalAddress, new JRaw(stateById[v.Id].State), currentStake, activeInEpoch, metadataById[v.Id]);
+                return new GatewayModel.ValidatorCollectionItem(
+                    v.GlobalAddress,
+                    new JRaw(details.State),
+                    TokenAmount.FromSubUnitsString(details.Balance).ToString(),
+                    activeInEpoch,
+                    metadataById[v.Id]);
             })
             .ToList();
 

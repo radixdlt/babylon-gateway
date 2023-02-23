@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230222124134_InitialCreate")]
+    [Migration("20230223122134_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1049,9 +1049,17 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
-                    b.Property<long>("StakeVaultId")
+                    b.Property<long>("EpochManagerEntityId")
                         .HasColumnType("bigint")
-                        .HasColumnName("stake_vault_id");
+                        .HasColumnName("epoch_manager_entity_id");
+
+                    b.Property<long>("StakeVaultEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("stake_vault_entity_id");
+
+                    b.Property<long>("UnstakeVaultEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("unstake_vault_entity_id");
 
                     b.ToTable("entities");
 

@@ -293,7 +293,7 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityStateHistory>()
-            .HasIndex(e => new { EntityId = e.EntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<ValidatorPublicKeyHistory>()
             .HasIndex(e => new { e.ValidatorEntityId, e.FromStateVersion });

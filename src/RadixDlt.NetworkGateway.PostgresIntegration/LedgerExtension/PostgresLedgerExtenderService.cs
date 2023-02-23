@@ -399,17 +399,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (sd is CoreModel.ValidatorSubstate validator)
                     {
-                        referencedEntities.GetOrAdd(validator.StakeVault.EntityIdHex, _ => new ReferencedEntity(
-                            validator.StakeVault.EntityIdHex,
-                            validator.StakeVault.EntityType,
-                            stateVersion))
-                            .IsImmediateChildOf(re);
-
-                        childToParentEntities[validator.StakeVault.EntityIdHex] = sid.EntityIdHex;
-
                         re.PostResolveConfigure((ValidatorEntity e) =>
                         {
-                            e.StakeVaultId = referencedEntities.Get(validator.StakeVault.EntityIdHex).DatabaseId;
+                            e.EpochManagerEntityId = referencedEntities.GetByGlobal((GlobalAddress)validator.EpochManagerAddress).DatabaseId;
+                            e.StakeVaultEntityId = referencedEntities.Get(validator.StakeVault.EntityIdHex).DatabaseId;
+                            e.UnstakeVaultEntityId = referencedEntities.Get(validator.UnstakeVault.EntityIdHex).DatabaseId;
                         });
                     }
                 }

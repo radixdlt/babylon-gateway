@@ -112,7 +112,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     divisibility = table.Column<int>(type: "integer", nullable: true),
                     nonfungibleidtype = table.Column<NonFungibleIdType>(name: "non_fungible_id_type", type: "non_fungible_id_type", nullable: true),
                     code = table.Column<byte[]>(type: "bytea", nullable: true),
-                    stakevaultid = table.Column<long>(name: "stake_vault_id", type: "bigint", nullable: true),
+                    stakevaultentityid = table.Column<long>(name: "stake_vault_entity_id", type: "bigint", nullable: true),
+                    unstakevaultentityid = table.Column<long>(name: "unstake_vault_entity_id", type: "bigint", nullable: true),
+                    epochmanagerentityid = table.Column<long>(name: "epoch_manager_entity_id", type: "bigint", nullable: true),
                     royaltyvaultofentityid = table.Column<long>(name: "royalty_vault_of_entity_id", type: "bigint", nullable: true)
                 },
                 constraints: table =>
