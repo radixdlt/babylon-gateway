@@ -90,49 +90,51 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityOverviewResponseEntityItem
+    /// StateEntityDetailsRequest
     /// </summary>
-    [DataContract(Name = "EntityOverviewResponseEntityItem")]
-    public partial class EntityOverviewResponseEntityItem : IEquatable<EntityOverviewResponseEntityItem>
+    [DataContract(Name = "StateEntityDetailsRequest")]
+    public partial class StateEntityDetailsRequest : IEquatable<StateEntityDetailsRequest>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityOverviewResponseEntityItem" /> class.
+        /// Gets or Sets AggregationLevel
+        /// </summary>
+        [DataMember(Name = "aggregation_level", EmitDefaultValue = true)]
+        public ResourceAggregationLevel? AggregationLevel { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StateEntityDetailsRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityOverviewResponseEntityItem() { }
+        protected StateEntityDetailsRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityOverviewResponseEntityItem" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsRequest" /> class.
         /// </summary>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="metadata">metadata (required).</param>
-        public EntityOverviewResponseEntityItem(string address = default(string), EntityMetadataCollection metadata = default(EntityMetadataCollection))
+        /// <param name="atLedgerState">atLedgerState.</param>
+        /// <param name="addresses">addresses (required).</param>
+        /// <param name="aggregationLevel">aggregationLevel.</param>
+        public StateEntityDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), List<string> addresses = default(List<string>), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "addresses" is required (not null)
+            if (addresses == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityOverviewResponseEntityItem and cannot be null");
+                throw new ArgumentNullException("addresses is a required property for StateEntityDetailsRequest and cannot be null");
             }
-            this.Address = address;
-            // to ensure "metadata" is required (not null)
-            if (metadata == null)
-            {
-                throw new ArgumentNullException("metadata is a required property for EntityOverviewResponseEntityItem and cannot be null");
-            }
-            this.Metadata = metadata;
+            this.Addresses = addresses;
+            this.AtLedgerState = atLedgerState;
+            this.AggregationLevel = aggregationLevel;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// Gets or Sets AtLedgerState
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
-        /// Gets or Sets Metadata
+        /// Gets or Sets Addresses
         /// </summary>
-        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public EntityMetadataCollection Metadata { get; set; }
+        [DataMember(Name = "addresses", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> Addresses { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,9 +143,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityOverviewResponseEntityItem {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("class StateEntityDetailsRequest {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
+            sb.Append("  Addresses: ").Append(Addresses).Append("\n");
+            sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,15 +167,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityOverviewResponseEntityItem);
+            return this.Equals(input as StateEntityDetailsRequest);
         }
 
         /// <summary>
-        /// Returns true if EntityOverviewResponseEntityItem instances are equal
+        /// Returns true if StateEntityDetailsRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityOverviewResponseEntityItem to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityOverviewResponseEntityItem input)
+        public bool Equals(StateEntityDetailsRequest input)
         {
             if (input == null)
             {
@@ -180,14 +183,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
                 ) && 
                 (
-                    this.Metadata == input.Metadata ||
-                    (this.Metadata != null &&
-                    this.Metadata.Equals(input.Metadata))
+                    this.Addresses == input.Addresses ||
+                    this.Addresses != null &&
+                    input.Addresses != null &&
+                    this.Addresses.SequenceEqual(input.Addresses)
+                ) && 
+                (
+                    this.AggregationLevel == input.AggregationLevel ||
+                    this.AggregationLevel.Equals(input.AggregationLevel)
                 );
         }
 
@@ -200,14 +208,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                if (this.AtLedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
                 }
-                if (this.Metadata != null)
+                if (this.Addresses != null)
                 {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Addresses.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.AggregationLevel.GetHashCode();
                 return hashCode;
             }
         }

@@ -90,64 +90,66 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityDetailsResponseNonFungibleResourceDetails
+    /// StateEntityDetailsResponseItem
     /// </summary>
-    [DataContract(Name = "EntityDetailsResponseNonFungibleResourceDetails")]
-    public partial class EntityDetailsResponseNonFungibleResourceDetails : IEquatable<EntityDetailsResponseNonFungibleResourceDetails>
+    [DataContract(Name = "StateEntityDetailsResponseItem")]
+    public partial class StateEntityDetailsResponseItem : IEquatable<StateEntityDetailsResponseItem>
     {
-
         /// <summary>
-        /// Gets or Sets Discriminator
-        /// </summary>
-        [DataMember(Name = "discriminator", IsRequired = true, EmitDefaultValue = true)]
-        public EntityDetailsResponseDetailsType Discriminator { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NonFungibleIdType
-        /// </summary>
-        [DataMember(Name = "non_fungible_id_type", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleIdType NonFungibleIdType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseNonFungibleResourceDetails" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityDetailsResponseNonFungibleResourceDetails() { }
+        protected StateEntityDetailsResponseItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseNonFungibleResourceDetails" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseItem" /> class.
         /// </summary>
-        /// <param name="discriminator">discriminator (required).</param>
-        /// <param name="accessRulesChain">accessRulesChain (required).</param>
-        /// <param name="vaultAccessRulesChain">vaultAccessRulesChain (required).</param>
-        /// <param name="nonFungibleIdType">nonFungibleIdType (required).</param>
-        public EntityDetailsResponseNonFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), Object accessRulesChain = default(Object), Object vaultAccessRulesChain = default(Object), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType))
+        /// <param name="entityId">Hex-encoded entity&#39;s identifier. (required).</param>
+        /// <param name="globalAddress">Bech32m-encoded human readable version of the entity&#39;s global address..</param>
+        /// <param name="metadata">metadata (required).</param>
+        /// <param name="details">details.</param>
+        public StateEntityDetailsResponseItem(string entityId = default(string), string globalAddress = default(string), EntityMetadataCollection metadata = default(EntityMetadataCollection), StateEntityDetailsResponseItemDetails details = default(StateEntityDetailsResponseItemDetails))
         {
-            this.Discriminator = discriminator;
-            // to ensure "accessRulesChain" is required (not null)
-            if (accessRulesChain == null)
+            // to ensure "entityId" is required (not null)
+            if (entityId == null)
             {
-                throw new ArgumentNullException("accessRulesChain is a required property for EntityDetailsResponseNonFungibleResourceDetails and cannot be null");
+                throw new ArgumentNullException("entityId is a required property for StateEntityDetailsResponseItem and cannot be null");
             }
-            this.AccessRulesChain = accessRulesChain;
-            // to ensure "vaultAccessRulesChain" is required (not null)
-            if (vaultAccessRulesChain == null)
+            this.EntityId = entityId;
+            // to ensure "metadata" is required (not null)
+            if (metadata == null)
             {
-                throw new ArgumentNullException("vaultAccessRulesChain is a required property for EntityDetailsResponseNonFungibleResourceDetails and cannot be null");
+                throw new ArgumentNullException("metadata is a required property for StateEntityDetailsResponseItem and cannot be null");
             }
-            this.VaultAccessRulesChain = vaultAccessRulesChain;
-            this.NonFungibleIdType = nonFungibleIdType;
+            this.Metadata = metadata;
+            this.GlobalAddress = globalAddress;
+            this.Details = details;
         }
 
         /// <summary>
-        /// Gets or Sets AccessRulesChain
+        /// Hex-encoded entity&#39;s identifier.
         /// </summary>
-        [DataMember(Name = "access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
-        public Object AccessRulesChain { get; set; }
+        /// <value>Hex-encoded entity&#39;s identifier.</value>
+        [DataMember(Name = "entity_id", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityId { get; set; }
 
         /// <summary>
-        /// Gets or Sets VaultAccessRulesChain
+        /// Bech32m-encoded human readable version of the entity&#39;s global address.
         /// </summary>
-        [DataMember(Name = "vault_access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
-        public Object VaultAccessRulesChain { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        [DataMember(Name = "global_address", EmitDefaultValue = true)]
+        public string GlobalAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Metadata
+        /// </summary>
+        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
+        public EntityMetadataCollection Metadata { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Details
+        /// </summary>
+        [DataMember(Name = "details", EmitDefaultValue = true)]
+        public StateEntityDetailsResponseItemDetails Details { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -156,11 +158,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityDetailsResponseNonFungibleResourceDetails {\n");
-            sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
-            sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
-            sb.Append("  VaultAccessRulesChain: ").Append(VaultAccessRulesChain).Append("\n");
-            sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
+            sb.Append("class StateEntityDetailsResponseItem {\n");
+            sb.Append("  EntityId: ").Append(EntityId).Append("\n");
+            sb.Append("  GlobalAddress: ").Append(GlobalAddress).Append("\n");
+            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("  Details: ").Append(Details).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -181,15 +183,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityDetailsResponseNonFungibleResourceDetails);
+            return this.Equals(input as StateEntityDetailsResponseItem);
         }
 
         /// <summary>
-        /// Returns true if EntityDetailsResponseNonFungibleResourceDetails instances are equal
+        /// Returns true if StateEntityDetailsResponseItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityDetailsResponseNonFungibleResourceDetails to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponseItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityDetailsResponseNonFungibleResourceDetails input)
+        public bool Equals(StateEntityDetailsResponseItem input)
         {
             if (input == null)
             {
@@ -197,22 +199,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Discriminator == input.Discriminator ||
-                    this.Discriminator.Equals(input.Discriminator)
+                    this.EntityId == input.EntityId ||
+                    (this.EntityId != null &&
+                    this.EntityId.Equals(input.EntityId))
                 ) && 
                 (
-                    this.AccessRulesChain == input.AccessRulesChain ||
-                    (this.AccessRulesChain != null &&
-                    this.AccessRulesChain.Equals(input.AccessRulesChain))
+                    this.GlobalAddress == input.GlobalAddress ||
+                    (this.GlobalAddress != null &&
+                    this.GlobalAddress.Equals(input.GlobalAddress))
                 ) && 
                 (
-                    this.VaultAccessRulesChain == input.VaultAccessRulesChain ||
-                    (this.VaultAccessRulesChain != null &&
-                    this.VaultAccessRulesChain.Equals(input.VaultAccessRulesChain))
+                    this.Metadata == input.Metadata ||
+                    (this.Metadata != null &&
+                    this.Metadata.Equals(input.Metadata))
                 ) && 
                 (
-                    this.NonFungibleIdType == input.NonFungibleIdType ||
-                    this.NonFungibleIdType.Equals(input.NonFungibleIdType)
+                    this.Details == input.Details ||
+                    (this.Details != null &&
+                    this.Details.Equals(input.Details))
                 );
         }
 
@@ -225,16 +229,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
-                if (this.AccessRulesChain != null)
+                if (this.EntityId != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRulesChain.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityId.GetHashCode();
                 }
-                if (this.VaultAccessRulesChain != null)
+                if (this.GlobalAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.VaultAccessRulesChain.GetHashCode();
+                    hashCode = (hashCode * 59) + this.GlobalAddress.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
+                if (this.Metadata != null)
+                {
+                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
+                }
+                if (this.Details != null)
+                {
+                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
+                }
                 return hashCode;
             }
         }

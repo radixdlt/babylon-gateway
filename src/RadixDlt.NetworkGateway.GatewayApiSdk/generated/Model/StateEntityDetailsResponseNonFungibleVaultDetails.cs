@@ -84,50 +84,37 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityDetailsRequest
+    /// StateEntityDetailsResponseNonFungibleVaultDetails
     /// </summary>
-    [DataContract(Name = "EntityDetailsRequest")]
-    public partial class EntityDetailsRequest : IEquatable<EntityDetailsRequest>
+    [DataContract(Name = "StateEntityDetailsResponseNonFungibleVaultDetails")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseComponentDetails), "Component")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleResourceDetails), "FungibleResource")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleVaultDetails), "FungibleVault")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleResourceDetails), "NonFungibleResource")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleVaultDetails), "NonFungibleVault")]
+    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponsePackageDetails), "Package")]
+    public partial class StateEntityDetailsResponseNonFungibleVaultDetails : StateEntityDetailsResponseItemDetails, IEquatable<StateEntityDetailsResponseNonFungibleVaultDetails>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsRequest" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseNonFungibleVaultDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityDetailsRequest() { }
+        protected StateEntityDetailsResponseNonFungibleVaultDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsRequest" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseNonFungibleVaultDetails" /> class.
         /// </summary>
-        /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        public EntityDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string address = default(string))
+        /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.NonFungibleVault).</param>
+        public StateEntityDetailsResponseNonFungibleVaultDetails(StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.NonFungibleVault) : base(type)
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
-            {
-                throw new ArgumentNullException("address is a required property for EntityDetailsRequest and cannot be null");
-            }
-            this.Address = address;
-            this.AtLedgerState = atLedgerState;
         }
-
-        /// <summary>
-        /// Gets or Sets AtLedgerState
-        /// </summary>
-        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
-        public LedgerStateSelector AtLedgerState { get; set; }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -136,9 +123,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityDetailsRequest {\n");
-            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("class StateEntityDetailsResponseNonFungibleVaultDetails {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -147,7 +133,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -159,31 +145,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityDetailsRequest);
+            return this.Equals(input as StateEntityDetailsResponseNonFungibleVaultDetails);
         }
 
         /// <summary>
-        /// Returns true if EntityDetailsRequest instances are equal
+        /// Returns true if StateEntityDetailsResponseNonFungibleVaultDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityDetailsRequest to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponseNonFungibleVaultDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityDetailsRequest input)
+        public bool Equals(StateEntityDetailsResponseNonFungibleVaultDetails input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
-                (
-                    this.AtLedgerState == input.AtLedgerState ||
-                    (this.AtLedgerState != null &&
-                    this.AtLedgerState.Equals(input.AtLedgerState))
-                ) && 
-                (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
-                );
+            return base.Equals(input);
         }
 
         /// <summary>
@@ -194,15 +170,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.AtLedgerState != null)
-                {
-                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
-                }
-                if (this.Address != null)
-                {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
-                }
+                int hashCode = base.GetHashCode();
                 return hashCode;
             }
         }

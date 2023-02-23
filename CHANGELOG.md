@@ -1,6 +1,7 @@
 ## 0.2.0 - RCNet
 _Release Date: ???_
 
+- `/entity/overview` and `/entity/details` endpoints replaced with single `/state/entity/details`.
 - Fungible and non-fungible resources are now ordered by the most recently updated.
 - `/transaction/recent` endpoint replaced with `/stream/transactions` returning user and non-user transactions.
 - `limit` request parameter has been renamed to `limit_per_page`.

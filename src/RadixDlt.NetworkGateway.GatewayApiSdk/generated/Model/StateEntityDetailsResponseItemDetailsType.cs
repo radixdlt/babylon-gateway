@@ -90,10 +90,10 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Defines EntityDetailsResponseDetailsType
+    /// Defines StateEntityDetailsResponseItemDetailsType
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum EntityDetailsResponseDetailsType
+    public enum StateEntityDetailsResponseItemDetailsType
     {
         /// <summary>
         /// Enum FungibleResource for value: FungibleResource
@@ -108,16 +108,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         NonFungibleResource = 2,
 
         /// <summary>
+        /// Enum FungibleVault for value: FungibleVault
+        /// </summary>
+        [EnumMember(Value = "FungibleVault")]
+        FungibleVault = 3,
+
+        /// <summary>
+        /// Enum NonFungibleVault for value: NonFungibleVault
+        /// </summary>
+        [EnumMember(Value = "NonFungibleVault")]
+        NonFungibleVault = 4,
+
+        /// <summary>
         /// Enum Package for value: Package
         /// </summary>
         [EnumMember(Value = "Package")]
-        Package = 3,
+        Package = 5,
 
         /// <summary>
         /// Enum Component for value: Component
         /// </summary>
         [EnumMember(Value = "Component")]
-        Component = 4
+        Component = 6
 
     }
 

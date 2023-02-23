@@ -63,7 +63,9 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -92,18 +94,14 @@ internal class DefaultEntityHandler : IEntityHandler
         return await _entityStateQuerier.EntityResourcesSnapshot((GlobalAddress)request.Address, aggregatePerVault, ledgerState, token);
     }
 
-    public async Task<GatewayModel.EntityDetailsResponse?> Details(GatewayModel.EntityDetailsRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.StateEntityDetailsResponse> Details(GatewayModel.StateEntityDetailsRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
-        return await _entityStateQuerier.EntityDetailsSnapshot((GlobalAddress)request.Address, ledgerState, token);
-    }
+        // currently we enforce exactly one element in request.Addresses
+        var item = await _entityStateQuerier.EntityDetailsItem((GlobalAddress)request.Addresses.Single(), ledgerState, token);
 
-    public async Task<GatewayModel.EntityOverviewResponse> Overview(GatewayModel.EntityOverviewRequest request, CancellationToken token = default)
-    {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-
-        return await _entityStateQuerier.EntityOverview(request.Addresses.Select(x => (GlobalAddress)x).ToList(), ledgerState, token);
+        return new GatewayModel.StateEntityDetailsResponse(ledgerState, new List<GatewayModel.StateEntityDetailsResponseItem> { item });
     }
 
     public async Task<GatewayModel.EntityMetadataResponse?> Metadata(GatewayModel.EntityMetadataRequest request, CancellationToken token = default)

@@ -90,35 +90,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityOverviewRequestAllOf
+    /// StateEntityDetailsResponseAllOf
     /// </summary>
-    [DataContract(Name = "EntityOverviewRequest_allOf")]
-    public partial class EntityOverviewRequestAllOf : IEquatable<EntityOverviewRequestAllOf>
+    [DataContract(Name = "StateEntityDetailsResponse_allOf")]
+    public partial class StateEntityDetailsResponseAllOf : IEquatable<StateEntityDetailsResponseAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityOverviewRequestAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityOverviewRequestAllOf() { }
+        protected StateEntityDetailsResponseAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityOverviewRequestAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseAllOf" /> class.
         /// </summary>
-        /// <param name="addresses">addresses (required).</param>
-        public EntityOverviewRequestAllOf(List<string> addresses = default(List<string>))
+        /// <param name="items">items (required).</param>
+        public StateEntityDetailsResponseAllOf(List<StateEntityDetailsResponseItem> items = default(List<StateEntityDetailsResponseItem>))
         {
-            // to ensure "addresses" is required (not null)
-            if (addresses == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("addresses is a required property for EntityOverviewRequestAllOf and cannot be null");
+                throw new ArgumentNullException("items is a required property for StateEntityDetailsResponseAllOf and cannot be null");
             }
-            this.Addresses = addresses;
+            this.Items = items;
         }
 
         /// <summary>
-        /// Gets or Sets Addresses
+        /// Gets or Sets Items
         /// </summary>
-        [DataMember(Name = "addresses", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> Addresses { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<StateEntityDetailsResponseItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityOverviewRequestAllOf {\n");
-            sb.Append("  Addresses: ").Append(Addresses).Append("\n");
+            sb.Append("class StateEntityDetailsResponseAllOf {\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityOverviewRequestAllOf);
+            return this.Equals(input as StateEntityDetailsResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityOverviewRequestAllOf instances are equal
+        /// Returns true if StateEntityDetailsResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityOverviewRequestAllOf to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityOverviewRequestAllOf input)
+        public bool Equals(StateEntityDetailsResponseAllOf input)
         {
             if (input == null)
             {
@@ -165,10 +165,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Addresses == input.Addresses ||
-                    this.Addresses != null &&
-                    input.Addresses != null &&
-                    this.Addresses.SequenceEqual(input.Addresses)
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -181,9 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Addresses != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.Addresses.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

@@ -90,83 +90,36 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityDetailsResponseComponentDetails
+    /// EntityMetadataRequestAllOf
     /// </summary>
-    [DataContract(Name = "EntityDetailsResponseComponentDetails")]
-    public partial class EntityDetailsResponseComponentDetails : IEquatable<EntityDetailsResponseComponentDetails>
+    [DataContract(Name = "EntityMetadataRequest_allOf")]
+    public partial class EntityMetadataRequestAllOf : IEquatable<EntityMetadataRequestAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets Discriminator
-        /// </summary>
-        [DataMember(Name = "discriminator", IsRequired = true, EmitDefaultValue = true)]
-        public EntityDetailsResponseDetailsType Discriminator { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseComponentDetails" /> class.
+        /// Initializes a new instance of the <see cref="EntityMetadataRequestAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityDetailsResponseComponentDetails() { }
+        protected EntityMetadataRequestAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseComponentDetails" /> class.
+        /// Initializes a new instance of the <see cref="EntityMetadataRequestAllOf" /> class.
         /// </summary>
-        /// <param name="discriminator">discriminator (required).</param>
-        /// <param name="packageAddress">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="state">state (required).</param>
-        /// <param name="accessRulesChain">accessRulesChain (required).</param>
-        public EntityDetailsResponseComponentDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), Object accessRulesChain = default(Object))
+        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
+        public EntityMetadataRequestAllOf(string address = default(string))
         {
-            this.Discriminator = discriminator;
-            // to ensure "packageAddress" is required (not null)
-            if (packageAddress == null)
+            // to ensure "address" is required (not null)
+            if (address == null)
             {
-                throw new ArgumentNullException("packageAddress is a required property for EntityDetailsResponseComponentDetails and cannot be null");
+                throw new ArgumentNullException("address is a required property for EntityMetadataRequestAllOf and cannot be null");
             }
-            this.PackageAddress = packageAddress;
-            // to ensure "blueprintName" is required (not null)
-            if (blueprintName == null)
-            {
-                throw new ArgumentNullException("blueprintName is a required property for EntityDetailsResponseComponentDetails and cannot be null");
-            }
-            this.BlueprintName = blueprintName;
-            // to ensure "state" is required (not null)
-            if (state == null)
-            {
-                throw new ArgumentNullException("state is a required property for EntityDetailsResponseComponentDetails and cannot be null");
-            }
-            this.State = state;
-            // to ensure "accessRulesChain" is required (not null)
-            if (accessRulesChain == null)
-            {
-                throw new ArgumentNullException("accessRulesChain is a required property for EntityDetailsResponseComponentDetails and cannot be null");
-            }
-            this.AccessRulesChain = accessRulesChain;
+            this.Address = address;
         }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the entity&#39;s global address.
         /// </summary>
         /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
-        public string PackageAddress { get; set; }
-
-        /// <summary>
-        /// Gets or Sets BlueprintName
-        /// </summary>
-        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
-        public string BlueprintName { get; set; }
-
-        /// <summary>
-        /// Gets or Sets State
-        /// </summary>
-        [DataMember(Name = "state", IsRequired = true, EmitDefaultValue = true)]
-        public Object State { get; set; }
-
-        /// <summary>
-        /// Gets or Sets AccessRulesChain
-        /// </summary>
-        [DataMember(Name = "access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
-        public Object AccessRulesChain { get; set; }
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -175,12 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityDetailsResponseComponentDetails {\n");
-            sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
-            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
-            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
-            sb.Append("  State: ").Append(State).Append("\n");
-            sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
+            sb.Append("class EntityMetadataRequestAllOf {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -201,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityDetailsResponseComponentDetails);
+            return this.Equals(input as EntityMetadataRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityDetailsResponseComponentDetails instances are equal
+        /// Returns true if EntityMetadataRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityDetailsResponseComponentDetails to be compared</param>
+        /// <param name="input">Instance of EntityMetadataRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityDetailsResponseComponentDetails input)
+        public bool Equals(EntityMetadataRequestAllOf input)
         {
             if (input == null)
             {
@@ -217,28 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Discriminator == input.Discriminator ||
-                    this.Discriminator.Equals(input.Discriminator)
-                ) && 
-                (
-                    this.PackageAddress == input.PackageAddress ||
-                    (this.PackageAddress != null &&
-                    this.PackageAddress.Equals(input.PackageAddress))
-                ) && 
-                (
-                    this.BlueprintName == input.BlueprintName ||
-                    (this.BlueprintName != null &&
-                    this.BlueprintName.Equals(input.BlueprintName))
-                ) && 
-                (
-                    this.State == input.State ||
-                    (this.State != null &&
-                    this.State.Equals(input.State))
-                ) && 
-                (
-                    this.AccessRulesChain == input.AccessRulesChain ||
-                    (this.AccessRulesChain != null &&
-                    this.AccessRulesChain.Equals(input.AccessRulesChain))
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
                 );
         }
 
@@ -251,22 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
-                if (this.PackageAddress != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
-                }
-                if (this.BlueprintName != null)
-                {
-                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
-                }
-                if (this.State != null)
-                {
-                    hashCode = (hashCode * 59) + this.State.GetHashCode();
-                }
-                if (this.AccessRulesChain != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccessRulesChain.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
                 return hashCode;
             }

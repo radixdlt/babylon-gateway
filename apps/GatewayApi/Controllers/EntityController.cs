@@ -65,7 +65,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -93,24 +92,6 @@ public class EntityController : ControllerBase
         return response != null
             ? Ok(response)
             : NotFound();
-    }
-
-    [HttpPost("details")]
-    public async Task<IActionResult> Details(GatewayModel.EntityDetailsRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.Details(request, token);
-
-        return response != null
-            ? Ok(response)
-            : NotFound();
-    }
-
-    [HttpPost("overview")]
-    public async Task<IActionResult> Overview(GatewayModel.EntityOverviewRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.Overview(request, token);
-
-        return Ok(response);
     }
 
     [HttpPost("metadata")]

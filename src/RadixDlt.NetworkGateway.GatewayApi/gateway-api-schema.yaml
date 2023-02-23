@@ -304,37 +304,12 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
-  /entity/overview:
+  /state/entity/details:
     post:
-      operationId: EntityOverview
-      summary: Get Entities Overview
-      description: |
-        Returns basic information (incomplete metadata) for a given collection of entities.
-        This endpoint is intended to be used for populating screens which contain a small bit of information about
-        multiple entities.
-      tags:
-        - State
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/EntityOverviewRequest"
-      responses:
-        "200":
-          description: Entities Overview
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EntityOverviewResponse"
-        "4XX":
-          $ref: "#/components/responses/ErrorResponse"
-  /entity/details:
-    post:
-      operationId: EntityDetails
+      operationId: StateEntityDetails
       summary: Get Entity Details
       description: |
-        Returns detailed information for a single entity.
+        Returns detailed information for collection of entities. Aggregate resources globally by default.
       tags:
         - State
       requestBody:
@@ -342,16 +317,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/EntityDetailsRequest"
+              $ref: "#/components/schemas/StateEntityDetailsRequest"
       responses:
         "200":
           description: Entity Details
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EntityDetailsResponse"
+                $ref: "#/components/schemas/StateEntityDetailsResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
+
   /entity/resources:
     post:
       operationId: EntityResources
@@ -575,6 +551,9 @@ components:
       type: string
       example: "<network-name>"
 
+    EntityId:
+      description: Hex-encoded entity's identifier.
+      type: string
     EntityAddress:
       description: Bech32m-encoded human readable version of the entity's global address.
       type: string
@@ -1321,6 +1300,144 @@ components:
                     $ref: "#/components/schemas/CommittedTransactionInfo"
 
     #
+    # /state/* Request & Response Types
+    #
+
+    StateEntityDetailsRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - type: object
+          required:
+            - addresses
+          properties:
+            addresses:
+              type: array
+              items:
+                $ref: "#/components/schemas/EntityAddress"
+            aggregation_level:
+              $ref: "#/components/schemas/ResourceAggregationLevel"
+      example:
+        addresses:
+          - "<entity-address>"
+    StateEntityDetailsResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateEntityDetailsResponseItem"
+    StateEntityDetailsResponseItem:
+      type: object
+      required:
+        - entity_id
+        - metadata
+      properties:
+        entity_id:
+          $ref: "#/components/schemas/EntityId"
+        global_address:
+          $ref: "#/components/schemas/EntityAddress"
+        metadata:
+          $ref: "#/components/schemas/EntityMetadataCollection"
+        details:
+          $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
+    StateEntityDetailsResponseItemDetailsType:
+      type: string
+      enum:
+        - FungibleResource
+        - NonFungibleResource
+        - FungibleVault
+        - NonFungibleVault
+        - Package
+        - Component
+    StateEntityDetailsResponseItemDetails:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/StateEntityDetailsResponseItemDetailsType"
+      discriminator:
+        propertyName: type
+        mapping:
+          # Must match StateEntityDetailsResponseDetailsType
+          FungibleResource: "#/components/schemas/StateEntityDetailsResponseFungibleResourceDetails"
+          NonFungibleResource: "#/components/schemas/StateEntityDetailsResponseNonFungibleResourceDetails"
+          FungibleVault: "#/components/schemas/StateEntityDetailsResponseFungibleVaultDetails"
+          NonFungibleVault: "#/components/schemas/StateEntityDetailsResponseNonFungibleVaultDetails"
+          Package: "#/components/schemas/StateEntityDetailsResponsePackageDetails"
+          Component: "#/components/schemas/StateEntityDetailsResponseComponentDetails"
+    StateEntityDetailsResponseFungibleResourceDetails:
+      allOf:
+        - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
+        - type: object
+          required:
+            - access_rules_chain
+            - vault_access_rules_chain
+            - divisibility
+          properties:
+            access_rules_chain:
+              type: object
+            vault_access_rules_chain:
+              type: object
+            divisibility:
+              type: integer
+              minimum: 0
+    StateEntityDetailsResponseNonFungibleResourceDetails:
+      allOf:
+        - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
+        - type: object
+          required:
+            - access_rules_chain
+            - vault_access_rules_chain
+            - non_fungible_id_type
+          properties:
+            access_rules_chain:
+              type: object
+            vault_access_rules_chain:
+              type: object
+            non_fungible_id_type:
+              $ref: "#/components/schemas/NonFungibleIdType"
+    StateEntityDetailsResponseFungibleVaultDetails:
+      allOf:
+        - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
+        - type: object
+    StateEntityDetailsResponseNonFungibleVaultDetails:
+      allOf:
+        - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
+        - type: object
+    StateEntityDetailsResponsePackageDetails:
+      allOf:
+        - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
+        - type: object
+          required:
+            - code_hex
+          properties:
+            code_hex:
+              $ref: "#/components/schemas/HexString"
+    StateEntityDetailsResponseComponentDetails:
+      allOf:
+        - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
+        - type: object
+          required:
+            - package_address
+            - blueprint_name
+            - state
+            - access_rules_chain
+          properties:
+            package_address:
+              $ref: "#/components/schemas/EntityAddress"
+            blueprint_name:
+              type: string
+            state:
+              type: object
+            access_rules_chain:
+              type: object
+
+    #
     # /entity/* Request & Response Types
     #
 
@@ -1352,160 +1469,6 @@ components:
               $ref: "#/components/schemas/FungibleResourcesCollection"
             non_fungible_resources:
               $ref: "#/components/schemas/NonFungibleResourcesCollection"
-
-    EntityDetailsRequest:
-      allOf:
-        - $ref: "#/components/schemas/AtLedgerStateMixin"
-        - type: object
-          required:
-            - address
-          properties:
-            address:
-              $ref: "#/components/schemas/EntityAddress"
-      example:
-        address: "<entity-address>"
-    EntityDetailsResponse:
-      allOf:
-        - $ref: "#/components/schemas/LedgerStateMixin"
-        - type: object
-          required:
-            - address
-            - metadata
-          properties:
-            address:
-              $ref: "#/components/schemas/EntityAddress"
-            metadata:
-              $ref: "#/components/schemas/EntityMetadataCollection"
-            details:
-              $ref: "#/components/schemas/EntityDetailsResponseDetails"
-    EntityDetailsResponseDetailsType:
-      type: string
-      enum:
-        - FungibleResource
-        - NonFungibleResource
-        - Package
-        - Component
-    EntityDetailsResponseDetails:
-      oneOf:
-        - $ref: "#/components/schemas/EntityDetailsResponseFungibleResourceDetails"
-        - $ref: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetails"
-        - $ref: "#/components/schemas/EntityDetailsResponsePackageDetails"
-        - $ref: "#/components/schemas/EntityDetailsResponseComponentDetails"
-      discriminator:
-        propertyName: discriminator
-        mapping:
-          # Must match EntityDetailsResponseDetailsType
-          fungible_resource: "#/components/schemas/EntityDetailsResponseFungibleResourceDetails"
-          non_fungible_resource: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetails"
-          package: "#/components/schemas/EntityDetailsResponsePackageDetails"
-          component: "#/components/schemas/EntityDetailsResponseComponentDetails"
-    EntityDetailsResponseFungibleResourceDetails:
-      type: object
-      required:
-        - discriminator
-        - access_rules_chain
-        - vault_access_rules_chain
-        - divisibility
-        - total_supply
-        - total_minted
-        - total_burnt
-      properties:
-        discriminator:
-          $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
-        access_rules_chain:
-          type: object
-        vault_access_rules_chain:
-          type: object
-        divisibility:
-          type: integer
-          minimum: 0
-        total_supply:
-          $ref: "#/components/schemas/BigDecimal"
-        total_minted:
-          $ref: "#/components/schemas/BigDecimal"
-        total_burnt:
-          $ref: "#/components/schemas/BigDecimal"
-    EntityDetailsResponseNonFungibleResourceDetails:
-      type: object
-      required:
-        - discriminator
-        - access_rules_chain
-        - vault_access_rules_chain
-        - non_fungible_id_type
-      properties:
-        discriminator:
-          $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
-        access_rules_chain:
-          type: object
-        vault_access_rules_chain:
-          type: object
-        non_fungible_id_type:
-          $ref: "#/components/schemas/NonFungibleIdType"
-    EntityDetailsResponsePackageDetails:
-      type: object
-      required:
-        - discriminator
-        - code_hex
-      properties:
-        discriminator:
-          $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
-        code_hex:
-          $ref: "#/components/schemas/HexString"
-    EntityDetailsResponseComponentDetails:
-      type: object
-      required:
-        - discriminator
-        - package_address
-        - blueprint_name
-        - state
-        - access_rules_chain
-      properties:
-        discriminator:
-          $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
-        package_address:
-          $ref: "#/components/schemas/EntityAddress"
-        blueprint_name:
-          type: string
-        state:
-          type: object
-        access_rules_chain:
-          type: object
-
-    EntityOverviewRequest:
-      allOf:
-        - $ref: "#/components/schemas/AtLedgerStateMixin"
-        - type: object
-          required:
-            - addresses
-          properties:
-            addresses:
-              type: array
-              items:
-                $ref: "#/components/schemas/EntityAddress"
-      example:
-        addresses:
-          - "<entity-address>"
-    EntityOverviewResponse:
-      allOf:
-        - $ref: "#/components/schemas/LedgerStateMixin"
-        - type: object
-          required:
-            - entities
-          properties:
-            entities:
-              type: array
-              items:
-                $ref: "#/components/schemas/EntityOverviewResponseEntityItem"
-    EntityOverviewResponseEntityItem:
-      type: object
-      required:
-        - address
-        - metadata
-      properties:
-        address:
-          $ref: "#/components/schemas/EntityAddress"
-        metadata:
-          $ref: "#/components/schemas/EntityMetadataCollection"
 
     EntityMetadataRequest:
       allOf:
