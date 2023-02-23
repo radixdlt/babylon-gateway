@@ -68,6 +68,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
@@ -80,9 +81,11 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    partial class MigrationsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230223122134_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -248,20 +251,20 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint[]")
                         .HasColumnName("fungible_resource_entity_ids");
 
-                    b.Property<List<long>>("FungibleResourceSignificantUpdateStateVersions")
+                    b.Property<List<long>>("FungibleResourceLastUpdateStateVersions")
                         .IsRequired()
                         .HasColumnType("bigint[]")
-                        .HasColumnName("fungible_resource_significant_update_state_versions");
+                        .HasColumnName("fungible_resource_last_update_state_versions");
 
                     b.Property<List<long>>("NonFungibleResourceEntityIds")
                         .IsRequired()
                         .HasColumnType("bigint[]")
                         .HasColumnName("non_fungible_resource_entity_ids");
 
-                    b.Property<List<long>>("NonFungibleResourceSignificantUpdateStateVersions")
+                    b.Property<List<long>>("NonFungibleResourceLastUpdateStateVersions")
                         .IsRequired()
                         .HasColumnType("bigint[]")
-                        .HasColumnName("non_fungible_resource_significant_update_state_versions");
+                        .HasColumnName("non_fungible_resource_last_update_state_versions");
 
                     b.HasKey("Id");
 
