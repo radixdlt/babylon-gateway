@@ -86,6 +86,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
 {
     private record MetadataViewModel(long EntityId, string[] Keys, string[] Values, int TotalCount);
 
+    private record ValidatorCurrentStakeViewModel(long ValidatorId, string Balance);
+
     private record FungibleViewModel(GlobalAddress ResourceEntityGlobalAddress, string Balance, int ResourcesTotalCount);
 
     private record FungibleVaultViewModel(GlobalAddress ResourceEntityGlobalAddress, string VaultAddress, string Balance, int ResourceTotalCount, int VaultTotalCount);
@@ -125,7 +127,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
             (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EddsaEd25519VirtualIdentityComponent).AddressBytePrefix;
     }
 
-    public async Task<GatewayModel.EntityResourcesResponse> EntityResourcesSnapshot(GlobalAddress address, bool aggregatePerVault, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityResourcesResponse> EntityResourcesSnapshot(GlobalAddress address, bool aggregatePerVault, GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default)
     {
         var entity = await GetEntity<ComponentEntity>(address, ledgerState, token);
 
@@ -225,8 +228,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 var package = await _dbContext.Entities
                     .FirstAsync(e => e.Id == ce.PackageId, token);
 
-                var state = await _dbContext.ComponentEntityStateHistory
-                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ComponentEntityId == ce.Id)
+                var state = await _dbContext.EntityStateHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == ce.Id)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
@@ -399,7 +402,8 @@ LIMIT 1
             immutableDataHex: data.ImmutableData.ToHex());
     }
 
-    public async Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default)
     {
         var fromStateVersion = cursor?.StateVersionBoundary ?? 0;
 
@@ -428,23 +432,52 @@ LIMIT 1
 
         var validatorIds = validatorsAndOneMore.Take(ValidatorsLimit).Select(e => e.Id).ToArray();
 
+        var cd = new CommandDefinition(
+            commandText: @"
+WITH variables (validator_entity_id) AS (
+    SELECT UNNEST(@validatorIds)
+)
+SELECT e.id as ValidatorId, CAST(evh.balance AS text)
+FROM variables
+    INNER JOIN LATERAL (
+SELECT id, stake_vault_id
+FROM entities
+WHERE id = variables.validator_entity_id AND from_state_version <= @stateVersion
+ORDER BY from_state_version DESC
+LIMIT 1
+) e ON TRUE
+    INNER JOIN LATERAL (
+SELECT balance
+FROM entity_vault_history
+WHERE vault_entity_id = e.stake_vault_id AND from_state_version <= @stateVersion
+ORDER BY from_state_version DESC
+LIMIT 1
+) evh ON TRUE;",
+            parameters: new
+            {
+                validatorIds = validatorIds, stateVersion = ledgerState.StateVersion,
+            },
+            cancellationToken: token);
+
+        var validatorsCurrentStake = (await _dbContext.Database.GetDbConnection().QueryAsync<ValidatorCurrentStakeViewModel>(cd)).ToList();
+
         // TODO Validators are currently not a derived type of ComponentEntity but this is only temporary solution, remove this comment once they regain their Component-status
-        var stateById = await _dbContext.ComponentEntityStateHistory
+        var stateById = await _dbContext.EntityStateHistory
             .FromSqlInterpolated($@"
 WITH variables (validator_entity_id) AS (
     SELECT UNNEST({validatorIds})
 )
-SELECT cesh.*
+SELECT esh.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
-    FROM component_entity_state_history
-    WHERE component_entity_id = variables.validator_entity_id AND from_state_version <= {ledgerState.StateVersion}
+    FROM entity_state_history
+    WHERE entity_id = variables.validator_entity_id AND from_state_version <= {ledgerState.StateVersion}
     ORDER BY from_state_version DESC
     LIMIT 1
-) cesh ON true;
+) esh ON true;
 ")
-            .ToDictionaryAsync(e => e.ComponentEntityId, token);
+            .ToDictionaryAsync(e => e.EntityId, token);
 
         var metadataById = await GetMetadataSlices(validatorIds, 0, DefaultMetadataLimit, ledgerState, token);
 
@@ -454,17 +487,17 @@ INNER JOIN LATERAL (
             {
                 GatewayModel.ValidatorCollectionItemActiveInEpoch? activeInEpoch = null;
 
-                if (activeSetById.TryGetValue(v.Id, out var asv))
+                if (activeSetById.TryGetValue(v.Id, out var validatorActiveSetHistory))
                 {
-                    var stake = new GatewayModel.TokenAmount(asv.Stake.ToString(), _networkConfigurationProvider.GetWellKnownAddresses().Xrd);
-                    var stakePercentage = double.Parse((asv.Stake * _tokenAmount100 / totalStake).ToString());
-
                     activeInEpoch = new GatewayModel.ValidatorCollectionItemActiveInEpoch(
-                        new GatewayModel.ValidatorCollectionItemActiveInEpochStake(stake, stakePercentage),
-                        asv.PublicKey.ToGatewayPublicKey());
+                        validatorActiveSetHistory.Stake.ToString(),
+                        double.Parse((validatorActiveSetHistory.Stake * _tokenAmount100 / totalStake).ToString()),
+                        validatorActiveSetHistory.PublicKey.ToGatewayPublicKey());
                 }
 
-                return new GatewayModel.ValidatorCollectionItem(v.GlobalAddress, new JRaw(stateById[v.Id].State), activeInEpoch, metadataById[v.Id]);
+                var currentStake = TokenAmount.FromSubUnitsString(validatorsCurrentStake.Single(x => x.ValidatorId == v.Id).Balance).ToString();
+
+                return new GatewayModel.ValidatorCollectionItem(v.GlobalAddress, new JRaw(stateById[v.Id].State), currentStake, activeInEpoch, metadataById[v.Id]);
             })
             .ToList();
 
@@ -538,7 +571,8 @@ INNER JOIN LATERAL (
     /// <summary>
     /// Returns a paginable resource collection with total (aggregated) balance per resource.
     /// </summary>
-    private async Task<GatewayModel.FungibleResourcesCollection> GetFungiblesSlicePerResource(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<GatewayModel.FungibleResourcesCollection> GetFungiblesSlicePerResource(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState,
+        CancellationToken token)
     {
         var cd = new CommandDefinition(
             commandText: @"
@@ -601,7 +635,8 @@ INNER JOIN entities e ON ah.fungible_resource_entity_id = e.id
     /// Returns a first page of paginable resource collection with nested paginable collection of vaults with their balances per resource for a given entity.
     /// Not suitable for "give me next page" requests.
     /// </summary>
-    private async Task<GatewayModel.FungibleResourcesCollection> GetFungiblesSlicePerVault(long entityId, int resourceLimit, int vaultLimit, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<GatewayModel.FungibleResourcesCollection> GetFungiblesSlicePerVault(long entityId, int resourceLimit, int vaultLimit, GatewayModel.LedgerState ledgerState,
+        CancellationToken token)
     {
         var cd = new CommandDefinition(
             commandText: @"
@@ -691,7 +726,8 @@ INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
     /// <summary>
     /// Returns a paginable resource collection with total (aggregated) count per resource.
     /// </summary>
-    private async Task<GatewayModel.NonFungibleResourcesCollection> GetNonFungiblesSlicePerResource(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<GatewayModel.NonFungibleResourcesCollection> GetNonFungiblesSlicePerResource(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState,
+        CancellationToken token)
     {
         var cd = new CommandDefinition(
             commandText: @"
@@ -754,7 +790,8 @@ INNER JOIN entities e ON ah.non_fungible_resource_entity_id = e.id;
     /// Returns a first page of paginable resource collection with nested paginable collection of vaults with their total count per resource for a given entity.
     /// Not suitable for "give me next page" requests.
     /// </summary>
-    private async Task<GatewayModel.NonFungibleResourcesCollection> GetNonFungiblesSlicePerVault(long entityId, int resourceLimit, int vaultLimit, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<GatewayModel.NonFungibleResourcesCollection> GetNonFungiblesSlicePerVault(long entityId, int resourceLimit, int vaultLimit,
+        GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         var cd = new CommandDefinition(
             commandText: @"
@@ -838,10 +875,12 @@ INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
             ? new GatewayModel.EntityFungiblesCursor(resourceLimit).ToCursorString()
             : null;
 
-        return new GatewayModel.NonFungibleResourcesCollection(resourcesTotalCount, null, nextCursor, resources.Values.Cast<GatewayModel.NonFungibleResourcesCollectionItem>().ToList());
+        return new GatewayModel.NonFungibleResourcesCollection(resourcesTotalCount, null, nextCursor,
+            resources.Values.Cast<GatewayModel.NonFungibleResourcesCollectionItem>().ToList());
     }
 
-    private async Task<GatewayModel.NonFungibleIdsCollection> GetNonFungibleIdsSlice(long entityId, long resourceEntityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<GatewayModel.NonFungibleIdsCollection> GetNonFungibleIdsSlice(long entityId, long resourceEntityId, int offset, int limit,
+        GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         // TODO NG-283 this query does not account for multiple Vaults that could store NFIDs
 

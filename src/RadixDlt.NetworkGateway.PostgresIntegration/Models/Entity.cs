@@ -183,6 +183,8 @@ internal class AccessControllerEntity : Entity
 
 internal class ValidatorEntity : Entity
 {
+    [Column("stake_vault_id")]
+    public long StakeVaultId { get; set; }
 }
 
 internal class IdentityEntity : Entity

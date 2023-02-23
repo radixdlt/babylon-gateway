@@ -1053,12 +1053,15 @@ components:
       required:
         - address
         - metadata
+        - current_stake
       properties:
         address:
           $ref: "#/components/schemas/EntityAddress"
         state:
           type: object
           nullable: true
+        current_stake:
+          $ref: "#/components/schemas/BigDecimal"
         active_in_epoch:
           $ref: "#/components/schemas/ValidatorCollectionItemActiveInEpoch"
         metadata:
@@ -1067,25 +1070,16 @@ components:
       type: object
       required:
         - stake
+        - stake_percentage
         - key
       properties:
         stake:
-          $ref: "#/components/schemas/ValidatorCollectionItemActiveInEpochStake"
-        key:
-          $ref: "#/components/schemas/PublicKey"
-        metadata:
-          $ref: "#/components/schemas/EntityMetadataCollection"
-    ValidatorCollectionItemActiveInEpochStake:
-      type: object
-      required:
-        - stake
-        - stake_percentage
-      properties:
-        stake:
-          $ref: "#/components/schemas/TokenAmount"
+          $ref: "#/components/schemas/BigDecimal"
         stake_percentage:
           type: number
           format: double
+        key:
+          $ref: "#/components/schemas/PublicKey"
 
     #
     # /status/* Request & Response Types

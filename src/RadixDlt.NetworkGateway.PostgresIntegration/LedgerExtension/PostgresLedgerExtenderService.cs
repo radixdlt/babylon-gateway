@@ -337,7 +337,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         referencedEntities.GetOrAdd(rv.EntityIdHex, _ => new ReferencedEntity(rv.EntityIdHex, rv.EntityType, stateVersion)).IsImmediateChildOf(re);
                         childToParentEntities[rv.EntityIdHex] = sid.EntityIdHex;
 
-                        re.PostResolveConfigure((IRoyaltyVaultHolder e) => e.RoyaltyVaultEntityId = referencedEntities.Get(rv.EntityIdHex).DatabaseId);
+                        re.PostResolveConfigure((IRoyaltyVaultHolder e) =>
+                        {
+                            e.RoyaltyVaultEntityId = referencedEntities.Get(rv.EntityIdHex).DatabaseId;
+                        });
                         referencedEntities.Get(rv.EntityIdHex).PostResolveConfigure((VaultEntity e) => e.RoyaltyVaultOfEntityId = re.DatabaseId);
                     }
 
@@ -392,6 +395,22 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     if (sd is CoreModel.PackageInfoSubstate packageInfo)
                     {
                         re.PostResolveConfigure((PackageEntity e) => e.Code = packageInfo.GetCodeBytes());
+                    }
+
+                    if (sd is CoreModel.ValidatorSubstate validator)
+                    {
+                        referencedEntities.GetOrAdd(validator.StakeVault.EntityIdHex, _ => new ReferencedEntity(
+                            validator.StakeVault.EntityIdHex,
+                            validator.StakeVault.EntityType,
+                            stateVersion))
+                            .IsImmediateChildOf(re);
+
+                        childToParentEntities[validator.StakeVault.EntityIdHex] = sid.EntityIdHex;
+
+                        re.PostResolveConfigure((ValidatorEntity e) =>
+                        {
+                            e.StakeVaultId = referencedEntities.Get(validator.StakeVault.EntityIdHex).DatabaseId;
+                        });
                     }
                 }
 
@@ -604,7 +623,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var resourceManagerSupplyChanges = new List<ResourceManagerSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
         var entityAccessRulesChainHistoryToAdd = new List<EntityAccessRulesChainHistory>();
-        var componentEntityStateToAdd = new List<ComponentEntityStateHistory>();
+        var entityStateToAdd = new List<EntityStateHistory>();
         var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>();
 
         // step: scan all substates to figure out changes
@@ -696,11 +715,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (sd is CoreModel.ComponentStateSubstate componentState)
                     {
-                        componentEntityStateToAdd.Add(new ComponentEntityStateHistory
+                        entityStateToAdd.Add(new EntityStateHistory
                         {
-                            Id = sequences.ComponentEntityStateHistorySequence++,
+                            Id = sequences.EntityStateHistorySequence++,
                             FromStateVersion = stateVersion,
-                            ComponentEntityId = referencedEntities.Get(sid.EntityIdHex).DatabaseId,
+                            EntityId = referencedEntities.Get(sid.EntityIdHex).DatabaseId,
                             State = componentState.DataStruct.StructData.ToJson(),
                         });
                     }
@@ -718,11 +737,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             Key = lookup.PublicKey,
                         };
 
-                        componentEntityStateToAdd.Add(new ComponentEntityStateHistory
+                        entityStateToAdd.Add(new EntityStateHistory
                         {
-                            Id = sequences.ComponentEntityStateHistorySequence++,
+                            Id = sequences.EntityStateHistorySequence++,
                             FromStateVersion = stateVersion,
-                            ComponentEntityId = referencedEntities.Get(sid.EntityIdHex).DatabaseId,
+                            EntityId = referencedEntities.Get(sid.EntityIdHex).DatabaseId,
                             State = validator.ToJson(),
                         });
                     }
@@ -1161,7 +1180,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
             sw = Stopwatch.StartNew();
 
-            rowsInserted += await writeHelper.CopyComponentEntityStateHistory(componentEntityStateToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityStateHistory(entityStateToAdd, token);
             rowsInserted += await writeHelper.CopyEntityAccessRulesChainHistory(entityAccessRulesChainHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityMetadataHistory(entityMetadataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceAggregatedVaultsHistory(entityResourceAggregatedVaultsHistoryToAdd, token);
