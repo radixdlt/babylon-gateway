@@ -970,66 +970,39 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 {
                     // we only want to create new aggregated resource history entry if
                     // - given resource is seen for the very first time,
-                    // - given resource is already stored but has been updated and this update caused change of order (this is evaluated right before persistance)
+                    // - given resource is already stored but has been updated and this update caused change of order (this is evaluated right before db persistence)
 
-                    var currentResourceIndex = -1;
-
-                    if (mostRecentEntityResourceAggregateHistory.TryGetValue(entityId, out var existingAggregate))
+                    if (mostRecentEntityResourceAggregateHistory.TryGetValue(entityId, out var aggregate))
                     {
                         var existingResourceCollection = fungibleResource
-                            ? existingAggregate.FungibleResourceEntityIds
-                            : existingAggregate.NonFungibleResourceEntityIds;
-
-                        currentResourceIndex = existingResourceCollection.IndexOf(resourceEntityId);
+                            ? aggregate.FungibleResourceEntityIds
+                            : aggregate.NonFungibleResourceEntityIds;
 
                         // we're already the most recent one, there's nothing more to do
-                        if (currentResourceIndex == 0)
+                        if (existingResourceCollection.IndexOf(resourceEntityId) == 0)
                         {
                             return;
                         }
                     }
 
-                    var aggregate = existingAggregate;
-
                     if (aggregate == null || aggregate.FromStateVersion != stateVersion)
                     {
-                        aggregate = new EntityResourceAggregateHistory
-                        {
-                            Id = sequences.EntityResourceAggregateHistorySequence++,
-                            FromStateVersion = stateVersion,
-                            EntityId = entityId,
-                            FungibleResourceEntityIds = new List<long>(existingAggregate?.FungibleResourceEntityIds.ToArray() ?? Array.Empty<long>()),
-                            FungibleResourceSignificantUpdateStateVersions = new List<long>(existingAggregate?.FungibleResourceSignificantUpdateStateVersions.ToArray() ?? Array.Empty<long>()),
-                            NonFungibleResourceEntityIds = new List<long>(existingAggregate?.NonFungibleResourceEntityIds.ToArray() ?? Array.Empty<long>()),
-                            NonFungibleResourceSignificantUpdateStateVersions = new List<long>(existingAggregate?.NonFungibleResourceSignificantUpdateStateVersions.ToArray() ?? Array.Empty<long>()),
-                        };
-
-                        if (existingAggregate != null)
-                        {
-                            aggregate.MarkAsCloneOfExistingRecord();
-                        }
+                        aggregate = aggregate == null
+                            ? EntityResourceAggregateHistory.Create(sequences.EntityResourceAggregateHistorySequence++, entityId, stateVersion)
+                            : EntityResourceAggregateHistory.CopyOf(sequences.EntityResourceAggregateHistorySequence++, aggregate, stateVersion);
 
                         entityResourceAggregateHistoryCandidates.Add(aggregate);
                         mostRecentEntityResourceAggregateHistory[entityId] = aggregate;
                     }
 
-                    var resourceCollection = fungibleResource
-                        ? aggregate.FungibleResourceEntityIds
-                        : aggregate.NonFungibleResourceEntityIds;
-
-                    var lastRelevantUpdateCollection = fungibleResource
-                        ? aggregate.FungibleResourceSignificantUpdateStateVersions
-                        : aggregate.NonFungibleResourceSignificantUpdateStateVersions;
-
-                    // we're actually updating the position so we must remove old entry first
-                    if (currentResourceIndex != -1)
+                    if (fungibleResource)
                     {
-                        resourceCollection.RemoveAt(currentResourceIndex);
-                        lastRelevantUpdateCollection.RemoveAt(currentResourceIndex);
+                        aggregate.TryUpsertFungible(resourceEntityId, stateVersion);
                     }
-
-                    resourceCollection.Insert(0, resourceEntityId);
-                    lastRelevantUpdateCollection.Insert(0, stateVersion);
+                    else
+                    {
+                        aggregate.TryUpsertNonFungible(resourceEntityId, stateVersion);
+                    }
                 }
 
                 void AggregateEntityResourceVaultInternal(long entityId, long resourceEntityId, long resourceVaultEntityId)
