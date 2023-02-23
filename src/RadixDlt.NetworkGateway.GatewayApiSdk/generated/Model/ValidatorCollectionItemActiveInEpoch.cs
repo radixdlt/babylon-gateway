@@ -103,10 +103,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorCollectionItemActiveInEpoch" /> class.
         /// </summary>
-        /// <param name="stake">stake (required).</param>
+        /// <param name="stake">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
+        /// <param name="stakePercentage">stakePercentage (required).</param>
         /// <param name="key">key (required).</param>
-        /// <param name="metadata">metadata.</param>
-        public ValidatorCollectionItemActiveInEpoch(ValidatorCollectionItemActiveInEpochStake stake = default(ValidatorCollectionItemActiveInEpochStake), PublicKey key = default(PublicKey), EntityMetadataCollection metadata = default(EntityMetadataCollection))
+        public ValidatorCollectionItemActiveInEpoch(string stake = default(string), double stakePercentage = default(double), PublicKey key = default(PublicKey))
         {
             // to ensure "stake" is required (not null)
             if (stake == null)
@@ -114,32 +114,33 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("stake is a required property for ValidatorCollectionItemActiveInEpoch and cannot be null");
             }
             this.Stake = stake;
+            this.StakePercentage = stakePercentage;
             // to ensure "key" is required (not null)
             if (key == null)
             {
                 throw new ArgumentNullException("key is a required property for ValidatorCollectionItemActiveInEpoch and cannot be null");
             }
             this.Key = key;
-            this.Metadata = metadata;
         }
 
         /// <summary>
-        /// Gets or Sets Stake
+        /// String-encoded decimal representing the amount of a related fungible resource.
         /// </summary>
+        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
         [DataMember(Name = "stake", IsRequired = true, EmitDefaultValue = true)]
-        public ValidatorCollectionItemActiveInEpochStake Stake { get; set; }
+        public string Stake { get; set; }
+
+        /// <summary>
+        /// Gets or Sets StakePercentage
+        /// </summary>
+        [DataMember(Name = "stake_percentage", IsRequired = true, EmitDefaultValue = true)]
+        public double StakePercentage { get; set; }
 
         /// <summary>
         /// Gets or Sets Key
         /// </summary>
         [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
         public PublicKey Key { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Metadata
-        /// </summary>
-        [DataMember(Name = "metadata", EmitDefaultValue = true)]
-        public EntityMetadataCollection Metadata { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,8 +151,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ValidatorCollectionItemActiveInEpoch {\n");
             sb.Append("  Stake: ").Append(Stake).Append("\n");
+            sb.Append("  StakePercentage: ").Append(StakePercentage).Append("\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -193,14 +194,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Stake.Equals(input.Stake))
                 ) && 
                 (
+                    this.StakePercentage == input.StakePercentage ||
+                    this.StakePercentage.Equals(input.StakePercentage)
+                ) && 
+                (
                     this.Key == input.Key ||
                     (this.Key != null &&
                     this.Key.Equals(input.Key))
-                ) && 
-                (
-                    this.Metadata == input.Metadata ||
-                    (this.Metadata != null &&
-                    this.Metadata.Equals(input.Metadata))
                 );
         }
 
@@ -217,13 +217,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Stake.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.StakePercentage.GetHashCode();
                 if (this.Key != null)
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
-                }
-                if (this.Metadata != null)
-                {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
                 }
                 return hashCode;
             }

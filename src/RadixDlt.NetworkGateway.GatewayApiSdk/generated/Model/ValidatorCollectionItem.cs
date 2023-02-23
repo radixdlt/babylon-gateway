@@ -105,9 +105,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="state">state.</param>
+        /// <param name="currentStake">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="activeInEpoch">activeInEpoch.</param>
         /// <param name="metadata">metadata (required).</param>
-        public ValidatorCollectionItem(string address = default(string), Object state = default(Object), ValidatorCollectionItemActiveInEpoch activeInEpoch = default(ValidatorCollectionItemActiveInEpoch), EntityMetadataCollection metadata = default(EntityMetadataCollection))
+        public ValidatorCollectionItem(string address = default(string), Object state = default(Object), string currentStake = default(string), ValidatorCollectionItemActiveInEpoch activeInEpoch = default(ValidatorCollectionItemActiveInEpoch), EntityMetadataCollection metadata = default(EntityMetadataCollection))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -115,6 +116,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("address is a required property for ValidatorCollectionItem and cannot be null");
             }
             this.Address = address;
+            // to ensure "currentStake" is required (not null)
+            if (currentStake == null)
+            {
+                throw new ArgumentNullException("currentStake is a required property for ValidatorCollectionItem and cannot be null");
+            }
+            this.CurrentStake = currentStake;
             // to ensure "metadata" is required (not null)
             if (metadata == null)
             {
@@ -139,6 +146,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public Object State { get; set; }
 
         /// <summary>
+        /// String-encoded decimal representing the amount of a related fungible resource.
+        /// </summary>
+        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
+        [DataMember(Name = "current_stake", IsRequired = true, EmitDefaultValue = true)]
+        public string CurrentStake { get; set; }
+
+        /// <summary>
         /// Gets or Sets ActiveInEpoch
         /// </summary>
         [DataMember(Name = "active_in_epoch", EmitDefaultValue = true)]
@@ -160,6 +174,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class ValidatorCollectionItem {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
+            sb.Append("  CurrentStake: ").Append(CurrentStake).Append("\n");
             sb.Append("  ActiveInEpoch: ").Append(ActiveInEpoch).Append("\n");
             sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("}\n");
@@ -208,6 +223,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.State.Equals(input.State))
                 ) && 
                 (
+                    this.CurrentStake == input.CurrentStake ||
+                    (this.CurrentStake != null &&
+                    this.CurrentStake.Equals(input.CurrentStake))
+                ) && 
+                (
                     this.ActiveInEpoch == input.ActiveInEpoch ||
                     (this.ActiveInEpoch != null &&
                     this.ActiveInEpoch.Equals(input.ActiveInEpoch))
@@ -235,6 +255,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.State != null)
                 {
                     hashCode = (hashCode * 59) + this.State.GetHashCode();
+                }
+                if (this.CurrentStake != null)
+                {
+                    hashCode = (hashCode * 59) + this.CurrentStake.GetHashCode();
                 }
                 if (this.ActiveInEpoch != null)
                 {

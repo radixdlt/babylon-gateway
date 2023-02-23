@@ -183,6 +183,14 @@ internal class AccessControllerEntity : Entity
 
 internal class ValidatorEntity : Entity
 {
+    [Column("stake_vault_entity_id")]
+    public long StakeVaultEntityId { get; set; }
+
+    [Column("unstake_vault_entity_id")]
+    public long UnstakeVaultEntityId { get; set; }
+
+    [Column("epoch_manager_entity_id")]
+    public long EpochManagerEntityId { get; set; }
 }
 
 internal class IdentityEntity : Entity

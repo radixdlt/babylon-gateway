@@ -96,7 +96,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, blueprint_name, divisibility, non_fungible_id_type, code, royalty_vault_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, blueprint_name, divisibility, non_fungible_id_type, code, royalty_vault_entity_id, royalty_vault_of_entity_id, stake_vault_entity_id, unstake_vault_entity_id, epoch_manager_entity_id) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -142,6 +142,19 @@ internal class WriteHelper
             }
             else
             {
+                await writer.WriteNullAsync(token);
+            }
+
+            if (e is ValidatorEntity validatorEntity)
+            {
+                await writer.WriteAsync(validatorEntity.StakeVaultEntityId, token);
+                await writer.WriteAsync(validatorEntity.UnstakeVaultEntityId, token);
+                await writer.WriteAsync(validatorEntity.EpochManagerEntityId, token);
+            }
+            else
+            {
+                await writer.WriteNullAsync(token);
+                await writer.WriteNullAsync(token);
                 await writer.WriteNullAsync(token);
             }
         }
@@ -263,21 +276,21 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyComponentEntityStateHistory(ICollection<ComponentEntityStateHistory> entities, CancellationToken token)
+    public async Task<int> CopyEntityStateHistory(ICollection<EntityStateHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY component_entity_state_history (id, from_state_version, component_entity_id, state) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_state_history (id, from_state_version, entity_id, state) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ComponentEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.State, NpgsqlDbType.Jsonb, token);
         }
 
@@ -402,7 +415,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_resource_aggregate_history (id, from_state_version, entity_id, fungible_resource_entity_ids, fungible_resource_last_update_state_versions, non_fungible_resource_entity_ids, non_fungible_resource_last_update_state_versions) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_resource_aggregate_history (id, from_state_version, entity_id, fungible_resource_entity_ids, fungible_resource_significant_update_state_versions, non_fungible_resource_entity_ids, non_fungible_resource_significant_update_state_versions) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -411,9 +424,9 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FungibleResourceEntityIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FungibleResourceLastUpdateStateVersions.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FungibleResourceSignificantUpdateStateVersions.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.NonFungibleResourceEntityIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleResourceLastUpdateStateVersions.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.NonFungibleResourceSignificantUpdateStateVersions.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
         }
 
         await writer.CompleteAsync(token);
@@ -567,7 +580,7 @@ internal class WriteHelper
         var cd = new CommandDefinition(
             commandText: @"
 SELECT
-    setval('component_entity_state_history_id_seq', @componentEntityStateHistorySequence),
+    setval('entity_state_history_id_seq', @EntityStateHistorySequence),
     setval('entities_id_seq', @entitySequence),
     setval('entity_access_rules_chain_history_id_seq', @entityAccessRulesChainHistorySequence),
     setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
@@ -583,7 +596,7 @@ SELECT
     setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence)",
             parameters: new
             {
-                componentEntityStateHistorySequence = sequences.ComponentEntityStateHistorySequence,
+                entityStateHistorySequence = sequences.EntityStateHistorySequence,
                 entitySequence = sequences.EntitySequence,
                 entityAccessRulesChainHistorySequence = sequences.EntityAccessRulesChainHistorySequence,
                 entityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,

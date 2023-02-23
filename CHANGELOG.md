@@ -2,11 +2,12 @@
 _Release Date: ???_
 
 - `/entity/overview` and `/entity/details` endpoints replaced with single `/state/entity/details`.
+- Fungible and non-fungible resources are now ordered by the most recently updated.
 - `/transaction/recent` endpoint replaced with `/stream/transactions` returning user and non-user transactions.
 - `limit` request parameter has been renamed to `limit_per_page`.
 - All enum values use `PascalCase` naming.
 - `/gateway/information` replaced with two separate endpoints `/status/gateway-status` and `/status/network-configuration`
-- added new configuration section `CoreApiIntegration` where you can configure integration with core API. For now only `SubmitTransactionTimeout` setting is supported.
+- Added new configuration section `CoreApiIntegration` where you can configure integration with core API. For now only `SubmitTransactionTimeout` setting is supported.
 
 ### 0.1.1 - Betanet V2
 _Release Date: 14.02.2022_
