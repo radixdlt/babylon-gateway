@@ -163,9 +163,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
                     entityid = table.Column<long>(name: "entity_id", type: "bigint", nullable: false),
                     fungibleresourceentityids = table.Column<List<long>>(name: "fungible_resource_entity_ids", type: "bigint[]", nullable: false),
-                    fungibleresourcelastupdatestateversions = table.Column<List<long>>(name: "fungible_resource_last_update_state_versions", type: "bigint[]", nullable: false),
+                    fungibleresourcesignificantupdatestateversions = table.Column<List<long>>(name: "fungible_resource_significant_update_state_versions", type: "bigint[]", nullable: false),
                     nonfungibleresourceentityids = table.Column<List<long>>(name: "non_fungible_resource_entity_ids", type: "bigint[]", nullable: false),
-                    nonfungibleresourcelastupdatestateversions = table.Column<List<long>>(name: "non_fungible_resource_last_update_state_versions", type: "bigint[]", nullable: false)
+                    nonfungibleresourcesignificantupdatestateversions = table.Column<List<long>>(name: "non_fungible_resource_significant_update_state_versions", type: "bigint[]", nullable: false)
                 },
                 constraints: table =>
                 {
