@@ -99,7 +99,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
 
     public async Task<GatewayModel.TransactionConstructionResponse> Construction(CancellationToken token = default)
     {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(null, token);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForConstructionRequest(null, token);
 
         return new GatewayModel.TransactionConstructionResponse(ledgerState);
     }
