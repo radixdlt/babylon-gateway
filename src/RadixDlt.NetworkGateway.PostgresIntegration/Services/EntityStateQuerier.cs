@@ -75,6 +75,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -241,7 +242,9 @@ internal class EntityStateQuerier : IEntityStateQuerier
         return new GatewayModel.EntityDetailsResponse(ledgerState, entity.GlobalAddress, metadata, details);
     }
 
-    public async Task<GatewayModel.EntityOverviewResponse> EntityOverview(ICollection<GlobalAddress> addresses, GatewayModel.LedgerState ledgerState,
+    public async Task<GatewayModel.EntityOverviewResponse> EntityOverview(
+        ICollection<GlobalAddress> addresses,
+        GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
         var entities = await _dbContext.Entities
@@ -254,6 +257,18 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var items = entities
             .Select(entity => new GatewayModel.EntityOverviewResponseEntityItem(entity.GlobalAddress, metadata[entity.Id]))
             .ToList();
+
+        // it is possible that some addresses were virtual addresses not stored in our database so we have to try to add them now
+        if (entities.Count != addresses.Count)
+        {
+            foreach (var address in addresses)
+            {
+                if (TryGetVirtualEntity(address, out var virtualEntity))
+                {
+                    items.Add(new GatewayModel.EntityOverviewResponseEntityItem(virtualEntity.GlobalAddress, GatewayModel.EntityMetadataCollection.Empty));
+                }
+            }
+        }
 
         return new GatewayModel.EntityOverviewResponse(ledgerState, items);
     }
@@ -736,16 +751,9 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = final.non_fungible_id_data_id
             return entity;
         }
 
-        var firstAddressByte = RadixAddressCodec.Decode(address).Data[0];
-
-        if (firstAddressByte == _ecdsaSecp256k1VirtualAccountAddressPrefix || firstAddressByte == _eddsaEd25519VirtualAccountAddressPrefix)
+        if (TryGetVirtualEntity(address, out var virtualEntity))
         {
-            return new VirtualAccountComponentEntity(address);
-        }
-
-        if (firstAddressByte == _ecdsaSecp256k1VirtualIdentityAddressPrefix || firstAddressByte == _eddsaEd25519VirtualIdentityAddressPrefix)
-        {
-            return new VirtualIdentityEntity(address);
+            return virtualEntity;
         }
 
         throw new EntityNotFoundException(address.ToString());
@@ -762,5 +770,28 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = final.non_fungible_id_data_id
         }
 
         return typedEntity;
+    }
+
+    private bool TryGetVirtualEntity(GlobalAddress address, [NotNullWhen(true)] out Entity? entity)
+    {
+        var firstAddressByte = RadixAddressCodec.Decode(address).Data[0];
+
+        if (firstAddressByte == _ecdsaSecp256k1VirtualAccountAddressPrefix || firstAddressByte == _eddsaEd25519VirtualAccountAddressPrefix)
+        {
+            entity = new VirtualAccountComponentEntity(address);
+
+            return true;
+        }
+
+        if (firstAddressByte == _ecdsaSecp256k1VirtualIdentityAddressPrefix || firstAddressByte == _eddsaEd25519VirtualIdentityAddressPrefix)
+        {
+            entity = new VirtualIdentityEntity(address);
+
+            return true;
+        }
+
+        entity = default;
+
+        return false;
     }
 }
