@@ -345,7 +345,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "pending_transactions",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
+                    id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     payload_hash = table.Column<byte[]>(type: "bytea", nullable: false),
                     intent_hash = table.Column<byte[]>(type: "bytea", nullable: false),
@@ -366,7 +366,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_pending_transactions", x => x.Id);
+                    table.PrimaryKey("PK_pending_transactions", x => x.id);
                 });
 
             migrationBuilder.CreateTable(

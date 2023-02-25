@@ -76,10 +76,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 internal class PendingTransaction
 {
     [Key]
+    [Column("id")]
     public long Id { get; set; }
 
     [Column("payload_hash")]
-    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local - Needed for EF Core
     public byte[] PayloadHash { get; private set; }
 
     [Column("intent_hash")]
