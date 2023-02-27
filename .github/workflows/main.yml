@@ -48,7 +48,7 @@ jobs:
       enable_pr_comment: "false"
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
-      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      service_account: ${{ secrets.GCP_TEST_SERVICEACCOUNT }}
 
   publish-docker-database-migrations:
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
@@ -72,7 +72,7 @@ jobs:
       enable_pr_comment: "false"
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
-      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      service_account: ${{ secrets.GCP_TEST_SERVICEACCOUNT }}
 
   publish-docker-gateway-api:
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
@@ -96,7 +96,7 @@ jobs:
       enable_pr_comment: "false"
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
-      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      service_account: ${{ secrets.GCP_TEST_SERVICEACCOUNT }}
 
   # deploy-on-mardunet:
   #   runs-on: ubuntu-22.04
