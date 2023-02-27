@@ -29,7 +29,6 @@ jobs:
   publish-docker-data-aggregator:
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      environment: "release"
       # image information
       image_registry: "eu.gcr.io"
       image_organization: "dev-container-repo"
@@ -40,12 +39,7 @@ jobs:
       dockerfile: "./apps/DataAggregator/Dockerfile"
       platforms: "linux/amd64"
       # optimizations
-      cache_repo: "europe-west2-docker.pkg.dev/dev-container-repo/eu-cache-repo/babylon-ng-data-aggregator"
       cache_tag_suffix: "pr"
-      role_to_assume: "arn:aws:iam::308190735829:role/gh-dockerhub-releaser"
-      enable_dockerhub: "false"
-      enable_trivy: "false"
-      enable_pr_comment: "false"
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -53,7 +47,6 @@ jobs:
   publish-docker-database-migrations:
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      environment: "release"
       # image information
       image_registry: "eu.gcr.io"
       image_organization: "dev-container-repo"
@@ -63,13 +56,6 @@ jobs:
       context: "."
       dockerfile: "./apps/DatabaseMigrations/Dockerfile"
       platforms: "linux/amd64"
-      # optimizations
-      cache_repo: "europe-west2-docker.pkg.dev/dev-container-repo/eu-cache-repo/babylon-ng-database-migrations"
-      cache_tag_suffix: "pr"
-      role_to_assume: "arn:aws:iam::308190735829:role/gh-dockerhub-releaser"
-      enable_dockerhub: "false"
-      enable_trivy: "false"
-      enable_pr_comment: "false"
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -77,7 +63,6 @@ jobs:
   publish-docker-gateway-api:
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      environment: "release"
       # image information
       image_registry: "eu.gcr.io"
       image_organization: "dev-container-repo"
@@ -87,13 +72,6 @@ jobs:
       context: "."
       dockerfile: "./apps/GatewayApi/Dockerfile"
       platforms: "linux/amd64"
-      # optimizations
-      cache_repo: "europe-west2-docker.pkg.dev/dev-container-repo/eu-cache-repo/babylon-ng-gateway-api"
-      cache_tag_suffix: "pr"
-      role_to_assume: "arn:aws:iam::308190735829:role/gh-dockerhub-releaser"
-      enable_dockerhub: "false"
-      enable_trivy: "false"
-      enable_pr_comment: "false"
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
