@@ -75,6 +75,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -899,16 +900,9 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = final.non_fungible_id_data_id
 
         // TODO this method should return null/throw on missing, virtual component handling should be done upstream to avoid entity.Id = 0 uses, see https://github.com/radixdlt/babylon-gateway/pull/171#discussion_r1111957627
 
-        var firstAddressByte = RadixAddressCodec.Decode(address).Data[0];
-
-        if (firstAddressByte == _ecdsaSecp256k1VirtualAccountAddressPrefix || firstAddressByte == _eddsaEd25519VirtualAccountAddressPrefix)
+        if (TryGetVirtualEntity(address, out var virtualEntity))
         {
-            return new VirtualAccountComponentEntity(address);
-        }
-
-        if (firstAddressByte == _ecdsaSecp256k1VirtualIdentityAddressPrefix || firstAddressByte == _eddsaEd25519VirtualIdentityAddressPrefix)
-        {
-            return new VirtualIdentityEntity(address);
+            return virtualEntity;
         }
 
         throw new EntityNotFoundException(address.ToString());
@@ -925,5 +919,28 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = final.non_fungible_id_data_id
         }
 
         return typedEntity;
+    }
+
+    private bool TryGetVirtualEntity(GlobalAddress address, [NotNullWhen(true)] out Entity? entity)
+    {
+        var firstAddressByte = RadixAddressCodec.Decode(address).Data[0];
+
+        if (firstAddressByte == _ecdsaSecp256k1VirtualAccountAddressPrefix || firstAddressByte == _eddsaEd25519VirtualAccountAddressPrefix)
+        {
+            entity = new VirtualAccountComponentEntity(address);
+
+            return true;
+        }
+
+        if (firstAddressByte == _ecdsaSecp256k1VirtualIdentityAddressPrefix || firstAddressByte == _eddsaEd25519VirtualIdentityAddressPrefix)
+        {
+            entity = new VirtualIdentityEntity(address);
+
+            return true;
+        }
+
+        entity = default;
+
+        return false;
     }
 }
