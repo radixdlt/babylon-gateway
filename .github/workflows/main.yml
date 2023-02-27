@@ -45,7 +45,7 @@ jobs:
       role_to_assume: "arn:aws:iam::308190735829:role/gh-dockerhub-releaser"
       enable_dockerhub: "false"
       enable_trivy: "false"
-      enable_pr_comment: "true"
+      enable_pr_comment: "false"
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -69,7 +69,7 @@ jobs:
       role_to_assume: "arn:aws:iam::308190735829:role/gh-dockerhub-releaser"
       enable_dockerhub: "false"
       enable_trivy: "false"
-      enable_pr_comment: "true"
+      enable_pr_comment: "false"
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -93,7 +93,7 @@ jobs:
       role_to_assume: "arn:aws:iam::308190735829:role/gh-dockerhub-releaser"
       enable_dockerhub: "false"
       enable_trivy: "false"
-      enable_pr_comment: "true"
+      enable_pr_comment: "false"
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
