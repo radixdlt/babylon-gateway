@@ -841,7 +841,7 @@ INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
 
         var cd = new CommandDefinition(
             commandText: @"
-SELECT nfid.non_fungible_id AS NonFungibleId, final.total_count AS TotalCount
+SELECT nfid.non_fungible_id AS NonFungibleId, final.total_count AS NonFungibleIdsTotalCount
 FROM (
     SELECT UNNEST(non_fungible_ids[@offset:@limit]) AS non_fungible_id_data_id, cardinality(non_fungible_ids) AS total_count
     FROM entity_vault_history
