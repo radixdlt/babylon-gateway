@@ -90,57 +90,89 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// StateEpochResponse
+    /// StateAccessControllerResponse
     /// </summary>
-    [DataContract(Name = "StateEpochResponse")]
-    public partial class StateEpochResponse : IEquatable<StateEpochResponse>
+    [DataContract(Name = "StateAccessControllerResponse")]
+    public partial class StateAccessControllerResponse : IEquatable<StateAccessControllerResponse>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEpochResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateAccessControllerResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEpochResponse() { }
+        protected StateAccessControllerResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEpochResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateAccessControllerResponse" /> class.
         /// </summary>
-        /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch (required).</param>
-        /// <param name="epochManager">epochManager (required).</param>
-        /// <param name="activeValidatorSet">activeValidatorSet (required).</param>
-        public StateEpochResponse(long epoch = default(long), Substate epochManager = default(Substate), Substate activeValidatorSet = default(Substate))
+        /// <param name="state">state (required).</param>
+        /// <param name="metadata">metadata (required).</param>
+        /// <param name="accessRules">accessRules (required).</param>
+        /// <param name="stateOwnedVaults">Any vaults owned directly or indirectly by the component (required).</param>
+        /// <param name="descendentIds">Any descendent nodes owned directly or indirectly by the component (required).</param>
+        public StateAccessControllerResponse(Substate state = default(Substate), Substate metadata = default(Substate), Substate accessRules = default(Substate), List<Substate> stateOwnedVaults = default(List<Substate>), List<StateComponentDescendentId> descendentIds = default(List<StateComponentDescendentId>))
         {
-            this.Epoch = epoch;
-            // to ensure "epochManager" is required (not null)
-            if (epochManager == null)
+            // to ensure "state" is required (not null)
+            if (state == null)
             {
-                throw new ArgumentNullException("epochManager is a required property for StateEpochResponse and cannot be null");
+                throw new ArgumentNullException("state is a required property for StateAccessControllerResponse and cannot be null");
             }
-            this.EpochManager = epochManager;
-            // to ensure "activeValidatorSet" is required (not null)
-            if (activeValidatorSet == null)
+            this.State = state;
+            // to ensure "metadata" is required (not null)
+            if (metadata == null)
             {
-                throw new ArgumentNullException("activeValidatorSet is a required property for StateEpochResponse and cannot be null");
+                throw new ArgumentNullException("metadata is a required property for StateAccessControllerResponse and cannot be null");
             }
-            this.ActiveValidatorSet = activeValidatorSet;
+            this.Metadata = metadata;
+            // to ensure "accessRules" is required (not null)
+            if (accessRules == null)
+            {
+                throw new ArgumentNullException("accessRules is a required property for StateAccessControllerResponse and cannot be null");
+            }
+            this.AccessRules = accessRules;
+            // to ensure "stateOwnedVaults" is required (not null)
+            if (stateOwnedVaults == null)
+            {
+                throw new ArgumentNullException("stateOwnedVaults is a required property for StateAccessControllerResponse and cannot be null");
+            }
+            this.StateOwnedVaults = stateOwnedVaults;
+            // to ensure "descendentIds" is required (not null)
+            if (descendentIds == null)
+            {
+                throw new ArgumentNullException("descendentIds is a required property for StateAccessControllerResponse and cannot be null");
+            }
+            this.DescendentIds = descendentIds;
         }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch
+        /// Gets or Sets State
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch</value>
-        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long Epoch { get; set; }
+        [DataMember(Name = "state", IsRequired = true, EmitDefaultValue = true)]
+        public Substate State { get; set; }
 
         /// <summary>
-        /// Gets or Sets EpochManager
+        /// Gets or Sets Metadata
         /// </summary>
-        [DataMember(Name = "epoch_manager", IsRequired = true, EmitDefaultValue = true)]
-        public Substate EpochManager { get; set; }
+        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
+        public Substate Metadata { get; set; }
 
         /// <summary>
-        /// Gets or Sets ActiveValidatorSet
+        /// Gets or Sets AccessRules
         /// </summary>
-        [DataMember(Name = "active_validator_set", IsRequired = true, EmitDefaultValue = true)]
-        public Substate ActiveValidatorSet { get; set; }
+        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
+        public Substate AccessRules { get; set; }
+
+        /// <summary>
+        /// Any vaults owned directly or indirectly by the component
+        /// </summary>
+        /// <value>Any vaults owned directly or indirectly by the component</value>
+        [DataMember(Name = "state_owned_vaults", IsRequired = true, EmitDefaultValue = true)]
+        public List<Substate> StateOwnedVaults { get; set; }
+
+        /// <summary>
+        /// Any descendent nodes owned directly or indirectly by the component
+        /// </summary>
+        /// <value>Any descendent nodes owned directly or indirectly by the component</value>
+        [DataMember(Name = "descendent_ids", IsRequired = true, EmitDefaultValue = true)]
+        public List<StateComponentDescendentId> DescendentIds { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -149,10 +181,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEpochResponse {\n");
-            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
-            sb.Append("  EpochManager: ").Append(EpochManager).Append("\n");
-            sb.Append("  ActiveValidatorSet: ").Append(ActiveValidatorSet).Append("\n");
+            sb.Append("class StateAccessControllerResponse {\n");
+            sb.Append("  State: ").Append(State).Append("\n");
+            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
+            sb.Append("  StateOwnedVaults: ").Append(StateOwnedVaults).Append("\n");
+            sb.Append("  DescendentIds: ").Append(DescendentIds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -173,15 +207,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEpochResponse);
+            return this.Equals(input as StateAccessControllerResponse);
         }
 
         /// <summary>
-        /// Returns true if StateEpochResponse instances are equal
+        /// Returns true if StateAccessControllerResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEpochResponse to be compared</param>
+        /// <param name="input">Instance of StateAccessControllerResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEpochResponse input)
+        public bool Equals(StateAccessControllerResponse input)
         {
             if (input == null)
             {
@@ -189,18 +223,31 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Epoch == input.Epoch ||
-                    this.Epoch.Equals(input.Epoch)
+                    this.State == input.State ||
+                    (this.State != null &&
+                    this.State.Equals(input.State))
                 ) && 
                 (
-                    this.EpochManager == input.EpochManager ||
-                    (this.EpochManager != null &&
-                    this.EpochManager.Equals(input.EpochManager))
+                    this.Metadata == input.Metadata ||
+                    (this.Metadata != null &&
+                    this.Metadata.Equals(input.Metadata))
                 ) && 
                 (
-                    this.ActiveValidatorSet == input.ActiveValidatorSet ||
-                    (this.ActiveValidatorSet != null &&
-                    this.ActiveValidatorSet.Equals(input.ActiveValidatorSet))
+                    this.AccessRules == input.AccessRules ||
+                    (this.AccessRules != null &&
+                    this.AccessRules.Equals(input.AccessRules))
+                ) && 
+                (
+                    this.StateOwnedVaults == input.StateOwnedVaults ||
+                    this.StateOwnedVaults != null &&
+                    input.StateOwnedVaults != null &&
+                    this.StateOwnedVaults.SequenceEqual(input.StateOwnedVaults)
+                ) && 
+                (
+                    this.DescendentIds == input.DescendentIds ||
+                    this.DescendentIds != null &&
+                    input.DescendentIds != null &&
+                    this.DescendentIds.SequenceEqual(input.DescendentIds)
                 );
         }
 
@@ -213,14 +260,25 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
-                if (this.EpochManager != null)
+                if (this.State != null)
                 {
-                    hashCode = (hashCode * 59) + this.EpochManager.GetHashCode();
+                    hashCode = (hashCode * 59) + this.State.GetHashCode();
                 }
-                if (this.ActiveValidatorSet != null)
+                if (this.Metadata != null)
                 {
-                    hashCode = (hashCode * 59) + this.ActiveValidatorSet.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
+                }
+                if (this.AccessRules != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
+                }
+                if (this.StateOwnedVaults != null)
+                {
+                    hashCode = (hashCode * 59) + this.StateOwnedVaults.GetHashCode();
+                }
+                if (this.DescendentIds != null)
+                {
+                    hashCode = (hashCode * 59) + this.DescendentIds.GetHashCode();
                 }
                 return hashCode;
             }

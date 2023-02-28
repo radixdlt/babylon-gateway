@@ -62,31 +62,30 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Exceptions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using System;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
 public class InvalidTransactionException : ValidationException
 {
-    public WrappedCoreApiException? WrappedCoreApiException { get; }
+    public CoreModel.TransactionSubmitErrorResponse? ErrorResponse { get; }
 
     private InvalidTransactionException(string userFacingMessage, string internalMessage)
         : base(new GatewayModel.InvalidTransactionError(userFacingMessage), userFacingMessage, internalMessage)
     {
     }
 
-    private InvalidTransactionException(string userFacingMessage, WrappedCoreApiException? wrappedCoreApiException = null)
+    private InvalidTransactionException(string userFacingMessage, CoreModel.TransactionSubmitErrorResponse? errorResponse = default)
         : base(new GatewayModel.InvalidTransactionError(userFacingMessage), userFacingMessage)
     {
-        WrappedCoreApiException = wrappedCoreApiException;
+        ErrorResponse = errorResponse;
     }
 
-    public static InvalidTransactionException FromInvalidTransactionDueToCoreApiException(WrappedCoreApiException wrappedCoreApiException)
+    public static InvalidTransactionException FromInvalidTransactionDueToCoreApiError(CoreModel.TransactionSubmitErrorResponse errorResponse)
     {
-        return new InvalidTransactionException("Transaction is invalid", wrappedCoreApiException);
+        return new InvalidTransactionException("Transaction is invalid", errorResponse);
     }
 
     public static InvalidTransactionException FromPreviouslyFailedTransactionError(string failureReason)

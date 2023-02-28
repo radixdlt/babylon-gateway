@@ -92,6 +92,27 @@ namespace RadixDlt.CoreApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
+        /// Get Access Controller Details
+        /// </summary>
+        /// <remarks>
+        /// Reads the access controller&#39;s substate/s from the top of the current ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccessControllerRequest"></param>
+        /// <returns>StateAccessControllerResponse</returns>
+        StateAccessControllerResponse StateAccessControllerPost(StateAccessControllerRequest stateAccessControllerRequest);
+
+        /// <summary>
+        /// Get Access Controller Details
+        /// </summary>
+        /// <remarks>
+        /// Reads the access controller&#39;s substate/s from the top of the current ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccessControllerRequest"></param>
+        /// <returns>ApiResponse of StateAccessControllerResponse</returns>
+        ApiResponse<StateAccessControllerResponse> StateAccessControllerPostWithHttpInfo(StateAccessControllerRequest stateAccessControllerRequest);
+        /// <summary>
         /// Get Clock Details
         /// </summary>
         /// <remarks>
@@ -217,6 +238,27 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <param name="stateResourceRequest"></param>
         /// <returns>ApiResponse of StateResourceResponse</returns>
         ApiResponse<StateResourceResponse> StateResourcePostWithHttpInfo(StateResourceRequest stateResourceRequest);
+        /// <summary>
+        /// Get Validator Details
+        /// </summary>
+        /// <remarks>
+        /// Reads the validator&#39;s substate/s from the top of the current ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateValidatorRequest"></param>
+        /// <returns>StateValidatorResponse</returns>
+        StateValidatorResponse StateValidatorPost(StateValidatorRequest stateValidatorRequest);
+
+        /// <summary>
+        /// Get Validator Details
+        /// </summary>
+        /// <remarks>
+        /// Reads the validator&#39;s substate/s from the top of the current ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateValidatorRequest"></param>
+        /// <returns>ApiResponse of StateValidatorResponse</returns>
+        ApiResponse<StateValidatorResponse> StateValidatorPostWithHttpInfo(StateValidatorRequest stateValidatorRequest);
         #endregion Synchronous Operations
     }
 
@@ -226,6 +268,29 @@ namespace RadixDlt.CoreApiSdk.Api
     public interface IStateApiAsync : IApiAccessor
     {
         #region Asynchronous Operations
+        /// <summary>
+        /// Get Access Controller Details
+        /// </summary>
+        /// <remarks>
+        /// Reads the access controller&#39;s substate/s from the top of the current ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccessControllerRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccessControllerResponse</returns>
+        System.Threading.Tasks.Task<StateAccessControllerResponse> StateAccessControllerPostAsync(StateAccessControllerRequest stateAccessControllerRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Access Controller Details
+        /// </summary>
+        /// <remarks>
+        /// Reads the access controller&#39;s substate/s from the top of the current ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccessControllerRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccessControllerResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateAccessControllerResponse>> StateAccessControllerPostWithHttpInfoAsync(StateAccessControllerRequest stateAccessControllerRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Clock Details
         /// </summary>
@@ -364,6 +429,29 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (StateResourceResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<StateResourceResponse>> StateResourcePostWithHttpInfoAsync(StateResourceRequest stateResourceRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Validator Details
+        /// </summary>
+        /// <remarks>
+        /// Reads the validator&#39;s substate/s from the top of the current ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateValidatorRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateValidatorResponse</returns>
+        System.Threading.Tasks.Task<StateValidatorResponse> StateValidatorPostAsync(StateValidatorRequest stateValidatorRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Validator Details
+        /// </summary>
+        /// <remarks>
+        /// Reads the validator&#39;s substate/s from the top of the current ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateValidatorRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateValidatorResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateValidatorResponse>> StateValidatorPostWithHttpInfoAsync(StateValidatorRequest stateValidatorRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -575,6 +663,123 @@ namespace RadixDlt.CoreApiSdk.Api
                 return _exceptionFactory;
             }
             set { _exceptionFactory = value; }
+        }
+
+        /// <summary>
+        /// Get Access Controller Details Reads the access controller&#39;s substate/s from the top of the current ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccessControllerRequest"></param>
+        /// <returns>StateAccessControllerResponse</returns>
+        public StateAccessControllerResponse StateAccessControllerPost(StateAccessControllerRequest stateAccessControllerRequest)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<StateAccessControllerResponse> localVarResponse = StateAccessControllerPostWithHttpInfo(stateAccessControllerRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Access Controller Details Reads the access controller&#39;s substate/s from the top of the current ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccessControllerRequest"></param>
+        /// <returns>ApiResponse of StateAccessControllerResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<StateAccessControllerResponse> StateAccessControllerPostWithHttpInfo(StateAccessControllerRequest stateAccessControllerRequest)
+        {
+            // verify the required parameter 'stateAccessControllerRequest' is set
+            if (stateAccessControllerRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccessControllerRequest' when calling StateApi->StateAccessControllerPost");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccessControllerRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateAccessControllerResponse>("/state/access-controller", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("StateAccessControllerPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Access Controller Details Reads the access controller&#39;s substate/s from the top of the current ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccessControllerRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccessControllerResponse</returns>
+        public async System.Threading.Tasks.Task<StateAccessControllerResponse> StateAccessControllerPostAsync(StateAccessControllerRequest stateAccessControllerRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<StateAccessControllerResponse> localVarResponse = await StateAccessControllerPostWithHttpInfoAsync(stateAccessControllerRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Access Controller Details Reads the access controller&#39;s substate/s from the top of the current ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccessControllerRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccessControllerResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<StateAccessControllerResponse>> StateAccessControllerPostWithHttpInfoAsync(StateAccessControllerRequest stateAccessControllerRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateAccessControllerRequest' is set
+            if (stateAccessControllerRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccessControllerRequest' when calling StateApi->StateAccessControllerPost");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccessControllerRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateAccessControllerResponse>("/state/access-controller", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("StateAccessControllerPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
         }
 
         /// <summary>
@@ -1273,6 +1478,123 @@ namespace RadixDlt.CoreApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("StateResourcePost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Validator Details Reads the validator&#39;s substate/s from the top of the current ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateValidatorRequest"></param>
+        /// <returns>StateValidatorResponse</returns>
+        public StateValidatorResponse StateValidatorPost(StateValidatorRequest stateValidatorRequest)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<StateValidatorResponse> localVarResponse = StateValidatorPostWithHttpInfo(stateValidatorRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Validator Details Reads the validator&#39;s substate/s from the top of the current ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateValidatorRequest"></param>
+        /// <returns>ApiResponse of StateValidatorResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<StateValidatorResponse> StateValidatorPostWithHttpInfo(StateValidatorRequest stateValidatorRequest)
+        {
+            // verify the required parameter 'stateValidatorRequest' is set
+            if (stateValidatorRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'stateValidatorRequest' when calling StateApi->StateValidatorPost");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateValidatorRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateValidatorResponse>("/state/validator", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("StateValidatorPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Validator Details Reads the validator&#39;s substate/s from the top of the current ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateValidatorRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateValidatorResponse</returns>
+        public async System.Threading.Tasks.Task<StateValidatorResponse> StateValidatorPostAsync(StateValidatorRequest stateValidatorRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<StateValidatorResponse> localVarResponse = await StateValidatorPostWithHttpInfoAsync(stateValidatorRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Validator Details Reads the validator&#39;s substate/s from the top of the current ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateValidatorRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateValidatorResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<StateValidatorResponse>> StateValidatorPostWithHttpInfoAsync(StateValidatorRequest stateValidatorRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateValidatorRequest' is set
+            if (stateValidatorRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'stateValidatorRequest' when calling StateApi->StateValidatorPost");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateValidatorRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateValidatorResponse>("/state/validator", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("StateValidatorPost", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

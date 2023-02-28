@@ -84,42 +84,56 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// EpochUpdateValidatorTransaction
+    /// StateValidatorRequest
     /// </summary>
-    [DataContract(Name = "EpochUpdateValidatorTransaction")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(EpochUpdateValidatorTransaction), "EpochUpdate")]
-    [JsonSubtypes.KnownSubType(typeof(TimeUpdateValidatorTransaction), "TimeUpdate")]
-    public partial class EpochUpdateValidatorTransaction : ValidatorTransaction, IEquatable<EpochUpdateValidatorTransaction>
+    [DataContract(Name = "StateValidatorRequest")]
+    public partial class StateValidatorRequest : IEquatable<StateValidatorRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EpochUpdateValidatorTransaction" /> class.
+        /// Initializes a new instance of the <see cref="StateValidatorRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EpochUpdateValidatorTransaction() { }
+        protected StateValidatorRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EpochUpdateValidatorTransaction" /> class.
+        /// Initializes a new instance of the <see cref="StateValidatorRequest" /> class.
         /// </summary>
-        /// <param name="scryptoEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch. Note that currently this is not the same as &#x60;consensus_epoch&#x60;, but eventually will be.  (required).</param>
-        /// <param name="type">type (required) (default to ValidatorTransactionType.EpochUpdate).</param>
-        public EpochUpdateValidatorTransaction(long scryptoEpoch = default(long), ValidatorTransactionType type = ValidatorTransactionType.EpochUpdate) : base(type)
+        /// <param name="network">The logical name of the network (required).</param>
+        /// <param name="validatorAddress">The Bech32m-encoded human readable version of the component address (required).</param>
+        public StateValidatorRequest(string network = default(string), string validatorAddress = default(string))
         {
-            this.ScryptoEpoch = scryptoEpoch;
+            // to ensure "network" is required (not null)
+            if (network == null)
+            {
+                throw new ArgumentNullException("network is a required property for StateValidatorRequest and cannot be null");
+            }
+            this.Network = network;
+            // to ensure "validatorAddress" is required (not null)
+            if (validatorAddress == null)
+            {
+                throw new ArgumentNullException("validatorAddress is a required property for StateValidatorRequest and cannot be null");
+            }
+            this.ValidatorAddress = validatorAddress;
         }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch. Note that currently this is not the same as &#x60;consensus_epoch&#x60;, but eventually will be. 
+        /// The logical name of the network
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch. Note that currently this is not the same as &#x60;consensus_epoch&#x60;, but eventually will be. </value>
-        [DataMember(Name = "scrypto_epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long ScryptoEpoch { get; set; }
+        /// <value>The logical name of the network</value>
+        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
+        public string Network { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the component address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the component address</value>
+        [DataMember(Name = "validator_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ValidatorAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,9 +142,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EpochUpdateValidatorTransaction {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  ScryptoEpoch: ").Append(ScryptoEpoch).Append("\n");
+            sb.Append("class StateValidatorRequest {\n");
+            sb.Append("  Network: ").Append(Network).Append("\n");
+            sb.Append("  ValidatorAddress: ").Append(ValidatorAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -139,7 +153,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -151,24 +165,30 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EpochUpdateValidatorTransaction);
+            return this.Equals(input as StateValidatorRequest);
         }
 
         /// <summary>
-        /// Returns true if EpochUpdateValidatorTransaction instances are equal
+        /// Returns true if StateValidatorRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of EpochUpdateValidatorTransaction to be compared</param>
+        /// <param name="input">Instance of StateValidatorRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EpochUpdateValidatorTransaction input)
+        public bool Equals(StateValidatorRequest input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.ScryptoEpoch == input.ScryptoEpoch ||
-                    this.ScryptoEpoch.Equals(input.ScryptoEpoch)
+                    this.Network == input.Network ||
+                    (this.Network != null &&
+                    this.Network.Equals(input.Network))
+                ) && 
+                (
+                    this.ValidatorAddress == input.ValidatorAddress ||
+                    (this.ValidatorAddress != null &&
+                    this.ValidatorAddress.Equals(input.ValidatorAddress))
                 );
         }
 
@@ -180,8 +200,15 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.ScryptoEpoch.GetHashCode();
+                int hashCode = 41;
+                if (this.Network != null)
+                {
+                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
+                }
+                if (this.ValidatorAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValidatorAddress.GetHashCode();
+                }
                 return hashCode;
             }
         }

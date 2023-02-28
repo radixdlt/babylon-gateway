@@ -90,31 +90,50 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// EpochUpdateValidatorTransactionAllOf
+    /// StateAccessControllerRequest
     /// </summary>
-    [DataContract(Name = "EpochUpdateValidatorTransaction_allOf")]
-    public partial class EpochUpdateValidatorTransactionAllOf : IEquatable<EpochUpdateValidatorTransactionAllOf>
+    [DataContract(Name = "StateAccessControllerRequest")]
+    public partial class StateAccessControllerRequest : IEquatable<StateAccessControllerRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EpochUpdateValidatorTransactionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateAccessControllerRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EpochUpdateValidatorTransactionAllOf() { }
+        protected StateAccessControllerRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EpochUpdateValidatorTransactionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateAccessControllerRequest" /> class.
         /// </summary>
-        /// <param name="scryptoEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch. Note that currently this is not the same as &#x60;consensus_epoch&#x60;, but eventually will be.  (required).</param>
-        public EpochUpdateValidatorTransactionAllOf(long scryptoEpoch = default(long))
+        /// <param name="network">The logical name of the network (required).</param>
+        /// <param name="controllerAddress">The Bech32m-encoded human readable version of the component address (required).</param>
+        public StateAccessControllerRequest(string network = default(string), string controllerAddress = default(string))
         {
-            this.ScryptoEpoch = scryptoEpoch;
+            // to ensure "network" is required (not null)
+            if (network == null)
+            {
+                throw new ArgumentNullException("network is a required property for StateAccessControllerRequest and cannot be null");
+            }
+            this.Network = network;
+            // to ensure "controllerAddress" is required (not null)
+            if (controllerAddress == null)
+            {
+                throw new ArgumentNullException("controllerAddress is a required property for StateAccessControllerRequest and cannot be null");
+            }
+            this.ControllerAddress = controllerAddress;
         }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch. Note that currently this is not the same as &#x60;consensus_epoch&#x60;, but eventually will be. 
+        /// The logical name of the network
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the new epoch. Note that currently this is not the same as &#x60;consensus_epoch&#x60;, but eventually will be. </value>
-        [DataMember(Name = "scrypto_epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long ScryptoEpoch { get; set; }
+        /// <value>The logical name of the network</value>
+        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
+        public string Network { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the component address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the component address</value>
+        [DataMember(Name = "controller_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ControllerAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -123,8 +142,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EpochUpdateValidatorTransactionAllOf {\n");
-            sb.Append("  ScryptoEpoch: ").Append(ScryptoEpoch).Append("\n");
+            sb.Append("class StateAccessControllerRequest {\n");
+            sb.Append("  Network: ").Append(Network).Append("\n");
+            sb.Append("  ControllerAddress: ").Append(ControllerAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -145,15 +165,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EpochUpdateValidatorTransactionAllOf);
+            return this.Equals(input as StateAccessControllerRequest);
         }
 
         /// <summary>
-        /// Returns true if EpochUpdateValidatorTransactionAllOf instances are equal
+        /// Returns true if StateAccessControllerRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of EpochUpdateValidatorTransactionAllOf to be compared</param>
+        /// <param name="input">Instance of StateAccessControllerRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EpochUpdateValidatorTransactionAllOf input)
+        public bool Equals(StateAccessControllerRequest input)
         {
             if (input == null)
             {
@@ -161,8 +181,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ScryptoEpoch == input.ScryptoEpoch ||
-                    this.ScryptoEpoch.Equals(input.ScryptoEpoch)
+                    this.Network == input.Network ||
+                    (this.Network != null &&
+                    this.Network.Equals(input.Network))
+                ) && 
+                (
+                    this.ControllerAddress == input.ControllerAddress ||
+                    (this.ControllerAddress != null &&
+                    this.ControllerAddress.Equals(input.ControllerAddress))
                 );
         }
 
@@ -175,7 +201,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.ScryptoEpoch.GetHashCode();
+                if (this.Network != null)
+                {
+                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
+                }
+                if (this.ControllerAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ControllerAddress.GetHashCode();
+                }
                 return hashCode;
             }
         }

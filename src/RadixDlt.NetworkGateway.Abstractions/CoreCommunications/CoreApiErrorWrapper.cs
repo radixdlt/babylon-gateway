@@ -79,6 +79,27 @@ public static class CoreApiErrorWrapper
         return $"{nameof(WrappedCoreApiException)}<{wrappedCoreApiException.Error.GetType().Name}>";
     }
 
+    public static async Task<ResponseOrError<TResponse, TError>> ResultOrError<TResponse, TError>(Func<Task<TResponse>> requestAction)
+        where TResponse : class
+        where TError : CoreApiSdk.Model.ErrorResponse
+    {
+        try
+        {
+            return ResponseOrError<TResponse, TError>.Ok(await requestAction());
+        }
+        catch (CoreClient.ApiException apiException)
+        {
+            var errorResponse = ExtractErrorResponse(apiException.ErrorContent?.ToString());
+
+            if (errorResponse is TError error)
+            {
+                return ResponseOrError<TResponse, TError>.Fail(error);
+            }
+
+            throw;
+        }
+    }
+
     public static async Task<T> ExtractCoreApiErrors<T>(Func<Task<T>> requestAction)
     {
         try
@@ -111,10 +132,6 @@ public static class CoreApiErrorWrapper
         {
             return errorResponse.Message switch
             {
-                "Mempool is full" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Transient)),
-                "Rejected: ExecutionError" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Permanent)),
-                "Rejected: ValidationError" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Permanent)),
-                "Rejected: IntentHashCommitted" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Permanent)),
                 _ => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Transient)),
             };
         }

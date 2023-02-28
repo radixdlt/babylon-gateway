@@ -95,7 +95,6 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [DataContract(Name = "TimeUpdateValidatorTransaction")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(EpochUpdateValidatorTransaction), "EpochUpdate")]
     [JsonSubtypes.KnownSubType(typeof(TimeUpdateValidatorTransaction), "TimeUpdate")]
     public partial class TimeUpdateValidatorTransaction : ValidatorTransaction, IEquatable<TimeUpdateValidatorTransaction>
     {
@@ -108,7 +107,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="TimeUpdateValidatorTransaction" /> class.
         /// </summary>
         /// <param name="proposerTimestamp">proposerTimestamp (required).</param>
-        /// <param name="consensusEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. Note that currently this is not the same as &#x60;scrypto_epoch&#x60;, but eventually will be.  (required).</param>
+        /// <param name="consensusEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch.  (required).</param>
         /// <param name="roundInEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus round in the epoch (required).</param>
         /// <param name="type">type (required) (default to ValidatorTransactionType.TimeUpdate).</param>
         public TimeUpdateValidatorTransaction(Instant proposerTimestamp = default(Instant), long consensusEpoch = default(long), long roundInEpoch = default(long), ValidatorTransactionType type = ValidatorTransactionType.TimeUpdate) : base(type)
@@ -130,9 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public Instant ProposerTimestamp { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. Note that currently this is not the same as &#x60;scrypto_epoch&#x60;, but eventually will be. 
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. 
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. Note that currently this is not the same as &#x60;scrypto_epoch&#x60;, but eventually will be. </value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. </value>
         [DataMember(Name = "consensus_epoch", IsRequired = true, EmitDefaultValue = true)]
         public long ConsensusEpoch { get; set; }
 

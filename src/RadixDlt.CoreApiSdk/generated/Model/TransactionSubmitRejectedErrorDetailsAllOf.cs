@@ -109,8 +109,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="isIntentRejectionPermanent">Whether the rejection of this intent is known to be permanent - this is a stronger statement than the payload rejection being permanent, as it implies any payloads containing the intent will also be permanently rejected.  (required).</param>
         /// <param name="isRejectedBecauseIntentAlreadyCommitted">Whether the cached rejection of this intent is due to the intent already having been committed. If so, see the /transaction/receipt endpoint for further information.  (required).</param>
         /// <param name="recalculationDue">recalculationDue.</param>
+        /// <param name="recalculationFromEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch after which the node will consider recalculating the validity of the transaction. Only present if the rejection is temporary due to a header specifying a \&quot;from epoch\&quot; in the future. .</param>
         /// <param name="invalidFromEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the rejection isn&#39;t permanent. .</param>
-        public TransactionSubmitRejectedErrorDetailsAllOf(string errorMessage = default(string), bool isFresh = default(bool), bool isPayloadRejectionPermanent = default(bool), bool isIntentRejectionPermanent = default(bool), bool isRejectedBecauseIntentAlreadyCommitted = default(bool), Instant recalculationDue = default(Instant), long invalidFromEpoch = default(long))
+        public TransactionSubmitRejectedErrorDetailsAllOf(string errorMessage = default(string), bool isFresh = default(bool), bool isPayloadRejectionPermanent = default(bool), bool isIntentRejectionPermanent = default(bool), bool isRejectedBecauseIntentAlreadyCommitted = default(bool), Instant recalculationDue = default(Instant), long recalculationFromEpoch = default(long), long invalidFromEpoch = default(long))
         {
             // to ensure "errorMessage" is required (not null)
             if (errorMessage == null)
@@ -123,6 +124,7 @@ namespace RadixDlt.CoreApiSdk.Model
             this.IsIntentRejectionPermanent = isIntentRejectionPermanent;
             this.IsRejectedBecauseIntentAlreadyCommitted = isRejectedBecauseIntentAlreadyCommitted;
             this.RecalculationDue = recalculationDue;
+            this.RecalculationFromEpoch = recalculationFromEpoch;
             this.InvalidFromEpoch = invalidFromEpoch;
         }
 
@@ -168,6 +170,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public Instant RecalculationDue { get; set; }
 
         /// <summary>
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch after which the node will consider recalculating the validity of the transaction. Only present if the rejection is temporary due to a header specifying a \&quot;from epoch\&quot; in the future. 
+        /// </summary>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch after which the node will consider recalculating the validity of the transaction. Only present if the rejection is temporary due to a header specifying a \&quot;from epoch\&quot; in the future. </value>
+        [DataMember(Name = "recalculation_from_epoch", EmitDefaultValue = true)]
+        public long RecalculationFromEpoch { get; set; }
+
+        /// <summary>
         /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the rejection isn&#39;t permanent. 
         /// </summary>
         /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the rejection isn&#39;t permanent. </value>
@@ -188,6 +197,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  IsIntentRejectionPermanent: ").Append(IsIntentRejectionPermanent).Append("\n");
             sb.Append("  IsRejectedBecauseIntentAlreadyCommitted: ").Append(IsRejectedBecauseIntentAlreadyCommitted).Append("\n");
             sb.Append("  RecalculationDue: ").Append(RecalculationDue).Append("\n");
+            sb.Append("  RecalculationFromEpoch: ").Append(RecalculationFromEpoch).Append("\n");
             sb.Append("  InvalidFromEpoch: ").Append(InvalidFromEpoch).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -251,6 +261,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.RecalculationDue.Equals(input.RecalculationDue))
                 ) && 
                 (
+                    this.RecalculationFromEpoch == input.RecalculationFromEpoch ||
+                    this.RecalculationFromEpoch.Equals(input.RecalculationFromEpoch)
+                ) && 
+                (
                     this.InvalidFromEpoch == input.InvalidFromEpoch ||
                     this.InvalidFromEpoch.Equals(input.InvalidFromEpoch)
                 );
@@ -277,6 +291,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.RecalculationDue.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.RecalculationFromEpoch.GetHashCode();
                 hashCode = (hashCode * 59) + this.InvalidFromEpoch.GetHashCode();
                 return hashCode;
             }

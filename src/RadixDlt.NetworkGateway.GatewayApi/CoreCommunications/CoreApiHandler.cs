@@ -82,7 +82,7 @@ public interface ICoreApiHandler
 
     Task<CoreModel.TransactionPreviewResponse> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default);
 
-    Task<CoreModel.TransactionSubmitResponse> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default);
+    Task<ResponseOrError<CoreModel.TransactionSubmitResponse, CoreModel.TransactionSubmitErrorResponse>> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default);
 }
 
 /// <summary>
@@ -123,9 +123,9 @@ internal class CoreApiHandler : ICoreApiHandler
         return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.TransactionApi.TransactionPreviewPostAsync(request, token));
     }
 
-    public async Task<CoreModel.TransactionSubmitResponse> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default)
+    public async Task<ResponseOrError<CoreModel.TransactionSubmitResponse, CoreModel.TransactionSubmitErrorResponse>> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.TransactionApi.TransactionSubmitPostAsync(request, token));
+        return await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionSubmitResponse, CoreModel.TransactionSubmitErrorResponse>(() => _coreApiProvider.TransactionApi.TransactionSubmitPostAsync(request, token));
     }
 
     private static ICoreApiProvider ChooseCoreApiProvider(ICoreNodesSelectorService coreNodesSelectorService, HttpClient httpClient)

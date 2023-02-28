@@ -97,16 +97,10 @@ namespace RadixDlt.CoreApiSdk.Model
     public enum ValidatorTransactionType
     {
         /// <summary>
-        /// Enum EpochUpdate for value: EpochUpdate
-        /// </summary>
-        [EnumMember(Value = "EpochUpdate")]
-        EpochUpdate = 1,
-
-        /// <summary>
         /// Enum TimeUpdate for value: TimeUpdate
         /// </summary>
         [EnumMember(Value = "TimeUpdate")]
-        TimeUpdate = 2
+        TimeUpdate = 1
 
     }
 

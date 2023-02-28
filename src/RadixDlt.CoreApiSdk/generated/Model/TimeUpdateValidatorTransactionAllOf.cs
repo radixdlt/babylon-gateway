@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="TimeUpdateValidatorTransactionAllOf" /> class.
         /// </summary>
         /// <param name="proposerTimestamp">proposerTimestamp (required).</param>
-        /// <param name="consensusEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. Note that currently this is not the same as &#x60;scrypto_epoch&#x60;, but eventually will be.  (required).</param>
+        /// <param name="consensusEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch.  (required).</param>
         /// <param name="roundInEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus round in the epoch (required).</param>
         public TimeUpdateValidatorTransactionAllOf(Instant proposerTimestamp = default(Instant), long consensusEpoch = default(long), long roundInEpoch = default(long))
         {
@@ -125,9 +125,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public Instant ProposerTimestamp { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. Note that currently this is not the same as &#x60;scrypto_epoch&#x60;, but eventually will be. 
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. 
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. Note that currently this is not the same as &#x60;scrypto_epoch&#x60;, but eventually will be. </value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the consensus epoch. </value>
         [DataMember(Name = "consensus_epoch", IsRequired = true, EmitDefaultValue = true)]
         public long ConsensusEpoch { get; set; }
 

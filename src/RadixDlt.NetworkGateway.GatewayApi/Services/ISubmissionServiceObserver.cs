@@ -96,9 +96,9 @@ public interface ISubmissionServiceObserver
 
     ValueTask HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception);
 
-    ValueTask HandleSubmissionFailedPermanently(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception);
+    ValueTask HandleSubmissionFailedPermanently(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse = null);
 
-    ValueTask HandleSubmissionFailedTemporary(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception);
+    ValueTask HandleSubmissionFailedTemporary(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse = null);
 
     ValueTask HandleSubmissionFailedTimeout(GatewayModel.TransactionSubmitRequest request, OperationCanceledException exception);
 

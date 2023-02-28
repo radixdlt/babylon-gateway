@@ -68,12 +68,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
-using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
-using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
@@ -96,7 +94,6 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     private readonly IOptionsMonitor<NetworkOptions> _networkOptionsMonitor;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly ISystemStatusService _systemStatusService;
     private readonly IClock _clock;
     private readonly IEnumerable<IPendingTransactionResubmissionServiceObserver> _observers;
     private readonly ILogger _logger;
@@ -107,7 +104,6 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         IOptionsMonitor<NetworkOptions> networkOptionsMonitor,
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         INetworkConfigurationProvider networkConfigurationProvider,
-        ISystemStatusService systemStatusService,
         IClock clock,
         IEnumerable<IPendingTransactionResubmissionServiceObserver> observers,
         ILogger<PendingTransactionResubmissionService> logger)
@@ -117,7 +113,6 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         _networkOptionsMonitor = networkOptionsMonitor;
         _mempoolOptionsMonitor = mempoolOptionsMonitor;
         _networkConfigurationProvider = networkConfigurationProvider;
-        _systemStatusService = systemStatusService;
         _clock = clock;
         _observers = observers;
         _logger = logger;
@@ -244,7 +239,6 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     {
         var allowResubmissionIfLastSubmittedBefore = currentTimestamp - mempoolOptions.MinDelayBetweenResubmissions;
         var allowResubmissionIfDroppedOutOfMempoolBefore = currentTimestamp - mempoolOptions.MinDelayBetweenMissingFromMempoolAndResubmission;
-        var isEssentiallySyncedUpNow = _systemStatusService.IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(TimeSpan.FromSeconds(60));
 
         return dbContext.PendingTransactions
             .Where(mt =>
@@ -314,50 +308,55 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
         try
         {
-            var result = await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await
-                coreApiProvider.TransactionsApi.TransactionSubmitPostAsync(submitRequest, cancellationToken)
-            );
+            var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionSubmitResponse, CoreModel.TransactionSubmitErrorResponse>(() =>
+                coreApiProvider.TransactionsApi.TransactionSubmitPostAsync(submitRequest, cancellationToken));
 
             await _observers.ForEachAsync(x => x.PostResubmit(notarizedTransaction));
 
-            if (result.Duplicate)
+            if (result.Succeeded)
             {
-                await _observers.ForEachAsync(x => x.PostResubmitDuplicate(notarizedTransaction));
+                var response = result.Success;
+
+                if (response.Duplicate)
+                {
+                    await _observers.ForEachAsync(x => x.PostResubmitDuplicate(notarizedTransaction));
+                }
+                else
+                {
+                    await _observers.ForEachAsync(x => x.PostResubmitSucceeded(notarizedTransaction));
+                }
+
+                return new SubmissionResult(transaction, false, null, chosenNode.Name);
+            }
+
+            // TODO we need to somehow extract this common logic and share it with GatewayApi's SubmissionService
+
+            var details = result.Failure.Details;
+            var isPermanent = false;
+            var message = result.Failure.Message;
+            var detailedMessage = (string?)null;
+
+            switch (details)
+            {
+                case CoreModel.TransactionSubmitMempoolFullErrorDetails mempoolFull:
+                    detailedMessage = $"max mempool capacity of {mempoolFull.MempoolCapacity} exceeded";
+                    break;
+                case CoreModel.TransactionSubmitRejectedErrorDetails rejected:
+                    isPermanent = rejected.IsIntentRejectionPermanent || rejected.IsPayloadRejectionPermanent;
+                    detailedMessage = rejected.ErrorMessage;
+                    break;
+            }
+
+            if (isPermanent)
+            {
+                await _observers.ForEachAsync(x => x.ResubmitFailedPermanently(notarizedTransaction, result.Failure));
             }
             else
             {
-                await _observers.ForEachAsync(x => x.PostResubmitSucceeded(notarizedTransaction));
+                await _observers.ForEachAsync(x => x.ResubmitFailedTemporary(notarizedTransaction, result.Failure));
             }
 
-            return new SubmissionResult(transaction, false, null, chosenNode.Name);
-        }
-        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Permanent)
-        {
-            await _observers.ForEachAsync(x => x.ResubmitFailedPermanently(notarizedTransaction, ex));
-
-            string? failureReason = ex.Error.Message;
-
-            // TODO NG-289: to be replaced with proper error handling.
-            if (ex.Error is CoreModel.TransactionSubmitErrorResponse { Details: CoreModel.TransactionSubmitRejectedErrorDetails transactionSubmitRejectedErrorDetails })
-            {
-                failureReason = $"{ex.Error.Message}: {transactionSubmitRejectedErrorDetails.ErrorMessage}";
-            }
-
-            return new SubmissionResult(transaction, true, failureReason, chosenNode.Name);
-        }
-        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Transient)
-        {
-            await _observers.ForEachAsync(x => x.ResubmitFailedTemporary(notarizedTransaction, ex));
-
-            string? failureReason = ex.Error.Message;
-
-            // TODO NG-289: to be replaced with proper error handling.
-            if (ex.Error is CoreModel.TransactionSubmitErrorResponse { Details: CoreModel.TransactionSubmitRejectedErrorDetails transactionSubmitRejectedErrorDetails })
-            {
-                failureReason = $"{ex.Error.Message}: {transactionSubmitRejectedErrorDetails.ErrorMessage}";
-            }
-
-            return new SubmissionResult(transaction, false, failureReason, chosenNode.Name);
+            return new SubmissionResult(transaction, isPermanent, message + (detailedMessage != null ? " (" + detailedMessage + ")" : string.Empty), chosenNode.Name);
         }
         catch (OperationCanceledException ex)
         {

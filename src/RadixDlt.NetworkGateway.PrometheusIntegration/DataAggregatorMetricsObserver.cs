@@ -618,7 +618,7 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedPermanently(byte[] notarizedTransaction, WrappedCoreApiException wrappedCoreApiException)
+    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedPermanently(byte[] notarizedTransaction, CoreModel.TransactionSubmitErrorResponse? errorResponse)
     {
         _transactionResubmissionErrorCount.Inc();
         _transactionResubmissionResolutionByResultCount.WithLabels("unknown_permanent_error").Inc();
@@ -626,7 +626,7 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedTemporary(byte[] notarizedTransaction, WrappedCoreApiException wrappedCoreApiException)
+    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedTemporary(byte[] notarizedTransaction, CoreModel.TransactionSubmitErrorResponse? errorResponse)
     {
         _transactionResubmissionErrorCount.Inc();
         _transactionResubmissionResolutionByResultCount.WithLabels("unknown_temporary_error").Inc();
