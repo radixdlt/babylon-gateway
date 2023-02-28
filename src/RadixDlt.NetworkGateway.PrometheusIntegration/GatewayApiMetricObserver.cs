@@ -295,14 +295,14 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedPermanently(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception)
+    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedPermanently(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("unknown_permanent_error").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedTemporary(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception)
+    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedTemporary(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("unknown_temporary_error").Inc();
 

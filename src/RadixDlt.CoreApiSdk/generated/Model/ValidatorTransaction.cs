@@ -95,8 +95,6 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [DataContract(Name = "ValidatorTransaction")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(EpochUpdateValidatorTransaction), "EpochUpdate")]
-    [JsonSubtypes.KnownSubType(typeof(EpochUpdateValidatorTransaction), "EpochUpdateValidatorTransaction")]
     [JsonSubtypes.KnownSubType(typeof(TimeUpdateValidatorTransaction), "TimeUpdate")]
     [JsonSubtypes.KnownSubType(typeof(TimeUpdateValidatorTransaction), "TimeUpdateValidatorTransaction")]
     public partial class ValidatorTransaction : IEquatable<ValidatorTransaction>

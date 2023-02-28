@@ -79,7 +79,7 @@ public interface ISubmissionTrackingService
         CancellationToken token = default
     );
 
-    Task MarkAsFailed(
+    Task MarkInitialFailure(
         bool permanent,
         byte[] payloadHash,
         string failureReason,

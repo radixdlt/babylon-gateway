@@ -65,7 +65,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
@@ -205,60 +204,57 @@ internal class SubmissionService : ISubmissionService
                 finalTokenSource.Token
             );
 
-            if (result.Duplicate)
+            if (result.Succeeded)
             {
-                await _observers.ForEachAsync(x => x.SubmissionDuplicate(request, result));
+                var response = result.SuccessResponse;
+
+                if (response.Duplicate)
+                {
+                    await _observers.ForEachAsync(x => x.SubmissionDuplicate(request, response));
+                }
+                else
+                {
+                    await _observers.ForEachAsync(x => x.SubmissionSucceeded(request, response));
+                }
+
+                return new GatewayModel.TransactionSubmitResponse(
+                    duplicate: response.Duplicate
+                );
+            }
+
+            var details = result.FailureResponse.Details;
+            var isPermanent = false;
+            var message = result.FailureResponse.Message;
+            var detailedMessage = (string?)null;
+
+            switch (details)
+            {
+                case CoreModel.TransactionSubmitMempoolFullErrorDetails mempoolFull:
+                    detailedMessage = $"max mempool capacity of {mempoolFull.MempoolCapacity} exceeded";
+                    break;
+                case CoreModel.TransactionSubmitRejectedErrorDetails rejected:
+                    isPermanent = rejected.IsIntentRejectionPermanent || rejected.IsPayloadRejectionPermanent;
+                    detailedMessage = rejected.ErrorMessage;
+                    break;
+            }
+
+            if (isPermanent)
+            {
+                await _observers.ForEachAsync(x => x.HandleSubmissionFailedPermanently(request, result.FailureResponse));
             }
             else
             {
-                await _observers.ForEachAsync(x => x.SubmissionSucceeded(request, result));
+                await _observers.ForEachAsync(x => x.HandleSubmissionFailedTemporary(request, result.FailureResponse));
             }
 
-            return new GatewayModel.TransactionSubmitResponse(
-                duplicate: result.Duplicate
-            );
-        }
-        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Permanent)
-        {
-            // Any other known Core exception which can't result in the transaction being submitted
-            await _observers.ForEachAsync(x => x.HandleSubmissionFailedPermanently(request, ex));
-
-            string? failureReason = ex.Error.Message;
-
-            // TODO NG-289: to be replaced with proper error handling.
-            if (ex.Error is CoreModel.TransactionSubmitErrorResponse { Details: CoreModel.TransactionSubmitRejectedErrorDetails transactionSubmitRejectedErrorDetails })
-            {
-                failureReason = $"{ex.Error.Message}: {transactionSubmitRejectedErrorDetails.ErrorMessage}";
-            }
-
-            await _submissionTrackingService.MarkAsFailed(
-                true,
-                parsedTransaction.TransactionHash(),
-                failureReason,
+            await _submissionTrackingService.MarkInitialFailure(
+                isPermanent,
+                parsedTransaction.Hash(),
+                message + (detailedMessage != null ? " (" + detailedMessage + ")" : string.Empty),
                 token
             );
 
-            throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(ex);
-        }
-        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Transient)
-        {
-            // Any other known Core exception which can't result in the transaction being submitted
-            await _observers.ForEachAsync(x => x.HandleSubmissionFailedTemporary(request, ex));
-
-            string? failureReason = ex.Error.Message;
-
-            // TODO NG-289: to be replaced with proper error handling.
-            if (ex.Error is CoreModel.TransactionSubmitErrorResponse { Details: CoreModel.TransactionSubmitRejectedErrorDetails transactionSubmitRejectedErrorDetails })
-            {
-                failureReason = $"{ex.Error.Message}: {transactionSubmitRejectedErrorDetails.ErrorMessage}";
-            }
-
-            await _submissionTrackingService.MarkAsFailed(
-                false,
-                parsedTransaction.TransactionHash(),
-                failureReason,
-                token
-            );
+            throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiError(result.FailureResponse);
         }
         catch (OperationCanceledException ex) when (timeoutTokenSource.Token.IsCancellationRequested)
         {

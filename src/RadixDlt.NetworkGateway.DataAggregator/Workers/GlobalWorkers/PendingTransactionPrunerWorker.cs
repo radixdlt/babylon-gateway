@@ -74,7 +74,7 @@ using System.Threading.Tasks;
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 
 /// <summary>
-/// Responsible for keeping the db mempool pruned.
+/// Responsible for keeping the db pruned.
 /// </summary>
 public sealed class PendingTransactionPrunerWorker : GlobalWorker
 {

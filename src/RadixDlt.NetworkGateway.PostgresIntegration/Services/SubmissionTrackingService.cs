@@ -102,16 +102,17 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         CancellationToken token = default
     )
     {
-        var existingPendingTransaction = await GetPendingTransaction(notarizedTransaction.TransactionHash(), token);
+        var existingPendingTransaction = await GetPendingTransaction(notarizedTransaction.Hash(), token);
 
         if (existingPendingTransaction != null)
         {
             if (existingPendingTransaction.Status is PendingTransactionStatus.RejectedPermanently or PendingTransactionStatus.RejectedTemporarily)
             {
-                return new TackingGuidance(ShouldSubmitToNode: false, FailureReason: existingPendingTransaction.FailureReason);
+                return new TackingGuidance(ShouldSubmitToNode: false, FailureReason: existingPendingTransaction.LastFailureReason);
             }
 
             existingPendingTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
+
             await _dbContext.SaveChangesAsync(token);
 
             // It's already been submitted to a node - this will be handled by the resubmission service if appropriate
@@ -119,9 +120,8 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         }
 
         var pendingTransaction = PendingTransaction.NewAsSubmittedForFirstTimeByGateway(
+            notarizedTransaction.Hash(),
             notarizedTransaction.TransactionHash(),
-            notarizedTransaction.SignedIntent.Intent.Hash(),
-            notarizedTransaction.SignedIntent.Hash(),
             notarizedTransaction.Compile(),
             submittedToNodeName,
             submittedTimestamp
@@ -146,7 +146,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         }
     }
 
-    public async Task MarkAsFailed(bool permanent, byte[] payloadHash, string failureReason, CancellationToken token = default)
+    public async Task MarkInitialFailure(bool permanent, byte[] payloadHash, string failureReason, CancellationToken token = default)
     {
         var pendingTransaction = await GetPendingTransaction(payloadHash, token);
 

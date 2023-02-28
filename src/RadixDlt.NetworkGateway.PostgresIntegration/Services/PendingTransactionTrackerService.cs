@@ -158,9 +158,9 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
     /// from another node in the mean-time.
     /// </summary>
     /// <returns>If the transaction was first seen (true) or (false).</returns>
-    public bool TransactionContentsStillNeedFetching(PendingTransactionHashPair transactionIdentifier)
+    public bool TransactionContentsStillNeedFetching(PendingTransactionHashPair hashPair)
     {
-        return !_recentFullTransactionsFetched.Contains(transactionIdentifier);
+        return !_recentFullTransactionsFetched.Contains(hashPair);
     }
 
     /// <summary>

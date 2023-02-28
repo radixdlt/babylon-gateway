@@ -162,6 +162,25 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
     private async Task<int> UpdatePendingTransactions(ReadWriteDbContext dbContext, List<CoreModel.CommittedTransaction> committedTransactions, CancellationToken token)
     {
+        /*
+         * TODO replace with something like with no version control check but with change - we want to run this query with priority and let other operations fail instead
+         *
+         * UPDATE pending_transactions pt
+         * SET
+         *    status = define committed success/failure somehow (success if part of some array?),
+         *    commit_timestamp = {utcNow or some timestamp from committedTransactions coll},
+         *    last_failure_reason = null,
+         *    last_failure_timestamp = null,
+         *    version_control = -1
+         * FROM (
+         *    SELECT * FROM pending_transactions WHERE payload_hash = ANY(...)
+         * ) ptu
+         * WHERE pt.id = ptu.id
+         * RETURNING ptu.*;
+         *
+         * and then simple foreach loop notifying the observers
+         */
+
         var userTransactionStatusByPayloadHash = new Dictionary<ValueBytes, PendingTransactionStatus>(committedTransactions.Count);
 
         foreach (var ct in committedTransactions.Where(ct => ct.LedgerTransaction is CoreModel.UserLedgerTransaction))
@@ -201,8 +220,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     pendingTransaction.LastSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                     pendingTransaction.LastDroppedOutOfMempoolTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                     pendingTransaction.Status,
-                    pendingTransaction.FailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    pendingTransaction.FailureReason
+                    pendingTransaction.LastFailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                    pendingTransaction.LastFailureReason
                 );
             }
 
