@@ -88,7 +88,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "user,validator,system")
                 .Annotation("Npgsql:Enum:non_fungible_id_type", "string,number,bytes,uuid")
-                .Annotation("Npgsql:Enum:pending_transaction_status", "submitted_or_known_in_node_mempool,missing,resolved_but_unknown_till_synced_up,rejected_temporarily,rejected_permanently,committed_success,committed_failure")
+                .Annotation("Npgsql:Enum:pending_transaction_status", "submitted_or_known_in_node_mempool,missing,rejected_temporarily,rejected_permanently,committed_success,committed_failure")
                 .Annotation("Npgsql:Enum:public_key_type", "ecdsa_secp256k1,eddsa_ed25519")
                 .Annotation("Npgsql:Enum:resource_type", "fungible,non_fungible");
 
@@ -349,7 +349,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     payload_hash = table.Column<byte[]>(type: "bytea", nullable: false),
                     intent_hash = table.Column<byte[]>(type: "bytea", nullable: false),
-                    signed_intent_hash = table.Column<byte[]>(type: "bytea", nullable: false),
                     notarized_transaction_blob = table.Column<byte[]>(type: "bytea", nullable: false),
                     status = table.Column<PendingTransactionStatus>(type: "pending_transaction_status", nullable: false),
                     submitted_by_this_gateway = table.Column<bool>(type: "boolean", nullable: false),
@@ -361,8 +360,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     first_seen_in_mempool_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     last_missing_from_mempool_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     commit_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    failure_reason = table.Column<string>(type: "text", nullable: true),
-                    failure_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    last_failure_reason = table.Column<string>(type: "text", nullable: true),
+                    last_failure_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    version_control = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -563,14 +563,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_intent_hash",
                 table: "pending_transactions",
-                column: "intent_hash")
-                .Annotation("Npgsql:IndexMethod", "hash");
+                column: "intent_hash");
 
             migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_payload_hash",
                 table: "pending_transactions",
-                column: "payload_hash")
-                .Annotation("Npgsql:IndexMethod", "hash");
+                column: "payload_hash",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_status",

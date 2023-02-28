@@ -208,16 +208,14 @@ internal abstract class CommonDbContext : DbContext
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<PendingTransaction>()
-            .HasIndex(pt => pt.Status)
-            .HasMethod("hash");
+            .HasIndex(pt => pt.Status);
 
         modelBuilder.Entity<PendingTransaction>()
             .HasIndex(pt => pt.PayloadHash)
-            .HasMethod("hash");
+            .IsUnique();
 
         modelBuilder.Entity<PendingTransaction>()
-            .HasIndex(pt => pt.IntentHash)
-            .HasMethod("hash");
+            .HasIndex(pt => pt.IntentHash);
     }
 
     private static void HookupEntities(ModelBuilder modelBuilder)

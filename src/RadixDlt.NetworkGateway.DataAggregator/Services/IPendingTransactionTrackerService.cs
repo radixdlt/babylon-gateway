@@ -96,5 +96,5 @@ public interface IPendingTransactionTrackerService
     /// from another node in the mean-time.
     /// </summary>
     /// <returns>If the transaction was first seen (true) or (false).</returns>
-    bool TransactionContentsStillNeedFetching(PendingTransactionHashPair transactionIdentifier);
+    bool TransactionContentsStillNeedFetching(PendingTransactionHashPair hashPair);
 }

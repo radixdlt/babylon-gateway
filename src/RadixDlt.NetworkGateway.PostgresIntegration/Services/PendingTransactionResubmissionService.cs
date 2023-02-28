@@ -229,7 +229,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
                 transaction.MarkAsRejected(
                     true,
-                    $"The transaction keeps dropping out of the mempool, so we're not resubmitting it. Initial failure reason: {transaction.FailureReason}",
+                    $"The transaction keeps dropping out of the mempool, so we're not resubmitting it. Initial failure reason: {transaction.LastFailureReason}",
                     submittedAt
                 );
             }
@@ -255,10 +255,6 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
                     /* Transactions get marked RejectedTemporarily by PendingTransactionResubmissionService */
                     || mt.Status == PendingTransactionStatus.RejectedTemporarily
-
-                    /* If we're synced up now, try submitting transactions with unknown status again. They almost
-                       certainly failed due to a real double spend - so we'll detect it now and can mark them failed */
-                    || (isEssentiallySyncedUpNow && mt.Status == PendingTransactionStatus.ResolvedButUnknownTillSyncedUp)
                 )
                 && (mt.LastDroppedOutOfMempoolTimestamp!.Value < allowResubmissionIfDroppedOutOfMempoolBefore)
                 && (mt.LastSubmittedToNodeTimestamp!.Value < allowResubmissionIfLastSubmittedBefore)

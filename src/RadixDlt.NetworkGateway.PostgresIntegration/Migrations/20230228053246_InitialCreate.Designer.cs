@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230225100735_InitialCreate")]
+    [Migration("20230228053246_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -98,7 +98,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_type", new[] { "user", "validator", "system" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "non_fungible_id_type", new[] { "string", "number", "bytes", "uuid" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_status", new[] { "submitted_or_known_in_node_mempool", "missing", "resolved_but_unknown_till_synced_up", "rejected_temporarily", "rejected_permanently", "committed_success", "committed_failure" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_status", new[] { "submitted_or_known_in_node_mempool", "missing", "rejected_temporarily", "rejected_permanently", "committed_success", "committed_failure" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public_key_type", new[] { "ecdsa_secp256k1", "eddsa_ed25519" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "resource_type", new[] { "fungible", "non_fungible" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -706,14 +706,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("commit_timestamp");
 
-                    b.Property<string>("FailureReason")
-                        .HasColumnType("text")
-                        .HasColumnName("failure_reason");
-
-                    b.Property<DateTime?>("FailureTimestamp")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("failure_timestamp");
-
                     b.Property<DateTime?>("FirstSeenInMempoolTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("first_seen_in_mempool_timestamp");
@@ -730,6 +722,14 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<DateTime?>("LastDroppedOutOfMempoolTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_missing_from_mempool_timestamp");
+
+                    b.Property<string>("LastFailureReason")
+                        .HasColumnType("text")
+                        .HasColumnName("last_failure_reason");
+
+                    b.Property<DateTime?>("LastFailureTimestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_failure_timestamp");
 
                     b.Property<DateTime?>("LastSubmittedToGatewayTimestamp")
                         .HasColumnType("timestamp with time zone")
@@ -753,13 +753,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("payload_hash");
 
-                    b.Property<byte[]>("SignedIntentHash")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("signed_intent_hash");
-
                     b.Property<PendingTransactionStatus>("Status")
-                        .IsConcurrencyToken()
                         .HasColumnType("pending_transaction_status")
                         .HasColumnName("status");
 
@@ -771,15 +765,18 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("submitted_by_this_gateway");
 
+                    b.Property<uint>("VersionControl")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("version_control");
+
                     b.HasKey("Id");
 
                     b.HasIndex("IntentHash");
 
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("IntentHash"), "hash");
-
-                    b.HasIndex("PayloadHash");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("PayloadHash"), "hash");
+                    b.HasIndex("PayloadHash")
+                        .IsUnique();
 
                     b.HasIndex("Status");
 

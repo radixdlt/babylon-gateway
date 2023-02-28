@@ -193,7 +193,7 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
     private async Task<FetchAndSubmissionReport> FetchAndSubmitEachTransactionContents(
         MempoolOptions mempoolOptions,
         ICoreApiProvider coreApiProvider,
-        HashSet<PendingTransactionHashPair> transactionsToFetchByPayloadHash,
+        HashSet<PendingTransactionHashPair> hashPairs,
         CancellationToken cancellationToken
     )
     {
@@ -201,20 +201,20 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
         var fetchedDuplicateCount = 0;
 
         await Parallel.ForEachAsync(
-            transactionsToFetchByPayloadHash,
+            hashPairs,
             new ParallelOptions
             {
                 MaxDegreeOfParallelism = mempoolOptions.FetchUnknownTransactionFromMempoolDegreeOfParallelizationPerNode,
                 CancellationToken = cancellationToken,
             },
-            async (hashes, token) =>
+            async (hashPair, token) =>
             {
-                if (!_mempoolTrackerService.TransactionContentsStillNeedFetching(hashes))
+                if (!_mempoolTrackerService.TransactionContentsStillNeedFetching(hashPair))
                 {
                     return;
                 }
 
-                var transactionData = await FetchTransactionContents(coreApiProvider, hashes, token);
+                var transactionData = await FetchTransactionContents(coreApiProvider, hashPair, token);
 
                 if (transactionData != null)
                 {

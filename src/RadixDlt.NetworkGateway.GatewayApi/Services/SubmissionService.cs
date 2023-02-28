@@ -231,7 +231,7 @@ internal class SubmissionService : ISubmissionService
                 failureReason = $"{ex.Error.Message}: {transactionSubmitRejectedErrorDetails.ErrorMessage}";
             }
 
-            await _submissionTrackingService.MarkAsFailed(
+            await _submissionTrackingService.MarkInitialFailure(
                 true,
                 parsedTransaction.TransactionHash(),
                 failureReason,
@@ -253,7 +253,7 @@ internal class SubmissionService : ISubmissionService
                 failureReason = $"{ex.Error.Message}: {transactionSubmitRejectedErrorDetails.ErrorMessage}";
             }
 
-            await _submissionTrackingService.MarkAsFailed(
+            await _submissionTrackingService.MarkInitialFailure(
                 false,
                 parsedTransaction.TransactionHash(),
                 failureReason,

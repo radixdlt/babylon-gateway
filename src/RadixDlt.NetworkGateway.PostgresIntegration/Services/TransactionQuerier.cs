@@ -145,7 +145,7 @@ internal class TransactionQuerier : ITransactionQuerier
             .Where(pt => pt.IntentHash == intentHash)
             .ToListAsync(token);
 
-        return pendingTransactions.Select(pt => new StatusLookupResult(pt.PayloadHash.ToHex(), pt.Status.ToGatewayModel(), pt.FailureReason)).ToArray();
+        return pendingTransactions.Select(pt => new StatusLookupResult(pt.PayloadHash.ToHex(), pt.Status.ToGatewayModel(), pt.LastFailureReason)).ToArray();
     }
 
     private async Task<List<long>> GetTransactionStreamPageStateVersions(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token)

@@ -91,7 +91,6 @@ internal static class GatewayModelExtensions
         {
             PendingTransactionStatus.SubmittedOrKnownInNodeMempool => GatewayModel.TransactionStatus.Pending,
             PendingTransactionStatus.Missing => GatewayModel.TransactionStatus.Pending,
-            PendingTransactionStatus.ResolvedButUnknownTillSyncedUp => GatewayModel.TransactionStatus.Pending,
             PendingTransactionStatus.RejectedTemporarily => GatewayModel.TransactionStatus.Pending,
             PendingTransactionStatus.RejectedPermanently => GatewayModel.TransactionStatus.Rejected,
             PendingTransactionStatus.CommittedSuccess => GatewayModel.TransactionStatus.CommittedSuccess,
