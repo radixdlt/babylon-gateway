@@ -206,7 +206,7 @@ internal class SubmissionService : ISubmissionService
 
             if (result.Succeeded)
             {
-                var response = result.Success;
+                var response = result.SuccessResponse;
 
                 if (response.Duplicate)
                 {
@@ -222,9 +222,9 @@ internal class SubmissionService : ISubmissionService
                 );
             }
 
-            var details = result.Failure.Details;
+            var details = result.FailureResponse.Details;
             var isPermanent = false;
-            var message = result.Failure.Message;
+            var message = result.FailureResponse.Message;
             var detailedMessage = (string?)null;
 
             switch (details)
@@ -240,11 +240,11 @@ internal class SubmissionService : ISubmissionService
 
             if (isPermanent)
             {
-                await _observers.ForEachAsync(x => x.HandleSubmissionFailedPermanently(request, result.Failure));
+                await _observers.ForEachAsync(x => x.HandleSubmissionFailedPermanently(request, result.FailureResponse));
             }
             else
             {
-                await _observers.ForEachAsync(x => x.HandleSubmissionFailedTemporary(request, result.Failure));
+                await _observers.ForEachAsync(x => x.HandleSubmissionFailedTemporary(request, result.FailureResponse));
             }
 
             await _submissionTrackingService.MarkInitialFailure(
@@ -254,7 +254,7 @@ internal class SubmissionService : ISubmissionService
                 token
             );
 
-            throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiError(result.Failure);
+            throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiError(result.FailureResponse);
         }
         catch (OperationCanceledException ex) when (timeoutTokenSource.Token.IsCancellationRequested)
         {

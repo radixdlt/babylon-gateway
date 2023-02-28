@@ -6,22 +6,22 @@ public readonly struct ResponseOrError<TResponse, TError>
     where TResponse : class
     where TError : CoreApiSdk.Model.ErrorResponse
 {
-    public TResponse? Success { get; }
+    public TResponse? SuccessResponse { get; }
 
-    public TError? Failure { get; }
+    public TError? FailureResponse { get; }
 
-    [MemberNotNullWhen(true, nameof(Success))]
-    [MemberNotNullWhen(false, nameof(Failure))]
-    public bool Succeeded => Success != null;
+    [MemberNotNullWhen(true, nameof(SuccessResponse))]
+    [MemberNotNullWhen(false, nameof(FailureResponse))]
+    public bool Succeeded => SuccessResponse != null;
 
-    [MemberNotNullWhen(false, nameof(Success))]
-    [MemberNotNullWhen(true, nameof(Failure))]
-    public bool Failed => Failure != null;
+    [MemberNotNullWhen(false, nameof(SuccessResponse))]
+    [MemberNotNullWhen(true, nameof(FailureResponse))]
+    public bool Failed => FailureResponse != null;
 
-    private ResponseOrError(TResponse? success, TError? failure)
+    private ResponseOrError(TResponse? successResponse, TError? failureResponse)
     {
-        Success = success;
-        Failure = failure;
+        SuccessResponse = successResponse;
+        FailureResponse = failureResponse;
     }
 
     public static ResponseOrError<TResponse, TError> Ok(TResponse result) => new(result, default);

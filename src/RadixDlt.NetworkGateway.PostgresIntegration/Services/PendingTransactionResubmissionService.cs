@@ -315,7 +315,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
             if (result.Succeeded)
             {
-                var response = result.Success;
+                var response = result.SuccessResponse;
 
                 if (response.Duplicate)
                 {
@@ -331,9 +331,9 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
             // TODO we need to somehow extract this common logic and share it with GatewayApi's SubmissionService
 
-            var details = result.Failure.Details;
+            var details = result.FailureResponse.Details;
             var isPermanent = false;
-            var message = result.Failure.Message;
+            var message = result.FailureResponse.Message;
             var detailedMessage = (string?)null;
 
             switch (details)
@@ -349,11 +349,11 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
             if (isPermanent)
             {
-                await _observers.ForEachAsync(x => x.ResubmitFailedPermanently(notarizedTransaction, result.Failure));
+                await _observers.ForEachAsync(x => x.ResubmitFailedPermanently(notarizedTransaction, result.FailureResponse));
             }
             else
             {
-                await _observers.ForEachAsync(x => x.ResubmitFailedTemporary(notarizedTransaction, result.Failure));
+                await _observers.ForEachAsync(x => x.ResubmitFailedTemporary(notarizedTransaction, result.FailureResponse));
             }
 
             return new SubmissionResult(transaction, isPermanent, message + (detailedMessage != null ? " (" + detailedMessage + ")" : string.Empty), chosenNode.Name);

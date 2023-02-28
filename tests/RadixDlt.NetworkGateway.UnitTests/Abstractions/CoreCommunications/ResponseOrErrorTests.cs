@@ -14,8 +14,8 @@ public class ResponseOrErrorTests
 
         roe.Succeeded.Should().BeFalse();
         roe.Failed.Should().BeFalse();
-        roe.Success.Should().BeNull();
-        roe.Failure.Should().BeNull();
+        roe.SuccessResponse.Should().BeNull();
+        roe.FailureResponse.Should().BeNull();
     }
 
     [Fact]
@@ -26,8 +26,8 @@ public class ResponseOrErrorTests
 
         roe.Succeeded.Should().BeTrue();
         roe.Failed.Should().BeFalse();
-        roe.Success.Should().BeSameAs(success);
-        roe.Failure.Should().BeNull();
+        roe.SuccessResponse.Should().BeSameAs(success);
+        roe.FailureResponse.Should().BeNull();
     }
 
     [Fact]
@@ -38,7 +38,7 @@ public class ResponseOrErrorTests
 
         roe.Succeeded.Should().BeFalse();
         roe.Failed.Should().BeTrue();
-        roe.Success.Should().BeNull();
-        roe.Failure.Should().BeSameAs(error);
+        roe.SuccessResponse.Should().BeNull();
+        roe.FailureResponse.Should().BeSameAs(error);
     }
 }
