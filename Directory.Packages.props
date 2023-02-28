@@ -22,7 +22,7 @@
     <PackageVersion Include="prometheus-net" Version="8.0.0" />
     <PackageVersion Include="prometheus-net.AspNetCore" Version="8.0.0" />
     <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="8.0.0" />
-    <PackageVersion Include="RadixDlt.RadixEngineToolkit" Version="0.8.1" />
+    <PackageVersion Include="RadixDlt.RadixEngineToolkit" Version="0.8.2" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 
     <!-- build time dependencies -->
