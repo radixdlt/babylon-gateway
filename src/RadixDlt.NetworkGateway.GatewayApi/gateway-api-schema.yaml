@@ -551,17 +551,14 @@ components:
       type: string
       example: "<network-name>"
 
-    EntityId:
-      description: Hex-encoded entity's identifier.
-      type: string
     EntityAddress:
-      description: Bech32m-encoded human readable version of the entity's global address.
+      description: Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
       type: string
     ComponentAddress:
-      description: Bech32m-encoded human readable version of the component (normal, account, system) global address.
+      description: Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id.
       type: string
     ResourceAddress:
-      description: Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
+      description: Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
       type: string
 
     BigDecimal:
@@ -1333,12 +1330,10 @@ components:
     StateEntityDetailsResponseItem:
       type: object
       required:
-        - entity_id
+        - address
         - metadata
       properties:
-        entity_id:
-          $ref: "#/components/schemas/EntityId"
-        global_address:
+        address:
           $ref: "#/components/schemas/EntityAddress"
         metadata:
           $ref: "#/components/schemas/EntityMetadataCollection"

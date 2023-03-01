@@ -109,7 +109,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="aggregationLevel">aggregationLevel (required) (default to ResourceAggregationLevel.Global).</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
         public FungibleResourcesCollectionItemGloballyAggregated(string amount = default(string), ResourceAggregationLevel aggregationLevel = ResourceAggregationLevel.Global, string resourceAddress = default(string)) : base(aggregationLevel, resourceAddress)
         {
             // to ensure "amount" is required (not null)

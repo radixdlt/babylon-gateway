@@ -237,7 +237,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         var metadata = await GetMetadataSlice(entity.Id, 0, DefaultMetadataLimit, ledgerState, token);
 
-        return new GatewayModel.StateEntityDetailsResponseItem(entity.Address.ToHex(), entity.GlobalAddress, metadata, details);
+        return new GatewayModel.StateEntityDetailsResponseItem(entity.GlobalAddress ?? entity.Address.ToHex(), metadata, details);
     }
 
     public async Task<GatewayModel.EntityMetadataResponse> EntityMetadata(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState,

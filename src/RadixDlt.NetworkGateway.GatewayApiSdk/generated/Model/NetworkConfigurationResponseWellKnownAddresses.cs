@@ -103,13 +103,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NetworkConfigurationResponseWellKnownAddresses" /> class.
         /// </summary>
-        /// <param name="accountPackage">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="faucet">Bech32m-encoded human readable version of the component (normal, account, system) global address. (required).</param>
-        /// <param name="epochManager">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="clock">Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="ecdsaSecp256k1">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
-        /// <param name="eddsaEd25519">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
-        /// <param name="xrd">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
+        /// <param name="accountPackage">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="faucet">Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id. (required).</param>
+        /// <param name="epochManager">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="clock">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="ecdsaSecp256k1">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
+        /// <param name="eddsaEd25519">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
+        /// <param name="xrd">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
         public NetworkConfigurationResponseWellKnownAddresses(string accountPackage = default(string), string faucet = default(string), string epochManager = default(string), string clock = default(string), string ecdsaSecp256k1 = default(string), string eddsaEd25519 = default(string), string xrd = default(string))
         {
             // to ensure "accountPackage" is required (not null)
@@ -157,51 +157,51 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
         [DataMember(Name = "account_package", IsRequired = true, EmitDefaultValue = true)]
         public string AccountPackage { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the component (normal, account, system) global address.
+        /// Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the component (normal, account, system) global address.</value>
+        /// <value>Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id.</value>
         [DataMember(Name = "faucet", IsRequired = true, EmitDefaultValue = true)]
         public string Faucet { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
         [DataMember(Name = "epoch_manager", IsRequired = true, EmitDefaultValue = true)]
         public string EpochManager { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
         [DataMember(Name = "clock", IsRequired = true, EmitDefaultValue = true)]
         public string Clock { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
+        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
+        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
         [DataMember(Name = "ecdsa_secp256k1", IsRequired = true, EmitDefaultValue = true)]
         public string EcdsaSecp256k1 { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
+        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
+        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
         [DataMember(Name = "eddsa_ed25519", IsRequired = true, EmitDefaultValue = true)]
         public string EddsaEd25519 { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
+        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
+        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
         [DataMember(Name = "xrd", IsRequired = true, EmitDefaultValue = true)]
         public string Xrd { get; set; }
 

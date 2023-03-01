@@ -109,7 +109,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleDataResponseAllOf" /> class.
         /// </summary>
-        /// <param name="address">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
+        /// <param name="address">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
         /// <param name="nonFungibleIdType">nonFungibleIdType (required).</param>
         /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
         /// <param name="mutableDataHex">Hex-encoded binary blob. (required).</param>
@@ -144,9 +144,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
+        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
+        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 
