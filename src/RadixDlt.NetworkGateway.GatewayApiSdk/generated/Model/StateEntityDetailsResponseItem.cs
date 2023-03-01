@@ -103,41 +103,32 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseItem" /> class.
         /// </summary>
-        /// <param name="entityId">Hex-encoded entity&#39;s identifier. (required).</param>
-        /// <param name="globalAddress">Bech32m-encoded human readable version of the entity&#39;s global address..</param>
+        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
         /// <param name="metadata">metadata (required).</param>
         /// <param name="details">details.</param>
-        public StateEntityDetailsResponseItem(string entityId = default(string), string globalAddress = default(string), EntityMetadataCollection metadata = default(EntityMetadataCollection), StateEntityDetailsResponseItemDetails details = default(StateEntityDetailsResponseItemDetails))
+        public StateEntityDetailsResponseItem(string address = default(string), EntityMetadataCollection metadata = default(EntityMetadataCollection), StateEntityDetailsResponseItemDetails details = default(StateEntityDetailsResponseItemDetails))
         {
-            // to ensure "entityId" is required (not null)
-            if (entityId == null)
+            // to ensure "address" is required (not null)
+            if (address == null)
             {
-                throw new ArgumentNullException("entityId is a required property for StateEntityDetailsResponseItem and cannot be null");
+                throw new ArgumentNullException("address is a required property for StateEntityDetailsResponseItem and cannot be null");
             }
-            this.EntityId = entityId;
+            this.Address = address;
             // to ensure "metadata" is required (not null)
             if (metadata == null)
             {
                 throw new ArgumentNullException("metadata is a required property for StateEntityDetailsResponseItem and cannot be null");
             }
             this.Metadata = metadata;
-            this.GlobalAddress = globalAddress;
             this.Details = details;
         }
 
         /// <summary>
-        /// Hex-encoded entity&#39;s identifier.
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
         /// </summary>
-        /// <value>Hex-encoded entity&#39;s identifier.</value>
-        [DataMember(Name = "entity_id", IsRequired = true, EmitDefaultValue = true)]
-        public string EntityId { get; set; }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "global_address", EmitDefaultValue = true)]
-        public string GlobalAddress { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
         /// Gets or Sets Metadata
@@ -159,8 +150,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityDetailsResponseItem {\n");
-            sb.Append("  EntityId: ").Append(EntityId).Append("\n");
-            sb.Append("  GlobalAddress: ").Append(GlobalAddress).Append("\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("  Details: ").Append(Details).Append("\n");
             sb.Append("}\n");
@@ -199,14 +189,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.EntityId == input.EntityId ||
-                    (this.EntityId != null &&
-                    this.EntityId.Equals(input.EntityId))
-                ) && 
-                (
-                    this.GlobalAddress == input.GlobalAddress ||
-                    (this.GlobalAddress != null &&
-                    this.GlobalAddress.Equals(input.GlobalAddress))
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
                 ) && 
                 (
                     this.Metadata == input.Metadata ||
@@ -229,13 +214,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.EntityId != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.EntityId.GetHashCode();
-                }
-                if (this.GlobalAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.GlobalAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
                 if (this.Metadata != null)
                 {
