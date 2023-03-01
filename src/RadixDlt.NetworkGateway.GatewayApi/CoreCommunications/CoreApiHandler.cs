@@ -80,7 +80,7 @@ public interface ICoreApiHandler
 
     CoreApiNode GetCoreNodeConnectedTo();
 
-    Task<CoreModel.TransactionPreviewResponse> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default);
+    Task<ResponseOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default);
 
     Task<ResponseOrError<CoreModel.TransactionSubmitResponse, CoreModel.TransactionSubmitErrorResponse>> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default);
 }
@@ -118,9 +118,9 @@ internal class CoreApiHandler : ICoreApiHandler
         return _coreApiProvider.CoreApiNode;
     }
 
-    public async Task<CoreModel.TransactionPreviewResponse> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default)
+    public async Task<ResponseOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default)
     {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.TransactionApi.TransactionPreviewPostAsync(request, token));
+        return await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>(() => _coreApiProvider.TransactionApi.TransactionPreviewPostAsync(request, token));
     }
 
     public async Task<ResponseOrError<CoreModel.TransactionSubmitResponse, CoreModel.TransactionSubmitErrorResponse>> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default)

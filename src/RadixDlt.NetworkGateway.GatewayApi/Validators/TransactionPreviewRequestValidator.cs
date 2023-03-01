@@ -62,33 +62,49 @@
  * permissions under this License.
  */
 
-using System.Diagnostics.CodeAnalysis;
+using FluentValidation;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public readonly struct ResponseOrError<TResponse, TError>
-    where TResponse : class
-    where TError : CoreApiSdk.Model.ErrorResponse
+internal class TransactionPreviewRequestValidator : AbstractValidator<GatewayModel.TransactionPreviewRequest>
 {
-    public TResponse? SuccessResponse { get; }
-
-    public TError? FailureResponse { get; }
-
-    [MemberNotNullWhen(true, nameof(SuccessResponse))]
-    [MemberNotNullWhen(false, nameof(FailureResponse))]
-    public bool Succeeded => SuccessResponse != null;
-
-    [MemberNotNullWhen(false, nameof(SuccessResponse))]
-    [MemberNotNullWhen(true, nameof(FailureResponse))]
-    public bool Failed => FailureResponse != null;
-
-    private ResponseOrError(TResponse? successResponse, TError? failureResponse)
+    public TransactionPreviewRequestValidator()
     {
-        SuccessResponse = successResponse;
-        FailureResponse = failureResponse;
+        RuleFor(x => x.Manifest)
+            .NotEmpty();
+
+        RuleFor(x => x.BlobsHex)
+            .NotNull();
+
+        RuleForEach(x => x.BlobsHex)
+            .Hex();
+
+        RuleFor(x => x.StartEpochInclusive)
+            .InclusiveBetween(0, 10000000000);
+
+        RuleFor(x => x.EndEpochExclusive)
+            .InclusiveBetween(0, 10000000000);
+
+        RuleFor(x => x.NotaryPublicKey)
+            .SetInheritanceValidator(PublicKeyValidator.Configure);
+
+        RuleFor(x => x.CostUnitLimit)
+            .InclusiveBetween(0, 4294967295);
+
+        RuleFor(x => x.TipPercentage)
+            .InclusiveBetween(0, 255);
+
+        RuleFor(x => x.Nonce)
+            .NotEmpty();
+
+        RuleFor(x => x.SignerPublicKeys)
+            .NotNull();
+
+        RuleForEach(x => x.SignerPublicKeys)
+            .SetInheritanceValidator(PublicKeyValidator.Configure);
+
+        RuleFor(x => x.Flags)
+            .NotNull();
     }
-
-    public static ResponseOrError<TResponse, TError> Ok(TResponse result) => new(result, default);
-
-    public static ResponseOrError<TResponse, TError> Fail(TError error) => new(default, error);
 }

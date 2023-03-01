@@ -62,33 +62,43 @@
  * permissions under this License.
  */
 
-using System.Diagnostics.CodeAnalysis;
+using FluentValidation;
+using FluentValidation.Validators;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public readonly struct ResponseOrError<TResponse, TError>
-    where TResponse : class
-    where TError : CoreApiSdk.Model.ErrorResponse
+internal static class PublicKeyValidator
 {
-    public TResponse? SuccessResponse { get; }
-
-    public TError? FailureResponse { get; }
-
-    [MemberNotNullWhen(true, nameof(SuccessResponse))]
-    [MemberNotNullWhen(false, nameof(FailureResponse))]
-    public bool Succeeded => SuccessResponse != null;
-
-    [MemberNotNullWhen(false, nameof(SuccessResponse))]
-    [MemberNotNullWhen(true, nameof(FailureResponse))]
-    public bool Failed => FailureResponse != null;
-
-    private ResponseOrError(TResponse? successResponse, TError? failureResponse)
+    public static void Configure<TRequest>(PolymorphicValidator<TRequest, GatewayModel.PublicKey> validator)
     {
-        SuccessResponse = successResponse;
-        FailureResponse = failureResponse;
+        validator.Add(new PublicKeyEcdsaSecp256k1Validator());
+        validator.Add(new PublicKeyEddsaEd25519Validator());
     }
+}
 
-    public static ResponseOrError<TResponse, TError> Ok(TResponse result) => new(result, default);
+internal class PublicKeyEcdsaSecp256k1Validator : AbstractValidator<GatewayModel.PublicKeyEcdsaSecp256k1>
+{
+    public PublicKeyEcdsaSecp256k1Validator()
+    {
+        RuleFor(x => x.KeyType)
+            .Equal(GatewayModel.PublicKeyType.EcdsaSecp256k1);
 
-    public static ResponseOrError<TResponse, TError> Fail(TError error) => new(default, error);
+        RuleFor(x => x.KeyHex)
+            .NotEmpty()
+            .Hex();
+    }
+}
+
+internal class PublicKeyEddsaEd25519Validator : AbstractValidator<GatewayModel.PublicKeyEddsaEd25519>
+{
+    public PublicKeyEddsaEd25519Validator()
+    {
+        RuleFor(x => x.KeyType)
+            .Equal(GatewayModel.PublicKeyType.EddsaEd25519);
+
+        RuleFor(x => x.KeyHex)
+            .NotEmpty()
+            .Hex();
+    }
 }

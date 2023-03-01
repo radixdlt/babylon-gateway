@@ -69,11 +69,6 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
 public sealed class InvalidRequestException : ValidationException
 {
-    private InvalidRequestException(GatewayModel.InvalidRequestError gatewayError, string userFacingMessage, string internalMessage)
-        : base(gatewayError, userFacingMessage, internalMessage)
-    {
-    }
-
     private InvalidRequestException(GatewayModel.InvalidRequestError gatewayError, string userFacingMessage)
         : base(gatewayError, userFacingMessage)
     {
@@ -96,17 +91,6 @@ public sealed class InvalidRequestException : ValidationException
                 new List<GatewayModel.ValidationErrorsAtPath> { new("?", new List<string> { error }) }
             ),
             "One or more validation errors occurred"
-        );
-    }
-
-    public static InvalidRequestException FromOtherError(string error, string internalMessage)
-    {
-        return new InvalidRequestException(
-            new GatewayModel.InvalidRequestError(
-                new List<GatewayModel.ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred",
-            internalMessage
         );
     }
 }

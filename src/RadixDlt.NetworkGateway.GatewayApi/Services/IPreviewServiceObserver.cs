@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -72,9 +71,9 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IPreviewServiceObserver
 {
-    ValueTask PreHandlePreviewRequest(JToken request);
+    ValueTask PreHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request);
 
-    ValueTask PostHandlePreviewRequest(JToken request, object response);
+    ValueTask PostHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, GatewayModel.TransactionPreviewResponse response);
 
-    ValueTask HandlePreviewRequestFailed(JToken request, Exception exception);
+    ValueTask HandlePreviewRequestFailed(GatewayModel.TransactionPreviewRequest request, Exception exception);
 }
