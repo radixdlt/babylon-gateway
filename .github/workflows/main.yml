@@ -38,7 +38,8 @@ jobs:
       image_organization: "dev-container-repo"
       image_name: "babylon-ng-database-migrations"
       tags: |
-        type=raw,value=$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g')-{{sha}}
+        type=ref,event=branch,suffix={{sha}}
+        type=ref,event=pr,suffix={{sha}}
       context: "."
       dockerfile: "./apps/DatabaseMigrations/Dockerfile"
       platforms: "linux/amd64"
@@ -55,7 +56,8 @@ jobs:
       image_organization: "dev-container-repo"
       image_name: "babylon-ng-data-aggregator"
       tags: |
-        type=raw,value=$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g')-{{sha}}
+        type=ref,event=branch,suffix={{sha}}
+        type=ref,event=pr,suffix={{sha}}
       context: "."
       dockerfile: "./apps/DataAggregator/Dockerfile"
       platforms: "linux/amd64"
@@ -72,7 +74,8 @@ jobs:
       image_organization: "dev-container-repo"
       image_name: "babylon-ng-gateway-api"
       tags: |
-        type=raw,value=$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g')-{{sha}}
+        type=ref,event=branch,suffix={{sha}}
+        type=ref,event=pr,suffix={{sha}}
       context: "."
       dockerfile: "./apps/GatewayApi/Dockerfile"
       platforms: "linux/amd64"
