@@ -197,16 +197,14 @@ paths:
         content:
           application/json:
             schema:
-              description: Refer to `#/components/schemas/TransactionPreviewRequest` of CoreApi for more details.
-              type: object
+              $ref: "#/components/schemas/TransactionPreviewRequest"
       responses:
         "200":
           description: Successful Preview
           content:
             application/json:
               schema:
-                description: Refer to `#/components/schemas/TransactionPreviewResponse` of CoreApi for more details.
-                type: object
+                $ref: "#/components/schemas/TransactionPreviewResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
   "/transaction/submit":
@@ -1137,6 +1135,106 @@ components:
       allOf:
         - type: object
         - $ref: "#/components/schemas/LedgerStateMixin"
+
+    TransactionPreviewRequest:
+      type: object
+      required:
+        - manifest
+        - start_epoch_inclusive
+        - end_epoch_exclusive
+        - cost_unit_limit
+        - tip_percentage
+        - nonce
+        - signer_public_keys
+        - flags
+      properties:
+        manifest:
+          description: A text-representation of a transaction manifest
+          type: string
+        blobs_hex:
+          description: An array of hex-encoded blob data (optional)
+          type: array
+          items:
+            type: string
+        start_epoch_inclusive:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 10000000000
+          description: An integer between `0` and `10^10`, marking the epoch at which the transaction starts being valid
+        end_epoch_exclusive:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 10000000000
+          description: An integer between `0` and `10^10`, marking the epoch at which the transaction is no longer valid
+        notary_public_key:
+          $ref: "#/components/schemas/PublicKey"
+          description: The notary public key to use (optional)
+        notary_as_signatory:
+          type: boolean
+          description: Whether the notary should count as a signatory (optional, default false)
+        cost_unit_limit:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 4294967295
+          description: An integer between `0` and `2^32 - 1`, giving the maximum number of cost units available for transaction execution
+        tip_percentage:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 255
+          description: An integer between `0` and `255`, giving the validator tip as a percentage amount. A value of `1` corresponds to 1% of the fee.
+        nonce:
+          type: string
+          description: A decimal-string-encoded integer between `0` and `2^64 - 1`, used to ensure the transaction intent is unique.
+        signer_public_keys:
+          type: array
+          items:
+            $ref: "#/components/schemas/PublicKey"
+          description: A list of public keys to be used as transaction signers
+        flags:
+          type: object
+          required:
+            - unlimited_loan
+            - assume_all_signature_proofs
+            - permit_duplicate_intent_hash
+            - permit_invalid_header_epoch
+          properties:
+            unlimited_loan:
+              type: boolean
+            assume_all_signature_proofs:
+              type: boolean
+            permit_duplicate_intent_hash:
+              type: boolean
+            permit_invalid_header_epoch:
+              type: boolean
+    TransactionPreviewResponse:
+      type: object
+      required:
+        - receipt
+        - resource_changes
+        - logs
+      properties:
+        receipt:
+          type: object
+        resource_changes:
+          type: array
+          items:
+            type: object
+        logs:
+          type: array
+          items:
+            type: object
+            required:
+              - level
+              - message
+            properties:
+              level:
+                type: string
+              message:
+                type: string
 
     TransactionSubmitRequest:
       type: object

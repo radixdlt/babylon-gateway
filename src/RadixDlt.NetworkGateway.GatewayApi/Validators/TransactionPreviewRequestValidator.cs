@@ -62,35 +62,49 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
+using FluentValidation;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public sealed class InvalidRequestException : ValidationException
+internal class TransactionPreviewRequestValidator : AbstractValidator<GatewayModel.TransactionPreviewRequest>
 {
-    private InvalidRequestException(GatewayModel.InvalidRequestError gatewayError, string userFacingMessage)
-        : base(gatewayError, userFacingMessage)
+    public TransactionPreviewRequestValidator()
     {
-    }
+        RuleFor(x => x.Manifest)
+            .NotEmpty();
 
-    public static InvalidRequestException FromValidationErrors(List<GatewayModel.ValidationErrorsAtPath> validationErrors)
-    {
-        return new InvalidRequestException(
-            new GatewayModel.InvalidRequestError(
-                validationErrors
-            ),
-            "One or more validation errors occurred"
-        );
-    }
+        RuleFor(x => x.BlobsHex)
+            .NotNull();
 
-    public static InvalidRequestException FromOtherError(string error)
-    {
-        return new InvalidRequestException(
-            new GatewayModel.InvalidRequestError(
-                new List<GatewayModel.ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred"
-        );
+        RuleForEach(x => x.BlobsHex)
+            .Hex();
+
+        RuleFor(x => x.StartEpochInclusive)
+            .InclusiveBetween(0, 10000000000);
+
+        RuleFor(x => x.EndEpochExclusive)
+            .InclusiveBetween(0, 10000000000);
+
+        RuleFor(x => x.NotaryPublicKey)
+            .SetInheritanceValidator(PublicKeyValidator.Configure);
+
+        RuleFor(x => x.CostUnitLimit)
+            .InclusiveBetween(0, 4294967295);
+
+        RuleFor(x => x.TipPercentage)
+            .InclusiveBetween(0, 255);
+
+        RuleFor(x => x.Nonce)
+            .NotEmpty();
+
+        RuleFor(x => x.SignerPublicKeys)
+            .NotNull();
+
+        RuleForEach(x => x.SignerPublicKeys)
+            .SetInheritanceValidator(PublicKeyValidator.Configure);
+
+        RuleFor(x => x.Flags)
+            .NotNull();
     }
 }

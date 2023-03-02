@@ -63,7 +63,6 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using System.Threading;
@@ -104,7 +103,7 @@ public sealed class TransactionController : ControllerBase
     }
 
     [HttpPost("preview")]
-    public async Task<object> Preview(JToken request, CancellationToken token)
+    public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
     {
         return await _transactionHandler.Preview(request, token);
     }

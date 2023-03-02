@@ -62,35 +62,43 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
+using FluentValidation;
+using FluentValidation.Validators;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public sealed class InvalidRequestException : ValidationException
+internal static class PublicKeyValidator
 {
-    private InvalidRequestException(GatewayModel.InvalidRequestError gatewayError, string userFacingMessage)
-        : base(gatewayError, userFacingMessage)
+    public static void Configure<TRequest>(PolymorphicValidator<TRequest, GatewayModel.PublicKey> validator)
     {
+        validator.Add(new PublicKeyEcdsaSecp256k1Validator());
+        validator.Add(new PublicKeyEddsaEd25519Validator());
     }
+}
 
-    public static InvalidRequestException FromValidationErrors(List<GatewayModel.ValidationErrorsAtPath> validationErrors)
+internal class PublicKeyEcdsaSecp256k1Validator : AbstractValidator<GatewayModel.PublicKeyEcdsaSecp256k1>
+{
+    public PublicKeyEcdsaSecp256k1Validator()
     {
-        return new InvalidRequestException(
-            new GatewayModel.InvalidRequestError(
-                validationErrors
-            ),
-            "One or more validation errors occurred"
-        );
+        RuleFor(x => x.KeyType)
+            .Equal(GatewayModel.PublicKeyType.EcdsaSecp256k1);
+
+        RuleFor(x => x.KeyHex)
+            .NotEmpty()
+            .Hex();
     }
+}
 
-    public static InvalidRequestException FromOtherError(string error)
+internal class PublicKeyEddsaEd25519Validator : AbstractValidator<GatewayModel.PublicKeyEddsaEd25519>
+{
+    public PublicKeyEddsaEd25519Validator()
     {
-        return new InvalidRequestException(
-            new GatewayModel.InvalidRequestError(
-                new List<GatewayModel.ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred"
-        );
+        RuleFor(x => x.KeyType)
+            .Equal(GatewayModel.PublicKeyType.EddsaEd25519);
+
+        RuleFor(x => x.KeyHex)
+            .NotEmpty()
+            .Hex();
     }
 }
