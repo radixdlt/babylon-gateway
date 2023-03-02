@@ -99,11 +99,7 @@ internal abstract class Entity
     public long? GlobalAncestorId { get; set; }
 }
 
-internal class EpochManagerEntity : Entity
-{
-}
-
-internal abstract class ResourceManagerEntity : Entity
+internal abstract class ResourceManagerEntity : ComponentEntity
 {
 }
 
@@ -129,6 +125,34 @@ internal abstract class ComponentEntity : Entity, IRoyaltyVaultHolder
 
     [Column("royalty_vault_entity_id")]
     public long? RoyaltyVaultEntityId { get; set; }
+}
+
+internal class ValidatorEntity : ComponentEntity
+{
+    [Column("stake_vault_entity_id")]
+    public long StakeVaultEntityId { get; set; }
+
+    [Column("unstake_vault_entity_id")]
+    public long UnstakeVaultEntityId { get; set; }
+
+    [Column("epoch_manager_entity_id")]
+    public long EpochManagerEntityId { get; set; }
+}
+
+internal class EpochManagerEntity : ComponentEntity
+{
+}
+
+internal class ClockEntity : ComponentEntity
+{
+}
+
+internal class VaultEntity : ComponentEntity
+{
+    [Column("royalty_vault_of_entity_id")]
+    public long? RoyaltyVaultOfEntityId { get; set; }
+
+    public bool IsRoyaltyVault => RoyaltyVaultOfEntityId != null;
 }
 
 internal class NormalComponentEntity : ComponentEntity
@@ -161,36 +185,12 @@ internal class KeyValueStoreEntity : Entity
 {
 }
 
-internal class VaultEntity : Entity
-{
-    [Column("royalty_vault_of_entity_id")]
-    public long? RoyaltyVaultOfEntityId { get; set; }
-
-    public bool IsRoyaltyVault => RoyaltyVaultOfEntityId != null;
-}
-
 internal class NonFungibleStoreEntity : Entity
-{
-}
-
-internal class ClockEntity : Entity
 {
 }
 
 internal class AccessControllerEntity : Entity
 {
-}
-
-internal class ValidatorEntity : Entity
-{
-    [Column("stake_vault_entity_id")]
-    public long StakeVaultEntityId { get; set; }
-
-    [Column("unstake_vault_entity_id")]
-    public long UnstakeVaultEntityId { get; set; }
-
-    [Column("epoch_manager_entity_id")]
-    public long EpochManagerEntityId { get; set; }
 }
 
 internal class IdentityEntity : Entity

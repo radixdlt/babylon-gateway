@@ -102,7 +102,6 @@ public sealed class StatusController : ControllerBase
             _networkConfigurationProvider.GetNetworkId(),
             _networkConfigurationProvider.GetNetworkName(),
             new GatewayModel.NetworkConfigurationResponseWellKnownAddresses(
-                wellKnownAddresses.AccountPackage,
                 wellKnownAddresses.Faucet,
                 wellKnownAddresses.EpochManager,
                 wellKnownAddresses.Clock,

@@ -91,7 +91,7 @@ public static class TransactionConsistency
             );
         }
 
-        var payloadHash = HashingHelper.Sha256Twice(payload);
+        var payloadHash = HashingHelper.Hash(payload);
 
         if (!RadixHashing.IsValidAccumulator(previousAccumulator, payloadHash, accumulator))
         {

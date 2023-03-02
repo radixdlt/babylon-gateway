@@ -103,21 +103,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NetworkConfigurationResponseWellKnownAddresses" /> class.
         /// </summary>
-        /// <param name="accountPackage">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
         /// <param name="faucet">Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id. (required).</param>
         /// <param name="epochManager">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
         /// <param name="clock">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
         /// <param name="ecdsaSecp256k1">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
         /// <param name="eddsaEd25519">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
         /// <param name="xrd">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
-        public NetworkConfigurationResponseWellKnownAddresses(string accountPackage = default(string), string faucet = default(string), string epochManager = default(string), string clock = default(string), string ecdsaSecp256k1 = default(string), string eddsaEd25519 = default(string), string xrd = default(string))
+        public NetworkConfigurationResponseWellKnownAddresses(string faucet = default(string), string epochManager = default(string), string clock = default(string), string ecdsaSecp256k1 = default(string), string eddsaEd25519 = default(string), string xrd = default(string))
         {
-            // to ensure "accountPackage" is required (not null)
-            if (accountPackage == null)
-            {
-                throw new ArgumentNullException("accountPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
-            }
-            this.AccountPackage = accountPackage;
             // to ensure "faucet" is required (not null)
             if (faucet == null)
             {
@@ -155,13 +148,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.Xrd = xrd;
         }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
-        [DataMember(Name = "account_package", IsRequired = true, EmitDefaultValue = true)]
-        public string AccountPackage { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id.
@@ -213,7 +199,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NetworkConfigurationResponseWellKnownAddresses {\n");
-            sb.Append("  AccountPackage: ").Append(AccountPackage).Append("\n");
             sb.Append("  Faucet: ").Append(Faucet).Append("\n");
             sb.Append("  EpochManager: ").Append(EpochManager).Append("\n");
             sb.Append("  Clock: ").Append(Clock).Append("\n");
@@ -256,11 +241,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AccountPackage == input.AccountPackage ||
-                    (this.AccountPackage != null &&
-                    this.AccountPackage.Equals(input.AccountPackage))
-                ) && 
-                (
                     this.Faucet == input.Faucet ||
                     (this.Faucet != null &&
                     this.Faucet.Equals(input.Faucet))
@@ -301,10 +281,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AccountPackage != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccountPackage.GetHashCode();
-                }
                 if (this.Faucet != null)
                 {
                     hashCode = (hashCode * 59) + this.Faucet.GetHashCode();

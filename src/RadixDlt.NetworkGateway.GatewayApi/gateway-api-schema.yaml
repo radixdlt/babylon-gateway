@@ -1072,7 +1072,6 @@ components:
         well_known_addresses:
           type: object
           required:
-            - account_package
             - faucet
             - epoch_manager
             - clock
@@ -1080,8 +1079,6 @@ components:
             - eddsa_ed25519
             - xrd
           properties:
-            account_package:
-              $ref: "#/components/schemas/EntityAddress"
             faucet:
               $ref: "#/components/schemas/ComponentAddress"
             epoch_manager:
