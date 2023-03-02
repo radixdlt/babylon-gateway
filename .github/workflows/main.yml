@@ -38,7 +38,7 @@ jobs:
       image_organization: "dev-container-repo"
       image_name: "babylon-ng-database-migrations"
       tags: |
-        type=raw,value=mytag-{{branch}}-{{sha}}
+        type=raw,value=$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g')-{{sha}}
       context: "."
       dockerfile: "./apps/DatabaseMigrations/Dockerfile"
       platforms: "linux/amd64"
@@ -55,7 +55,7 @@ jobs:
       image_organization: "dev-container-repo"
       image_name: "babylon-ng-data-aggregator"
       tags: |
-        type=raw,value=mytag-{{branch}}-{{sha}}
+        type=raw,value=$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g')-{{sha}}
       context: "."
       dockerfile: "./apps/DataAggregator/Dockerfile"
       platforms: "linux/amd64"
@@ -72,7 +72,7 @@ jobs:
       image_organization: "dev-container-repo"
       image_name: "babylon-ng-gateway-api"
       tags: |
-        type=raw,value=mytag-{{branch}}-{{sha}}
+        type=raw,value=$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g')-{{sha}}
       context: "."
       dockerfile: "./apps/GatewayApi/Dockerfile"
       platforms: "linux/amd64"
@@ -87,6 +87,7 @@ jobs:
       data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag }}
       gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag }}
     steps:
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - name: Setup tags for docker image
         id: setup_tags
         uses: ./.github/actions/set-variables
