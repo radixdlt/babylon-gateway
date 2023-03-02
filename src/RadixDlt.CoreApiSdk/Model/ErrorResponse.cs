@@ -62,62 +62,13 @@
  * permissions under this License.
  */
 
-using System;
-using CoreClient = RadixDlt.CoreApiSdk.Client;
+using RadixDlt.CoreApiSdk.Client;
+using System.Runtime.Serialization;
 
-namespace RadixDlt.NetworkGateway.Abstractions.Exceptions;
+namespace RadixDlt.CoreApiSdk.Model;
 
-public enum CoreApiErrorTransience
+public partial class ErrorResponse
 {
-    Transient,
-    Permanent,
-}
-
-public sealed class CoreApiErrorProperties
-{
-    public CoreApiErrorTransience Transience { get; }
-
-    public CoreApiErrorProperties(CoreApiErrorTransience transience)
-    {
-        Transience = transience;
-    }
-}
-
-/// <summary>
-/// A marker exception to be caught / handled in other code.
-/// We use this rather than the ApiException itself so that we have a typesafe CoreError we can use in other places.
-/// </summary>
-/// <typeparam name="T">The type of the core error.</typeparam>
-public sealed class WrappedCoreApiException<T> : WrappedCoreApiException
-    where T : RadixDlt.CoreApiSdk.Model.ErrorResponse
-{
-    public override T Error { get; }
-
-    public WrappedCoreApiException(CoreClient.ApiException apiException, T error, CoreApiErrorProperties properties)
-        : base($"Core API reported a {typeof(T).Name}", apiException, properties)
-    {
-        Error = error;
-    }
-}
-
-public abstract class WrappedCoreApiException : Exception
-{
-    public abstract RadixDlt.CoreApiSdk.Model.ErrorResponse Error { get; }
-
-    public CoreClient.ApiException ApiException { get; }
-
-    public CoreApiErrorProperties Properties { get; }
-
-    protected WrappedCoreApiException(string message, CoreClient.ApiException apiException, CoreApiErrorProperties properties)
-        : base(message, apiException)
-    {
-        ApiException = apiException;
-        Properties = properties;
-    }
-
-    public static WrappedCoreApiException<T> Of<T>(CoreClient.ApiException apiException, T error, CoreApiErrorProperties properties)
-        where T : RadixDlt.CoreApiSdk.Model.ErrorResponse
-    {
-        return new WrappedCoreApiException<T>(apiException, error, properties);
-    }
+    [IgnoreDataMember]
+    public ApiException OriginalApiException { get; set; }
 }

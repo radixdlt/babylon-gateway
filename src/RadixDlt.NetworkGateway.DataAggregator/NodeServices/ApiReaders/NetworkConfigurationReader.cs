@@ -93,8 +93,7 @@ internal class NetworkConfigurationReader : INetworkConfigurationReader
     {
         try
         {
-            return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
-                await _statusApi.StatusNetworkConfigurationPostAsync(token));
+            return await _statusApi.StatusNetworkConfigurationPostAsync(token);
         }
         catch (Exception ex)
         {
