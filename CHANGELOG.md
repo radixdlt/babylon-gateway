@@ -8,6 +8,7 @@ _Release Date: ???_
 - All enum values use `PascalCase` naming.
 - `/gateway/information` replaced with two separate endpoints `/status/gateway-status` and `/status/network-configuration`
 - Added new configuration section `CoreApiIntegration` where you can configure integration with core API. For now only `SubmitTransactionTimeout` setting is supported.
+- `/stake/validator/list` rework, added current stake value.
 
 ### 0.1.1 - Betanet V2
 _Release Date: 14.02.2022_

@@ -76,7 +76,6 @@ public sealed record HrpDefinition(
 );
 
 public sealed record WellKnownAddresses(
-    string AccountPackage,
     string Faucet,
     string EpochManager,
     string Clock,

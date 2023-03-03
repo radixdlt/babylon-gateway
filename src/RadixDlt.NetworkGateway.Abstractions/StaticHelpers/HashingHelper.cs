@@ -62,14 +62,61 @@
  * permissions under this License.
  */
 
+using Org.BouncyCastle.Crypto.Digests;
 using System;
-using System.Security.Cryptography;
 
 namespace RadixDlt.NetworkGateway.Abstractions.StaticHelpers;
-
 public static class HashingHelper
 {
-    public static void ConcatHashesAndTakeSha256Twice(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, Span<byte> destination)
+    private const int DigestSize = 256;
+
+    public static byte[] ComputeCombinedHash(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2)
+    {
+        var destination = new byte[32];
+        ComputeCombinedHash(hash1, hash2, destination);
+        return destination;
+    }
+
+    public static bool ComputeAndVerifyCombinedHash(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, ReadOnlySpan<byte> hashToVerify)
+    {
+        if (hashToVerify.Length != 32)
+        {
+            return false;
+        }
+
+        Span<byte> hashResult = stackalloc byte[32];
+        ComputeCombinedHash(hash1, hash2, hashResult);
+        return hashToVerify.SequenceEqual(hashResult);
+    }
+
+    public static bool VerifyHash(ReadOnlySpan<byte> source, ReadOnlySpan<byte> hashToVerify)
+    {
+        if (hashToVerify.Length != 32)
+        {
+            return false;
+        }
+
+        Span<byte> hashResult = stackalloc byte[32];
+        Hash(source, hashResult);
+        return hashToVerify.SequenceEqual(hashResult);
+    }
+
+    public static byte[] Hash(ReadOnlySpan<byte> source)
+    {
+        Span<byte> result = stackalloc byte[32];
+        Hash(source, result);
+        return result.ToArray();
+    }
+
+    private static void Hash(ReadOnlySpan<byte> source, Span<byte> result)
+    {
+        var blake2bDigesterLocal = new Blake2bDigest(DigestSize);
+        blake2bDigesterLocal.Reset();
+        blake2bDigesterLocal.BlockUpdate(source);
+        blake2bDigesterLocal.DoFinal(result);
+    }
+
+    private static void ComputeCombinedHash(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, Span<byte> destination)
     {
         if (hash1.Length != 32)
         {
@@ -85,51 +132,6 @@ public static class HashingHelper
         hash1.CopyTo(aggregate);
         hash2.CopyTo(aggregate[32..]);
 
-        Sha256Twice(aggregate, destination);
-    }
-
-    public static byte[] ConcatHashesAndTakeSha256Twice(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2)
-    {
-        var destination = new byte[32];
-        ConcatHashesAndTakeSha256Twice(hash1, hash2, destination);
-        return destination;
-    }
-
-    public static bool VerifyConcatHashesAndTakeSha256Twice(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, ReadOnlySpan<byte> hashToVerify)
-    {
-        if (hashToVerify.Length != 32)
-        {
-            return false;
-        }
-
-        Span<byte> hashResult = stackalloc byte[32];
-        ConcatHashesAndTakeSha256Twice(hash1, hash2, hashResult);
-        return hashToVerify.SequenceEqual(hashResult);
-    }
-
-    public static void Sha256Twice(ReadOnlySpan<byte> source, Span<byte> destination)
-    {
-        Span<byte> hashResult1 = stackalloc byte[32];
-        SHA256.HashData(source, hashResult1);
-        SHA256.HashData(hashResult1, destination);
-    }
-
-    public static byte[] Sha256Twice(ReadOnlySpan<byte> source)
-    {
-        Span<byte> hashResult1 = stackalloc byte[32];
-        SHA256.HashData(source, hashResult1);
-        return SHA256.HashData(hashResult1);
-    }
-
-    public static bool VerifySha256TwiceHash(ReadOnlySpan<byte> source, ReadOnlySpan<byte> hashToVerify)
-    {
-        if (hashToVerify.Length != 32)
-        {
-            return false;
-        }
-
-        Span<byte> hashResult = stackalloc byte[32];
-        Sha256Twice(source, hashResult);
-        return hashToVerify.SequenceEqual(hashResult);
+        Hash(aggregate, destination);
     }
 }

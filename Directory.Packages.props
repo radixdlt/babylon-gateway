@@ -1,6 +1,7 @@
 <Project>
   <ItemGroup>
     <!-- runtime dependencies -->
+    <PackageVersion Include="BouncyCastle.Cryptography" Version="2.1.1" />
     <PackageVersion Include="Dapper" Version="2.0.123" />
     <PackageVersion Include="FluentValidation" Version="11.5.1" />
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.2.2" />
@@ -33,5 +34,4 @@
     <PackageVersion Include="xunit" Version="2.4.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
   </ItemGroup>
-
 </Project>

@@ -183,15 +183,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         var userTransactionStatusByPayloadHash = new Dictionary<ValueBytes, PendingTransactionStatus>(committedTransactions.Count);
 
-        foreach (var ct in committedTransactions.Where(ct => ct.LedgerTransaction is CoreModel.UserLedgerTransaction))
+        foreach (var committedTransaction in committedTransactions.Where(ct => ct.LedgerTransaction is CoreModel.UserLedgerTransaction))
         {
-            var nt = ((CoreModel.UserLedgerTransaction)ct.LedgerTransaction).NotarizedTransaction;
+            var nt = ((CoreModel.UserLedgerTransaction)committedTransaction.LedgerTransaction).NotarizedTransaction;
 
-            userTransactionStatusByPayloadHash[nt.GetHashBytes()] = ct.Receipt.Status switch
+            userTransactionStatusByPayloadHash[nt.GetHashBytes()] = committedTransaction.Receipt.Status switch
             {
                 CoreModel.TransactionStatus.Succeeded => PendingTransactionStatus.CommittedSuccess,
                 CoreModel.TransactionStatus.Failed => PendingTransactionStatus.CommittedFailure,
-                _ => throw new UnreachableException($"Didn't expect {ct.Receipt.Status} value"),
+                _ => throw new UnreachableException($"Didn't expect {committedTransaction.Receipt.Status} value"),
             };
         }
 
@@ -280,58 +280,53 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         {
             var hrp = _networkConfigurationProvider.GetHrpDefinition();
 
-            foreach (var ct in ledgerExtension.CommittedTransactions)
+            foreach (var commitedTransaction in ledgerExtension.CommittedTransactions)
             {
-                var stateVersion = ct.StateVersion;
-                var stateUpdates = ct.Receipt.StateUpdates;
+                var stateVersion = commitedTransaction.StateVersion;
+                var stateUpdates = commitedTransaction.Receipt.StateUpdates;
 
                 long? nextEpoch = null;
                 long? newRoundInEpoch = null;
                 DateTime? newRoundTimestamp = null;
                 LedgerTransactionKindFilterConstraint? kindFilterConstraint = null;
 
-                if (ct.Receipt.NextEpoch != null)
-                {
-                    nextEpoch = ct.Receipt.NextEpoch.Epoch;
-                    kindFilterConstraint = LedgerTransactionKindFilterConstraint.EpochChange;
-                }
-
-                if (ct.LedgerTransaction is CoreModel.ValidatorLedgerTransaction vlt)
+                if (commitedTransaction.LedgerTransaction is CoreModel.ValidatorLedgerTransaction vlt)
                 {
                     switch (vlt.ValidatorTransaction)
                     {
-                        case CoreModel.TimeUpdateValidatorTransaction timeUpdate:
-                            newRoundInEpoch = timeUpdate.RoundInEpoch;
-                            newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(timeUpdate.ProposerTimestamp.UnixTimestampMs).UtcDateTime;
+                        case CoreModel.RoundUpdateValidatorTransaction roundUpdate:
+                            newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(roundUpdate.ProposerTimestamp.UnixTimestampMs).UtcDateTime;
                             break;
                     }
                 }
 
-                if (ct.LedgerTransaction is CoreModel.SystemLedgerTransaction)
+                if (commitedTransaction.LedgerTransaction is CoreModel.SystemLedgerTransaction)
                 {
                     // no-op so far
                 }
 
-                if (ct.LedgerTransaction is CoreModel.UserLedgerTransaction)
+                if (commitedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction)
                 {
                     kindFilterConstraint = LedgerTransactionKindFilterConstraint.User;
                 }
 
-                foreach (var newSubstate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
+                var substates = stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates).ToList();
+                var d = substates.GroupBy(x => x.SubstateData.SubstateType).ToList();
+                foreach (var newSubstate in substates)
                 {
-                    var sid = newSubstate.SubstateId;
-                    var sd = newSubstate.SubstateData;
+                    var substateId = newSubstate.SubstateId;
+                    var substateData = newSubstate.SubstateData;
 
-                    if (sd is CoreModel.GlobalAddressSubstate globalAddress)
+                    if (substateData is CoreModel.GlobalAddressSubstate globalAddressSubstate)
                     {
-                        var target = globalAddress.TargetEntity;
-                        var te = referencedEntities.GetOrAdd(target.TargetEntityIdHex, _ => new ReferencedEntity(target.TargetEntityIdHex, target.TargetEntityType, stateVersion));
+                        var target = globalAddressSubstate.TargetEntity;
+                        var targetReferencedEntity = referencedEntities.GetOrAdd(target.TargetEntityIdHex, _ => new ReferencedEntity(target.TargetEntityIdHex, target.TargetEntityType, stateVersion));
 
-                        te.Globalize((GlobalAddress)target.GlobalAddress);
+                        targetReferencedEntity.Globalize((GlobalAddress)target.GlobalAddress);
 
                         if (target.TargetEntityType == CoreModel.EntityType.Component)
                         {
-                            te.WithTypeHint(target.GlobalAddress.StartsWith(hrp.AccountComponent) ? typeof(AccountComponentEntity) : typeof(NormalComponentEntity));
+                            targetReferencedEntity.WithTypeHint(target.GlobalAddress.StartsWith(hrp.AccountComponent) ? typeof(AccountComponentEntity) : typeof(NormalComponentEntity));
                         }
 
                         // we do not want to store GlobalEntities as they bring no value from NG perspective
@@ -340,61 +335,69 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         continue;
                     }
 
-                    var re = referencedEntities.GetOrAdd(sid.EntityIdHex, _ => new ReferencedEntity(sid.EntityIdHex, sid.EntityType, stateVersion));
+                    if (substateData is CoreModel.EpochManagerSubstate epochManagerSubstate)
+                    {
+                        newRoundInEpoch = epochManagerSubstate.Round;
 
-                    if (sd is CoreModel.IEntityOwner entityOwner)
+                        if (epochManagerSubstate.Round == 0)
+                        {
+                            nextEpoch = epochManagerSubstate.Epoch;
+                            kindFilterConstraint = LedgerTransactionKindFilterConstraint.EpochChange;
+                        }
+                    }
+
+                    var referencedEntity = referencedEntities.GetOrAdd(substateId.EntityIdHex, _ => new ReferencedEntity(substateId.EntityIdHex, substateId.EntityType, stateVersion));
+
+                    if (substateData is CoreModel.IEntityOwner entityOwner)
                     {
                         foreach (var oe in entityOwner.GetOwnedEntities())
                         {
-                            referencedEntities.GetOrAdd(oe.EntityIdHex, _ => new ReferencedEntity(oe.EntityIdHex, oe.EntityType, stateVersion)).IsImmediateChildOf(re);
-                            childToParentEntities[oe.EntityIdHex] = sid.EntityIdHex;
+                            referencedEntities.GetOrAdd(oe.EntityIdHex, _ => new ReferencedEntity(oe.EntityIdHex, oe.EntityType, stateVersion)).IsImmediateChildOf(referencedEntity);
+                            childToParentEntities[oe.EntityIdHex] = substateId.EntityIdHex;
                         }
                     }
 
-                    if (sd is CoreModel.IRoyaltyVaultHolder royaltyVaultHolder && royaltyVaultHolder.TryGetRoyaltyVault(out var rv))
+                    if (substateData is CoreModel.IRoyaltyVaultHolder royaltyVaultHolder && royaltyVaultHolder.TryGetRoyaltyVault(out var rv))
                     {
-                        referencedEntities.GetOrAdd(rv.EntityIdHex, _ => new ReferencedEntity(rv.EntityIdHex, rv.EntityType, stateVersion)).IsImmediateChildOf(re);
-                        childToParentEntities[rv.EntityIdHex] = sid.EntityIdHex;
+                        referencedEntities.GetOrAdd(rv.EntityIdHex, _ => new ReferencedEntity(rv.EntityIdHex, rv.EntityType, stateVersion)).IsImmediateChildOf(referencedEntity);
+                        childToParentEntities[rv.EntityIdHex] = substateId.EntityIdHex;
 
-                        re.PostResolveConfigure((IRoyaltyVaultHolder e) =>
-                        {
-                            e.RoyaltyVaultEntityId = referencedEntities.Get(rv.EntityIdHex).DatabaseId;
-                        });
-                        referencedEntities.Get(rv.EntityIdHex).PostResolveConfigure((VaultEntity e) => e.RoyaltyVaultOfEntityId = re.DatabaseId);
+                        referencedEntity.PostResolveConfigure((IRoyaltyVaultHolder e) => e.RoyaltyVaultEntityId = referencedEntities.Get(rv.EntityIdHex).DatabaseId);
+                        referencedEntities.Get(rv.EntityIdHex).PostResolveConfigure((VaultEntity e) => e.RoyaltyVaultOfEntityId = referencedEntity.DatabaseId);
                     }
 
-                    if (sd is CoreModel.IGlobalAddressPointer globalEntityPointer)
+                    if (substateData is CoreModel.IGlobalAddressPointer globalEntityPointer)
                     {
-                        foreach (var ga in globalEntityPointer.GetGlobalAddresses())
+                        foreach (var globalAddress in globalEntityPointer.GetGlobalAddresses())
                         {
-                            referencedEntities.MarkSeenGlobalAddress((GlobalAddress)ga);
+                            referencedEntities.MarkSeenGlobalAddress((GlobalAddress)globalAddress);
                         }
                     }
 
-                    if (sd is CoreModel.ResourceManagerSubstate resourceManager)
+                    if (substateData is CoreModel.ResourceManagerSubstate resourceManager)
                     {
                         Type typeHint = resourceManager.ResourceType switch
                         {
                             CoreModel.ResourceType.Fungible => typeof(FungibleResourceManagerEntity),
                             CoreModel.ResourceType.NonFungible => typeof(NonFungibleResourceManagerEntity),
-                            _ => throw new ArgumentOutOfRangeException(),
+                            _ => throw new ArgumentOutOfRangeException(nameof(resourceManager.ResourceType), resourceManager.ResourceType, "Unexpected value of ResourceType"),
                         };
 
-                        re.WithTypeHint(typeHint);
+                        referencedEntity.WithTypeHint(typeHint);
 
                         if (resourceManager.ResourceType == CoreModel.ResourceType.Fungible)
                         {
-                            re.PostResolveConfigure((FungibleResourceManagerEntity e) => e.Divisibility = resourceManager.FungibleDivisibility);
+                            referencedEntity.PostResolveConfigure((FungibleResourceManagerEntity e) => e.Divisibility = resourceManager.FungibleDivisibility);
                         }
 
                         if (resourceManager.ResourceType == CoreModel.ResourceType.NonFungible)
                         {
                             var type = resourceManager.NonFungibleIdType ?? throw new InvalidOperationException("NonFungibleIdType must be set.");
 
-                            re.PostResolveConfigure((NonFungibleResourceManagerEntity e) => e.NonFungibleIdType = type switch
+                            referencedEntity.PostResolveConfigure((NonFungibleResourceManagerEntity e) => e.NonFungibleIdType = type switch
                             {
                                 CoreModel.NonFungibleIdType.String => NonFungibleIdType.String,
-                                CoreModel.NonFungibleIdType.Number => NonFungibleIdType.Number,
+                                CoreModel.NonFungibleIdType.Integer => NonFungibleIdType.Integer,
                                 CoreModel.NonFungibleIdType.Bytes => NonFungibleIdType.Bytes,
                                 CoreModel.NonFungibleIdType.UUID => NonFungibleIdType.UUID,
                                 _ => throw new ArgumentOutOfRangeException(),
@@ -402,23 +405,23 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         }
                     }
 
-                    if (sd is CoreModel.ComponentInfoSubstate componentInfo)
+                    if (substateData is CoreModel.ComponentInfoSubstate componentInfo)
                     {
-                        re.PostResolveConfigure((ComponentEntity e) =>
+                        referencedEntity.PostResolveConfigure((ComponentEntity e) =>
                         {
                             e.PackageId = referencedEntities.GetByGlobal((GlobalAddress)componentInfo.PackageAddress).DatabaseId;
                             e.BlueprintName = componentInfo.BlueprintName;
                         });
                     }
 
-                    if (sd is CoreModel.PackageInfoSubstate packageInfo)
+                    if (substateData is CoreModel.WasmCodeSubstate wasmCode)
                     {
-                        re.PostResolveConfigure((PackageEntity e) => e.Code = packageInfo.GetCodeBytes());
+                        referencedEntity.PostResolveConfigure((PackageEntity e) => e.Code = wasmCode.GetCodeBytes());
                     }
 
-                    if (sd is CoreModel.ValidatorSubstate validator)
+                    if (substateData is CoreModel.ValidatorSubstate validator)
                     {
-                        re.PostResolveConfigure((ValidatorEntity e) =>
+                        referencedEntity.PostResolveConfigure((ValidatorEntity e) =>
                         {
                             e.EpochManagerEntityId = referencedEntities.GetByGlobal((GlobalAddress)validator.EpochManagerAddress).DatabaseId;
                             e.StakeVaultEntityId = referencedEntities.Get(validator.StakeVault.EntityIdHex).DatabaseId;
@@ -458,9 +461,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     IndexInEpoch: isStartOfEpoch ? 0 : lastTransactionSummary.IndexInEpoch + 1,
                     IndexInRound: isStartOfRound ? 0 : lastTransactionSummary.IndexInRound + 1,
                     IsEndOfEpoch: nextEpoch != null,
-                    TransactionAccumulator: ct.LedgerTransaction.GetPayloadBytes());
+                    TransactionAccumulator: commitedTransaction.LedgerTransaction.GetPayloadBytes());
 
-                LedgerTransaction ledgerTransaction = ct.LedgerTransaction switch
+                LedgerTransaction ledgerTransaction = commitedTransaction.LedgerTransaction switch
                 {
                     CoreModel.UserLedgerTransaction ult => new UserLedgerTransaction
                     {
@@ -473,10 +476,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     _ => throw new UnreachableException(),
                 };
 
-                ledgerTransaction.StateVersion = ct.StateVersion;
-                ledgerTransaction.Status = ct.Receipt.Status.ToModel();
-                ledgerTransaction.ErrorMessage = ct.Receipt.ErrorMessage;
-                ledgerTransaction.TransactionAccumulator = ct.GetAccumulatorHashBytes();
+                ledgerTransaction.StateVersion = commitedTransaction.StateVersion;
+                ledgerTransaction.Status = commitedTransaction.Receipt.Status.ToModel();
+                ledgerTransaction.ErrorMessage = commitedTransaction.Receipt.ErrorMessage;
+                ledgerTransaction.TransactionAccumulator = commitedTransaction.GetAccumulatorHashBytes();
                 // TODO commented out as incompatible with current Core API version
                 ledgerTransaction.Message = null; // message: transaction.Metadata.Message?.ConvertFromHex(),
                 ledgerTransaction.Epoch = summary.Epoch;
@@ -484,14 +487,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 ledgerTransaction.IndexInEpoch = summary.IndexInEpoch;
                 ledgerTransaction.IndexInRound = summary.IndexInRound;
                 ledgerTransaction.IsEndOfEpoch = summary.IsEndOfEpoch;
-                ledgerTransaction.FeePaid = TokenAmount.FromDecimalString(ct.Receipt.FeeSummary.XrdTotalExecutionCost);
-                ledgerTransaction.TipPaid = TokenAmount.FromDecimalString(ct.Receipt.FeeSummary.XrdTotalTipped);
+                ledgerTransaction.FeePaid = TokenAmount.FromDecimalString(commitedTransaction.Receipt.FeeSummary.XrdTotalExecutionCost);
+                ledgerTransaction.TipPaid = TokenAmount.FromDecimalString(commitedTransaction.Receipt.FeeSummary.XrdTotalTipped);
                 ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
                 ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
                 ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
                 ledgerTransaction.KindFilterConstraint = kindFilterConstraint;
-                ledgerTransaction.RawPayload = ct.LedgerTransaction.GetPayloadBytes();
-                ledgerTransaction.EngineReceipt = ct.Receipt.ToJson();
+                ledgerTransaction.RawPayload = commitedTransaction.LedgerTransaction.GetPayloadBytes();
+                ledgerTransaction.EngineReceipt = commitedTransaction.Receipt.ToJson();
 
                 ledgerTransactionsToAdd.Add(ledgerTransaction);
 
@@ -512,15 +515,16 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 var entityType = knownDbEntity switch
                 {
                     EpochManagerEntity => CoreModel.EntityType.EpochManager,
+                    AccountComponentEntity => CoreModel.EntityType.Account,
                     ResourceManagerEntity => CoreModel.EntityType.ResourceManager,
+                    ClockEntity => CoreModel.EntityType.Clock,
+                    ValidatorEntity => CoreModel.EntityType.Validator,
+                    VaultEntity => CoreModel.EntityType.Vault,
                     ComponentEntity => CoreModel.EntityType.Component,
                     PackageEntity => CoreModel.EntityType.Package,
                     KeyValueStoreEntity => CoreModel.EntityType.KeyValueStore,
-                    VaultEntity => CoreModel.EntityType.Vault,
                     NonFungibleStoreEntity => CoreModel.EntityType.NonFungibleStore,
-                    ClockEntity => CoreModel.EntityType.Clock,
                     AccessControllerEntity => CoreModel.EntityType.AccessController,
-                    ValidatorEntity => CoreModel.EntityType.Validator,
                     IdentityEntity => CoreModel.EntityType.Identity,
                     _ => throw new ArgumentOutOfRangeException(nameof(knownDbEntity), knownDbEntity.GetType().Name),
                 };
@@ -528,40 +532,41 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 referencedEntities.GetOrAdd(knownDbEntity.Address.ToHex(), address => new ReferencedEntity(address, entityType, knownDbEntity.FromStateVersion));
             }
 
-            foreach (var re in referencedEntities.All)
+            foreach (var referencedEntity in referencedEntities.All)
             {
-                if (knownDbEntities.ContainsKey(re.IdHex))
+                if (knownDbEntities.ContainsKey(referencedEntity.IdHex))
                 {
-                    re.Resolve(knownDbEntities[re.IdHex]);
+                    referencedEntity.Resolve(knownDbEntities[referencedEntity.IdHex]);
 
                     continue;
                 }
 
-                Entity dbEntity = re.Type switch
+                Entity dbEntity = referencedEntity.Type switch
                 {
                     CoreModel.EntityType.EpochManager => new EpochManagerEntity(),
-                    CoreModel.EntityType.ResourceManager => re.CreateUsingTypeHint<ResourceManagerEntity>(),
+                    CoreModel.EntityType.ResourceManager => referencedEntity.CreateUsingTypeHint<ResourceManagerEntity>(),
                     // If the component is a local / owned component, it doesn't have a Component/Account type hint
                     // from the address, so assume it's a normal component for now until we can do better from the ComponentInfo
-                    CoreModel.EntityType.Component => re.CreateUsingTypeHintOrDefault<ComponentEntity>(typeof(NormalComponentEntity)),
+                    CoreModel.EntityType.Component => referencedEntity.CreateUsingTypeHintOrDefault<ComponentEntity>(typeof(NormalComponentEntity)),
                     CoreModel.EntityType.Package => new PackageEntity(),
                     CoreModel.EntityType.Vault => new VaultEntity(),
                     CoreModel.EntityType.KeyValueStore => new KeyValueStoreEntity(),
-                    CoreModel.EntityType.Global => throw new ArgumentOutOfRangeException(nameof(re.Type), re.Type, "Global entities should be filtered out"),
+                    CoreModel.EntityType.Global => throw new ArgumentOutOfRangeException(nameof(referencedEntity.Type), referencedEntity.Type, "Global entities should be filtered out"),
                     CoreModel.EntityType.NonFungibleStore => new NonFungibleStoreEntity(),
                     CoreModel.EntityType.Clock => new ClockEntity(),
                     CoreModel.EntityType.AccessController => new AccessControllerEntity(),
                     CoreModel.EntityType.Validator => new ValidatorEntity(),
                     CoreModel.EntityType.Identity => new IdentityEntity(),
-                    _ => throw new ArgumentOutOfRangeException(nameof(re.Type), re.Type, null),
+                    CoreModel.EntityType.Account => new AccountComponentEntity(),
+                    _ => throw new ArgumentOutOfRangeException(nameof(referencedEntity.Type), referencedEntity.Type, null),
                 };
 
                 dbEntity.Id = sequences.EntitySequence++;
-                dbEntity.FromStateVersion = re.StateVersion;
-                dbEntity.Address = re.IdHex.ConvertFromHex();
-                dbEntity.GlobalAddress = re.GlobalAddress;
+                dbEntity.FromStateVersion = referencedEntity.StateVersion;
+                dbEntity.Address = referencedEntity.IdHex.ConvertFromHex();
+                dbEntity.GlobalAddress = referencedEntity.GlobalAddress;
 
-                re.Resolve(dbEntity);
+                referencedEntity.Resolve(dbEntity);
                 entitiesToAdd.Add(dbEntity);
             }
 
@@ -641,36 +646,36 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         // step: scan all substates to figure out changes
         {
-            foreach (var ct in ledgerExtension.CommittedTransactions)
+            foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
             {
-                var stateVersion = ct.StateVersion;
-                var stateUpdates = ct.Receipt.StateUpdates;
+                var stateVersion = committedTransaction.StateVersion;
+                var stateUpdates = committedTransaction.Receipt.StateUpdates;
 
                 foreach (var newSubstate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
                 {
-                    var sid = newSubstate.SubstateId;
-                    var sd = newSubstate.SubstateData;
+                    var substateId = newSubstate.SubstateId;
+                    var substateData = newSubstate.SubstateData;
 
-                    if (sd is CoreModel.GlobalAddressSubstate)
+                    if (substateData is CoreModel.GlobalAddressSubstate)
                     {
                         // we do not want to store GlobalEntities as they bring no value from NG perspective
 
                         continue;
                     }
 
-                    var re = referencedEntities.Get(sid.EntityIdHex);
+                    var referencedEntity = referencedEntities.Get(substateId.EntityIdHex);
 
-                    if (sd is CoreModel.MetadataSubstate metadata)
+                    if (substateData is CoreModel.MetadataSubstate metadata)
                     {
-                        metadataChanges.Add(new MetadataChange(re, metadata.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), stateVersion));
+                        metadataChanges.Add(new MetadataChange(referencedEntity, metadata.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), stateVersion));
                     }
 
-                    if (sd is CoreModel.ResourceManagerSubstate resourceManager)
+                    if (substateData is CoreModel.ResourceManagerSubstate resourceManager)
                     {
-                        resourceManagerSupplyChanges.Add(new ResourceManagerSupplyChange(re, TokenAmount.FromDecimalString(resourceManager.TotalSupply), stateVersion));
+                        resourceManagerSupplyChanges.Add(new ResourceManagerSupplyChange(referencedEntity, TokenAmount.FromDecimalString(resourceManager.TotalSupply), stateVersion));
                     }
 
-                    if (sd is CoreModel.VaultSubstate vault)
+                    if (substateData is CoreModel.VaultSubstate vault)
                     {
                         switch (vault.ResourceAmount)
                         {
@@ -679,7 +684,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 var amount = TokenAmount.FromDecimalString(fra.Amount);
                                 var resourceEntity = referencedEntities.GetByGlobal((GlobalAddress)fra.ResourceAddress);
 
-                                fungibleVaultChanges.Add(new FungibleVaultChange(re, resourceEntity, amount, stateVersion));
+                                fungibleVaultChanges.Add(new FungibleVaultChange(referencedEntity, resourceEntity, amount, stateVersion));
 
                                 break;
                             }
@@ -688,7 +693,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             {
                                 var resourceEntity = referencedEntities.GetByGlobal((GlobalAddress)nfra.ResourceAddress);
 
-                                nonFungibleVaultChanges.Add(new NonFungibleVaultChange(re, resourceEntity, nfra.NonFungibleIds.Select(nfid => nfid.SimpleRep).ToList(),
+                                nonFungibleVaultChanges.Add(new NonFungibleVaultChange(referencedEntity, resourceEntity, nfra.NonFungibleIds.Select(nfid => nfid.SimpleRep).ToList(),
                                     stateVersion));
 
                                 break;
@@ -699,47 +704,47 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         }
                     }
 
-                    if (sd is CoreModel.NonFungibleStoreEntrySubstate nonFungibleStoreEntry)
+                    if (substateData is CoreModel.NonFungibleStoreEntrySubstate nonFungibleStoreEntry)
                     {
-                        var resourceManagerEntity = referencedEntities.GetByDatabaseId(re.DatabaseGlobalAncestorId);
+                        var resourceManagerEntity = referencedEntities.GetByDatabaseId(referencedEntity.DatabaseGlobalAncestorId);
 
-                        nonFungibleIdStoreChanges.Add(new NonFungibleIdChange(re, resourceManagerEntity, nonFungibleStoreEntry.NonFungibleId.SimpleRep,
+                        nonFungibleIdStoreChanges.Add(new NonFungibleIdChange(referencedEntity, resourceManagerEntity, nonFungibleStoreEntry.NonFungibleId.SimpleRep,
                             nonFungibleStoreEntry.IsDeleted, nonFungibleStoreEntry.NonFungibleData, stateVersion));
                     }
 
-                    if (sd is CoreModel.AccessRulesChainSubstate accessRulesChain)
+                    if (substateData is CoreModel.AccessRulesChainSubstate accessRulesChain)
                     {
-                        AccessRulesChainSubtype subtype = sid.SubstateKeyType switch
+                        AccessRulesChainSubtype subtype = substateId.ModuleType switch
                         {
-                            CoreModel.SubstateKeyType.AccessRulesChain => AccessRulesChainSubtype.None,
-                            CoreModel.SubstateKeyType.ResourceManagerVaultAccessRulesChain => AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain,
-                            _ => throw new UnreachableException($"Didn't expect {sid.SubstateKeyType} value"),
+                            CoreModel.ModuleType.AccessRules => AccessRulesChainSubtype.None,
+                            CoreModel.ModuleType.AccessRules1 => AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain,
+                            _ => throw new UnreachableException($"Didn't expect {substateId.ModuleType} value"),
                         };
 
                         entityAccessRulesChainHistoryToAdd.Add(new EntityAccessRulesChainHistory
                         {
                             Id = sequences.EntityAccessRulesChainHistorySequence++,
                             FromStateVersion = stateVersion,
-                            EntityId = referencedEntities.Get(sid.EntityIdHex).DatabaseId,
+                            EntityId = referencedEntities.Get(substateId.EntityIdHex).DatabaseId,
                             Subtype = subtype,
                             AccessRulesChain = JsonConvert.SerializeObject(accessRulesChain.Chain),
                         });
                     }
 
-                    if (sd is CoreModel.ComponentStateSubstate componentState)
+                    if (substateData is CoreModel.ComponentStateSubstate componentState)
                     {
                         entityStateToAdd.Add(new EntityStateHistory
                         {
                             Id = sequences.EntityStateHistorySequence++,
                             FromStateVersion = stateVersion,
-                            EntityId = referencedEntities.Get(sid.EntityIdHex).DatabaseId,
+                            EntityId = referencedEntities.Get(substateId.EntityIdHex).DatabaseId,
                             State = componentState.DataStruct.StructData.ToJson(),
                         });
                     }
 
-                    if (sd is CoreModel.ValidatorSubstate validator)
+                    if (substateData is CoreModel.ValidatorSubstate validator)
                     {
-                        var lookup = new ValidatorKeyLookup(referencedEntities.Get(sid.EntityIdHex).DatabaseId, validator.PublicKey.KeyType.ToModel(), validator.PublicKey.GetKeyBytes());
+                        var lookup = new ValidatorKeyLookup(referencedEntities.Get(substateId.EntityIdHex).DatabaseId, validator.PublicKey.KeyType.ToModel(), validator.PublicKey.GetKeyBytes());
 
                         validatorKeyHistoryToAdd[lookup] = new ValidatorPublicKeyHistory
                         {
@@ -754,12 +759,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         {
                             Id = sequences.EntityStateHistorySequence++,
                             FromStateVersion = stateVersion,
-                            EntityId = referencedEntities.Get(sid.EntityIdHex).DatabaseId,
+                            EntityId = referencedEntities.Get(substateId.EntityIdHex).DatabaseId,
                             State = validator.ToJson(),
                         });
                     }
 
-                    if (sd is CoreModel.ValidatorSetSubstate validatorSet && sid.SubstateKeyType == CoreModel.SubstateKeyType.CurrentValidatorSet)
+                    if (substateData is CoreModel.ValidatorSetSubstate validatorSet && substateId.SubstateKeyType == CoreModel.SubstateKeyType.CurrentValidatorSet)
                     {
                         var change = validatorSet.ValidatorSet
                             .ToDictionary(

@@ -206,7 +206,6 @@ internal class EntityStateQuerier : IEntityStateQuerier
             case VirtualAccountComponentEntity:
                 // TODO - we should better fake the data - eg accessRulesChain when this is possible
                 details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
-                    packageAddress: _networkConfigurationProvider.GetWellKnownAddresses().AccountPackage,
                     blueprintName: "Account",
                     state: new JObject(),
                     accessRulesChain: new JArray()
@@ -403,7 +402,6 @@ LIMIT 1
 
         var validatorIds = validatorsAndOneMore.Take(ValidatorsLimit).Select(e => e.Id).ToArray();
 
-        // TODO Validators are currently not a derived type of ComponentEntity but this is only temporary solution, remove this comment once they regain their Component-status
         var cd = new CommandDefinition(
             commandText: @"
 WITH variables (validator_entity_id) AS (SELECT UNNEST(@validatorIds))

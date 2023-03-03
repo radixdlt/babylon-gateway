@@ -193,7 +193,6 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 Resource: GetHrpPrefix(at, AddressSubtype.Resource)
             ),
             WellKnownAddresses = new WellKnownAddresses(
-                AccountPackage: wka.AccountPackage,
                 Faucet: wka.Faucet,
                 EpochManager: wka.EpochManager,
                 Clock: wka.Clock,

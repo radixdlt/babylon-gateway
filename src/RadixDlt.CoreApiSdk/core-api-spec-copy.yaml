@@ -43,7 +43,7 @@ openapi: 3.0.0
 # => Hex-encoded hashes should end _hash
 # => Hex-encoded bytes/payload should end _hex and not include _bytes
 info:
-  version: '0.2.0'
+  version: '0.3.0'
   title: 'Babylon Core API'
   license:
     name: The Radix License, Version 1.0
@@ -95,7 +95,7 @@ tags:
 
       User transactions are formed of a core "intent", which is then signed by 0+ signatories, before being notarized. The output is called a notarized payload.
       It is this notarized transaction payload which is submitted to the network.
-
+      
       For most users, this construction process will generally happen in their Radix Wallet. If you wish to construct transactions programmatically or offline,
       you will need to integrate the Radix Engine Toolkit into your application for construction and finalization.
 
@@ -119,7 +119,7 @@ tags:
       ## State Model
 
       The Radix Engine State Model can be thought of as a forest of state sub-trees.
-      A state sub-tree consists of "entities". These entities have an ID, and 0 or more "substates" at keys underneath them.
+      A state sub-tree consists of "entities". These entities have an ID, and 0 or more "substates" at keys underneath them. 
       These substates are typed, and can own other entities, forming a tree of ownership.
 
       Each state sub-tree has a root entity, and a single Bech32M Global Address, with a human-readable-prefix (and prefix byte) matching the root entity type.
@@ -146,9 +146,9 @@ tags:
     x-displayName: Stream Endpoints
     description: To query the transaction stream of the ledger.
 paths:
-  ##################
-  # Status Sub-API #
-  ##################
+##################
+# Status Sub-API #
+##################
   "/status/network-configuration":
     post:
       summary: Get Network Configuration
@@ -193,9 +193,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
-  ###################
-  # Mempool Sub-API #
-  ###################
+###################
+# Mempool Sub-API #
+###################
   "/mempool/list":
     post:
       summary: Get Mempool List
@@ -252,9 +252,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
-  #######################
-  # Transaction Sub-API #
-  #######################
+#######################
+# Transaction Sub-API #
+#######################
   "/transaction/parse":
     post:
       summary: Parse Transaction Payload
@@ -463,9 +463,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
-  ##################
-  # Stream Sub-API #
-  ##################
+##################
+# Stream Sub-API #
+##################
   "/stream/transactions":
     post:
       summary: Get Committed Transactions
@@ -498,9 +498,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
-  #################
-  # State Sub-API #
-  #################
+#################
+# State Sub-API #
+#################
   "/state/epoch":
     post:
       summary: Get Epoch Details
@@ -797,9 +797,9 @@ paths:
 #############################################################################################
 components:
   schemas:
-    ##########################################
-    # GENERAL / SHARED MODELS - Transactions #
-    ##########################################
+##########################################
+# GENERAL / SHARED MODELS - Transactions #
+##########################################
     TransactionStatus:
       type: string
       enum:
@@ -1022,7 +1022,7 @@ components:
         propertyName: error_type
         mapping:
           # The discriminator values on the left side need to match ErrorResponseType
-          # NOTE: To ease
+          # NOTE: To ease 
           Basic: "#/components/schemas/BasicErrorResponse"
           TransactionSubmit: "#/components/schemas/TransactionSubmitErrorResponse"
       required:
@@ -1045,9 +1045,9 @@ components:
       allOf:
         - $ref: "#/components/schemas/ErrorResponse"
         - type: object
-    ######################################
-    # GENERAL / SHARED MODELS - Receipts #
-    ######################################
+######################################
+# GENERAL / SHARED MODELS - Receipts #
+######################################
     FeeSummary:
       description: Fees paid
       type: object
@@ -1265,6 +1265,7 @@ components:
       required:
         - entity_type
         - entity_id_hex
+        - module_type
         - substate_type
         - substate_key_type
         - substate_key_hex
@@ -1274,6 +1275,8 @@ components:
         entity_id_hex:
           type: string
           description: The hex-encoded bytes of the entity id
+        module_type:
+          $ref: "#/components/schemas/ModuleType"
         substate_type:
           $ref: "#/components/schemas/SubstateType"
         substate_key_type:
@@ -1326,9 +1329,9 @@ components:
           description: |
             The string-encoded decimal representing the XRD amount put or taken from the vault.
             A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(256 - 1) <= m < 2^(256 - 1)`.
-    #################################################
-    # GENERAL / SHARED MODELS - keys and signatures #
-    #################################################
+#################################################
+# GENERAL / SHARED MODELS - keys and signatures #
+#################################################
     PublicKeyType:
       type: string
       enum:
@@ -1438,15 +1441,15 @@ components:
           required:
             - public_key
             - signature
-          description: The EdDSA public key and signature
+          description: The EdDSA public key and signature 
           properties:
             public_key:
               $ref: '#/components/schemas/EddsaEd25519PublicKey'
             signature:
               $ref: '#/components/schemas/EddsaEd25519Signature'
-    ################################################
-    # GENERAL / SHARED MODELS - Dynamic auth rules #
-    ################################################
+################################################
+# GENERAL / SHARED MODELS - Dynamic auth rules #
+################################################
     AccessRules:
       type: object
       required:
@@ -1950,9 +1953,9 @@ components:
             field:
               type: string
               description: The name of the field
-    #######################################
-    # GENERAL / SHARED MODELS - Resources #
-    #######################################
+#######################################
+# GENERAL / SHARED MODELS - Resources #
+#######################################
     ResourceType:
       type: string
       enum:
@@ -1962,7 +1965,7 @@ components:
       type: string
       enum:
         - String
-        - Number
+        - Integer
         - Bytes
         - UUID
     NonFungibleId:
@@ -2025,9 +2028,9 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/NonFungibleId'
-    ##################################
-    # GENERAL / SHARED MODELS - SBOR #
-    ##################################
+##################################
+# GENERAL / SHARED MODELS - SBOR #
+##################################
     DataStruct:
       type: object
       required:
@@ -2057,9 +2060,9 @@ components:
           description: The hex-encoded, raw SBOR-encoded data
         data_json:
           description: An untyped JSON body representing the content of the SBOR data
-    #####################################
-    # GENERAL / SHARED MODELS - Royalty #
-    #####################################
+#####################################
+# GENERAL / SHARED MODELS - Royalty #
+#####################################
     BlueprintRoyaltyConfig:
       type: object
       required:
@@ -2099,9 +2102,9 @@ components:
       minimum: 0
       maximum: 4294967295
       description: An integer between `0` and `2^32 - 1`, representing the number of cost units required to access this method.
-    #######################################
-    # GENERAL / SHARED MODELS - validators #
-    #######################################
+#######################################
+# GENERAL / SHARED MODELS - validators #
+#######################################
     ActiveValidator:
       type: object
       required:
@@ -2119,9 +2122,9 @@ components:
             A string-encoded decimal representing the validator's voting power for this epoch.
             This is a snapshot of the amount of XRD staked to the validator at the start of the epoch.
 
-    #######################################
-    # GENERAL / SHARED MODELS - substates #
-    #######################################
+#######################################
+# GENERAL / SHARED MODELS - substates #
+#######################################
     EntityType:
       type: string
       enum:
@@ -2134,10 +2137,22 @@ components:
         - Clock
         - Validator
         - AccessController
+        - Account
         - Identity
         - KeyValueStore
         - NonFungibleStore
         - Vault
+    ModuleType:
+      type: string
+      enum:
+        - Self
+        - Metadata
+        - AccessRules
+        - AccessRules1
+        - ComponentRoyalty
+        - PackageRoyalty
+        - PackageTypeInfo
+        - ComponentTypeInfo
     Substate:
       type: object
       required:
@@ -2157,6 +2172,9 @@ components:
           ComponentRoyaltyConfig: '#/components/schemas/ComponentRoyaltyConfigSubstate'
           ComponentRoyaltyAccumulator: '#/components/schemas/ComponentRoyaltyAccumulatorSubstate'
           PackageInfo: '#/components/schemas/PackageInfoSubstate'
+          PackageTypeInfo: '#/components/schemas/PackageTypeInfoSubstate'
+          WasmCode: '#/components/schemas/WasmCodeSubstate'
+          NativeCode: '#/components/schemas/NativeCodeSubstate'
           PackageRoyaltyConfig: '#/components/schemas/PackageRoyaltyConfigSubstate'
           PackageRoyaltyAccumulator: '#/components/schemas/PackageRoyaltyAccumulatorSubstate'
           ResourceManager: '#/components/schemas/ResourceManagerSubstate'
@@ -2168,6 +2186,7 @@ components:
           Vault: '#/components/schemas/VaultSubstate'
           NonFungibleStoreEntry: '#/components/schemas/NonFungibleStoreEntrySubstate'
           AccessController: '#/components/schemas/AccessControllerSubstate'
+          Account: '#/components/schemas/AccountSubstate'
     SubstateType:
       type: string
       enum:
@@ -2181,6 +2200,9 @@ components:
         - ComponentRoyaltyConfig
         - ComponentRoyaltyAccumulator
         - PackageInfo
+        - PackageTypeInfo
+        - WasmCode
+        - NativeCode
         - PackageRoyaltyConfig
         - PackageRoyaltyAccumulator
         - ResourceManager
@@ -2192,6 +2214,7 @@ components:
         - NonFungibleStoreEntry
         - Vault
         - AccessController
+        - Account
     SubstateKeyType:
       # This corresponds to what's currently referred to as the "SubstateOffset"
       # This is roughly the same as the substate type, but some entities have two of the same substates
@@ -2210,10 +2233,12 @@ components:
         - ComponentRoyaltyConfig
         - ComponentRoyaltyAccumulator
         - PackageInfo
+        - PackageTypeInfo
+        - WasmCode
+        - NativeCode
         - PackageRoyaltyConfig
         - PackageRoyaltyAccumulator
         - ResourceManager
-        - ResourceManagerVaultAccessRulesChain
         - EpochManager
         - CurrentValidatorSet
         - PreparingValidatorSet
@@ -2223,7 +2248,8 @@ components:
         - NonFungibleStoreEntry
         - Vault
         - AccessController
-    ### COMMON SUBSTATES
+        - Account
+### COMMON SUBSTATES
     AccessRulesChainSubstate:
       allOf:
         - $ref: '#/components/schemas/Substate'
@@ -2256,7 +2282,7 @@ components:
                     type: string
                   value:
                     type: string
-    ### SPECIFIC SUBSTATES
+### SPECIFIC SUBSTATES
     GlobalAddressSubstate:
       allOf:
         - $ref: '#/components/schemas/Substate'
@@ -2333,17 +2359,46 @@ components:
         - $ref: '#/components/schemas/Substate'
         - type: object
           required:
-            - code_hex
             - blueprints
+            - dependent_resources
+            - dependent_components
           properties:
-            code_hex:
-              type: string
-              description: The hex-encoded package code
             blueprints:
               type: object
               description: A map from the blueprint name to BlueprintData
               additionalProperties:
                 $ref: '#/components/schemas/BlueprintData'
+            dependent_resources:
+              type: array
+              items:
+                $ref: '#/components/schemas/ResourceAddress'
+            dependent_components:
+              type: array
+              items:
+                $ref: '#/components/schemas/ComponentAddress'
+    PackageTypeInfoSubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+        - type: object
+    WasmCodeSubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+        - type: object
+          required:
+            - code_hex
+          properties:
+            code_hex:
+              type: string
+              description: The hex-encoded package code
+    NativeCodeSubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+        - type: object
+          required:
+            - native_package_code_id
+          properties:
+            native_package_code_id:
+              type: integer
     BlueprintData:
       type: object
       required:
@@ -2561,9 +2616,18 @@ components:
           properties:
             data_struct:
               $ref: '#/components/schemas/DataStruct'
-    ##########################################
-    # REQUEST: /status/network-configuration #
-    ##########################################
+    AccountSubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+        - type: object
+          required:
+            - data_struct
+          properties:
+            data_struct:
+              $ref: '#/components/schemas/DataStruct'
+##########################################
+# REQUEST: /status/network-configuration #
+##########################################
     NetworkConfigurationResponse:
       type: object
       required:
@@ -2600,7 +2664,6 @@ components:
           type: object
           description: Key addresses for this network.
           required:
-            - account_package
             - faucet
             - epoch_manager
             - clock
@@ -2608,8 +2671,6 @@ components:
             - eddsa_ed25519
             - xrd
           properties:
-            account_package:
-              type: string
             faucet:
               type: string
             epoch_manager:
@@ -2647,6 +2708,7 @@ components:
             - Validator
             - Clock
             - AccessController
+            - Account
         hrp_prefix:
           type: string
         entity_type:
@@ -2661,9 +2723,9 @@ components:
           format: int32
           minimum: 0
           maximum: 255
-    ###################################
-    # REQUEST: /status/network-status #
-    ###################################
+###################################
+# REQUEST: /status/network-status #
+###################################
     NetworkStatusRequest:
       type: object
       required:
@@ -2688,9 +2750,9 @@ components:
           description: |
             The current state identifier at the top of the node's copy of the ledger.
             This is also the resultant state identifier of the node's last committed transaction.
-    ##########################
-    # REQUEST: /mempool/list #
-    ##########################
+##########################
+# REQUEST: /mempool/list #
+##########################
     MempoolListRequest:
       type: object
       required:
@@ -2717,9 +2779,9 @@ components:
           $ref: "#/components/schemas/IntentHash"
         payload_hash:
           $ref: "#/components/schemas/PayloadHash"
-    #################################
-    # REQUEST: /mempool/transaction #
-    #################################
+#################################
+# REQUEST: /mempool/transaction #
+#################################
     MempoolTransactionRequest:
       type: object
       required:
@@ -2737,9 +2799,9 @@ components:
       properties:
         notarized_transaction:
           $ref: "#/components/schemas/NotarizedTransaction"
-    ###############################
-    # REQUEST: /transaction/parse #
-    ###############################
+###############################
+# REQUEST: /transaction/parse #
+###############################
     TransactionParseRequest:
       type: object
       required:
@@ -2926,9 +2988,9 @@ components:
                   $ref: "#/components/schemas/PayloadHash"
                 ledger_hash:
                   $ref: "#/components/schemas/LedgerHash"
-    ################################
-    # REQUEST: /transaction/submit #
-    ################################
+################################
+# REQUEST: /transaction/submit #
+################################
     TransactionSubmitRequest:
       type: object
       required:
@@ -3018,12 +3080,12 @@ components:
               description: |
                 Whether the cached rejection of this intent is due to the intent already having been committed.
                 If so, see the /transaction/receipt endpoint for further information.
-            recalculation_due:
+            retry_from_timestamp:
               $ref: "#/components/schemas/Instant"
               description: |
                 The time after which the node will consider recalculating the validity of the transaction.
                 Only present if the rejection is temporary, and not due to the header specifying a "from epoch" in the future.
-            recalculation_from_epoch:
+            retry_from_epoch:
               type: integer
               format: int64
               minimum: 0
@@ -3039,9 +3101,9 @@ components:
               description: |
                 An integer between `0` and `10^10`, marking the epoch from which the transaction will no longer be valid, and be permanently rejected.
                 Only present if the rejection isn't permanent.
-    ###################################
-    # REQUEST: /transaction/status #
-    ###################################
+###################################
+# REQUEST: /transaction/status #
+###################################
     TransactionStatusRequest:
       type: object
       required:
@@ -3063,7 +3125,7 @@ components:
           type: string
           description: |
             The status of the transaction intent, as determined by the node.
-            FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction
+            FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction 
           enum:
             - CommittedSuccess
             - CommittedFailure
@@ -3111,9 +3173,9 @@ components:
         error_message:
           description: An explanation for the error, if failed or rejected
           type: string
-    ####################################
-    # REQUEST: /transaction/receipt #
-    ####################################
+####################################
+# REQUEST: /transaction/receipt #
+####################################
     TransactionReceiptRequest:
       type: object
       required:
@@ -3131,9 +3193,9 @@ components:
       properties:
         committed:
           $ref: "#/components/schemas/CommittedTransaction"
-    #####################################
-    # REQUEST: /transaction/callpreview #
-    #####################################
+#####################################
+# REQUEST: /transaction/callpreview #
+#####################################
     TransactionCallPreviewRequest:
       type: object
       required:
@@ -3207,9 +3269,9 @@ components:
         error_message:
           type: string
           description: Error message (only present if status is Failed or Rejected)
-    #################################
-    # REQUEST: /transaction/preview #
-    #################################
+#################################
+# REQUEST: /transaction/preview #
+#################################
     TransactionPreviewRequest:
       type: object
       required:
@@ -3312,9 +3374,9 @@ components:
                 type: string
               message:
                 type: string
-    #################################
-    # REQUEST: /stream/transactions #
-    #################################
+#################################
+# REQUEST: /stream/transactions #
+#################################
     StreamTransactionsRequest:
       description: |
         A request to retrieve a sublist of committed transactions from the ledger.
@@ -3449,7 +3511,7 @@ components:
       type: string
       description: The type of the validator transaction
       enum:
-        - TimeUpdate
+        - RoundUpdate
     ValidatorTransaction:
       type: object
       required:
@@ -3461,8 +3523,8 @@ components:
         propertyName: type
         mapping:
           # NOTE: These need to match ValidatorTransactionType
-          TimeUpdate: '#/components/schemas/TimeUpdateValidatorTransaction'
-    TimeUpdateValidatorTransaction:
+          RoundUpdate: '#/components/schemas/RoundUpdateValidatorTransaction'
+    RoundUpdateValidatorTransaction:
       allOf:
         - $ref: "#/components/schemas/ValidatorTransaction"
         - type: object
@@ -3495,9 +3557,9 @@ components:
         payload_hex:
           type: string
           description: The hex-encoded system transaction payload
-    #########################
-    # REQUEST: /state/epoch #
-    #########################
+#########################
+# REQUEST: /state/epoch #
+#########################
     StateEpochRequest:
       type: object
       required:
@@ -3522,9 +3584,9 @@ components:
           $ref: "#/components/schemas/Substate"
         active_validator_set:
           $ref: "#/components/schemas/Substate"
-    #########################
-    # REQUEST: /state/clock #
-    #########################
+#########################
+# REQUEST: /state/clock #
+#########################
     StateClockRequest:
       type: object
       required:
@@ -3539,9 +3601,9 @@ components:
       properties:
         current_minute:
           $ref: "#/components/schemas/Substate"
-    #############################
-    # REQUEST: /state/component #
-    #############################
+#############################
+# REQUEST: /state/component #
+#############################
     StateComponentRequest:
       type: object
       required:
@@ -3604,9 +3666,9 @@ components:
           format: int32
           minimum: 0
           maximum: 100
-    #############################
-    # REQUEST: /state/validator #
-    #############################
+#############################
+# REQUEST: /state/validator #
+#############################
     StateValidatorRequest:
       type: object
       required:
@@ -3642,9 +3704,9 @@ components:
           description: Any descendent nodes owned directly or indirectly by the component
           items:
             $ref: "#/components/schemas/StateComponentDescendentId"
-    #####################################
-    # REQUEST: /state/access-controller #
-    #####################################
+#####################################
+# REQUEST: /state/access-controller #
+#####################################
     StateAccessControllerRequest:
       type: object
       required:
@@ -3680,9 +3742,9 @@ components:
           description: Any descendent nodes owned directly or indirectly by the component
           items:
             $ref: "#/components/schemas/StateComponentDescendentId"
-    ############################
-    # REQUEST: /state/resource #
-    ############################
+############################
+# REQUEST: /state/resource #
+############################
     StateResourceRequest:
       type: object
       required:
@@ -3710,9 +3772,9 @@ components:
           $ref: "#/components/schemas/Substate"
         vault_access_rules:
           $ref: "#/components/schemas/Substate"
-    ################################
-    # REQUEST: /state/non-fungible #
-    ################################
+################################
+# REQUEST: /state/non-fungible #
+################################
     StateNonFungibleRequest:
       type: object
       required:
@@ -3734,9 +3796,9 @@ components:
       properties:
         non_fungible:
           $ref: "#/components/schemas/Substate"
-    ###########################
-    # REQUEST: /state/package #
-    ###########################
+###########################
+# REQUEST: /state/package #
+###########################
     StatePackageRequest:
       type: object
       required:

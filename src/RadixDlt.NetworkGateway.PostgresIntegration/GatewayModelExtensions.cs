@@ -78,7 +78,7 @@ internal static class GatewayModelExtensions
         return nonFungibleIdType switch
         {
             NonFungibleIdType.String => GatewayModel.NonFungibleIdType.String,
-            NonFungibleIdType.Number => GatewayModel.NonFungibleIdType.Number,
+            NonFungibleIdType.Integer => GatewayModel.NonFungibleIdType.Integer,
             NonFungibleIdType.Bytes => GatewayModel.NonFungibleIdType.Bytes,
             NonFungibleIdType.UUID => GatewayModel.NonFungibleIdType.Uuid,
             _ => throw new ArgumentOutOfRangeException(nameof(nonFungibleIdType), nonFungibleIdType, null),
