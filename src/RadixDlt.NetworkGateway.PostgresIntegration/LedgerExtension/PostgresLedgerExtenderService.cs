@@ -317,17 +317,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     var substateId = newSubstate.SubstateId;
                     var substateData = newSubstate.SubstateData;
 
-                    if (substateData is CoreModel.EpochManagerSubstate epochManagerSubstate)
-                    {
-                        newRoundInEpoch = epochManagerSubstate.Round;
-
-                        if (epochManagerSubstate.Round == 0)
-                        {
-                            nextEpoch = epochManagerSubstate.Epoch;
-                            kindFilterConstraint = LedgerTransactionKindFilterConstraint.EpochChange;
-                        }
-                    }
-
                     if (substateData is CoreModel.GlobalAddressSubstate globalAddressSubstate)
                     {
                         var target = globalAddressSubstate.TargetEntity;
@@ -344,6 +333,17 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         // GlobalAddress is essentially a property of other entities
 
                         continue;
+                    }
+
+                    if (substateData is CoreModel.EpochManagerSubstate epochManagerSubstate)
+                    {
+                        newRoundInEpoch = epochManagerSubstate.Round;
+
+                        if (epochManagerSubstate.Round == 0)
+                        {
+                            nextEpoch = epochManagerSubstate.Epoch;
+                            kindFilterConstraint = LedgerTransactionKindFilterConstraint.EpochChange;
+                        }
                     }
 
                     var referencedEntity = referencedEntities.GetOrAdd(substateId.EntityIdHex, _ => new ReferencedEntity(substateId.EntityIdHex, substateId.EntityType, stateVersion));

@@ -102,10 +102,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         String = 1,
 
         /// <summary>
-        /// Enum Number for value: Number
+        /// Enum Integer for value: Integer
         /// </summary>
-        [EnumMember(Value = "Number")]
-        Number = 2,
+        [EnumMember(Value = "Integer")]
+        Integer = 2,
 
         /// <summary>
         /// Enum Bytes for value: Bytes
