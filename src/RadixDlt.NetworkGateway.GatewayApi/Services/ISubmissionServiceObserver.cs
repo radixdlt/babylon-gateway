@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using System;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -78,7 +77,7 @@ public interface ISubmissionServiceObserver
 
     ValueTask HandleSubmitRequestFailed(GatewayModel.TransactionSubmitRequest request, Exception exception);
 
-    ValueTask ParseTransactionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException wrappedCoreApiException);
+    ValueTask ParseTransactionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, Exception exception);
 
     ValueTask ParseTransactionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception);
 
@@ -94,7 +93,7 @@ public interface ISubmissionServiceObserver
 
     ValueTask SubmissionSucceeded(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response);
 
-    ValueTask HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception);
+    ValueTask HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, Exception exception);
 
     ValueTask HandleSubmissionFailedPermanently(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse = null);
 

@@ -96,9 +96,7 @@ public static class ExceptionExtensions
 
     public static string GetNameForMetricsOrLogging(this Exception exception)
     {
-        return exception is WrappedCoreApiException wrappedCoreApiException
-            ? wrappedCoreApiException.GetDetailedExceptionName()
-            : exception is AggregateException aggregateException
+        return exception is AggregateException aggregateException
                 ? aggregateException.GetArrayOfExceptionNamesForMetricsOrLogging()
                 : exception.GetType().Name;
     }

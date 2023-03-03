@@ -78,6 +78,7 @@ using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -153,12 +154,9 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
 
         // We duplicate this call from the TransactionHashesReader for simplicity, to mean the workers don't need
         // to sync up. This should be a cheap call to the Core API.
-        var mempoolListResponse = await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await coreApiProvider.MempoolApi.MempoolListPostAsync(
-            new CoreModel.MempoolListRequest(
-                network: _networkConfigurationProvider.GetNetworkName()
-            ),
-            cancellationToken
-        ));
+        var mempoolListResponse = await coreApiProvider.MempoolApi.MempoolListPostAsync(
+            new CoreModel.MempoolListRequest(network: _networkConfigurationProvider.GetNetworkName()),
+            cancellationToken);
 
         var hashesInMempool = mempoolListResponse.Contents
             .Select(ti => new PendingTransactionHashPair(ti.GetIntentHashBytes(), ti.GetPayloadHashBytes()))
@@ -238,22 +236,24 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
 
     private async Task<PendingTransactionData?> FetchTransactionContents(ICoreApiProvider coreApiProvider, PendingTransactionHashPair hashes, CancellationToken token)
     {
-        try
-        {
-            var response = await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await coreApiProvider.MempoolApi.MempoolTransactionPostAsync(
-                new CoreModel.MempoolTransactionRequest(
-                    network: _networkConfigurationProvider.GetNetworkName(),
-                    payloadHash: hashes.PayloadHash.ToHex()
-                ),
-                token
-            ));
+        var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.MempoolTransactionResponse, CoreModel.BasicErrorResponse>(() => coreApiProvider.MempoolApi.MempoolTransactionPostAsync(
+            new CoreModel.MempoolTransactionRequest(
+                network: _networkConfigurationProvider.GetNetworkName(),
+                payloadHash: hashes.PayloadHash.ToHex()
+            ),
+            token
+        ));
 
-            return new PendingTransactionData(hashes, _clock.UtcNow, response.NotarizedTransaction.GetPayloadBytes());
-        }
-        catch (WrappedCoreApiException<CoreModel.MempoolTransactionNotFoundError>)
+        if (result.Succeeded)
         {
-            // It's likely dropped out of the mempool, so we can't fetch it
+            return new PendingTransactionData(hashes, _clock.UtcNow, result.SuccessResponse.NotarizedTransaction.GetPayloadBytes());
+        }
+
+        if (result.FailureResponse.OriginalApiException.ErrorCode == (int)HttpStatusCode.NotFound)
+        {
             return null;
         }
+
+        throw result.FailureResponse.OriginalApiException;
     }
 }

@@ -64,7 +64,6 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Prometheus;
-using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
@@ -231,7 +230,7 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.ParseTransactionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException wrappedCoreApiException)
+    ValueTask ISubmissionServiceObserver.ParseTransactionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, Exception exception)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_invalid_transaction").Inc();
 
@@ -287,7 +286,7 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception)
+    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, Exception exception)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("invalid_transaction").Inc();
 

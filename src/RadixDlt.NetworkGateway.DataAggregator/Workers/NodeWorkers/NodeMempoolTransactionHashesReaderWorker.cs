@@ -65,7 +65,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.Abstractions.Workers;
@@ -143,13 +142,9 @@ public class NodeMempoolTransactionHashesReaderWorker : NodeWorker
         var coreApiProvider = _services.GetRequiredService<ICoreApiProvider>();
 
         var (mempoolListResponse, fetchMs) = await CodeStopwatch.TimeInMs(async () =>
-            await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await coreApiProvider.MempoolApi.MempoolListPostAsync(
-                new CoreModel.MempoolListRequest(
-                    network: _networkConfigurationProvider.GetNetworkName()
-                ),
-                stoppingToken
-            ))
-        );
+            await coreApiProvider.MempoolApi.MempoolListPostAsync(
+                new CoreModel.MempoolListRequest(network: _networkConfigurationProvider.GetNetworkName()),
+                stoppingToken));
 
         await _observers.ForEachAsync(x => x.MempoolSize(_nodeConfig.CoreApiNode.Name, mempoolListResponse.Contents.Count));
 

@@ -94,15 +94,13 @@ internal class TransactionStreamReader : ITransactionStreamReader
     {
         try
         {
-            return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
-                await _streamApi.StreamTransactionsPostAsync(
-                    new CoreModel.StreamTransactionsRequest(
-                        network: _networkConfigurationProvider.GetNetworkName(),
-                        fromStateVersion: fromStateVersion,
-                        limit: count
-                    ),
-                    token
-                )
+            return await _streamApi.StreamTransactionsPostAsync(
+                new CoreModel.StreamTransactionsRequest(
+                    network: _networkConfigurationProvider.GetNetworkName(),
+                    fromStateVersion: fromStateVersion,
+                    limit: count
+                ),
+                token
             );
         }
         catch (Exception ex)
