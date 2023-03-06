@@ -261,7 +261,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         // it is possible that some addresses were virtual addresses not stored in our database so we have to try to add them now
         if (entities.Count != addresses.Count)
         {
-            foreach (var address in addresses)
+            foreach (var address in addresses.Where(a => entities.All(e => e.GlobalAddress != a)))
             {
                 if (TryGetVirtualEntity(address, out var virtualEntity))
                 {
