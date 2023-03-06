@@ -105,7 +105,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="key">Entity metadata key. (required).</param>
         /// <param name="value">Entity metadata value. (required).</param>
-        public EntityMetadataItem(string key = default(string), string value = default(string))
+        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        public EntityMetadataItem(string key = default(string), string value = default(string), long lastUpdatedAtStateVersion = default(long))
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -119,6 +120,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("value is a required property for EntityMetadataItem and cannot be null");
             }
             this.Value = value;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
         /// <summary>
@@ -136,6 +138,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Value { get; set; }
 
         /// <summary>
+        /// TBD
+        /// </summary>
+        /// <value>TBD</value>
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -145,6 +154,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class EntityMetadataItem {\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("  Value: ").Append(Value).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -189,6 +199,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Value == input.Value ||
                     (this.Value != null &&
                     this.Value.Equals(input.Value))
+                ) && 
+                (
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
         }
 
@@ -209,6 +223,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

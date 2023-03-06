@@ -114,7 +114,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
         /// <param name="mutableDataHex">Hex-encoded binary blob. (required).</param>
         /// <param name="immutableDataHex">Hex-encoded binary blob. (required).</param>
-        public NonFungibleDataResponseAllOf(string address = default(string), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), string nonFungibleId = default(string), string mutableDataHex = default(string), string immutableDataHex = default(string))
+        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        public NonFungibleDataResponseAllOf(string address = default(string), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), string nonFungibleId = default(string), string mutableDataHex = default(string), string immutableDataHex = default(string), long lastUpdatedAtStateVersion = default(long))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -141,6 +142,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("immutableDataHex is a required property for NonFungibleDataResponseAllOf and cannot be null");
             }
             this.ImmutableDataHex = immutableDataHex;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
         /// <summary>
@@ -172,6 +174,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string ImmutableDataHex { get; set; }
 
         /// <summary>
+        /// TBD
+        /// </summary>
+        /// <value>TBD</value>
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -184,6 +193,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("  MutableDataHex: ").Append(MutableDataHex).Append("\n");
             sb.Append("  ImmutableDataHex: ").Append(ImmutableDataHex).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -242,6 +252,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ImmutableDataHex == input.ImmutableDataHex ||
                     (this.ImmutableDataHex != null &&
                     this.ImmutableDataHex.Equals(input.ImmutableDataHex))
+                ) && 
+                (
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
         }
 
@@ -271,6 +285,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ImmutableDataHex.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

@@ -84,59 +84,50 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponsePackageDetails
+    /// StateEntityDetailsResponseItemAncestorIdentities
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponsePackageDetails")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseComponentDetails), "Component")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleResourceDetails), "FungibleResource")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleVaultDetails), "FungibleVault")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleResourceDetails), "NonFungibleResource")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleVaultDetails), "NonFungibleVault")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponsePackageDetails), "Package")]
-    public partial class StateEntityDetailsResponsePackageDetails : StateEntityDetailsResponseItemDetails, IEquatable<StateEntityDetailsResponsePackageDetails>
+    [DataContract(Name = "StateEntityDetailsResponseItemAncestorIdentities")]
+    public partial class StateEntityDetailsResponseItemAncestorIdentities : IEquatable<StateEntityDetailsResponseItemAncestorIdentities>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetails" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseItemAncestorIdentities" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected StateEntityDetailsResponsePackageDetails() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetails" /> class.
-        /// </summary>
-        /// <param name="codeHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="royaltyAggregator">royaltyAggregator.</param>
-        /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Package).</param>
-        public StateEntityDetailsResponsePackageDetails(string codeHex = default(string), FungibleResourcesCollectionItemGloballyAggregated royaltyAggregator = default(FungibleResourcesCollectionItemGloballyAggregated), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Package) : base(type)
+        /// <param name="parentAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id..</param>
+        /// <param name="ownerAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id..</param>
+        /// <param name="globalAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id..</param>
+        public StateEntityDetailsResponseItemAncestorIdentities(string parentAddress = default(string), string ownerAddress = default(string), string globalAddress = default(string))
         {
-            // to ensure "codeHex" is required (not null)
-            if (codeHex == null)
-            {
-                throw new ArgumentNullException("codeHex is a required property for StateEntityDetailsResponsePackageDetails and cannot be null");
-            }
-            this.CodeHex = codeHex;
-            this.RoyaltyAggregator = royaltyAggregator;
+            this.ParentAddress = parentAddress;
+            this.OwnerAddress = ownerAddress;
+            this.GlobalAddress = globalAddress;
         }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string CodeHex { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        [DataMember(Name = "parent_address", EmitDefaultValue = true)]
+        public string ParentAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets RoyaltyAggregator
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
         /// </summary>
-        [DataMember(Name = "royalty_aggregator", EmitDefaultValue = true)]
-        public FungibleResourcesCollectionItemGloballyAggregated RoyaltyAggregator { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        [DataMember(Name = "owner_address", EmitDefaultValue = true)]
+        public string OwnerAddress { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        [DataMember(Name = "global_address", EmitDefaultValue = true)]
+        public string GlobalAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,10 +136,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponsePackageDetails {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
-            sb.Append("  RoyaltyAggregator: ").Append(RoyaltyAggregator).Append("\n");
+            sb.Append("class StateEntityDetailsResponseItemAncestorIdentities {\n");
+            sb.Append("  ParentAddress: ").Append(ParentAddress).Append("\n");
+            sb.Append("  OwnerAddress: ").Append(OwnerAddress).Append("\n");
+            sb.Append("  GlobalAddress: ").Append(GlobalAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -157,7 +148,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -169,30 +160,35 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponsePackageDetails);
+            return this.Equals(input as StateEntityDetailsResponseItemAncestorIdentities);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponsePackageDetails instances are equal
+        /// Returns true if StateEntityDetailsResponseItemAncestorIdentities instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetails to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponseItemAncestorIdentities to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponsePackageDetails input)
+        public bool Equals(StateEntityDetailsResponseItemAncestorIdentities input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.CodeHex == input.CodeHex ||
-                    (this.CodeHex != null &&
-                    this.CodeHex.Equals(input.CodeHex))
-                ) && base.Equals(input) && 
+                    this.ParentAddress == input.ParentAddress ||
+                    (this.ParentAddress != null &&
+                    this.ParentAddress.Equals(input.ParentAddress))
+                ) && 
                 (
-                    this.RoyaltyAggregator == input.RoyaltyAggregator ||
-                    (this.RoyaltyAggregator != null &&
-                    this.RoyaltyAggregator.Equals(input.RoyaltyAggregator))
+                    this.OwnerAddress == input.OwnerAddress ||
+                    (this.OwnerAddress != null &&
+                    this.OwnerAddress.Equals(input.OwnerAddress))
+                ) && 
+                (
+                    this.GlobalAddress == input.GlobalAddress ||
+                    (this.GlobalAddress != null &&
+                    this.GlobalAddress.Equals(input.GlobalAddress))
                 );
         }
 
@@ -204,14 +200,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.CodeHex != null)
+                int hashCode = 41;
+                if (this.ParentAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ParentAddress.GetHashCode();
                 }
-                if (this.RoyaltyAggregator != null)
+                if (this.OwnerAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoyaltyAggregator.GetHashCode();
+                    hashCode = (hashCode * 59) + this.OwnerAddress.GetHashCode();
+                }
+                if (this.GlobalAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.GlobalAddress.GetHashCode();
                 }
                 return hashCode;
             }

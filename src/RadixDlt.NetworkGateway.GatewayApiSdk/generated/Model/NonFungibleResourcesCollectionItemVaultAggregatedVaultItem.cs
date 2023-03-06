@@ -105,7 +105,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="vaultAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
         /// <param name="totalCount">totalCount (required).</param>
-        public NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(string vaultAddress = default(string), long totalCount = default(long))
+        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        public NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(string vaultAddress = default(string), long totalCount = default(long), long lastUpdatedAtStateVersion = default(long))
         {
             // to ensure "vaultAddress" is required (not null)
             if (vaultAddress == null)
@@ -114,6 +115,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.VaultAddress = vaultAddress;
             this.TotalCount = totalCount;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
         /// <summary>
@@ -130,6 +132,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public long TotalCount { get; set; }
 
         /// <summary>
+        /// TBD
+        /// </summary>
+        /// <value>TBD</value>
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -139,6 +148,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class NonFungibleResourcesCollectionItemVaultAggregatedVaultItem {\n");
             sb.Append("  VaultAddress: ").Append(VaultAddress).Append("\n");
             sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -182,6 +192,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 (
                     this.TotalCount == input.TotalCount ||
                     this.TotalCount.Equals(input.TotalCount)
+                ) && 
+                (
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
         }
 
@@ -199,6 +213,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     hashCode = (hashCode * 59) + this.VaultAddress.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

@@ -581,9 +581,15 @@ components:
       description: Refer to `#/components/schemas/AccessRules` of CoreApi for more details.
       type: object
 
+    LastUpdatedAtStateVersion:
+      description: TBD # TODO describe
+      type: integer
+      format: int64
+
     #
     # Keys
     #
+
     PublicKeyType:
       type: string
       enum:
@@ -765,6 +771,7 @@ components:
       required:
         - key
         - value
+        - last_updated_at_state_version
       properties:
         key:
           description: Entity metadata key.
@@ -772,6 +779,8 @@ components:
         value:
           description: Entity metadata value.
           type: string
+        last_updated_at_state_version:
+          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
 
     FungibleResourcesCollection:
       description: Fungible resources collection.
@@ -807,9 +816,12 @@ components:
         - type: object
           required:
             - amount
+            - last_updated_at_state_version
           properties:
             amount:
               $ref: "#/components/schemas/BigDecimal"
+            last_updated_at_state_version:
+              $ref: "#/components/schemas/LastUpdatedAtStateVersion"
     FungibleResourcesCollectionItemVaultAggregated:
       allOf:
         - $ref: "#/components/schemas/FungibleResourcesCollectionItem"
@@ -835,11 +847,14 @@ components:
       required:
         - vault_address
         - amount
+        - last_updated_at_state_version
       properties:
         vault_address:
           $ref: "#/components/schemas/EntityAddress"
         amount:
           $ref: "#/components/schemas/BigDecimal"
+        last_updated_at_state_version:
+          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
 
     FungibleVaultsCollection:
       description: Fungible vaults collection.
@@ -858,12 +873,14 @@ components:
       required:
         - address
         - amount
+        - last_updated_at_state_version
       properties:
         address:
-          type: string
-          description: TBA # TODO missing description
+          $ref: "#/components/schemas/EntityAddress"
         amount:
           $ref: "#/components/schemas/BigDecimal"
+        last_updated_at_state_version:
+          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
 
     NonFungibleResourcesCollection:
       description: Non-fungible resources collection.
@@ -899,10 +916,14 @@ components:
         - type: object
           required:
             - amount
+            - last_updated_at_state_version
           properties:
             amount:
+              description: TBA # TODO describe
               type: integer
               format: int64
+            last_updated_at_state_version:
+              $ref: "#/components/schemas/LastUpdatedAtStateVersion"
     NonFungibleResourcesCollectionItemVaultAggregated:
       allOf:
         - $ref: "#/components/schemas/NonFungibleResourcesCollectionItem"
@@ -928,12 +949,15 @@ components:
       required:
         - vault_address
         - total_count
+        - last_updated_at_state_version
       properties:
         vault_address:
           $ref: "#/components/schemas/EntityAddress"
         total_count:
           type: integer
           format: int64
+        last_updated_at_state_version:
+          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
 
     NonFungibleIdsCollection:
       description: Non-fungible resource IDs collection.
@@ -1430,10 +1454,21 @@ components:
       properties:
         address:
           $ref: "#/components/schemas/EntityAddress"
+        ancestor_identities:
+          $ref: "#/components/schemas/StateEntityDetailsResponseItemAncestorIdentities"
         metadata:
           $ref: "#/components/schemas/EntityMetadataCollection"
         details:
           $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
+    StateEntityDetailsResponseItemAncestorIdentities:
+      type: object
+      properties:
+        parent_address:
+          $ref: "#/components/schemas/EntityAddress"
+        owner_address:
+          $ref: "#/components/schemas/EntityAddress"
+        global_address:
+          $ref: "#/components/schemas/EntityAddress"
     StateEntityDetailsResponseItemDetailsType:
       type: string
       enum:
@@ -1508,6 +1543,8 @@ components:
           properties:
             code_hex:
               $ref: "#/components/schemas/HexString"
+            royalty_aggregator:
+              $ref: "#/components/schemas/FungibleResourcesCollectionItemGloballyAggregated"
     StateEntityDetailsResponseComponentDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
@@ -1526,6 +1563,8 @@ components:
               type: object
             access_rules_chain:
               type: object
+            royalty_aggregator:
+              $ref: "#/components/schemas/FungibleResourcesCollectionItemGloballyAggregated"
 
     #
     # /entity/* Request & Response Types
@@ -1717,6 +1756,7 @@ components:
             - non_fungible_id
             - mutable_data_hex
             - immutable_data_hex
+            - last_updated_at_state_version
           properties:
             address:
               $ref: "#/components/schemas/ResourceAddress"
@@ -1728,6 +1768,8 @@ components:
               $ref: "#/components/schemas/HexString"
             immutable_data_hex:
               $ref: "#/components/schemas/HexString"
+            last_updated_at_state_version:
+              $ref: "#/components/schemas/LastUpdatedAtStateVersion"
 
     #
     # /state/validators/* Request & Response Types
