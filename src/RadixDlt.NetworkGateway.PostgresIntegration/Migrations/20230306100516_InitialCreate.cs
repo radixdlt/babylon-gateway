@@ -362,7 +362,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     commit_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     last_failure_reason = table.Column<string>(type: "text", nullable: true),
                     last_failure_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    version_control = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
