@@ -159,7 +159,7 @@ internal class PendingTransaction
     /// Ledger extender service might update this entity without any checks as it is considered to have highest priority and it is expected that other services should detect
     /// concurrency issues instead.
     /// </remarks>
-    [Column("version_control")]
+    [Column("xmin")]
     [Timestamp]
     public uint VersionControl { get; private set; }
 

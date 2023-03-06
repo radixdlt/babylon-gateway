@@ -766,7 +766,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("xid")
-                        .HasColumnName("version_control");
+                        .HasColumnName("xmin");
 
                     b.HasKey("Id");
 
