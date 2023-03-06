@@ -104,7 +104,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsAllOf" /> class.
         /// </summary>
         /// <param name="codeHex">Hex-encoded binary blob. (required).</param>
-        public StateEntityDetailsResponsePackageDetailsAllOf(string codeHex = default(string))
+        /// <param name="royaltyAggregator">royaltyAggregator.</param>
+        public StateEntityDetailsResponsePackageDetailsAllOf(string codeHex = default(string), FungibleResourcesCollectionItemGloballyAggregated royaltyAggregator = default(FungibleResourcesCollectionItemGloballyAggregated))
         {
             // to ensure "codeHex" is required (not null)
             if (codeHex == null)
@@ -112,6 +113,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("codeHex is a required property for StateEntityDetailsResponsePackageDetailsAllOf and cannot be null");
             }
             this.CodeHex = codeHex;
+            this.RoyaltyAggregator = royaltyAggregator;
         }
 
         /// <summary>
@@ -122,6 +124,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string CodeHex { get; set; }
 
         /// <summary>
+        /// Gets or Sets RoyaltyAggregator
+        /// </summary>
+        [DataMember(Name = "royalty_aggregator", EmitDefaultValue = true)]
+        public FungibleResourcesCollectionItemGloballyAggregated RoyaltyAggregator { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -130,6 +138,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityDetailsResponsePackageDetailsAllOf {\n");
             sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
+            sb.Append("  RoyaltyAggregator: ").Append(RoyaltyAggregator).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,6 +178,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.CodeHex == input.CodeHex ||
                     (this.CodeHex != null &&
                     this.CodeHex.Equals(input.CodeHex))
+                ) && 
+                (
+                    this.RoyaltyAggregator == input.RoyaltyAggregator ||
+                    (this.RoyaltyAggregator != null &&
+                    this.RoyaltyAggregator.Equals(input.RoyaltyAggregator))
                 );
         }
 
@@ -184,6 +198,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.CodeHex != null)
                 {
                     hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
+                }
+                if (this.RoyaltyAggregator != null)
+                {
+                    hashCode = (hashCode * 59) + this.RoyaltyAggregator.GetHashCode();
                 }
                 return hashCode;
             }

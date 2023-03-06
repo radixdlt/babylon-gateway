@@ -103,17 +103,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItemGloballyAggregatedAllOf" /> class.
         /// </summary>
-        /// <param name="amount">amount (required).</param>
-        public NonFungibleResourcesCollectionItemGloballyAggregatedAllOf(long amount = default(long))
+        /// <param name="amount">TBA (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        public NonFungibleResourcesCollectionItemGloballyAggregatedAllOf(long amount = default(long), long lastUpdatedAtStateVersion = default(long))
         {
             this.Amount = amount;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
         /// <summary>
-        /// Gets or Sets Amount
+        /// TBA
         /// </summary>
+        /// <value>TBA</value>
         [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
         public long Amount { get; set; }
+
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <value>TBD</value>
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -124,6 +134,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleResourcesCollectionItemGloballyAggregatedAllOf {\n");
             sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -162,6 +173,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 (
                     this.Amount == input.Amount ||
                     this.Amount.Equals(input.Amount)
+                ) && 
+                (
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
         }
 
@@ -175,6 +190,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

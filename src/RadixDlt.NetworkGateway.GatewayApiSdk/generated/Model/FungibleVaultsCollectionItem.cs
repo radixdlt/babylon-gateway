@@ -103,9 +103,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="FungibleVaultsCollectionItem" /> class.
         /// </summary>
-        /// <param name="address">TBA (required).</param>
+        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
         /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        public FungibleVaultsCollectionItem(string address = default(string), string amount = default(string))
+        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        public FungibleVaultsCollectionItem(string address = default(string), string amount = default(string), long lastUpdatedAtStateVersion = default(long))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -119,12 +120,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("amount is a required property for FungibleVaultsCollectionItem and cannot be null");
             }
             this.Amount = amount;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
         /// <summary>
-        /// TBA
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
         /// </summary>
-        /// <value>TBA</value>
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 
@@ -136,6 +138,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Amount { get; set; }
 
         /// <summary>
+        /// TBD
+        /// </summary>
+        /// <value>TBD</value>
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -145,6 +154,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class FungibleVaultsCollectionItem {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -189,6 +199,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Amount == input.Amount ||
                     (this.Amount != null &&
                     this.Amount.Equals(input.Amount))
+                ) && 
+                (
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
         }
 
@@ -209,6 +223,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

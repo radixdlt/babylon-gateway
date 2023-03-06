@@ -104,9 +104,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseItem" /> class.
         /// </summary>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="ancestorIdentities">ancestorIdentities.</param>
         /// <param name="metadata">metadata (required).</param>
         /// <param name="details">details.</param>
-        public StateEntityDetailsResponseItem(string address = default(string), EntityMetadataCollection metadata = default(EntityMetadataCollection), StateEntityDetailsResponseItemDetails details = default(StateEntityDetailsResponseItemDetails))
+        public StateEntityDetailsResponseItem(string address = default(string), StateEntityDetailsResponseItemAncestorIdentities ancestorIdentities = default(StateEntityDetailsResponseItemAncestorIdentities), EntityMetadataCollection metadata = default(EntityMetadataCollection), StateEntityDetailsResponseItemDetails details = default(StateEntityDetailsResponseItemDetails))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -120,6 +121,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("metadata is a required property for StateEntityDetailsResponseItem and cannot be null");
             }
             this.Metadata = metadata;
+            this.AncestorIdentities = ancestorIdentities;
             this.Details = details;
         }
 
@@ -129,6 +131,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AncestorIdentities
+        /// </summary>
+        [DataMember(Name = "ancestor_identities", EmitDefaultValue = true)]
+        public StateEntityDetailsResponseItemAncestorIdentities AncestorIdentities { get; set; }
 
         /// <summary>
         /// Gets or Sets Metadata
@@ -151,6 +159,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityDetailsResponseItem {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  AncestorIdentities: ").Append(AncestorIdentities).Append("\n");
             sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("  Details: ").Append(Details).Append("\n");
             sb.Append("}\n");
@@ -194,6 +203,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
+                    this.AncestorIdentities == input.AncestorIdentities ||
+                    (this.AncestorIdentities != null &&
+                    this.AncestorIdentities.Equals(input.AncestorIdentities))
+                ) && 
+                (
                     this.Metadata == input.Metadata ||
                     (this.Metadata != null &&
                     this.Metadata.Equals(input.Metadata))
@@ -217,6 +231,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Address != null)
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                }
+                if (this.AncestorIdentities != null)
+                {
+                    hashCode = (hashCode * 59) + this.AncestorIdentities.GetHashCode();
                 }
                 if (this.Metadata != null)
                 {

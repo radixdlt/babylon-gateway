@@ -115,8 +115,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="blueprintName">blueprintName (required).</param>
         /// <param name="state">state (required).</param>
         /// <param name="accessRulesChain">accessRulesChain (required).</param>
+        /// <param name="royaltyAggregator">royaltyAggregator.</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Component).</param>
-        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), Object accessRulesChain = default(Object), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
+        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), Object accessRulesChain = default(Object), FungibleResourcesCollectionItemGloballyAggregated royaltyAggregator = default(FungibleResourcesCollectionItemGloballyAggregated), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
         {
             // to ensure "packageAddress" is required (not null)
             if (packageAddress == null)
@@ -142,6 +143,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("accessRulesChain is a required property for StateEntityDetailsResponseComponentDetails and cannot be null");
             }
             this.AccessRulesChain = accessRulesChain;
+            this.RoyaltyAggregator = royaltyAggregator;
         }
 
         /// <summary>
@@ -170,6 +172,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public Object AccessRulesChain { get; set; }
 
         /// <summary>
+        /// Gets or Sets RoyaltyAggregator
+        /// </summary>
+        [DataMember(Name = "royalty_aggregator", EmitDefaultValue = true)]
+        public FungibleResourcesCollectionItemGloballyAggregated RoyaltyAggregator { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -182,6 +190,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
             sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
+            sb.Append("  RoyaltyAggregator: ").Append(RoyaltyAggregator).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -236,6 +245,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.AccessRulesChain == input.AccessRulesChain ||
                     (this.AccessRulesChain != null &&
                     this.AccessRulesChain.Equals(input.AccessRulesChain))
+                ) && base.Equals(input) && 
+                (
+                    this.RoyaltyAggregator == input.RoyaltyAggregator ||
+                    (this.RoyaltyAggregator != null &&
+                    this.RoyaltyAggregator.Equals(input.RoyaltyAggregator))
                 );
         }
 
@@ -263,6 +277,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.AccessRulesChain != null)
                 {
                     hashCode = (hashCode * 59) + this.AccessRulesChain.GetHashCode();
+                }
+                if (this.RoyaltyAggregator != null)
+                {
+                    hashCode = (hashCode * 59) + this.RoyaltyAggregator.GetHashCode();
                 }
                 return hashCode;
             }

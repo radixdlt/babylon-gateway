@@ -108,9 +108,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItemGloballyAggregated" /> class.
         /// </summary>
         /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
         /// <param name="aggregationLevel">aggregationLevel (required) (default to ResourceAggregationLevel.Global).</param>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
-        public FungibleResourcesCollectionItemGloballyAggregated(string amount = default(string), ResourceAggregationLevel aggregationLevel = ResourceAggregationLevel.Global, string resourceAddress = default(string)) : base(aggregationLevel, resourceAddress)
+        public FungibleResourcesCollectionItemGloballyAggregated(string amount = default(string), long lastUpdatedAtStateVersion = default(long), ResourceAggregationLevel aggregationLevel = ResourceAggregationLevel.Global, string resourceAddress = default(string)) : base(aggregationLevel, resourceAddress)
         {
             // to ensure "amount" is required (not null)
             if (amount == null)
@@ -118,6 +119,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("amount is a required property for FungibleResourcesCollectionItemGloballyAggregated and cannot be null");
             }
             this.Amount = amount;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
         /// <summary>
@@ -126,6 +128,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
         [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
         public string Amount { get; set; }
+
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <value>TBD</value>
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,6 +146,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class FungibleResourcesCollectionItemGloballyAggregated {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -176,6 +186,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Amount == input.Amount ||
                     (this.Amount != null &&
                     this.Amount.Equals(input.Amount))
+                ) && base.Equals(input) && 
+                (
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
         }
 
@@ -192,6 +206,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

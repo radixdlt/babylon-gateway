@@ -67,6 +67,7 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
@@ -97,6 +98,9 @@ internal abstract class Entity
 
     [Column("global_ancestor_id")]
     public long? GlobalAncestorId { get; set; }
+
+    [MemberNotNullWhen(true, nameof(AncestorIds), nameof(ParentAncestorId), nameof(OwnerAncestorId), nameof(GlobalAncestorId))]
+    public bool HasParent => AncestorIds != null;
 }
 
 internal abstract class ResourceManagerEntity : ComponentEntity

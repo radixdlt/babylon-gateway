@@ -104,7 +104,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItemGloballyAggregatedAllOf" /> class.
         /// </summary>
         /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        public FungibleResourcesCollectionItemGloballyAggregatedAllOf(string amount = default(string))
+        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        public FungibleResourcesCollectionItemGloballyAggregatedAllOf(string amount = default(string), long lastUpdatedAtStateVersion = default(long))
         {
             // to ensure "amount" is required (not null)
             if (amount == null)
@@ -112,6 +113,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("amount is a required property for FungibleResourcesCollectionItemGloballyAggregatedAllOf and cannot be null");
             }
             this.Amount = amount;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
         /// <summary>
@@ -122,6 +124,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Amount { get; set; }
 
         /// <summary>
+        /// TBD
+        /// </summary>
+        /// <value>TBD</value>
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -130,6 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class FungibleResourcesCollectionItemGloballyAggregatedAllOf {\n");
             sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,6 +179,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Amount == input.Amount ||
                     (this.Amount != null &&
                     this.Amount.Equals(input.Amount))
+                ) && 
+                (
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
         }
 
@@ -185,6 +199,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }
