@@ -91,39 +91,64 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// LocalNativeMethodReference
+    /// VaultInfoSubstate
     /// </summary>
-    [DataContract(Name = "LocalNativeMethodReference")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(LocalNativeMethodReference), "NativeMethod")]
-    [JsonSubtypes.KnownSubType(typeof(LocalScryptoMethodReference), "ScryptoMethod")]
-    public partial class LocalNativeMethodReference : LocalMethodReference, IEquatable<LocalNativeMethodReference>
+    [DataContract(Name = "VaultInfoSubstate")]
+    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
+    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
+    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
+    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
+    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
+    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "Metadata")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
+    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
+    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
+    public partial class VaultInfoSubstate : Substate, IEquatable<VaultInfoSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalNativeMethodReference" /> class.
+        /// Initializes a new instance of the <see cref="VaultInfoSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected LocalNativeMethodReference() { }
+        protected VaultInfoSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalNativeMethodReference" /> class.
+        /// Initializes a new instance of the <see cref="VaultInfoSubstate" /> class.
         /// </summary>
-        /// <param name="name">name (required).</param>
-        /// <param name="type">type (required) (default to LocalMethodReferenceType.NativeMethod).</param>
-        public LocalNativeMethodReference(string name = default(string), LocalMethodReferenceType type = LocalMethodReferenceType.NativeMethod) : base(type)
+        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.VaultInfo).</param>
+        public VaultInfoSubstate(string resourceAddress = default(string), SubstateType substateType = SubstateType.VaultInfo) : base(substateType)
         {
-            // to ensure "name" is required (not null)
-            if (name == null)
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("name is a required property for LocalNativeMethodReference and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for VaultInfoSubstate and cannot be null");
             }
-            this.Name = name;
+            this.ResourceAddress = resourceAddress;
         }
 
         /// <summary>
-        /// Gets or Sets Name
+        /// The Bech32m-encoded human readable version of the resource address
         /// </summary>
-        [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
-        public string Name { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource address</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -132,9 +157,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class LocalNativeMethodReference {\n");
+            sb.Append("class VaultInfoSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Name: ").Append(Name).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -155,15 +180,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as LocalNativeMethodReference);
+            return this.Equals(input as VaultInfoSubstate);
         }
 
         /// <summary>
-        /// Returns true if LocalNativeMethodReference instances are equal
+        /// Returns true if VaultInfoSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of LocalNativeMethodReference to be compared</param>
+        /// <param name="input">Instance of VaultInfoSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(LocalNativeMethodReference input)
+        public bool Equals(VaultInfoSubstate input)
         {
             if (input == null)
             {
@@ -171,9 +196,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Name == input.Name ||
-                    (this.Name != null &&
-                    this.Name.Equals(input.Name))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 );
         }
 
@@ -186,9 +211,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Name != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Name.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
                 return hashCode;
             }

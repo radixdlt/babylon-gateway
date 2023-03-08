@@ -84,42 +84,70 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// WasmCodeSubstateAllOf
+    /// VaultNonFungibleSubstate
     /// </summary>
-    [DataContract(Name = "WasmCodeSubstate_allOf")]
-    public partial class WasmCodeSubstateAllOf : IEquatable<WasmCodeSubstateAllOf>
+    [DataContract(Name = "VaultNonFungibleSubstate")]
+    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
+    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
+    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
+    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
+    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
+    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "Metadata")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
+    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
+    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
+    public partial class VaultNonFungibleSubstate : Substate, IEquatable<VaultNonFungibleSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="WasmCodeSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="VaultNonFungibleSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected WasmCodeSubstateAllOf() { }
+        protected VaultNonFungibleSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="WasmCodeSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="VaultNonFungibleSubstate" /> class.
         /// </summary>
-        /// <param name="codeHex">The hex-encoded package code (required).</param>
-        public WasmCodeSubstateAllOf(string codeHex = default(string))
+        /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.VaultNonFungible).</param>
+        public VaultNonFungibleSubstate(List<NonFungibleId> nonFungibleIds = default(List<NonFungibleId>), SubstateType substateType = SubstateType.VaultNonFungible) : base(substateType)
         {
-            // to ensure "codeHex" is required (not null)
-            if (codeHex == null)
+            // to ensure "nonFungibleIds" is required (not null)
+            if (nonFungibleIds == null)
             {
-                throw new ArgumentNullException("codeHex is a required property for WasmCodeSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("nonFungibleIds is a required property for VaultNonFungibleSubstate and cannot be null");
             }
-            this.CodeHex = codeHex;
+            this.NonFungibleIds = nonFungibleIds;
         }
 
         /// <summary>
-        /// The hex-encoded package code
+        /// Gets or Sets NonFungibleIds
         /// </summary>
-        /// <value>The hex-encoded package code</value>
-        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string CodeHex { get; set; }
+        [DataMember(Name = "non_fungible_ids", IsRequired = true, EmitDefaultValue = true)]
+        public List<NonFungibleId> NonFungibleIds { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +156,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class WasmCodeSubstateAllOf {\n");
-            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
+            sb.Append("class VaultNonFungibleSubstate {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -138,7 +167,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -150,25 +179,26 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as WasmCodeSubstateAllOf);
+            return this.Equals(input as VaultNonFungibleSubstate);
         }
 
         /// <summary>
-        /// Returns true if WasmCodeSubstateAllOf instances are equal
+        /// Returns true if VaultNonFungibleSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of WasmCodeSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of VaultNonFungibleSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(WasmCodeSubstateAllOf input)
+        public bool Equals(VaultNonFungibleSubstate input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.CodeHex == input.CodeHex ||
-                    (this.CodeHex != null &&
-                    this.CodeHex.Equals(input.CodeHex))
+                    this.NonFungibleIds == input.NonFungibleIds ||
+                    this.NonFungibleIds != null &&
+                    input.NonFungibleIds != null &&
+                    this.NonFungibleIds.SequenceEqual(input.NonFungibleIds)
                 );
         }
 
@@ -180,10 +210,10 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.CodeHex != null)
+                int hashCode = base.GetHashCode();
+                if (this.NonFungibleIds != null)
                 {
-                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleIds.GetHashCode();
                 }
                 return hashCode;
             }

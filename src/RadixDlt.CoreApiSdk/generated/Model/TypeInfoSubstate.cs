@@ -91,55 +91,77 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NativeCodeSubstate
+    /// TypeInfoSubstate
     /// </summary>
-    [DataContract(Name = "NativeCodeSubstate")]
+    [DataContract(Name = "TypeInfoSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
     [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
     [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentInfoSubstate), "ComponentInfo")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
     [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
     [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(GlobalAddressSubstate), "GlobalAddress")]
+    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
     [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
     [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "Metadata")]
-    [JsonSubtypes.KnownSubType(typeof(NativeCodeSubstate), "NativeCode")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
     [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
     [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(PackageTypeInfoSubstate), "PackageTypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultSubstate), "Vault")]
-    [JsonSubtypes.KnownSubType(typeof(WasmCodeSubstate), "WasmCode")]
-    public partial class NativeCodeSubstate : Substate, IEquatable<NativeCodeSubstate>
+    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
+    public partial class TypeInfoSubstate : Substate, IEquatable<TypeInfoSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NativeCodeSubstate" /> class.
+        /// Initializes a new instance of the <see cref="TypeInfoSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NativeCodeSubstate() { }
+        protected TypeInfoSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NativeCodeSubstate" /> class.
+        /// Initializes a new instance of the <see cref="TypeInfoSubstate" /> class.
         /// </summary>
-        /// <param name="nativePackageCodeId">nativePackageCodeId (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.NativeCode).</param>
-        public NativeCodeSubstate(int nativePackageCodeId = default(int), SubstateType substateType = SubstateType.NativeCode) : base(substateType)
+        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
+        /// <param name="blueprintName">blueprintName (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.TypeInfo).</param>
+        public TypeInfoSubstate(string packageAddress = default(string), string blueprintName = default(string), SubstateType substateType = SubstateType.TypeInfo) : base(substateType)
         {
-            this.NativePackageCodeId = nativePackageCodeId;
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
+            {
+                throw new ArgumentNullException("packageAddress is a required property for TypeInfoSubstate and cannot be null");
+            }
+            this.PackageAddress = packageAddress;
+            // to ensure "blueprintName" is required (not null)
+            if (blueprintName == null)
+            {
+                throw new ArgumentNullException("blueprintName is a required property for TypeInfoSubstate and cannot be null");
+            }
+            this.BlueprintName = blueprintName;
         }
 
         /// <summary>
-        /// Gets or Sets NativePackageCodeId
+        /// The Bech32m-encoded human readable version of the package address
         /// </summary>
-        [DataMember(Name = "native_package_code_id", IsRequired = true, EmitDefaultValue = true)]
-        public int NativePackageCodeId { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the package address</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets BlueprintName
+        /// </summary>
+        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
+        public string BlueprintName { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -148,9 +170,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NativeCodeSubstate {\n");
+            sb.Append("class TypeInfoSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  NativePackageCodeId: ").Append(NativePackageCodeId).Append("\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
+            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -171,15 +194,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NativeCodeSubstate);
+            return this.Equals(input as TypeInfoSubstate);
         }
 
         /// <summary>
-        /// Returns true if NativeCodeSubstate instances are equal
+        /// Returns true if TypeInfoSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of NativeCodeSubstate to be compared</param>
+        /// <param name="input">Instance of TypeInfoSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NativeCodeSubstate input)
+        public bool Equals(TypeInfoSubstate input)
         {
             if (input == null)
             {
@@ -187,8 +210,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.NativePackageCodeId == input.NativePackageCodeId ||
-                    this.NativePackageCodeId.Equals(input.NativePackageCodeId)
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
+                ) && base.Equals(input) && 
+                (
+                    this.BlueprintName == input.BlueprintName ||
+                    (this.BlueprintName != null &&
+                    this.BlueprintName.Equals(input.BlueprintName))
                 );
         }
 
@@ -201,7 +230,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.NativePackageCodeId.GetHashCode();
+                if (this.PackageAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
+                }
+                if (this.BlueprintName != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                }
                 return hashCode;
             }
         }

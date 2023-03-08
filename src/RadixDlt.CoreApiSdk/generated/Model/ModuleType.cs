@@ -102,46 +102,46 @@ namespace RadixDlt.CoreApiSdk.Model
         Self = 1,
 
         /// <summary>
+        /// Enum TypeInfo for value: TypeInfo
+        /// </summary>
+        [EnumMember(Value = "TypeInfo")]
+        TypeInfo = 2,
+
+        /// <summary>
         /// Enum Metadata for value: Metadata
         /// </summary>
         [EnumMember(Value = "Metadata")]
-        Metadata = 2,
+        Metadata = 3,
 
         /// <summary>
         /// Enum AccessRules for value: AccessRules
         /// </summary>
         [EnumMember(Value = "AccessRules")]
-        AccessRules = 3,
+        AccessRules = 4,
 
         /// <summary>
         /// Enum AccessRules1 for value: AccessRules1
         /// </summary>
         [EnumMember(Value = "AccessRules1")]
-        AccessRules1 = 4,
+        AccessRules1 = 5,
+
+        /// <summary>
+        /// Enum FunctionAccessRules for value: FunctionAccessRules
+        /// </summary>
+        [EnumMember(Value = "FunctionAccessRules")]
+        FunctionAccessRules = 6,
 
         /// <summary>
         /// Enum ComponentRoyalty for value: ComponentRoyalty
         /// </summary>
         [EnumMember(Value = "ComponentRoyalty")]
-        ComponentRoyalty = 5,
+        ComponentRoyalty = 7,
 
         /// <summary>
         /// Enum PackageRoyalty for value: PackageRoyalty
         /// </summary>
         [EnumMember(Value = "PackageRoyalty")]
-        PackageRoyalty = 6,
-
-        /// <summary>
-        /// Enum PackageTypeInfo for value: PackageTypeInfo
-        /// </summary>
-        [EnumMember(Value = "PackageTypeInfo")]
-        PackageTypeInfo = 7,
-
-        /// <summary>
-        /// Enum ComponentTypeInfo for value: ComponentTypeInfo
-        /// </summary>
-        [EnumMember(Value = "ComponentTypeInfo")]
-        ComponentTypeInfo = 8
+        PackageRoyalty = 8
 
     }
 

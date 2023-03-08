@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230306100516_InitialCreate")]
+    [Migration("20230306075602_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -769,7 +769,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("xid")
-                        .HasColumnName("xmin");
+                        .HasColumnName("version_control");
 
                     b.HasKey("Id");
 

@@ -108,16 +108,16 @@ namespace RadixDlt.CoreApiSdk.Model
         AccessRulesChain = 2,
 
         /// <summary>
-        /// Enum GlobalAddress for value: GlobalAddress
+        /// Enum FunctionAccessRules for value: FunctionAccessRules
         /// </summary>
-        [EnumMember(Value = "GlobalAddress")]
-        GlobalAddress = 3,
+        [EnumMember(Value = "FunctionAccessRules")]
+        FunctionAccessRules = 3,
 
         /// <summary>
-        /// Enum ComponentInfo for value: ComponentInfo
+        /// Enum TypeInfo for value: TypeInfo
         /// </summary>
-        [EnumMember(Value = "ComponentInfo")]
-        ComponentInfo = 4,
+        [EnumMember(Value = "TypeInfo")]
+        TypeInfo = 4,
 
         /// <summary>
         /// Enum ComponentState for value: ComponentState
@@ -144,94 +144,112 @@ namespace RadixDlt.CoreApiSdk.Model
         PackageInfo = 8,
 
         /// <summary>
-        /// Enum PackageTypeInfo for value: PackageTypeInfo
+        /// Enum PackageCode for value: PackageCode
         /// </summary>
-        [EnumMember(Value = "PackageTypeInfo")]
-        PackageTypeInfo = 9,
+        [EnumMember(Value = "PackageCode")]
+        PackageCode = 9,
 
         /// <summary>
-        /// Enum WasmCode for value: WasmCode
+        /// Enum PackageCodeType for value: PackageCodeType
         /// </summary>
-        [EnumMember(Value = "WasmCode")]
-        WasmCode = 10,
-
-        /// <summary>
-        /// Enum NativeCode for value: NativeCode
-        /// </summary>
-        [EnumMember(Value = "NativeCode")]
-        NativeCode = 11,
+        [EnumMember(Value = "PackageCodeType")]
+        PackageCodeType = 10,
 
         /// <summary>
         /// Enum PackageRoyaltyConfig for value: PackageRoyaltyConfig
         /// </summary>
         [EnumMember(Value = "PackageRoyaltyConfig")]
-        PackageRoyaltyConfig = 12,
+        PackageRoyaltyConfig = 11,
 
         /// <summary>
         /// Enum PackageRoyaltyAccumulator for value: PackageRoyaltyAccumulator
         /// </summary>
         [EnumMember(Value = "PackageRoyaltyAccumulator")]
-        PackageRoyaltyAccumulator = 13,
+        PackageRoyaltyAccumulator = 12,
 
         /// <summary>
         /// Enum ResourceManager for value: ResourceManager
         /// </summary>
         [EnumMember(Value = "ResourceManager")]
-        ResourceManager = 14,
+        ResourceManager = 13,
 
         /// <summary>
         /// Enum EpochManager for value: EpochManager
         /// </summary>
         [EnumMember(Value = "EpochManager")]
-        EpochManager = 15,
+        EpochManager = 14,
 
         /// <summary>
         /// Enum ValidatorSet for value: ValidatorSet
         /// </summary>
         [EnumMember(Value = "ValidatorSet")]
-        ValidatorSet = 16,
+        ValidatorSet = 15,
 
         /// <summary>
         /// Enum Validator for value: Validator
         /// </summary>
         [EnumMember(Value = "Validator")]
-        Validator = 17,
+        Validator = 16,
 
         /// <summary>
         /// Enum ClockCurrentMinute for value: ClockCurrentMinute
         /// </summary>
         [EnumMember(Value = "ClockCurrentMinute")]
-        ClockCurrentMinute = 18,
+        ClockCurrentMinute = 17,
 
         /// <summary>
         /// Enum KeyValueStoreEntry for value: KeyValueStoreEntry
         /// </summary>
         [EnumMember(Value = "KeyValueStoreEntry")]
-        KeyValueStoreEntry = 19,
+        KeyValueStoreEntry = 18,
 
         /// <summary>
         /// Enum NonFungibleStoreEntry for value: NonFungibleStoreEntry
         /// </summary>
         [EnumMember(Value = "NonFungibleStoreEntry")]
-        NonFungibleStoreEntry = 20,
+        NonFungibleStoreEntry = 19,
 
         /// <summary>
-        /// Enum Vault for value: Vault
+        /// Enum VaultInfo for value: VaultInfo
         /// </summary>
-        [EnumMember(Value = "Vault")]
-        Vault = 21,
+        [EnumMember(Value = "VaultInfo")]
+        VaultInfo = 20,
+
+        /// <summary>
+        /// Enum VaultFungible for value: VaultFungible
+        /// </summary>
+        [EnumMember(Value = "VaultFungible")]
+        VaultFungible = 21,
+
+        /// <summary>
+        /// Enum VaultNonFungible for value: VaultNonFungible
+        /// </summary>
+        [EnumMember(Value = "VaultNonFungible")]
+        VaultNonFungible = 22,
+
+        /// <summary>
+        /// Enum VaultLockedFungible for value: VaultLockedFungible
+        /// </summary>
+        [EnumMember(Value = "VaultLockedFungible")]
+        VaultLockedFungible = 23,
+
+        /// <summary>
+        /// Enum VaultLockedNonFungible for value: VaultLockedNonFungible
+        /// </summary>
+        [EnumMember(Value = "VaultLockedNonFungible")]
+        VaultLockedNonFungible = 24,
 
         /// <summary>
         /// Enum AccessController for value: AccessController
         /// </summary>
         [EnumMember(Value = "AccessController")]
-        AccessController = 22,
+        AccessController = 25,
 
         /// <summary>
         /// Enum Account for value: Account
         /// </summary>
         [EnumMember(Value = "Account")]
-        Account = 23
+        Account = 26
 
     }
 

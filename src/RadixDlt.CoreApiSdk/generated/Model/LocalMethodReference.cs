@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
@@ -94,19 +93,8 @@ namespace RadixDlt.CoreApiSdk.Model
     /// LocalMethodReference
     /// </summary>
     [DataContract(Name = "LocalMethodReference")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(LocalNativeMethodReference), "LocalNativeMethodReference")]
-    [JsonSubtypes.KnownSubType(typeof(LocalScryptoMethodReference), "LocalScryptoMethodReference")]
-    [JsonSubtypes.KnownSubType(typeof(LocalNativeMethodReference), "NativeMethod")]
-    [JsonSubtypes.KnownSubType(typeof(LocalScryptoMethodReference), "ScryptoMethod")]
     public partial class LocalMethodReference : IEquatable<LocalMethodReference>
     {
-
-        /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
-        public LocalMethodReferenceType Type { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalMethodReference" /> class.
         /// </summary>
@@ -115,11 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalMethodReference" /> class.
         /// </summary>
-        /// <param name="type">type (required).</param>
-        public LocalMethodReference(LocalMethodReferenceType type = default(LocalMethodReferenceType))
+        /// <param name="name">name (required).</param>
+        public LocalMethodReference(string name = default(string))
         {
-            this.Type = type;
+            // to ensure "name" is required (not null)
+            if (name == null)
+            {
+                throw new ArgumentNullException("name is a required property for LocalMethodReference and cannot be null");
+            }
+            this.Name = name;
         }
+
+        /// <summary>
+        /// Gets or Sets Name
+        /// </summary>
+        [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
+        public string Name { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class LocalMethodReference {\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  Name: ").Append(Name).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,8 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
+                    this.Name == input.Name ||
+                    (this.Name != null &&
+                    this.Name.Equals(input.Name))
                 );
         }
 
@@ -180,7 +180,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                if (this.Name != null)
+                {
+                    hashCode = (hashCode * 59) + this.Name.GetHashCode();
+                }
                 return hashCode;
             }
         }

@@ -90,35 +90,36 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// VaultSubstateAllOf
+    /// PackageCodeSubstateAllOf
     /// </summary>
-    [DataContract(Name = "VaultSubstate_allOf")]
-    public partial class VaultSubstateAllOf : IEquatable<VaultSubstateAllOf>
+    [DataContract(Name = "PackageCodeSubstate_allOf")]
+    public partial class PackageCodeSubstateAllOf : IEquatable<PackageCodeSubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="VaultSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageCodeSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected VaultSubstateAllOf() { }
+        protected PackageCodeSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="VaultSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageCodeSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="resourceAmount">resourceAmount (required).</param>
-        public VaultSubstateAllOf(ResourceAmount resourceAmount = default(ResourceAmount))
+        /// <param name="codeHex">The hex-encoded package code (required).</param>
+        public PackageCodeSubstateAllOf(string codeHex = default(string))
         {
-            // to ensure "resourceAmount" is required (not null)
-            if (resourceAmount == null)
+            // to ensure "codeHex" is required (not null)
+            if (codeHex == null)
             {
-                throw new ArgumentNullException("resourceAmount is a required property for VaultSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("codeHex is a required property for PackageCodeSubstateAllOf and cannot be null");
             }
-            this.ResourceAmount = resourceAmount;
+            this.CodeHex = codeHex;
         }
 
         /// <summary>
-        /// Gets or Sets ResourceAmount
+        /// The hex-encoded package code
         /// </summary>
-        [DataMember(Name = "resource_amount", IsRequired = true, EmitDefaultValue = true)]
-        public ResourceAmount ResourceAmount { get; set; }
+        /// <value>The hex-encoded package code</value>
+        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string CodeHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class VaultSubstateAllOf {\n");
-            sb.Append("  ResourceAmount: ").Append(ResourceAmount).Append("\n");
+            sb.Append("class PackageCodeSubstateAllOf {\n");
+            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +150,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as VaultSubstateAllOf);
+            return this.Equals(input as PackageCodeSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if VaultSubstateAllOf instances are equal
+        /// Returns true if PackageCodeSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of VaultSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of PackageCodeSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(VaultSubstateAllOf input)
+        public bool Equals(PackageCodeSubstateAllOf input)
         {
             if (input == null)
             {
@@ -165,9 +166,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ResourceAmount == input.ResourceAmount ||
-                    (this.ResourceAmount != null &&
-                    this.ResourceAmount.Equals(input.ResourceAmount))
+                    this.CodeHex == input.CodeHex ||
+                    (this.CodeHex != null &&
+                    this.CodeHex.Equals(input.CodeHex))
                 );
         }
 
@@ -180,9 +181,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ResourceAmount != null)
+                if (this.CodeHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.ResourceAmount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
                 }
                 return hashCode;
             }

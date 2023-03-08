@@ -111,7 +111,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="accessRules">accessRules (required).</param>
         /// <param name="stateOwnedVaults">Any vaults owned directly or indirectly by the component (required).</param>
         /// <param name="descendentIds">Any descendent nodes owned directly or indirectly by the component (required).</param>
-        public StateComponentResponse(Substate info = default(Substate), Substate state = default(Substate), Substate royaltyConfig = default(Substate), Substate royaltyAccumulator = default(Substate), Substate metadata = default(Substate), Substate accessRules = default(Substate), List<Substate> stateOwnedVaults = default(List<Substate>), List<StateComponentDescendentId> descendentIds = default(List<StateComponentDescendentId>))
+        public StateComponentResponse(Substate info = default(Substate), Substate state = default(Substate), Substate royaltyConfig = default(Substate), Substate royaltyAccumulator = default(Substate), Substate metadata = default(Substate), Substate accessRules = default(Substate), List<ResourceAmount> stateOwnedVaults = default(List<ResourceAmount>), List<StateComponentDescendentId> descendentIds = default(List<StateComponentDescendentId>))
         {
             // to ensure "info" is required (not null)
             if (info == null)
@@ -204,7 +204,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <value>Any vaults owned directly or indirectly by the component</value>
         [DataMember(Name = "state_owned_vaults", IsRequired = true, EmitDefaultValue = true)]
-        public List<Substate> StateOwnedVaults { get; set; }
+        public List<ResourceAmount> StateOwnedVaults { get; set; }
 
         /// <summary>
         /// Any descendent nodes owned directly or indirectly by the component

@@ -84,41 +84,71 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// LocalNativeMethodReferenceAllOf
+    /// VaultFungibleSubstate
     /// </summary>
-    [DataContract(Name = "LocalNativeMethodReference_allOf")]
-    public partial class LocalNativeMethodReferenceAllOf : IEquatable<LocalNativeMethodReferenceAllOf>
+    [DataContract(Name = "VaultFungibleSubstate")]
+    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
+    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
+    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
+    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
+    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
+    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "Metadata")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
+    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
+    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
+    public partial class VaultFungibleSubstate : Substate, IEquatable<VaultFungibleSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalNativeMethodReferenceAllOf" /> class.
+        /// Initializes a new instance of the <see cref="VaultFungibleSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected LocalNativeMethodReferenceAllOf() { }
+        protected VaultFungibleSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalNativeMethodReferenceAllOf" /> class.
+        /// Initializes a new instance of the <see cref="VaultFungibleSubstate" /> class.
         /// </summary>
-        /// <param name="name">name (required).</param>
-        public LocalNativeMethodReferenceAllOf(string name = default(string))
+        /// <param name="amount">The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.VaultFungible).</param>
+        public VaultFungibleSubstate(string amount = default(string), SubstateType substateType = SubstateType.VaultFungible) : base(substateType)
         {
-            // to ensure "name" is required (not null)
-            if (name == null)
+            // to ensure "amount" is required (not null)
+            if (amount == null)
             {
-                throw new ArgumentNullException("name is a required property for LocalNativeMethodReferenceAllOf and cannot be null");
+                throw new ArgumentNullException("amount is a required property for VaultFungibleSubstate and cannot be null");
             }
-            this.Name = name;
+            this.Amount = amount;
         }
 
         /// <summary>
-        /// Gets or Sets Name
+        /// The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
         /// </summary>
-        [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
-        public string Name { get; set; }
+        /// <value>The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public string Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +157,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class LocalNativeMethodReferenceAllOf {\n");
-            sb.Append("  Name: ").Append(Name).Append("\n");
+            sb.Append("class VaultFungibleSubstate {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -137,7 +168,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -149,25 +180,25 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as LocalNativeMethodReferenceAllOf);
+            return this.Equals(input as VaultFungibleSubstate);
         }
 
         /// <summary>
-        /// Returns true if LocalNativeMethodReferenceAllOf instances are equal
+        /// Returns true if VaultFungibleSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of LocalNativeMethodReferenceAllOf to be compared</param>
+        /// <param name="input">Instance of VaultFungibleSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(LocalNativeMethodReferenceAllOf input)
+        public bool Equals(VaultFungibleSubstate input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.Name == input.Name ||
-                    (this.Name != null &&
-                    this.Name.Equals(input.Name))
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
                 );
         }
 
@@ -179,10 +210,10 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.Name != null)
+                int hashCode = base.GetHashCode();
+                if (this.Amount != null)
                 {
-                    hashCode = (hashCode * 59) + this.Name.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 }
                 return hashCode;
             }

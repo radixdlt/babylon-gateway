@@ -167,6 +167,12 @@ internal class AccountComponentEntity : ComponentEntity
 {
 }
 
+internal class PackageEntity : ComponentEntity
+{
+    [Column("code")]
+    public byte[] Code { get; set; }
+}
+
 // This is transient model, not stored in database
 internal class VirtualAccountComponentEntity : AccountComponentEntity
 {
@@ -174,15 +180,6 @@ internal class VirtualAccountComponentEntity : AccountComponentEntity
     {
         GlobalAddress = globalAddress;
     }
-}
-
-internal class PackageEntity : Entity, IRoyaltyVaultHolder
-{
-    [Column("code")]
-    public byte[] Code { get; set; }
-
-    [Column("royalty_vault_entity_id")]
-    public long? RoyaltyVaultEntityId { get; set; }
 }
 
 internal class KeyValueStoreEntity : Entity

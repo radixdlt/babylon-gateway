@@ -90,30 +90,49 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NativeCodeSubstateAllOf
+    /// TypeInfoSubstateAllOf
     /// </summary>
-    [DataContract(Name = "NativeCodeSubstate_allOf")]
-    public partial class NativeCodeSubstateAllOf : IEquatable<NativeCodeSubstateAllOf>
+    [DataContract(Name = "TypeInfoSubstate_allOf")]
+    public partial class TypeInfoSubstateAllOf : IEquatable<TypeInfoSubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NativeCodeSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TypeInfoSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NativeCodeSubstateAllOf() { }
+        protected TypeInfoSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NativeCodeSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TypeInfoSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="nativePackageCodeId">nativePackageCodeId (required).</param>
-        public NativeCodeSubstateAllOf(int nativePackageCodeId = default(int))
+        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
+        /// <param name="blueprintName">blueprintName (required).</param>
+        public TypeInfoSubstateAllOf(string packageAddress = default(string), string blueprintName = default(string))
         {
-            this.NativePackageCodeId = nativePackageCodeId;
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
+            {
+                throw new ArgumentNullException("packageAddress is a required property for TypeInfoSubstateAllOf and cannot be null");
+            }
+            this.PackageAddress = packageAddress;
+            // to ensure "blueprintName" is required (not null)
+            if (blueprintName == null)
+            {
+                throw new ArgumentNullException("blueprintName is a required property for TypeInfoSubstateAllOf and cannot be null");
+            }
+            this.BlueprintName = blueprintName;
         }
 
         /// <summary>
-        /// Gets or Sets NativePackageCodeId
+        /// The Bech32m-encoded human readable version of the package address
         /// </summary>
-        [DataMember(Name = "native_package_code_id", IsRequired = true, EmitDefaultValue = true)]
-        public int NativePackageCodeId { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the package address</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets BlueprintName
+        /// </summary>
+        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
+        public string BlueprintName { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -122,8 +141,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NativeCodeSubstateAllOf {\n");
-            sb.Append("  NativePackageCodeId: ").Append(NativePackageCodeId).Append("\n");
+            sb.Append("class TypeInfoSubstateAllOf {\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
+            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -144,15 +164,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NativeCodeSubstateAllOf);
+            return this.Equals(input as TypeInfoSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if NativeCodeSubstateAllOf instances are equal
+        /// Returns true if TypeInfoSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of NativeCodeSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of TypeInfoSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NativeCodeSubstateAllOf input)
+        public bool Equals(TypeInfoSubstateAllOf input)
         {
             if (input == null)
             {
@@ -160,8 +180,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.NativePackageCodeId == input.NativePackageCodeId ||
-                    this.NativePackageCodeId.Equals(input.NativePackageCodeId)
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
+                ) && 
+                (
+                    this.BlueprintName == input.BlueprintName ||
+                    (this.BlueprintName != null &&
+                    this.BlueprintName.Equals(input.BlueprintName))
                 );
         }
 
@@ -174,7 +200,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.NativePackageCodeId.GetHashCode();
+                if (this.PackageAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
+                }
+                if (this.BlueprintName != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                }
                 return hashCode;
             }
         }

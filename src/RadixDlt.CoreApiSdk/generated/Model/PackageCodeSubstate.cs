@@ -91,60 +91,64 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// GlobalAddressSubstate
+    /// PackageCodeSubstate
     /// </summary>
-    [DataContract(Name = "GlobalAddressSubstate")]
+    [DataContract(Name = "PackageCodeSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
     [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
     [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentInfoSubstate), "ComponentInfo")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
     [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
     [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(GlobalAddressSubstate), "GlobalAddress")]
+    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
     [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
     [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "Metadata")]
-    [JsonSubtypes.KnownSubType(typeof(NativeCodeSubstate), "NativeCode")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
     [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
     [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(PackageTypeInfoSubstate), "PackageTypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultSubstate), "Vault")]
-    [JsonSubtypes.KnownSubType(typeof(WasmCodeSubstate), "WasmCode")]
-    public partial class GlobalAddressSubstate : Substate, IEquatable<GlobalAddressSubstate>
+    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
+    public partial class PackageCodeSubstate : Substate, IEquatable<PackageCodeSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GlobalAddressSubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageCodeSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected GlobalAddressSubstate() { }
+        protected PackageCodeSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="GlobalAddressSubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageCodeSubstate" /> class.
         /// </summary>
-        /// <param name="targetEntity">targetEntity (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.GlobalAddress).</param>
-        public GlobalAddressSubstate(GlobalEntityAssignment targetEntity = default(GlobalEntityAssignment), SubstateType substateType = SubstateType.GlobalAddress) : base(substateType)
+        /// <param name="codeHex">The hex-encoded package code (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.PackageCode).</param>
+        public PackageCodeSubstate(string codeHex = default(string), SubstateType substateType = SubstateType.PackageCode) : base(substateType)
         {
-            // to ensure "targetEntity" is required (not null)
-            if (targetEntity == null)
+            // to ensure "codeHex" is required (not null)
+            if (codeHex == null)
             {
-                throw new ArgumentNullException("targetEntity is a required property for GlobalAddressSubstate and cannot be null");
+                throw new ArgumentNullException("codeHex is a required property for PackageCodeSubstate and cannot be null");
             }
-            this.TargetEntity = targetEntity;
+            this.CodeHex = codeHex;
         }
 
         /// <summary>
-        /// Gets or Sets TargetEntity
+        /// The hex-encoded package code
         /// </summary>
-        [DataMember(Name = "target_entity", IsRequired = true, EmitDefaultValue = true)]
-        public GlobalEntityAssignment TargetEntity { get; set; }
+        /// <value>The hex-encoded package code</value>
+        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string CodeHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -153,9 +157,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class GlobalAddressSubstate {\n");
+            sb.Append("class PackageCodeSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  TargetEntity: ").Append(TargetEntity).Append("\n");
+            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -176,15 +180,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as GlobalAddressSubstate);
+            return this.Equals(input as PackageCodeSubstate);
         }
 
         /// <summary>
-        /// Returns true if GlobalAddressSubstate instances are equal
+        /// Returns true if PackageCodeSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of GlobalAddressSubstate to be compared</param>
+        /// <param name="input">Instance of PackageCodeSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(GlobalAddressSubstate input)
+        public bool Equals(PackageCodeSubstate input)
         {
             if (input == null)
             {
@@ -192,9 +196,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.TargetEntity == input.TargetEntity ||
-                    (this.TargetEntity != null &&
-                    this.TargetEntity.Equals(input.TargetEntity))
+                    this.CodeHex == input.CodeHex ||
+                    (this.CodeHex != null &&
+                    this.CodeHex.Equals(input.CodeHex))
                 );
         }
 
@@ -207,9 +211,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.TargetEntity != null)
+                if (this.CodeHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.TargetEntity.GetHashCode();
+                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
                 }
                 return hashCode;
             }

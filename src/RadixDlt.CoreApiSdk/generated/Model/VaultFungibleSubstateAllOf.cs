@@ -90,86 +90,36 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// GlobalEntityAssignment
+    /// VaultFungibleSubstateAllOf
     /// </summary>
-    [DataContract(Name = "GlobalEntityAssignment")]
-    public partial class GlobalEntityAssignment : IEquatable<GlobalEntityAssignment>
+    [DataContract(Name = "VaultFungibleSubstate_allOf")]
+    public partial class VaultFungibleSubstateAllOf : IEquatable<VaultFungibleSubstateAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets TargetEntityType
-        /// </summary>
-        [DataMember(Name = "target_entity_type", IsRequired = true, EmitDefaultValue = true)]
-        public EntityType TargetEntityType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GlobalEntityAssignment" /> class.
+        /// Initializes a new instance of the <see cref="VaultFungibleSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected GlobalEntityAssignment() { }
+        protected VaultFungibleSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="GlobalEntityAssignment" /> class.
+        /// Initializes a new instance of the <see cref="VaultFungibleSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="targetEntityType">targetEntityType (required).</param>
-        /// <param name="targetEntityIdHex">The hex-encoded bytes of the target entity id (required).</param>
-        /// <param name="globalEntityIdHex">The hex-encoded bytes of the global entity id (required).</param>
-        /// <param name="globalAddressHex">The hex-encoded bytes of the assigned global address. (required).</param>
-        /// <param name="globalAddress">The Bech32m-encoded human readable version of the assigned global address (required).</param>
-        public GlobalEntityAssignment(EntityType targetEntityType = default(EntityType), string targetEntityIdHex = default(string), string globalEntityIdHex = default(string), string globalAddressHex = default(string), string globalAddress = default(string))
+        /// <param name="amount">The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        public VaultFungibleSubstateAllOf(string amount = default(string))
         {
-            this.TargetEntityType = targetEntityType;
-            // to ensure "targetEntityIdHex" is required (not null)
-            if (targetEntityIdHex == null)
+            // to ensure "amount" is required (not null)
+            if (amount == null)
             {
-                throw new ArgumentNullException("targetEntityIdHex is a required property for GlobalEntityAssignment and cannot be null");
+                throw new ArgumentNullException("amount is a required property for VaultFungibleSubstateAllOf and cannot be null");
             }
-            this.TargetEntityIdHex = targetEntityIdHex;
-            // to ensure "globalEntityIdHex" is required (not null)
-            if (globalEntityIdHex == null)
-            {
-                throw new ArgumentNullException("globalEntityIdHex is a required property for GlobalEntityAssignment and cannot be null");
-            }
-            this.GlobalEntityIdHex = globalEntityIdHex;
-            // to ensure "globalAddressHex" is required (not null)
-            if (globalAddressHex == null)
-            {
-                throw new ArgumentNullException("globalAddressHex is a required property for GlobalEntityAssignment and cannot be null");
-            }
-            this.GlobalAddressHex = globalAddressHex;
-            // to ensure "globalAddress" is required (not null)
-            if (globalAddress == null)
-            {
-                throw new ArgumentNullException("globalAddress is a required property for GlobalEntityAssignment and cannot be null");
-            }
-            this.GlobalAddress = globalAddress;
+            this.Amount = amount;
         }
 
         /// <summary>
-        /// The hex-encoded bytes of the target entity id
+        /// The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
         /// </summary>
-        /// <value>The hex-encoded bytes of the target entity id</value>
-        [DataMember(Name = "target_entity_id_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string TargetEntityIdHex { get; set; }
-
-        /// <summary>
-        /// The hex-encoded bytes of the global entity id
-        /// </summary>
-        /// <value>The hex-encoded bytes of the global entity id</value>
-        [DataMember(Name = "global_entity_id_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string GlobalEntityIdHex { get; set; }
-
-        /// <summary>
-        /// The hex-encoded bytes of the assigned global address.
-        /// </summary>
-        /// <value>The hex-encoded bytes of the assigned global address.</value>
-        [DataMember(Name = "global_address_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string GlobalAddressHex { get; set; }
-
-        /// <summary>
-        /// The Bech32m-encoded human readable version of the assigned global address
-        /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the assigned global address</value>
-        [DataMember(Name = "global_address", IsRequired = true, EmitDefaultValue = true)]
-        public string GlobalAddress { get; set; }
+        /// <value>The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public string Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -178,12 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class GlobalEntityAssignment {\n");
-            sb.Append("  TargetEntityType: ").Append(TargetEntityType).Append("\n");
-            sb.Append("  TargetEntityIdHex: ").Append(TargetEntityIdHex).Append("\n");
-            sb.Append("  GlobalEntityIdHex: ").Append(GlobalEntityIdHex).Append("\n");
-            sb.Append("  GlobalAddressHex: ").Append(GlobalAddressHex).Append("\n");
-            sb.Append("  GlobalAddress: ").Append(GlobalAddress).Append("\n");
+            sb.Append("class VaultFungibleSubstateAllOf {\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -204,15 +150,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as GlobalEntityAssignment);
+            return this.Equals(input as VaultFungibleSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if GlobalEntityAssignment instances are equal
+        /// Returns true if VaultFungibleSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of GlobalEntityAssignment to be compared</param>
+        /// <param name="input">Instance of VaultFungibleSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(GlobalEntityAssignment input)
+        public bool Equals(VaultFungibleSubstateAllOf input)
         {
             if (input == null)
             {
@@ -220,28 +166,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.TargetEntityType == input.TargetEntityType ||
-                    this.TargetEntityType.Equals(input.TargetEntityType)
-                ) && 
-                (
-                    this.TargetEntityIdHex == input.TargetEntityIdHex ||
-                    (this.TargetEntityIdHex != null &&
-                    this.TargetEntityIdHex.Equals(input.TargetEntityIdHex))
-                ) && 
-                (
-                    this.GlobalEntityIdHex == input.GlobalEntityIdHex ||
-                    (this.GlobalEntityIdHex != null &&
-                    this.GlobalEntityIdHex.Equals(input.GlobalEntityIdHex))
-                ) && 
-                (
-                    this.GlobalAddressHex == input.GlobalAddressHex ||
-                    (this.GlobalAddressHex != null &&
-                    this.GlobalAddressHex.Equals(input.GlobalAddressHex))
-                ) && 
-                (
-                    this.GlobalAddress == input.GlobalAddress ||
-                    (this.GlobalAddress != null &&
-                    this.GlobalAddress.Equals(input.GlobalAddress))
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
                 );
         }
 
@@ -254,22 +181,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.TargetEntityType.GetHashCode();
-                if (this.TargetEntityIdHex != null)
+                if (this.Amount != null)
                 {
-                    hashCode = (hashCode * 59) + this.TargetEntityIdHex.GetHashCode();
-                }
-                if (this.GlobalEntityIdHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.GlobalEntityIdHex.GetHashCode();
-                }
-                if (this.GlobalAddressHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.GlobalAddressHex.GetHashCode();
-                }
-                if (this.GlobalAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.GlobalAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 }
                 return hashCode;
             }
