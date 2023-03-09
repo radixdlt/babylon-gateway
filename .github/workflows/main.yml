@@ -167,6 +167,8 @@ jobs:
     runs-on: ubuntu-22.04
     needs: 
       - docker-gateway-api-gcr
+      - docker-data-aggregator-gcr
+      - docker-database-migrations-gcr
       - setup-tags
     if: github.event_name == 'pull_request'
     steps:
