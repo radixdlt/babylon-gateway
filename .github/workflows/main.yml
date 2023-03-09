@@ -29,6 +29,21 @@ jobs:
         # Add --verbosity normal to get more noisy logs if required for debugging
         run: dotnet test --no-restore --filter RadixDlt.NetworkGateway.UnitTests
 
+  setup-tags:
+    runs-on: ubuntu-22.04
+    outputs:
+      database-migrations-tag: ${{ steps.setup_tags.outputs.database-migrations-tag }}
+      data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag }}
+      gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag }}
+    steps:
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - name: Setup tags for docker image
+        id: setup_tags
+        uses: ./.github/actions/set-variables
+        with:
+          github_event_name: ${{ github.event_name }}
+          github_action_name: ${{ github.event.action}}
+
   docker-database-migrations-gcr:
     name: (DatabaseMigrations) Docker
     needs:
@@ -82,21 +97,6 @@ jobs:
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-
-  setup-tags:
-    runs-on: ubuntu-22.04
-    outputs:
-      database-migrations-tag: ${{ steps.setup_tags.outputs.database-migrations-tag }}
-      data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag }}
-      gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag }}
-    steps:
-      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-      - name: Setup tags for docker image
-        id: setup_tags
-        uses: ./.github/actions/set-variables
-        with:
-          github_event_name: ${{ github.event_name }}
-          github_action_name: ${{ github.event.action}}
 
   deploy-on-mardunet:
     runs-on: ubuntu-22.04
