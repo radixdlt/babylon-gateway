@@ -119,7 +119,7 @@ jobs:
       cache_tag_suffix: "release"
       enable_dockerhub: "true"
       restore_artifact: "true"
-      artifact_location: "src/DataAggregator/appsettings.json"
+      artifact_location: "src/DatabaseMigrations/appsettings.json"
       artifact_name: "migrations"
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
