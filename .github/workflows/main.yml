@@ -29,61 +29,82 @@ jobs:
         # Add --verbosity normal to get more noisy logs if required for debugging
         run: dotnet test --no-restore --filter RadixDlt.NetworkGateway.UnitTests
 
-  publish-docker:
+  setup-tags:
     runs-on: ubuntu-22.04
     outputs:
       database-migrations-tag: ${{ steps.setup_tags.outputs.database-migrations-tag }}
       data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag }}
       gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag }}
-    permissions:
-      id-token: write
-      contents: read
-      pull-requests: read
     steps:
-      - name: Dump context
-        uses: crazy-max/ghaction-dump-context@516dbb0c760f39b4cdd750ae095f1688780f68f4
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-        with:
-          fetch-depth: 0
-#          ref: ${{ github.event.pull_request.head.ref }} # TODO do we want to restore that?
-      - id: auth
-        uses: google-github-actions/auth@a61909d048e0be579b6c15b27088d19668493851
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - name: configure-docker
-        run: gcloud auth configure-docker -q
       - name: Setup tags for docker image
         id: setup_tags
         uses: ./.github/actions/set-variables
         with:
           github_event_name: ${{ github.event_name }}
           github_action_name: ${{ github.event.action}}
-      - name: Docker build and push Database Migrations
-        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
-        with:
-          file: ./apps/DatabaseMigrations/Dockerfile
-          tags: ${{ steps.setup_tags.outputs.database_migrations_tags }}
-          push: true
-          context: ./
-      - name: Docker build and push DataAggregator
-        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
-        with:
-          file: ./apps/DataAggregator/Dockerfile
-          tags: ${{ steps.setup_tags.outputs.data_aggregator_tags }}
-          push: true
-          context: ./
-      - name: Docker build and push Gateway API
-        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
-        with:
-          file: ./apps/GatewayApi/Dockerfile
-          tags: ${{ steps.setup_tags.outputs.gateway_api_tags }}
-          push: true
-          context: ./
+
+  docker-database-migrations-gcr:
+    name: (DatabaseMigrations) Docker
+    needs:
+      - setup-tags
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    with:
+      runs_on: ubuntu-22.04
+      image_registry: "eu.gcr.io"
+      image_organization: "dev-container-repo"
+      image_name: "babylon-ng-database-migrations"
+      tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}
+      context: "."
+      dockerfile: "./apps/DatabaseMigrations/Dockerfile"
+      platforms: "linux/amd64"
+    secrets:
+      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
+      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+  
+  docker-data-aggregator-gcr:
+    name: (DataAggregator) Docker
+    needs:
+      - setup-tags
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    with:
+      runs_on: ubuntu-22.04
+      image_registry: "eu.gcr.io"
+      image_organization: "dev-container-repo"
+      image_name: "babylon-ng-data-aggregator"
+      tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}
+      context: "."
+      dockerfile: "./apps/DataAggregator/Dockerfile"
+      platforms: "linux/amd64"
+    secrets:
+      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
+      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+  
+  docker-gateway-api-gcr:
+    name: (GatewayApi) Docker
+    needs:
+      - setup-tags
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    with:
+      runs_on: ubuntu-22.04
+      image_registry: "eu.gcr.io"
+      image_organization: "dev-container-repo"
+      image_name: "babylon-ng-gateway-api"
+      tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}
+      context: "."
+      dockerfile: "./apps/GatewayApi/Dockerfile"
+      platforms: "linux/amd64"
+    secrets:
+      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
+      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
   deploy-on-mardunet:
     runs-on: ubuntu-22.04
-    needs: publish-docker
+    needs:
+      - docker-gateway-api-gcr
+      - docker-data-aggregator-gcr
+      - docker-database-migrations-gcr
+      - setup-tags
     if: github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
@@ -104,16 +125,20 @@ jobs:
                 "event_type": "${{env.EVENT_TYPE}}",
                 "client_payload": {
                   "namespace_postfix": "${{env.NAMESPACE}}",
-                  "data_aggregator_image_tag": "${{ needs.publish-docker.outputs.data-aggregator-tag }}",
-                  "gateway_api_image_tag": "${{ needs.publish-docker.outputs.gateway-api-tag }}",
-                  "database_migrations_image_tag": "${{ needs.publish-docker.outputs.database-migrations-tag }}",
+                  "data_aggregator_image_tag": "${{ needs.setup-tags.outputs.data-aggregator-tag }}",
+                  "gateway_api_image_tag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
+                  "database_migrations_image_tag": "${{ needs.setup-tags.outputs.database-migrations-tag }}",
                   "feature_branch_name": "${{env.FULLNODE_COMMIT}}"
                 }
             }'
 
   deploy-pr:
     runs-on: ubuntu-22.04
-    needs: publish-docker
+    needs:
+      - docker-gateway-api-gcr
+      - docker-data-aggregator-gcr
+      - docker-database-migrations-gcr
+      - setup-tags
     if: github.event_name == 'pull_request'
     steps:
       - name: setup "namespace_postfix"
@@ -132,15 +157,19 @@ jobs:
                 "event_type": "${{env.EVENT_TYPE}}",
                 "client_payload": {
                     "namespace_postfix": "${{env.NAMESPACE}}",
-                    "data_aggregator_image_tag": "${{ needs.publish-docker.outputs.data-aggregator-tag }}",
-                    "gateway_api_image_tag": "${{ needs.publish-docker.outputs.gateway-api-tag }}",
-                    "database_migrations_image_tag": "${{ needs.publish-docker.outputs.database-migrations-tag }}"
+                    "data_aggregator_image_tag": "${{ needs.setup-tags.outputs.data-aggregator-tag }}",
+                    "gateway_api_image_tag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
+                    "database_migrations_image_tag": "${{ needs.setup-tags.outputs.database-migrations-tag }}",
                 }
             }'
 
   ephemeral-deploy-and-test:
     runs-on: ubuntu-22.04
-    needs: publish-docker
+    needs: 
+      - docker-gateway-api-gcr
+      - docker-data-aggregator-gcr
+      - docker-database-migrations-gcr
+      - setup-tags
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
@@ -161,7 +190,7 @@ jobs:
           job_name: "ephemeral-deployments/job/ephemeral-gateway-env-deploy-and-test"
           job_params: |
             {
-              "gatewayDockerTag": "${{ needs.publish-docker.outputs.gateway-api-tag }}",
+              "gatewayDockerTag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
               "gatewayBranch": "${{ env.GATEWAY_BRANCH }}",
               "nodeDockerTag": "${{ env.FULLNODE_VERSION }}",
               "postgresVersion": "${{ env.POSTGRES_VERSION }}"
