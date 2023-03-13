@@ -128,7 +128,7 @@ jobs:
                   "data_aggregator_image_tag": "${{ needs.setup-tags.outputs.data-aggregator-tag }}",
                   "gateway_api_image_tag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
                   "database_migrations_image_tag": "${{ needs.setup-tags.outputs.database-migrations-tag }}",
-                  "feature_branch_name": "${{env.FULLNODE_COMMIT}}"
+                  "core_docker_tag": "${{env.FULLNODE_VERSION}}"
                 }
             }'
 
