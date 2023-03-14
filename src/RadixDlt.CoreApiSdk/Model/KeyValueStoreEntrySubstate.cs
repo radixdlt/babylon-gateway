@@ -63,10 +63,16 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class KeyValueStoreEntrySubstate : IEntityOwner
 {
-    public IEnumerable<EntityReference> GetOwnedEntities() => DataStruct.OwnedEntities;
+    public IEnumerable<EntityReference> GetOwnedEntities()
+    {
+        return DataStruct != null
+            ? DataStruct.OwnedEntities
+            : Enumerable.Empty<EntityReference>();
+    }
 }
