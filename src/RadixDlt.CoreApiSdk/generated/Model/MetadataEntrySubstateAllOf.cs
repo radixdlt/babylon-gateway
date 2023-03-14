@@ -90,48 +90,44 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// MetadataSubstateAllOfMetadata
+    /// MetadataEntrySubstateAllOf
     /// </summary>
-    [DataContract(Name = "MetadataSubstate_allOf_metadata")]
-    public partial class MetadataSubstateAllOfMetadata : IEquatable<MetadataSubstateAllOfMetadata>
+    [DataContract(Name = "MetadataEntrySubstate_allOf")]
+    public partial class MetadataEntrySubstateAllOf : IEquatable<MetadataEntrySubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataSubstateAllOfMetadata" /> class.
+        /// Initializes a new instance of the <see cref="MetadataEntrySubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MetadataSubstateAllOfMetadata() { }
+        protected MetadataEntrySubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataSubstateAllOfMetadata" /> class.
+        /// Initializes a new instance of the <see cref="MetadataEntrySubstateAllOf" /> class.
         /// </summary>
-        /// <param name="key">key (required).</param>
-        /// <param name="value">value (required).</param>
-        public MetadataSubstateAllOfMetadata(string key = default(string), string value = default(string))
+        /// <param name="keyHex">The hex-encoded bytes of its key (required).</param>
+        /// <param name="dataStruct">dataStruct.</param>
+        public MetadataEntrySubstateAllOf(string keyHex = default(string), DataStruct dataStruct = default(DataStruct))
         {
-            // to ensure "key" is required (not null)
-            if (key == null)
+            // to ensure "keyHex" is required (not null)
+            if (keyHex == null)
             {
-                throw new ArgumentNullException("key is a required property for MetadataSubstateAllOfMetadata and cannot be null");
+                throw new ArgumentNullException("keyHex is a required property for MetadataEntrySubstateAllOf and cannot be null");
             }
-            this.Key = key;
-            // to ensure "value" is required (not null)
-            if (value == null)
-            {
-                throw new ArgumentNullException("value is a required property for MetadataSubstateAllOfMetadata and cannot be null");
-            }
-            this.Value = value;
+            this.KeyHex = keyHex;
+            this.DataStruct = dataStruct;
         }
 
         /// <summary>
-        /// Gets or Sets Key
+        /// The hex-encoded bytes of its key
         /// </summary>
-        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
-        public string Key { get; set; }
+        /// <value>The hex-encoded bytes of its key</value>
+        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets Value
+        /// Gets or Sets DataStruct
         /// </summary>
-        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public string Value { get; set; }
+        [DataMember(Name = "data_struct", EmitDefaultValue = true)]
+        public DataStruct DataStruct { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -140,9 +136,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MetadataSubstateAllOfMetadata {\n");
-            sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  Value: ").Append(Value).Append("\n");
+            sb.Append("class MetadataEntrySubstateAllOf {\n");
+            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
+            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -163,15 +159,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MetadataSubstateAllOfMetadata);
+            return this.Equals(input as MetadataEntrySubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if MetadataSubstateAllOfMetadata instances are equal
+        /// Returns true if MetadataEntrySubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of MetadataSubstateAllOfMetadata to be compared</param>
+        /// <param name="input">Instance of MetadataEntrySubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MetadataSubstateAllOfMetadata input)
+        public bool Equals(MetadataEntrySubstateAllOf input)
         {
             if (input == null)
             {
@@ -179,14 +175,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Key == input.Key ||
-                    (this.Key != null &&
-                    this.Key.Equals(input.Key))
+                    this.KeyHex == input.KeyHex ||
+                    (this.KeyHex != null &&
+                    this.KeyHex.Equals(input.KeyHex))
                 ) && 
                 (
-                    this.Value == input.Value ||
-                    (this.Value != null &&
-                    this.Value.Equals(input.Value))
+                    this.DataStruct == input.DataStruct ||
+                    (this.DataStruct != null &&
+                    this.DataStruct.Equals(input.DataStruct))
                 );
         }
 
@@ -199,13 +195,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Key != null)
+                if (this.KeyHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
                 }
-                if (this.Value != null)
+                if (this.DataStruct != null)
                 {
-                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
                 }
                 return hashCode;
             }

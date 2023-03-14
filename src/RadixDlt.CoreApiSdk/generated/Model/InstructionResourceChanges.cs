@@ -90,57 +90,43 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TypeInfoSubstateAllOf
+    /// InstructionResourceChanges
     /// </summary>
-    [DataContract(Name = "TypeInfoSubstate_allOf")]
-    public partial class TypeInfoSubstateAllOf : IEquatable<TypeInfoSubstateAllOf>
+    [DataContract(Name = "InstructionResourceChanges")]
+    public partial class InstructionResourceChanges : IEquatable<InstructionResourceChanges>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypeInfoSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="InstructionResourceChanges" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TypeInfoSubstateAllOf() { }
+        protected InstructionResourceChanges() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypeInfoSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="InstructionResourceChanges" /> class.
         /// </summary>
-        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
-        /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="global">global (required).</param>
-        public TypeInfoSubstateAllOf(string packageAddress = default(string), string blueprintName = default(string), bool global = default(bool))
+        /// <param name="index">index (required).</param>
+        /// <param name="resourceChanges">resourceChanges (required).</param>
+        public InstructionResourceChanges(int index = default(int), List<ResourceChange> resourceChanges = default(List<ResourceChange>))
         {
-            // to ensure "packageAddress" is required (not null)
-            if (packageAddress == null)
+            this.Index = index;
+            // to ensure "resourceChanges" is required (not null)
+            if (resourceChanges == null)
             {
-                throw new ArgumentNullException("packageAddress is a required property for TypeInfoSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("resourceChanges is a required property for InstructionResourceChanges and cannot be null");
             }
-            this.PackageAddress = packageAddress;
-            // to ensure "blueprintName" is required (not null)
-            if (blueprintName == null)
-            {
-                throw new ArgumentNullException("blueprintName is a required property for TypeInfoSubstateAllOf and cannot be null");
-            }
-            this.BlueprintName = blueprintName;
-            this.Global = global;
+            this.ResourceChanges = resourceChanges;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the package address
+        /// Gets or Sets Index
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the package address</value>
-        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
-        public string PackageAddress { get; set; }
+        [DataMember(Name = "index", IsRequired = true, EmitDefaultValue = true)]
+        public int Index { get; set; }
 
         /// <summary>
-        /// Gets or Sets BlueprintName
+        /// Gets or Sets ResourceChanges
         /// </summary>
-        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
-        public string BlueprintName { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Global
-        /// </summary>
-        [DataMember(Name = "global", IsRequired = true, EmitDefaultValue = true)]
-        public bool Global { get; set; }
+        [DataMember(Name = "resource_changes", IsRequired = true, EmitDefaultValue = true)]
+        public List<ResourceChange> ResourceChanges { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -149,10 +135,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TypeInfoSubstateAllOf {\n");
-            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
-            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
-            sb.Append("  Global: ").Append(Global).Append("\n");
+            sb.Append("class InstructionResourceChanges {\n");
+            sb.Append("  Index: ").Append(Index).Append("\n");
+            sb.Append("  ResourceChanges: ").Append(ResourceChanges).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -173,15 +158,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TypeInfoSubstateAllOf);
+            return this.Equals(input as InstructionResourceChanges);
         }
 
         /// <summary>
-        /// Returns true if TypeInfoSubstateAllOf instances are equal
+        /// Returns true if InstructionResourceChanges instances are equal
         /// </summary>
-        /// <param name="input">Instance of TypeInfoSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of InstructionResourceChanges to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TypeInfoSubstateAllOf input)
+        public bool Equals(InstructionResourceChanges input)
         {
             if (input == null)
             {
@@ -189,18 +174,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.PackageAddress == input.PackageAddress ||
-                    (this.PackageAddress != null &&
-                    this.PackageAddress.Equals(input.PackageAddress))
+                    this.Index == input.Index ||
+                    this.Index.Equals(input.Index)
                 ) && 
                 (
-                    this.BlueprintName == input.BlueprintName ||
-                    (this.BlueprintName != null &&
-                    this.BlueprintName.Equals(input.BlueprintName))
-                ) && 
-                (
-                    this.Global == input.Global ||
-                    this.Global.Equals(input.Global)
+                    this.ResourceChanges == input.ResourceChanges ||
+                    this.ResourceChanges != null &&
+                    input.ResourceChanges != null &&
+                    this.ResourceChanges.SequenceEqual(input.ResourceChanges)
                 );
         }
 
@@ -213,15 +194,11 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.PackageAddress != null)
+                hashCode = (hashCode * 59) + this.Index.GetHashCode();
+                if (this.ResourceChanges != null)
                 {
-                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceChanges.GetHashCode();
                 }
-                if (this.BlueprintName != null)
-                {
-                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.Global.GetHashCode();
                 return hashCode;
             }
         }

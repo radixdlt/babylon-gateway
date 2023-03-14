@@ -90,23 +90,23 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Slightly different to the SubstateType - some entities have two of the same substate (eg ResouceManager AccessRuleChains) 
+    /// Slightly different to the SubstateType - some entities have two of the same substate (eg ResouceManager AccessRules) 
     /// </summary>
-    /// <value>Slightly different to the SubstateType - some entities have two of the same substate (eg ResouceManager AccessRuleChains) </value>
+    /// <value>Slightly different to the SubstateType - some entities have two of the same substate (eg ResouceManager AccessRules) </value>
     [JsonConverter(typeof(StringEnumConverter))]
     public enum SubstateKeyType
     {
         /// <summary>
-        /// Enum Metadata for value: Metadata
+        /// Enum MetadataEntry for value: MetadataEntry
         /// </summary>
-        [EnumMember(Value = "Metadata")]
-        Metadata = 1,
+        [EnumMember(Value = "MetadataEntry")]
+        MetadataEntry = 1,
 
         /// <summary>
-        /// Enum AccessRulesChain for value: AccessRulesChain
+        /// Enum AccessRules for value: AccessRules
         /// </summary>
-        [EnumMember(Value = "AccessRulesChain")]
-        AccessRulesChain = 2,
+        [EnumMember(Value = "AccessRules")]
+        AccessRules = 2,
 
         /// <summary>
         /// Enum FunctionAccessRules for value: FunctionAccessRules
@@ -256,7 +256,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum Account for value: Account
         /// </summary>
         [EnumMember(Value = "Account")]
-        Account = 27
+        Account = 27,
+
+        /// <summary>
+        /// Enum PackageEventSchema for value: PackageEventSchema
+        /// </summary>
+        [EnumMember(Value = "PackageEventSchema")]
+        PackageEventSchema = 28
 
     }
 

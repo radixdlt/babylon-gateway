@@ -104,14 +104,14 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="StateComponentResponse" /> class.
         /// </summary>
         /// <param name="info">info (required).</param>
-        /// <param name="state">state (required).</param>
-        /// <param name="royaltyConfig">royaltyConfig (required).</param>
-        /// <param name="royaltyAccumulator">royaltyAccumulator (required).</param>
-        /// <param name="metadata">metadata (required).</param>
+        /// <param name="state">state.</param>
+        /// <param name="account">account.</param>
+        /// <param name="royaltyConfig">royaltyConfig.</param>
+        /// <param name="royaltyAccumulator">royaltyAccumulator.</param>
         /// <param name="accessRules">accessRules (required).</param>
         /// <param name="stateOwnedVaults">Any vaults owned directly or indirectly by the component (required).</param>
         /// <param name="descendentIds">Any descendent nodes owned directly or indirectly by the component (required).</param>
-        public StateComponentResponse(Substate info = default(Substate), Substate state = default(Substate), Substate royaltyConfig = default(Substate), Substate royaltyAccumulator = default(Substate), Substate metadata = default(Substate), Substate accessRules = default(Substate), List<ResourceAmount> stateOwnedVaults = default(List<ResourceAmount>), List<StateComponentDescendentId> descendentIds = default(List<StateComponentDescendentId>))
+        public StateComponentResponse(Substate info = default(Substate), Substate state = default(Substate), Substate account = default(Substate), Substate royaltyConfig = default(Substate), Substate royaltyAccumulator = default(Substate), Substate accessRules = default(Substate), List<ResourceAmount> stateOwnedVaults = default(List<ResourceAmount>), List<StateComponentDescendentId> descendentIds = default(List<StateComponentDescendentId>))
         {
             // to ensure "info" is required (not null)
             if (info == null)
@@ -119,30 +119,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("info is a required property for StateComponentResponse and cannot be null");
             }
             this.Info = info;
-            // to ensure "state" is required (not null)
-            if (state == null)
-            {
-                throw new ArgumentNullException("state is a required property for StateComponentResponse and cannot be null");
-            }
-            this.State = state;
-            // to ensure "royaltyConfig" is required (not null)
-            if (royaltyConfig == null)
-            {
-                throw new ArgumentNullException("royaltyConfig is a required property for StateComponentResponse and cannot be null");
-            }
-            this.RoyaltyConfig = royaltyConfig;
-            // to ensure "royaltyAccumulator" is required (not null)
-            if (royaltyAccumulator == null)
-            {
-                throw new ArgumentNullException("royaltyAccumulator is a required property for StateComponentResponse and cannot be null");
-            }
-            this.RoyaltyAccumulator = royaltyAccumulator;
-            // to ensure "metadata" is required (not null)
-            if (metadata == null)
-            {
-                throw new ArgumentNullException("metadata is a required property for StateComponentResponse and cannot be null");
-            }
-            this.Metadata = metadata;
             // to ensure "accessRules" is required (not null)
             if (accessRules == null)
             {
@@ -161,6 +137,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("descendentIds is a required property for StateComponentResponse and cannot be null");
             }
             this.DescendentIds = descendentIds;
+            this.State = state;
+            this.Account = account;
+            this.RoyaltyConfig = royaltyConfig;
+            this.RoyaltyAccumulator = royaltyAccumulator;
         }
 
         /// <summary>
@@ -172,26 +152,26 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Gets or Sets State
         /// </summary>
-        [DataMember(Name = "state", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "state", EmitDefaultValue = true)]
         public Substate State { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Account
+        /// </summary>
+        [DataMember(Name = "account", EmitDefaultValue = true)]
+        public Substate Account { get; set; }
 
         /// <summary>
         /// Gets or Sets RoyaltyConfig
         /// </summary>
-        [DataMember(Name = "royalty_config", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "royalty_config", EmitDefaultValue = true)]
         public Substate RoyaltyConfig { get; set; }
 
         /// <summary>
         /// Gets or Sets RoyaltyAccumulator
         /// </summary>
-        [DataMember(Name = "royalty_accumulator", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "royalty_accumulator", EmitDefaultValue = true)]
         public Substate RoyaltyAccumulator { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Metadata
-        /// </summary>
-        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public Substate Metadata { get; set; }
 
         /// <summary>
         /// Gets or Sets AccessRules
@@ -223,9 +203,9 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class StateComponentResponse {\n");
             sb.Append("  Info: ").Append(Info).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
+            sb.Append("  Account: ").Append(Account).Append("\n");
             sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
             sb.Append("  RoyaltyAccumulator: ").Append(RoyaltyAccumulator).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
             sb.Append("  StateOwnedVaults: ").Append(StateOwnedVaults).Append("\n");
             sb.Append("  DescendentIds: ").Append(DescendentIds).Append("\n");
@@ -275,6 +255,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.State.Equals(input.State))
                 ) && 
                 (
+                    this.Account == input.Account ||
+                    (this.Account != null &&
+                    this.Account.Equals(input.Account))
+                ) && 
+                (
                     this.RoyaltyConfig == input.RoyaltyConfig ||
                     (this.RoyaltyConfig != null &&
                     this.RoyaltyConfig.Equals(input.RoyaltyConfig))
@@ -283,11 +268,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.RoyaltyAccumulator == input.RoyaltyAccumulator ||
                     (this.RoyaltyAccumulator != null &&
                     this.RoyaltyAccumulator.Equals(input.RoyaltyAccumulator))
-                ) && 
-                (
-                    this.Metadata == input.Metadata ||
-                    (this.Metadata != null &&
-                    this.Metadata.Equals(input.Metadata))
                 ) && 
                 (
                     this.AccessRules == input.AccessRules ||
@@ -325,6 +305,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.State.GetHashCode();
                 }
+                if (this.Account != null)
+                {
+                    hashCode = (hashCode * 59) + this.Account.GetHashCode();
+                }
                 if (this.RoyaltyConfig != null)
                 {
                     hashCode = (hashCode * 59) + this.RoyaltyConfig.GetHashCode();
@@ -332,10 +316,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.RoyaltyAccumulator != null)
                 {
                     hashCode = (hashCode * 59) + this.RoyaltyAccumulator.GetHashCode();
-                }
-                if (this.Metadata != null)
-                {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
                 }
                 if (this.AccessRules != null)
                 {

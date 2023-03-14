@@ -84,70 +84,41 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// MetadataSubstate
+    /// AccessRulesSubstateAllOf
     /// </summary>
-    [DataContract(Name = "MetadataSubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
-    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "Metadata")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class MetadataSubstate : Substate, IEquatable<MetadataSubstate>
+    [DataContract(Name = "AccessRulesSubstate_allOf")]
+    public partial class AccessRulesSubstateAllOf : IEquatable<AccessRulesSubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataSubstate" /> class.
+        /// Initializes a new instance of the <see cref="AccessRulesSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MetadataSubstate() { }
+        protected AccessRulesSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataSubstate" /> class.
+        /// Initializes a new instance of the <see cref="AccessRulesSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="metadata">metadata (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.Metadata).</param>
-        public MetadataSubstate(List<MetadataSubstateAllOfMetadata> metadata = default(List<MetadataSubstateAllOfMetadata>), SubstateType substateType = SubstateType.Metadata) : base(substateType)
+        /// <param name="accessRules">accessRules (required).</param>
+        public AccessRulesSubstateAllOf(AccessRules accessRules = default(AccessRules))
         {
-            // to ensure "metadata" is required (not null)
-            if (metadata == null)
+            // to ensure "accessRules" is required (not null)
+            if (accessRules == null)
             {
-                throw new ArgumentNullException("metadata is a required property for MetadataSubstate and cannot be null");
+                throw new ArgumentNullException("accessRules is a required property for AccessRulesSubstateAllOf and cannot be null");
             }
-            this.Metadata = metadata;
+            this.AccessRules = accessRules;
         }
 
         /// <summary>
-        /// Gets or Sets Metadata
+        /// Gets or Sets AccessRules
         /// </summary>
-        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public List<MetadataSubstateAllOfMetadata> Metadata { get; set; }
+        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
+        public AccessRules AccessRules { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -156,9 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MetadataSubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("class AccessRulesSubstateAllOf {\n");
+            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -167,7 +137,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -179,26 +149,25 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MetadataSubstate);
+            return this.Equals(input as AccessRulesSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if MetadataSubstate instances are equal
+        /// Returns true if AccessRulesSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of MetadataSubstate to be compared</param>
+        /// <param name="input">Instance of AccessRulesSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MetadataSubstate input)
+        public bool Equals(AccessRulesSubstateAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.Metadata == input.Metadata ||
-                    this.Metadata != null &&
-                    input.Metadata != null &&
-                    this.Metadata.SequenceEqual(input.Metadata)
+                    this.AccessRules == input.AccessRules ||
+                    (this.AccessRules != null &&
+                    this.AccessRules.Equals(input.AccessRules))
                 );
         }
 
@@ -210,10 +179,10 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.Metadata != null)
+                int hashCode = 41;
+                if (this.AccessRules != null)
                 {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
                 }
                 return hashCode;
             }

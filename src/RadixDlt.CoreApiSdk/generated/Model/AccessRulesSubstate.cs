@@ -91,12 +91,12 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// AccessRulesChainSubstate
+    /// AccessRulesSubstate
     /// </summary>
-    [DataContract(Name = "AccessRulesChainSubstate")]
+    [DataContract(Name = "AccessRulesSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
     [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
     [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
@@ -105,10 +105,11 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
     [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
     [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "Metadata")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
     [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
+    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
     [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
     [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
@@ -121,34 +122,33 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class AccessRulesChainSubstate : Substate, IEquatable<AccessRulesChainSubstate>
+    public partial class AccessRulesSubstate : Substate, IEquatable<AccessRulesSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRulesChainSubstate" /> class.
+        /// Initializes a new instance of the <see cref="AccessRulesSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccessRulesChainSubstate() { }
+        protected AccessRulesSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRulesChainSubstate" /> class.
+        /// Initializes a new instance of the <see cref="AccessRulesSubstate" /> class.
         /// </summary>
-        /// <param name="chain">The layers of access rules applied.  (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.AccessRulesChain).</param>
-        public AccessRulesChainSubstate(List<AccessRules> chain = default(List<AccessRules>), SubstateType substateType = SubstateType.AccessRulesChain) : base(substateType)
+        /// <param name="accessRules">accessRules (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.AccessRules).</param>
+        public AccessRulesSubstate(AccessRules accessRules = default(AccessRules), SubstateType substateType = SubstateType.AccessRules) : base(substateType)
         {
-            // to ensure "chain" is required (not null)
-            if (chain == null)
+            // to ensure "accessRules" is required (not null)
+            if (accessRules == null)
             {
-                throw new ArgumentNullException("chain is a required property for AccessRulesChainSubstate and cannot be null");
+                throw new ArgumentNullException("accessRules is a required property for AccessRulesSubstate and cannot be null");
             }
-            this.Chain = chain;
+            this.AccessRules = accessRules;
         }
 
         /// <summary>
-        /// The layers of access rules applied. 
+        /// Gets or Sets AccessRules
         /// </summary>
-        /// <value>The layers of access rules applied. </value>
-        [DataMember(Name = "chain", IsRequired = true, EmitDefaultValue = true)]
-        public List<AccessRules> Chain { get; set; }
+        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
+        public AccessRules AccessRules { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,9 +157,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccessRulesChainSubstate {\n");
+            sb.Append("class AccessRulesSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Chain: ").Append(Chain).Append("\n");
+            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -180,15 +180,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccessRulesChainSubstate);
+            return this.Equals(input as AccessRulesSubstate);
         }
 
         /// <summary>
-        /// Returns true if AccessRulesChainSubstate instances are equal
+        /// Returns true if AccessRulesSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccessRulesChainSubstate to be compared</param>
+        /// <param name="input">Instance of AccessRulesSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccessRulesChainSubstate input)
+        public bool Equals(AccessRulesSubstate input)
         {
             if (input == null)
             {
@@ -196,10 +196,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Chain == input.Chain ||
-                    this.Chain != null &&
-                    input.Chain != null &&
-                    this.Chain.SequenceEqual(input.Chain)
+                    this.AccessRules == input.AccessRules ||
+                    (this.AccessRules != null &&
+                    this.AccessRules.Equals(input.AccessRules))
                 );
         }
 
@@ -212,9 +211,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Chain != null)
+                if (this.AccessRules != null)
                 {
-                    hashCode = (hashCode * 59) + this.Chain.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
                 }
                 return hashCode;
             }

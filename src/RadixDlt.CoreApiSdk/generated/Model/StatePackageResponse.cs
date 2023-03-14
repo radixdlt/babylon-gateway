@@ -106,9 +106,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="info">info (required).</param>
         /// <param name="royaltyConfig">royaltyConfig (required).</param>
         /// <param name="royaltyAccumulator">royaltyAccumulator (required).</param>
-        /// <param name="metadata">metadata (required).</param>
         /// <param name="accessRules">accessRules (required).</param>
-        public StatePackageResponse(Substate info = default(Substate), Substate royaltyConfig = default(Substate), Substate royaltyAccumulator = default(Substate), Substate metadata = default(Substate), Substate accessRules = default(Substate))
+        public StatePackageResponse(Substate info = default(Substate), Substate royaltyConfig = default(Substate), Substate royaltyAccumulator = default(Substate), Substate accessRules = default(Substate))
         {
             // to ensure "info" is required (not null)
             if (info == null)
@@ -128,12 +127,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("royaltyAccumulator is a required property for StatePackageResponse and cannot be null");
             }
             this.RoyaltyAccumulator = royaltyAccumulator;
-            // to ensure "metadata" is required (not null)
-            if (metadata == null)
-            {
-                throw new ArgumentNullException("metadata is a required property for StatePackageResponse and cannot be null");
-            }
-            this.Metadata = metadata;
             // to ensure "accessRules" is required (not null)
             if (accessRules == null)
             {
@@ -161,12 +154,6 @@ namespace RadixDlt.CoreApiSdk.Model
         public Substate RoyaltyAccumulator { get; set; }
 
         /// <summary>
-        /// Gets or Sets Metadata
-        /// </summary>
-        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public Substate Metadata { get; set; }
-
-        /// <summary>
         /// Gets or Sets AccessRules
         /// </summary>
         [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
@@ -183,7 +170,6 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  Info: ").Append(Info).Append("\n");
             sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
             sb.Append("  RoyaltyAccumulator: ").Append(RoyaltyAccumulator).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -236,11 +222,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.RoyaltyAccumulator.Equals(input.RoyaltyAccumulator))
                 ) && 
                 (
-                    this.Metadata == input.Metadata ||
-                    (this.Metadata != null &&
-                    this.Metadata.Equals(input.Metadata))
-                ) && 
-                (
                     this.AccessRules == input.AccessRules ||
                     (this.AccessRules != null &&
                     this.AccessRules.Equals(input.AccessRules))
@@ -267,10 +248,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.RoyaltyAccumulator != null)
                 {
                     hashCode = (hashCode * 59) + this.RoyaltyAccumulator.GetHashCode();
-                }
-                if (this.Metadata != null)
-                {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
                 }
                 if (this.AccessRules != null)
                 {

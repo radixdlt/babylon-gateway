@@ -694,10 +694,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     var referencedEntity = referencedEntities.Get(substateId.EntityIdHex);
 
-                    if (substateData is CoreModel.MetadataSubstate metadata)
-                    {
-                        metadataChanges.Add(new MetadataChange(referencedEntity, metadata.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), stateVersion));
-                    }
+                    // TODO: PP
+                    // if (substateData is CoreModel.MetadataSubstate metadata)
+                    // {
+                    //     metadataChanges.Add(new MetadataChange(referencedEntity, metadata.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), stateVersion));
+                    // }
 
                     if (substateData is CoreModel.ResourceManagerSubstate resourceManager)
                     {
@@ -742,24 +743,25 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             nonFungibleStoreEntry.IsDeleted, nonFungibleStoreEntry.NonFungibleData, stateVersion));
                     }
 
-                    if (substateData is CoreModel.AccessRulesChainSubstate accessRulesChain)
-                    {
-                        AccessRulesChainSubtype subtype = substateId.ModuleType switch
-                        {
-                            CoreModel.ModuleType.AccessRules => AccessRulesChainSubtype.None,
-                            CoreModel.ModuleType.AccessRules1 => AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain,
-                            _ => throw new UnreachableException($"Didn't expect {substateId.ModuleType} value"),
-                        };
-
-                        entityAccessRulesChainHistoryToAdd.Add(new EntityAccessRulesChainHistory
-                        {
-                            Id = sequences.EntityAccessRulesChainHistorySequence++,
-                            FromStateVersion = stateVersion,
-                            EntityId = referencedEntities.Get(substateId.EntityIdHex).DatabaseId,
-                            Subtype = subtype,
-                            AccessRulesChain = JsonConvert.SerializeObject(accessRulesChain.Chain),
-                        });
-                    }
+                    // TODO: PP
+                    // if (substateData is CoreModel.AccessRulesChainSubstate accessRulesChain)
+                    // {
+                    //     AccessRulesChainSubtype subtype = substateId.ModuleType switch
+                    //     {
+                    //         CoreModel.ModuleType.AccessRules => AccessRulesChainSubtype.None,
+                    //         CoreModel.ModuleType.AccessRules1 => AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain,
+                    //         _ => throw new UnreachableException($"Didn't expect {substateId.ModuleType} value"),
+                    //     };
+                    //
+                    //     entityAccessRulesChainHistoryToAdd.Add(new EntityAccessRulesChainHistory
+                    //     {
+                    //         Id = sequences.EntityAccessRulesChainHistorySequence++,
+                    //         FromStateVersion = stateVersion,
+                    //         EntityId = referencedEntities.Get(substateId.EntityIdHex).DatabaseId,
+                    //         Subtype = subtype,
+                    //         AccessRulesChain = JsonConvert.SerializeObject(accessRulesChain.Chain),
+                    //     });
+                    // }
 
                     if (substateData is CoreModel.ComponentStateSubstate componentState)
                     {

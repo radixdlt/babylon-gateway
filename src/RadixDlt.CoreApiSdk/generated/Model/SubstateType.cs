@@ -96,16 +96,16 @@ namespace RadixDlt.CoreApiSdk.Model
     public enum SubstateType
     {
         /// <summary>
-        /// Enum Metadata for value: Metadata
+        /// Enum MetadataEntry for value: MetadataEntry
         /// </summary>
-        [EnumMember(Value = "Metadata")]
-        Metadata = 1,
+        [EnumMember(Value = "MetadataEntry")]
+        MetadataEntry = 1,
 
         /// <summary>
-        /// Enum AccessRulesChain for value: AccessRulesChain
+        /// Enum AccessRules for value: AccessRules
         /// </summary>
-        [EnumMember(Value = "AccessRulesChain")]
-        AccessRulesChain = 2,
+        [EnumMember(Value = "AccessRules")]
+        AccessRules = 2,
 
         /// <summary>
         /// Enum FunctionAccessRules for value: FunctionAccessRules
@@ -249,7 +249,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum Account for value: Account
         /// </summary>
         [EnumMember(Value = "Account")]
-        Account = 26
+        Account = 26,
+
+        /// <summary>
+        /// Enum PackageEventSchema for value: PackageEventSchema
+        /// </summary>
+        [EnumMember(Value = "PackageEventSchema")]
+        PackageEventSchema = 27
 
     }
 

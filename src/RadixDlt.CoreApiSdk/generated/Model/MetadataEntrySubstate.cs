@@ -84,42 +84,80 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// AccessRulesChainSubstateAllOf
+    /// MetadataEntrySubstate
     /// </summary>
-    [DataContract(Name = "AccessRulesChainSubstate_allOf")]
-    public partial class AccessRulesChainSubstateAllOf : IEquatable<AccessRulesChainSubstateAllOf>
+    [DataContract(Name = "MetadataEntrySubstate")]
+    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
+    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
+    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
+    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
+    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
+    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
+    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
+    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
+    public partial class MetadataEntrySubstate : Substate, IEquatable<MetadataEntrySubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRulesChainSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MetadataEntrySubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccessRulesChainSubstateAllOf() { }
+        protected MetadataEntrySubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRulesChainSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MetadataEntrySubstate" /> class.
         /// </summary>
-        /// <param name="chain">The layers of access rules applied.  (required).</param>
-        public AccessRulesChainSubstateAllOf(List<AccessRules> chain = default(List<AccessRules>))
+        /// <param name="keyHex">The hex-encoded bytes of its key (required).</param>
+        /// <param name="dataStruct">dataStruct.</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.MetadataEntry).</param>
+        public MetadataEntrySubstate(string keyHex = default(string), DataStruct dataStruct = default(DataStruct), SubstateType substateType = SubstateType.MetadataEntry) : base(substateType)
         {
-            // to ensure "chain" is required (not null)
-            if (chain == null)
+            // to ensure "keyHex" is required (not null)
+            if (keyHex == null)
             {
-                throw new ArgumentNullException("chain is a required property for AccessRulesChainSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("keyHex is a required property for MetadataEntrySubstate and cannot be null");
             }
-            this.Chain = chain;
+            this.KeyHex = keyHex;
+            this.DataStruct = dataStruct;
         }
 
         /// <summary>
-        /// The layers of access rules applied. 
+        /// The hex-encoded bytes of its key
         /// </summary>
-        /// <value>The layers of access rules applied. </value>
-        [DataMember(Name = "chain", IsRequired = true, EmitDefaultValue = true)]
-        public List<AccessRules> Chain { get; set; }
+        /// <value>The hex-encoded bytes of its key</value>
+        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets DataStruct
+        /// </summary>
+        [DataMember(Name = "data_struct", EmitDefaultValue = true)]
+        public DataStruct DataStruct { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +166,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccessRulesChainSubstateAllOf {\n");
-            sb.Append("  Chain: ").Append(Chain).Append("\n");
+            sb.Append("class MetadataEntrySubstate {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
+            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -138,7 +178,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -150,26 +190,30 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccessRulesChainSubstateAllOf);
+            return this.Equals(input as MetadataEntrySubstate);
         }
 
         /// <summary>
-        /// Returns true if AccessRulesChainSubstateAllOf instances are equal
+        /// Returns true if MetadataEntrySubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccessRulesChainSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of MetadataEntrySubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccessRulesChainSubstateAllOf input)
+        public bool Equals(MetadataEntrySubstate input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.Chain == input.Chain ||
-                    this.Chain != null &&
-                    input.Chain != null &&
-                    this.Chain.SequenceEqual(input.Chain)
+                    this.KeyHex == input.KeyHex ||
+                    (this.KeyHex != null &&
+                    this.KeyHex.Equals(input.KeyHex))
+                ) && base.Equals(input) && 
+                (
+                    this.DataStruct == input.DataStruct ||
+                    (this.DataStruct != null &&
+                    this.DataStruct.Equals(input.DataStruct))
                 );
         }
 
@@ -181,10 +225,14 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.Chain != null)
+                int hashCode = base.GetHashCode();
+                if (this.KeyHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Chain.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
+                }
+                if (this.DataStruct != null)
+                {
+                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
                 }
                 return hashCode;
             }

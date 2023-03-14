@@ -141,7 +141,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum PackageRoyalty for value: PackageRoyalty
         /// </summary>
         [EnumMember(Value = "PackageRoyalty")]
-        PackageRoyalty = 8
+        PackageRoyalty = 8,
+
+        /// <summary>
+        /// Enum PackageEventSchema for value: PackageEventSchema
+        /// </summary>
+        [EnumMember(Value = "PackageEventSchema")]
+        PackageEventSchema = 9
 
     }
 

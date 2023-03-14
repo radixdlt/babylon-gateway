@@ -150,7 +150,7 @@ internal class PreviewService : IPreviewService
 
             return new GatewayModel.TransactionPreviewResponse(
                 receipt: coreResponse.Receipt,
-                resourceChanges: coreResponse.ResourceChanges.Cast<object>().ToList(),
+                resourceChanges: coreResponse.InstructionResourceChanges.Cast<object>().ToList(),
                 logs: coreResponse.Logs.Select(l => new GatewayModel.TransactionPreviewResponseLogsInner(l.Level, l.Message)).ToList());
         }
 
