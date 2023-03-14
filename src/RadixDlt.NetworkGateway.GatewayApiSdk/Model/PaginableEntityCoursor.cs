@@ -62,29 +62,23 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Runtime.Serialization;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-internal class EntityFungiblesRequestValidator : AbstractValidator<GatewayModel.EntityFungiblesRequest>
+[DataContract]
+public sealed record PaginableEntityCoursor(int? Offset)
 {
-    public EntityFungiblesRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    [DataMember(Name = "o", EmitDefaultValue = false)]
+    public int? Offset { get; set; } = Offset;
+
+    public static PaginableEntityCoursor FromCursorString(string cursorString)
     {
-        RuleFor(x => x.Address)
-            .NotEmpty()
-            .RadixAddress();
+        return Serializations.FromBase64JsonOrDefault<PaginableEntityCoursor>(cursorString);
+    }
 
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
-
-        RuleFor(x => x.Cursor)
-            .Base64();
-
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
+    public string ToCursorString()
+    {
+        return Serializations.AsBase64Json(this);
     }
 }

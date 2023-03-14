@@ -62,23 +62,34 @@
  * permissions under this License.
  */
 
-using System.Runtime.Serialization;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-[DataContract]
-public sealed record EntityNonFungiblesCursor(int? Offset)
+internal class StateEntityFungibleResourceVaultsPageRequestValidator : AbstractValidator<StateEntityFungibleResourceVaultsPageRequest>
 {
-    [DataMember(Name = "o", EmitDefaultValue = false)]
-    public int? Offset { get; set; } = Offset;
-
-    public static EntityNonFungiblesCursor FromCursorString(string cursorString)
+    public StateEntityFungibleResourceVaultsPageRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot)
     {
-        return Serializations.FromBase64JsonOrDefault<EntityNonFungiblesCursor>(cursorString);
-    }
+        RuleFor(x => x.Address)
+            .NotEmpty()
+            .RadixAddress();
 
-    public string ToCursorString()
-    {
-        return Serializations.AsBase64Json(this);
+        RuleFor(x => x.ResourceAddress)
+            .NotEmpty()
+            .RadixAddress();
+
+        RuleFor(x => x.AtLedgerStateVersion)
+            .GreaterThan(0)
+            .NotEmpty();
+
+        RuleFor(x => x.Cursor)
+            .Base64();
+
+        RuleFor(x => x.LimitPerPage)
+            .GreaterThan(0)
+            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
     }
 }

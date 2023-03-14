@@ -62,23 +62,30 @@
  * permissions under this License.
  */
 
-using System.Runtime.Serialization;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-[DataContract]
-public sealed record EntityMetadataRequestCursor(int? Offset)
+internal class StateEntityMetadataPageRequestValidator : AbstractValidator<GatewayModel.StateEntityMetadataPageRequest>
 {
-    [DataMember(Name = "o", EmitDefaultValue = false)]
-    public int? Offset { get; set; } = Offset;
-
-    public static EntityMetadataRequestCursor FromCursorString(string cursorString)
+    public StateEntityMetadataPageRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot)
     {
-        return Serializations.FromBase64JsonOrDefault<EntityMetadataRequestCursor>(cursorString);
-    }
+        RuleFor(x => x.Address)
+            .NotEmpty()
+            .RadixAddress();
 
-    public string ToCursorString()
-    {
-        return Serializations.AsBase64Json(this);
+        RuleFor(x => x.AtLedgerStateVersion)
+            .GreaterThan(0)
+            .NotEmpty();
+
+        RuleFor(x => x.Cursor)
+            .Base64();
+
+        RuleFor(x => x.LimitPerPage)
+            .GreaterThan(0)
+            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
     }
 }

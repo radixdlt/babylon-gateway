@@ -105,7 +105,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="packageAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
         /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="state">state (required).</param>
+        /// <param name="state">state.</param>
         /// <param name="accessRulesChain">accessRulesChain (required).</param>
         /// <param name="royaltyAggregator">royaltyAggregator.</param>
         public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), Object accessRulesChain = default(Object), FungibleResourcesCollectionItemGloballyAggregated royaltyAggregator = default(FungibleResourcesCollectionItemGloballyAggregated))
@@ -122,18 +122,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("blueprintName is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
             }
             this.BlueprintName = blueprintName;
-            // to ensure "state" is required (not null)
-            if (state == null)
-            {
-                throw new ArgumentNullException("state is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
-            }
-            this.State = state;
             // to ensure "accessRulesChain" is required (not null)
             if (accessRulesChain == null)
             {
                 throw new ArgumentNullException("accessRulesChain is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
             }
             this.AccessRulesChain = accessRulesChain;
+            this.State = state;
             this.RoyaltyAggregator = royaltyAggregator;
         }
 
@@ -153,7 +148,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets State
         /// </summary>
-        [DataMember(Name = "state", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "state", EmitDefaultValue = true)]
         public Object State { get; set; }
 
         /// <summary>

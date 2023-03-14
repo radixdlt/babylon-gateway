@@ -92,47 +92,68 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
-        /// Get Entity Fungible Resource Totals
+        /// Get vault page of Entity Fungible resource aggregated per vault
         /// </summary>
         /// <remarks>
-        /// Returns the total amount of each fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Returns vaults for fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityFungiblesRequest"></param>
-        /// <returns>EntityFungiblesResponse</returns>
-        EntityFungiblesResponse EntityFungibles(EntityFungiblesRequest entityFungiblesRequest);
+        /// <param name="stateEntityFungibleResourceVaultsPageRequest"></param>
+        /// <returns>StateEntityFungibleResourceVaultsPageResponse</returns>
+        StateEntityFungibleResourceVaultsPageResponse EntityFungibleResourceVaultPage(StateEntityFungibleResourceVaultsPageRequest stateEntityFungibleResourceVaultsPageRequest);
 
         /// <summary>
-        /// Get Entity Fungible Resource Totals
+        /// Get vault page of Entity Fungible resource aggregated per vault
         /// </summary>
         /// <remarks>
-        /// Returns the total amount of each fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Returns vaults for fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityFungiblesRequest"></param>
-        /// <returns>ApiResponse of EntityFungiblesResponse</returns>
-        ApiResponse<EntityFungiblesResponse> EntityFungiblesWithHttpInfo(EntityFungiblesRequest entityFungiblesRequest);
+        /// <param name="stateEntityFungibleResourceVaultsPageRequest"></param>
+        /// <returns>ApiResponse of StateEntityFungibleResourceVaultsPageResponse</returns>
+        ApiResponse<StateEntityFungibleResourceVaultsPageResponse> EntityFungibleResourceVaultPageWithHttpInfo(StateEntityFungibleResourceVaultsPageRequest stateEntityFungibleResourceVaultsPageRequest);
         /// <summary>
-        /// Get Entity Metadata
+        /// Get Entity Fungible Resource Totals Page aggregated globally
+        /// </summary>
+        /// <remarks>
+        /// Returns the total amount of each fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityFungiblesPageRequest"></param>
+        /// <returns>StateEntityFungiblesPageResponse</returns>
+        StateEntityFungiblesPageResponse EntityFungiblesPage(StateEntityFungiblesPageRequest stateEntityFungiblesPageRequest);
+
+        /// <summary>
+        /// Get Entity Fungible Resource Totals Page aggregated globally
+        /// </summary>
+        /// <remarks>
+        /// Returns the total amount of each fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityFungiblesPageRequest"></param>
+        /// <returns>ApiResponse of StateEntityFungiblesPageResponse</returns>
+        ApiResponse<StateEntityFungiblesPageResponse> EntityFungiblesPageWithHttpInfo(StateEntityFungiblesPageRequest stateEntityFungiblesPageRequest);
+        /// <summary>
+        /// Get Entity Metadata Page
         /// </summary>
         /// <remarks>
         /// Returns all the metadata properties associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityMetadataRequest"></param>
-        /// <returns>EntityMetadataResponse</returns>
-        EntityMetadataResponse EntityMetadata(EntityMetadataRequest entityMetadataRequest);
+        /// <param name="stateEntityMetadataPageRequest"></param>
+        /// <returns>StateEntityMetadataPageResponse</returns>
+        StateEntityMetadataPageResponse EntityMetadataPage(StateEntityMetadataPageRequest stateEntityMetadataPageRequest);
 
         /// <summary>
-        /// Get Entity Metadata
+        /// Get Entity Metadata Page
         /// </summary>
         /// <remarks>
         /// Returns all the metadata properties associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityMetadataRequest"></param>
-        /// <returns>ApiResponse of EntityMetadataResponse</returns>
-        ApiResponse<EntityMetadataResponse> EntityMetadataWithHttpInfo(EntityMetadataRequest entityMetadataRequest);
+        /// <param name="stateEntityMetadataPageRequest"></param>
+        /// <returns>ApiResponse of StateEntityMetadataPageResponse</returns>
+        ApiResponse<StateEntityMetadataPageResponse> EntityMetadataPageWithHttpInfo(StateEntityMetadataPageRequest stateEntityMetadataPageRequest);
         /// <summary>
         /// Get Entity Non-Fungible IDs
         /// </summary>
@@ -140,9 +161,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns all non-fungible IDs of a given non-fungible resource owned by a given entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearence on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungibleIdsRequest"></param>
-        /// <returns>EntityNonFungibleIdsResponse</returns>
-        EntityNonFungibleIdsResponse EntityNonFungibleIds(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest);
+        /// <param name="stateEntityNonFungibleIdsPageRequest"></param>
+        /// <returns>StateEntityNonFungibleIdsPageResponse</returns>
+        StateEntityNonFungibleIdsPageResponse EntityNonFungibleIdsPage(StateEntityNonFungibleIdsPageRequest stateEntityNonFungibleIdsPageRequest);
 
         /// <summary>
         /// Get Entity Non-Fungible IDs
@@ -151,30 +172,51 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns all non-fungible IDs of a given non-fungible resource owned by a given entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearence on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungibleIdsRequest"></param>
-        /// <returns>ApiResponse of EntityNonFungibleIdsResponse</returns>
-        ApiResponse<EntityNonFungibleIdsResponse> EntityNonFungibleIdsWithHttpInfo(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest);
+        /// <param name="stateEntityNonFungibleIdsPageRequest"></param>
+        /// <returns>ApiResponse of StateEntityNonFungibleIdsPageResponse</returns>
+        ApiResponse<StateEntityNonFungibleIdsPageResponse> EntityNonFungibleIdsPageWithHttpInfo(StateEntityNonFungibleIdsPageRequest stateEntityNonFungibleIdsPageRequest);
         /// <summary>
-        /// Get Entity Non-Fungible Resource Totals
+        /// Get vault page of Entity Non Fungible aggregated per vault
         /// </summary>
         /// <remarks>
-        /// Returns the total amount of each non-fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Returns vaults for non fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungiblesRequest"></param>
-        /// <returns>EntityNonFungiblesResponse</returns>
-        EntityNonFungiblesResponse EntityNonFungibles(EntityNonFungiblesRequest entityNonFungiblesRequest);
+        /// <param name="stateEntityNonFungibleResourceVaultsPageRequest"></param>
+        /// <returns>StateEntityNonFungibleResourceVaultsPageResponse</returns>
+        StateEntityNonFungibleResourceVaultsPageResponse EntityNonFungibleResourceVaultPage(StateEntityNonFungibleResourceVaultsPageRequest stateEntityNonFungibleResourceVaultsPageRequest);
 
         /// <summary>
-        /// Get Entity Non-Fungible Resource Totals
+        /// Get vault page of Entity Non Fungible aggregated per vault
         /// </summary>
         /// <remarks>
-        /// Returns the total amount of each non-fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Returns vaults for non fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungiblesRequest"></param>
-        /// <returns>ApiResponse of EntityNonFungiblesResponse</returns>
-        ApiResponse<EntityNonFungiblesResponse> EntityNonFungiblesWithHttpInfo(EntityNonFungiblesRequest entityNonFungiblesRequest);
+        /// <param name="stateEntityNonFungibleResourceVaultsPageRequest"></param>
+        /// <returns>ApiResponse of StateEntityNonFungibleResourceVaultsPageResponse</returns>
+        ApiResponse<StateEntityNonFungibleResourceVaultsPageResponse> EntityNonFungibleResourceVaultPageWithHttpInfo(StateEntityNonFungibleResourceVaultsPageRequest stateEntityNonFungibleResourceVaultsPageRequest);
+        /// <summary>
+        /// Get Entity Non-Fungible Resource Totals Page aggregated globally
+        /// </summary>
+        /// <remarks>
+        /// Returns the total amount of each non-fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityNonFungiblesPageRequest"></param>
+        /// <returns>StateEntityNonFungiblesPageResponse</returns>
+        StateEntityNonFungiblesPageResponse EntityNonFungiblesPage(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest);
+
+        /// <summary>
+        /// Get Entity Non-Fungible Resource Totals Page aggregated globally
+        /// </summary>
+        /// <remarks>
+        /// Returns the total amount of each non-fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityNonFungiblesPageRequest"></param>
+        /// <returns>ApiResponse of StateEntityNonFungiblesPageResponse</returns>
+        ApiResponse<StateEntityNonFungiblesPageResponse> EntityNonFungiblesPageWithHttpInfo(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest);
         /// <summary>
         /// Get Entity Resource Totals
         /// </summary>
@@ -287,51 +329,74 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Asynchronous Operations
         /// <summary>
-        /// Get Entity Fungible Resource Totals
+        /// Get vault page of Entity Fungible resource aggregated per vault
         /// </summary>
         /// <remarks>
-        /// Returns the total amount of each fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Returns vaults for fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityFungiblesRequest"></param>
+        /// <param name="stateEntityFungibleResourceVaultsPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntityFungiblesResponse</returns>
-        System.Threading.Tasks.Task<EntityFungiblesResponse> EntityFungiblesAsync(EntityFungiblesRequest entityFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of StateEntityFungibleResourceVaultsPageResponse</returns>
+        System.Threading.Tasks.Task<StateEntityFungibleResourceVaultsPageResponse> EntityFungibleResourceVaultPageAsync(StateEntityFungibleResourceVaultsPageRequest stateEntityFungibleResourceVaultsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Get Entity Fungible Resource Totals
+        /// Get vault page of Entity Fungible resource aggregated per vault
         /// </summary>
         /// <remarks>
-        /// Returns the total amount of each fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Returns vaults for fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityFungiblesRequest"></param>
+        /// <param name="stateEntityFungibleResourceVaultsPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntityFungiblesResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<EntityFungiblesResponse>> EntityFungiblesWithHttpInfoAsync(EntityFungiblesRequest entityFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (StateEntityFungibleResourceVaultsPageResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateEntityFungibleResourceVaultsPageResponse>> EntityFungibleResourceVaultPageWithHttpInfoAsync(StateEntityFungibleResourceVaultsPageRequest stateEntityFungibleResourceVaultsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
-        /// Get Entity Metadata
+        /// Get Entity Fungible Resource Totals Page aggregated globally
+        /// </summary>
+        /// <remarks>
+        /// Returns the total amount of each fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityFungiblesPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateEntityFungiblesPageResponse</returns>
+        System.Threading.Tasks.Task<StateEntityFungiblesPageResponse> EntityFungiblesPageAsync(StateEntityFungiblesPageRequest stateEntityFungiblesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Entity Fungible Resource Totals Page aggregated globally
+        /// </summary>
+        /// <remarks>
+        /// Returns the total amount of each fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityFungiblesPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateEntityFungiblesPageResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateEntityFungiblesPageResponse>> EntityFungiblesPageWithHttpInfoAsync(StateEntityFungiblesPageRequest stateEntityFungiblesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Entity Metadata Page
         /// </summary>
         /// <remarks>
         /// Returns all the metadata properties associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityMetadataRequest"></param>
+        /// <param name="stateEntityMetadataPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntityMetadataResponse</returns>
-        System.Threading.Tasks.Task<EntityMetadataResponse> EntityMetadataAsync(EntityMetadataRequest entityMetadataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of StateEntityMetadataPageResponse</returns>
+        System.Threading.Tasks.Task<StateEntityMetadataPageResponse> EntityMetadataPageAsync(StateEntityMetadataPageRequest stateEntityMetadataPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Get Entity Metadata
+        /// Get Entity Metadata Page
         /// </summary>
         /// <remarks>
         /// Returns all the metadata properties associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityMetadataRequest"></param>
+        /// <param name="stateEntityMetadataPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntityMetadataResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<EntityMetadataResponse>> EntityMetadataWithHttpInfoAsync(EntityMetadataRequest entityMetadataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (StateEntityMetadataPageResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateEntityMetadataPageResponse>> EntityMetadataPageWithHttpInfoAsync(StateEntityMetadataPageRequest stateEntityMetadataPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Entity Non-Fungible IDs
         /// </summary>
@@ -339,10 +404,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns all non-fungible IDs of a given non-fungible resource owned by a given entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearence on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungibleIdsRequest"></param>
+        /// <param name="stateEntityNonFungibleIdsPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntityNonFungibleIdsResponse</returns>
-        System.Threading.Tasks.Task<EntityNonFungibleIdsResponse> EntityNonFungibleIdsAsync(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of StateEntityNonFungibleIdsPageResponse</returns>
+        System.Threading.Tasks.Task<StateEntityNonFungibleIdsPageResponse> EntityNonFungibleIdsPageAsync(StateEntityNonFungibleIdsPageRequest stateEntityNonFungibleIdsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Get Entity Non-Fungible IDs
@@ -351,33 +416,56 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns all non-fungible IDs of a given non-fungible resource owned by a given entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearence on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungibleIdsRequest"></param>
+        /// <param name="stateEntityNonFungibleIdsPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntityNonFungibleIdsResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<EntityNonFungibleIdsResponse>> EntityNonFungibleIdsWithHttpInfoAsync(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (StateEntityNonFungibleIdsPageResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateEntityNonFungibleIdsPageResponse>> EntityNonFungibleIdsPageWithHttpInfoAsync(StateEntityNonFungibleIdsPageRequest stateEntityNonFungibleIdsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
-        /// Get Entity Non-Fungible Resource Totals
+        /// Get vault page of Entity Non Fungible aggregated per vault
         /// </summary>
         /// <remarks>
-        /// Returns the total amount of each non-fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Returns vaults for non fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungiblesRequest"></param>
+        /// <param name="stateEntityNonFungibleResourceVaultsPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntityNonFungiblesResponse</returns>
-        System.Threading.Tasks.Task<EntityNonFungiblesResponse> EntityNonFungiblesAsync(EntityNonFungiblesRequest entityNonFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of StateEntityNonFungibleResourceVaultsPageResponse</returns>
+        System.Threading.Tasks.Task<StateEntityNonFungibleResourceVaultsPageResponse> EntityNonFungibleResourceVaultPageAsync(StateEntityNonFungibleResourceVaultsPageRequest stateEntityNonFungibleResourceVaultsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Get Entity Non-Fungible Resource Totals
+        /// Get vault page of Entity Non Fungible aggregated per vault
         /// </summary>
         /// <remarks>
-        /// Returns the total amount of each non-fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Returns vaults for non fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungiblesRequest"></param>
+        /// <param name="stateEntityNonFungibleResourceVaultsPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntityNonFungiblesResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<EntityNonFungiblesResponse>> EntityNonFungiblesWithHttpInfoAsync(EntityNonFungiblesRequest entityNonFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (StateEntityNonFungibleResourceVaultsPageResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateEntityNonFungibleResourceVaultsPageResponse>> EntityNonFungibleResourceVaultPageWithHttpInfoAsync(StateEntityNonFungibleResourceVaultsPageRequest stateEntityNonFungibleResourceVaultsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Entity Non-Fungible Resource Totals Page aggregated globally
+        /// </summary>
+        /// <remarks>
+        /// Returns the total amount of each non-fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityNonFungiblesPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateEntityNonFungiblesPageResponse</returns>
+        System.Threading.Tasks.Task<StateEntityNonFungiblesPageResponse> EntityNonFungiblesPageAsync(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Entity Non-Fungible Resource Totals Page aggregated globally
+        /// </summary>
+        /// <remarks>
+        /// Returns the total amount of each non-fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityNonFungiblesPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateEntityNonFungiblesPageResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateEntityNonFungiblesPageResponse>> EntityNonFungiblesPageWithHttpInfoAsync(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Entity Resource Totals
         /// </summary>
@@ -707,28 +795,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Entity Fungible Resource Totals Returns the total amount of each fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Get vault page of Entity Fungible resource aggregated per vault Returns vaults for fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityFungiblesRequest"></param>
-        /// <returns>EntityFungiblesResponse</returns>
-        public EntityFungiblesResponse EntityFungibles(EntityFungiblesRequest entityFungiblesRequest)
+        /// <param name="stateEntityFungibleResourceVaultsPageRequest"></param>
+        /// <returns>StateEntityFungibleResourceVaultsPageResponse</returns>
+        public StateEntityFungibleResourceVaultsPageResponse EntityFungibleResourceVaultPage(StateEntityFungibleResourceVaultsPageRequest stateEntityFungibleResourceVaultsPageRequest)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityFungiblesResponse> localVarResponse = EntityFungiblesWithHttpInfo(entityFungiblesRequest);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityFungibleResourceVaultsPageResponse> localVarResponse = EntityFungibleResourceVaultPageWithHttpInfo(stateEntityFungibleResourceVaultsPageRequest);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Entity Fungible Resource Totals Returns the total amount of each fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Get vault page of Entity Fungible resource aggregated per vault Returns vaults for fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityFungiblesRequest"></param>
-        /// <returns>ApiResponse of EntityFungiblesResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityFungiblesResponse> EntityFungiblesWithHttpInfo(EntityFungiblesRequest entityFungiblesRequest)
+        /// <param name="stateEntityFungibleResourceVaultsPageRequest"></param>
+        /// <returns>ApiResponse of StateEntityFungibleResourceVaultsPageResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityFungibleResourceVaultsPageResponse> EntityFungibleResourceVaultPageWithHttpInfo(StateEntityFungibleResourceVaultsPageRequest stateEntityFungibleResourceVaultsPageRequest)
         {
-            // verify the required parameter 'entityFungiblesRequest' is set
-            if (entityFungiblesRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityFungiblesRequest' when calling StateApi->EntityFungibles");
+            // verify the required parameter 'stateEntityFungibleResourceVaultsPageRequest' is set
+            if (stateEntityFungibleResourceVaultsPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntityFungibleResourceVaultsPageRequest' when calling StateApi->EntityFungibleResourceVaultPage");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -747,15 +835,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = entityFungiblesRequest;
+            localVarRequestOptions.Data = stateEntityFungibleResourceVaultsPageRequest;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<EntityFungiblesResponse>("/entity/fungibles", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<StateEntityFungibleResourceVaultsPageResponse>("/state/entity/page/fungible-vaults/", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("EntityFungibles", localVarResponse);
+                Exception _exception = this.ExceptionFactory("EntityFungibleResourceVaultPage", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -763,30 +851,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Entity Fungible Resource Totals Returns the total amount of each fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Get vault page of Entity Fungible resource aggregated per vault Returns vaults for fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityFungiblesRequest"></param>
+        /// <param name="stateEntityFungibleResourceVaultsPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntityFungiblesResponse</returns>
-        public async System.Threading.Tasks.Task<EntityFungiblesResponse> EntityFungiblesAsync(EntityFungiblesRequest entityFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of StateEntityFungibleResourceVaultsPageResponse</returns>
+        public async System.Threading.Tasks.Task<StateEntityFungibleResourceVaultsPageResponse> EntityFungibleResourceVaultPageAsync(StateEntityFungibleResourceVaultsPageRequest stateEntityFungibleResourceVaultsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityFungiblesResponse> localVarResponse = await EntityFungiblesWithHttpInfoAsync(entityFungiblesRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityFungibleResourceVaultsPageResponse> localVarResponse = await EntityFungibleResourceVaultPageWithHttpInfoAsync(stateEntityFungibleResourceVaultsPageRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Entity Fungible Resource Totals Returns the total amount of each fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Get vault page of Entity Fungible resource aggregated per vault Returns vaults for fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityFungiblesRequest"></param>
+        /// <param name="stateEntityFungibleResourceVaultsPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntityFungiblesResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityFungiblesResponse>> EntityFungiblesWithHttpInfoAsync(EntityFungiblesRequest entityFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (StateEntityFungibleResourceVaultsPageResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityFungibleResourceVaultsPageResponse>> EntityFungibleResourceVaultPageWithHttpInfoAsync(StateEntityFungibleResourceVaultsPageRequest stateEntityFungibleResourceVaultsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'entityFungiblesRequest' is set
-            if (entityFungiblesRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityFungiblesRequest' when calling StateApi->EntityFungibles");
+            // verify the required parameter 'stateEntityFungibleResourceVaultsPageRequest' is set
+            if (stateEntityFungibleResourceVaultsPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntityFungibleResourceVaultsPageRequest' when calling StateApi->EntityFungibleResourceVaultPage");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -807,16 +895,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = entityFungiblesRequest;
+            localVarRequestOptions.Data = stateEntityFungibleResourceVaultsPageRequest;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<EntityFungiblesResponse>("/entity/fungibles", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateEntityFungibleResourceVaultsPageResponse>("/state/entity/page/fungible-vaults/", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("EntityFungibles", localVarResponse);
+                Exception _exception = this.ExceptionFactory("EntityFungibleResourceVaultPage", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -824,28 +912,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Entity Metadata Returns all the metadata properties associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// Get Entity Fungible Resource Totals Page aggregated globally Returns the total amount of each fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityMetadataRequest"></param>
-        /// <returns>EntityMetadataResponse</returns>
-        public EntityMetadataResponse EntityMetadata(EntityMetadataRequest entityMetadataRequest)
+        /// <param name="stateEntityFungiblesPageRequest"></param>
+        /// <returns>StateEntityFungiblesPageResponse</returns>
+        public StateEntityFungiblesPageResponse EntityFungiblesPage(StateEntityFungiblesPageRequest stateEntityFungiblesPageRequest)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityMetadataResponse> localVarResponse = EntityMetadataWithHttpInfo(entityMetadataRequest);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityFungiblesPageResponse> localVarResponse = EntityFungiblesPageWithHttpInfo(stateEntityFungiblesPageRequest);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Entity Metadata Returns all the metadata properties associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// Get Entity Fungible Resource Totals Page aggregated globally Returns the total amount of each fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityMetadataRequest"></param>
-        /// <returns>ApiResponse of EntityMetadataResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityMetadataResponse> EntityMetadataWithHttpInfo(EntityMetadataRequest entityMetadataRequest)
+        /// <param name="stateEntityFungiblesPageRequest"></param>
+        /// <returns>ApiResponse of StateEntityFungiblesPageResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityFungiblesPageResponse> EntityFungiblesPageWithHttpInfo(StateEntityFungiblesPageRequest stateEntityFungiblesPageRequest)
         {
-            // verify the required parameter 'entityMetadataRequest' is set
-            if (entityMetadataRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityMetadataRequest' when calling StateApi->EntityMetadata");
+            // verify the required parameter 'stateEntityFungiblesPageRequest' is set
+            if (stateEntityFungiblesPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntityFungiblesPageRequest' when calling StateApi->EntityFungiblesPage");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -864,15 +952,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = entityMetadataRequest;
+            localVarRequestOptions.Data = stateEntityFungiblesPageRequest;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<EntityMetadataResponse>("/entity/metadata", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<StateEntityFungiblesPageResponse>("/state/entity/page/fungibles/", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("EntityMetadata", localVarResponse);
+                Exception _exception = this.ExceptionFactory("EntityFungiblesPage", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -880,30 +968,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Entity Metadata Returns all the metadata properties associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// Get Entity Fungible Resource Totals Page aggregated globally Returns the total amount of each fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityMetadataRequest"></param>
+        /// <param name="stateEntityFungiblesPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntityMetadataResponse</returns>
-        public async System.Threading.Tasks.Task<EntityMetadataResponse> EntityMetadataAsync(EntityMetadataRequest entityMetadataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of StateEntityFungiblesPageResponse</returns>
+        public async System.Threading.Tasks.Task<StateEntityFungiblesPageResponse> EntityFungiblesPageAsync(StateEntityFungiblesPageRequest stateEntityFungiblesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityMetadataResponse> localVarResponse = await EntityMetadataWithHttpInfoAsync(entityMetadataRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityFungiblesPageResponse> localVarResponse = await EntityFungiblesPageWithHttpInfoAsync(stateEntityFungiblesPageRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Entity Metadata Returns all the metadata properties associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// Get Entity Fungible Resource Totals Page aggregated globally Returns the total amount of each fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityMetadataRequest"></param>
+        /// <param name="stateEntityFungiblesPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntityMetadataResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityMetadataResponse>> EntityMetadataWithHttpInfoAsync(EntityMetadataRequest entityMetadataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (StateEntityFungiblesPageResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityFungiblesPageResponse>> EntityFungiblesPageWithHttpInfoAsync(StateEntityFungiblesPageRequest stateEntityFungiblesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'entityMetadataRequest' is set
-            if (entityMetadataRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityMetadataRequest' when calling StateApi->EntityMetadata");
+            // verify the required parameter 'stateEntityFungiblesPageRequest' is set
+            if (stateEntityFungiblesPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntityFungiblesPageRequest' when calling StateApi->EntityFungiblesPage");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -924,16 +1012,133 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = entityMetadataRequest;
+            localVarRequestOptions.Data = stateEntityFungiblesPageRequest;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<EntityMetadataResponse>("/entity/metadata", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateEntityFungiblesPageResponse>("/state/entity/page/fungibles/", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("EntityMetadata", localVarResponse);
+                Exception _exception = this.ExceptionFactory("EntityFungiblesPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Entity Metadata Page Returns all the metadata properties associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityMetadataPageRequest"></param>
+        /// <returns>StateEntityMetadataPageResponse</returns>
+        public StateEntityMetadataPageResponse EntityMetadataPage(StateEntityMetadataPageRequest stateEntityMetadataPageRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityMetadataPageResponse> localVarResponse = EntityMetadataPageWithHttpInfo(stateEntityMetadataPageRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Entity Metadata Page Returns all the metadata properties associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityMetadataPageRequest"></param>
+        /// <returns>ApiResponse of StateEntityMetadataPageResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityMetadataPageResponse> EntityMetadataPageWithHttpInfo(StateEntityMetadataPageRequest stateEntityMetadataPageRequest)
+        {
+            // verify the required parameter 'stateEntityMetadataPageRequest' is set
+            if (stateEntityMetadataPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntityMetadataPageRequest' when calling StateApi->EntityMetadataPage");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateEntityMetadataPageRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateEntityMetadataPageResponse>("/state/entity/page/metadata", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntityMetadataPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Entity Metadata Page Returns all the metadata properties associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityMetadataPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateEntityMetadataPageResponse</returns>
+        public async System.Threading.Tasks.Task<StateEntityMetadataPageResponse> EntityMetadataPageAsync(StateEntityMetadataPageRequest stateEntityMetadataPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityMetadataPageResponse> localVarResponse = await EntityMetadataPageWithHttpInfoAsync(stateEntityMetadataPageRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Entity Metadata Page Returns all the metadata properties associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityMetadataPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateEntityMetadataPageResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityMetadataPageResponse>> EntityMetadataPageWithHttpInfoAsync(StateEntityMetadataPageRequest stateEntityMetadataPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateEntityMetadataPageRequest' is set
+            if (stateEntityMetadataPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntityMetadataPageRequest' when calling StateApi->EntityMetadataPage");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateEntityMetadataPageRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateEntityMetadataPageResponse>("/state/entity/page/metadata", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntityMetadataPage", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -944,11 +1149,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Entity Non-Fungible IDs Returns all non-fungible IDs of a given non-fungible resource owned by a given entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearence on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungibleIdsRequest"></param>
-        /// <returns>EntityNonFungibleIdsResponse</returns>
-        public EntityNonFungibleIdsResponse EntityNonFungibleIds(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest)
+        /// <param name="stateEntityNonFungibleIdsPageRequest"></param>
+        /// <returns>StateEntityNonFungibleIdsPageResponse</returns>
+        public StateEntityNonFungibleIdsPageResponse EntityNonFungibleIdsPage(StateEntityNonFungibleIdsPageRequest stateEntityNonFungibleIdsPageRequest)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungibleIdsResponse> localVarResponse = EntityNonFungibleIdsWithHttpInfo(entityNonFungibleIdsRequest);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityNonFungibleIdsPageResponse> localVarResponse = EntityNonFungibleIdsPageWithHttpInfo(stateEntityNonFungibleIdsPageRequest);
             return localVarResponse.Data;
         }
 
@@ -956,13 +1161,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Entity Non-Fungible IDs Returns all non-fungible IDs of a given non-fungible resource owned by a given entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearence on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungibleIdsRequest"></param>
-        /// <returns>ApiResponse of EntityNonFungibleIdsResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungibleIdsResponse> EntityNonFungibleIdsWithHttpInfo(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest)
+        /// <param name="stateEntityNonFungibleIdsPageRequest"></param>
+        /// <returns>ApiResponse of StateEntityNonFungibleIdsPageResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityNonFungibleIdsPageResponse> EntityNonFungibleIdsPageWithHttpInfo(StateEntityNonFungibleIdsPageRequest stateEntityNonFungibleIdsPageRequest)
         {
-            // verify the required parameter 'entityNonFungibleIdsRequest' is set
-            if (entityNonFungibleIdsRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityNonFungibleIdsRequest' when calling StateApi->EntityNonFungibleIds");
+            // verify the required parameter 'stateEntityNonFungibleIdsPageRequest' is set
+            if (stateEntityNonFungibleIdsPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntityNonFungibleIdsPageRequest' when calling StateApi->EntityNonFungibleIdsPage");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -981,15 +1186,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = entityNonFungibleIdsRequest;
+            localVarRequestOptions.Data = stateEntityNonFungibleIdsPageRequest;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<EntityNonFungibleIdsResponse>("/entity/non-fungible/ids", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<StateEntityNonFungibleIdsPageResponse>("/state/entity/page/non-fungible-vault/ids", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("EntityNonFungibleIds", localVarResponse);
+                Exception _exception = this.ExceptionFactory("EntityNonFungibleIdsPage", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -1000,12 +1205,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Entity Non-Fungible IDs Returns all non-fungible IDs of a given non-fungible resource owned by a given entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearence on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungibleIdsRequest"></param>
+        /// <param name="stateEntityNonFungibleIdsPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntityNonFungibleIdsResponse</returns>
-        public async System.Threading.Tasks.Task<EntityNonFungibleIdsResponse> EntityNonFungibleIdsAsync(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of StateEntityNonFungibleIdsPageResponse</returns>
+        public async System.Threading.Tasks.Task<StateEntityNonFungibleIdsPageResponse> EntityNonFungibleIdsPageAsync(StateEntityNonFungibleIdsPageRequest stateEntityNonFungibleIdsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungibleIdsResponse> localVarResponse = await EntityNonFungibleIdsWithHttpInfoAsync(entityNonFungibleIdsRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityNonFungibleIdsPageResponse> localVarResponse = await EntityNonFungibleIdsPageWithHttpInfoAsync(stateEntityNonFungibleIdsPageRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -1013,14 +1218,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Entity Non-Fungible IDs Returns all non-fungible IDs of a given non-fungible resource owned by a given entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearence on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungibleIdsRequest"></param>
+        /// <param name="stateEntityNonFungibleIdsPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntityNonFungibleIdsResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungibleIdsResponse>> EntityNonFungibleIdsWithHttpInfoAsync(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (StateEntityNonFungibleIdsPageResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityNonFungibleIdsPageResponse>> EntityNonFungibleIdsPageWithHttpInfoAsync(StateEntityNonFungibleIdsPageRequest stateEntityNonFungibleIdsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'entityNonFungibleIdsRequest' is set
-            if (entityNonFungibleIdsRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityNonFungibleIdsRequest' when calling StateApi->EntityNonFungibleIds");
+            // verify the required parameter 'stateEntityNonFungibleIdsPageRequest' is set
+            if (stateEntityNonFungibleIdsPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntityNonFungibleIdsPageRequest' when calling StateApi->EntityNonFungibleIdsPage");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -1041,16 +1246,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = entityNonFungibleIdsRequest;
+            localVarRequestOptions.Data = stateEntityNonFungibleIdsPageRequest;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<EntityNonFungibleIdsResponse>("/entity/non-fungible/ids", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateEntityNonFungibleIdsPageResponse>("/state/entity/page/non-fungible-vault/ids", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("EntityNonFungibleIds", localVarResponse);
+                Exception _exception = this.ExceptionFactory("EntityNonFungibleIdsPage", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -1058,28 +1263,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Entity Non-Fungible Resource Totals Returns the total amount of each non-fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Get vault page of Entity Non Fungible aggregated per vault Returns vaults for non fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungiblesRequest"></param>
-        /// <returns>EntityNonFungiblesResponse</returns>
-        public EntityNonFungiblesResponse EntityNonFungibles(EntityNonFungiblesRequest entityNonFungiblesRequest)
+        /// <param name="stateEntityNonFungibleResourceVaultsPageRequest"></param>
+        /// <returns>StateEntityNonFungibleResourceVaultsPageResponse</returns>
+        public StateEntityNonFungibleResourceVaultsPageResponse EntityNonFungibleResourceVaultPage(StateEntityNonFungibleResourceVaultsPageRequest stateEntityNonFungibleResourceVaultsPageRequest)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungiblesResponse> localVarResponse = EntityNonFungiblesWithHttpInfo(entityNonFungiblesRequest);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityNonFungibleResourceVaultsPageResponse> localVarResponse = EntityNonFungibleResourceVaultPageWithHttpInfo(stateEntityNonFungibleResourceVaultsPageRequest);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Entity Non-Fungible Resource Totals Returns the total amount of each non-fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Get vault page of Entity Non Fungible aggregated per vault Returns vaults for non fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungiblesRequest"></param>
-        /// <returns>ApiResponse of EntityNonFungiblesResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungiblesResponse> EntityNonFungiblesWithHttpInfo(EntityNonFungiblesRequest entityNonFungiblesRequest)
+        /// <param name="stateEntityNonFungibleResourceVaultsPageRequest"></param>
+        /// <returns>ApiResponse of StateEntityNonFungibleResourceVaultsPageResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityNonFungibleResourceVaultsPageResponse> EntityNonFungibleResourceVaultPageWithHttpInfo(StateEntityNonFungibleResourceVaultsPageRequest stateEntityNonFungibleResourceVaultsPageRequest)
         {
-            // verify the required parameter 'entityNonFungiblesRequest' is set
-            if (entityNonFungiblesRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityNonFungiblesRequest' when calling StateApi->EntityNonFungibles");
+            // verify the required parameter 'stateEntityNonFungibleResourceVaultsPageRequest' is set
+            if (stateEntityNonFungibleResourceVaultsPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntityNonFungibleResourceVaultsPageRequest' when calling StateApi->EntityNonFungibleResourceVaultPage");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -1098,15 +1303,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = entityNonFungiblesRequest;
+            localVarRequestOptions.Data = stateEntityNonFungibleResourceVaultsPageRequest;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<EntityNonFungiblesResponse>("/entity/non-fungibles", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<StateEntityNonFungibleResourceVaultsPageResponse>("/state/entity/page/non-fungible-vaults/", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("EntityNonFungibles", localVarResponse);
+                Exception _exception = this.ExceptionFactory("EntityNonFungibleResourceVaultPage", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -1114,30 +1319,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Entity Non-Fungible Resource Totals Returns the total amount of each non-fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Get vault page of Entity Non Fungible aggregated per vault Returns vaults for non fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungiblesRequest"></param>
+        /// <param name="stateEntityNonFungibleResourceVaultsPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntityNonFungiblesResponse</returns>
-        public async System.Threading.Tasks.Task<EntityNonFungiblesResponse> EntityNonFungiblesAsync(EntityNonFungiblesRequest entityNonFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of StateEntityNonFungibleResourceVaultsPageResponse</returns>
+        public async System.Threading.Tasks.Task<StateEntityNonFungibleResourceVaultsPageResponse> EntityNonFungibleResourceVaultPageAsync(StateEntityNonFungibleResourceVaultsPageRequest stateEntityNonFungibleResourceVaultsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungiblesResponse> localVarResponse = await EntityNonFungiblesWithHttpInfoAsync(entityNonFungiblesRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityNonFungibleResourceVaultsPageResponse> localVarResponse = await EntityNonFungibleResourceVaultPageWithHttpInfoAsync(stateEntityNonFungibleResourceVaultsPageRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Entity Non-Fungible Resource Totals Returns the total amount of each non-fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// Get vault page of Entity Non Fungible aggregated per vault Returns vaults for non fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityNonFungiblesRequest"></param>
+        /// <param name="stateEntityNonFungibleResourceVaultsPageRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntityNonFungiblesResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungiblesResponse>> EntityNonFungiblesWithHttpInfoAsync(EntityNonFungiblesRequest entityNonFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (StateEntityNonFungibleResourceVaultsPageResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityNonFungibleResourceVaultsPageResponse>> EntityNonFungibleResourceVaultPageWithHttpInfoAsync(StateEntityNonFungibleResourceVaultsPageRequest stateEntityNonFungibleResourceVaultsPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'entityNonFungiblesRequest' is set
-            if (entityNonFungiblesRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityNonFungiblesRequest' when calling StateApi->EntityNonFungibles");
+            // verify the required parameter 'stateEntityNonFungibleResourceVaultsPageRequest' is set
+            if (stateEntityNonFungibleResourceVaultsPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntityNonFungibleResourceVaultsPageRequest' when calling StateApi->EntityNonFungibleResourceVaultPage");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -1158,16 +1363,133 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = entityNonFungiblesRequest;
+            localVarRequestOptions.Data = stateEntityNonFungibleResourceVaultsPageRequest;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<EntityNonFungiblesResponse>("/entity/non-fungibles", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateEntityNonFungibleResourceVaultsPageResponse>("/state/entity/page/non-fungible-vaults/", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("EntityNonFungibles", localVarResponse);
+                Exception _exception = this.ExceptionFactory("EntityNonFungibleResourceVaultPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Entity Non-Fungible Resource Totals Page aggregated globally Returns the total amount of each non-fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityNonFungiblesPageRequest"></param>
+        /// <returns>StateEntityNonFungiblesPageResponse</returns>
+        public StateEntityNonFungiblesPageResponse EntityNonFungiblesPage(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityNonFungiblesPageResponse> localVarResponse = EntityNonFungiblesPageWithHttpInfo(stateEntityNonFungiblesPageRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Entity Non-Fungible Resource Totals Page aggregated globally Returns the total amount of each non-fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityNonFungiblesPageRequest"></param>
+        /// <returns>ApiResponse of StateEntityNonFungiblesPageResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityNonFungiblesPageResponse> EntityNonFungiblesPageWithHttpInfo(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest)
+        {
+            // verify the required parameter 'stateEntityNonFungiblesPageRequest' is set
+            if (stateEntityNonFungiblesPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntityNonFungiblesPageRequest' when calling StateApi->EntityNonFungiblesPage");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateEntityNonFungiblesPageRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateEntityNonFungiblesPageResponse>("/state/entity/page/non-fungibles/", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntityNonFungiblesPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Entity Non-Fungible Resource Totals Page aggregated globally Returns the total amount of each non-fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityNonFungiblesPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateEntityNonFungiblesPageResponse</returns>
+        public async System.Threading.Tasks.Task<StateEntityNonFungiblesPageResponse> EntityNonFungiblesPageAsync(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityNonFungiblesPageResponse> localVarResponse = await EntityNonFungiblesPageWithHttpInfoAsync(stateEntityNonFungiblesPageRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Entity Non-Fungible Resource Totals Page aggregated globally Returns the total amount of each non-fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource&#39;s first appearance on the ledger. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateEntityNonFungiblesPageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateEntityNonFungiblesPageResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateEntityNonFungiblesPageResponse>> EntityNonFungiblesPageWithHttpInfoAsync(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateEntityNonFungiblesPageRequest' is set
+            if (stateEntityNonFungiblesPageRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateEntityNonFungiblesPageRequest' when calling StateApi->EntityNonFungiblesPage");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateEntityNonFungiblesPageRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateEntityNonFungiblesPageResponse>("/state/entity/page/non-fungibles/", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntityNonFungiblesPage", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

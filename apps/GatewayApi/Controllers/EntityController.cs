@@ -93,44 +93,4 @@ public class EntityController : ControllerBase
             ? Ok(response)
             : NotFound();
     }
-
-    [HttpPost("metadata")]
-    public async Task<IActionResult> Metadata(GatewayModel.EntityMetadataRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.Metadata(request, token);
-
-        return response != null
-            ? Ok(response)
-            : NotFound();
-    }
-
-    [HttpPost("fungibles")]
-    public async Task<IActionResult> Fungibles(GatewayModel.EntityFungiblesRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.Fungibles(request, token);
-
-        return response != null
-            ? Ok(response)
-            : NotFound();
-    }
-
-    [HttpPost("non-fungibles")]
-    public async Task<IActionResult> NonFungibles(GatewayModel.EntityNonFungiblesRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.NonFungibles(request, token);
-
-        return response != null
-            ? Ok(response)
-            : NotFound();
-    }
-
-    [HttpPost("non-fungible/ids")]
-    public async Task<IActionResult> NonFungibleIds(GatewayModel.EntityNonFungibleIdsRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.NonFungibleIds(request, token);
-
-        return response != null
-            ? Ok(response)
-            : NotFound();
-    }
 }

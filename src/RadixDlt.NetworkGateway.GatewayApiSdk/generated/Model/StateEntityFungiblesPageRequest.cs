@@ -90,62 +90,71 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Fungible vaults collection.
+    /// StateEntityFungiblesPageRequest
     /// </summary>
-    [DataContract(Name = "FungibleVaultsCollection")]
-    public partial class FungibleVaultsCollection : IEquatable<FungibleVaultsCollection>
+    [DataContract(Name = "StateEntityFungiblesPageRequest")]
+    public partial class StateEntityFungiblesPageRequest : IEquatable<StateEntityFungiblesPageRequest>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleVaultsCollection" /> class.
+        /// Gets or Sets AggregationLevel
+        /// </summary>
+        [DataMember(Name = "aggregation_level", EmitDefaultValue = true)]
+        public ResourceAggregationLevel? AggregationLevel { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StateEntityFungiblesPageRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected FungibleVaultsCollection() { }
+        protected StateEntityFungiblesPageRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleVaultsCollection" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityFungiblesPageRequest" /> class.
         /// </summary>
-        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
-        /// <param name="previousCursor">If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection..</param>
-        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
-        /// <param name="items">items (required).</param>
-        public FungibleVaultsCollection(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<FungibleVaultsCollectionItem> items = default(List<FungibleVaultsCollectionItem>))
+        /// <param name="atLedgerStateVersion">Ledger state version for which request is made. (required).</param>
+        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
+        /// <param name="limitPerPage">The page size requested..</param>
+        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="aggregationLevel">aggregationLevel.</param>
+        public StateEntityFungiblesPageRequest(long atLedgerStateVersion = default(long), string cursor = default(string), int? limitPerPage = default(int?), string address = default(string), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            this.AtLedgerStateVersion = atLedgerStateVersion;
+            // to ensure "address" is required (not null)
+            if (address == null)
             {
-                throw new ArgumentNullException("items is a required property for FungibleVaultsCollection and cannot be null");
+                throw new ArgumentNullException("address is a required property for StateEntityFungiblesPageRequest and cannot be null");
             }
-            this.Items = items;
-            this.TotalCount = totalCount;
-            this.PreviousCursor = previousCursor;
-            this.NextCursor = nextCursor;
+            this.Address = address;
+            this.Cursor = cursor;
+            this.LimitPerPage = limitPerPage;
+            this.AggregationLevel = aggregationLevel;
         }
 
         /// <summary>
-        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
+        /// Ledger state version for which request is made.
         /// </summary>
-        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public long? TotalCount { get; set; }
+        /// <value>Ledger state version for which request is made.</value>
+        [DataMember(Name = "at_ledger_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long AtLedgerStateVersion { get; set; }
 
         /// <summary>
-        /// If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.
+        /// This cursor allows forward pagination, by providing the cursor from the previous request.
         /// </summary>
-        /// <value>If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
-        public string PreviousCursor { get; set; }
+        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
+        [DataMember(Name = "cursor", EmitDefaultValue = true)]
+        public string Cursor { get; set; }
 
         /// <summary>
-        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
+        /// The page size requested.
         /// </summary>
-        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
+        /// <value>The page size requested.</value>
+        [DataMember(Name = "limit_per_page", EmitDefaultValue = true)]
+        public int? LimitPerPage { get; set; }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<FungibleVaultsCollectionItem> Items { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -154,11 +163,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class FungibleVaultsCollection {\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class StateEntityFungiblesPageRequest {\n");
+            sb.Append("  AtLedgerStateVersion: ").Append(AtLedgerStateVersion).Append("\n");
+            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
+            sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,15 +189,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as FungibleVaultsCollection);
+            return this.Equals(input as StateEntityFungiblesPageRequest);
         }
 
         /// <summary>
-        /// Returns true if FungibleVaultsCollection instances are equal
+        /// Returns true if StateEntityFungiblesPageRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of FungibleVaultsCollection to be compared</param>
+        /// <param name="input">Instance of StateEntityFungiblesPageRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(FungibleVaultsCollection input)
+        public bool Equals(StateEntityFungiblesPageRequest input)
         {
             if (input == null)
             {
@@ -195,25 +205,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TotalCount == input.TotalCount ||
-                    (this.TotalCount != null &&
-                    this.TotalCount.Equals(input.TotalCount))
+                    this.AtLedgerStateVersion == input.AtLedgerStateVersion ||
+                    this.AtLedgerStateVersion.Equals(input.AtLedgerStateVersion)
                 ) && 
                 (
-                    this.PreviousCursor == input.PreviousCursor ||
-                    (this.PreviousCursor != null &&
-                    this.PreviousCursor.Equals(input.PreviousCursor))
+                    this.Cursor == input.Cursor ||
+                    (this.Cursor != null &&
+                    this.Cursor.Equals(input.Cursor))
                 ) && 
                 (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
+                    this.LimitPerPage == input.LimitPerPage ||
+                    (this.LimitPerPage != null &&
+                    this.LimitPerPage.Equals(input.LimitPerPage))
                 ) && 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
+                ) && 
+                (
+                    this.AggregationLevel == input.AggregationLevel ||
+                    this.AggregationLevel.Equals(input.AggregationLevel)
                 );
         }
 
@@ -226,22 +238,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TotalCount != null)
+                hashCode = (hashCode * 59) + this.AtLedgerStateVersion.GetHashCode();
+                if (this.Cursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
                 }
-                if (this.PreviousCursor != null)
+                if (this.LimitPerPage != null)
                 {
-                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LimitPerPage.GetHashCode();
                 }
-                if (this.NextCursor != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.Items != null)
-                {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.AggregationLevel.GetHashCode();
                 return hashCode;
             }
         }

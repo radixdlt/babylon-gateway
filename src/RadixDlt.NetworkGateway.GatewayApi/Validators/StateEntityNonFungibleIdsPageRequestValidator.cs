@@ -62,26 +62,38 @@
  * permissions under this License.
  */
 
-using System.Runtime.Serialization;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-[DataContract]
-public sealed record NonFungibleIdsRequestCursor(int? Offset, long StateVersion)
+internal class StateEntityNonFungibleIdsPageRequestValidator : AbstractValidator<GatewayModel.StateEntityNonFungibleIdsPageRequest>
 {
-    [DataMember(Name = "o", EmitDefaultValue = false)]
-    public int? Offset { get; set; } = Offset;
-
-    [DataMember(Name = "v", EmitDefaultValue = false)]
-    public long StateVersion { get; set; } = StateVersion;
-
-    public static NonFungibleIdsRequestCursor FromCursorString(string cursorString)
+    public StateEntityNonFungibleIdsPageRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot)
     {
-        return Serializations.FromBase64JsonOrDefault<NonFungibleIdsRequestCursor>(cursorString);
-    }
+        RuleFor(x => x.Address)
+            .NotEmpty()
+            .RadixAddress();
 
-    public string ToCursorString()
-    {
-        return Serializations.AsBase64Json(this);
+        RuleFor(x => x.ResourceAddress)
+            .NotEmpty()
+            .RadixAddress();
+
+        RuleFor(x => x.VaultAddress)
+            .NotEmpty()
+            .Hex();
+
+        RuleFor(x => x.AtLedgerStateVersion)
+            .GreaterThan(0)
+            .NotEmpty();
+
+        RuleFor(x => x.Cursor)
+            .Base64();
+
+        RuleFor(x => x.LimitPerPage)
+            .GreaterThan(0)
+            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
     }
 }

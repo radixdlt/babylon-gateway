@@ -90,35 +90,63 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// FungibleVaultsCollectionAllOf
+    /// StateEntityMetadataPageRequest
     /// </summary>
-    [DataContract(Name = "FungibleVaultsCollection_allOf")]
-    public partial class FungibleVaultsCollectionAllOf : IEquatable<FungibleVaultsCollectionAllOf>
+    [DataContract(Name = "StateEntityMetadataPageRequest")]
+    public partial class StateEntityMetadataPageRequest : IEquatable<StateEntityMetadataPageRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleVaultsCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityMetadataPageRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected FungibleVaultsCollectionAllOf() { }
+        protected StateEntityMetadataPageRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleVaultsCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityMetadataPageRequest" /> class.
         /// </summary>
-        /// <param name="items">items (required).</param>
-        public FungibleVaultsCollectionAllOf(List<FungibleVaultsCollectionItem> items = default(List<FungibleVaultsCollectionItem>))
+        /// <param name="atLedgerStateVersion">Ledger state version for which request is made. (required).</param>
+        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
+        /// <param name="limitPerPage">The page size requested..</param>
+        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        public StateEntityMetadataPageRequest(long atLedgerStateVersion = default(long), string cursor = default(string), int? limitPerPage = default(int?), string address = default(string))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            this.AtLedgerStateVersion = atLedgerStateVersion;
+            // to ensure "address" is required (not null)
+            if (address == null)
             {
-                throw new ArgumentNullException("items is a required property for FungibleVaultsCollectionAllOf and cannot be null");
+                throw new ArgumentNullException("address is a required property for StateEntityMetadataPageRequest and cannot be null");
             }
-            this.Items = items;
+            this.Address = address;
+            this.Cursor = cursor;
+            this.LimitPerPage = limitPerPage;
         }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// Ledger state version for which request is made.
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<FungibleVaultsCollectionItem> Items { get; set; }
+        /// <value>Ledger state version for which request is made.</value>
+        [DataMember(Name = "at_ledger_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long AtLedgerStateVersion { get; set; }
+
+        /// <summary>
+        /// This cursor allows forward pagination, by providing the cursor from the previous request.
+        /// </summary>
+        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
+        [DataMember(Name = "cursor", EmitDefaultValue = true)]
+        public string Cursor { get; set; }
+
+        /// <summary>
+        /// The page size requested.
+        /// </summary>
+        /// <value>The page size requested.</value>
+        [DataMember(Name = "limit_per_page", EmitDefaultValue = true)]
+        public int? LimitPerPage { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +155,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class FungibleVaultsCollectionAllOf {\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class StateEntityMetadataPageRequest {\n");
+            sb.Append("  AtLedgerStateVersion: ").Append(AtLedgerStateVersion).Append("\n");
+            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
+            sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +180,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as FungibleVaultsCollectionAllOf);
+            return this.Equals(input as StateEntityMetadataPageRequest);
         }
 
         /// <summary>
-        /// Returns true if FungibleVaultsCollectionAllOf instances are equal
+        /// Returns true if StateEntityMetadataPageRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of FungibleVaultsCollectionAllOf to be compared</param>
+        /// <param name="input">Instance of StateEntityMetadataPageRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(FungibleVaultsCollectionAllOf input)
+        public bool Equals(StateEntityMetadataPageRequest input)
         {
             if (input == null)
             {
@@ -165,10 +196,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.AtLedgerStateVersion == input.AtLedgerStateVersion ||
+                    this.AtLedgerStateVersion.Equals(input.AtLedgerStateVersion)
+                ) && 
+                (
+                    this.Cursor == input.Cursor ||
+                    (this.Cursor != null &&
+                    this.Cursor.Equals(input.Cursor))
+                ) && 
+                (
+                    this.LimitPerPage == input.LimitPerPage ||
+                    (this.LimitPerPage != null &&
+                    this.LimitPerPage.Equals(input.LimitPerPage))
+                ) && 
+                (
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
                 );
         }
 
@@ -181,9 +225,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Items != null)
+                hashCode = (hashCode * 59) + this.AtLedgerStateVersion.GetHashCode();
+                if (this.Cursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
+                }
+                if (this.LimitPerPage != null)
+                {
+                    hashCode = (hashCode * 59) + this.LimitPerPage.GetHashCode();
+                }
+                if (this.Address != null)
+                {
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
                 return hashCode;
             }
