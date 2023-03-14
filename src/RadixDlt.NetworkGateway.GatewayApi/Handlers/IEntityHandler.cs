@@ -70,8 +70,6 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 public interface IEntityHandler
 {
-    Task<GatewayModel.EntityResourcesResponse?> Resources(GatewayModel.EntityResourcesRequest request, CancellationToken token = default);
-
     Task<GatewayModel.StateEntityDetailsResponse> Details(GatewayModel.StateEntityDetailsRequest request, CancellationToken token = default);
 
     Task<GatewayModel.StateEntityMetadataPageResponse?> Metadata(GatewayModel.StateEntityMetadataPageRequest request, CancellationToken token = default);

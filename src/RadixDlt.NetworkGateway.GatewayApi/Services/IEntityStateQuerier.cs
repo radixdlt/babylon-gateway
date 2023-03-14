@@ -75,9 +75,7 @@ public interface IEntityStateQuerier
 
     public sealed record ResourceVaultsPageRequest(GlobalAddress Address, GlobalAddress ResourceAddress, int Offset, int Limit);
 
-    Task<GatewayModel.EntityResourcesResponse> EntityResourcesSnapshot(GlobalAddress address, bool aggregatePerVault, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<GatewayModel.StateEntityDetailsResponseItem> EntityDetailsItem(GlobalAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.StateEntityDetailsResponseItem> EntityDetailsItem(GlobalAddress address, bool aggregatePerVault, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
     Task<GatewayModel.StateEntityMetadataPageResponse> EntityMetadata(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 

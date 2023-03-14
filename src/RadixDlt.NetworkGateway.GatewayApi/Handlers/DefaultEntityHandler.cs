@@ -88,20 +88,13 @@ internal class DefaultEntityHandler : IEntityHandler
         _endpointConfiguration = endpointConfiguration;
     }
 
-    public async Task<GatewayModel.EntityResourcesResponse?> Resources(GatewayModel.EntityResourcesRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.StateEntityDetailsResponse> Details(GatewayModel.StateEntityDetailsRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
         var aggregatePerVault = request.AggregationLevel == GatewayModel.ResourceAggregationLevel.Vault;
 
-        return await _entityStateQuerier.EntityResourcesSnapshot((GlobalAddress)request.Address, aggregatePerVault, ledgerState, token);
-    }
-
-    public async Task<GatewayModel.StateEntityDetailsResponse> Details(GatewayModel.StateEntityDetailsRequest request, CancellationToken token = default)
-    {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-
         // currently we enforce exactly one element in request.Addresses
-        var item = await _entityStateQuerier.EntityDetailsItem((GlobalAddress)request.Addresses.Single(), ledgerState, token);
+        var item = await _entityStateQuerier.EntityDetailsItem((GlobalAddress)request.Addresses.Single(), aggregatePerVault, ledgerState, token);
 
         return new GatewayModel.StateEntityDetailsResponse(ledgerState, new List<GatewayModel.StateEntityDetailsResponseItem> { item });
     }

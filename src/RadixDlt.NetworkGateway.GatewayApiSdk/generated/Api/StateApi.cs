@@ -218,27 +218,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of StateEntityNonFungiblesPageResponse</returns>
         ApiResponse<StateEntityNonFungiblesPageResponse> EntityNonFungiblesPageWithHttpInfo(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest);
         /// <summary>
-        /// Get Entity Resource Totals
-        /// </summary>
-        /// <remarks>
-        /// Returns the total amount of each fungible and non-fungible resources owned by a given global entity. The response for fungibles and non-fungibles is paginated, and only the first page of each is returned. The returned lists are ordered by the resource&#39;s first appearance on the ledger. For further pages, use the &#x60;entity/fungibles&#x60; and &#x60;entity/non-fungibles&#x60; endpoints. To get the owned non-fungible ids (instead of just the amount), use the &#x60;entity/non-fungible-ids&#x60; endpoint. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityResourcesRequest"></param>
-        /// <returns>EntityResourcesResponse</returns>
-        EntityResourcesResponse EntityResources(EntityResourcesRequest entityResourcesRequest);
-
-        /// <summary>
-        /// Get Entity Resource Totals
-        /// </summary>
-        /// <remarks>
-        /// Returns the total amount of each fungible and non-fungible resources owned by a given global entity. The response for fungibles and non-fungibles is paginated, and only the first page of each is returned. The returned lists are ordered by the resource&#39;s first appearance on the ledger. For further pages, use the &#x60;entity/fungibles&#x60; and &#x60;entity/non-fungibles&#x60; endpoints. To get the owned non-fungible ids (instead of just the amount), use the &#x60;entity/non-fungible-ids&#x60; endpoint. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityResourcesRequest"></param>
-        /// <returns>ApiResponse of EntityResourcesResponse</returns>
-        ApiResponse<EntityResourcesResponse> EntityResourcesWithHttpInfo(EntityResourcesRequest entityResourcesRequest);
-        /// <summary>
         /// Get Non-Fungible Data
         /// </summary>
         /// <remarks>
@@ -466,29 +445,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (StateEntityNonFungiblesPageResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<StateEntityNonFungiblesPageResponse>> EntityNonFungiblesPageWithHttpInfoAsync(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-        /// <summary>
-        /// Get Entity Resource Totals
-        /// </summary>
-        /// <remarks>
-        /// Returns the total amount of each fungible and non-fungible resources owned by a given global entity. The response for fungibles and non-fungibles is paginated, and only the first page of each is returned. The returned lists are ordered by the resource&#39;s first appearance on the ledger. For further pages, use the &#x60;entity/fungibles&#x60; and &#x60;entity/non-fungibles&#x60; endpoints. To get the owned non-fungible ids (instead of just the amount), use the &#x60;entity/non-fungible-ids&#x60; endpoint. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityResourcesRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntityResourcesResponse</returns>
-        System.Threading.Tasks.Task<EntityResourcesResponse> EntityResourcesAsync(EntityResourcesRequest entityResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-        /// <summary>
-        /// Get Entity Resource Totals
-        /// </summary>
-        /// <remarks>
-        /// Returns the total amount of each fungible and non-fungible resources owned by a given global entity. The response for fungibles and non-fungibles is paginated, and only the first page of each is returned. The returned lists are ordered by the resource&#39;s first appearance on the ledger. For further pages, use the &#x60;entity/fungibles&#x60; and &#x60;entity/non-fungibles&#x60; endpoints. To get the owned non-fungible ids (instead of just the amount), use the &#x60;entity/non-fungible-ids&#x60; endpoint. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityResourcesRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntityResourcesResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<EntityResourcesResponse>> EntityResourcesWithHttpInfoAsync(EntityResourcesRequest entityResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Non-Fungible Data
         /// </summary>
@@ -1490,123 +1446,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("EntityNonFungiblesPage", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Get Entity Resource Totals Returns the total amount of each fungible and non-fungible resources owned by a given global entity. The response for fungibles and non-fungibles is paginated, and only the first page of each is returned. The returned lists are ordered by the resource&#39;s first appearance on the ledger. For further pages, use the &#x60;entity/fungibles&#x60; and &#x60;entity/non-fungibles&#x60; endpoints. To get the owned non-fungible ids (instead of just the amount), use the &#x60;entity/non-fungible-ids&#x60; endpoint. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityResourcesRequest"></param>
-        /// <returns>EntityResourcesResponse</returns>
-        public EntityResourcesResponse EntityResources(EntityResourcesRequest entityResourcesRequest)
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityResourcesResponse> localVarResponse = EntityResourcesWithHttpInfo(entityResourcesRequest);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get Entity Resource Totals Returns the total amount of each fungible and non-fungible resources owned by a given global entity. The response for fungibles and non-fungibles is paginated, and only the first page of each is returned. The returned lists are ordered by the resource&#39;s first appearance on the ledger. For further pages, use the &#x60;entity/fungibles&#x60; and &#x60;entity/non-fungibles&#x60; endpoints. To get the owned non-fungible ids (instead of just the amount), use the &#x60;entity/non-fungible-ids&#x60; endpoint. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityResourcesRequest"></param>
-        /// <returns>ApiResponse of EntityResourcesResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityResourcesResponse> EntityResourcesWithHttpInfo(EntityResourcesRequest entityResourcesRequest)
-        {
-            // verify the required parameter 'entityResourcesRequest' is set
-            if (entityResourcesRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityResourcesRequest' when calling StateApi->EntityResources");
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = entityResourcesRequest;
-
-
-            // make the HTTP request
-            var localVarResponse = this.Client.Post<EntityResourcesResponse>("/entity/resources", localVarRequestOptions, this.Configuration);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("EntityResources", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Get Entity Resource Totals Returns the total amount of each fungible and non-fungible resources owned by a given global entity. The response for fungibles and non-fungibles is paginated, and only the first page of each is returned. The returned lists are ordered by the resource&#39;s first appearance on the ledger. For further pages, use the &#x60;entity/fungibles&#x60; and &#x60;entity/non-fungibles&#x60; endpoints. To get the owned non-fungible ids (instead of just the amount), use the &#x60;entity/non-fungible-ids&#x60; endpoint. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityResourcesRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of EntityResourcesResponse</returns>
-        public async System.Threading.Tasks.Task<EntityResourcesResponse> EntityResourcesAsync(EntityResourcesRequest entityResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityResourcesResponse> localVarResponse = await EntityResourcesWithHttpInfoAsync(entityResourcesRequest, cancellationToken).ConfigureAwait(false);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get Entity Resource Totals Returns the total amount of each fungible and non-fungible resources owned by a given global entity. The response for fungibles and non-fungibles is paginated, and only the first page of each is returned. The returned lists are ordered by the resource&#39;s first appearance on the ledger. For further pages, use the &#x60;entity/fungibles&#x60; and &#x60;entity/non-fungibles&#x60; endpoints. To get the owned non-fungible ids (instead of just the amount), use the &#x60;entity/non-fungible-ids&#x60; endpoint. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="entityResourcesRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (EntityResourcesResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityResourcesResponse>> EntityResourcesWithHttpInfoAsync(EntityResourcesRequest entityResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            // verify the required parameter 'entityResourcesRequest' is set
-            if (entityResourcesRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityResourcesRequest' when calling StateApi->EntityResources");
-
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = entityResourcesRequest;
-
-
-            // make the HTTP request
-
-            var localVarResponse = await this.AsynchronousClient.PostAsync<EntityResourcesResponse>("/entity/resources", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("EntityResources", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

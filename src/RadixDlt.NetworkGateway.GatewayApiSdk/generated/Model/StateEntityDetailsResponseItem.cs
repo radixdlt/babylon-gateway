@@ -104,10 +104,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseItem" /> class.
         /// </summary>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="fungibleResources">fungibleResources.</param>
+        /// <param name="nonFungibleResources">nonFungibleResources.</param>
         /// <param name="ancestorIdentities">ancestorIdentities.</param>
         /// <param name="metadata">metadata (required).</param>
         /// <param name="details">details.</param>
-        public StateEntityDetailsResponseItem(string address = default(string), StateEntityDetailsResponseItemAncestorIdentities ancestorIdentities = default(StateEntityDetailsResponseItemAncestorIdentities), EntityMetadataCollection metadata = default(EntityMetadataCollection), StateEntityDetailsResponseItemDetails details = default(StateEntityDetailsResponseItemDetails))
+        public StateEntityDetailsResponseItem(string address = default(string), FungibleResourcesCollection fungibleResources = default(FungibleResourcesCollection), NonFungibleResourcesCollection nonFungibleResources = default(NonFungibleResourcesCollection), StateEntityDetailsResponseItemAncestorIdentities ancestorIdentities = default(StateEntityDetailsResponseItemAncestorIdentities), EntityMetadataCollection metadata = default(EntityMetadataCollection), StateEntityDetailsResponseItemDetails details = default(StateEntityDetailsResponseItemDetails))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -121,6 +123,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("metadata is a required property for StateEntityDetailsResponseItem and cannot be null");
             }
             this.Metadata = metadata;
+            this.FungibleResources = fungibleResources;
+            this.NonFungibleResources = nonFungibleResources;
             this.AncestorIdentities = ancestorIdentities;
             this.Details = details;
         }
@@ -131,6 +135,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
+
+        /// <summary>
+        /// Gets or Sets FungibleResources
+        /// </summary>
+        [DataMember(Name = "fungible_resources", EmitDefaultValue = true)]
+        public FungibleResourcesCollection FungibleResources { get; set; }
+
+        /// <summary>
+        /// Gets or Sets NonFungibleResources
+        /// </summary>
+        [DataMember(Name = "non_fungible_resources", EmitDefaultValue = true)]
+        public NonFungibleResourcesCollection NonFungibleResources { get; set; }
 
         /// <summary>
         /// Gets or Sets AncestorIdentities
@@ -159,6 +175,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityDetailsResponseItem {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  FungibleResources: ").Append(FungibleResources).Append("\n");
+            sb.Append("  NonFungibleResources: ").Append(NonFungibleResources).Append("\n");
             sb.Append("  AncestorIdentities: ").Append(AncestorIdentities).Append("\n");
             sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("  Details: ").Append(Details).Append("\n");
@@ -203,6 +221,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
+                    this.FungibleResources == input.FungibleResources ||
+                    (this.FungibleResources != null &&
+                    this.FungibleResources.Equals(input.FungibleResources))
+                ) && 
+                (
+                    this.NonFungibleResources == input.NonFungibleResources ||
+                    (this.NonFungibleResources != null &&
+                    this.NonFungibleResources.Equals(input.NonFungibleResources))
+                ) && 
+                (
                     this.AncestorIdentities == input.AncestorIdentities ||
                     (this.AncestorIdentities != null &&
                     this.AncestorIdentities.Equals(input.AncestorIdentities))
@@ -231,6 +259,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Address != null)
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                }
+                if (this.FungibleResources != null)
+                {
+                    hashCode = (hashCode * 59) + this.FungibleResources.GetHashCode();
+                }
+                if (this.NonFungibleResources != null)
+                {
+                    hashCode = (hashCode * 59) + this.NonFungibleResources.GetHashCode();
                 }
                 if (this.AncestorIdentities != null)
                 {

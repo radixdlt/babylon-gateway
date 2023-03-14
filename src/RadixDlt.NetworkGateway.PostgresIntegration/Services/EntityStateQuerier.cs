@@ -132,18 +132,6 @@ internal class EntityStateQuerier : IEntityStateQuerier
             (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EddsaEd25519VirtualIdentityComponent).AddressBytePrefix;
     }
 
-    public async Task<GatewayModel.EntityResourcesResponse> EntityResourcesSnapshot(GlobalAddress address, bool aggregatePerVault, GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default)
-    {
-        var entity = await GetEntity<ComponentEntity>(address, ledgerState, token);
-
-        // TODO ideally we'd like to run those as either single query or separate ones but without await between them
-        var fungibles = await EntityFungibleResourcesPageSlice(entity.Id, aggregatePerVault, 0, _endpointConfiguration.CurrentValue.DefaultPageSize, ledgerState, token);
-        var nonFungibles = await EntityNonFungibleResourcesPageSlice(entity.Id, aggregatePerVault, 0, _endpointConfiguration.CurrentValue.DefaultPageSize, ledgerState, token);
-
-        return new GatewayModel.EntityResourcesResponse(ledgerState, entity.GlobalAddress, fungibles, nonFungibles);
-    }
-
     public async Task<GatewayModel.StateEntityFungiblesPageResponse> EntityFungibleResourcesPage(IEntityStateQuerier.PageRequest pageRequest, bool aggregatePerVault, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity<ComponentEntity>(pageRequest.Address, ledgerState, token);
@@ -179,7 +167,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         return nonFungibles;
     }
 
-    public async Task<GatewayModel.StateEntityDetailsResponseItem> EntityDetailsItem(GlobalAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.StateEntityDetailsResponseItem> EntityDetailsItem(GlobalAddress address, bool aggregatePerVault, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity(address, ledgerState, token);
 
@@ -282,7 +270,10 @@ internal class EntityStateQuerier : IEntityStateQuerier
             ? await GetAncestorIdentities(entity, token)
             : null;
 
-        return new GatewayModel.StateEntityDetailsResponseItem(entity.GlobalAddress ?? entity.Address.ToHex(), ancestorIdentities, metadata, details);
+        var fungibles = await EntityFungibleResourcesPageSlice(entity.Id, aggregatePerVault, 0, _endpointConfiguration.CurrentValue.DefaultPageSize, ledgerState, token);
+        var nonFungibles = await EntityNonFungibleResourcesPageSlice(entity.Id, aggregatePerVault, 0, _endpointConfiguration.CurrentValue.DefaultPageSize, ledgerState, token);
+
+        return new GatewayModel.StateEntityDetailsResponseItem(entity.GlobalAddress ?? entity.Address.ToHex(), fungibles, nonFungibles, ancestorIdentities, metadata, details);
     }
 
     public async Task<GatewayModel.StateEntityMetadataPageResponse> EntityMetadata(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState,

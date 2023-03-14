@@ -478,34 +478,6 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
-  /entity/resources:
-    post:
-      operationId: EntityResources
-      summary: Get Entity Resource Totals
-      description: |
-        Returns the total amount of each fungible and non-fungible resources owned by a given global entity.
-        The response for fungibles and non-fungibles is paginated, and only the first page of each is returned.
-        The returned lists are ordered by the resource's first appearance on the ledger.
-        For further pages, use the `entity/fungibles` and `entity/non-fungibles` endpoints.
-        To get the owned non-fungible ids (instead of just the amount), use the `entity/non-fungible-ids` endpoint.
-      tags:
-        - State
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/EntityResourcesRequest"
-      responses:
-        "200":
-          description: Entity Resources
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EntityResourcesResponse"
-        "4XX":
-          $ref: "#/components/responses/ErrorResponse"
-
   /non-fungible/ids:
     post:
       operationId: NonFungibleIds
@@ -1519,6 +1491,10 @@ components:
       properties:
         address:
           $ref: "#/components/schemas/EntityAddress"
+        fungible_resources:
+          $ref: "#/components/schemas/FungibleResourcesCollection"
+        non_fungible_resources:
+          $ref: "#/components/schemas/NonFungibleResourcesCollection"
         ancestor_identities:
           $ref: "#/components/schemas/StateEntityDetailsResponseItemAncestorIdentities"
         metadata:
@@ -1805,34 +1781,34 @@ components:
     # /entity/* Request & Response Types
     #
 
-    EntityResourcesRequest:
-      allOf:
-        - $ref: "#/components/schemas/AtLedgerStateMixin"
-        - type: object
-          required:
-            - address
-          properties:
-            address:
-              $ref: "#/components/schemas/EntityAddress"
-            aggregation_level:
-              $ref: "#/components/schemas/ResourceAggregationLevel"
-      example:
-        address: "<component-entity-address>"
-    EntityResourcesResponse:
-      allOf:
-        - $ref: "#/components/schemas/LedgerStateMixin"
-        - type: object
-          required:
-            - address
-            - fungible_resources
-            - non_fungible_resources
-          properties:
-            address:
-              $ref: "#/components/schemas/EntityAddress"
-            fungible_resources:
-              $ref: "#/components/schemas/FungibleResourcesCollection"
-            non_fungible_resources:
-              $ref: "#/components/schemas/NonFungibleResourcesCollection"
+#    EntityResourcesRequest:
+#      allOf:
+#        - $ref: "#/components/schemas/AtLedgerStateMixin"
+#        - type: object
+#          required:
+#            - address
+#          properties:
+#            address:
+#              $ref: "#/components/schemas/EntityAddress"
+#            aggregation_level:
+#              $ref: "#/components/schemas/ResourceAggregationLevel"
+#      example:
+#        address: "<component-entity-address>"
+#    EntityResourcesResponse:
+#      allOf:
+#        - $ref: "#/components/schemas/LedgerStateMixin"
+#        - type: object
+#          required:
+#            - address
+#            - fungible_resources
+#            - non_fungible_resources
+#          properties:
+#            address:
+#              $ref: "#/components/schemas/EntityAddress"
+#            fungible_resources:
+#              $ref: "#/components/schemas/FungibleResourcesCollection"
+#            non_fungible_resources:
+#              $ref: "#/components/schemas/NonFungibleResourcesCollection"
 
     NonFungibleIdsRequest:
       allOf:
