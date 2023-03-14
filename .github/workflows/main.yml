@@ -61,7 +61,7 @@ jobs:
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-  
+
   docker-data-aggregator-gcr:
     name: (DataAggregator) Docker
     needs:
@@ -79,7 +79,7 @@ jobs:
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-  
+
   docker-gateway-api-gcr:
     name: (GatewayApi) Docker
     needs:
@@ -111,7 +111,7 @@ jobs:
       - name: Process ci.env
         run: |
           export $(grep -v '^#' ./deployment/ci.env | xargs)
-          echo "FULLNODE_COMMIT=$FULLNODE_COMMIT" >> $GITHUB_ENV
+          echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
       - name: Trigger deployment event ${{ github.ref }}
         env:
           NAMESPACE: "ng-mardunet"
@@ -165,7 +165,7 @@ jobs:
 
   ephemeral-deploy-and-test:
     runs-on: ubuntu-22.04
-    needs: 
+    needs:
       - docker-gateway-api-gcr
       - docker-data-aggregator-gcr
       - docker-database-migrations-gcr
