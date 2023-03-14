@@ -780,7 +780,7 @@ INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
         var vaultsTotalCount = result.FirstOrDefault()?.VaultTotalCount ?? 0;
         var castedResult = result.Select(x =>
                 new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem(
-                    amount: x.Balance,
+                    amount: TokenAmount.FromSubUnitsString(x.Balance).ToString(),
                     vaultAddress: x.VaultAddress,
                     lastUpdatedAtStateVersion: x.LastUpdatedAtStateVersion))
                .ToList();
