@@ -90,6 +90,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<Entity> Entities => Set<Entity>();
 
+    public DbSet<EntityMetadataHistory> EntityMetadataHistory => Set<EntityMetadataHistory>();
+
     public DbSet<EntityResourceAggregateHistory> EntityResourceAggregateHistory => Set<EntityResourceAggregateHistory>();
 
     public DbSet<EntityResourceVaultAggregateHistory> EntityResourceVaultAggregateHistory => Set<EntityResourceVaultAggregateHistory>();
@@ -112,7 +114,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ValidatorActiveSetHistory> ValidatorActiveSetHistory => Set<ValidatorActiveSetHistory>();
 
-    public DbSet<EntityAccessRulesChainHistory> EntityAccessRulesLayersHistory => Set<EntityAccessRulesChainHistory>();
+    public DbSet<EntityAccessRulesChainHistory> EntityAccessRulesChainHistory => Set<EntityAccessRulesChainHistory>();
 
     public CommonDbContext(DbContextOptions options)
         : base(options)

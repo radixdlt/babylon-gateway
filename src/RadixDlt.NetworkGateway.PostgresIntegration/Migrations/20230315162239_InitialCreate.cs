@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -147,7 +147,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
                     keys = table.Column<List<string>>(type: "text[]", nullable: false),
-                    values = table.Column<List<string>>(type: "text[]", nullable: false)
+                    values = table.Column<List<byte[]>>(type: "bytea[]", nullable: false),
+                    updated_at_state_versions = table.Column<List<long>>(type: "bigint[]", nullable: false)
                 },
                 constraints: table =>
                 {

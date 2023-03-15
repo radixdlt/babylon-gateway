@@ -87,7 +87,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class EntityStateQuerier : IEntityStateQuerier
 {
-    private record MetadataViewModel(long EntityId, string[] Keys, string[] Values, int TotalCount, long LastUpdatedAtStateVersion);
+    private record MetadataViewModel(long EntityId, string[] Keys, byte[][] Values, long[] UpdatedAtStateVersions, int TotalCount);
 
     private record ValidatorCurrentStakeViewModel(long ValidatorId, string Balance, string State, long BalanceLastUpdatedAtStateVersion, long StateLastUpdatedAtStateVersion);
 
@@ -179,12 +179,12 @@ internal class EntityStateQuerier : IEntityStateQuerier
             {
                 // TODO ideally we'd like to run those as either single query or separate ones but without await between them
 
-                var accessRulesChain = await _dbContext.EntityAccessRulesLayersHistory
+                var accessRulesChain = await _dbContext.EntityAccessRulesChainHistory
                     .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == frme.Id && e.Subtype == AccessRulesChainSubtype.None)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
-                var vaultAccessRulesChain = await _dbContext.EntityAccessRulesLayersHistory
+                var vaultAccessRulesChain = await _dbContext.EntityAccessRulesChainHistory
                     .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == frme.Id &&
                                 e.Subtype == AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain)
                     .OrderByDescending(e => e.FromStateVersion)
@@ -202,12 +202,12 @@ internal class EntityStateQuerier : IEntityStateQuerier
             {
                 // TODO ideally we'd like to run those as either single query or separate ones but without await between them
 
-                var accessRulesChain = await _dbContext.EntityAccessRulesLayersHistory
+                var accessRulesChain = await _dbContext.EntityAccessRulesChainHistory
                     .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == nfrme.Id && e.Subtype == AccessRulesChainSubtype.None)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
-                var vaultAccessRulesChain = await _dbContext.EntityAccessRulesLayersHistory
+                var vaultAccessRulesChain = await _dbContext.EntityAccessRulesChainHistory
                     .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == nfrme.Id &&
                                 e.Subtype == AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain)
                     .OrderByDescending(e => e.FromStateVersion)
@@ -252,7 +252,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstOrDefaultAsync(token);
 
-                var accessRulesLayers = await _dbContext.EntityAccessRulesLayersHistory
+                var accessRulesLayers = await _dbContext.EntityAccessRulesChainHistory
                     .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == ce.Id)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
@@ -525,15 +525,15 @@ INNER JOIN LATERAL (
 
         var cd = new CommandDefinition(
             commandText: @"
-WITH entities (id) AS (
+WITH variables (entity_id) AS (
     SELECT UNNEST(@entityIds)
 )
 SELECT emh.*
-FROM entities
+FROM variables
 INNER JOIN LATERAL (
-    SELECT entity_id AS EntityId, keys[@offset:@limit] AS Keys, values[@offset:@limit] AS Values, cardinality(keys) AS TotalCount, from_state_version AS LastUpdatedAtStateVersion
+    SELECT entity_id AS EntityId, keys[@offset:@limit] AS Keys, values[@offset:@limit] AS Values, updated_at_state_versions[@offset:@limit] AS UpdatedAtStateVersions, cardinality(keys) AS TotalCount
     FROM entity_metadata_history
-    WHERE entity_id = entities.id AND from_state_version <= @stateVersion
+    WHERE entity_id = variables.entity_id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
 ) emh ON true;",
@@ -548,8 +548,8 @@ INNER JOIN LATERAL (
 
         foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<MetadataViewModel>(cd))
         {
-            var items = vm.Keys.Zip(vm.Values)
-                .Select(rm => new GatewayModel.EntityMetadataItem(rm.First, rm.Second, vm.LastUpdatedAtStateVersion))
+            var items = vm.Keys.Zip(vm.Values, vm.UpdatedAtStateVersions)
+                .Select(t => new GatewayModel.EntityMetadataItem(t.First, ScryptoSborUtils.MetadataValueToGatewayScryptoSborValue(t.Second, _networkConfigurationProvider.GetNetworkId()), t.Third))
                 .ToList();
 
             var previousCursor = offset > 0

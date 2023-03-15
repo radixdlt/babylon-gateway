@@ -87,6 +87,28 @@ internal class ReadHelper
         _connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
     }
 
+    public async Task<Dictionary<long, EntityMetadataHistory>> MostRecentEntityMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
+    {
+        var ids = metadataChanges.Select(x => x.ReferencedEntity.DatabaseId).Distinct().ToList();
+
+        return await _dbContext.EntityMetadataHistory
+            .FromSqlInterpolated(@$"
+WITH variables (entity_id) AS (
+    SELECT UNNEST({ids})
+)
+SELECT emh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_metadata_history
+    WHERE entity_id = variables.entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) emh ON true;")
+            .AsNoTracking()
+            .ToDictionaryAsync(e => e.EntityId, token);
+    }
+
     public async Task<Dictionary<long, EntityResourceAggregateHistory>> MostRecentEntityResourceAggregateHistoryFor(List<FungibleVaultChange> fungibleVaultChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
     {
         var entityIds = new HashSet<long>();
