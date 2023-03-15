@@ -103,15 +103,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityNonFungibleIdsPageRequest" /> class.
         /// </summary>
-        /// <param name="atLedgerStateVersion">Ledger state version for which request is made. (required).</param>
+        /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limitPerPage">The page size requested..</param>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
         /// <param name="vaultAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
-        public StateEntityNonFungibleIdsPageRequest(long atLedgerStateVersion = default(long), string cursor = default(string), int? limitPerPage = default(int?), string address = default(string), string vaultAddress = default(string), string resourceAddress = default(string))
+        public StateEntityNonFungibleIdsPageRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string address = default(string), string vaultAddress = default(string), string resourceAddress = default(string))
         {
-            this.AtLedgerStateVersion = atLedgerStateVersion;
             // to ensure "address" is required (not null)
             if (address == null)
             {
@@ -130,16 +129,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("resourceAddress is a required property for StateEntityNonFungibleIdsPageRequest and cannot be null");
             }
             this.ResourceAddress = resourceAddress;
+            this.AtLedgerState = atLedgerState;
             this.Cursor = cursor;
             this.LimitPerPage = limitPerPage;
         }
 
         /// <summary>
-        /// Ledger state version for which request is made.
+        /// Gets or Sets AtLedgerState
         /// </summary>
-        /// <value>Ledger state version for which request is made.</value>
-        [DataMember(Name = "at_ledger_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long AtLedgerStateVersion { get; set; }
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
         /// This cursor allows forward pagination, by providing the cursor from the previous request.
@@ -184,7 +183,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityNonFungibleIdsPageRequest {\n");
-            sb.Append("  AtLedgerStateVersion: ").Append(AtLedgerStateVersion).Append("\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
             sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
@@ -226,8 +225,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtLedgerStateVersion == input.AtLedgerStateVersion ||
-                    this.AtLedgerStateVersion.Equals(input.AtLedgerStateVersion)
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
                 ) && 
                 (
                     this.Cursor == input.Cursor ||
@@ -265,7 +265,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.AtLedgerStateVersion.GetHashCode();
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
                 if (this.Cursor != null)
                 {
                     hashCode = (hashCode * 59) + this.Cursor.GetHashCode();

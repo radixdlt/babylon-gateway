@@ -67,14 +67,14 @@ using System.Runtime.Serialization;
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 [DataContract]
-public sealed record PaginableEntityCoursor(int? Offset)
+public sealed record OffsetCursor(int? Offset)
 {
     [DataMember(Name = "o", EmitDefaultValue = false)]
     public int? Offset { get; set; } = Offset;
 
-    public static PaginableEntityCoursor FromCursorString(string cursorString)
+    public static OffsetCursor FromCursorString(string cursorString)
     {
-        return Serializations.FromBase64JsonOrDefault<PaginableEntityCoursor>(cursorString);
+        return Serializations.FromBase64JsonOrDefault<OffsetCursor>(cursorString);
     }
 
     public string ToCursorString()

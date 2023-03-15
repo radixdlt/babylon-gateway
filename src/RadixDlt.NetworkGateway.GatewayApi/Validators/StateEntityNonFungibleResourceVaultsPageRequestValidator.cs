@@ -71,7 +71,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class StateEntityNonFungibleResourceVaultsPageRequestValidator : AbstractValidator<StateEntityNonFungibleResourceVaultsPageRequest>
 {
-    public StateEntityNonFungibleResourceVaultsPageRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot)
+    public StateEntityNonFungibleResourceVaultsPageRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
         RuleFor(x => x.Address)
             .NotEmpty()
@@ -81,10 +81,8 @@ internal class StateEntityNonFungibleResourceVaultsPageRequestValidator : Abstra
             .NotEmpty()
             .RadixAddress();
 
-        RuleFor(x => x.AtLedgerStateVersion)
-            .GreaterThan(0)
-            .NotEmpty();
-
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
         RuleFor(x => x.Cursor)
             .Base64();
 

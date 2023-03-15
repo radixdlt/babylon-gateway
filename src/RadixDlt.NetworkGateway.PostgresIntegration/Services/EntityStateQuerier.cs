@@ -109,14 +109,14 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private readonly TokenAmount _tokenAmount100 = TokenAmount.FromDecimalString("100");
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IOptionsMonitor<EndpointOptions> _endpointConfiguration;
+    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
     private readonly ReadOnlyDbContext _dbContext;
     private readonly byte _ecdsaSecp256k1VirtualAccountAddressPrefix;
     private readonly byte _eddsaEd25519VirtualAccountAddressPrefix;
     private readonly byte _ecdsaSecp256k1VirtualIdentityAddressPrefix;
     private readonly byte _eddsaEd25519VirtualIdentityAddressPrefix;
 
-    public EntityStateQuerier(INetworkConfigurationProvider networkConfigurationProvider, ReadOnlyDbContext dbContext, IOptionsMonitor<EndpointOptions> endpointConfiguration)
+    public EntityStateQuerier(INetworkConfigurationProvider networkConfigurationProvider, ReadOnlyDbContext dbContext, IOptionsSnapshot<EndpointOptions> endpointConfiguration)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _dbContext = dbContext;
@@ -151,7 +151,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         CancellationToken token = default)
     {
         var fungibles = aggregatePerVault
-            ? await GetFungiblesSliceAggregatedPerVault(entityId, offset, limit, 0, _endpointConfiguration.CurrentValue.DefaultPageSize, ledgerState, token)
+            ? await GetFungiblesSliceAggregatedPerVault(entityId, offset, limit, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token)
             : await GetFungiblesSliceAggregatedPerResource(entityId, offset, limit, ledgerState, token);
 
         return fungibles;
@@ -161,8 +161,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
         CancellationToken token = default)
     {
         var nonFungibles = aggregatePerVault
-            ? await GetNonFungiblesSliceAggregatedPerVault(entityId, offset, limit, 0, _endpointConfiguration.CurrentValue.DefaultPageSize, ledgerState, token)
-            : await GetNonFungiblesSliceAggregatedPerResource(entityId, offset, _endpointConfiguration.CurrentValue.DefaultPageSize, ledgerState, token);
+            ? await GetNonFungiblesSliceAggregatedPerVault(entityId, offset, limit, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token)
+            : await GetNonFungiblesSliceAggregatedPerResource(entityId, offset, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
 
         return nonFungibles;
     }
@@ -265,13 +265,13 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 break;
         }
 
-        var metadata = await GetMetadataSlice(entity.Id, 0, _endpointConfiguration.CurrentValue.DefaultPageSize, ledgerState, token);
+        var metadata = await GetMetadataSlice(entity.Id, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
         var ancestorIdentities = entity.HasParent
             ? await GetAncestorIdentities(entity, token)
             : null;
 
-        var fungibles = await EntityFungibleResourcesPageSlice(entity.Id, aggregatePerVault, 0, _endpointConfiguration.CurrentValue.DefaultPageSize, ledgerState, token);
-        var nonFungibles = await EntityNonFungibleResourcesPageSlice(entity.Id, aggregatePerVault, 0, _endpointConfiguration.CurrentValue.DefaultPageSize, ledgerState, token);
+        var fungibles = await EntityFungibleResourcesPageSlice(entity.Id, aggregatePerVault, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
+        var nonFungibles = await EntityNonFungibleResourcesPageSlice(entity.Id, aggregatePerVault, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
 
         return new GatewayModel.StateEntityDetailsResponseItem(entity.GlobalAddress ?? entity.Address.ToHex(), fungibles, nonFungibles, ancestorIdentities, metadata, details);
     }
@@ -360,11 +360,11 @@ ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
             .ToList();
 
         var previousCursor = request.Offset > 0
-            ? new GatewayModel.PaginableEntityCoursor(Math.Max(request.Offset - request.Limit, 0)).ToCursorString()
+            ? new GatewayModel.OffsetCursor(Math.Max(request.Offset - request.Limit, 0)).ToCursorString()
             : null;
 
         var nextCursor = items.Count > request.Limit
-            ? new GatewayModel.PaginableEntityCoursor(request.Offset + request.Limit).ToCursorString()
+            ? new GatewayModel.OffsetCursor(request.Offset + request.Limit).ToCursorString()
             : null;
 
         return new GatewayModel.NonFungibleIdsResponse(
@@ -420,7 +420,7 @@ LIMIT 1
     public async Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
-        var validatorsPageSize = _endpointConfiguration.CurrentValue.ValidatorsPageSize;
+        var validatorsPageSize = _endpointConfiguration.Value.ValidatorsPageSize;
         var fromStateVersion = cursor?.StateVersionBoundary ?? 0;
 
         var validatorsAndOneMore = await _dbContext.Entities
@@ -477,7 +477,7 @@ INNER JOIN LATERAL (
 
         var validatorsDetails = (await _dbContext.Database.GetDbConnection().QueryAsync<ValidatorCurrentStakeViewModel>(cd)).ToList();
 
-        var metadataById = await GetMetadataSlices(validatorIds, 0, _endpointConfiguration.CurrentValue.DefaultPageSize, ledgerState, token);
+        var metadataById = await GetMetadataSlices(validatorIds, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
 
         var items = validatorsAndOneMore
             .Take(validatorsPageSize)
@@ -553,11 +553,11 @@ INNER JOIN LATERAL (
                 .ToList();
 
             var previousCursor = offset > 0
-                ? new GatewayModel.PaginableEntityCoursor(Math.Max(offset - limit, 0)).ToCursorString()
+                ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
                 : null;
 
             var nextCursor = items.Count > limit
-                ? new GatewayModel.PaginableEntityCoursor(offset + limit).ToCursorString()
+                ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
                 : null;
 
             result[vm.EntityId] = new GatewayModel.EntityMetadataCollection(vm.TotalCount, previousCursor, nextCursor, items.Take(limit).ToList());
@@ -622,11 +622,11 @@ INNER JOIN entities e ON ah.fungible_resource_entity_id = e.id
         }
 
         var previousCursor = offset > 0
-            ? new GatewayModel.PaginableEntityCoursor(Math.Max(offset - limit, 0)).ToCursorString()
+            ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
             : null;
 
         var nextCursor = items.Count > limit
-            ? new GatewayModel.PaginableEntityCoursor(offset + limit).ToCursorString()
+            ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
             : null;
 
         return new GatewayModel.FungibleResourcesCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
@@ -697,7 +697,7 @@ INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
             if (!resources.TryGetValue(vm.ResourceEntityGlobalAddress, out var existingRecord))
             {
                 var vaultNextCursor = vm.VaultTotalCount > vaultLimit
-                    ? new GatewayModel.PaginableEntityCoursor(vaultLimit).ToCursorString()
+                    ? new GatewayModel.OffsetCursor(vaultLimit).ToCursorString()
                     : null;
 
                 existingRecord = new GatewayModel.FungibleResourcesCollectionItemVaultAggregated(
@@ -717,11 +717,11 @@ INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
         }
 
         var previousCursor = resourceOffset > 0
-            ? new GatewayModel.PaginableEntityCoursor(Math.Max(resourceOffset - resourceLimit, 0)).ToCursorString()
+            ? new GatewayModel.OffsetCursor(Math.Max(resourceOffset - resourceLimit, 0)).ToCursorString()
             : null;
 
         var nextCursor = resourcesTotalCount > resourceLimit + resourceOffset
-            ? new GatewayModel.PaginableEntityCoursor(resourceLimit).ToCursorString()
+            ? new GatewayModel.OffsetCursor(resourceLimit).ToCursorString()
             : null;
 
         return new GatewayModel.FungibleResourcesCollection(resourcesTotalCount, previousCursor, nextCursor, resources.Values.Cast<GatewayModel.FungibleResourcesCollectionItem>().ToList());
@@ -786,11 +786,11 @@ INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
                .ToList();
 
         var previousCursor = vaultOffset > 0
-            ? new GatewayModel.PaginableEntityCoursor(Math.Max(vaultOffset - vaultLimit, 0)).ToCursorString()
+            ? new GatewayModel.OffsetCursor(Math.Max(vaultOffset - vaultLimit, 0)).ToCursorString()
             : null;
 
         var nextCursor = vaultsTotalCount > vaultOffset + vaultLimit
-            ? new GatewayModel.PaginableEntityCoursor(vaultLimit).ToCursorString()
+            ? new GatewayModel.OffsetCursor(vaultLimit).ToCursorString()
             : null;
 
         return new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault(vaultsTotalCount, previousCursor, nextCursor, castedResult);
@@ -847,11 +847,11 @@ INNER JOIN entities e ON ah.non_fungible_resource_entity_id = e.id;
         }
 
         var previousCursor = offset > 0
-            ? new GatewayModel.PaginableEntityCoursor(Math.Max(offset - limit, 0)).ToCursorString()
+            ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
             : null;
 
         var nextCursor = items.Count > limit
-            ? new GatewayModel.PaginableEntityCoursor(offset + limit).ToCursorString()
+            ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
             : null;
 
         return new GatewayModel.NonFungibleResourcesCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
@@ -922,7 +922,7 @@ INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
             if (!resources.TryGetValue(vm.ResourceEntityGlobalAddress, out var existingRecord))
             {
                 var vaultNextCursor = vm.VaultTotalCount > vaultLimit
-                    ? new GatewayModel.PaginableEntityCoursor(vaultLimit).ToCursorString()
+                    ? new GatewayModel.OffsetCursor(vaultLimit).ToCursorString()
                     : null;
 
                 existingRecord = new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregated(
@@ -942,11 +942,11 @@ INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
         }
 
         var previousCursor = resourceOffset > 0
-            ? new GatewayModel.PaginableEntityCoursor(Math.Max(resourceOffset - resourceLimit, 0)).ToCursorString()
+            ? new GatewayModel.OffsetCursor(Math.Max(resourceOffset - resourceLimit, 0)).ToCursorString()
             : null;
 
         var nextCursor = resourcesTotalCount > resourceLimit + resourceOffset
-            ? new GatewayModel.PaginableEntityCoursor(resourceLimit).ToCursorString()
+            ? new GatewayModel.OffsetCursor(resourceLimit).ToCursorString()
             : null;
 
         return new GatewayModel.NonFungibleResourcesCollection(resourcesTotalCount, previousCursor, nextCursor,
@@ -1012,11 +1012,11 @@ INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
                .ToList();
 
         var previousCursor = vaultOffset > 0
-            ? new GatewayModel.PaginableEntityCoursor(Math.Max(vaultOffset - vaultLimit, 0)).ToCursorString()
+            ? new GatewayModel.OffsetCursor(Math.Max(vaultOffset - vaultLimit, 0)).ToCursorString()
             : null;
 
         var nextCursor = vaultsTotalCount > vaultOffset + vaultLimit
-            ? new GatewayModel.PaginableEntityCoursor(vaultLimit).ToCursorString()
+            ? new GatewayModel.OffsetCursor(vaultLimit).ToCursorString()
             : null;
 
         return new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVault(vaultsTotalCount, previousCursor, nextCursor, castedResult);
@@ -1064,11 +1064,11 @@ INNER JOIN non_fungible_id_data nfid ON nfid.id = final.non_fungible_id_data_id
             .ToList();
 
         var previousCursor = offset > 0
-            ? new GatewayModel.PaginableEntityCoursor(Math.Max(offset - limit, 0)).ToCursorString()
+            ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
             : null;
 
         var nextCursor = items.Count > limit
-            ? new GatewayModel.PaginableEntityCoursor(offset + limit).ToCursorString()
+            ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
             : null;
 
         return new GatewayModel.NonFungibleIdsCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());

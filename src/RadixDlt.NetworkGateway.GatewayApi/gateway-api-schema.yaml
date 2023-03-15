@@ -664,16 +664,6 @@ components:
     # Common Request Types
     #
 
-    AtLedgerStateVersionMixin:
-      type: object
-      required:
-        - at_ledger_state_version
-      properties:
-        at_ledger_state_version:
-          description: Ledger state version for which request is made.
-          type: integer
-          format: int64
-
     AtLedgerStateMixin:
       type: object
       properties:
@@ -892,32 +882,6 @@ components:
           $ref: "#/components/schemas/BigDecimal"
         last_updated_at_state_version:
           $ref: "#/components/schemas/LastUpdatedAtStateVersion"
-
-#    FungibleVaultsCollection:
-#      description: Fungible vaults collection.
-#      allOf:
-#        - $ref: "#/components/schemas/ResultSetCursorMixin"
-#        - type: object
-#          required:
-#            - items
-#          properties:
-#            items:
-#              type: array
-#              items:
-#                $ref: "#/components/schemas/FungibleVaultsCollectionItem"
-#    FungibleVaultsCollectionItem:
-#      type: object
-#      required:
-#        - address
-#        - amount
-#        - last_updated_at_state_version
-#      properties:
-#        address:
-#          $ref: "#/components/schemas/EntityAddress"
-#        amount:
-#          $ref: "#/components/schemas/BigDecimal"
-#        last_updated_at_state_version:
-#          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
 
     NonFungibleResourcesCollection:
       description: Non-fungible resources collection.
@@ -1608,7 +1572,7 @@ components:
 
     StateEntityMetadataPageRequest:
       allOf:
-        - $ref: "#/components/schemas/AtLedgerStateVersionMixin"
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
         - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
@@ -1618,7 +1582,6 @@ components:
               $ref: "#/components/schemas/EntityAddress"
       example:
         address: "<entity-address>"
-        at_ledger_state_version: "<at_ledger_state_version>"
     StateEntityMetadataPageResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1632,7 +1595,7 @@ components:
 
     StateEntityFungiblesPageRequest:
       allOf:
-        - $ref: "#/components/schemas/AtLedgerStateVersionMixin"
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
         - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
@@ -1644,7 +1607,6 @@ components:
               $ref: "#/components/schemas/ResourceAggregationLevel"
       example:
         address: "<component-entity-address>"
-        at_ledger_state_version: "<at_ledger_state_version>"
     StateEntityFungiblesPageResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1657,7 +1619,7 @@ components:
               $ref: "#/components/schemas/EntityAddress"
     StateEntityFungibleResourceVaultsPageRequest:
       allOf:
-        - $ref: "#/components/schemas/AtLedgerStateVersionMixin"
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
         - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
@@ -1670,7 +1632,6 @@ components:
               $ref: "#/components/schemas/ResourceAddress"
       example:
         address: "<component-entity-address>"
-        at_ledger_state_version: "<at_ledger_state_version>"
         resource_address: "<resource_address>"
     StateEntityFungibleResourceVaultsPageResponse:
       allOf:
@@ -1688,7 +1649,7 @@ components:
 
     StateEntityNonFungiblesPageRequest:
       allOf:
-        - $ref: "#/components/schemas/AtLedgerStateVersionMixin"
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
         - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
@@ -1700,7 +1661,6 @@ components:
               $ref: "#/components/schemas/ResourceAggregationLevel"
       example:
         address: "<component-entity-address>"
-        at_ledger_state_version: "<at_ledger_state_version>"
     StateEntityNonFungiblesPageResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1714,7 +1674,7 @@ components:
 
     StateEntityNonFungibleResourceVaultsPageRequest:
       allOf:
-        - $ref: "#/components/schemas/AtLedgerStateVersionMixin"
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
         - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
@@ -1727,7 +1687,6 @@ components:
               $ref: "#/components/schemas/ResourceAddress"
       example:
         address: "<component-entity-address>"
-        at_ledger_state_version: "<at_ledger_state_version>"
         resource_address: "<resource_address>"
     StateEntityNonFungibleResourceVaultsPageResponse:
       allOf:
@@ -1745,7 +1704,7 @@ components:
 
     StateEntityNonFungibleIdsPageRequest:
       allOf:
-        - $ref: "#/components/schemas/AtLedgerStateVersionMixin"
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
         - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
@@ -1761,8 +1720,8 @@ components:
               $ref: "#/components/schemas/ResourceAddress"
       example:
         address: "<component-entity-address>"
-        resource_address: "<non-fungible-resource-entity-address>"
-        at_ledger_state_version: "<at_ledger_state_version>"
+        resource_address: null
+        vault_address: null
     StateEntityNonFungibleIdsPageResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1780,35 +1739,6 @@ components:
     #
     # /entity/* Request & Response Types
     #
-
-#    EntityResourcesRequest:
-#      allOf:
-#        - $ref: "#/components/schemas/AtLedgerStateMixin"
-#        - type: object
-#          required:
-#            - address
-#          properties:
-#            address:
-#              $ref: "#/components/schemas/EntityAddress"
-#            aggregation_level:
-#              $ref: "#/components/schemas/ResourceAggregationLevel"
-#      example:
-#        address: "<component-entity-address>"
-#    EntityResourcesResponse:
-#      allOf:
-#        - $ref: "#/components/schemas/LedgerStateMixin"
-#        - type: object
-#          required:
-#            - address
-#            - fungible_resources
-#            - non_fungible_resources
-#          properties:
-#            address:
-#              $ref: "#/components/schemas/EntityAddress"
-#            fungible_resources:
-#              $ref: "#/components/schemas/FungibleResourcesCollection"
-#            non_fungible_resources:
-#              $ref: "#/components/schemas/NonFungibleResourcesCollection"
 
     NonFungibleIdsRequest:
       allOf:

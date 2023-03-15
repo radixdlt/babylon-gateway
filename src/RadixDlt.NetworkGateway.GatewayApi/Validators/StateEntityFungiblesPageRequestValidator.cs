@@ -71,7 +71,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class StateEntityFungiblesPageRequestValidator : AbstractValidator<GatewayModel.StateEntityFungiblesPageRequest>
 {
-    public StateEntityFungiblesPageRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot)
+    public StateEntityFungiblesPageRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
         RuleFor(x => x.Address)
             .NotEmpty()
@@ -80,9 +80,8 @@ internal class StateEntityFungiblesPageRequestValidator : AbstractValidator<Gate
         RuleFor(x => x.AggregationLevel)
             .IsInEnum();
 
-        RuleFor(x => x.AtLedgerStateVersion)
-            .GreaterThan(0)
-            .NotEmpty();
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
 
         RuleFor(x => x.Cursor)
             .Base64();

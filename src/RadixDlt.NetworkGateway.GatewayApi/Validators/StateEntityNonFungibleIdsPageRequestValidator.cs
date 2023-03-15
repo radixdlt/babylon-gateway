@@ -71,7 +71,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class StateEntityNonFungibleIdsPageRequestValidator : AbstractValidator<GatewayModel.StateEntityNonFungibleIdsPageRequest>
 {
-    public StateEntityNonFungibleIdsPageRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot)
+    public StateEntityNonFungibleIdsPageRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
         RuleFor(x => x.Address)
             .NotEmpty()
@@ -85,9 +85,8 @@ internal class StateEntityNonFungibleIdsPageRequestValidator : AbstractValidator
             .NotEmpty()
             .Hex();
 
-        RuleFor(x => x.AtLedgerStateVersion)
-            .GreaterThan(0)
-            .NotEmpty();
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
 
         RuleFor(x => x.Cursor)
             .Base64();

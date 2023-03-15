@@ -103,29 +103,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityMetadataPageRequest" /> class.
         /// </summary>
-        /// <param name="atLedgerStateVersion">Ledger state version for which request is made. (required).</param>
+        /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limitPerPage">The page size requested..</param>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
-        public StateEntityMetadataPageRequest(long atLedgerStateVersion = default(long), string cursor = default(string), int? limitPerPage = default(int?), string address = default(string))
+        public StateEntityMetadataPageRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string address = default(string))
         {
-            this.AtLedgerStateVersion = atLedgerStateVersion;
             // to ensure "address" is required (not null)
             if (address == null)
             {
                 throw new ArgumentNullException("address is a required property for StateEntityMetadataPageRequest and cannot be null");
             }
             this.Address = address;
+            this.AtLedgerState = atLedgerState;
             this.Cursor = cursor;
             this.LimitPerPage = limitPerPage;
         }
 
         /// <summary>
-        /// Ledger state version for which request is made.
+        /// Gets or Sets AtLedgerState
         /// </summary>
-        /// <value>Ledger state version for which request is made.</value>
-        [DataMember(Name = "at_ledger_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long AtLedgerStateVersion { get; set; }
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
         /// This cursor allows forward pagination, by providing the cursor from the previous request.
@@ -156,7 +155,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityMetadataPageRequest {\n");
-            sb.Append("  AtLedgerStateVersion: ").Append(AtLedgerStateVersion).Append("\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
             sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
@@ -196,8 +195,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtLedgerStateVersion == input.AtLedgerStateVersion ||
-                    this.AtLedgerStateVersion.Equals(input.AtLedgerStateVersion)
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
                 ) && 
                 (
                     this.Cursor == input.Cursor ||
@@ -225,7 +225,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.AtLedgerStateVersion.GetHashCode();
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
                 if (this.Cursor != null)
                 {
                     hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
