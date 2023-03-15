@@ -110,17 +110,7 @@ internal class ReferencedEntityDictionary
 
     public ReferencedEntity GetByGlobal(GlobalAddress globalAddress)
     {
-        return _globalsCache.GetOrAdd(globalAddress, _ =>
-        {
-            var x = All.FirstOrDefault(re => re.GlobalAddress == globalAddress);
-
-            if (x == null)
-            {
-                throw new NotImplementedException("lol.");
-            }
-
-            return x;
-        });
+        return _globalsCache.GetOrAdd(globalAddress, _ => All.First(re => re.GlobalAddress == globalAddress));
     }
 
     public ReferencedEntity GetByDatabaseId(long id)
