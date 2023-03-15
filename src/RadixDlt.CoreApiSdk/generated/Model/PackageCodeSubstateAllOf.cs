@@ -84,62 +84,42 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NativeCodeSubstate
+    /// PackageCodeSubstateAllOf
     /// </summary>
-    [DataContract(Name = "NativeCodeSubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
-    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentInfoSubstate), "ComponentInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(GlobalAddressSubstate), "GlobalAddress")]
-    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "Metadata")]
-    [JsonSubtypes.KnownSubType(typeof(NativeCodeSubstate), "NativeCode")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(PackageTypeInfoSubstate), "PackageTypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultSubstate), "Vault")]
-    [JsonSubtypes.KnownSubType(typeof(WasmCodeSubstate), "WasmCode")]
-    public partial class NativeCodeSubstate : Substate, IEquatable<NativeCodeSubstate>
+    [DataContract(Name = "PackageCodeSubstate_allOf")]
+    public partial class PackageCodeSubstateAllOf : IEquatable<PackageCodeSubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NativeCodeSubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageCodeSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NativeCodeSubstate() { }
+        protected PackageCodeSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NativeCodeSubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageCodeSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="nativePackageCodeId">nativePackageCodeId (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.NativeCode).</param>
-        public NativeCodeSubstate(int nativePackageCodeId = default(int), SubstateType substateType = SubstateType.NativeCode) : base(substateType)
+        /// <param name="codeHex">The hex-encoded package code (required).</param>
+        public PackageCodeSubstateAllOf(string codeHex = default(string))
         {
-            this.NativePackageCodeId = nativePackageCodeId;
+            // to ensure "codeHex" is required (not null)
+            if (codeHex == null)
+            {
+                throw new ArgumentNullException("codeHex is a required property for PackageCodeSubstateAllOf and cannot be null");
+            }
+            this.CodeHex = codeHex;
         }
 
         /// <summary>
-        /// Gets or Sets NativePackageCodeId
+        /// The hex-encoded package code
         /// </summary>
-        [DataMember(Name = "native_package_code_id", IsRequired = true, EmitDefaultValue = true)]
-        public int NativePackageCodeId { get; set; }
+        /// <value>The hex-encoded package code</value>
+        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string CodeHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -148,9 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NativeCodeSubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  NativePackageCodeId: ").Append(NativePackageCodeId).Append("\n");
+            sb.Append("class PackageCodeSubstateAllOf {\n");
+            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -159,7 +138,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -171,24 +150,25 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NativeCodeSubstate);
+            return this.Equals(input as PackageCodeSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if NativeCodeSubstate instances are equal
+        /// Returns true if PackageCodeSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of NativeCodeSubstate to be compared</param>
+        /// <param name="input">Instance of PackageCodeSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NativeCodeSubstate input)
+        public bool Equals(PackageCodeSubstateAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.NativePackageCodeId == input.NativePackageCodeId ||
-                    this.NativePackageCodeId.Equals(input.NativePackageCodeId)
+                    this.CodeHex == input.CodeHex ||
+                    (this.CodeHex != null &&
+                    this.CodeHex.Equals(input.CodeHex))
                 );
         }
 
@@ -200,8 +180,11 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.NativePackageCodeId.GetHashCode();
+                int hashCode = 41;
+                if (this.CodeHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
+                }
                 return hashCode;
             }
         }

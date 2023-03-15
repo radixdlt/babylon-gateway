@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230307124248_InitialCreate")]
+    [Migration("20230315154051_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1092,10 +1092,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<string>("BlueprintName")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_name");
+
                     b.Property<byte[]>("Code")
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("code");
+
+                    b.Property<long>("PackageId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("package_id");
 
                     b.Property<long?>("RoyaltyVaultEntityId")
                         .ValueGeneratedOnUpdateSometimes()

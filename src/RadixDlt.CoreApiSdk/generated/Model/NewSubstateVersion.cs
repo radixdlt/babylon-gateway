@@ -106,7 +106,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="substateId">substateId (required).</param>
         /// <param name="version">An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, counting the number of times the substate was updated (required).</param>
         /// <param name="substateHex">The hex-encoded, SBOR-encoded substate data bytes (required).</param>
-        /// <param name="substateDataHash">The hex-encoded single-SHA256 hash of the substate data bytes (required).</param>
+        /// <param name="substateDataHash">The hex-encoded Blake2b-256 hash of the substate data bytes (required).</param>
         /// <param name="substateData">substateData (required).</param>
         public NewSubstateVersion(SubstateId substateId = default(SubstateId), long version = default(long), string substateHex = default(string), string substateDataHash = default(string), Substate substateData = default(Substate))
         {
@@ -158,9 +158,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public string SubstateHex { get; set; }
 
         /// <summary>
-        /// The hex-encoded single-SHA256 hash of the substate data bytes
+        /// The hex-encoded Blake2b-256 hash of the substate data bytes
         /// </summary>
-        /// <value>The hex-encoded single-SHA256 hash of the substate data bytes</value>
+        /// <value>The hex-encoded Blake2b-256 hash of the substate data bytes</value>
         [DataMember(Name = "substate_data_hash", IsRequired = true, EmitDefaultValue = true)]
         public string SubstateDataHash { get; set; }
 

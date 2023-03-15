@@ -66,18 +66,21 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.RadixEngineToolkit.Model.Value;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Array = System.Array;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
@@ -312,28 +315,44 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 var substates = stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates).ToList();
                 var d = substates.GroupBy(x => x.SubstateData.SubstateType).ToList();
+
+                foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
+                {
+                    var referencedEntity = referencedEntities
+                        .GetOrAdd(
+                            newGlobalEntity.EntityReference.EntityIdHex,
+                            _ => new ReferencedEntity(newGlobalEntity.EntityReference.EntityIdHex, newGlobalEntity.EntityReference.EntityType, stateVersion)
+                        );
+
+                    referencedEntity.Globalize((GlobalAddress)newGlobalEntity.GlobalAddress);
+
+                    var typeHint = newGlobalEntity.EntityReference.EntityType switch
+                    {
+                        CoreModel.EntityType.Component => typeof(NormalComponentEntity),
+                        CoreModel.EntityType.Package => typeof(PackageEntity),
+                        CoreModel.EntityType.EpochManager => typeof(EpochManagerEntity),
+                        CoreModel.EntityType.Clock => typeof(ClockEntity),
+                        CoreModel.EntityType.Validator => typeof(ValidatorEntity),
+                        CoreModel.EntityType.AccessController => typeof(AccessControllerEntity),
+                        CoreModel.EntityType.Account => typeof(AccountComponentEntity),
+                        CoreModel.EntityType.Identity => typeof(IdentityEntity),
+                        CoreModel.EntityType.KeyValueStore => typeof(KeyValueStoreEntity),
+                        CoreModel.EntityType.NonFungibleStore => typeof(NonFungibleStoreEntity),
+                        CoreModel.EntityType.Vault => typeof(VaultEntity),
+                        CoreModel.EntityType.ResourceManager => null, // Unable to determine type of resource manager based on entity type. It's handled later based on ResourceManagerSubstate.
+                        _ => throw new ArgumentOutOfRangeException(),
+                    };
+
+                    if (typeHint != null)
+                    {
+                        referencedEntity.WithTypeHint(typeHint);
+                    }
+                }
+
                 foreach (var newSubstate in substates)
                 {
                     var substateId = newSubstate.SubstateId;
                     var substateData = newSubstate.SubstateData;
-
-                    if (substateData is CoreModel.GlobalAddressSubstate globalAddressSubstate)
-                    {
-                        var target = globalAddressSubstate.TargetEntity;
-                        var targetReferencedEntity = referencedEntities.GetOrAdd(target.TargetEntityIdHex, _ => new ReferencedEntity(target.TargetEntityIdHex, target.TargetEntityType, stateVersion));
-
-                        targetReferencedEntity.Globalize((GlobalAddress)target.GlobalAddress);
-
-                        if (target.TargetEntityType == CoreModel.EntityType.Component)
-                        {
-                            targetReferencedEntity.WithTypeHint(target.GlobalAddress.StartsWith(hrp.AccountComponent) ? typeof(AccountComponentEntity) : typeof(NormalComponentEntity));
-                        }
-
-                        // we do not want to store GlobalEntities as they bring no value from NG perspective
-                        // GlobalAddress is essentially a property of other entities
-
-                        continue;
-                    }
 
                     if (substateData is CoreModel.EpochManagerSubstate epochManagerSubstate)
                     {
@@ -400,21 +419,21 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 CoreModel.NonFungibleIdType.Integer => NonFungibleIdType.Integer,
                                 CoreModel.NonFungibleIdType.Bytes => NonFungibleIdType.Bytes,
                                 CoreModel.NonFungibleIdType.UUID => NonFungibleIdType.UUID,
-                                _ => throw new ArgumentOutOfRangeException(),
+                                _ => throw new ArgumentOutOfRangeException(nameof(e.NonFungibleIdType), e.NonFungibleIdType, "Unexpected value of NonFungibleIdType"),
                             });
                         }
                     }
 
-                    if (substateData is CoreModel.ComponentInfoSubstate componentInfo)
+                    if (substateData is CoreModel.TypeInfoSubstate typeInfoSubstate)
                     {
                         referencedEntity.PostResolveConfigure((ComponentEntity e) =>
                         {
-                            e.PackageId = referencedEntities.GetByGlobal((GlobalAddress)componentInfo.PackageAddress).DatabaseId;
-                            e.BlueprintName = componentInfo.BlueprintName;
+                            e.PackageId = referencedEntities.GetByGlobal((GlobalAddress)typeInfoSubstate.PackageAddress).DatabaseId;
+                            e.BlueprintName = typeInfoSubstate.BlueprintName;
                         });
                     }
 
-                    if (substateData is CoreModel.WasmCodeSubstate wasmCode)
+                    if (substateData is CoreModel.PackageCodeSubstate wasmCode)
                     {
                         referencedEntity.PostResolveConfigure((PackageEntity e) => e.Code = wasmCode.GetCodeBytes());
                     }
@@ -520,8 +539,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     ClockEntity => CoreModel.EntityType.Clock,
                     ValidatorEntity => CoreModel.EntityType.Validator,
                     VaultEntity => CoreModel.EntityType.Vault,
-                    ComponentEntity => CoreModel.EntityType.Component,
                     PackageEntity => CoreModel.EntityType.Package,
+                    ComponentEntity => CoreModel.EntityType.Component,
                     KeyValueStoreEntity => CoreModel.EntityType.KeyValueStore,
                     NonFungibleStoreEntity => CoreModel.EntityType.NonFungibleStore,
                     AccessControllerEntity => CoreModel.EntityType.AccessController,
@@ -551,7 +570,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     CoreModel.EntityType.Package => new PackageEntity(),
                     CoreModel.EntityType.Vault => new VaultEntity(),
                     CoreModel.EntityType.KeyValueStore => new KeyValueStoreEntity(),
-                    CoreModel.EntityType.Global => throw new ArgumentOutOfRangeException(nameof(referencedEntity.Type), referencedEntity.Type, "Global entities should be filtered out"),
                     CoreModel.EntityType.NonFungibleStore => new NonFungibleStoreEntity(),
                     CoreModel.EntityType.Clock => new ClockEntity(),
                     CoreModel.EntityType.AccessController => new AccessControllerEntity(),
@@ -634,6 +652,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             dbWriteDuration += sw.Elapsed;
         }
 
+        var vaultEntityIdToResourceAddressDictionary = new Dictionary<string, GlobalAddress>();
         var fungibleVaultChanges = new List<FungibleVaultChange>();
         var nonFungibleVaultChanges = new List<NonFungibleVaultChange>();
         var nonFungibleIdStoreChanges = new List<NonFungibleIdChange>();
@@ -656,52 +675,45 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     var substateId = newSubstate.SubstateId;
                     var substateData = newSubstate.SubstateData;
 
-                    if (substateData is CoreModel.GlobalAddressSubstate)
-                    {
-                        // we do not want to store GlobalEntities as they bring no value from NG perspective
-
-                        continue;
-                    }
-
                     var referencedEntity = referencedEntities.Get(substateId.EntityIdHex);
 
-                    if (substateData is CoreModel.MetadataSubstate metadata)
-                    {
-                        metadataChanges.Add(new MetadataChange(referencedEntity, metadata.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), stateVersion));
-                    }
+                    // TODO: KL
+                    // if (substateData is CoreModel.MetadataSubstate metadata)
+                    // {
+                    //     metadataChanges.Add(new MetadataChange(referencedEntity, metadata.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), stateVersion));
+                    // }
 
                     if (substateData is CoreModel.ResourceManagerSubstate resourceManager)
                     {
                         resourceManagerSupplyChanges.Add(new ResourceManagerSupplyChange(referencedEntity, TokenAmount.FromDecimalString(resourceManager.TotalSupply), stateVersion));
                     }
 
-                    if (substateData is CoreModel.VaultSubstate vault)
+                    if (substateData is CoreModel.VaultInfoSubstate vault)
                     {
-                        switch (vault.ResourceAmount)
-                        {
-                            case CoreModel.FungibleResourceAmount fra:
-                            {
-                                var amount = TokenAmount.FromDecimalString(fra.Amount);
-                                var resourceEntity = referencedEntities.GetByGlobal((GlobalAddress)fra.ResourceAddress);
+                        vaultEntityIdToResourceAddressDictionary.GetOrAdd(substateId.EntityIdHex, x => (GlobalAddress)vault.ResourceAddress);
+                    }
 
-                                fungibleVaultChanges.Add(new FungibleVaultChange(referencedEntity, resourceEntity, amount, stateVersion));
+                    if (substateData is CoreModel.VaultFungibleSubstate fungible)
+                    {
+                        var amount = TokenAmount.FromDecimalString(fungible.Amount);
+                        var resourceAddress = vaultEntityIdToResourceAddressDictionary[substateId.EntityIdHex];
+                        var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
 
-                                break;
-                            }
+                        fungibleVaultChanges.Add(new FungibleVaultChange(referencedEntity, resourceEntity, amount, stateVersion));
+                    }
 
-                            case CoreModel.NonFungibleResourceAmount nfra:
-                            {
-                                var resourceEntity = referencedEntities.GetByGlobal((GlobalAddress)nfra.ResourceAddress);
+                    if (substateData is CoreModel.VaultNonFungibleSubstate nonFungible)
+                    {
+                        var resourceAddress = vaultEntityIdToResourceAddressDictionary[substateId.EntityIdHex];
+                        var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
 
-                                nonFungibleVaultChanges.Add(new NonFungibleVaultChange(referencedEntity, resourceEntity, nfra.NonFungibleIds.Select(nfid => nfid.SimpleRep).ToList(),
-                                    stateVersion));
-
-                                break;
-                            }
-
-                            default:
-                                throw new UnreachableException($"Didn't expect {vault.ResourceAmount.GetType().Name} type");
-                        }
+                        nonFungibleVaultChanges.Add(
+                            new NonFungibleVaultChange(
+                                referencedEntity,
+                                resourceEntity,
+                                nonFungible.NonFungibleIds.Select(nfid => nfid.SimpleRep).ToList(),
+                                stateVersion)
+                        );
                     }
 
                     if (substateData is CoreModel.NonFungibleStoreEntrySubstate nonFungibleStoreEntry)
@@ -712,7 +724,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             nonFungibleStoreEntry.IsDeleted, nonFungibleStoreEntry.NonFungibleData, stateVersion));
                     }
 
-                    if (substateData is CoreModel.AccessRulesChainSubstate accessRulesChain)
+                    if (substateData is CoreModel.AccessRulesSubstate accessRulesSubstate)
                     {
                         AccessRulesChainSubtype subtype = substateId.ModuleType switch
                         {
@@ -727,7 +739,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             FromStateVersion = stateVersion,
                             EntityId = referencedEntities.Get(substateId.EntityIdHex).DatabaseId,
                             Subtype = subtype,
-                            AccessRulesChain = JsonConvert.SerializeObject(accessRulesChain.Chain),
+                            AccessRulesChain = JsonConvert.SerializeObject(accessRulesSubstate.AccessRules.ToJson()),
                         });
                     }
 

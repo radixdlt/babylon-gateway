@@ -84,41 +84,58 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// GlobalAddressSubstateAllOf
+    /// PackageEventSchemaSubstate
     /// </summary>
-    [DataContract(Name = "GlobalAddressSubstate_allOf")]
-    public partial class GlobalAddressSubstateAllOf : IEquatable<GlobalAddressSubstateAllOf>
+    [DataContract(Name = "PackageEventSchemaSubstate")]
+    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
+    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
+    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
+    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
+    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
+    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
+    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
+    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
+    public partial class PackageEventSchemaSubstate : Substate, IEquatable<PackageEventSchemaSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GlobalAddressSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageEventSchemaSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected GlobalAddressSubstateAllOf() { }
+        protected PackageEventSchemaSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="GlobalAddressSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageEventSchemaSubstate" /> class.
         /// </summary>
-        /// <param name="targetEntity">targetEntity (required).</param>
-        public GlobalAddressSubstateAllOf(GlobalEntityAssignment targetEntity = default(GlobalEntityAssignment))
+        /// <param name="substateType">substateType (required) (default to SubstateType.PackageEventSchema).</param>
+        public PackageEventSchemaSubstate(SubstateType substateType = SubstateType.PackageEventSchema) : base(substateType)
         {
-            // to ensure "targetEntity" is required (not null)
-            if (targetEntity == null)
-            {
-                throw new ArgumentNullException("targetEntity is a required property for GlobalAddressSubstateAllOf and cannot be null");
-            }
-            this.TargetEntity = targetEntity;
         }
-
-        /// <summary>
-        /// Gets or Sets TargetEntity
-        /// </summary>
-        [DataMember(Name = "target_entity", IsRequired = true, EmitDefaultValue = true)]
-        public GlobalEntityAssignment TargetEntity { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +144,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class GlobalAddressSubstateAllOf {\n");
-            sb.Append("  TargetEntity: ").Append(TargetEntity).Append("\n");
+            sb.Append("class PackageEventSchemaSubstate {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -137,7 +154,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -149,26 +166,21 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as GlobalAddressSubstateAllOf);
+            return this.Equals(input as PackageEventSchemaSubstate);
         }
 
         /// <summary>
-        /// Returns true if GlobalAddressSubstateAllOf instances are equal
+        /// Returns true if PackageEventSchemaSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of GlobalAddressSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of PackageEventSchemaSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(GlobalAddressSubstateAllOf input)
+        public bool Equals(PackageEventSchemaSubstate input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
-                (
-                    this.TargetEntity == input.TargetEntity ||
-                    (this.TargetEntity != null &&
-                    this.TargetEntity.Equals(input.TargetEntity))
-                );
+            return base.Equals(input);
         }
 
         /// <summary>
@@ -179,11 +191,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.TargetEntity != null)
-                {
-                    hashCode = (hashCode * 59) + this.TargetEntity.GetHashCode();
-                }
+                int hashCode = base.GetHashCode();
                 return hashCode;
             }
         }

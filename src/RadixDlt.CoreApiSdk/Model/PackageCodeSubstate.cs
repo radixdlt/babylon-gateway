@@ -62,14 +62,13 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
+using System;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class ComponentInfoSubstate : IGlobalAddressPointer
+public partial class PackageCodeSubstate
 {
-    public IEnumerable<string> GetGlobalAddresses()
-    {
-        yield return PackageAddress;
-    }
+    private byte[] _codeBytes;
+
+    public byte[] GetCodeBytes() => _codeBytes ??= Convert.FromHexString(CodeHex);
 }

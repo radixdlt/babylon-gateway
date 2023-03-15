@@ -91,74 +91,64 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ComponentInfoSubstate
+    /// VaultNonFungibleSubstate
     /// </summary>
-    [DataContract(Name = "ComponentInfoSubstate")]
+    [DataContract(Name = "VaultNonFungibleSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
     [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
     [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentInfoSubstate), "ComponentInfo")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
     [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
     [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(GlobalAddressSubstate), "GlobalAddress")]
+    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
     [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "Metadata")]
-    [JsonSubtypes.KnownSubType(typeof(NativeCodeSubstate), "NativeCode")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
+    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
     [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
     [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(PackageTypeInfoSubstate), "PackageTypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultSubstate), "Vault")]
-    [JsonSubtypes.KnownSubType(typeof(WasmCodeSubstate), "WasmCode")]
-    public partial class ComponentInfoSubstate : Substate, IEquatable<ComponentInfoSubstate>
+    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
+    public partial class VaultNonFungibleSubstate : Substate, IEquatable<VaultNonFungibleSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentInfoSubstate" /> class.
+        /// Initializes a new instance of the <see cref="VaultNonFungibleSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ComponentInfoSubstate() { }
+        protected VaultNonFungibleSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentInfoSubstate" /> class.
+        /// Initializes a new instance of the <see cref="VaultNonFungibleSubstate" /> class.
         /// </summary>
-        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
-        /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.ComponentInfo).</param>
-        public ComponentInfoSubstate(string packageAddress = default(string), string blueprintName = default(string), SubstateType substateType = SubstateType.ComponentInfo) : base(substateType)
+        /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.VaultNonFungible).</param>
+        public VaultNonFungibleSubstate(List<NonFungibleId> nonFungibleIds = default(List<NonFungibleId>), SubstateType substateType = SubstateType.VaultNonFungible) : base(substateType)
         {
-            // to ensure "packageAddress" is required (not null)
-            if (packageAddress == null)
+            // to ensure "nonFungibleIds" is required (not null)
+            if (nonFungibleIds == null)
             {
-                throw new ArgumentNullException("packageAddress is a required property for ComponentInfoSubstate and cannot be null");
+                throw new ArgumentNullException("nonFungibleIds is a required property for VaultNonFungibleSubstate and cannot be null");
             }
-            this.PackageAddress = packageAddress;
-            // to ensure "blueprintName" is required (not null)
-            if (blueprintName == null)
-            {
-                throw new ArgumentNullException("blueprintName is a required property for ComponentInfoSubstate and cannot be null");
-            }
-            this.BlueprintName = blueprintName;
+            this.NonFungibleIds = nonFungibleIds;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the package address
+        /// Gets or Sets NonFungibleIds
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the package address</value>
-        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
-        public string PackageAddress { get; set; }
-
-        /// <summary>
-        /// Gets or Sets BlueprintName
-        /// </summary>
-        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
-        public string BlueprintName { get; set; }
+        [DataMember(Name = "non_fungible_ids", IsRequired = true, EmitDefaultValue = true)]
+        public List<NonFungibleId> NonFungibleIds { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -167,10 +157,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ComponentInfoSubstate {\n");
+            sb.Append("class VaultNonFungibleSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
-            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
+            sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -191,15 +180,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ComponentInfoSubstate);
+            return this.Equals(input as VaultNonFungibleSubstate);
         }
 
         /// <summary>
-        /// Returns true if ComponentInfoSubstate instances are equal
+        /// Returns true if VaultNonFungibleSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of ComponentInfoSubstate to be compared</param>
+        /// <param name="input">Instance of VaultNonFungibleSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ComponentInfoSubstate input)
+        public bool Equals(VaultNonFungibleSubstate input)
         {
             if (input == null)
             {
@@ -207,14 +196,10 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.PackageAddress == input.PackageAddress ||
-                    (this.PackageAddress != null &&
-                    this.PackageAddress.Equals(input.PackageAddress))
-                ) && base.Equals(input) && 
-                (
-                    this.BlueprintName == input.BlueprintName ||
-                    (this.BlueprintName != null &&
-                    this.BlueprintName.Equals(input.BlueprintName))
+                    this.NonFungibleIds == input.NonFungibleIds ||
+                    this.NonFungibleIds != null &&
+                    input.NonFungibleIds != null &&
+                    this.NonFungibleIds.SequenceEqual(input.NonFungibleIds)
                 );
         }
 
@@ -227,13 +212,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.PackageAddress != null)
+                if (this.NonFungibleIds != null)
                 {
-                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
-                }
-                if (this.BlueprintName != null)
-                {
-                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleIds.GetHashCode();
                 }
                 return hashCode;
             }

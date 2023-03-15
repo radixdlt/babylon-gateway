@@ -91,60 +91,51 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// VaultSubstate
+    /// FunctionAccessRulesSubstate
     /// </summary>
-    [DataContract(Name = "VaultSubstate")]
+    [DataContract(Name = "FunctionAccessRulesSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
     [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
     [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentInfoSubstate), "ComponentInfo")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
     [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
     [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(GlobalAddressSubstate), "GlobalAddress")]
+    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
     [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "Metadata")]
-    [JsonSubtypes.KnownSubType(typeof(NativeCodeSubstate), "NativeCode")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
+    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
     [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
     [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(PackageTypeInfoSubstate), "PackageTypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultSubstate), "Vault")]
-    [JsonSubtypes.KnownSubType(typeof(WasmCodeSubstate), "WasmCode")]
-    public partial class VaultSubstate : Substate, IEquatable<VaultSubstate>
+    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
+    public partial class FunctionAccessRulesSubstate : Substate, IEquatable<FunctionAccessRulesSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="VaultSubstate" /> class.
+        /// Initializes a new instance of the <see cref="FunctionAccessRulesSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected VaultSubstate() { }
+        protected FunctionAccessRulesSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="VaultSubstate" /> class.
+        /// Initializes a new instance of the <see cref="FunctionAccessRulesSubstate" /> class.
         /// </summary>
-        /// <param name="resourceAmount">resourceAmount (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.Vault).</param>
-        public VaultSubstate(ResourceAmount resourceAmount = default(ResourceAmount), SubstateType substateType = SubstateType.Vault) : base(substateType)
+        /// <param name="substateType">substateType (required) (default to SubstateType.FunctionAccessRules).</param>
+        public FunctionAccessRulesSubstate(SubstateType substateType = SubstateType.FunctionAccessRules) : base(substateType)
         {
-            // to ensure "resourceAmount" is required (not null)
-            if (resourceAmount == null)
-            {
-                throw new ArgumentNullException("resourceAmount is a required property for VaultSubstate and cannot be null");
-            }
-            this.ResourceAmount = resourceAmount;
         }
-
-        /// <summary>
-        /// Gets or Sets ResourceAmount
-        /// </summary>
-        [DataMember(Name = "resource_amount", IsRequired = true, EmitDefaultValue = true)]
-        public ResourceAmount ResourceAmount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -153,9 +144,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class VaultSubstate {\n");
+            sb.Append("class FunctionAccessRulesSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  ResourceAmount: ").Append(ResourceAmount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -176,26 +166,21 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as VaultSubstate);
+            return this.Equals(input as FunctionAccessRulesSubstate);
         }
 
         /// <summary>
-        /// Returns true if VaultSubstate instances are equal
+        /// Returns true if FunctionAccessRulesSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of VaultSubstate to be compared</param>
+        /// <param name="input">Instance of FunctionAccessRulesSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(VaultSubstate input)
+        public bool Equals(FunctionAccessRulesSubstate input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
-                (
-                    this.ResourceAmount == input.ResourceAmount ||
-                    (this.ResourceAmount != null &&
-                    this.ResourceAmount.Equals(input.ResourceAmount))
-                );
+            return base.Equals(input);
         }
 
         /// <summary>
@@ -207,10 +192,6 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.ResourceAmount != null)
-                {
-                    hashCode = (hashCode * 59) + this.ResourceAmount.GetHashCode();
-                }
                 return hashCode;
             }
         }

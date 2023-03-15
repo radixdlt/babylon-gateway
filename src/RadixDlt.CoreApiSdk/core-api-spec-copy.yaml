@@ -35,7 +35,7 @@ openapi: 3.0.0
 #
 # Descriptions guidance:
 # => For descriptions of encoded types, we follow this pattern: 'The xyz-encoded, abc-encoded xx of the yy'
-#    EG 'The hex-encoded, SBOR-encoded data' or 'The hex-encoded double-SHA256 hash of the banana payload'
+#    EG 'The hex-encoded, SBOR-encoded data' or 'The hex-encoded Blake2b-256 hash of the banana payload'
 # => Don't end in a full-stop, unless it is more than 1 sentence, then all sentences should end in a full stop
 # => It's not technically valid to have both $ref and description, but it works in ReDocly, so feel free to do it
 #
@@ -977,7 +977,7 @@ components:
           maxLength: 64
           description: |
             The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger.
-            This hash is `ACC_{N+1} = SHA256(SHA256(CONCAT(ACC_N, LEDGER_HASH_{N})))`, starting with `ACC_0 = 000..000` the pre-genesis accumulator.
+            This hash is `ACC_{N+1} = Blake2b-256(CONCAT(ACC_N, LEDGER_HASH_{N}))`, starting with `ACC_0 = 000..000` the pre-genesis accumulator.
     TransactionIdentifiers:
       type: object
       required:
@@ -995,22 +995,22 @@ components:
       type: string
       minLength: 64
       maxLength: 64
-      description: The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is `SHA256(SHA256(compiled_intent))`
+      description: The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is `Blake2b-256(compiled_intent)`
     SignaturesHash:
       type: string
       minLength: 64
       maxLength: 64
-      description: The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is `SHA256(SHA256(compiled_signed_transaction))`
+      description: The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is `Blake2b-256(compiled_signed_transaction)`
     PayloadHash:
       type: string
       minLength: 64
       maxLength: 64
-      description: The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is `SHA256(SHA256(compiled_notarized_transaction))`
+      description: The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is `Blake2b-256(compiled_notarized_transaction)`
     LedgerHash:
       type: string
       minLength: 64
       maxLength: 64
-      description: The hex-encoded ledger-wrapped transaction hash. This is known as the Ledger Hash. This hash is `SHA256(SHA256(ledger_transaction_bytes))`
+      description: The hex-encoded ledger-wrapped transaction hash. This is known as the Ledger Hash. This hash is `Blake2b-256(ledger_transaction_bytes)`
     ErrorResponseType:
       type: string
       enum:
@@ -1173,7 +1173,7 @@ components:
         new_global_entities:
           type: array
           items:
-            $ref: "#/components/schemas/GlobalEntityAssignment"
+            $ref: "#/components/schemas/GlobalEntityReference"
     NextEpoch:
       type: object
       required:
@@ -1213,7 +1213,7 @@ components:
           description: The hex-encoded, SBOR-encoded substate data bytes
         substate_data_hash:
           type: string
-          description: The hex-encoded single-SHA256 hash of the substate data bytes
+          description: The hex-encoded Blake2b-256 hash of the substate data bytes
         substate_data:
           $ref: "#/components/schemas/Substate"
     DeletedSubstateVersionRef:
@@ -1227,7 +1227,7 @@ components:
           $ref: "#/components/schemas/SubstateId"
         substate_data_hash:
           type: string
-          description: The hex-encoded single-SHA256 hash of the substate data bytes
+          description: The hex-encoded Blake2b-256 hash of the substate data bytes
         version:
           type: integer
           format: int64
@@ -1237,18 +1237,18 @@ components:
     GlobalEntityReference:
       type: object
       required:
-        - entity_type
+        - entity_reference
         - global_address_hex
         - global_address
       properties:
-        entity_type:
-          $ref: "#/components/schemas/EntityType"
         global_address_hex:
           type: string
           description: The hex-encoded bytes of the entity's global address
         global_address:
           type: string
           description: The Bech32m-encoded human readable version of the entity's global address
+        entity_reference:
+          $ref: "#/components/schemas/EntityReference"
     EntityReference:
       type: object
       required:
@@ -1310,6 +1310,18 @@ components:
           description: |
             The RFC 3339 / ISO 8601 string representation of the timestamp. Will always use "Z" denoting UTC and include milliseconds.
             EG: `2023-01-26T18:30:09.453Z`.
+    InstructionResourceChanges:
+      type: object
+      required:
+        - index
+        - resource_changes
+      properties:
+        index:
+          type: integer
+        resource_changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceChange'
     ResourceChange:
       type: object
       required:
@@ -1500,42 +1512,13 @@ components:
           $ref: '#/components/schemas/LocalMethodReference'
         access_rule:
           $ref: '#/components/schemas/AccessRule'
-    LocalMethodReferenceType:
-      type: string
-      enum:
-        - NativeMethod
-        - ScryptoMethod
     LocalMethodReference:
       type: object
       required:
-        - type
+        - name
       properties:
-        type:
-          $ref: '#/components/schemas/LocalMethodReferenceType'
-      discriminator:
-        propertyName: type
-        mapping:
-          # NOTE: These need to match LocalMethodReferenceType options above
-          NativeMethod: '#/components/schemas/LocalNativeMethodReference'
-          ScryptoMethod: '#/components/schemas/LocalScryptoMethodReference'
-    LocalNativeMethodReference:
-      allOf:
-        - $ref: '#/components/schemas/LocalMethodReference'
-        - type: object
-          required:
-            - name
-          properties:
-            name:
-              type: string
-    LocalScryptoMethodReference:
-      allOf:
-        - $ref: '#/components/schemas/LocalMethodReference'
-        - type: object
-          required:
-            - name
-          properties:
-            name:
-              type: string
+        name:
+          type: string
     AccessRuleReferenceType:
       type: string
       enum:
@@ -2128,7 +2111,6 @@ components:
     EntityType:
       type: string
       enum:
-        - Global
         - Component
         - Package
         - ResourceManager
@@ -2146,13 +2128,14 @@ components:
       type: string
       enum:
         - Self
+        - TypeInfo
         - Metadata
         - AccessRules
         - AccessRules1
+        - FunctionAccessRules
         - ComponentRoyalty
         - PackageRoyalty
-        - PackageTypeInfo
-        - ComponentTypeInfo
+        - PackageEventSchema
     Substate:
       type: object
       required:
@@ -2164,17 +2147,16 @@ components:
         propertyName: substate_type
         mapping:
           # NOTE: These need to match SubstateType options below
-          Metadata: '#/components/schemas/MetadataSubstate'
-          AccessRulesChain: '#/components/schemas/AccessRulesChainSubstate'
-          GlobalAddress: '#/components/schemas/GlobalAddressSubstate'
-          ComponentInfo: '#/components/schemas/ComponentInfoSubstate'
+          MetadataEntry: '#/components/schemas/MetadataEntrySubstate'
+          AccessRules: '#/components/schemas/AccessRulesSubstate'
+          FunctionAccessRules: '#/components/schemas/FunctionAccessRulesSubstate'
+          TypeInfo: '#/components/schemas/TypeInfoSubstate'
           ComponentState: '#/components/schemas/ComponentStateSubstate'
           ComponentRoyaltyConfig: '#/components/schemas/ComponentRoyaltyConfigSubstate'
           ComponentRoyaltyAccumulator: '#/components/schemas/ComponentRoyaltyAccumulatorSubstate'
           PackageInfo: '#/components/schemas/PackageInfoSubstate'
-          PackageTypeInfo: '#/components/schemas/PackageTypeInfoSubstate'
-          WasmCode: '#/components/schemas/WasmCodeSubstate'
-          NativeCode: '#/components/schemas/NativeCodeSubstate'
+          PackageCode: '#/components/schemas/PackageCodeSubstate'
+          PackageCodeType: '#/components/schemas/PackageCodeTypeSubstate'
           PackageRoyaltyConfig: '#/components/schemas/PackageRoyaltyConfigSubstate'
           PackageRoyaltyAccumulator: '#/components/schemas/PackageRoyaltyAccumulatorSubstate'
           ResourceManager: '#/components/schemas/ResourceManagerSubstate'
@@ -2183,26 +2165,30 @@ components:
           Validator: '#/components/schemas/ValidatorSubstate'
           ClockCurrentMinute: '#/components/schemas/ClockCurrentMinuteSubstate'
           KeyValueStoreEntry: '#/components/schemas/KeyValueStoreEntrySubstate'
-          Vault: '#/components/schemas/VaultSubstate'
+          VaultInfo: '#/components/schemas/VaultInfoSubstate'
+          VaultFungible: '#/components/schemas/VaultFungibleSubstate'
+          VaultNonFungible: '#/components/schemas/VaultNonFungibleSubstate'
+          VaultLockedFungible: '#/components/schemas/VaultLockedFungibleSubstate'
+          VaultLockedNonFungible: '#/components/schemas/VaultLockedNonFungibleSubstate'
           NonFungibleStoreEntry: '#/components/schemas/NonFungibleStoreEntrySubstate'
           AccessController: '#/components/schemas/AccessControllerSubstate'
           Account: '#/components/schemas/AccountSubstate'
+          PackageEventSchema: '#/components/schemas/PackageEventSchemaSubstate'
     SubstateType:
       type: string
       enum:
         # Common
-        - Metadata
-        - AccessRulesChain
+        - MetadataEntry
+        - AccessRules
+        - FunctionAccessRules
         # Specific
-        - GlobalAddress
-        - ComponentInfo
+        - TypeInfo
         - ComponentState
         - ComponentRoyaltyConfig
         - ComponentRoyaltyAccumulator
         - PackageInfo
-        - PackageTypeInfo
-        - WasmCode
-        - NativeCode
+        - PackageCode
+        - PackageCodeType
         - PackageRoyaltyConfig
         - PackageRoyaltyAccumulator
         - ResourceManager
@@ -2212,30 +2198,34 @@ components:
         - ClockCurrentMinute
         - KeyValueStoreEntry
         - NonFungibleStoreEntry
-        - Vault
+        - VaultInfo
+        - VaultFungible
+        - VaultNonFungible
+        - VaultLockedFungible
+        - VaultLockedNonFungible
         - AccessController
         - Account
+        - PackageEventSchema
     SubstateKeyType:
       # This corresponds to what's currently referred to as the "SubstateOffset"
       # This is roughly the same as the substate type, but some entities have two of the same substates
-      # (eg ResourceManagers have two AccessRulesChain substates)
+      # (eg ResourceManagers have two AccessRules substates)
       type: string
       description: |
-        Slightly different to the SubstateType - some entities have two of the same substate (eg ResouceManager AccessRuleChains)
+        Slightly different to the SubstateType - some entities have two of the same substate (eg ResouceManager AccessRules)
       enum:
         # Common
-        - Metadata
-        - AccessRulesChain
+        - MetadataEntry
+        - AccessRules
+        - FunctionAccessRules
         # Specific
-        - GlobalAddress
-        - ComponentInfo
+        - TypeInfo
         - ComponentState
         - ComponentRoyaltyConfig
         - ComponentRoyaltyAccumulator
         - PackageInfo
-        - PackageTypeInfo
-        - WasmCode
-        - NativeCode
+        - PackageCode
+        - PackageCodeType
         - PackageRoyaltyConfig
         - PackageRoyaltyAccumulator
         - ResourceManager
@@ -2246,87 +2236,58 @@ components:
         - ClockCurrentMinute
         - KeyValueStoreEntry
         - NonFungibleStoreEntry
-        - Vault
+        - VaultInfo
+        - VaultFungible
+        - VaultNonFungible
+        - VaultLockedFungible
+        - VaultLockedNonFungible
         - AccessController
         - Account
+        - PackageEventSchema
 ### COMMON SUBSTATES
-    AccessRulesChainSubstate:
+    AccessRulesSubstate:
       allOf:
         - $ref: '#/components/schemas/Substate'
         - type: object
           required:
-            - chain
+            - access_rules
           properties:
-            chain:
-              type: array
-              description: |
-                The layers of access rules applied.
-              items:
-                $ref: '#/components/schemas/AccessRules'
-    MetadataSubstate:
+            access_rules:
+              $ref: '#/components/schemas/AccessRules'
+    FunctionAccessRulesSubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+    MetadataEntrySubstate:
       allOf:
         - $ref: '#/components/schemas/Substate'
         - type: object
           required:
-            - metadata
+            - key_hex
           properties:
-            metadata:
-              type: array
-              items:
-                type: object
-                required:
-                  - key
-                  - value
-                properties:
-                  key:
-                    type: string
-                  value:
-                    type: string
+            key_hex:
+              type: string
+              description: The hex-encoded bytes of its key
+            data_struct:
+              $ref: '#/components/schemas/DataStruct'
+    PackageEventSchemaSubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
 ### SPECIFIC SUBSTATES
-    GlobalAddressSubstate:
-      allOf:
-        - $ref: '#/components/schemas/Substate'
-        - type: object
-          required:
-            - target_entity
-          properties:
-            target_entity:
-              $ref: '#/components/schemas/GlobalEntityAssignment'
-    GlobalEntityAssignment:
-      type: object
-      required:
-        - target_entity_type
-        - target_entity_id_hex
-        - global_entity_id_hex
-        - global_address_hex
-        - global_address
-      properties:
-        target_entity_type:
-          $ref: "#/components/schemas/EntityType"
-        target_entity_id_hex:
-          type: string
-          description: The hex-encoded bytes of the target entity id
-        global_entity_id_hex:
-          type: string
-          description: The hex-encoded bytes of the global entity id
-        global_address_hex:
-          type: string
-          description: The hex-encoded bytes of the assigned global address.
-        global_address:
-          type: string
-          description: The Bech32m-encoded human readable version of the assigned global address
-    ComponentInfoSubstate:
+    TypeInfoSubstate:
       allOf:
         - $ref: '#/components/schemas/Substate'
         - type: object
           required:
             - package_address
             - blueprint_name
+            - global
           properties:
             package_address:
               $ref: '#/components/schemas/PackageAddress'
             blueprint_name:
               type: string
+            global:
+              type: boolean
     ComponentStateSubstate:
       allOf:
         - $ref: '#/components/schemas/Substate'
@@ -2376,11 +2337,7 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/ComponentAddress'
-    PackageTypeInfoSubstate:
-      allOf:
-        - $ref: '#/components/schemas/Substate'
-        - type: object
-    WasmCodeSubstate:
+    PackageCodeSubstate:
       allOf:
         - $ref: '#/components/schemas/Substate'
         - type: object
@@ -2390,15 +2347,15 @@ components:
             code_hex:
               type: string
               description: The hex-encoded package code
-    NativeCodeSubstate:
+    PackageCodeTypeSubstate:
       allOf:
         - $ref: '#/components/schemas/Substate'
         - type: object
           required:
-            - native_package_code_id
+            - code_type
           properties:
-            native_package_code_id:
-              type: integer
+            code_type:
+              type: string
     BlueprintData:
       type: object
       required:
@@ -2560,15 +2517,61 @@ components:
               type: boolean
             data_struct:
               $ref: '#/components/schemas/DataStruct'
-    VaultSubstate:
+    VaultInfoSubstate:
       allOf:
         - $ref: '#/components/schemas/Substate'
         - type: object
           required:
-            - resource_amount
+            - resource_address
           properties:
-            resource_amount:
-              $ref: '#/components/schemas/ResourceAmount'
+            resource_address:
+              $ref: '#/components/schemas/ResourceAddress'
+    VaultFungibleSubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+        - type: object
+          required:
+            - amount
+          properties:
+            amount:
+              type: string
+              description: |
+                The string-encoded decimal representing the token amount in the vault.
+                A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(256 - 1) <= m < 2^(256 - 1)`.
+    VaultNonFungibleSubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+        - type: object
+          required:
+            - non_fungible_ids
+          properties:
+            non_fungible_ids:
+              type: array
+              items:
+                $ref: '#/components/schemas/NonFungibleId'
+    VaultLockedFungibleSubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+        - type: object
+          required:
+            - amount
+          properties:
+            amount:
+              type: string
+              description: |
+                The string-encoded decimal representing the token amount in the vault.
+                A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(256 - 1) <= m < 2^(256 - 1)`.
+    VaultLockedNonFungibleSubstate:
+      allOf:
+        - $ref: '#/components/schemas/Substate'
+        - type: object
+          required:
+            - non_fungible_ids
+          properties:
+            non_fungible_ids:
+              type: array
+              items:
+                $ref: '#/components/schemas/NonFungibleId'
     NonFungibleStoreEntrySubstate:
       allOf:
         - $ref: '#/components/schemas/Substate'
@@ -2625,6 +2628,8 @@ components:
           properties:
             data_struct:
               $ref: '#/components/schemas/DataStruct'
+
+
 ##########################################
 # REQUEST: /status/network-configuration #
 ##########################################
@@ -2708,7 +2713,6 @@ components:
             - Validator
             - Clock
             - AccessController
-            - Account
         hrp_prefix:
           type: string
         entity_type:
@@ -3352,16 +3356,20 @@ components:
     TransactionPreviewResponse:
       type: object
       required:
+        - encoded_receipt
         - receipt
-        - resource_changes
+        - instruction_resource_changes
         - logs
       properties:
+        encoded_receipt:
+          type: string
+          description: The hex-sbor-encoded receipt
         receipt:
           $ref: "#/components/schemas/TransactionReceipt"
-        resource_changes:
+        instruction_resource_changes:
           type: array
           items:
-            $ref: "#/components/schemas/ResourceChange"
+            $ref: "#/components/schemas/InstructionResourceChanges"
         logs:
           type: array
           items:
@@ -3450,7 +3458,7 @@ components:
           maxLength: 64
           description: |
             The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger.
-            This hash is `ACC_{N+1} = SHA256(SHA256(CONCAT(ACC_N, LEDGER_HASH_{N})))`, starting with `ACC_0 = 000..000` the pre-genesis accumulator.
+            This hash is `ACC_{N+1} = Blake2b-256(CONCAT(ACC_N, LEDGER_HASH_{N}))`, starting with `ACC_0 = 000..000` the pre-genesis accumulator.
         ledger_transaction:
           $ref: "#/components/schemas/LedgerTransaction"
         receipt:
@@ -3619,10 +3627,6 @@ components:
       type: object
       required:
         - info
-        - state
-        - royalty_config
-        - royalty_accumulator
-        - metadata
         - access_rules
         - state_owned_vaults
         - descendent_ids
@@ -3631,11 +3635,11 @@ components:
           $ref: "#/components/schemas/Substate"
         state:
           $ref: "#/components/schemas/Substate"
+        account:
+          $ref: "#/components/schemas/Substate"
         royalty_config:
           $ref: "#/components/schemas/Substate"
         royalty_accumulator:
-          $ref: "#/components/schemas/Substate"
-        metadata:
           $ref: "#/components/schemas/Substate"
         access_rules:
           $ref: "#/components/schemas/Substate"
@@ -3643,7 +3647,7 @@ components:
           type: array
           description: Any vaults owned directly or indirectly by the component
           items:
-            $ref: "#/components/schemas/Substate"
+            $ref: "#/components/schemas/ResourceAmount"
         descendent_ids:
           type: array
           description: Any descendent nodes owned directly or indirectly by the component
@@ -3683,14 +3687,11 @@ components:
       type: object
       required:
         - state
-        - metadata
         - access_rules
         - state_owned_vaults
         - descendent_ids
       properties:
         state:
-          $ref: "#/components/schemas/Substate"
-        metadata:
           $ref: "#/components/schemas/Substate"
         access_rules:
           $ref: "#/components/schemas/Substate"
@@ -3698,7 +3699,7 @@ components:
           type: array
           description: Any vaults owned directly or indirectly by the component
           items:
-            $ref: "#/components/schemas/Substate"
+            $ref: "#/components/schemas/ResourceAmount"
         descendent_ids:
           type: array
           description: Any descendent nodes owned directly or indirectly by the component
@@ -3721,14 +3722,11 @@ components:
       type: object
       required:
         - state
-        - metadata
         - access_rules
         - state_owned_vaults
         - descendent_ids
       properties:
         state:
-          $ref: "#/components/schemas/Substate"
-        metadata:
           $ref: "#/components/schemas/Substate"
         access_rules:
           $ref: "#/components/schemas/Substate"
@@ -3736,7 +3734,7 @@ components:
           type: array
           description: Any vaults owned directly or indirectly by the component
           items:
-            $ref: "#/components/schemas/Substate"
+            $ref: "#/components/schemas/ResourceAmount"
         descendent_ids:
           type: array
           description: Any descendent nodes owned directly or indirectly by the component
@@ -3760,13 +3758,10 @@ components:
       type: object
       required:
         - manager
-        - metadata
         - access_rules
         - vault_access_rules
       properties:
         manager:
-          $ref: "#/components/schemas/Substate"
-        metadata:
           $ref: "#/components/schemas/Substate"
         access_rules:
           $ref: "#/components/schemas/Substate"
@@ -3816,7 +3811,6 @@ components:
         - info
         - royalty_config
         - royalty_accumulator
-        - metadata
         - access_rules
       properties:
         info:
@@ -3824,8 +3818,6 @@ components:
         royalty_config:
           $ref: "#/components/schemas/Substate"
         royalty_accumulator:
-          $ref: "#/components/schemas/Substate"
-        metadata:
           $ref: "#/components/schemas/Substate"
         access_rules:
           $ref: "#/components/schemas/Substate"

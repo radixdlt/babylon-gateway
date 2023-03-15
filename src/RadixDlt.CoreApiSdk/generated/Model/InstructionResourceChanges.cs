@@ -90,22 +90,118 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines LocalMethodReferenceType
+    /// InstructionResourceChanges
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum LocalMethodReferenceType
+    [DataContract(Name = "InstructionResourceChanges")]
+    public partial class InstructionResourceChanges : IEquatable<InstructionResourceChanges>
     {
         /// <summary>
-        /// Enum NativeMethod for value: NativeMethod
+        /// Initializes a new instance of the <see cref="InstructionResourceChanges" /> class.
         /// </summary>
-        [EnumMember(Value = "NativeMethod")]
-        NativeMethod = 1,
+        [JsonConstructorAttribute]
+        protected InstructionResourceChanges() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InstructionResourceChanges" /> class.
+        /// </summary>
+        /// <param name="index">index (required).</param>
+        /// <param name="resourceChanges">resourceChanges (required).</param>
+        public InstructionResourceChanges(int index = default(int), List<ResourceChange> resourceChanges = default(List<ResourceChange>))
+        {
+            this.Index = index;
+            // to ensure "resourceChanges" is required (not null)
+            if (resourceChanges == null)
+            {
+                throw new ArgumentNullException("resourceChanges is a required property for InstructionResourceChanges and cannot be null");
+            }
+            this.ResourceChanges = resourceChanges;
+        }
 
         /// <summary>
-        /// Enum ScryptoMethod for value: ScryptoMethod
+        /// Gets or Sets Index
         /// </summary>
-        [EnumMember(Value = "ScryptoMethod")]
-        ScryptoMethod = 2
+        [DataMember(Name = "index", IsRequired = true, EmitDefaultValue = true)]
+        public int Index { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ResourceChanges
+        /// </summary>
+        [DataMember(Name = "resource_changes", IsRequired = true, EmitDefaultValue = true)]
+        public List<ResourceChange> ResourceChanges { get; set; }
+
+        /// <summary>
+        /// Returns the string presentation of the object
+        /// </summary>
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class InstructionResourceChanges {\n");
+            sb.Append("  Index: ").Append(Index).Append("\n");
+            sb.Append("  ResourceChanges: ").Append(ResourceChanges).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns the JSON string presentation of the object
+        /// </summary>
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Returns true if objects are equal
+        /// </summary>
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as InstructionResourceChanges);
+        }
+
+        /// <summary>
+        /// Returns true if InstructionResourceChanges instances are equal
+        /// </summary>
+        /// <param name="input">Instance of InstructionResourceChanges to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(InstructionResourceChanges input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.Index == input.Index ||
+                    this.Index.Equals(input.Index)
+                ) && 
+                (
+                    this.ResourceChanges == input.ResourceChanges ||
+                    this.ResourceChanges != null &&
+                    input.ResourceChanges != null &&
+                    this.ResourceChanges.SequenceEqual(input.ResourceChanges)
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Index.GetHashCode();
+                if (this.ResourceChanges != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceChanges.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
 
     }
 

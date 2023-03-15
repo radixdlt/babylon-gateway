@@ -84,46 +84,41 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// LocalScryptoMethodReference
+    /// PackageCodeTypeSubstateAllOf
     /// </summary>
-    [DataContract(Name = "LocalScryptoMethodReference")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(LocalNativeMethodReference), "NativeMethod")]
-    [JsonSubtypes.KnownSubType(typeof(LocalScryptoMethodReference), "ScryptoMethod")]
-    public partial class LocalScryptoMethodReference : LocalMethodReference, IEquatable<LocalScryptoMethodReference>
+    [DataContract(Name = "PackageCodeTypeSubstate_allOf")]
+    public partial class PackageCodeTypeSubstateAllOf : IEquatable<PackageCodeTypeSubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalScryptoMethodReference" /> class.
+        /// Initializes a new instance of the <see cref="PackageCodeTypeSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected LocalScryptoMethodReference() { }
+        protected PackageCodeTypeSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalScryptoMethodReference" /> class.
+        /// Initializes a new instance of the <see cref="PackageCodeTypeSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="name">name (required).</param>
-        /// <param name="type">type (required) (default to LocalMethodReferenceType.ScryptoMethod).</param>
-        public LocalScryptoMethodReference(string name = default(string), LocalMethodReferenceType type = LocalMethodReferenceType.ScryptoMethod) : base(type)
+        /// <param name="codeType">codeType (required).</param>
+        public PackageCodeTypeSubstateAllOf(string codeType = default(string))
         {
-            // to ensure "name" is required (not null)
-            if (name == null)
+            // to ensure "codeType" is required (not null)
+            if (codeType == null)
             {
-                throw new ArgumentNullException("name is a required property for LocalScryptoMethodReference and cannot be null");
+                throw new ArgumentNullException("codeType is a required property for PackageCodeTypeSubstateAllOf and cannot be null");
             }
-            this.Name = name;
+            this.CodeType = codeType;
         }
 
         /// <summary>
-        /// Gets or Sets Name
+        /// Gets or Sets CodeType
         /// </summary>
-        [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
-        public string Name { get; set; }
+        [DataMember(Name = "code_type", IsRequired = true, EmitDefaultValue = true)]
+        public string CodeType { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -132,9 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class LocalScryptoMethodReference {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Name: ").Append(Name).Append("\n");
+            sb.Append("class PackageCodeTypeSubstateAllOf {\n");
+            sb.Append("  CodeType: ").Append(CodeType).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -143,7 +137,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -155,25 +149,25 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as LocalScryptoMethodReference);
+            return this.Equals(input as PackageCodeTypeSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if LocalScryptoMethodReference instances are equal
+        /// Returns true if PackageCodeTypeSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of LocalScryptoMethodReference to be compared</param>
+        /// <param name="input">Instance of PackageCodeTypeSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(LocalScryptoMethodReference input)
+        public bool Equals(PackageCodeTypeSubstateAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.Name == input.Name ||
-                    (this.Name != null &&
-                    this.Name.Equals(input.Name))
+                    this.CodeType == input.CodeType ||
+                    (this.CodeType != null &&
+                    this.CodeType.Equals(input.CodeType))
                 );
         }
 
@@ -185,10 +179,10 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.Name != null)
+                int hashCode = 41;
+                if (this.CodeType != null)
                 {
-                    hashCode = (hashCode * 59) + this.Name.GetHashCode();
+                    hashCode = (hashCode * 59) + this.CodeType.GetHashCode();
                 }
                 return hashCode;
             }

@@ -84,41 +84,71 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// VaultSubstateAllOf
+    /// PackageCodeTypeSubstate
     /// </summary>
-    [DataContract(Name = "VaultSubstate_allOf")]
-    public partial class VaultSubstateAllOf : IEquatable<VaultSubstateAllOf>
+    [DataContract(Name = "PackageCodeTypeSubstate")]
+    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
+    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
+    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
+    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
+    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
+    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
+    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
+    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
+    public partial class PackageCodeTypeSubstate : Substate, IEquatable<PackageCodeTypeSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="VaultSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageCodeTypeSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected VaultSubstateAllOf() { }
+        protected PackageCodeTypeSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="VaultSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageCodeTypeSubstate" /> class.
         /// </summary>
-        /// <param name="resourceAmount">resourceAmount (required).</param>
-        public VaultSubstateAllOf(ResourceAmount resourceAmount = default(ResourceAmount))
+        /// <param name="codeType">codeType (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.PackageCodeType).</param>
+        public PackageCodeTypeSubstate(string codeType = default(string), SubstateType substateType = SubstateType.PackageCodeType) : base(substateType)
         {
-            // to ensure "resourceAmount" is required (not null)
-            if (resourceAmount == null)
+            // to ensure "codeType" is required (not null)
+            if (codeType == null)
             {
-                throw new ArgumentNullException("resourceAmount is a required property for VaultSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("codeType is a required property for PackageCodeTypeSubstate and cannot be null");
             }
-            this.ResourceAmount = resourceAmount;
+            this.CodeType = codeType;
         }
 
         /// <summary>
-        /// Gets or Sets ResourceAmount
+        /// Gets or Sets CodeType
         /// </summary>
-        [DataMember(Name = "resource_amount", IsRequired = true, EmitDefaultValue = true)]
-        public ResourceAmount ResourceAmount { get; set; }
+        [DataMember(Name = "code_type", IsRequired = true, EmitDefaultValue = true)]
+        public string CodeType { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +157,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class VaultSubstateAllOf {\n");
-            sb.Append("  ResourceAmount: ").Append(ResourceAmount).Append("\n");
+            sb.Append("class PackageCodeTypeSubstate {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  CodeType: ").Append(CodeType).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -137,7 +168,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -149,25 +180,25 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as VaultSubstateAllOf);
+            return this.Equals(input as PackageCodeTypeSubstate);
         }
 
         /// <summary>
-        /// Returns true if VaultSubstateAllOf instances are equal
+        /// Returns true if PackageCodeTypeSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of VaultSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of PackageCodeTypeSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(VaultSubstateAllOf input)
+        public bool Equals(PackageCodeTypeSubstate input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.ResourceAmount == input.ResourceAmount ||
-                    (this.ResourceAmount != null &&
-                    this.ResourceAmount.Equals(input.ResourceAmount))
+                    this.CodeType == input.CodeType ||
+                    (this.CodeType != null &&
+                    this.CodeType.Equals(input.CodeType))
                 );
         }
 
@@ -179,10 +210,10 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.ResourceAmount != null)
+                int hashCode = base.GetHashCode();
+                if (this.CodeType != null)
                 {
-                    hashCode = (hashCode * 59) + this.ResourceAmount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.CodeType.GetHashCode();
                 }
                 return hashCode;
             }

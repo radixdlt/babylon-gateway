@@ -84,67 +84,63 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// MetadataSubstate
+    /// TypeInfoSubstateAllOf
     /// </summary>
-    [DataContract(Name = "MetadataSubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
-    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentInfoSubstate), "ComponentInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(GlobalAddressSubstate), "GlobalAddress")]
-    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "Metadata")]
-    [JsonSubtypes.KnownSubType(typeof(NativeCodeSubstate), "NativeCode")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(PackageTypeInfoSubstate), "PackageTypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultSubstate), "Vault")]
-    [JsonSubtypes.KnownSubType(typeof(WasmCodeSubstate), "WasmCode")]
-    public partial class MetadataSubstate : Substate, IEquatable<MetadataSubstate>
+    [DataContract(Name = "TypeInfoSubstate_allOf")]
+    public partial class TypeInfoSubstateAllOf : IEquatable<TypeInfoSubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataSubstate" /> class.
+        /// Initializes a new instance of the <see cref="TypeInfoSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MetadataSubstate() { }
+        protected TypeInfoSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataSubstate" /> class.
+        /// Initializes a new instance of the <see cref="TypeInfoSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="metadata">metadata (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.Metadata).</param>
-        public MetadataSubstate(List<MetadataSubstateAllOfMetadata> metadata = default(List<MetadataSubstateAllOfMetadata>), SubstateType substateType = SubstateType.Metadata) : base(substateType)
+        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
+        /// <param name="blueprintName">blueprintName (required).</param>
+        /// <param name="global">global (required).</param>
+        public TypeInfoSubstateAllOf(string packageAddress = default(string), string blueprintName = default(string), bool global = default(bool))
         {
-            // to ensure "metadata" is required (not null)
-            if (metadata == null)
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
             {
-                throw new ArgumentNullException("metadata is a required property for MetadataSubstate and cannot be null");
+                throw new ArgumentNullException("packageAddress is a required property for TypeInfoSubstateAllOf and cannot be null");
             }
-            this.Metadata = metadata;
+            this.PackageAddress = packageAddress;
+            // to ensure "blueprintName" is required (not null)
+            if (blueprintName == null)
+            {
+                throw new ArgumentNullException("blueprintName is a required property for TypeInfoSubstateAllOf and cannot be null");
+            }
+            this.BlueprintName = blueprintName;
+            this.Global = global;
         }
 
         /// <summary>
-        /// Gets or Sets Metadata
+        /// The Bech32m-encoded human readable version of the package address
         /// </summary>
-        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public List<MetadataSubstateAllOfMetadata> Metadata { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the package address</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets BlueprintName
+        /// </summary>
+        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
+        public string BlueprintName { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Global
+        /// </summary>
+        [DataMember(Name = "global", IsRequired = true, EmitDefaultValue = true)]
+        public bool Global { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -153,9 +149,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MetadataSubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("class TypeInfoSubstateAllOf {\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
+            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
+            sb.Append("  Global: ").Append(Global).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,7 +161,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -176,26 +173,34 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MetadataSubstate);
+            return this.Equals(input as TypeInfoSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if MetadataSubstate instances are equal
+        /// Returns true if TypeInfoSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of MetadataSubstate to be compared</param>
+        /// <param name="input">Instance of TypeInfoSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MetadataSubstate input)
+        public bool Equals(TypeInfoSubstateAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.Metadata == input.Metadata ||
-                    this.Metadata != null &&
-                    input.Metadata != null &&
-                    this.Metadata.SequenceEqual(input.Metadata)
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
+                ) && 
+                (
+                    this.BlueprintName == input.BlueprintName ||
+                    (this.BlueprintName != null &&
+                    this.BlueprintName.Equals(input.BlueprintName))
+                ) && 
+                (
+                    this.Global == input.Global ||
+                    this.Global.Equals(input.Global)
                 );
         }
 
@@ -207,11 +212,16 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.Metadata != null)
+                int hashCode = 41;
+                if (this.PackageAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
                 }
+                if (this.BlueprintName != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.Global.GetHashCode();
                 return hashCode;
             }
         }

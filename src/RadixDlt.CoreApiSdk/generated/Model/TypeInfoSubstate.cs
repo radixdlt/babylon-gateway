@@ -91,61 +91,86 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// AccessRulesChainSubstate
+    /// TypeInfoSubstate
     /// </summary>
-    [DataContract(Name = "AccessRulesChainSubstate")]
+    [DataContract(Name = "TypeInfoSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesChainSubstate), "AccessRulesChain")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
     [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
     [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentInfoSubstate), "ComponentInfo")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
     [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
     [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(GlobalAddressSubstate), "GlobalAddress")]
+    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
     [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataSubstate), "Metadata")]
-    [JsonSubtypes.KnownSubType(typeof(NativeCodeSubstate), "NativeCode")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
+    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
     [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
     [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(PackageTypeInfoSubstate), "PackageTypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultSubstate), "Vault")]
-    [JsonSubtypes.KnownSubType(typeof(WasmCodeSubstate), "WasmCode")]
-    public partial class AccessRulesChainSubstate : Substate, IEquatable<AccessRulesChainSubstate>
+    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
+    public partial class TypeInfoSubstate : Substate, IEquatable<TypeInfoSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRulesChainSubstate" /> class.
+        /// Initializes a new instance of the <see cref="TypeInfoSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccessRulesChainSubstate() { }
+        protected TypeInfoSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRulesChainSubstate" /> class.
+        /// Initializes a new instance of the <see cref="TypeInfoSubstate" /> class.
         /// </summary>
-        /// <param name="chain">The layers of access rules applied.  (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.AccessRulesChain).</param>
-        public AccessRulesChainSubstate(List<AccessRules> chain = default(List<AccessRules>), SubstateType substateType = SubstateType.AccessRulesChain) : base(substateType)
+        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
+        /// <param name="blueprintName">blueprintName (required).</param>
+        /// <param name="global">global (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.TypeInfo).</param>
+        public TypeInfoSubstate(string packageAddress = default(string), string blueprintName = default(string), bool global = default(bool), SubstateType substateType = SubstateType.TypeInfo) : base(substateType)
         {
-            // to ensure "chain" is required (not null)
-            if (chain == null)
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
             {
-                throw new ArgumentNullException("chain is a required property for AccessRulesChainSubstate and cannot be null");
+                throw new ArgumentNullException("packageAddress is a required property for TypeInfoSubstate and cannot be null");
             }
-            this.Chain = chain;
+            this.PackageAddress = packageAddress;
+            // to ensure "blueprintName" is required (not null)
+            if (blueprintName == null)
+            {
+                throw new ArgumentNullException("blueprintName is a required property for TypeInfoSubstate and cannot be null");
+            }
+            this.BlueprintName = blueprintName;
+            this.Global = global;
         }
 
         /// <summary>
-        /// The layers of access rules applied. 
+        /// The Bech32m-encoded human readable version of the package address
         /// </summary>
-        /// <value>The layers of access rules applied. </value>
-        [DataMember(Name = "chain", IsRequired = true, EmitDefaultValue = true)]
-        public List<AccessRules> Chain { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the package address</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets BlueprintName
+        /// </summary>
+        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
+        public string BlueprintName { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Global
+        /// </summary>
+        [DataMember(Name = "global", IsRequired = true, EmitDefaultValue = true)]
+        public bool Global { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -154,9 +179,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccessRulesChainSubstate {\n");
+            sb.Append("class TypeInfoSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Chain: ").Append(Chain).Append("\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
+            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
+            sb.Append("  Global: ").Append(Global).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -177,15 +204,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccessRulesChainSubstate);
+            return this.Equals(input as TypeInfoSubstate);
         }
 
         /// <summary>
-        /// Returns true if AccessRulesChainSubstate instances are equal
+        /// Returns true if TypeInfoSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccessRulesChainSubstate to be compared</param>
+        /// <param name="input">Instance of TypeInfoSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccessRulesChainSubstate input)
+        public bool Equals(TypeInfoSubstate input)
         {
             if (input == null)
             {
@@ -193,10 +220,18 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Chain == input.Chain ||
-                    this.Chain != null &&
-                    input.Chain != null &&
-                    this.Chain.SequenceEqual(input.Chain)
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
+                ) && base.Equals(input) && 
+                (
+                    this.BlueprintName == input.BlueprintName ||
+                    (this.BlueprintName != null &&
+                    this.BlueprintName.Equals(input.BlueprintName))
+                ) && base.Equals(input) && 
+                (
+                    this.Global == input.Global ||
+                    this.Global.Equals(input.Global)
                 );
         }
 
@@ -209,10 +244,15 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Chain != null)
+                if (this.PackageAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Chain.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
                 }
+                if (this.BlueprintName != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.Global.GetHashCode();
                 return hashCode;
             }
         }

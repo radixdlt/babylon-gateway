@@ -91,39 +91,64 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// LocalNativeMethodReference
+    /// VaultLockedNonFungibleSubstate
     /// </summary>
-    [DataContract(Name = "LocalNativeMethodReference")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(LocalNativeMethodReference), "NativeMethod")]
-    [JsonSubtypes.KnownSubType(typeof(LocalScryptoMethodReference), "ScryptoMethod")]
-    public partial class LocalNativeMethodReference : LocalMethodReference, IEquatable<LocalNativeMethodReference>
+    [DataContract(Name = "VaultLockedNonFungibleSubstate")]
+    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
+    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
+    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
+    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
+    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
+    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
+    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
+    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
+    public partial class VaultLockedNonFungibleSubstate : Substate, IEquatable<VaultLockedNonFungibleSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalNativeMethodReference" /> class.
+        /// Initializes a new instance of the <see cref="VaultLockedNonFungibleSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected LocalNativeMethodReference() { }
+        protected VaultLockedNonFungibleSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocalNativeMethodReference" /> class.
+        /// Initializes a new instance of the <see cref="VaultLockedNonFungibleSubstate" /> class.
         /// </summary>
-        /// <param name="name">name (required).</param>
-        /// <param name="type">type (required) (default to LocalMethodReferenceType.NativeMethod).</param>
-        public LocalNativeMethodReference(string name = default(string), LocalMethodReferenceType type = LocalMethodReferenceType.NativeMethod) : base(type)
+        /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.VaultLockedNonFungible).</param>
+        public VaultLockedNonFungibleSubstate(List<NonFungibleId> nonFungibleIds = default(List<NonFungibleId>), SubstateType substateType = SubstateType.VaultLockedNonFungible) : base(substateType)
         {
-            // to ensure "name" is required (not null)
-            if (name == null)
+            // to ensure "nonFungibleIds" is required (not null)
+            if (nonFungibleIds == null)
             {
-                throw new ArgumentNullException("name is a required property for LocalNativeMethodReference and cannot be null");
+                throw new ArgumentNullException("nonFungibleIds is a required property for VaultLockedNonFungibleSubstate and cannot be null");
             }
-            this.Name = name;
+            this.NonFungibleIds = nonFungibleIds;
         }
 
         /// <summary>
-        /// Gets or Sets Name
+        /// Gets or Sets NonFungibleIds
         /// </summary>
-        [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
-        public string Name { get; set; }
+        [DataMember(Name = "non_fungible_ids", IsRequired = true, EmitDefaultValue = true)]
+        public List<NonFungibleId> NonFungibleIds { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -132,9 +157,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class LocalNativeMethodReference {\n");
+            sb.Append("class VaultLockedNonFungibleSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Name: ").Append(Name).Append("\n");
+            sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -155,15 +180,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as LocalNativeMethodReference);
+            return this.Equals(input as VaultLockedNonFungibleSubstate);
         }
 
         /// <summary>
-        /// Returns true if LocalNativeMethodReference instances are equal
+        /// Returns true if VaultLockedNonFungibleSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of LocalNativeMethodReference to be compared</param>
+        /// <param name="input">Instance of VaultLockedNonFungibleSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(LocalNativeMethodReference input)
+        public bool Equals(VaultLockedNonFungibleSubstate input)
         {
             if (input == null)
             {
@@ -171,9 +196,10 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Name == input.Name ||
-                    (this.Name != null &&
-                    this.Name.Equals(input.Name))
+                    this.NonFungibleIds == input.NonFungibleIds ||
+                    this.NonFungibleIds != null &&
+                    input.NonFungibleIds != null &&
+                    this.NonFungibleIds.SequenceEqual(input.NonFungibleIds)
                 );
         }
 
@@ -186,9 +212,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Name != null)
+                if (this.NonFungibleIds != null)
                 {
-                    hashCode = (hashCode * 59) + this.Name.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleIds.GetHashCode();
                 }
                 return hashCode;
             }
