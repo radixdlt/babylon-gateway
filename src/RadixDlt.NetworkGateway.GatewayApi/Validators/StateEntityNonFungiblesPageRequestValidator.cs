@@ -62,75 +62,32 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using System.Threading;
-using System.Threading.Tasks;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace GatewayApi.Controllers;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-[ApiController]
-[Route("entity")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
-public class EntityController : ControllerBase
+internal class StateEntityNonFungiblesPageRequestValidator : AbstractValidator<GatewayModel.StateEntityNonFungiblesPageRequest>
 {
-    private readonly IEntityHandler _entityHandler;
-
-    public EntityController(IEntityHandler entityHandler)
+    public StateEntityNonFungiblesPageRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
-        _entityHandler = entityHandler;
-    }
+        RuleFor(x => x.Address)
+            .NotEmpty()
+            .RadixAddress();
 
-    [HttpPost("resources")]
-    public async Task<IActionResult> Resources(GatewayModel.EntityResourcesRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.Resources(request, token);
+        RuleFor(x => x.AggregationLevel)
+            .IsInEnum();
 
-        return response != null
-            ? Ok(response)
-            : NotFound();
-    }
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
 
-    [HttpPost("metadata")]
-    public async Task<IActionResult> Metadata(GatewayModel.EntityMetadataRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.Metadata(request, token);
+        RuleFor(x => x.Cursor)
+            .Base64();
 
-        return response != null
-            ? Ok(response)
-            : NotFound();
-    }
-
-    [HttpPost("fungibles")]
-    public async Task<IActionResult> Fungibles(GatewayModel.EntityFungiblesRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.Fungibles(request, token);
-
-        return response != null
-            ? Ok(response)
-            : NotFound();
-    }
-
-    [HttpPost("non-fungibles")]
-    public async Task<IActionResult> NonFungibles(GatewayModel.EntityNonFungiblesRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.NonFungibles(request, token);
-
-        return response != null
-            ? Ok(response)
-            : NotFound();
-    }
-
-    [HttpPost("non-fungible/ids")]
-    public async Task<IActionResult> NonFungibleIds(GatewayModel.EntityNonFungibleIdsRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.NonFungibleIds(request, token);
-
-        return response != null
-            ? Ok(response)
-            : NotFound();
+        RuleFor(x => x.LimitPerPage)
+            .GreaterThan(0)
+            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
     }
 }

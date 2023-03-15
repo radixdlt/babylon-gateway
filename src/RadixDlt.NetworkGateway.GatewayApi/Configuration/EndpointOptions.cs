@@ -76,6 +76,12 @@ public sealed class EndpointOptions
 
     [ConfigurationKeyName("RequestTimeout")]
     public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(10);
+
+    [ConfigurationKeyName("DefaultPageSize")]
+    public int DefaultPageSize { get; set; } = 100;
+
+    [ConfigurationKeyName("ValidatorsPageSize")]
+    public int ValidatorsPageSize { get; set; } = 1000;
 }
 
 internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptions>
@@ -84,5 +90,7 @@ internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptio
     {
         RuleFor(x => x.MaxPageSize).GreaterThan(0);
         RuleFor(x => x.RequestTimeout).GreaterThan(TimeSpan.Zero);
+        RuleFor(x => x.DefaultPageSize).GreaterThan(0);
+        RuleFor(x => x.ValidatorsPageSize).GreaterThan(0);
     }
 }

@@ -89,4 +89,64 @@ public class StateController : ControllerBase
     {
         return Ok(await _entityHandler.Details(request, token));
     }
+
+    [HttpPost("page/metadata")]
+    public async Task<IActionResult> MetadataPage(GatewayModel.StateEntityMetadataPageRequest request, CancellationToken token = default)
+    {
+        var response = await _entityHandler.Metadata(request, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
+
+    [HttpPost("page/fungibles")]
+    public async Task<IActionResult> FungiblesPage(GatewayModel.StateEntityFungiblesPageRequest request, CancellationToken token = default)
+    {
+        var response = await _entityHandler.Fungibles(request, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
+
+    [HttpPost("page/fungible-vaults")]
+    public async Task<IActionResult> FungibleVaultsPage(GatewayModel.StateEntityFungibleResourceVaultsPageRequest request, CancellationToken token = default)
+    {
+        var response = await _entityHandler.FungibleVaults(request, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
+
+    [HttpPost("page/non-fungibles")]
+    public async Task<IActionResult> NonFungiblesPage(GatewayModel.StateEntityNonFungiblesPageRequest request, CancellationToken token = default)
+    {
+        var response = await _entityHandler.NonFungibles(request, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
+
+    [HttpPost("page/non-fungible-vaults")]
+    public async Task<IActionResult> NonFungibleVaultsPage(GatewayModel.StateEntityNonFungibleResourceVaultsPageRequest request, CancellationToken token = default)
+    {
+        var response = await _entityHandler.NonFungibleVaults(request, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
+
+    [HttpPost("page/non-fungible-vault/ids")]
+    public async Task<IActionResult> NonFungibleIdsPage(GatewayModel.StateEntityNonFungibleIdsPageRequest request, CancellationToken token = default)
+    {
+        var response = await _entityHandler.NonFungibleIds(request, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
 }

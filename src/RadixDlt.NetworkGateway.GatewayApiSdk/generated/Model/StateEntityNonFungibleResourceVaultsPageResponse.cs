@@ -90,36 +90,89 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityMetadataResponseAllOf
+    /// StateEntityNonFungibleResourceVaultsPageResponse
     /// </summary>
-    [DataContract(Name = "EntityMetadataResponse_allOf")]
-    public partial class EntityMetadataResponseAllOf : IEquatable<EntityMetadataResponseAllOf>
+    [DataContract(Name = "StateEntityNonFungibleResourceVaultsPageResponse")]
+    public partial class StateEntityNonFungibleResourceVaultsPageResponse : IEquatable<StateEntityNonFungibleResourceVaultsPageResponse>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityNonFungibleResourceVaultsPageResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityMetadataResponseAllOf() { }
+        protected StateEntityNonFungibleResourceVaultsPageResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityNonFungibleResourceVaultsPageResponse" /> class.
         /// </summary>
+        /// <param name="ledgerState">ledgerState (required).</param>
+        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
+        /// <param name="previousCursor">If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection..</param>
+        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
+        /// <param name="items">items (required).</param>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
-        /// <param name="metadata">metadata (required).</param>
-        public EntityMetadataResponseAllOf(string address = default(string), EntityMetadataCollection metadata = default(EntityMetadataCollection))
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
+        public StateEntityNonFungibleResourceVaultsPageResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<NonFungibleResourcesCollectionItemVaultAggregatedVaultItem> items = default(List<NonFungibleResourcesCollectionItemVaultAggregatedVaultItem>), string address = default(string), string resourceAddress = default(string))
         {
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
+            {
+                throw new ArgumentNullException("ledgerState is a required property for StateEntityNonFungibleResourceVaultsPageResponse and cannot be null");
+            }
+            this.LedgerState = ledgerState;
+            // to ensure "items" is required (not null)
+            if (items == null)
+            {
+                throw new ArgumentNullException("items is a required property for StateEntityNonFungibleResourceVaultsPageResponse and cannot be null");
+            }
+            this.Items = items;
             // to ensure "address" is required (not null)
             if (address == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityMetadataResponseAllOf and cannot be null");
+                throw new ArgumentNullException("address is a required property for StateEntityNonFungibleResourceVaultsPageResponse and cannot be null");
             }
             this.Address = address;
-            // to ensure "metadata" is required (not null)
-            if (metadata == null)
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("metadata is a required property for EntityMetadataResponseAllOf and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for StateEntityNonFungibleResourceVaultsPageResponse and cannot be null");
             }
-            this.Metadata = metadata;
+            this.ResourceAddress = resourceAddress;
+            this.TotalCount = totalCount;
+            this.PreviousCursor = previousCursor;
+            this.NextCursor = nextCursor;
         }
+
+        /// <summary>
+        /// Gets or Sets LedgerState
+        /// </summary>
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
+
+        /// <summary>
+        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
+        /// </summary>
+        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "total_count", EmitDefaultValue = true)]
+        public long? TotalCount { get; set; }
+
+        /// <summary>
+        /// If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.
+        /// </summary>
+        /// <value>If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
+        public string PreviousCursor { get; set; }
+
+        /// <summary>
+        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
+        /// </summary>
+        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Items
+        /// </summary>
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<NonFungibleResourcesCollectionItemVaultAggregatedVaultItem> Items { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
@@ -129,10 +182,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Address { get; set; }
 
         /// <summary>
-        /// Gets or Sets Metadata
+        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
         /// </summary>
-        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public EntityMetadataCollection Metadata { get; set; }
+        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,9 +195,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityMetadataResponseAllOf {\n");
+            sb.Append("class StateEntityNonFungibleResourceVaultsPageResponse {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,15 +223,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityMetadataResponseAllOf);
+            return this.Equals(input as StateEntityNonFungibleResourceVaultsPageResponse);
         }
 
         /// <summary>
-        /// Returns true if EntityMetadataResponseAllOf instances are equal
+        /// Returns true if StateEntityNonFungibleResourceVaultsPageResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityMetadataResponseAllOf to be compared</param>
+        /// <param name="input">Instance of StateEntityNonFungibleResourceVaultsPageResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityMetadataResponseAllOf input)
+        public bool Equals(StateEntityNonFungibleResourceVaultsPageResponse input)
         {
             if (input == null)
             {
@@ -180,14 +239,40 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
+                ) && 
+                (
+                    this.TotalCount == input.TotalCount ||
+                    (this.TotalCount != null &&
+                    this.TotalCount.Equals(input.TotalCount))
+                ) && 
+                (
+                    this.PreviousCursor == input.PreviousCursor ||
+                    (this.PreviousCursor != null &&
+                    this.PreviousCursor.Equals(input.PreviousCursor))
+                ) && 
+                (
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
+                ) && 
+                (
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
+                ) && 
+                (
                     this.Address == input.Address ||
                     (this.Address != null &&
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.Metadata == input.Metadata ||
-                    (this.Metadata != null &&
-                    this.Metadata.Equals(input.Metadata))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 );
         }
 
@@ -200,13 +285,33 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.LedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                }
+                if (this.TotalCount != null)
+                {
+                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                }
+                if (this.PreviousCursor != null)
+                {
+                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
+                }
+                if (this.NextCursor != null)
+                {
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
+                }
+                if (this.Items != null)
+                {
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                }
                 if (this.Address != null)
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.Metadata != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
                 return hashCode;
             }

@@ -63,22 +63,36 @@
  */
 
 using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class EntityResourcesRequestValidator : AbstractValidator<GatewayModel.EntityResourcesRequest>
+internal class StateEntityNonFungibleIdsPageRequestValidator : AbstractValidator<GatewayModel.StateEntityNonFungibleIdsPageRequest>
 {
-    public EntityResourcesRequestValidator(LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public StateEntityNonFungibleIdsPageRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
-
         RuleFor(x => x.Address)
             .NotEmpty()
             .RadixAddress();
 
-        RuleFor(x => x.AggregationLevel)
-            .IsInEnum();
+        RuleFor(x => x.ResourceAddress)
+            .NotEmpty()
+            .RadixAddress();
+
+        RuleFor(x => x.VaultAddress)
+            .NotEmpty()
+            .Hex();
+
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
+
+        RuleFor(x => x.Cursor)
+            .Base64();
+
+        RuleFor(x => x.LimitPerPage)
+            .GreaterThan(0)
+            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
     }
 }

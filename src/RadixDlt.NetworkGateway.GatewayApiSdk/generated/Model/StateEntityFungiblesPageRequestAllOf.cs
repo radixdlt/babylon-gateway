@@ -90,37 +90,36 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// FungibleVaultsCollectionItem
+    /// StateEntityFungiblesPageRequestAllOf
     /// </summary>
-    [DataContract(Name = "FungibleVaultsCollectionItem")]
-    public partial class FungibleVaultsCollectionItem : IEquatable<FungibleVaultsCollectionItem>
+    [DataContract(Name = "StateEntityFungiblesPageRequest_allOf")]
+    public partial class StateEntityFungiblesPageRequestAllOf : IEquatable<StateEntityFungiblesPageRequestAllOf>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleVaultsCollectionItem" /> class.
+        /// Gets or Sets AggregationLevel
+        /// </summary>
+        [DataMember(Name = "aggregation_level", EmitDefaultValue = true)]
+        public ResourceAggregationLevel? AggregationLevel { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StateEntityFungiblesPageRequestAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected FungibleVaultsCollectionItem() { }
+        protected StateEntityFungiblesPageRequestAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleVaultsCollectionItem" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityFungiblesPageRequestAllOf" /> class.
         /// </summary>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
-        /// <param name="amount">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
-        public FungibleVaultsCollectionItem(string address = default(string), string amount = default(string), long lastUpdatedAtStateVersion = default(long))
+        /// <param name="aggregationLevel">aggregationLevel.</param>
+        public StateEntityFungiblesPageRequestAllOf(string address = default(string), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
         {
             // to ensure "address" is required (not null)
             if (address == null)
             {
-                throw new ArgumentNullException("address is a required property for FungibleVaultsCollectionItem and cannot be null");
+                throw new ArgumentNullException("address is a required property for StateEntityFungiblesPageRequestAllOf and cannot be null");
             }
             this.Address = address;
-            // to ensure "amount" is required (not null)
-            if (amount == null)
-            {
-                throw new ArgumentNullException("amount is a required property for FungibleVaultsCollectionItem and cannot be null");
-            }
-            this.Amount = amount;
-            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
+            this.AggregationLevel = aggregationLevel;
         }
 
         /// <summary>
@@ -131,30 +130,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Address { get; set; }
 
         /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
-        /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public string Amount { get; set; }
-
-        /// <summary>
-        /// TBD
-        /// </summary>
-        /// <value>TBD</value>
-        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long LastUpdatedAtStateVersion { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class FungibleVaultsCollectionItem {\n");
+            sb.Append("class StateEntityFungiblesPageRequestAllOf {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
-            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
+            sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -175,15 +159,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as FungibleVaultsCollectionItem);
+            return this.Equals(input as StateEntityFungiblesPageRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if FungibleVaultsCollectionItem instances are equal
+        /// Returns true if StateEntityFungiblesPageRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of FungibleVaultsCollectionItem to be compared</param>
+        /// <param name="input">Instance of StateEntityFungiblesPageRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(FungibleVaultsCollectionItem input)
+        public bool Equals(StateEntityFungiblesPageRequestAllOf input)
         {
             if (input == null)
             {
@@ -196,13 +180,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.Amount == input.Amount ||
-                    (this.Amount != null &&
-                    this.Amount.Equals(input.Amount))
-                ) && 
-                (
-                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
-                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
+                    this.AggregationLevel == input.AggregationLevel ||
+                    this.AggregationLevel.Equals(input.AggregationLevel)
                 );
         }
 
@@ -219,11 +198,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.Amount != null)
-                {
-                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
+                hashCode = (hashCode * 59) + this.AggregationLevel.GetHashCode();
                 return hashCode;
             }
         }

@@ -62,9 +62,11 @@
  * permissions under this License.
  */
 
+using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.RadixEngineToolkit.Model.Value;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -75,84 +77,108 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 internal class DefaultEntityHandler : IEntityHandler
 {
-    private const int DefaultPageLimit = 100; // TODO make it configurable
-
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IEntityStateQuerier _entityStateQuerier;
+    private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
 
-    public DefaultEntityHandler(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier)
+    public DefaultEntityHandler(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier, IOptionsSnapshot<EndpointOptions> endpointConfiguration)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
         _entityStateQuerier = entityStateQuerier;
-    }
-
-    public async Task<GatewayModel.EntityResourcesResponse?> Resources(GatewayModel.EntityResourcesRequest request, CancellationToken token = default)
-    {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var aggregatePerVault = request.AggregationLevel == GatewayModel.ResourceAggregationLevel.Vault;
-
-        return await _entityStateQuerier.EntityResourcesSnapshot((GlobalAddress)request.Address, aggregatePerVault, ledgerState, token);
+        _endpointConfiguration = endpointConfiguration;
     }
 
     public async Task<GatewayModel.StateEntityDetailsResponse> Details(GatewayModel.StateEntityDetailsRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        var aggregatePerVault = request.AggregationLevel == GatewayModel.ResourceAggregationLevel.Vault;
 
         // currently we enforce exactly one element in request.Addresses
-        var item = await _entityStateQuerier.EntityDetailsItem((GlobalAddress)request.Addresses.Single(), ledgerState, token);
+        var item = await _entityStateQuerier.EntityDetailsItem((GlobalAddress)request.Addresses.Single(), aggregatePerVault, ledgerState, token);
 
         return new GatewayModel.StateEntityDetailsResponse(ledgerState, new List<GatewayModel.StateEntityDetailsResponseItem> { item });
     }
 
-    public async Task<GatewayModel.EntityMetadataResponse?> Metadata(GatewayModel.EntityMetadataRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.StateEntityMetadataPageResponse?> Metadata(GatewayModel.StateEntityMetadataPageRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (GlobalAddress)request.Address,
-            Offset: GatewayModel.EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.LimitPerPage ?? DefaultPageLimit
+            Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
         );
 
         return await _entityStateQuerier.EntityMetadata(pageRequest, ledgerState, token);
     }
 
-    public async Task<GatewayModel.EntityFungiblesResponse?> Fungibles(GatewayModel.EntityFungiblesRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.StateEntityFungiblesPageResponse?> Fungibles(GatewayModel.StateEntityFungiblesPageRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        var aggregatePerVault = request.AggregationLevel == GatewayModel.ResourceAggregationLevel.Vault;
 
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (GlobalAddress)request.Address,
-            Offset: GatewayModel.EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.LimitPerPage ?? DefaultPageLimit
+            Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
         );
 
-        return await _entityStateQuerier.EntityFungibles(pageRequest, ledgerState, token);
+        return await _entityStateQuerier.EntityFungibleResourcesPage(pageRequest, aggregatePerVault, ledgerState, token);
     }
 
-    public async Task<GatewayModel.EntityNonFungiblesResponse?> NonFungibles(GatewayModel.EntityNonFungiblesRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.StateEntityFungibleResourceVaultsPageResponse?> FungibleVaults(GatewayModel.StateEntityFungibleResourceVaultsPageRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
-        var pageRequest = new IEntityStateQuerier.PageRequest(
+        var pageRequest = new IEntityStateQuerier.ResourceVaultsPageRequest(
             Address: (GlobalAddress)request.Address,
-            Offset: GatewayModel.EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.LimitPerPage ?? DefaultPageLimit
+            ResourceAddress: (GlobalAddress)request.ResourceAddress,
+            Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
         );
 
-        return await _entityStateQuerier.EntityNonFungibles(pageRequest, ledgerState, token);
+        return await _entityStateQuerier.EntityFungibleResourceVaults(pageRequest, ledgerState, token);
     }
 
-    public async Task<GatewayModel.EntityNonFungibleIdsResponse?> NonFungibleIds(GatewayModel.EntityNonFungibleIdsRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.StateEntityNonFungiblesPageResponse?> NonFungibles(GatewayModel.StateEntityNonFungiblesPageRequest request, CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        var aggregatePerVault = request.AggregationLevel == GatewayModel.ResourceAggregationLevel.Vault;
+
+        var pageRequest = new IEntityStateQuerier.PageRequest(
+            Address: (GlobalAddress)request.Address,
+            Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
+        );
+
+        return await _entityStateQuerier.EntityNonFungibleResourcesPage(pageRequest, aggregatePerVault, ledgerState, token);
+    }
+
+    public async Task<GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse?> NonFungibleVaults(GatewayModel.StateEntityNonFungibleResourceVaultsPageRequest request, CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+
+        var pageRequest = new IEntityStateQuerier.ResourceVaultsPageRequest(
+            Address: (GlobalAddress)request.Address,
+            ResourceAddress: (GlobalAddress)request.ResourceAddress,
+            Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
+        );
+
+        return await _entityStateQuerier.EntityNonFungibleResourceVaults(pageRequest, ledgerState, token);
+    }
+
+    public async Task<GatewayModel.StateEntityNonFungibleIdsPageResponse?> NonFungibleIds(
+        GatewayModel.StateEntityNonFungibleIdsPageRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (GlobalAddress)request.Address,
-            Offset: GatewayModel.EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.LimitPerPage ?? DefaultPageLimit
+            Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
         );
 
-        return await _entityStateQuerier.EntityNonFungibleIds(pageRequest, (GlobalAddress)request.ResourceAddress, ledgerState, token);
+        return await _entityStateQuerier.EntityNonFungibleIds(pageRequest, (GlobalAddress)request.ResourceAddress, request.VaultAddress, ledgerState, token);
     }
 }

@@ -69,13 +69,16 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class EntityNonFungiblesRequestValidator : AbstractValidator<GatewayModel.EntityNonFungiblesRequest>
+internal class StateEntityFungiblesPageRequestValidator : AbstractValidator<GatewayModel.StateEntityFungiblesPageRequest>
 {
-    public EntityNonFungiblesRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public StateEntityFungiblesPageRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
         RuleFor(x => x.Address)
             .NotEmpty()
             .RadixAddress();
+
+        RuleFor(x => x.AggregationLevel)
+            .IsInEnum();
 
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);

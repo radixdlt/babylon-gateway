@@ -84,9 +84,14 @@ namespace GatewayApi;
 
 public static class OpenApiDocumentHandler
 {
-    public static async Task Handle([FromServices] INetworkConfigurationProvider networkConfigurationProvider, [FromServices] ITransactionHandler transactionHandler, HttpContext context, CancellationToken token = default)
+    public static async Task Handle(
+        [FromServices] INetworkConfigurationProvider networkConfigurationProvider,
+        [FromServices] ITransactionHandler transactionHandler,
+        [FromServices] ILedgerStateQuerier ledgerStateQuerier,
+        HttpContext context,
+        CancellationToken token = default)
     {
-        var placeholderReplacements = await GetPlaceholderReplacements(networkConfigurationProvider, transactionHandler, token);
+        var placeholderReplacements = await GetPlaceholderReplacements(networkConfigurationProvider, transactionHandler, ledgerStateQuerier, token);
 
         var assembly = typeof(GatewayApiBuilder).Assembly;
         var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.gateway-api-schema.yaml");
@@ -114,6 +119,7 @@ public static class OpenApiDocumentHandler
         response = OptionalReplace(response, "<transaction-payload-hash>", placeholderReplacements.TransactionPayloadHex);
         response = OptionalReplace(response, "<network-id>", placeholderReplacements.NetworkId?.ToString());
         response = OptionalReplace(response, "<network-name>", placeholderReplacements.NetworkName);
+        response = OptionalReplace(response, "<at_ledger_state_version>", placeholderReplacements.LedgerStateVersion.ToString());
         await context.Response.WriteAsync(response, Encoding.UTF8, token);
     }
 
@@ -133,9 +139,13 @@ public static class OpenApiDocumentHandler
         public byte? NetworkId { get; set; }
 
         public string? NetworkName { get; set; }
+
+        public long LedgerStateVersion { get; set; }
     }
 
-    private static async Task<PlaceholderReplacements> GetPlaceholderReplacements(INetworkConfigurationProvider networkConfigurationProvider, ITransactionHandler transactionHandler, CancellationToken token)
+    private static async Task<PlaceholderReplacements> GetPlaceholderReplacements(
+        INetworkConfigurationProvider networkConfigurationProvider, ITransactionHandler transactionHandler,
+        ILedgerStateQuerier ledgerStateQuerier, CancellationToken token)
     {
         var placeholderReplacements = new PlaceholderReplacements();
 
@@ -146,6 +156,7 @@ public static class OpenApiDocumentHandler
             placeholderReplacements.ComponentAddress = wellKnownAddresses.Faucet;
             placeholderReplacements.NetworkId = networkConfigurationProvider.GetNetworkId();
             placeholderReplacements.NetworkName = networkConfigurationProvider.GetNetworkName();
+            placeholderReplacements.LedgerStateVersion = await ledgerStateQuerier.GetTopOfLedgerStateVersion(token);
         }
         catch (Exception)
         {

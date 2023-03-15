@@ -90,35 +90,55 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Fungible vaults collection.
+    /// StateEntityFungiblesPageResponse
     /// </summary>
-    [DataContract(Name = "FungibleVaultsCollection")]
-    public partial class FungibleVaultsCollection : IEquatable<FungibleVaultsCollection>
+    [DataContract(Name = "StateEntityFungiblesPageResponse")]
+    public partial class StateEntityFungiblesPageResponse : IEquatable<StateEntityFungiblesPageResponse>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleVaultsCollection" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityFungiblesPageResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected FungibleVaultsCollection() { }
+        protected StateEntityFungiblesPageResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleVaultsCollection" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityFungiblesPageResponse" /> class.
         /// </summary>
+        /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
         /// <param name="previousCursor">If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection..</param>
         /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
         /// <param name="items">items (required).</param>
-        public FungibleVaultsCollection(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<FungibleVaultsCollectionItem> items = default(List<FungibleVaultsCollectionItem>))
+        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        public StateEntityFungiblesPageResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<FungibleResourcesCollectionItem> items = default(List<FungibleResourcesCollectionItem>), string address = default(string))
         {
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
+            {
+                throw new ArgumentNullException("ledgerState is a required property for StateEntityFungiblesPageResponse and cannot be null");
+            }
+            this.LedgerState = ledgerState;
             // to ensure "items" is required (not null)
             if (items == null)
             {
-                throw new ArgumentNullException("items is a required property for FungibleVaultsCollection and cannot be null");
+                throw new ArgumentNullException("items is a required property for StateEntityFungiblesPageResponse and cannot be null");
             }
             this.Items = items;
+            // to ensure "address" is required (not null)
+            if (address == null)
+            {
+                throw new ArgumentNullException("address is a required property for StateEntityFungiblesPageResponse and cannot be null");
+            }
+            this.Address = address;
             this.TotalCount = totalCount;
             this.PreviousCursor = previousCursor;
             this.NextCursor = nextCursor;
         }
+
+        /// <summary>
+        /// Gets or Sets LedgerState
+        /// </summary>
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
 
         /// <summary>
         /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
@@ -145,7 +165,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Items
         /// </summary>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<FungibleVaultsCollectionItem> Items { get; set; }
+        public List<FungibleResourcesCollectionItem> Items { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -154,11 +181,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class FungibleVaultsCollection {\n");
+            sb.Append("class StateEntityFungiblesPageResponse {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
             sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
             sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
             sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,21 +208,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as FungibleVaultsCollection);
+            return this.Equals(input as StateEntityFungiblesPageResponse);
         }
 
         /// <summary>
-        /// Returns true if FungibleVaultsCollection instances are equal
+        /// Returns true if StateEntityFungiblesPageResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of FungibleVaultsCollection to be compared</param>
+        /// <param name="input">Instance of StateEntityFungiblesPageResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(FungibleVaultsCollection input)
+        public bool Equals(StateEntityFungiblesPageResponse input)
         {
             if (input == null)
             {
                 return false;
             }
             return 
+                (
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
+                ) && 
                 (
                     this.TotalCount == input.TotalCount ||
                     (this.TotalCount != null &&
@@ -214,6 +248,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Items != null &&
                     input.Items != null &&
                     this.Items.SequenceEqual(input.Items)
+                ) && 
+                (
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
                 );
         }
 
@@ -226,6 +265,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.LedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                }
                 if (this.TotalCount != null)
                 {
                     hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
@@ -241,6 +284,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Items != null)
                 {
                     hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                }
+                if (this.Address != null)
+                {
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
                 return hashCode;
             }

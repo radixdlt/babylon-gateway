@@ -90,56 +90,62 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityNonFungibleIdsResponse
+    /// StateEntityNonFungibleResourceVaultsPageRequest
     /// </summary>
-    [DataContract(Name = "EntityNonFungibleIdsResponse")]
-    public partial class EntityNonFungibleIdsResponse : IEquatable<EntityNonFungibleIdsResponse>
+    [DataContract(Name = "StateEntityNonFungibleResourceVaultsPageRequest")]
+    public partial class StateEntityNonFungibleResourceVaultsPageRequest : IEquatable<StateEntityNonFungibleResourceVaultsPageRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityNonFungibleIdsResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityNonFungibleResourceVaultsPageRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityNonFungibleIdsResponse() { }
+        protected StateEntityNonFungibleResourceVaultsPageRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityNonFungibleIdsResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityNonFungibleResourceVaultsPageRequest" /> class.
         /// </summary>
-        /// <param name="ledgerState">ledgerState (required).</param>
+        /// <param name="atLedgerState">atLedgerState.</param>
+        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
+        /// <param name="limitPerPage">The page size requested..</param>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
-        /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
-        public EntityNonFungibleIdsResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), string resourceAddress = default(string), NonFungibleIdsCollection nonFungibleIds = default(NonFungibleIdsCollection))
+        public StateEntityNonFungibleResourceVaultsPageRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string address = default(string), string resourceAddress = default(string))
         {
-            // to ensure "ledgerState" is required (not null)
-            if (ledgerState == null)
-            {
-                throw new ArgumentNullException("ledgerState is a required property for EntityNonFungibleIdsResponse and cannot be null");
-            }
-            this.LedgerState = ledgerState;
             // to ensure "address" is required (not null)
             if (address == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityNonFungibleIdsResponse and cannot be null");
+                throw new ArgumentNullException("address is a required property for StateEntityNonFungibleResourceVaultsPageRequest and cannot be null");
             }
             this.Address = address;
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
             {
-                throw new ArgumentNullException("resourceAddress is a required property for EntityNonFungibleIdsResponse and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for StateEntityNonFungibleResourceVaultsPageRequest and cannot be null");
             }
             this.ResourceAddress = resourceAddress;
-            // to ensure "nonFungibleIds" is required (not null)
-            if (nonFungibleIds == null)
-            {
-                throw new ArgumentNullException("nonFungibleIds is a required property for EntityNonFungibleIdsResponse and cannot be null");
-            }
-            this.NonFungibleIds = nonFungibleIds;
+            this.AtLedgerState = atLedgerState;
+            this.Cursor = cursor;
+            this.LimitPerPage = limitPerPage;
         }
 
         /// <summary>
-        /// Gets or Sets LedgerState
+        /// Gets or Sets AtLedgerState
         /// </summary>
-        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
-        public LedgerState LedgerState { get; set; }
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
+
+        /// <summary>
+        /// This cursor allows forward pagination, by providing the cursor from the previous request.
+        /// </summary>
+        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
+        [DataMember(Name = "cursor", EmitDefaultValue = true)]
+        public string Cursor { get; set; }
+
+        /// <summary>
+        /// The page size requested.
+        /// </summary>
+        /// <value>The page size requested.</value>
+        [DataMember(Name = "limit_per_page", EmitDefaultValue = true)]
+        public int? LimitPerPage { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
@@ -156,23 +162,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIds
-        /// </summary>
-        [DataMember(Name = "non_fungible_ids", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleIdsCollection NonFungibleIds { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityNonFungibleIdsResponse {\n");
-            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
+            sb.Append("class StateEntityNonFungibleResourceVaultsPageRequest {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
+            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
+            sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -193,15 +194,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityNonFungibleIdsResponse);
+            return this.Equals(input as StateEntityNonFungibleResourceVaultsPageRequest);
         }
 
         /// <summary>
-        /// Returns true if EntityNonFungibleIdsResponse instances are equal
+        /// Returns true if StateEntityNonFungibleResourceVaultsPageRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityNonFungibleIdsResponse to be compared</param>
+        /// <param name="input">Instance of StateEntityNonFungibleResourceVaultsPageRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityNonFungibleIdsResponse input)
+        public bool Equals(StateEntityNonFungibleResourceVaultsPageRequest input)
         {
             if (input == null)
             {
@@ -209,9 +210,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.LedgerState == input.LedgerState ||
-                    (this.LedgerState != null &&
-                    this.LedgerState.Equals(input.LedgerState))
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
+                (
+                    this.Cursor == input.Cursor ||
+                    (this.Cursor != null &&
+                    this.Cursor.Equals(input.Cursor))
+                ) && 
+                (
+                    this.LimitPerPage == input.LimitPerPage ||
+                    (this.LimitPerPage != null &&
+                    this.LimitPerPage.Equals(input.LimitPerPage))
                 ) && 
                 (
                     this.Address == input.Address ||
@@ -222,11 +233,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ResourceAddress == input.ResourceAddress ||
                     (this.ResourceAddress != null &&
                     this.ResourceAddress.Equals(input.ResourceAddress))
-                ) && 
-                (
-                    this.NonFungibleIds == input.NonFungibleIds ||
-                    (this.NonFungibleIds != null &&
-                    this.NonFungibleIds.Equals(input.NonFungibleIds))
                 );
         }
 
@@ -239,9 +245,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.LedgerState != null)
+                if (this.AtLedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
+                if (this.Cursor != null)
+                {
+                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
+                }
+                if (this.LimitPerPage != null)
+                {
+                    hashCode = (hashCode * 59) + this.LimitPerPage.GetHashCode();
                 }
                 if (this.Address != null)
                 {
@@ -250,10 +264,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.ResourceAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
-                }
-                if (this.NonFungibleIds != null)
-                {
-                    hashCode = (hashCode * 59) + this.NonFungibleIds.GetHashCode();
                 }
                 return hashCode;
             }

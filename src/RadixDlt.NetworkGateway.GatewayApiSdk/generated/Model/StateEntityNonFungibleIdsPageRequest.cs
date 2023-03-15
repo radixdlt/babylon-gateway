@@ -90,49 +90,69 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityMetadataResponse
+    /// StateEntityNonFungibleIdsPageRequest
     /// </summary>
-    [DataContract(Name = "EntityMetadataResponse")]
-    public partial class EntityMetadataResponse : IEquatable<EntityMetadataResponse>
+    [DataContract(Name = "StateEntityNonFungibleIdsPageRequest")]
+    public partial class StateEntityNonFungibleIdsPageRequest : IEquatable<StateEntityNonFungibleIdsPageRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityNonFungibleIdsPageRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityMetadataResponse() { }
+        protected StateEntityNonFungibleIdsPageRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityNonFungibleIdsPageRequest" /> class.
         /// </summary>
-        /// <param name="ledgerState">ledgerState (required).</param>
+        /// <param name="atLedgerState">atLedgerState.</param>
+        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
+        /// <param name="limitPerPage">The page size requested..</param>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
-        /// <param name="metadata">metadata (required).</param>
-        public EntityMetadataResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), EntityMetadataCollection metadata = default(EntityMetadataCollection))
+        /// <param name="vaultAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
+        public StateEntityNonFungibleIdsPageRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string address = default(string), string vaultAddress = default(string), string resourceAddress = default(string))
         {
-            // to ensure "ledgerState" is required (not null)
-            if (ledgerState == null)
-            {
-                throw new ArgumentNullException("ledgerState is a required property for EntityMetadataResponse and cannot be null");
-            }
-            this.LedgerState = ledgerState;
             // to ensure "address" is required (not null)
             if (address == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityMetadataResponse and cannot be null");
+                throw new ArgumentNullException("address is a required property for StateEntityNonFungibleIdsPageRequest and cannot be null");
             }
             this.Address = address;
-            // to ensure "metadata" is required (not null)
-            if (metadata == null)
+            // to ensure "vaultAddress" is required (not null)
+            if (vaultAddress == null)
             {
-                throw new ArgumentNullException("metadata is a required property for EntityMetadataResponse and cannot be null");
+                throw new ArgumentNullException("vaultAddress is a required property for StateEntityNonFungibleIdsPageRequest and cannot be null");
             }
-            this.Metadata = metadata;
+            this.VaultAddress = vaultAddress;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
+            {
+                throw new ArgumentNullException("resourceAddress is a required property for StateEntityNonFungibleIdsPageRequest and cannot be null");
+            }
+            this.ResourceAddress = resourceAddress;
+            this.AtLedgerState = atLedgerState;
+            this.Cursor = cursor;
+            this.LimitPerPage = limitPerPage;
         }
 
         /// <summary>
-        /// Gets or Sets LedgerState
+        /// Gets or Sets AtLedgerState
         /// </summary>
-        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
-        public LedgerState LedgerState { get; set; }
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
+
+        /// <summary>
+        /// This cursor allows forward pagination, by providing the cursor from the previous request.
+        /// </summary>
+        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
+        [DataMember(Name = "cursor", EmitDefaultValue = true)]
+        public string Cursor { get; set; }
+
+        /// <summary>
+        /// The page size requested.
+        /// </summary>
+        /// <value>The page size requested.</value>
+        [DataMember(Name = "limit_per_page", EmitDefaultValue = true)]
+        public int? LimitPerPage { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
@@ -142,10 +162,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Address { get; set; }
 
         /// <summary>
-        /// Gets or Sets Metadata
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
         /// </summary>
-        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public EntityMetadataCollection Metadata { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        [DataMember(Name = "vault_address", IsRequired = true, EmitDefaultValue = true)]
+        public string VaultAddress { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -154,10 +182,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityMetadataResponse {\n");
-            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
+            sb.Append("class StateEntityNonFungibleIdsPageRequest {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
+            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
+            sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("  VaultAddress: ").Append(VaultAddress).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -178,15 +209,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityMetadataResponse);
+            return this.Equals(input as StateEntityNonFungibleIdsPageRequest);
         }
 
         /// <summary>
-        /// Returns true if EntityMetadataResponse instances are equal
+        /// Returns true if StateEntityNonFungibleIdsPageRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityMetadataResponse to be compared</param>
+        /// <param name="input">Instance of StateEntityNonFungibleIdsPageRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityMetadataResponse input)
+        public bool Equals(StateEntityNonFungibleIdsPageRequest input)
         {
             if (input == null)
             {
@@ -194,9 +225,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.LedgerState == input.LedgerState ||
-                    (this.LedgerState != null &&
-                    this.LedgerState.Equals(input.LedgerState))
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
+                (
+                    this.Cursor == input.Cursor ||
+                    (this.Cursor != null &&
+                    this.Cursor.Equals(input.Cursor))
+                ) && 
+                (
+                    this.LimitPerPage == input.LimitPerPage ||
+                    (this.LimitPerPage != null &&
+                    this.LimitPerPage.Equals(input.LimitPerPage))
                 ) && 
                 (
                     this.Address == input.Address ||
@@ -204,9 +245,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.Metadata == input.Metadata ||
-                    (this.Metadata != null &&
-                    this.Metadata.Equals(input.Metadata))
+                    this.VaultAddress == input.VaultAddress ||
+                    (this.VaultAddress != null &&
+                    this.VaultAddress.Equals(input.VaultAddress))
+                ) && 
+                (
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 );
         }
 
@@ -219,17 +265,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.LedgerState != null)
+                if (this.AtLedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
+                if (this.Cursor != null)
+                {
+                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
+                }
+                if (this.LimitPerPage != null)
+                {
+                    hashCode = (hashCode * 59) + this.LimitPerPage.GetHashCode();
                 }
                 if (this.Address != null)
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.Metadata != null)
+                if (this.VaultAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
+                    hashCode = (hashCode * 59) + this.VaultAddress.GetHashCode();
+                }
+                if (this.ResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
                 return hashCode;
             }

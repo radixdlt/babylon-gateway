@@ -90,37 +90,62 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityResourcesRequestAllOf
+    /// StateEntityFungibleResourceVaultsPageRequest
     /// </summary>
-    [DataContract(Name = "EntityResourcesRequest_allOf")]
-    public partial class EntityResourcesRequestAllOf : IEquatable<EntityResourcesRequestAllOf>
+    [DataContract(Name = "StateEntityFungibleResourceVaultsPageRequest")]
+    public partial class StateEntityFungibleResourceVaultsPageRequest : IEquatable<StateEntityFungibleResourceVaultsPageRequest>
     {
-
         /// <summary>
-        /// Gets or Sets AggregationLevel
-        /// </summary>
-        [DataMember(Name = "aggregation_level", EmitDefaultValue = true)]
-        public ResourceAggregationLevel? AggregationLevel { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesRequestAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityFungibleResourceVaultsPageRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityResourcesRequestAllOf() { }
+        protected StateEntityFungibleResourceVaultsPageRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesRequestAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityFungibleResourceVaultsPageRequest" /> class.
         /// </summary>
+        /// <param name="atLedgerState">atLedgerState.</param>
+        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
+        /// <param name="limitPerPage">The page size requested..</param>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
-        /// <param name="aggregationLevel">aggregationLevel.</param>
-        public EntityResourcesRequestAllOf(string address = default(string), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
+        public StateEntityFungibleResourceVaultsPageRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string address = default(string), string resourceAddress = default(string))
         {
             // to ensure "address" is required (not null)
             if (address == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityResourcesRequestAllOf and cannot be null");
+                throw new ArgumentNullException("address is a required property for StateEntityFungibleResourceVaultsPageRequest and cannot be null");
             }
             this.Address = address;
-            this.AggregationLevel = aggregationLevel;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
+            {
+                throw new ArgumentNullException("resourceAddress is a required property for StateEntityFungibleResourceVaultsPageRequest and cannot be null");
+            }
+            this.ResourceAddress = resourceAddress;
+            this.AtLedgerState = atLedgerState;
+            this.Cursor = cursor;
+            this.LimitPerPage = limitPerPage;
         }
+
+        /// <summary>
+        /// Gets or Sets AtLedgerState
+        /// </summary>
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
+
+        /// <summary>
+        /// This cursor allows forward pagination, by providing the cursor from the previous request.
+        /// </summary>
+        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
+        [DataMember(Name = "cursor", EmitDefaultValue = true)]
+        public string Cursor { get; set; }
+
+        /// <summary>
+        /// The page size requested.
+        /// </summary>
+        /// <value>The page size requested.</value>
+        [DataMember(Name = "limit_per_page", EmitDefaultValue = true)]
+        public int? LimitPerPage { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
@@ -130,15 +155,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Address { get; set; }
 
         /// <summary>
+        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityResourcesRequestAllOf {\n");
+            sb.Append("class StateEntityFungibleResourceVaultsPageRequest {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
+            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
+            sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -159,15 +194,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityResourcesRequestAllOf);
+            return this.Equals(input as StateEntityFungibleResourceVaultsPageRequest);
         }
 
         /// <summary>
-        /// Returns true if EntityResourcesRequestAllOf instances are equal
+        /// Returns true if StateEntityFungibleResourceVaultsPageRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityResourcesRequestAllOf to be compared</param>
+        /// <param name="input">Instance of StateEntityFungibleResourceVaultsPageRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityResourcesRequestAllOf input)
+        public bool Equals(StateEntityFungibleResourceVaultsPageRequest input)
         {
             if (input == null)
             {
@@ -175,13 +210,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
+                (
+                    this.Cursor == input.Cursor ||
+                    (this.Cursor != null &&
+                    this.Cursor.Equals(input.Cursor))
+                ) && 
+                (
+                    this.LimitPerPage == input.LimitPerPage ||
+                    (this.LimitPerPage != null &&
+                    this.LimitPerPage.Equals(input.LimitPerPage))
+                ) && 
+                (
                     this.Address == input.Address ||
                     (this.Address != null &&
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.AggregationLevel == input.AggregationLevel ||
-                    this.AggregationLevel.Equals(input.AggregationLevel)
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 );
         }
 
@@ -194,11 +245,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
+                if (this.Cursor != null)
+                {
+                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
+                }
+                if (this.LimitPerPage != null)
+                {
+                    hashCode = (hashCode * 59) + this.LimitPerPage.GetHashCode();
+                }
                 if (this.Address != null)
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.AggregationLevel.GetHashCode();
+                if (this.ResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
                 return hashCode;
             }
         }

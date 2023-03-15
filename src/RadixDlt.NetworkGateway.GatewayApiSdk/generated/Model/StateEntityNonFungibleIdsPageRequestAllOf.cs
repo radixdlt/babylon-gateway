@@ -90,35 +90,64 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// FungibleVaultsCollectionAllOf
+    /// StateEntityNonFungibleIdsPageRequestAllOf
     /// </summary>
-    [DataContract(Name = "FungibleVaultsCollection_allOf")]
-    public partial class FungibleVaultsCollectionAllOf : IEquatable<FungibleVaultsCollectionAllOf>
+    [DataContract(Name = "StateEntityNonFungibleIdsPageRequest_allOf")]
+    public partial class StateEntityNonFungibleIdsPageRequestAllOf : IEquatable<StateEntityNonFungibleIdsPageRequestAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleVaultsCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityNonFungibleIdsPageRequestAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected FungibleVaultsCollectionAllOf() { }
+        protected StateEntityNonFungibleIdsPageRequestAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="FungibleVaultsCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityNonFungibleIdsPageRequestAllOf" /> class.
         /// </summary>
-        /// <param name="items">items (required).</param>
-        public FungibleVaultsCollectionAllOf(List<FungibleVaultsCollectionItem> items = default(List<FungibleVaultsCollectionItem>))
+        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="vaultAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
+        public StateEntityNonFungibleIdsPageRequestAllOf(string address = default(string), string vaultAddress = default(string), string resourceAddress = default(string))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "address" is required (not null)
+            if (address == null)
             {
-                throw new ArgumentNullException("items is a required property for FungibleVaultsCollectionAllOf and cannot be null");
+                throw new ArgumentNullException("address is a required property for StateEntityNonFungibleIdsPageRequestAllOf and cannot be null");
             }
-            this.Items = items;
+            this.Address = address;
+            // to ensure "vaultAddress" is required (not null)
+            if (vaultAddress == null)
+            {
+                throw new ArgumentNullException("vaultAddress is a required property for StateEntityNonFungibleIdsPageRequestAllOf and cannot be null");
+            }
+            this.VaultAddress = vaultAddress;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
+            {
+                throw new ArgumentNullException("resourceAddress is a required property for StateEntityNonFungibleIdsPageRequestAllOf and cannot be null");
+            }
+            this.ResourceAddress = resourceAddress;
         }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<FungibleVaultsCollectionItem> Items { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        [DataMember(Name = "vault_address", IsRequired = true, EmitDefaultValue = true)]
+        public string VaultAddress { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +156,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class FungibleVaultsCollectionAllOf {\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class StateEntityNonFungibleIdsPageRequestAllOf {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  VaultAddress: ").Append(VaultAddress).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +180,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as FungibleVaultsCollectionAllOf);
+            return this.Equals(input as StateEntityNonFungibleIdsPageRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if FungibleVaultsCollectionAllOf instances are equal
+        /// Returns true if StateEntityNonFungibleIdsPageRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of FungibleVaultsCollectionAllOf to be compared</param>
+        /// <param name="input">Instance of StateEntityNonFungibleIdsPageRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(FungibleVaultsCollectionAllOf input)
+        public bool Equals(StateEntityNonFungibleIdsPageRequestAllOf input)
         {
             if (input == null)
             {
@@ -165,10 +196,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
+                ) && 
+                (
+                    this.VaultAddress == input.VaultAddress ||
+                    (this.VaultAddress != null &&
+                    this.VaultAddress.Equals(input.VaultAddress))
+                ) && 
+                (
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 );
         }
 
@@ -181,9 +221,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Items != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                }
+                if (this.VaultAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.VaultAddress.GetHashCode();
+                }
+                if (this.ResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
                 return hashCode;
             }

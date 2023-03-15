@@ -94,7 +94,6 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
     private readonly ILogger<LedgerStateQuerier> _logger;
     private readonly ReadOnlyDbContext _dbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IOptionsMonitor<EndpointOptions> _endpointOptionsMonitor;
     private readonly IOptionsMonitor<AcceptableLedgerLagOptions> _acceptableLedgerLagOptionsMonitor;
     private readonly IEnumerable<ILedgerStateQuerierObserver> _observers;
     private readonly IClock _clock;
@@ -103,7 +102,6 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         ILogger<LedgerStateQuerier> logger,
         ReadOnlyDbContext dbContext,
         INetworkConfigurationProvider networkConfigurationProvider,
-        IOptionsMonitor<EndpointOptions> endpointOptionsMonitor,
         IOptionsMonitor<AcceptableLedgerLagOptions> acceptableLedgerLagOptionsMonitor,
         IEnumerable<ILedgerStateQuerierObserver> observers,
         IClock clock)
@@ -111,7 +109,6 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         _logger = logger;
         _dbContext = dbContext;
         _networkConfigurationProvider = networkConfigurationProvider;
-        _endpointOptionsMonitor = endpointOptionsMonitor;
         _acceptableLedgerLagOptionsMonitor = acceptableLedgerLagOptionsMonitor;
         _observers = observers;
         _clock = clock;

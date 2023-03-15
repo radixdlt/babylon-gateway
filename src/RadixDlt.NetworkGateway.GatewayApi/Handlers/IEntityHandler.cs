@@ -70,15 +70,17 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 public interface IEntityHandler
 {
-    Task<GatewayModel.EntityResourcesResponse?> Resources(GatewayModel.EntityResourcesRequest request, CancellationToken token = default);
-
     Task<GatewayModel.StateEntityDetailsResponse> Details(GatewayModel.StateEntityDetailsRequest request, CancellationToken token = default);
 
-    Task<GatewayModel.EntityMetadataResponse?> Metadata(GatewayModel.EntityMetadataRequest request, CancellationToken token = default);
+    Task<GatewayModel.StateEntityMetadataPageResponse?> Metadata(GatewayModel.StateEntityMetadataPageRequest request, CancellationToken token = default);
 
-    Task<GatewayModel.EntityFungiblesResponse?> Fungibles(GatewayModel.EntityFungiblesRequest request, CancellationToken token = default);
+    Task<GatewayModel.StateEntityFungiblesPageResponse?> Fungibles(GatewayModel.StateEntityFungiblesPageRequest request, CancellationToken token = default);
 
-    Task<GatewayModel.EntityNonFungiblesResponse?> NonFungibles(GatewayModel.EntityNonFungiblesRequest request, CancellationToken token = default);
+    Task<GatewayModel.StateEntityFungibleResourceVaultsPageResponse?> FungibleVaults(GatewayModel.StateEntityFungibleResourceVaultsPageRequest request, CancellationToken token = default);
 
-    Task<GatewayModel.EntityNonFungibleIdsResponse?> NonFungibleIds(GatewayModel.EntityNonFungibleIdsRequest request, CancellationToken token = default);
+    Task<GatewayModel.StateEntityNonFungiblesPageResponse?> NonFungibles(GatewayModel.StateEntityNonFungiblesPageRequest request, CancellationToken token = default);
+
+    Task<GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse?> NonFungibleVaults(GatewayModel.StateEntityNonFungibleResourceVaultsPageRequest request, CancellationToken token = default);
+
+    Task<GatewayModel.StateEntityNonFungibleIdsPageResponse?> NonFungibleIds(GatewayModel.StateEntityNonFungibleIdsPageRequest request, CancellationToken token = default);
 }

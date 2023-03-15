@@ -87,7 +87,7 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
-        var cursor = GatewayModel.NonFungibleIdsRequestCursor.FromCursorString(request.Cursor);
+        var cursor = GatewayModel.OffsetCursor.FromCursorString(request.Cursor);
         var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: (GlobalAddress)request.Address,
             Offset: cursor?.Offset ?? 0,

@@ -326,37 +326,10 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
-  /entity/resources:
+  /state/entity/page/metadata:
     post:
-      operationId: EntityResources
-      summary: Get Entity Resource Totals
-      description: |
-        Returns the total amount of each fungible and non-fungible resources owned by a given global entity.
-        The response for fungibles and non-fungibles is paginated, and only the first page of each is returned.
-        The returned lists are ordered by the resource's first appearance on the ledger.
-        For further pages, use the `entity/fungibles` and `entity/non-fungibles` endpoints.
-        To get the owned non-fungible ids (instead of just the amount), use the `entity/non-fungible-ids` endpoint.
-      tags:
-        - State
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/EntityResourcesRequest"
-      responses:
-        "200":
-          description: Entity Resources
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EntityResourcesResponse"
-        "4XX":
-          $ref: "#/components/responses/ErrorResponse"
-  /entity/metadata:
-    post:
-      operationId: EntityMetadata
-      summary: Get Entity Metadata
+      operationId: EntityMetadataPage
+      summary: Get Entity Metadata Page
       description: |
         Returns all the metadata properties associated with a given global entity.
         The returned response is in a paginated format, ordered by first appearance on the ledger.
@@ -367,22 +340,24 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/EntityMetadataRequest"
+              $ref: "#/components/schemas/StateEntityMetadataPageRequest"
       responses:
         "200":
           description: Entity Metadata (paginated)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EntityMetadataResponse"
+                $ref: "#/components/schemas/StateEntityMetadataPageResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
-  /entity/fungibles:
+
+  /state/entity/page/fungibles/:
     post:
-      operationId: EntityFungibles
-      summary: Get Entity Fungible Resource Totals
+      operationId: EntityFungiblesPage
+      summary: Get Entity Fungible Resource Totals Page aggregated globally
       description: |
         Returns the total amount of each fungible resource owned by a given global entity.
+        Result can be aggregated globally or per vault.
         The returned response is in a paginated format, ordered by the resource's first appearance on the ledger.
       tags:
         - State
@@ -391,22 +366,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/EntityFungiblesRequest"
+              $ref: "#/components/schemas/StateEntityFungiblesPageRequest"
       responses:
         "200":
           description: Entity Fungibles (paginated)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EntityFungiblesResponse"
+                $ref: "#/components/schemas/StateEntityFungiblesPageResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
-  /entity/non-fungibles:
+
+  /state/entity/page/fungible-vaults/:
     post:
-      operationId: EntityNonFungibles
-      summary: Get Entity Non-Fungible Resource Totals
+      operationId: EntityFungibleResourceVaultPage
+      summary: Get vault page of Entity Fungible resource aggregated per vault
       description: |
-        Returns the total amount of each non-fungible resource owned by a given global entity.
+        Returns vaults for fungible resource owned by a given global entity.
         The returned response is in a paginated format, ordered by the resource's first appearance on the ledger.
       tags:
         - State
@@ -415,20 +391,71 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/EntityNonFungiblesRequest"
+              $ref: "#/components/schemas/StateEntityFungibleResourceVaultsPageRequest"
+      responses:
+        "200":
+          description: Entity Fungibles (paginated)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateEntityFungibleResourceVaultsPageResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /state/entity/page/non-fungibles/:
+    post:
+      operationId: EntityNonFungiblesPage
+      summary: Get Entity Non-Fungible Resource Totals Page aggregated globally
+      description: |
+        Returns the total amount of each non-fungible resource owned by a given global entity.
+        Result can be aggregated globally or per vault.
+        The returned response is in a paginated format, ordered by the resource's first appearance on the ledger.
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateEntityNonFungiblesPageRequest"
       responses:
         "200":
           description: Entity Non-Fungibles (paginated)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EntityNonFungiblesResponse"
+                $ref: "#/components/schemas/StateEntityNonFungiblesPageResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
-  /entity/non-fungible/ids:
+
+  /state/entity/page/non-fungible-vaults/:
     post:
-      operationId: EntityNonFungibleIds
-      #### TODO: CONTINUE FROM HERE WITH ADDING GET AND FIXING THE DESCRIPTIONS
+      operationId: EntityNonFungibleResourceVaultPage
+      summary: Get vault page of Entity Non Fungible aggregated per vault
+      description: |
+        Returns vaults for non fungible resource owned by a given global entity.
+        The returned response is in a paginated format, ordered by the resource's first appearance on the ledger.
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateEntityNonFungibleResourceVaultsPageRequest"
+      responses:
+        "200":
+          description: Entity Fungibles (paginated)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateEntityNonFungibleResourceVaultsPageResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /state/entity/page/non-fungible-vault/ids:
+    post:
+      operationId: EntityNonFungibleIdsPage
       summary: Get Entity Non-Fungible IDs
       description: |
         Returns all non-fungible IDs of a given non-fungible resource owned by a given entity.
@@ -440,14 +467,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/EntityNonFungibleIdsRequest"
+              $ref: "#/components/schemas/StateEntityNonFungibleIdsPageRequest"
       responses:
         "200":
           description: Entity Non-Fungible IDs (paginated)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EntityNonFungibleIdsResponse"
+                $ref: "#/components/schemas/StateEntityNonFungibleIdsPageResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
@@ -850,32 +877,6 @@ components:
         - last_updated_at_state_version
       properties:
         vault_address:
-          $ref: "#/components/schemas/EntityAddress"
-        amount:
-          $ref: "#/components/schemas/BigDecimal"
-        last_updated_at_state_version:
-          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
-
-    FungibleVaultsCollection:
-      description: Fungible vaults collection.
-      allOf:
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              type: array
-              items:
-                $ref: "#/components/schemas/FungibleVaultsCollectionItem"
-    FungibleVaultsCollectionItem:
-      type: object
-      required:
-        - address
-        - amount
-        - last_updated_at_state_version
-      properties:
-        address:
           $ref: "#/components/schemas/EntityAddress"
         amount:
           $ref: "#/components/schemas/BigDecimal"
@@ -1454,6 +1455,10 @@ components:
       properties:
         address:
           $ref: "#/components/schemas/EntityAddress"
+        fungible_resources:
+          $ref: "#/components/schemas/FungibleResourcesCollection"
+        non_fungible_resources:
+          $ref: "#/components/schemas/NonFungibleResourcesCollection"
         ancestor_identities:
           $ref: "#/components/schemas/StateEntityDetailsResponseItemAncestorIdentities"
         metadata:
@@ -1552,7 +1557,6 @@ components:
           required:
             - package_address
             - blueprint_name
-            - state
             - access_rules_chain
           properties:
             package_address:
@@ -1566,40 +1570,7 @@ components:
             royalty_aggregator:
               $ref: "#/components/schemas/FungibleResourcesCollectionItemGloballyAggregated"
 
-    #
-    # /entity/* Request & Response Types
-    #
-
-    EntityResourcesRequest:
-      allOf:
-        - $ref: "#/components/schemas/AtLedgerStateMixin"
-        - type: object
-          required:
-            - address
-          properties:
-            address:
-              $ref: "#/components/schemas/EntityAddress"
-            aggregation_level:
-              $ref: "#/components/schemas/ResourceAggregationLevel"
-      example:
-        address: "<component-entity-address>"
-    EntityResourcesResponse:
-      allOf:
-        - $ref: "#/components/schemas/LedgerStateMixin"
-        - type: object
-          required:
-            - address
-            - fungible_resources
-            - non_fungible_resources
-          properties:
-            address:
-              $ref: "#/components/schemas/EntityAddress"
-            fungible_resources:
-              $ref: "#/components/schemas/FungibleResourcesCollection"
-            non_fungible_resources:
-              $ref: "#/components/schemas/NonFungibleResourcesCollection"
-
-    EntityMetadataRequest:
+    StateEntityMetadataPageRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
         - $ref: "#/components/schemas/CursorLimitMixin"
@@ -1611,20 +1582,18 @@ components:
               $ref: "#/components/schemas/EntityAddress"
       example:
         address: "<entity-address>"
-    EntityMetadataResponse:
+    StateEntityMetadataPageResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
+        - $ref: "#/components/schemas/EntityMetadataCollection"
         - type: object
           required:
             - address
-            - metadata
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
-            metadata:
-              $ref: "#/components/schemas/EntityMetadataCollection"
 
-    EntityFungiblesRequest:
+    StateEntityFungiblesPageRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
         - $ref: "#/components/schemas/CursorLimitMixin"
@@ -1634,76 +1603,142 @@ components:
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
+            aggregation_level:
+              $ref: "#/components/schemas/ResourceAggregationLevel"
       example:
         address: "<component-entity-address>"
-    EntityFungiblesResponse:
+    StateEntityFungiblesPageResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
+        - $ref: "#/components/schemas/FungibleResourcesCollection"
         - type: object
           required:
             - address
-            - fungibles
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
-            fungibles:
-              $ref: "#/components/schemas/FungibleResourcesCollection"
-
-    EntityNonFungiblesRequest:
+    StateEntityFungibleResourceVaultsPageRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
         - $ref: "#/components/schemas/CursorLimitMixin"
-        - type: object
-          required:
-            - address
-          properties:
-            address:
-              $ref: "#/components/schemas/EntityAddress"
-      example:
-        address: "<component-entity-address>"
-    EntityNonFungiblesResponse:
-      allOf:
-        - $ref: "#/components/schemas/LedgerStateMixin"
-        - type: object
-          required:
-            - address
-            - non_fungibles
-          properties:
-            address:
-              $ref: "#/components/schemas/EntityAddress"
-            non_fungibles:
-              $ref: "#/components/schemas/NonFungibleResourcesCollection"
-
-    EntityNonFungibleIdsRequest:
-      allOf:
-        - $ref: "#/components/schemas/AtLedgerStateMixin"
-        - $ref: "#/components/schemas/CursorLimitMixin"
-        - type: object
-          required:
-            - address
-          properties:
-            address:
-              $ref: "#/components/schemas/EntityAddress"
-            resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
-      example:
-        address: "<component-entity-address>"
-        resource_address: "<non-fungible-resource-entity-address>"
-    EntityNonFungibleIdsResponse:
-      allOf:
-        - $ref: "#/components/schemas/LedgerStateMixin"
         - type: object
           required:
             - address
             - resource_address
-            - non_fungible_ids
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
             resource_address:
               $ref: "#/components/schemas/ResourceAddress"
-            non_fungible_ids:
-              $ref: "#/components/schemas/NonFungibleIdsCollection"
+      example:
+        address: "<component-entity-address>"
+        resource_address: "<resource_address>"
+    StateEntityFungibleResourceVaultsPageResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - $ref: "#/components/schemas/FungibleResourcesCollectionItemVaultAggregatedVault"
+        - type: object
+          required:
+            - address
+            - resource_address
+          properties:
+            address:
+              $ref: "#/components/schemas/EntityAddress"
+            resource_address:
+              $ref: "#/components/schemas/ResourceAddress"
+
+    StateEntityNonFungiblesPageRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - type: object
+          required:
+            - address
+          properties:
+            address:
+              $ref: "#/components/schemas/EntityAddress"
+            aggregation_level:
+              $ref: "#/components/schemas/ResourceAggregationLevel"
+      example:
+        address: "<component-entity-address>"
+    StateEntityNonFungiblesPageResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - $ref: "#/components/schemas/NonFungibleResourcesCollection"
+        - type: object
+          required:
+            - address
+          properties:
+            address:
+              $ref: "#/components/schemas/EntityAddress"
+
+    StateEntityNonFungibleResourceVaultsPageRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - type: object
+          required:
+            - address
+            - resource_address
+          properties:
+            address:
+              $ref: "#/components/schemas/EntityAddress"
+            resource_address:
+              $ref: "#/components/schemas/ResourceAddress"
+      example:
+        address: "<component-entity-address>"
+        resource_address: "<resource_address>"
+    StateEntityNonFungibleResourceVaultsPageResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - $ref: "#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregatedVault"
+        - type: object
+          required:
+            - address
+            - resource_address
+          properties:
+            address:
+              $ref: "#/components/schemas/EntityAddress"
+            resource_address:
+              $ref: "#/components/schemas/ResourceAddress"
+
+    StateEntityNonFungibleIdsPageRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - type: object
+          required:
+            - address
+            - vault_address
+            - resource_address
+          properties:
+            address:
+              $ref: "#/components/schemas/EntityAddress"
+            vault_address:
+              $ref: "#/components/schemas/EntityAddress"
+            resource_address:
+              $ref: "#/components/schemas/ResourceAddress"
+      example:
+        address: "<component-entity-address>"
+        resource_address: null
+        vault_address: null
+    StateEntityNonFungibleIdsPageResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - $ref: "#/components/schemas/NonFungibleIdsCollection"
+        - type: object
+          required:
+            - address
+            - resource_address
+          properties:
+            address:
+              $ref: "#/components/schemas/EntityAddress"
+            resource_address:
+              $ref: "#/components/schemas/ResourceAddress"
+
+    #
+    # /entity/* Request & Response Types
+    #
 
     NonFungibleIdsRequest:
       allOf:
