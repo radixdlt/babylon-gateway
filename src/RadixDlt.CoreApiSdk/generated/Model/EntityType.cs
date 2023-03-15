@@ -96,82 +96,76 @@ namespace RadixDlt.CoreApiSdk.Model
     public enum EntityType
     {
         /// <summary>
-        /// Enum Global for value: Global
-        /// </summary>
-        [EnumMember(Value = "Global")]
-        Global = 1,
-
-        /// <summary>
         /// Enum Component for value: Component
         /// </summary>
         [EnumMember(Value = "Component")]
-        Component = 2,
+        Component = 1,
 
         /// <summary>
         /// Enum Package for value: Package
         /// </summary>
         [EnumMember(Value = "Package")]
-        Package = 3,
+        Package = 2,
 
         /// <summary>
         /// Enum ResourceManager for value: ResourceManager
         /// </summary>
         [EnumMember(Value = "ResourceManager")]
-        ResourceManager = 4,
+        ResourceManager = 3,
 
         /// <summary>
         /// Enum EpochManager for value: EpochManager
         /// </summary>
         [EnumMember(Value = "EpochManager")]
-        EpochManager = 5,
+        EpochManager = 4,
 
         /// <summary>
         /// Enum Clock for value: Clock
         /// </summary>
         [EnumMember(Value = "Clock")]
-        Clock = 6,
+        Clock = 5,
 
         /// <summary>
         /// Enum Validator for value: Validator
         /// </summary>
         [EnumMember(Value = "Validator")]
-        Validator = 7,
+        Validator = 6,
 
         /// <summary>
         /// Enum AccessController for value: AccessController
         /// </summary>
         [EnumMember(Value = "AccessController")]
-        AccessController = 8,
+        AccessController = 7,
 
         /// <summary>
         /// Enum Account for value: Account
         /// </summary>
         [EnumMember(Value = "Account")]
-        Account = 9,
+        Account = 8,
 
         /// <summary>
         /// Enum Identity for value: Identity
         /// </summary>
         [EnumMember(Value = "Identity")]
-        Identity = 10,
+        Identity = 9,
 
         /// <summary>
         /// Enum KeyValueStore for value: KeyValueStore
         /// </summary>
         [EnumMember(Value = "KeyValueStore")]
-        KeyValueStore = 11,
+        KeyValueStore = 10,
 
         /// <summary>
         /// Enum NonFungibleStore for value: NonFungibleStore
         /// </summary>
         [EnumMember(Value = "NonFungibleStore")]
-        NonFungibleStore = 12,
+        NonFungibleStore = 11,
 
         /// <summary>
         /// Enum Vault for value: Vault
         /// </summary>
         [EnumMember(Value = "Vault")]
-        Vault = 13
+        Vault = 12
 
     }
 

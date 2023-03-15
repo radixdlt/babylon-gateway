@@ -62,13 +62,15 @@
  * permissions under this License.
  */
 
-using System;
+using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class WasmCodeSubstate
+public partial class VaultInfoSubstate : IGlobalAddressPointer
 {
-    private byte[] _codeBytes;
-
-    public byte[] GetCodeBytes() => _codeBytes ??= Convert.FromHexString(CodeHex);
+    public IEnumerable<string> GetGlobalAddresses()
+    {
+        yield return ResourceAddress;
+    }
 }
+

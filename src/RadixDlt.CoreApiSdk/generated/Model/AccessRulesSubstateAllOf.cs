@@ -90,48 +90,35 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// MetadataSubstateAllOfMetadata
+    /// AccessRulesSubstateAllOf
     /// </summary>
-    [DataContract(Name = "MetadataSubstate_allOf_metadata")]
-    public partial class MetadataSubstateAllOfMetadata : IEquatable<MetadataSubstateAllOfMetadata>
+    [DataContract(Name = "AccessRulesSubstate_allOf")]
+    public partial class AccessRulesSubstateAllOf : IEquatable<AccessRulesSubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataSubstateAllOfMetadata" /> class.
+        /// Initializes a new instance of the <see cref="AccessRulesSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MetadataSubstateAllOfMetadata() { }
+        protected AccessRulesSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataSubstateAllOfMetadata" /> class.
+        /// Initializes a new instance of the <see cref="AccessRulesSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="key">key (required).</param>
-        /// <param name="value">value (required).</param>
-        public MetadataSubstateAllOfMetadata(string key = default(string), string value = default(string))
+        /// <param name="accessRules">accessRules (required).</param>
+        public AccessRulesSubstateAllOf(AccessRules accessRules = default(AccessRules))
         {
-            // to ensure "key" is required (not null)
-            if (key == null)
+            // to ensure "accessRules" is required (not null)
+            if (accessRules == null)
             {
-                throw new ArgumentNullException("key is a required property for MetadataSubstateAllOfMetadata and cannot be null");
+                throw new ArgumentNullException("accessRules is a required property for AccessRulesSubstateAllOf and cannot be null");
             }
-            this.Key = key;
-            // to ensure "value" is required (not null)
-            if (value == null)
-            {
-                throw new ArgumentNullException("value is a required property for MetadataSubstateAllOfMetadata and cannot be null");
-            }
-            this.Value = value;
+            this.AccessRules = accessRules;
         }
 
         /// <summary>
-        /// Gets or Sets Key
+        /// Gets or Sets AccessRules
         /// </summary>
-        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
-        public string Key { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Value
-        /// </summary>
-        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public string Value { get; set; }
+        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
+        public AccessRules AccessRules { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -140,9 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MetadataSubstateAllOfMetadata {\n");
-            sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  Value: ").Append(Value).Append("\n");
+            sb.Append("class AccessRulesSubstateAllOf {\n");
+            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -163,15 +149,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MetadataSubstateAllOfMetadata);
+            return this.Equals(input as AccessRulesSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if MetadataSubstateAllOfMetadata instances are equal
+        /// Returns true if AccessRulesSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of MetadataSubstateAllOfMetadata to be compared</param>
+        /// <param name="input">Instance of AccessRulesSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MetadataSubstateAllOfMetadata input)
+        public bool Equals(AccessRulesSubstateAllOf input)
         {
             if (input == null)
             {
@@ -179,14 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Key == input.Key ||
-                    (this.Key != null &&
-                    this.Key.Equals(input.Key))
-                ) && 
-                (
-                    this.Value == input.Value ||
-                    (this.Value != null &&
-                    this.Value.Equals(input.Value))
+                    this.AccessRules == input.AccessRules ||
+                    (this.AccessRules != null &&
+                    this.AccessRules.Equals(input.AccessRules))
                 );
         }
 
@@ -199,13 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Key != null)
+                if (this.AccessRules != null)
                 {
-                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
-                }
-                if (this.Value != null)
-                {
-                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
                 }
                 return hashCode;
             }

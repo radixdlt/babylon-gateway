@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="DeletedSubstateVersionRef" /> class.
         /// </summary>
         /// <param name="substateId">substateId (required).</param>
-        /// <param name="substateDataHash">The hex-encoded single-SHA256 hash of the substate data bytes (required).</param>
+        /// <param name="substateDataHash">The hex-encoded Blake2b-256 hash of the substate data bytes (required).</param>
         /// <param name="version">An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, counting the number of times the substate was updated (required).</param>
         public DeletedSubstateVersionRef(SubstateId substateId = default(SubstateId), string substateDataHash = default(string), long version = default(long))
         {
@@ -130,9 +130,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public SubstateId SubstateId { get; set; }
 
         /// <summary>
-        /// The hex-encoded single-SHA256 hash of the substate data bytes
+        /// The hex-encoded Blake2b-256 hash of the substate data bytes
         /// </summary>
-        /// <value>The hex-encoded single-SHA256 hash of the substate data bytes</value>
+        /// <value>The hex-encoded Blake2b-256 hash of the substate data bytes</value>
         [DataMember(Name = "substate_data_hash", IsRequired = true, EmitDefaultValue = true)]
         public string SubstateDataHash { get; set; }
 

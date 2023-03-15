@@ -107,7 +107,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="updatedSubstates">updatedSubstates (required).</param>
         /// <param name="deletedSubstates">deletedSubstates (required).</param>
         /// <param name="newGlobalEntities">newGlobalEntities (required).</param>
-        public StateUpdates(List<NewSubstateVersion> createdSubstates = default(List<NewSubstateVersion>), List<NewSubstateVersion> updatedSubstates = default(List<NewSubstateVersion>), List<DeletedSubstateVersionRef> deletedSubstates = default(List<DeletedSubstateVersionRef>), List<GlobalEntityAssignment> newGlobalEntities = default(List<GlobalEntityAssignment>))
+        public StateUpdates(List<NewSubstateVersion> createdSubstates = default(List<NewSubstateVersion>), List<NewSubstateVersion> updatedSubstates = default(List<NewSubstateVersion>), List<DeletedSubstateVersionRef> deletedSubstates = default(List<DeletedSubstateVersionRef>), List<GlobalEntityReference> newGlobalEntities = default(List<GlobalEntityReference>))
         {
             // to ensure "createdSubstates" is required (not null)
             if (createdSubstates == null)
@@ -157,7 +157,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets NewGlobalEntities
         /// </summary>
         [DataMember(Name = "new_global_entities", IsRequired = true, EmitDefaultValue = true)]
-        public List<GlobalEntityAssignment> NewGlobalEntities { get; set; }
+        public List<GlobalEntityReference> NewGlobalEntities { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

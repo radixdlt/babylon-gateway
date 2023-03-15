@@ -90,36 +90,44 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// AccessRulesChainSubstateAllOf
+    /// MetadataEntrySubstateAllOf
     /// </summary>
-    [DataContract(Name = "AccessRulesChainSubstate_allOf")]
-    public partial class AccessRulesChainSubstateAllOf : IEquatable<AccessRulesChainSubstateAllOf>
+    [DataContract(Name = "MetadataEntrySubstate_allOf")]
+    public partial class MetadataEntrySubstateAllOf : IEquatable<MetadataEntrySubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRulesChainSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MetadataEntrySubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccessRulesChainSubstateAllOf() { }
+        protected MetadataEntrySubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccessRulesChainSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MetadataEntrySubstateAllOf" /> class.
         /// </summary>
-        /// <param name="chain">The layers of access rules applied.  (required).</param>
-        public AccessRulesChainSubstateAllOf(List<AccessRules> chain = default(List<AccessRules>))
+        /// <param name="keyHex">The hex-encoded bytes of its key (required).</param>
+        /// <param name="dataStruct">dataStruct.</param>
+        public MetadataEntrySubstateAllOf(string keyHex = default(string), DataStruct dataStruct = default(DataStruct))
         {
-            // to ensure "chain" is required (not null)
-            if (chain == null)
+            // to ensure "keyHex" is required (not null)
+            if (keyHex == null)
             {
-                throw new ArgumentNullException("chain is a required property for AccessRulesChainSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("keyHex is a required property for MetadataEntrySubstateAllOf and cannot be null");
             }
-            this.Chain = chain;
+            this.KeyHex = keyHex;
+            this.DataStruct = dataStruct;
         }
 
         /// <summary>
-        /// The layers of access rules applied. 
+        /// The hex-encoded bytes of its key
         /// </summary>
-        /// <value>The layers of access rules applied. </value>
-        [DataMember(Name = "chain", IsRequired = true, EmitDefaultValue = true)]
-        public List<AccessRules> Chain { get; set; }
+        /// <value>The hex-encoded bytes of its key</value>
+        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets DataStruct
+        /// </summary>
+        [DataMember(Name = "data_struct", EmitDefaultValue = true)]
+        public DataStruct DataStruct { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +136,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccessRulesChainSubstateAllOf {\n");
-            sb.Append("  Chain: ").Append(Chain).Append("\n");
+            sb.Append("class MetadataEntrySubstateAllOf {\n");
+            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
+            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +159,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccessRulesChainSubstateAllOf);
+            return this.Equals(input as MetadataEntrySubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if AccessRulesChainSubstateAllOf instances are equal
+        /// Returns true if MetadataEntrySubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccessRulesChainSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of MetadataEntrySubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccessRulesChainSubstateAllOf input)
+        public bool Equals(MetadataEntrySubstateAllOf input)
         {
             if (input == null)
             {
@@ -166,10 +175,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Chain == input.Chain ||
-                    this.Chain != null &&
-                    input.Chain != null &&
-                    this.Chain.SequenceEqual(input.Chain)
+                    this.KeyHex == input.KeyHex ||
+                    (this.KeyHex != null &&
+                    this.KeyHex.Equals(input.KeyHex))
+                ) && 
+                (
+                    this.DataStruct == input.DataStruct ||
+                    (this.DataStruct != null &&
+                    this.DataStruct.Equals(input.DataStruct))
                 );
         }
 
@@ -182,9 +195,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Chain != null)
+                if (this.KeyHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Chain.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
+                }
+                if (this.DataStruct != null)
+                {
+                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
                 }
                 return hashCode;
             }

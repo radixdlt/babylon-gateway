@@ -84,42 +84,80 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// WasmCodeSubstateAllOf
+    /// MetadataEntrySubstate
     /// </summary>
-    [DataContract(Name = "WasmCodeSubstate_allOf")]
-    public partial class WasmCodeSubstateAllOf : IEquatable<WasmCodeSubstateAllOf>
+    [DataContract(Name = "MetadataEntrySubstate")]
+    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
+    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
+    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
+    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
+    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
+    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
+    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
+    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
+    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
+    public partial class MetadataEntrySubstate : Substate, IEquatable<MetadataEntrySubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="WasmCodeSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MetadataEntrySubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected WasmCodeSubstateAllOf() { }
+        protected MetadataEntrySubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="WasmCodeSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MetadataEntrySubstate" /> class.
         /// </summary>
-        /// <param name="codeHex">The hex-encoded package code (required).</param>
-        public WasmCodeSubstateAllOf(string codeHex = default(string))
+        /// <param name="keyHex">The hex-encoded bytes of its key (required).</param>
+        /// <param name="dataStruct">dataStruct.</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.MetadataEntry).</param>
+        public MetadataEntrySubstate(string keyHex = default(string), DataStruct dataStruct = default(DataStruct), SubstateType substateType = SubstateType.MetadataEntry) : base(substateType)
         {
-            // to ensure "codeHex" is required (not null)
-            if (codeHex == null)
+            // to ensure "keyHex" is required (not null)
+            if (keyHex == null)
             {
-                throw new ArgumentNullException("codeHex is a required property for WasmCodeSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("keyHex is a required property for MetadataEntrySubstate and cannot be null");
             }
-            this.CodeHex = codeHex;
+            this.KeyHex = keyHex;
+            this.DataStruct = dataStruct;
         }
 
         /// <summary>
-        /// The hex-encoded package code
+        /// The hex-encoded bytes of its key
         /// </summary>
-        /// <value>The hex-encoded package code</value>
-        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string CodeHex { get; set; }
+        /// <value>The hex-encoded bytes of its key</value>
+        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets DataStruct
+        /// </summary>
+        [DataMember(Name = "data_struct", EmitDefaultValue = true)]
+        public DataStruct DataStruct { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +166,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class WasmCodeSubstateAllOf {\n");
-            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
+            sb.Append("class MetadataEntrySubstate {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
+            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -138,7 +178,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -150,25 +190,30 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as WasmCodeSubstateAllOf);
+            return this.Equals(input as MetadataEntrySubstate);
         }
 
         /// <summary>
-        /// Returns true if WasmCodeSubstateAllOf instances are equal
+        /// Returns true if MetadataEntrySubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of WasmCodeSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of MetadataEntrySubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(WasmCodeSubstateAllOf input)
+        public bool Equals(MetadataEntrySubstate input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.CodeHex == input.CodeHex ||
-                    (this.CodeHex != null &&
-                    this.CodeHex.Equals(input.CodeHex))
+                    this.KeyHex == input.KeyHex ||
+                    (this.KeyHex != null &&
+                    this.KeyHex.Equals(input.KeyHex))
+                ) && base.Equals(input) && 
+                (
+                    this.DataStruct == input.DataStruct ||
+                    (this.DataStruct != null &&
+                    this.DataStruct.Equals(input.DataStruct))
                 );
         }
 
@@ -180,10 +225,14 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.CodeHex != null)
+                int hashCode = base.GetHashCode();
+                if (this.KeyHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
+                }
+                if (this.DataStruct != null)
+                {
+                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
                 }
                 return hashCode;
             }
