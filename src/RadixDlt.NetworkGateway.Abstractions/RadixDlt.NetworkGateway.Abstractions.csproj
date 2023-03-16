@@ -6,6 +6,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" /> <!-- can't use .Abstractions as we rely on .ValidateOnStart() -->
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="RadixDlt.RadixEngineToolkit" />
   </ItemGroup>
 
   <ItemGroup>

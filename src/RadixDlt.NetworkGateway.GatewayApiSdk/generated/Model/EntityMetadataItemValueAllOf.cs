@@ -90,58 +90,33 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Entity metadata key-value pair.
+    /// EntityMetadataItemValueAllOf
     /// </summary>
-    [DataContract(Name = "EntityMetadataItem")]
-    public partial class EntityMetadataItem : IEquatable<EntityMetadataItem>
+    [DataContract(Name = "EntityMetadataItemValue_allOf")]
+    public partial class EntityMetadataItemValueAllOf : IEquatable<EntityMetadataItemValueAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataItem" /> class.
+        /// Initializes a new instance of the <see cref="EntityMetadataItemValueAllOf" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected EntityMetadataItem() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataItem" /> class.
-        /// </summary>
-        /// <param name="key">Entity metadata key. (required).</param>
-        /// <param name="value">value (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
-        public EntityMetadataItem(string key = default(string), EntityMetadataItemValue value = default(EntityMetadataItemValue), long lastUpdatedAtStateVersion = default(long))
+        /// <param name="asString">asString.</param>
+        /// <param name="asStringCollection">asStringCollection.</param>
+        public EntityMetadataItemValueAllOf(string asString = default(string), List<string> asStringCollection = default(List<string>))
         {
-            // to ensure "key" is required (not null)
-            if (key == null)
-            {
-                throw new ArgumentNullException("key is a required property for EntityMetadataItem and cannot be null");
-            }
-            this.Key = key;
-            // to ensure "value" is required (not null)
-            if (value == null)
-            {
-                throw new ArgumentNullException("value is a required property for EntityMetadataItem and cannot be null");
-            }
-            this.Value = value;
-            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
+            this.AsString = asString;
+            this.AsStringCollection = asStringCollection;
         }
 
         /// <summary>
-        /// Entity metadata key.
+        /// Gets or Sets AsString
         /// </summary>
-        /// <value>Entity metadata key.</value>
-        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
-        public string Key { get; set; }
+        [DataMember(Name = "as_string", EmitDefaultValue = true)]
+        public string AsString { get; set; }
 
         /// <summary>
-        /// Gets or Sets Value
+        /// Gets or Sets AsStringCollection
         /// </summary>
-        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public EntityMetadataItemValue Value { get; set; }
-
-        /// <summary>
-        /// TBD
-        /// </summary>
-        /// <value>TBD</value>
-        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long LastUpdatedAtStateVersion { get; set; }
+        [DataMember(Name = "as_string_collection", EmitDefaultValue = true)]
+        public List<string> AsStringCollection { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,10 +125,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityMetadataItem {\n");
-            sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  Value: ").Append(Value).Append("\n");
-            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
+            sb.Append("class EntityMetadataItemValueAllOf {\n");
+            sb.Append("  AsString: ").Append(AsString).Append("\n");
+            sb.Append("  AsStringCollection: ").Append(AsStringCollection).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +148,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityMetadataItem);
+            return this.Equals(input as EntityMetadataItemValueAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityMetadataItem instances are equal
+        /// Returns true if EntityMetadataItemValueAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityMetadataItem to be compared</param>
+        /// <param name="input">Instance of EntityMetadataItemValueAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityMetadataItem input)
+        public bool Equals(EntityMetadataItemValueAllOf input)
         {
             if (input == null)
             {
@@ -190,18 +164,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Key == input.Key ||
-                    (this.Key != null &&
-                    this.Key.Equals(input.Key))
+                    this.AsString == input.AsString ||
+                    (this.AsString != null &&
+                    this.AsString.Equals(input.AsString))
                 ) && 
                 (
-                    this.Value == input.Value ||
-                    (this.Value != null &&
-                    this.Value.Equals(input.Value))
-                ) && 
-                (
-                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
-                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
+                    this.AsStringCollection == input.AsStringCollection ||
+                    this.AsStringCollection != null &&
+                    input.AsStringCollection != null &&
+                    this.AsStringCollection.SequenceEqual(input.AsStringCollection)
                 );
         }
 
@@ -214,15 +185,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Key != null)
+                if (this.AsString != null)
                 {
-                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AsString.GetHashCode();
                 }
-                if (this.Value != null)
+                if (this.AsStringCollection != null)
                 {
-                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AsStringCollection.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

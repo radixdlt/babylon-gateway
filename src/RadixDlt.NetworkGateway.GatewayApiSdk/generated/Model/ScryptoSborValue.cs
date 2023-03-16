@@ -90,58 +90,48 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Entity metadata key-value pair.
+    /// ScryptoSborValue
     /// </summary>
-    [DataContract(Name = "EntityMetadataItem")]
-    public partial class EntityMetadataItem : IEquatable<EntityMetadataItem>
+    [DataContract(Name = "ScryptoSborValue")]
+    public partial class ScryptoSborValue : IEquatable<ScryptoSborValue>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataItem" /> class.
+        /// Initializes a new instance of the <see cref="ScryptoSborValue" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityMetadataItem() { }
+        protected ScryptoSborValue() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataItem" /> class.
+        /// Initializes a new instance of the <see cref="ScryptoSborValue" /> class.
         /// </summary>
-        /// <param name="key">Entity metadata key. (required).</param>
-        /// <param name="value">value (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
-        public EntityMetadataItem(string key = default(string), EntityMetadataItemValue value = default(EntityMetadataItemValue), long lastUpdatedAtStateVersion = default(long))
+        /// <param name="rawHex">rawHex (required).</param>
+        /// <param name="rawJson">rawJson (required).</param>
+        public ScryptoSborValue(string rawHex = default(string), Object rawJson = default(Object))
         {
-            // to ensure "key" is required (not null)
-            if (key == null)
+            // to ensure "rawHex" is required (not null)
+            if (rawHex == null)
             {
-                throw new ArgumentNullException("key is a required property for EntityMetadataItem and cannot be null");
+                throw new ArgumentNullException("rawHex is a required property for ScryptoSborValue and cannot be null");
             }
-            this.Key = key;
-            // to ensure "value" is required (not null)
-            if (value == null)
+            this.RawHex = rawHex;
+            // to ensure "rawJson" is required (not null)
+            if (rawJson == null)
             {
-                throw new ArgumentNullException("value is a required property for EntityMetadataItem and cannot be null");
+                throw new ArgumentNullException("rawJson is a required property for ScryptoSborValue and cannot be null");
             }
-            this.Value = value;
-            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
+            this.RawJson = rawJson;
         }
 
         /// <summary>
-        /// Entity metadata key.
+        /// Gets or Sets RawHex
         /// </summary>
-        /// <value>Entity metadata key.</value>
-        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
-        public string Key { get; set; }
+        [DataMember(Name = "raw_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string RawHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets Value
+        /// Gets or Sets RawJson
         /// </summary>
-        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public EntityMetadataItemValue Value { get; set; }
-
-        /// <summary>
-        /// TBD
-        /// </summary>
-        /// <value>TBD</value>
-        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long LastUpdatedAtStateVersion { get; set; }
+        [DataMember(Name = "raw_json", IsRequired = true, EmitDefaultValue = true)]
+        public Object RawJson { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,10 +140,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityMetadataItem {\n");
-            sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  Value: ").Append(Value).Append("\n");
-            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
+            sb.Append("class ScryptoSborValue {\n");
+            sb.Append("  RawHex: ").Append(RawHex).Append("\n");
+            sb.Append("  RawJson: ").Append(RawJson).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +163,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityMetadataItem);
+            return this.Equals(input as ScryptoSborValue);
         }
 
         /// <summary>
-        /// Returns true if EntityMetadataItem instances are equal
+        /// Returns true if ScryptoSborValue instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityMetadataItem to be compared</param>
+        /// <param name="input">Instance of ScryptoSborValue to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityMetadataItem input)
+        public bool Equals(ScryptoSborValue input)
         {
             if (input == null)
             {
@@ -190,18 +179,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Key == input.Key ||
-                    (this.Key != null &&
-                    this.Key.Equals(input.Key))
+                    this.RawHex == input.RawHex ||
+                    (this.RawHex != null &&
+                    this.RawHex.Equals(input.RawHex))
                 ) && 
                 (
-                    this.Value == input.Value ||
-                    (this.Value != null &&
-                    this.Value.Equals(input.Value))
-                ) && 
-                (
-                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
-                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
+                    this.RawJson == input.RawJson ||
+                    (this.RawJson != null &&
+                    this.RawJson.Equals(input.RawJson))
                 );
         }
 
@@ -214,15 +199,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Key != null)
+                if (this.RawHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
                 }
-                if (this.Value != null)
+                if (this.RawJson != null)
                 {
-                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RawJson.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

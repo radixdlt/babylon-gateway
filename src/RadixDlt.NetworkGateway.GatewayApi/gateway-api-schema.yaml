@@ -780,6 +780,17 @@ components:
         - Global
         - Vault
 
+    ScryptoSborValue:
+      type: object
+      required:
+        - raw_hex
+        - raw_json
+      properties:
+        raw_hex:
+          type: string
+        raw_json:
+          type: object
+
     EntityMetadataCollection:
       description: Entity metadata collection.
       allOf:
@@ -804,10 +815,20 @@ components:
           description: Entity metadata key.
           type: string
         value:
-          description: Entity metadata value.
-          type: string
+          $ref: "#/components/schemas/EntityMetadataItemValue"
         last_updated_at_state_version:
           $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+    EntityMetadataItemValue:
+      allOf:
+        - $ref: "#/components/schemas/ScryptoSborValue"
+        - type: object
+          properties:
+            as_string:
+              type: string
+            as_string_collection:
+              type: array
+              items:
+                type: string
 
     FungibleResourcesCollection:
       description: Fungible resources collection.

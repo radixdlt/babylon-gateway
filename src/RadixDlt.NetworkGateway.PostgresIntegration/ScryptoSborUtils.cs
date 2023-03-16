@@ -62,31 +62,99 @@
  * permissions under this License.
  */
 
+using Newtonsoft.Json.Linq;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
+using System.Linq;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-[Table("entity_metadata_history")]
-internal class EntityMetadataHistory
+internal static class ScryptoSborUtils
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    public static string ConvertFromScryptoSborString(string input, byte networkId)
+    {
+        var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(Convert.FromHexString(input), networkId);
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+        if (result is not ToolkitModel.Exchange.SborDecodeResponse.ScryptoSbor scryptoSbor)
+        {
+            throw new UnreachableException("Expected ScryptoSbor response");
+        }
 
-    [Column("entity_id")]
-    public long EntityId { get; set; }
+        if (scryptoSbor.Value is not ToolkitModel.Value.ScryptoSbor.String value)
+        {
+            throw new UnreachableException("Expected ScryptoSbor.String");
+        }
 
-    [Column("keys")]
-    public List<string> Keys { get; set; }
+        return value;
+    }
 
-    [Column("values")]
-    public List<byte[]> Values { get; set; }
+    public static GatewayModel.EntityMetadataItemValue MetadataValueToGatewayScryptoSborValue(byte[] rawScryptoSbor, byte networkId)
+    {
+        var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(rawScryptoSbor, networkId);
 
-    [Column("updated_at_state_versions")]
-    public List<long> UpdatedAtStateVersions { get; set; }
+        if (result is not ToolkitModel.Exchange.SborDecodeResponse.ScryptoSbor scryptoSbor)
+        {
+            throw new UnreachableException("Expected ScryptoSbor response");
+        }
+
+        if (scryptoSbor.Value is not ToolkitModel.Value.ScryptoSbor.Enum outerEnum)
+        {
+            throw new UnreachableException("Expected ScryptoSbor.Enum");
+        }
+
+        string? asString = null;
+        List<string>? asStringCollection = null;
+
+        switch (outerEnum.Variant)
+        {
+            case 0:
+            {
+                if (outerEnum.Fields is not [ToolkitModel.Value.ScryptoSbor.Enum innerEnum])
+                {
+                    throw new UnreachableException("Expected ScryptoSbor.Enum");
+                }
+
+                if (innerEnum.Variant != 0 || innerEnum.Fields is not [ToolkitModel.Value.ScryptoSbor.String value])
+                {
+                    throw new UnreachableException("Expected ScryptoSbor.Enum with String-only fields");
+                }
+
+                asString = value.Value;
+
+                break;
+            }
+
+            case 1:
+            {
+                if (outerEnum.Fields == null || outerEnum.Fields.Any(f => f is not ToolkitModel.Value.ScryptoSbor.Enum))
+                {
+                    throw new UnreachableException("Expected ScryptoSbor.Enum with Enum-only fields");
+                }
+
+                asStringCollection = new List<string>(outerEnum.Fields.Length);
+
+                foreach (var innerEnum in outerEnum.Fields.Cast<ToolkitModel.Value.ScryptoSbor.Enum>())
+                {
+                    if (innerEnum.Variant != 0 || innerEnum.Fields is not [ToolkitModel.Value.ScryptoSbor.String value])
+                    {
+                        throw new UnreachableException("Expected ScryptoSbor.Enum with String-only fields");
+                    }
+
+                    asStringCollection.Add(value.Value);
+                }
+
+                break;
+            }
+        }
+
+        return new GatewayModel.EntityMetadataItemValue(
+            rawHex: rawScryptoSbor.ToHex(),
+            rawJson: new JRaw(RadixEngineToolkit.RadixEngineToolkit.ScryptoSborEncodeJson(outerEnum)),
+            asString: asString,
+            asStringCollection: asStringCollection);
+    }
 }

@@ -86,6 +86,7 @@ internal static class CustomTypes
         SqlMapper.AddTypeHandler(new GenericArrayHandler<int>());
         SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
         SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
+        SqlMapper.AddTypeHandler(new GenericArrayHandler<byte[]>());
 
 #pragma warning disable CS0618
         // needed to support custom enums in postgres
