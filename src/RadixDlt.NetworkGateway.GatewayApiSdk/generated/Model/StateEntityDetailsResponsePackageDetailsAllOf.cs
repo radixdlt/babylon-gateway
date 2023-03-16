@@ -98,20 +98,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsAllOf" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected StateEntityDetailsResponsePackageDetailsAllOf() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsAllOf" /> class.
-        /// </summary>
-        /// <param name="codeHex">Hex-encoded binary blob. (required).</param>
+        /// <param name="codeHex">Hex-encoded binary blob..</param>
         /// <param name="royaltyAggregator">royaltyAggregator.</param>
         public StateEntityDetailsResponsePackageDetailsAllOf(string codeHex = default(string), FungibleResourcesCollectionItemGloballyAggregated royaltyAggregator = default(FungibleResourcesCollectionItemGloballyAggregated))
         {
-            // to ensure "codeHex" is required (not null)
-            if (codeHex == null)
-            {
-                throw new ArgumentNullException("codeHex is a required property for StateEntityDetailsResponsePackageDetailsAllOf and cannot be null");
-            }
             this.CodeHex = codeHex;
             this.RoyaltyAggregator = royaltyAggregator;
         }
@@ -120,7 +110,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Hex-encoded binary blob.
         /// </summary>
         /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "code_hex", EmitDefaultValue = true)]
         public string CodeHex { get; set; }
 
         /// <summary>
