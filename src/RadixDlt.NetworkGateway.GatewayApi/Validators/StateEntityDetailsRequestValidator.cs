@@ -63,13 +63,15 @@
  */
 
 using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class StateEntityDetailsRequestValidator : AbstractValidator<GatewayModel.StateEntityDetailsRequest>
 {
-    public StateEntityDetailsRequestValidator(LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public StateEntityDetailsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
@@ -79,7 +81,8 @@ internal class StateEntityDetailsRequestValidator : AbstractValidator<GatewayMod
             .DependentRules(() =>
             {
                 RuleFor(x => x.Addresses.Count)
-                    .Equal(1);
+                    .GreaterThan(0)
+                    .LessThan(endpointOptionsSnapshot.Value.StateEntityDetailsMaxPageSize);
 
                 RuleForEach(x => x.Addresses)
                     .NotNull()
