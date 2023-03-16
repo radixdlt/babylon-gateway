@@ -739,7 +739,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             FromStateVersion = stateVersion,
                             EntityId = referencedEntities.Get(substateId.EntityIdHex).DatabaseId,
                             Subtype = subtype,
-                            AccessRulesChain = JsonConvert.SerializeObject(accessRulesSubstate.AccessRules.ToJson()),
+                            AccessRulesChain = JsonConvert.SerializeObject(accessRulesSubstate.AccessRules),
                         });
                     }
 
