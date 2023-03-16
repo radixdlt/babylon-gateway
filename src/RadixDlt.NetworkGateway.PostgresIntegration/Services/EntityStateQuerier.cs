@@ -221,8 +221,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
             }
 
             case PackageEntity pe:
-                details = new GatewayModel.StateEntityDetailsResponsePackageDetails(
-                    codeHex: pe.Code.ToHex());
+                details = new GatewayModel.StateEntityDetailsResponsePackageDetails(codeHex: pe.Code?.ToHex());
                 break;
 
             case VirtualIdentityEntity:

@@ -1564,8 +1564,6 @@ components:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
-          required:
-            - code_hex
           properties:
             code_hex:
               $ref: "#/components/schemas/HexString"
