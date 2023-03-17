@@ -69,11 +69,11 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class NonFungibleIdsRequestValidator : AbstractValidator<GatewayModel.NonFungibleIdsRequest>
+internal class StateNonFungibleIdsRequestValidator : AbstractValidator<GatewayModel.StateNonFungibleIdsRequest>
 {
-    public NonFungibleIdsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public StateNonFungibleIdsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
-        RuleFor(x => x.Address)
+        RuleFor(x => x.ResourceAddress)
             .NotEmpty()
             .RadixAddress();
 

@@ -478,7 +478,7 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
-  /non-fungible/ids:
+  /state/non-fungible/ids:
     post:
       operationId: NonFungibleIds
       summary: Get Non-Fungible Collection
@@ -492,20 +492,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NonFungibleIdsRequest"
+              $ref: "#/components/schemas/StateNonFungibleIdsRequest"
       responses:
         "200":
           description: Non-Fungible IDs (paginated)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NonFungibleIdsResponse"
+                $ref: "#/components/schemas/StateNonFungibleIdsResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
-  /non-fungible/data:
+  /state/non-fungible/details:
     post:
-      operationId: NonFungibleIdData
-      summary: Get Non-Fungible Data
+      operationId: NonFungibleDetails
+      summary: Get Non-Fungible Details
       description: |
         Returns data associated with a given non-fungible ID of a given non-fungible resource.
       tags:
@@ -515,14 +515,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NonFungibleDataRequest"
+              $ref: "#/components/schemas/StateNonFungibleDetailsRequest"
       responses:
         "200":
           description: Non-Fungible ID Data
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NonFungibleDataResponse"
+                $ref: "#/components/schemas/StateNonFungibleDetailsResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
@@ -1420,7 +1420,7 @@ components:
                     $ref: "#/components/schemas/CommittedTransactionInfo"
 
     #
-    # /state/* Request & Response Types
+    # /state/entity/* Request & Response Types
     #
 
     StateEntityDetailsRequest:
@@ -1738,74 +1738,86 @@ components:
               $ref: "#/components/schemas/ResourceAddress"
 
     #
-    # /entity/* Request & Response Types
+    # /state/non-fungible/* Request & Response Types
     #
 
-    NonFungibleIdsRequest:
+    StateNonFungibleIdsRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
         - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
-            - address
+            - resource_address
           properties:
-            address:
-              $ref: "#/components/schemas/EntityAddress"
+            resource_address:
+              $ref: "#/components/schemas/ResourceAddress"
       example:
-        address: "<non-fungible-entity-address>"
-    NonFungibleIdsResponse:
+        resource_address: "<non-fungible-entity-address>"
+    StateNonFungibleIdsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
         - type: object
           required:
-            - address
+            - resource_address
             - non_fungible_ids
           properties:
-            address:
-              $ref: "#/components/schemas/EntityAddress"
+            resource_address:
+              $ref: "#/components/schemas/ResourceAddress"
             non_fungible_ids:
               $ref: "#/components/schemas/NonFungibleIdsCollection"
 
-    NonFungibleDataRequest: # TODO rename to NonFungibleIdDataRequest
+    StateNonFungibleDetailsRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
         - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
-            - address
-            - non_fungible_id
+            - resource_address
+            - non_fungible_ids
           properties:
-            address:
-              $ref: "#/components/schemas/EntityAddress"
-            non_fungible_id:
-              $ref: "#/components/schemas/NonFungibleId"
+            resource_address:
+              $ref: "#/components/schemas/ResourceAddress"
+            non_fungible_ids:
+              type: array
+              items:
+                $ref: "#/components/schemas/NonFungibleId"
       example:
-        address: "<non-fungible-entity-address>"
-        non_fungible_id: "0a0100000000"
-    NonFungibleDataResponse: # TODO rename to NonFungibleIdDataResponse
+        resource_address: "<non-fungible-entity-address>"
+        non_fungible_ids: ["0a0100000000"]
+    StateNonFungibleDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
         - type: object
           required:
-            - address
+            - resource_address
             - non_fungible_id_type
-            - non_fungible_id
-            - mutable_data_hex
-            - immutable_data_hex
-            - last_updated_at_state_version
+            - non_fungible_ids
           properties:
-            address:
+            resource_address:
               $ref: "#/components/schemas/ResourceAddress"
             non_fungible_id_type:
               $ref: "#/components/schemas/NonFungibleIdType"
-            non_fungible_id:
-              $ref: "#/components/schemas/NonFungibleId"
-            mutable_data_hex:
-              $ref: "#/components/schemas/HexString"
-            immutable_data_hex:
-              $ref: "#/components/schemas/HexString"
-            last_updated_at_state_version:
-              $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+            non_fungible_ids:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateNonFungibleDetailsResponseItem"
+    StateNonFungibleDetailsResponseItem:
+      type: object
+      required:
+        - non_fungible_id
+        - mutable_data
+        - immutable_data
+        - last_updated_at_state_version
+      properties:
+        non_fungible_id:
+          $ref: "#/components/schemas/NonFungibleId"
+        mutable_data:
+          $ref: "#/components/schemas/ScryptoSborValue"
+        immutable_data:
+          $ref: "#/components/schemas/ScryptoSborValue"
+        last_updated_at_state_version:
+          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+
 
     #
     # /state/validators/* Request & Response Types

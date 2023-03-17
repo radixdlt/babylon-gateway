@@ -83,13 +83,13 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
         _entityStateQuerier = entityStateQuerier;
     }
 
-    public async Task<GatewayModel.NonFungibleIdsResponse> Ids(GatewayModel.NonFungibleIdsRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.StateNonFungibleIdsResponse> Ids(GatewayModel.StateNonFungibleIdsRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
         var cursor = GatewayModel.OffsetCursor.FromCursorString(request.Cursor);
         var pageRequest = new IEntityStateQuerier.PageRequest(
-            Address: (GlobalAddress)request.Address,
+            Address: (GlobalAddress)request.ResourceAddress,
             Offset: cursor?.Offset ?? 0,
             Limit: request.LimitPerPage ?? DefaultPageLimit
         );
@@ -97,10 +97,10 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
         return await _entityStateQuerier.NonFungibleIds(pageRequest, ledgerState, token);
     }
 
-    public async Task<GatewayModel.NonFungibleDataResponse> Data(GatewayModel.NonFungibleDataRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.StateNonFungibleDetailsResponse> Data(GatewayModel.StateNonFungibleDetailsRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
-        return await _entityStateQuerier.NonFungibleIdData((GlobalAddress)request.Address, request.NonFungibleId, ledgerState, token);
+        return await _entityStateQuerier.NonFungibleIdData((GlobalAddress)request.ResourceAddress, request.NonFungibleIds, ledgerState, token);
     }
 }

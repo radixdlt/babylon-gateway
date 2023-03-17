@@ -63,6 +63,7 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -89,9 +90,9 @@ public interface IEntityStateQuerier
 
     Task<GatewayModel.StateEntityNonFungibleIdsPageResponse> EntityNonFungibleIds(PageRequest request, GlobalAddress resourceAddress, string vaultAddress, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
-    Task<GatewayModel.NonFungibleIdsResponse> NonFungibleIds(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
-    Task<GatewayModel.NonFungibleDataResponse> NonFungibleIdData(GlobalAddress address, string nonFungibleId, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.StateNonFungibleDetailsResponse> NonFungibleIdData(GlobalAddress resourceAddress, IList<string> nonFungibleIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
     Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 }
