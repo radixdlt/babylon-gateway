@@ -96,7 +96,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, blueprint_name, divisibility, non_fungible_id_type, code, royalty_vault_entity_id, royalty_vault_of_entity_id, stake_vault_entity_id, unstake_vault_entity_id, epoch_manager_entity_id) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, royalty_vault_entity_id, divisibility, non_fungible_id_type, code, stake_vault_entity_id, unstake_vault_entity_id, epoch_manager_entity_id, resource_manager_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -111,9 +111,20 @@ internal class WriteHelper
             await writer.WriteNullableAsync(e.ParentAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteNullableAsync(e.OwnerAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteNullableAsync(e.GlobalAncestorId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.CorrelatedEntities.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(discriminator, "entity_type", token);
             await writer.WriteNullableAsync(e is ComponentEntity ce1 ? ce1.PackageId : null, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e is ComponentEntity ce2 ? ce2.BlueprintName : null, NpgsqlDbType.Text, token);
+
+            if (e is IRoyaltyVaultHolder rvh && rvh.RoyaltyVaultEntityId.HasValue)
+            {
+                await writer.WriteAsync(rvh.RoyaltyVaultEntityId.Value, token);
+            }
+            else
+            {
+                await writer.WriteNullAsync(token);
+            }
+
             await writer.WriteNullableAsync(e is FungibleResourceManagerEntity frme ? frme.Divisibility : null, NpgsqlDbType.Integer, token);
 
             if (e is NonFungibleResourceManagerEntity nfrme)
@@ -127,24 +138,6 @@ internal class WriteHelper
 
             await writer.WriteNullableAsync(e is PackageEntity pe ? pe.Code : null, NpgsqlDbType.Bytea, token);
 
-            if (e is IRoyaltyVaultHolder rvh && rvh.RoyaltyVaultEntityId.HasValue)
-            {
-                await writer.WriteAsync(rvh.RoyaltyVaultEntityId.Value, token);
-            }
-            else
-            {
-                await writer.WriteNullAsync(token);
-            }
-
-            if (e is VaultEntity ve && ve.RoyaltyVaultOfEntityId.HasValue)
-            {
-                await writer.WriteAsync(ve.RoyaltyVaultOfEntityId.Value, token);
-            }
-            else
-            {
-                await writer.WriteNullAsync(token);
-            }
-
             if (e is ValidatorEntity validatorEntity)
             {
                 await writer.WriteAsync(validatorEntity.StakeVaultEntityId, token);
@@ -154,6 +147,17 @@ internal class WriteHelper
             else
             {
                 await writer.WriteNullAsync(token);
+                await writer.WriteNullAsync(token);
+                await writer.WriteNullAsync(token);
+            }
+
+            if (e is VaultEntity ve)
+            {
+                await writer.WriteNullableAsync(ve.ResourceManagerEntityId, NpgsqlDbType.Bigint, token);
+                await writer.WriteNullableAsync(ve.RoyaltyVaultOfEntityId, NpgsqlDbType.Bigint, token);
+            }
+            else
+            {
                 await writer.WriteNullAsync(token);
                 await writer.WriteNullAsync(token);
             }
