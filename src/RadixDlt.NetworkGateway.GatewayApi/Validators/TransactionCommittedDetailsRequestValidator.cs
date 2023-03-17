@@ -63,19 +63,18 @@
  */
 
 using FluentValidation;
+using RadixDlt.NetworkGateway.Abstractions;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class TransactionCommittedDetailsRequestValidator : AbstractValidator<GatewayModel.TransactionCommittedDetailsRequest>
 {
-    public TransactionCommittedDetailsRequestValidator(
-        TransactionCommittedDetailsRequestIdentifierValidator transactionCommittedDetailsRequestIdentifierValidator,
-        LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public TransactionCommittedDetailsRequestValidator(LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
-        RuleFor(x => x.TransactionIdentifier)
+        RuleFor(x => x.IntentHashHex)
             .NotNull()
-            .SetValidator(transactionCommittedDetailsRequestIdentifierValidator);
+            .Hex(NetworkGatewayConstants.Transaction.IdentifierByteLength);
 
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);

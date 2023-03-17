@@ -10,7 +10,8 @@ _Release Date: ???_
 - Added new configuration section `CoreApiIntegration` where you can configure integration with core API. For now only `SubmitTransactionTimeout` setting is supported.
 - `/stake/validator/list` rework, added current stake value.
 - `/entity/resources` merged into `/state/entity/details` endpoint
-- new paginable endpoints `/state/entity/page/{x}` for metadata, fungibles, fungible-vaults, non-fungibles, non-fungible-vaults and non-fungible-vault/ids. Cursors returned from `state/entity/details` can be later used to query for next pages in specific endpoints. 
+- new paginable endpoints `/state/entity/page/{x}` for metadata, fungibles, fungible-vaults, non-fungibles, non-fungible-vaults and non-fungible-vault/ids. Cursors returned from `state/entity/details` can be later used to query for next pages in specific endpoints.
+- `/transaction/committed-details` endpoint operates on `intent_hash_hex` only now
 
 ### 0.1.1 - Betanet V2
 _Release Date: 14.02.2022_

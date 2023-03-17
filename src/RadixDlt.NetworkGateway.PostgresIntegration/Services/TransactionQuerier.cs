@@ -68,7 +68,6 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -103,29 +102,11 @@ internal class TransactionQuerier : ITransactionQuerier
         return new TransactionPageWithoutTotal(nextCursor, transactions);
     }
 
-    public async Task<DetailsLookupResult?> LookupCommittedTransaction(GatewayModel.TransactionCommittedDetailsRequestIdentifier identifier, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
+    public async Task<DetailsLookupResult?> LookupCommittedTransaction(byte[] intentHash, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
     {
-        var hash = identifier.GetValueBytes();
-        var query = _dbContext.LedgerTransactions
+        var stateVersion = await _dbContext.LedgerTransactions
             .OfType<UserLedgerTransaction>()
-            .Where(ult => ult.StateVersion <= ledgerState.StateVersion);
-
-        switch (identifier.Type)
-        {
-            case GatewayModel.TransactionCommittedDetailsRequestIdentifierType.IntentHash:
-                query = query.Where(ult => ult.IntentHash == hash);
-                break;
-            case GatewayModel.TransactionCommittedDetailsRequestIdentifierType.SignedIntentHash:
-                query = query.Where(ult => ult.SignedIntentHash == hash);
-                break;
-            case GatewayModel.TransactionCommittedDetailsRequestIdentifierType.PayloadHash:
-                query = query.Where(ult => ult.PayloadHash == hash);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(identifier.Type), identifier.Type, null);
-        }
-
-        var stateVersion = await query
+            .Where(ult => ult.StateVersion <= ledgerState.StateVersion && ult.IntentHash == intentHash)
             .Select(ult => ult.StateVersion)
             .FirstOrDefaultAsync(token);
 

@@ -1341,30 +1341,12 @@ components:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
         - type: object
           required:
-            - transaction_identifier
+            - intent_hash_hex
           properties:
-            transaction_identifier:
-              $ref: "#/components/schemas/TransactionCommittedDetailsRequestIdentifier"
+            intent_hash_hex:
+              $ref: "#/components/schemas/HashHexString"
       example:
-        transaction_identifier:
-          type: payload_hash
-          value_hex: "<transaction-payload-hash>"
-    TransactionCommittedDetailsRequestIdentifierType:
-      type: string
-      enum:
-        - IntentHash
-        - SignedIntentHash
-        - PayloadHash
-    TransactionCommittedDetailsRequestIdentifier:
-      type: object
-      required:
-        - type
-        - value_hex
-      properties:
-        type:
-          $ref: "#/components/schemas/TransactionCommittedDetailsRequestIdentifierType"
-        value_hex:
-          $ref: "#/components/schemas/HexString"
+        intent_hash_hex: "<transaction-intent-hash>"
     TransactionCommittedDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1948,10 +1930,10 @@ components:
         - $ref: "#/components/schemas/GatewayError"
         - type: object
           required:
-            - transaction_not_found
+            - intent_hash_hex
           properties:
-            transaction_not_found:
-              $ref: "#/components/schemas/TransactionCommittedDetailsRequestIdentifier"
+            intent_hash_hex:
+              $ref: "#/components/schemas/HashHexString"
     InternalServerError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"
