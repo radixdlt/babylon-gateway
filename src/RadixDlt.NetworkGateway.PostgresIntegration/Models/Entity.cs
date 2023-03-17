@@ -64,6 +64,7 @@
 
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -99,6 +100,20 @@ internal abstract class Entity
     [Column("global_ancestor_id")]
     public long? GlobalAncestorId { get; set; }
 
+    [Column("correlated_entities")]
+    public virtual List<long> CorrelatedEntities
+    {
+        get
+        {
+            return new List<long>(AncestorIds?.ToArray() ?? Array.Empty<long>());
+        }
+
+        private set
+        {
+            /* setter needed for EF Core only */
+        }
+    }
+
     [MemberNotNullWhen(true, nameof(AncestorIds), nameof(ParentAncestorId), nameof(OwnerAncestorId), nameof(GlobalAncestorId))]
     public bool HasParent => AncestorIds != null;
 }
@@ -129,6 +144,23 @@ internal abstract class ComponentEntity : Entity, IRoyaltyVaultHolder
 
     [Column("royalty_vault_entity_id")]
     public long? RoyaltyVaultEntityId { get; set; }
+
+    public override List<long> CorrelatedEntities
+    {
+        get
+        {
+            var ce = base.CorrelatedEntities;
+
+            ce.Add(PackageId);
+
+            if (RoyaltyVaultEntityId.HasValue)
+            {
+                ce.Add(RoyaltyVaultEntityId.Value);
+            }
+
+            return ce;
+        }
+    }
 }
 
 internal class ValidatorEntity : ComponentEntity
@@ -141,6 +173,20 @@ internal class ValidatorEntity : ComponentEntity
 
     [Column("epoch_manager_entity_id")]
     public long EpochManagerEntityId { get; set; }
+
+    public override List<long> CorrelatedEntities
+    {
+        get
+        {
+            var ce = base.CorrelatedEntities;
+
+            ce.Add(StakeVaultEntityId);
+            ce.Add(UnstakeVaultEntityId);
+            ce.Add(EpochManagerEntityId);
+
+            return ce;
+        }
+    }
 }
 
 internal class EpochManagerEntity : ComponentEntity
@@ -153,10 +199,30 @@ internal class ClockEntity : ComponentEntity
 
 internal class VaultEntity : ComponentEntity
 {
+    [Column("resource_manager_entity_id")]
+    public long ResourceManagerEntityId { get; set; }
+
     [Column("royalty_vault_of_entity_id")]
     public long? RoyaltyVaultOfEntityId { get; set; }
 
     public bool IsRoyaltyVault => RoyaltyVaultOfEntityId != null;
+
+    public override List<long> CorrelatedEntities
+    {
+        get
+        {
+            var ce = base.CorrelatedEntities;
+
+            ce.Add(ResourceManagerEntityId);
+
+            if (RoyaltyVaultOfEntityId.HasValue)
+            {
+                ce.Add(RoyaltyVaultOfEntityId.Value);
+            }
+
+            return ce;
+        }
+    }
 }
 
 internal class NormalComponentEntity : ComponentEntity

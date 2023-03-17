@@ -104,15 +104,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionCommittedDetailsRequest" /> class.
         /// </summary>
         /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="transactionIdentifier">transactionIdentifier (required).</param>
-        public TransactionCommittedDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), TransactionCommittedDetailsRequestIdentifier transactionIdentifier = default(TransactionCommittedDetailsRequestIdentifier))
+        /// <param name="intentHashHex">Hex-encoded SHA-256 hash. (required).</param>
+        public TransactionCommittedDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string intentHashHex = default(string))
         {
-            // to ensure "transactionIdentifier" is required (not null)
-            if (transactionIdentifier == null)
+            // to ensure "intentHashHex" is required (not null)
+            if (intentHashHex == null)
             {
-                throw new ArgumentNullException("transactionIdentifier is a required property for TransactionCommittedDetailsRequest and cannot be null");
+                throw new ArgumentNullException("intentHashHex is a required property for TransactionCommittedDetailsRequest and cannot be null");
             }
-            this.TransactionIdentifier = transactionIdentifier;
+            this.IntentHashHex = intentHashHex;
             this.AtLedgerState = atLedgerState;
         }
 
@@ -123,10 +123,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
-        /// Gets or Sets TransactionIdentifier
+        /// Hex-encoded SHA-256 hash.
         /// </summary>
-        [DataMember(Name = "transaction_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionCommittedDetailsRequestIdentifier TransactionIdentifier { get; set; }
+        /// <value>Hex-encoded SHA-256 hash.</value>
+        [DataMember(Name = "intent_hash_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string IntentHashHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,7 +138,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionCommittedDetailsRequest {\n");
             sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  TransactionIdentifier: ").Append(TransactionIdentifier).Append("\n");
+            sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,9 +180,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.AtLedgerState.Equals(input.AtLedgerState))
                 ) && 
                 (
-                    this.TransactionIdentifier == input.TransactionIdentifier ||
-                    (this.TransactionIdentifier != null &&
-                    this.TransactionIdentifier.Equals(input.TransactionIdentifier))
+                    this.IntentHashHex == input.IntentHashHex ||
+                    (this.IntentHashHex != null &&
+                    this.IntentHashHex.Equals(input.IntentHashHex))
                 );
         }
 
@@ -198,9 +199,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
                 }
-                if (this.TransactionIdentifier != null)
+                if (this.IntentHashHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.TransactionIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
                 }
                 return hashCode;
             }

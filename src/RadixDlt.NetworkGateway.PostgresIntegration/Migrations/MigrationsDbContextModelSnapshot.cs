@@ -118,6 +118,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint[]")
                         .HasColumnName("ancestor_ids");
 
+                    b.Property<List<long>>("CorrelatedEntities")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("correlated_entities");
+
                     b.Property<long>("FromStateVersion")
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
@@ -1172,6 +1177,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("package_id");
 
+                    b.Property<long>("ResourceManagerEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_manager_entity_id");
+
                     b.Property<long?>("RoyaltyVaultEntityId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
@@ -1277,16 +1286,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasFilter("intent_hash IS NOT NULL");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("IntentHash"), "hash");
-
-                    b.HasIndex("PayloadHash")
-                        .HasFilter("payload_hash IS NOT NULL");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("PayloadHash"), "hash");
-
-                    b.HasIndex("SignedIntentHash")
-                        .HasFilter("signed_intent_hash IS NOT NULL");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SignedIntentHash"), "hash");
 
                     b.ToTable("ledger_transactions");
 

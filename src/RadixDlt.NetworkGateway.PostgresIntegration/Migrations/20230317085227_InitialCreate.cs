@@ -105,6 +105,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     parent_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     owner_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     global_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
+                    correlated_entities = table.Column<List<long>>(type: "bigint[]", nullable: false),
                     discriminator = table.Column<EntityType>(type: "entity_type", nullable: false),
                     package_id = table.Column<long>(type: "bigint", nullable: true),
                     blueprint_name = table.Column<string>(type: "text", nullable: true),
@@ -115,6 +116,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     stake_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     unstake_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     epoch_manager_entity_id = table.Column<long>(type: "bigint", nullable: true),
+                    resource_manager_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     royalty_vault_of_entity_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
@@ -523,23 +525,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 filter: "kind_filter_constraint IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ledger_transactions_payload_hash",
-                table: "ledger_transactions",
-                column: "payload_hash",
-                filter: "payload_hash IS NOT NULL")
-                .Annotation("Npgsql:IndexMethod", "hash");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_round_timestamp",
                 table: "ledger_transactions",
                 column: "round_timestamp");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ledger_transactions_signed_intent_hash",
-                table: "ledger_transactions",
-                column: "signed_intent_hash",
-                filter: "signed_intent_hash IS NOT NULL")
-                .Annotation("Npgsql:IndexMethod", "hash");
 
             migrationBuilder.CreateIndex(
                 name: "IX_non_fungible_id_data_non_fungible_resource_manager_entity_~1",

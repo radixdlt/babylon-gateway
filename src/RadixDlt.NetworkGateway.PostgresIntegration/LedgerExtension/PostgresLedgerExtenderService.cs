@@ -314,7 +314,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 }
 
                 var substates = stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates).ToList();
-                var d = substates.GroupBy(x => x.SubstateData.SubstateType).ToList();
 
                 foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
                 {
@@ -422,6 +421,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 _ => throw new ArgumentOutOfRangeException(nameof(e.NonFungibleIdType), e.NonFungibleIdType, "Unexpected value of NonFungibleIdType"),
                             });
                         }
+                    }
+
+                    if (substateData is CoreModel.VaultInfoSubstate vaultInfo)
+                    {
+                        referencedEntity.PostResolveConfigure((VaultEntity e) =>
+                        {
+                            e.ResourceManagerEntityId = referencedEntities.GetByGlobal((GlobalAddress)vaultInfo.ResourceAddress).DatabaseId;
+                        });
                     }
 
                     if (substateData is CoreModel.TypeInfoSubstate typeInfoSubstate)
@@ -652,7 +659,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             dbWriteDuration += sw.Elapsed;
         }
 
-        var vaultEntityIdToResourceAddressDictionary = new Dictionary<string, GlobalAddress>();
         var fungibleVaultChanges = new List<FungibleVaultChange>();
         var nonFungibleVaultChanges = new List<NonFungibleVaultChange>();
         var nonFungibleIdStoreChanges = new List<NonFungibleIdChange>();
@@ -670,7 +676,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 var stateVersion = committedTransaction.StateVersion;
                 var stateUpdates = committedTransaction.Receipt.StateUpdates;
 
-                foreach (var newSubstate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
+                foreach (var newSubstate in stateUpdates.UpdatedSubstates.Concat(stateUpdates.CreatedSubstates))
                 {
                     var substateId = newSubstate.SubstateId;
                     var substateData = newSubstate.SubstateData;
@@ -692,24 +698,17 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         resourceManagerSupplyChanges.Add(new ResourceManagerSupplyChange(referencedEntity, TokenAmount.FromDecimalString(resourceManager.TotalSupply), stateVersion));
                     }
 
-                    if (substateData is CoreModel.VaultInfoSubstate vault)
-                    {
-                        vaultEntityIdToResourceAddressDictionary.GetOrAdd(substateId.EntityIdHex, x => (GlobalAddress)vault.ResourceAddress);
-                    }
-
                     if (substateData is CoreModel.VaultFungibleSubstate fungible)
                     {
                         var amount = TokenAmount.FromDecimalString(fungible.Amount);
-                        var resourceAddress = vaultEntityIdToResourceAddressDictionary[substateId.EntityIdHex];
-                        var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
+                        var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<VaultEntity>().ResourceManagerEntityId);
 
                         fungibleVaultChanges.Add(new FungibleVaultChange(referencedEntity, resourceEntity, amount, stateVersion));
                     }
 
                     if (substateData is CoreModel.VaultNonFungibleSubstate nonFungible)
                     {
-                        var resourceAddress = vaultEntityIdToResourceAddressDictionary[substateId.EntityIdHex];
-                        var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
+                        var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<VaultEntity>().ResourceManagerEntityId);
 
                         nonFungibleVaultChanges.Add(
                             new NonFungibleVaultChange(

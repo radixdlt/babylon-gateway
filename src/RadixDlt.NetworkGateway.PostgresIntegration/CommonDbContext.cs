@@ -174,17 +174,9 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<SystemLedgerTransaction>(LedgerTransactionType.System);
 
         modelBuilder.Entity<UserLedgerTransaction>()
-            .HasIndex(lt => lt.PayloadHash)
-            .HasMethod("hash")
-            .HasFilter("payload_hash IS NOT NULL");
-        modelBuilder.Entity<UserLedgerTransaction>()
             .HasIndex(lt => lt.IntentHash)
             .HasMethod("hash")
             .HasFilter("intent_hash IS NOT NULL");
-        modelBuilder.Entity<UserLedgerTransaction>()
-            .HasIndex(lt => lt.SignedIntentHash)
-            .HasMethod("hash")
-            .HasFilter("signed_intent_hash IS NOT NULL");
 
         // Because StateVersion, RoundTimestamp and (Epoch, EndOfEpochRound) are correlated with the linear
         // history of the table,  we could consider defining them as a BRIN index, using .HasMethod("brin")

@@ -287,7 +287,7 @@ INNER JOIN LATERAL (
 SELECT *
 FROM entities
 WHERE id IN(
-    SELECT DISTINCT UNNEST(id || ancestor_ids) AS id
+    SELECT UNNEST(id || correlated_entities) AS id
     FROM entities
     WHERE address = ANY({entityAddressesParameter}) OR global_address = ANY({globalEntityAddressesParameter})
 )")

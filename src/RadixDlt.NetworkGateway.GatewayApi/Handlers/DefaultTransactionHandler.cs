@@ -104,9 +104,8 @@ internal class DefaultTransactionHandler : ITransactionHandler
 
     public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token = default)
     {
-        var identifier = new GatewayModel.TransactionCommittedDetailsRequestIdentifier(GatewayModel.TransactionCommittedDetailsRequestIdentifierType.IntentHash, request.IntentHashHex);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(null, token);
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(identifier, ledgerState, false, token);
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.GetIntentHashBytes(), ledgerState, false, token);
         var pendingTransactions = await _transactionQuerier.LookupPendingTransactionsByIntentHash(request.GetIntentHashBytes(), token);
         var remainingPendingTransactions = pendingTransactions.Where(pt => pt.PayloadHashHex != committedTransaction?.Info.PayloadHashHex).ToList();
 
@@ -140,14 +139,14 @@ internal class DefaultTransactionHandler : ITransactionHandler
     public async Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.TransactionIdentifier, ledgerState, true, token);
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.GetIntentHashBytes(), ledgerState, true, token);
 
         if (committedTransaction != null)
         {
             return new GatewayModel.TransactionCommittedDetailsResponse(ledgerState, committedTransaction.Info, committedTransaction.Details);
         }
 
-        throw new TransactionNotFoundException(request.TransactionIdentifier);
+        throw new TransactionNotFoundException(request.IntentHashHex);
     }
 
     public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default)

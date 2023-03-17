@@ -116,10 +116,9 @@ public static class OpenApiDocumentHandler
 
         response = OptionalReplace(response, "<entity-address>", placeholderReplacements.ResourceAddress);
         response = OptionalReplace(response, "<component-entity-address>", placeholderReplacements.ComponentAddress);
-        response = OptionalReplace(response, "<transaction-payload-hash>", placeholderReplacements.TransactionPayloadHex);
+        response = OptionalReplace(response, "<transaction-intent-hash>", placeholderReplacements.CommittedTransactionIntentHex);
         response = OptionalReplace(response, "<network-id>", placeholderReplacements.NetworkId?.ToString());
         response = OptionalReplace(response, "<network-name>", placeholderReplacements.NetworkName);
-        response = OptionalReplace(response, "<at_ledger_state_version>", placeholderReplacements.LedgerStateVersion.ToString());
         await context.Response.WriteAsync(response, Encoding.UTF8, token);
     }
 
@@ -134,7 +133,7 @@ public static class OpenApiDocumentHandler
 
         public string? ComponentAddress { get; set; }
 
-        public string? TransactionPayloadHex { get; set; }
+        public string? CommittedTransactionIntentHex { get; set; }
 
         public byte? NetworkId { get; set; }
 
@@ -156,7 +155,6 @@ public static class OpenApiDocumentHandler
             placeholderReplacements.ComponentAddress = wellKnownAddresses.Faucet;
             placeholderReplacements.NetworkId = networkConfigurationProvider.GetNetworkId();
             placeholderReplacements.NetworkName = networkConfigurationProvider.GetNetworkName();
-            placeholderReplacements.LedgerStateVersion = await ledgerStateQuerier.GetTopOfLedgerStateVersion(token);
         }
         catch (Exception)
         {
@@ -166,7 +164,7 @@ public static class OpenApiDocumentHandler
         try
         {
             var sampleTransaction = (await transactionHandler.StreamTransactions(new StreamTransactionsRequest(limitPerPage: 1), token)).Items.FirstOrDefault();
-            placeholderReplacements.TransactionPayloadHex = sampleTransaction?.PayloadHashHex;
+            placeholderReplacements.CommittedTransactionIntentHex = sampleTransaction?.IntentHashHex;
         }
         catch (Exception)
         {

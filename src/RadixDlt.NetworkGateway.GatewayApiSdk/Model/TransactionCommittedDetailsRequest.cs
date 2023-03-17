@@ -66,9 +66,9 @@ using System;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public partial class TransactionCommittedDetailsRequestIdentifier
+public partial class TransactionCommittedDetailsRequest
 {
-    private byte[] _valueBytes;
+    private byte[] _intentHashBytes;
 
-    public byte[] GetValueBytes() => _valueBytes ??= Convert.FromHexString(ValueHex);
+    public byte[] GetIntentHashBytes() => _intentHashBytes ??= Convert.FromHexString(IntentHashHex);
 }

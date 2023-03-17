@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230315162239_InitialCreate")]
+    [Migration("20230317085227_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -120,6 +120,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<List<long>>("AncestorIds")
                         .HasColumnType("bigint[]")
                         .HasColumnName("ancestor_ids");
+
+                    b.Property<List<long>>("CorrelatedEntities")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("correlated_entities");
 
                     b.Property<long>("FromStateVersion")
                         .HasColumnType("bigint")
@@ -1175,6 +1180,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("package_id");
 
+                    b.Property<long>("ResourceManagerEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_manager_entity_id");
+
                     b.Property<long?>("RoyaltyVaultEntityId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
@@ -1280,16 +1289,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasFilter("intent_hash IS NOT NULL");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("IntentHash"), "hash");
-
-                    b.HasIndex("PayloadHash")
-                        .HasFilter("payload_hash IS NOT NULL");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("PayloadHash"), "hash");
-
-                    b.HasIndex("SignedIntentHash")
-                        .HasFilter("signed_intent_hash IS NOT NULL");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SignedIntentHash"), "hash");
 
                     b.ToTable("ledger_transactions");
 
