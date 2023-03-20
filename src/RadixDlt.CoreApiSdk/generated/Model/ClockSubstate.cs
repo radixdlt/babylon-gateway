@@ -91,9 +91,9 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ComponentRoyaltyAccumulatorSubstate
+    /// ClockSubstate
     /// </summary>
-    [DataContract(Name = "ComponentRoyaltyAccumulatorSubstate")]
+    [DataContract(Name = "ClockSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
@@ -121,28 +121,33 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class ComponentRoyaltyAccumulatorSubstate : Substate, IEquatable<ComponentRoyaltyAccumulatorSubstate>
+    public partial class ClockSubstate : Substate, IEquatable<ClockSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentRoyaltyAccumulatorSubstate" /> class.
+        /// Initializes a new instance of the <see cref="ClockSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ComponentRoyaltyAccumulatorSubstate() { }
+        protected ClockSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentRoyaltyAccumulatorSubstate" /> class.
+        /// Initializes a new instance of the <see cref="ClockSubstate" /> class.
         /// </summary>
-        /// <param name="vaultEntity">vaultEntity.</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.ComponentRoyaltyAccumulator).</param>
-        public ComponentRoyaltyAccumulatorSubstate(EntityReference vaultEntity = default(EntityReference), SubstateType substateType = SubstateType.ComponentRoyaltyAccumulator) : base(substateType)
+        /// <param name="timestampRoundedDownToMinute">timestampRoundedDownToMinute (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.Clock).</param>
+        public ClockSubstate(Instant timestampRoundedDownToMinute = default(Instant), SubstateType substateType = SubstateType.Clock) : base(substateType)
         {
-            this.VaultEntity = vaultEntity;
+            // to ensure "timestampRoundedDownToMinute" is required (not null)
+            if (timestampRoundedDownToMinute == null)
+            {
+                throw new ArgumentNullException("timestampRoundedDownToMinute is a required property for ClockSubstate and cannot be null");
+            }
+            this.TimestampRoundedDownToMinute = timestampRoundedDownToMinute;
         }
 
         /// <summary>
-        /// Gets or Sets VaultEntity
+        /// Gets or Sets TimestampRoundedDownToMinute
         /// </summary>
-        [DataMember(Name = "vault_entity", EmitDefaultValue = true)]
-        public EntityReference VaultEntity { get; set; }
+        [DataMember(Name = "timestamp_rounded_down_to_minute", IsRequired = true, EmitDefaultValue = true)]
+        public Instant TimestampRoundedDownToMinute { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -151,9 +156,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ComponentRoyaltyAccumulatorSubstate {\n");
+            sb.Append("class ClockSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  VaultEntity: ").Append(VaultEntity).Append("\n");
+            sb.Append("  TimestampRoundedDownToMinute: ").Append(TimestampRoundedDownToMinute).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +179,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ComponentRoyaltyAccumulatorSubstate);
+            return this.Equals(input as ClockSubstate);
         }
 
         /// <summary>
-        /// Returns true if ComponentRoyaltyAccumulatorSubstate instances are equal
+        /// Returns true if ClockSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of ComponentRoyaltyAccumulatorSubstate to be compared</param>
+        /// <param name="input">Instance of ClockSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ComponentRoyaltyAccumulatorSubstate input)
+        public bool Equals(ClockSubstate input)
         {
             if (input == null)
             {
@@ -190,9 +195,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.VaultEntity == input.VaultEntity ||
-                    (this.VaultEntity != null &&
-                    this.VaultEntity.Equals(input.VaultEntity))
+                    this.TimestampRoundedDownToMinute == input.TimestampRoundedDownToMinute ||
+                    (this.TimestampRoundedDownToMinute != null &&
+                    this.TimestampRoundedDownToMinute.Equals(input.TimestampRoundedDownToMinute))
                 );
         }
 
@@ -205,9 +210,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.VaultEntity != null)
+                if (this.TimestampRoundedDownToMinute != null)
                 {
-                    hashCode = (hashCode * 59) + this.VaultEntity.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TimestampRoundedDownToMinute.GetHashCode();
                 }
                 return hashCode;
             }

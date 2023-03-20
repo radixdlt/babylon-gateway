@@ -90,35 +90,35 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// BlueprintData
+    /// ClockSubstateAllOf
     /// </summary>
-    [DataContract(Name = "BlueprintData")]
-    public partial class BlueprintData : IEquatable<BlueprintData>
+    [DataContract(Name = "ClockSubstate_allOf")]
+    public partial class ClockSubstateAllOf : IEquatable<ClockSubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="BlueprintData" /> class.
+        /// Initializes a new instance of the <see cref="ClockSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected BlueprintData() { }
+        protected ClockSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="BlueprintData" /> class.
+        /// Initializes a new instance of the <see cref="ClockSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="abi">abi (required).</param>
-        public BlueprintData(SborData abi = default(SborData))
+        /// <param name="timestampRoundedDownToMinute">timestampRoundedDownToMinute (required).</param>
+        public ClockSubstateAllOf(Instant timestampRoundedDownToMinute = default(Instant))
         {
-            // to ensure "abi" is required (not null)
-            if (abi == null)
+            // to ensure "timestampRoundedDownToMinute" is required (not null)
+            if (timestampRoundedDownToMinute == null)
             {
-                throw new ArgumentNullException("abi is a required property for BlueprintData and cannot be null");
+                throw new ArgumentNullException("timestampRoundedDownToMinute is a required property for ClockSubstateAllOf and cannot be null");
             }
-            this.Abi = abi;
+            this.TimestampRoundedDownToMinute = timestampRoundedDownToMinute;
         }
 
         /// <summary>
-        /// Gets or Sets Abi
+        /// Gets or Sets TimestampRoundedDownToMinute
         /// </summary>
-        [DataMember(Name = "abi", IsRequired = true, EmitDefaultValue = true)]
-        public SborData Abi { get; set; }
+        [DataMember(Name = "timestamp_rounded_down_to_minute", IsRequired = true, EmitDefaultValue = true)]
+        public Instant TimestampRoundedDownToMinute { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class BlueprintData {\n");
-            sb.Append("  Abi: ").Append(Abi).Append("\n");
+            sb.Append("class ClockSubstateAllOf {\n");
+            sb.Append("  TimestampRoundedDownToMinute: ").Append(TimestampRoundedDownToMinute).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +149,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as BlueprintData);
+            return this.Equals(input as ClockSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if BlueprintData instances are equal
+        /// Returns true if ClockSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of BlueprintData to be compared</param>
+        /// <param name="input">Instance of ClockSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(BlueprintData input)
+        public bool Equals(ClockSubstateAllOf input)
         {
             if (input == null)
             {
@@ -165,9 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Abi == input.Abi ||
-                    (this.Abi != null &&
-                    this.Abi.Equals(input.Abi))
+                    this.TimestampRoundedDownToMinute == input.TimestampRoundedDownToMinute ||
+                    (this.TimestampRoundedDownToMinute != null &&
+                    this.TimestampRoundedDownToMinute.Equals(input.TimestampRoundedDownToMinute))
                 );
         }
 
@@ -180,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Abi != null)
+                if (this.TimestampRoundedDownToMinute != null)
                 {
-                    hashCode = (hashCode * 59) + this.Abi.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TimestampRoundedDownToMinute.GetHashCode();
                 }
                 return hashCode;
             }

@@ -91,9 +91,9 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ComponentRoyaltyAccumulatorSubstate
+    /// PackageFunctionAccessRulesSubstate
     /// </summary>
-    [DataContract(Name = "ComponentRoyaltyAccumulatorSubstate")]
+    [DataContract(Name = "PackageFunctionAccessRulesSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
@@ -121,28 +121,46 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class ComponentRoyaltyAccumulatorSubstate : Substate, IEquatable<ComponentRoyaltyAccumulatorSubstate>
+    public partial class PackageFunctionAccessRulesSubstate : Substate, IEquatable<PackageFunctionAccessRulesSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentRoyaltyAccumulatorSubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageFunctionAccessRulesSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ComponentRoyaltyAccumulatorSubstate() { }
+        protected PackageFunctionAccessRulesSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentRoyaltyAccumulatorSubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageFunctionAccessRulesSubstate" /> class.
         /// </summary>
-        /// <param name="vaultEntity">vaultEntity.</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.ComponentRoyaltyAccumulator).</param>
-        public ComponentRoyaltyAccumulatorSubstate(EntityReference vaultEntity = default(EntityReference), SubstateType substateType = SubstateType.ComponentRoyaltyAccumulator) : base(substateType)
+        /// <param name="functionAuth">functionAuth (required).</param>
+        /// <param name="defaultAuth">defaultAuth (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.PackageFunctionAccessRules).</param>
+        public PackageFunctionAccessRulesSubstate(List<PackageFunctionAccessRule> functionAuth = default(List<PackageFunctionAccessRule>), AccessRule defaultAuth = default(AccessRule), SubstateType substateType = SubstateType.PackageFunctionAccessRules) : base(substateType)
         {
-            this.VaultEntity = vaultEntity;
+            // to ensure "functionAuth" is required (not null)
+            if (functionAuth == null)
+            {
+                throw new ArgumentNullException("functionAuth is a required property for PackageFunctionAccessRulesSubstate and cannot be null");
+            }
+            this.FunctionAuth = functionAuth;
+            // to ensure "defaultAuth" is required (not null)
+            if (defaultAuth == null)
+            {
+                throw new ArgumentNullException("defaultAuth is a required property for PackageFunctionAccessRulesSubstate and cannot be null");
+            }
+            this.DefaultAuth = defaultAuth;
         }
 
         /// <summary>
-        /// Gets or Sets VaultEntity
+        /// Gets or Sets FunctionAuth
         /// </summary>
-        [DataMember(Name = "vault_entity", EmitDefaultValue = true)]
-        public EntityReference VaultEntity { get; set; }
+        [DataMember(Name = "function_auth", IsRequired = true, EmitDefaultValue = true)]
+        public List<PackageFunctionAccessRule> FunctionAuth { get; set; }
+
+        /// <summary>
+        /// Gets or Sets DefaultAuth
+        /// </summary>
+        [DataMember(Name = "default_auth", IsRequired = true, EmitDefaultValue = true)]
+        public AccessRule DefaultAuth { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -151,9 +169,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ComponentRoyaltyAccumulatorSubstate {\n");
+            sb.Append("class PackageFunctionAccessRulesSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  VaultEntity: ").Append(VaultEntity).Append("\n");
+            sb.Append("  FunctionAuth: ").Append(FunctionAuth).Append("\n");
+            sb.Append("  DefaultAuth: ").Append(DefaultAuth).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +193,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ComponentRoyaltyAccumulatorSubstate);
+            return this.Equals(input as PackageFunctionAccessRulesSubstate);
         }
 
         /// <summary>
-        /// Returns true if ComponentRoyaltyAccumulatorSubstate instances are equal
+        /// Returns true if PackageFunctionAccessRulesSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of ComponentRoyaltyAccumulatorSubstate to be compared</param>
+        /// <param name="input">Instance of PackageFunctionAccessRulesSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ComponentRoyaltyAccumulatorSubstate input)
+        public bool Equals(PackageFunctionAccessRulesSubstate input)
         {
             if (input == null)
             {
@@ -190,9 +209,15 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.VaultEntity == input.VaultEntity ||
-                    (this.VaultEntity != null &&
-                    this.VaultEntity.Equals(input.VaultEntity))
+                    this.FunctionAuth == input.FunctionAuth ||
+                    this.FunctionAuth != null &&
+                    input.FunctionAuth != null &&
+                    this.FunctionAuth.SequenceEqual(input.FunctionAuth)
+                ) && base.Equals(input) && 
+                (
+                    this.DefaultAuth == input.DefaultAuth ||
+                    (this.DefaultAuth != null &&
+                    this.DefaultAuth.Equals(input.DefaultAuth))
                 );
         }
 
@@ -205,9 +230,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.VaultEntity != null)
+                if (this.FunctionAuth != null)
                 {
-                    hashCode = (hashCode * 59) + this.VaultEntity.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FunctionAuth.GetHashCode();
+                }
+                if (this.DefaultAuth != null)
+                {
+                    hashCode = (hashCode * 59) + this.DefaultAuth.GetHashCode();
                 }
                 return hashCode;
             }

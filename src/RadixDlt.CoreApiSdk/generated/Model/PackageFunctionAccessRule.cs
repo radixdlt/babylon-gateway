@@ -90,35 +90,61 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// PackageRoyaltyConfigSubstateAllOf
+    /// PackageFunctionAccessRule
     /// </summary>
-    [DataContract(Name = "PackageRoyaltyConfigSubstate_allOf")]
-    public partial class PackageRoyaltyConfigSubstateAllOf : IEquatable<PackageRoyaltyConfigSubstateAllOf>
+    [DataContract(Name = "PackageFunctionAccessRule")]
+    public partial class PackageFunctionAccessRule : IEquatable<PackageFunctionAccessRule>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PackageRoyaltyConfigSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageFunctionAccessRule" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected PackageRoyaltyConfigSubstateAllOf() { }
+        protected PackageFunctionAccessRule() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="PackageRoyaltyConfigSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageFunctionAccessRule" /> class.
         /// </summary>
-        /// <param name="blueprintRoyalties">blueprintRoyalties (required).</param>
-        public PackageRoyaltyConfigSubstateAllOf(List<BlueprintRoyaltyConfig> blueprintRoyalties = default(List<BlueprintRoyaltyConfig>))
+        /// <param name="blueprint">blueprint (required).</param>
+        /// <param name="functionName">functionName (required).</param>
+        /// <param name="accessRule">accessRule (required).</param>
+        public PackageFunctionAccessRule(string blueprint = default(string), string functionName = default(string), AccessRule accessRule = default(AccessRule))
         {
-            // to ensure "blueprintRoyalties" is required (not null)
-            if (blueprintRoyalties == null)
+            // to ensure "blueprint" is required (not null)
+            if (blueprint == null)
             {
-                throw new ArgumentNullException("blueprintRoyalties is a required property for PackageRoyaltyConfigSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("blueprint is a required property for PackageFunctionAccessRule and cannot be null");
             }
-            this.BlueprintRoyalties = blueprintRoyalties;
+            this.Blueprint = blueprint;
+            // to ensure "functionName" is required (not null)
+            if (functionName == null)
+            {
+                throw new ArgumentNullException("functionName is a required property for PackageFunctionAccessRule and cannot be null");
+            }
+            this.FunctionName = functionName;
+            // to ensure "accessRule" is required (not null)
+            if (accessRule == null)
+            {
+                throw new ArgumentNullException("accessRule is a required property for PackageFunctionAccessRule and cannot be null");
+            }
+            this.AccessRule = accessRule;
         }
 
         /// <summary>
-        /// Gets or Sets BlueprintRoyalties
+        /// Gets or Sets Blueprint
         /// </summary>
-        [DataMember(Name = "blueprint_royalties", IsRequired = true, EmitDefaultValue = true)]
-        public List<BlueprintRoyaltyConfig> BlueprintRoyalties { get; set; }
+        [DataMember(Name = "blueprint", IsRequired = true, EmitDefaultValue = true)]
+        public string Blueprint { get; set; }
+
+        /// <summary>
+        /// Gets or Sets FunctionName
+        /// </summary>
+        [DataMember(Name = "function_name", IsRequired = true, EmitDefaultValue = true)]
+        public string FunctionName { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AccessRule
+        /// </summary>
+        [DataMember(Name = "access_rule", IsRequired = true, EmitDefaultValue = true)]
+        public AccessRule AccessRule { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +153,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PackageRoyaltyConfigSubstateAllOf {\n");
-            sb.Append("  BlueprintRoyalties: ").Append(BlueprintRoyalties).Append("\n");
+            sb.Append("class PackageFunctionAccessRule {\n");
+            sb.Append("  Blueprint: ").Append(Blueprint).Append("\n");
+            sb.Append("  FunctionName: ").Append(FunctionName).Append("\n");
+            sb.Append("  AccessRule: ").Append(AccessRule).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +177,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PackageRoyaltyConfigSubstateAllOf);
+            return this.Equals(input as PackageFunctionAccessRule);
         }
 
         /// <summary>
-        /// Returns true if PackageRoyaltyConfigSubstateAllOf instances are equal
+        /// Returns true if PackageFunctionAccessRule instances are equal
         /// </summary>
-        /// <param name="input">Instance of PackageRoyaltyConfigSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of PackageFunctionAccessRule to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PackageRoyaltyConfigSubstateAllOf input)
+        public bool Equals(PackageFunctionAccessRule input)
         {
             if (input == null)
             {
@@ -165,10 +193,19 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.BlueprintRoyalties == input.BlueprintRoyalties ||
-                    this.BlueprintRoyalties != null &&
-                    input.BlueprintRoyalties != null &&
-                    this.BlueprintRoyalties.SequenceEqual(input.BlueprintRoyalties)
+                    this.Blueprint == input.Blueprint ||
+                    (this.Blueprint != null &&
+                    this.Blueprint.Equals(input.Blueprint))
+                ) && 
+                (
+                    this.FunctionName == input.FunctionName ||
+                    (this.FunctionName != null &&
+                    this.FunctionName.Equals(input.FunctionName))
+                ) && 
+                (
+                    this.AccessRule == input.AccessRule ||
+                    (this.AccessRule != null &&
+                    this.AccessRule.Equals(input.AccessRule))
                 );
         }
 
@@ -181,9 +218,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.BlueprintRoyalties != null)
+                if (this.Blueprint != null)
                 {
-                    hashCode = (hashCode * 59) + this.BlueprintRoyalties.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Blueprint.GetHashCode();
+                }
+                if (this.FunctionName != null)
+                {
+                    hashCode = (hashCode * 59) + this.FunctionName.GetHashCode();
+                }
+                if (this.AccessRule != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccessRule.GetHashCode();
                 }
                 return hashCode;
             }

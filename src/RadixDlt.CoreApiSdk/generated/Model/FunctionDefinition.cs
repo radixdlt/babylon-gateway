@@ -90,35 +90,95 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ClockCurrentMinuteSubstateAllOf
+    /// FunctionDefinition
     /// </summary>
-    [DataContract(Name = "ClockCurrentMinuteSubstate_allOf")]
-    public partial class ClockCurrentMinuteSubstateAllOf : IEquatable<ClockCurrentMinuteSubstateAllOf>
+    [DataContract(Name = "FunctionDefinition")]
+    public partial class FunctionDefinition : IEquatable<FunctionDefinition>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ClockCurrentMinuteSubstateAllOf" /> class.
+        /// Defines Receiver
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum ReceiverEnum
+        {
+            /// <summary>
+            /// Enum Function for value: Function
+            /// </summary>
+            [EnumMember(Value = "Function")]
+            Function = 1,
+
+            /// <summary>
+            /// Enum ComponentReadOnly for value: ComponentReadOnly
+            /// </summary>
+            [EnumMember(Value = "ComponentReadOnly")]
+            ComponentReadOnly = 2,
+
+            /// <summary>
+            /// Enum ComponentMutable for value: ComponentMutable
+            /// </summary>
+            [EnumMember(Value = "ComponentMutable")]
+            ComponentMutable = 3
+
+        }
+
+
+        /// <summary>
+        /// Gets or Sets Receiver
+        /// </summary>
+        [DataMember(Name = "receiver", IsRequired = true, EmitDefaultValue = true)]
+        public ReceiverEnum Receiver { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FunctionDefinition" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ClockCurrentMinuteSubstateAllOf() { }
+        protected FunctionDefinition() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ClockCurrentMinuteSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="FunctionDefinition" /> class.
         /// </summary>
-        /// <param name="timestampRoundedDownToMinute">timestampRoundedDownToMinute (required).</param>
-        public ClockCurrentMinuteSubstateAllOf(Instant timestampRoundedDownToMinute = default(Instant))
+        /// <param name="receiver">receiver (required).</param>
+        /// <param name="input">input (required).</param>
+        /// <param name="output">output (required).</param>
+        /// <param name="exportName">exportName (required).</param>
+        public FunctionDefinition(ReceiverEnum receiver = default(ReceiverEnum), LocalTypeIndex input = default(LocalTypeIndex), LocalTypeIndex output = default(LocalTypeIndex), string exportName = default(string))
         {
-            // to ensure "timestampRoundedDownToMinute" is required (not null)
-            if (timestampRoundedDownToMinute == null)
+            this.Receiver = receiver;
+            // to ensure "input" is required (not null)
+            if (input == null)
             {
-                throw new ArgumentNullException("timestampRoundedDownToMinute is a required property for ClockCurrentMinuteSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("input is a required property for FunctionDefinition and cannot be null");
             }
-            this.TimestampRoundedDownToMinute = timestampRoundedDownToMinute;
+            this.Input = input;
+            // to ensure "output" is required (not null)
+            if (output == null)
+            {
+                throw new ArgumentNullException("output is a required property for FunctionDefinition and cannot be null");
+            }
+            this.Output = output;
+            // to ensure "exportName" is required (not null)
+            if (exportName == null)
+            {
+                throw new ArgumentNullException("exportName is a required property for FunctionDefinition and cannot be null");
+            }
+            this.ExportName = exportName;
         }
 
         /// <summary>
-        /// Gets or Sets TimestampRoundedDownToMinute
+        /// Gets or Sets Input
         /// </summary>
-        [DataMember(Name = "timestamp_rounded_down_to_minute", IsRequired = true, EmitDefaultValue = true)]
-        public Instant TimestampRoundedDownToMinute { get; set; }
+        [DataMember(Name = "input", IsRequired = true, EmitDefaultValue = true)]
+        public LocalTypeIndex Input { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Output
+        /// </summary>
+        [DataMember(Name = "output", IsRequired = true, EmitDefaultValue = true)]
+        public LocalTypeIndex Output { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ExportName
+        /// </summary>
+        [DataMember(Name = "export_name", IsRequired = true, EmitDefaultValue = true)]
+        public string ExportName { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +187,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ClockCurrentMinuteSubstateAllOf {\n");
-            sb.Append("  TimestampRoundedDownToMinute: ").Append(TimestampRoundedDownToMinute).Append("\n");
+            sb.Append("class FunctionDefinition {\n");
+            sb.Append("  Receiver: ").Append(Receiver).Append("\n");
+            sb.Append("  Input: ").Append(Input).Append("\n");
+            sb.Append("  Output: ").Append(Output).Append("\n");
+            sb.Append("  ExportName: ").Append(ExportName).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +212,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ClockCurrentMinuteSubstateAllOf);
+            return this.Equals(input as FunctionDefinition);
         }
 
         /// <summary>
-        /// Returns true if ClockCurrentMinuteSubstateAllOf instances are equal
+        /// Returns true if FunctionDefinition instances are equal
         /// </summary>
-        /// <param name="input">Instance of ClockCurrentMinuteSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of FunctionDefinition to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ClockCurrentMinuteSubstateAllOf input)
+        public bool Equals(FunctionDefinition input)
         {
             if (input == null)
             {
@@ -165,9 +228,23 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.TimestampRoundedDownToMinute == input.TimestampRoundedDownToMinute ||
-                    (this.TimestampRoundedDownToMinute != null &&
-                    this.TimestampRoundedDownToMinute.Equals(input.TimestampRoundedDownToMinute))
+                    this.Receiver == input.Receiver ||
+                    this.Receiver.Equals(input.Receiver)
+                ) && 
+                (
+                    this.Input == input.Input ||
+                    (this.Input != null &&
+                    this.Input.Equals(input.Input))
+                ) && 
+                (
+                    this.Output == input.Output ||
+                    (this.Output != null &&
+                    this.Output.Equals(input.Output))
+                ) && 
+                (
+                    this.ExportName == input.ExportName ||
+                    (this.ExportName != null &&
+                    this.ExportName.Equals(input.ExportName))
                 );
         }
 
@@ -180,9 +257,18 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TimestampRoundedDownToMinute != null)
+                hashCode = (hashCode * 59) + this.Receiver.GetHashCode();
+                if (this.Input != null)
                 {
-                    hashCode = (hashCode * 59) + this.TimestampRoundedDownToMinute.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Input.GetHashCode();
+                }
+                if (this.Output != null)
+                {
+                    hashCode = (hashCode * 59) + this.Output.GetHashCode();
+                }
+                if (this.ExportName != null)
+                {
+                    hashCode = (hashCode * 59) + this.ExportName.GetHashCode();
                 }
                 return hashCode;
             }

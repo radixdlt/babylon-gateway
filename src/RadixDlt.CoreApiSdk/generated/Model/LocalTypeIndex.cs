@@ -90,66 +90,61 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Only present if the non fungible isn&#39;t deleted. NOTE: Currently there is no schema for mutable/immutable data, and it&#39;s not even guaranteed to be SBOR-encoded. But from scrypto, it likely always will be. For now, immutable_data / mutable_data is optional, and only included if the data is valid SBOR. When the payload is validated, &#x60;immutable_data_raw_hex&#x60; / &#x60;mutable_data_raw_hex&#x60; will be removed. 
+    /// LocalTypeIndex
     /// </summary>
-    [DataContract(Name = "NonFungibleData")]
-    public partial class NonFungibleData : IEquatable<NonFungibleData>
+    [DataContract(Name = "LocalTypeIndex")]
+    public partial class LocalTypeIndex : IEquatable<LocalTypeIndex>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleData" /> class.
+        /// The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema. 
+        /// </summary>
+        /// <value>The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema. </value>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum KindEnum
+        {
+            /// <summary>
+            /// Enum WellKnown for value: WellKnown
+            /// </summary>
+            [EnumMember(Value = "WellKnown")]
+            WellKnown = 1,
+
+            /// <summary>
+            /// Enum SchemaLocal for value: SchemaLocal
+            /// </summary>
+            [EnumMember(Value = "SchemaLocal")]
+            SchemaLocal = 2
+
+        }
+
+
+        /// <summary>
+        /// The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema. 
+        /// </summary>
+        /// <value>The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema. </value>
+        [DataMember(Name = "kind", IsRequired = true, EmitDefaultValue = true)]
+        public KindEnum Kind { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LocalTypeIndex" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleData() { }
+        protected LocalTypeIndex() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleData" /> class.
+        /// Initializes a new instance of the <see cref="LocalTypeIndex" /> class.
         /// </summary>
-        /// <param name="immutableData">immutableData.</param>
-        /// <param name="immutableDataRawHex">The hex-encoded raw bytes of the immutable data of the NF.  (required).</param>
-        /// <param name="mutableData">mutableData.</param>
-        /// <param name="mutableDataRawHex">The hex-encoded raw bytes of the mutadata data of the NF.  (required).</param>
-        public NonFungibleData(DataStruct immutableData = default(DataStruct), string immutableDataRawHex = default(string), DataStruct mutableData = default(DataStruct), string mutableDataRawHex = default(string))
+        /// <param name="kind">The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema.  (required).</param>
+        /// <param name="index">Either the well known identifier, of the schema-local index, depending on the kind.  (required).</param>
+        public LocalTypeIndex(KindEnum kind = default(KindEnum), int index = default(int))
         {
-            // to ensure "immutableDataRawHex" is required (not null)
-            if (immutableDataRawHex == null)
-            {
-                throw new ArgumentNullException("immutableDataRawHex is a required property for NonFungibleData and cannot be null");
-            }
-            this.ImmutableDataRawHex = immutableDataRawHex;
-            // to ensure "mutableDataRawHex" is required (not null)
-            if (mutableDataRawHex == null)
-            {
-                throw new ArgumentNullException("mutableDataRawHex is a required property for NonFungibleData and cannot be null");
-            }
-            this.MutableDataRawHex = mutableDataRawHex;
-            this.ImmutableData = immutableData;
-            this.MutableData = mutableData;
+            this.Kind = kind;
+            this.Index = index;
         }
 
         /// <summary>
-        /// Gets or Sets ImmutableData
+        /// Either the well known identifier, of the schema-local index, depending on the kind. 
         /// </summary>
-        [DataMember(Name = "immutable_data", EmitDefaultValue = true)]
-        public DataStruct ImmutableData { get; set; }
-
-        /// <summary>
-        /// The hex-encoded raw bytes of the immutable data of the NF. 
-        /// </summary>
-        /// <value>The hex-encoded raw bytes of the immutable data of the NF. </value>
-        [DataMember(Name = "immutable_data_raw_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string ImmutableDataRawHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets MutableData
-        /// </summary>
-        [DataMember(Name = "mutable_data", EmitDefaultValue = true)]
-        public DataStruct MutableData { get; set; }
-
-        /// <summary>
-        /// The hex-encoded raw bytes of the mutadata data of the NF. 
-        /// </summary>
-        /// <value>The hex-encoded raw bytes of the mutadata data of the NF. </value>
-        [DataMember(Name = "mutable_data_raw_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string MutableDataRawHex { get; set; }
+        /// <value>Either the well known identifier, of the schema-local index, depending on the kind. </value>
+        [DataMember(Name = "index", IsRequired = true, EmitDefaultValue = true)]
+        public int Index { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -158,11 +153,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleData {\n");
-            sb.Append("  ImmutableData: ").Append(ImmutableData).Append("\n");
-            sb.Append("  ImmutableDataRawHex: ").Append(ImmutableDataRawHex).Append("\n");
-            sb.Append("  MutableData: ").Append(MutableData).Append("\n");
-            sb.Append("  MutableDataRawHex: ").Append(MutableDataRawHex).Append("\n");
+            sb.Append("class LocalTypeIndex {\n");
+            sb.Append("  Kind: ").Append(Kind).Append("\n");
+            sb.Append("  Index: ").Append(Index).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -183,15 +176,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleData);
+            return this.Equals(input as LocalTypeIndex);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleData instances are equal
+        /// Returns true if LocalTypeIndex instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleData to be compared</param>
+        /// <param name="input">Instance of LocalTypeIndex to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleData input)
+        public bool Equals(LocalTypeIndex input)
         {
             if (input == null)
             {
@@ -199,24 +192,12 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ImmutableData == input.ImmutableData ||
-                    (this.ImmutableData != null &&
-                    this.ImmutableData.Equals(input.ImmutableData))
+                    this.Kind == input.Kind ||
+                    this.Kind.Equals(input.Kind)
                 ) && 
                 (
-                    this.ImmutableDataRawHex == input.ImmutableDataRawHex ||
-                    (this.ImmutableDataRawHex != null &&
-                    this.ImmutableDataRawHex.Equals(input.ImmutableDataRawHex))
-                ) && 
-                (
-                    this.MutableData == input.MutableData ||
-                    (this.MutableData != null &&
-                    this.MutableData.Equals(input.MutableData))
-                ) && 
-                (
-                    this.MutableDataRawHex == input.MutableDataRawHex ||
-                    (this.MutableDataRawHex != null &&
-                    this.MutableDataRawHex.Equals(input.MutableDataRawHex))
+                    this.Index == input.Index ||
+                    this.Index.Equals(input.Index)
                 );
         }
 
@@ -229,22 +210,8 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ImmutableData != null)
-                {
-                    hashCode = (hashCode * 59) + this.ImmutableData.GetHashCode();
-                }
-                if (this.ImmutableDataRawHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.ImmutableDataRawHex.GetHashCode();
-                }
-                if (this.MutableData != null)
-                {
-                    hashCode = (hashCode * 59) + this.MutableData.GetHashCode();
-                }
-                if (this.MutableDataRawHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.MutableDataRawHex.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Kind.GetHashCode();
+                hashCode = (hashCode * 59) + this.Index.GetHashCode();
                 return hashCode;
             }
         }

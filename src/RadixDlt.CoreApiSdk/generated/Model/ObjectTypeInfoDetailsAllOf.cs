@@ -90,46 +90,141 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines ModuleType
+    /// ObjectTypeInfoDetailsAllOf
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum ModuleType
+    [DataContract(Name = "ObjectTypeInfoDetails_allOf")]
+    public partial class ObjectTypeInfoDetailsAllOf : IEquatable<ObjectTypeInfoDetailsAllOf>
     {
         /// <summary>
-        /// Enum Self for value: Self
+        /// Initializes a new instance of the <see cref="ObjectTypeInfoDetailsAllOf" /> class.
         /// </summary>
-        [EnumMember(Value = "Self")]
-        Self = 1,
+        [JsonConstructorAttribute]
+        protected ObjectTypeInfoDetailsAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObjectTypeInfoDetailsAllOf" /> class.
+        /// </summary>
+        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
+        /// <param name="blueprintName">blueprintName (required).</param>
+        /// <param name="global">global (required).</param>
+        public ObjectTypeInfoDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), bool global = default(bool))
+        {
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
+            {
+                throw new ArgumentNullException("packageAddress is a required property for ObjectTypeInfoDetailsAllOf and cannot be null");
+            }
+            this.PackageAddress = packageAddress;
+            // to ensure "blueprintName" is required (not null)
+            if (blueprintName == null)
+            {
+                throw new ArgumentNullException("blueprintName is a required property for ObjectTypeInfoDetailsAllOf and cannot be null");
+            }
+            this.BlueprintName = blueprintName;
+            this.Global = global;
+        }
 
         /// <summary>
-        /// Enum TypeInfo for value: TypeInfo
+        /// The Bech32m-encoded human readable version of the package address
         /// </summary>
-        [EnumMember(Value = "TypeInfo")]
-        TypeInfo = 2,
+        /// <value>The Bech32m-encoded human readable version of the package address</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
 
         /// <summary>
-        /// Enum Metadata for value: Metadata
+        /// Gets or Sets BlueprintName
         /// </summary>
-        [EnumMember(Value = "Metadata")]
-        Metadata = 3,
+        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
+        public string BlueprintName { get; set; }
 
         /// <summary>
-        /// Enum AccessRules for value: AccessRules
+        /// Gets or Sets Global
         /// </summary>
-        [EnumMember(Value = "AccessRules")]
-        AccessRules = 4,
+        [DataMember(Name = "global", IsRequired = true, EmitDefaultValue = true)]
+        public bool Global { get; set; }
 
         /// <summary>
-        /// Enum AccessRules1 for value: AccessRules1
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "AccessRules1")]
-        AccessRules1 = 5,
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class ObjectTypeInfoDetailsAllOf {\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
+            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
+            sb.Append("  Global: ").Append(Global).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
 
         /// <summary>
-        /// Enum ComponentRoyalty for value: ComponentRoyalty
+        /// Returns the JSON string presentation of the object
         /// </summary>
-        [EnumMember(Value = "ComponentRoyalty")]
-        ComponentRoyalty = 6
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Returns true if objects are equal
+        /// </summary>
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as ObjectTypeInfoDetailsAllOf);
+        }
+
+        /// <summary>
+        /// Returns true if ObjectTypeInfoDetailsAllOf instances are equal
+        /// </summary>
+        /// <param name="input">Instance of ObjectTypeInfoDetailsAllOf to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(ObjectTypeInfoDetailsAllOf input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
+                ) && 
+                (
+                    this.BlueprintName == input.BlueprintName ||
+                    (this.BlueprintName != null &&
+                    this.BlueprintName.Equals(input.BlueprintName))
+                ) && 
+                (
+                    this.Global == input.Global ||
+                    this.Global.Equals(input.Global)
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                if (this.PackageAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
+                }
+                if (this.BlueprintName != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.Global.GetHashCode();
+                return hashCode;
+            }
+        }
 
     }
 

@@ -120,10 +120,10 @@ internal abstract class LedgerTransaction
     public List<long> ReferencedEntities { get; set; }
 
     [Column("fee_paid")]
-    public TokenAmount FeePaid { get; set; }
+    public TokenAmount? FeePaid { get; set; }
 
     [Column("tip_paid")]
-    public TokenAmount TipPaid { get; set; }
+    public TokenAmount? TipPaid { get; set; }
 
     /// <summary>
     /// The round timestamp of a round where vertex V was voted on is derived as the median of the timestamp of the

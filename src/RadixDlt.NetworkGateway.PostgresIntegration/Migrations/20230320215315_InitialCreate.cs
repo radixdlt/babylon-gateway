@@ -83,7 +83,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         {
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:access_rules_chain_subtype", "none,resource_manager_vault_access_rules_chain")
-                .Annotation("Npgsql:Enum:entity_type", "epoch_manager,fungible_resource_manager,non_fungible_resource_manager,normal_component,account_component,package,key_value_store,vault,non_fungible_store,clock,validator,access_controller,identity")
+                .Annotation("Npgsql:Enum:entity_type", "epoch_manager,fungible_resource_manager,non_fungible_resource_manager,normal_component,account_component,package,key_value_store,vault,clock,validator,access_controller,identity")
                 .Annotation("Npgsql:Enum:ledger_transaction_kind_filter_constraint", "user,epoch_change")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "user,validator,system")
@@ -111,8 +111,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     blueprint_name = table.Column<string>(type: "text", nullable: true),
                     royalty_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     divisibility = table.Column<int>(type: "integer", nullable: true),
+                    store_of_non_fungible_resource_manager_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     non_fungible_id_type = table.Column<NonFungibleIdType>(type: "non_fungible_id_type", nullable: true),
                     code = table.Column<byte[]>(type: "bytea", nullable: true),
+                    code_type = table.Column<string>(type: "text", nullable: true),
                     stake_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     unstake_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     epoch_manager_entity_id = table.Column<long>(type: "bigint", nullable: true),
@@ -261,8 +263,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     index_in_round = table.Column<long>(type: "bigint", nullable: false),
                     is_end_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
                     referenced_entities = table.Column<List<long>>(type: "bigint[]", nullable: false),
-                    fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    tip_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
+                    tip_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
                     round_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     created_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     normalized_round_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),

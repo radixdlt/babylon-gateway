@@ -90,51 +90,48 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleStoreEntrySubstateAllOf
+    /// PackageFunctionAccessRulesSubstateAllOf
     /// </summary>
-    [DataContract(Name = "NonFungibleStoreEntrySubstate_allOf")]
-    public partial class NonFungibleStoreEntrySubstateAllOf : IEquatable<NonFungibleStoreEntrySubstateAllOf>
+    [DataContract(Name = "PackageFunctionAccessRulesSubstate_allOf")]
+    public partial class PackageFunctionAccessRulesSubstateAllOf : IEquatable<PackageFunctionAccessRulesSubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleStoreEntrySubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageFunctionAccessRulesSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleStoreEntrySubstateAllOf() { }
+        protected PackageFunctionAccessRulesSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleStoreEntrySubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageFunctionAccessRulesSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="nonFungibleId">nonFungibleId (required).</param>
-        /// <param name="nonFungibleData">nonFungibleData.</param>
-        /// <param name="isDeleted">isDeleted (required).</param>
-        public NonFungibleStoreEntrySubstateAllOf(NonFungibleId nonFungibleId = default(NonFungibleId), NonFungibleData nonFungibleData = default(NonFungibleData), bool isDeleted = default(bool))
+        /// <param name="functionAuth">functionAuth (required).</param>
+        /// <param name="defaultAuth">defaultAuth (required).</param>
+        public PackageFunctionAccessRulesSubstateAllOf(List<PackageFunctionAccessRule> functionAuth = default(List<PackageFunctionAccessRule>), AccessRule defaultAuth = default(AccessRule))
         {
-            // to ensure "nonFungibleId" is required (not null)
-            if (nonFungibleId == null)
+            // to ensure "functionAuth" is required (not null)
+            if (functionAuth == null)
             {
-                throw new ArgumentNullException("nonFungibleId is a required property for NonFungibleStoreEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("functionAuth is a required property for PackageFunctionAccessRulesSubstateAllOf and cannot be null");
             }
-            this.NonFungibleId = nonFungibleId;
-            this.IsDeleted = isDeleted;
-            this.NonFungibleData = nonFungibleData;
+            this.FunctionAuth = functionAuth;
+            // to ensure "defaultAuth" is required (not null)
+            if (defaultAuth == null)
+            {
+                throw new ArgumentNullException("defaultAuth is a required property for PackageFunctionAccessRulesSubstateAllOf and cannot be null");
+            }
+            this.DefaultAuth = defaultAuth;
         }
 
         /// <summary>
-        /// Gets or Sets NonFungibleId
+        /// Gets or Sets FunctionAuth
         /// </summary>
-        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleId NonFungibleId { get; set; }
+        [DataMember(Name = "function_auth", IsRequired = true, EmitDefaultValue = true)]
+        public List<PackageFunctionAccessRule> FunctionAuth { get; set; }
 
         /// <summary>
-        /// Gets or Sets NonFungibleData
+        /// Gets or Sets DefaultAuth
         /// </summary>
-        [DataMember(Name = "non_fungible_data", EmitDefaultValue = true)]
-        public NonFungibleData NonFungibleData { get; set; }
-
-        /// <summary>
-        /// Gets or Sets IsDeleted
-        /// </summary>
-        [DataMember(Name = "is_deleted", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsDeleted { get; set; }
+        [DataMember(Name = "default_auth", IsRequired = true, EmitDefaultValue = true)]
+        public AccessRule DefaultAuth { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,10 +140,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleStoreEntrySubstateAllOf {\n");
-            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
-            sb.Append("  NonFungibleData: ").Append(NonFungibleData).Append("\n");
-            sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
+            sb.Append("class PackageFunctionAccessRulesSubstateAllOf {\n");
+            sb.Append("  FunctionAuth: ").Append(FunctionAuth).Append("\n");
+            sb.Append("  DefaultAuth: ").Append(DefaultAuth).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -167,15 +163,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleStoreEntrySubstateAllOf);
+            return this.Equals(input as PackageFunctionAccessRulesSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleStoreEntrySubstateAllOf instances are equal
+        /// Returns true if PackageFunctionAccessRulesSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleStoreEntrySubstateAllOf to be compared</param>
+        /// <param name="input">Instance of PackageFunctionAccessRulesSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleStoreEntrySubstateAllOf input)
+        public bool Equals(PackageFunctionAccessRulesSubstateAllOf input)
         {
             if (input == null)
             {
@@ -183,18 +179,15 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.NonFungibleId == input.NonFungibleId ||
-                    (this.NonFungibleId != null &&
-                    this.NonFungibleId.Equals(input.NonFungibleId))
+                    this.FunctionAuth == input.FunctionAuth ||
+                    this.FunctionAuth != null &&
+                    input.FunctionAuth != null &&
+                    this.FunctionAuth.SequenceEqual(input.FunctionAuth)
                 ) && 
                 (
-                    this.NonFungibleData == input.NonFungibleData ||
-                    (this.NonFungibleData != null &&
-                    this.NonFungibleData.Equals(input.NonFungibleData))
-                ) && 
-                (
-                    this.IsDeleted == input.IsDeleted ||
-                    this.IsDeleted.Equals(input.IsDeleted)
+                    this.DefaultAuth == input.DefaultAuth ||
+                    (this.DefaultAuth != null &&
+                    this.DefaultAuth.Equals(input.DefaultAuth))
                 );
         }
 
@@ -207,15 +200,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.NonFungibleId != null)
+                if (this.FunctionAuth != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FunctionAuth.GetHashCode();
                 }
-                if (this.NonFungibleData != null)
+                if (this.DefaultAuth != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleData.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DefaultAuth.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
                 return hashCode;
             }
         }

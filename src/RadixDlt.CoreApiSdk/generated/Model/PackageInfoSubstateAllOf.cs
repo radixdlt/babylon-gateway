@@ -103,17 +103,17 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageInfoSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="blueprints">A map from the blueprint name to BlueprintData (required).</param>
+        /// <param name="packageSchema">packageSchema (required).</param>
         /// <param name="dependentResources">dependentResources (required).</param>
         /// <param name="dependentComponents">dependentComponents (required).</param>
-        public PackageInfoSubstateAllOf(Dictionary<string, BlueprintData> blueprints = default(Dictionary<string, BlueprintData>), List<string> dependentResources = default(List<string>), List<string> dependentComponents = default(List<string>))
+        public PackageInfoSubstateAllOf(PackageSchema packageSchema = default(PackageSchema), List<string> dependentResources = default(List<string>), List<string> dependentComponents = default(List<string>))
         {
-            // to ensure "blueprints" is required (not null)
-            if (blueprints == null)
+            // to ensure "packageSchema" is required (not null)
+            if (packageSchema == null)
             {
-                throw new ArgumentNullException("blueprints is a required property for PackageInfoSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("packageSchema is a required property for PackageInfoSubstateAllOf and cannot be null");
             }
-            this.Blueprints = blueprints;
+            this.PackageSchema = packageSchema;
             // to ensure "dependentResources" is required (not null)
             if (dependentResources == null)
             {
@@ -129,11 +129,10 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// A map from the blueprint name to BlueprintData
+        /// Gets or Sets PackageSchema
         /// </summary>
-        /// <value>A map from the blueprint name to BlueprintData</value>
-        [DataMember(Name = "blueprints", IsRequired = true, EmitDefaultValue = true)]
-        public Dictionary<string, BlueprintData> Blueprints { get; set; }
+        [DataMember(Name = "package_schema", IsRequired = true, EmitDefaultValue = true)]
+        public PackageSchema PackageSchema { get; set; }
 
         /// <summary>
         /// Gets or Sets DependentResources
@@ -155,7 +154,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class PackageInfoSubstateAllOf {\n");
-            sb.Append("  Blueprints: ").Append(Blueprints).Append("\n");
+            sb.Append("  PackageSchema: ").Append(PackageSchema).Append("\n");
             sb.Append("  DependentResources: ").Append(DependentResources).Append("\n");
             sb.Append("  DependentComponents: ").Append(DependentComponents).Append("\n");
             sb.Append("}\n");
@@ -194,10 +193,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Blueprints == input.Blueprints ||
-                    this.Blueprints != null &&
-                    input.Blueprints != null &&
-                    this.Blueprints.SequenceEqual(input.Blueprints)
+                    this.PackageSchema == input.PackageSchema ||
+                    (this.PackageSchema != null &&
+                    this.PackageSchema.Equals(input.PackageSchema))
                 ) && 
                 (
                     this.DependentResources == input.DependentResources ||
@@ -222,9 +220,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Blueprints != null)
+                if (this.PackageSchema != null)
                 {
-                    hashCode = (hashCode * 59) + this.Blueprints.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PackageSchema.GetHashCode();
                 }
                 if (this.DependentResources != null)
                 {

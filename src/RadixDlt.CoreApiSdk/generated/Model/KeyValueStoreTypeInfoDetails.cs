@@ -84,52 +84,115 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines ModuleType
+    /// KeyValueStoreTypeInfoDetails
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum ModuleType
+    [DataContract(Name = "KeyValueStoreTypeInfoDetails")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreTypeInfoDetails), "KeyValueStore")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectTypeInfoDetails), "Object")]
+    public partial class KeyValueStoreTypeInfoDetails : TypeInfoDetails, IEquatable<KeyValueStoreTypeInfoDetails>
     {
         /// <summary>
-        /// Enum Self for value: Self
+        /// Initializes a new instance of the <see cref="KeyValueStoreTypeInfoDetails" /> class.
         /// </summary>
-        [EnumMember(Value = "Self")]
-        Self = 1,
+        [JsonConstructorAttribute]
+        protected KeyValueStoreTypeInfoDetails() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KeyValueStoreTypeInfoDetails" /> class.
+        /// </summary>
+        /// <param name="keyValueStoreSchema">keyValueStoreSchema (required).</param>
+        /// <param name="type">type (required) (default to TypeInfoType.KeyValueStore).</param>
+        public KeyValueStoreTypeInfoDetails(KeyValueStoreSchema keyValueStoreSchema = default(KeyValueStoreSchema), TypeInfoType type = TypeInfoType.KeyValueStore) : base(type)
+        {
+            // to ensure "keyValueStoreSchema" is required (not null)
+            if (keyValueStoreSchema == null)
+            {
+                throw new ArgumentNullException("keyValueStoreSchema is a required property for KeyValueStoreTypeInfoDetails and cannot be null");
+            }
+            this.KeyValueStoreSchema = keyValueStoreSchema;
+        }
 
         /// <summary>
-        /// Enum TypeInfo for value: TypeInfo
+        /// Gets or Sets KeyValueStoreSchema
         /// </summary>
-        [EnumMember(Value = "TypeInfo")]
-        TypeInfo = 2,
+        [DataMember(Name = "key_value_store_schema", IsRequired = true, EmitDefaultValue = true)]
+        public KeyValueStoreSchema KeyValueStoreSchema { get; set; }
 
         /// <summary>
-        /// Enum Metadata for value: Metadata
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "Metadata")]
-        Metadata = 3,
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class KeyValueStoreTypeInfoDetails {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  KeyValueStoreSchema: ").Append(KeyValueStoreSchema).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
 
         /// <summary>
-        /// Enum AccessRules for value: AccessRules
+        /// Returns the JSON string presentation of the object
         /// </summary>
-        [EnumMember(Value = "AccessRules")]
-        AccessRules = 4,
+        /// <returns>JSON string presentation of the object</returns>
+        public override string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
 
         /// <summary>
-        /// Enum AccessRules1 for value: AccessRules1
+        /// Returns true if objects are equal
         /// </summary>
-        [EnumMember(Value = "AccessRules1")]
-        AccessRules1 = 5,
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as KeyValueStoreTypeInfoDetails);
+        }
 
         /// <summary>
-        /// Enum ComponentRoyalty for value: ComponentRoyalty
+        /// Returns true if KeyValueStoreTypeInfoDetails instances are equal
         /// </summary>
-        [EnumMember(Value = "ComponentRoyalty")]
-        ComponentRoyalty = 6
+        /// <param name="input">Instance of KeyValueStoreTypeInfoDetails to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(KeyValueStoreTypeInfoDetails input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return base.Equals(input) && 
+                (
+                    this.KeyValueStoreSchema == input.KeyValueStoreSchema ||
+                    (this.KeyValueStoreSchema != null &&
+                    this.KeyValueStoreSchema.Equals(input.KeyValueStoreSchema))
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = base.GetHashCode();
+                if (this.KeyValueStoreSchema != null)
+                {
+                    hashCode = (hashCode * 59) + this.KeyValueStoreSchema.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
 
     }
 

@@ -84,71 +84,50 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// PackageRoyaltyAccumulatorSubstate
+    /// FungibleResourceManagerSubstateAllOf
     /// </summary>
-    [DataContract(Name = "PackageRoyaltyAccumulatorSubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
-    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class PackageRoyaltyAccumulatorSubstate : Substate, IEquatable<PackageRoyaltyAccumulatorSubstate>
+    [DataContract(Name = "FungibleResourceManagerSubstate_allOf")]
+    public partial class FungibleResourceManagerSubstateAllOf : IEquatable<FungibleResourceManagerSubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PackageRoyaltyAccumulatorSubstate" /> class.
+        /// Initializes a new instance of the <see cref="FungibleResourceManagerSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected PackageRoyaltyAccumulatorSubstate() { }
+        protected FungibleResourceManagerSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="PackageRoyaltyAccumulatorSubstate" /> class.
+        /// Initializes a new instance of the <see cref="FungibleResourceManagerSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="vaultEntity">vaultEntity (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.PackageRoyaltyAccumulator).</param>
-        public PackageRoyaltyAccumulatorSubstate(EntityReference vaultEntity = default(EntityReference), SubstateType substateType = SubstateType.PackageRoyaltyAccumulator) : base(substateType)
+        /// <param name="divisibility">divisibility (required).</param>
+        /// <param name="totalSupply">The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        public FungibleResourceManagerSubstateAllOf(int divisibility = default(int), string totalSupply = default(string))
         {
-            // to ensure "vaultEntity" is required (not null)
-            if (vaultEntity == null)
+            this.Divisibility = divisibility;
+            // to ensure "totalSupply" is required (not null)
+            if (totalSupply == null)
             {
-                throw new ArgumentNullException("vaultEntity is a required property for PackageRoyaltyAccumulatorSubstate and cannot be null");
+                throw new ArgumentNullException("totalSupply is a required property for FungibleResourceManagerSubstateAllOf and cannot be null");
             }
-            this.VaultEntity = vaultEntity;
+            this.TotalSupply = totalSupply;
         }
 
         /// <summary>
-        /// Gets or Sets VaultEntity
+        /// Gets or Sets Divisibility
         /// </summary>
-        [DataMember(Name = "vault_entity", IsRequired = true, EmitDefaultValue = true)]
-        public EntityReference VaultEntity { get; set; }
+        [DataMember(Name = "divisibility", IsRequired = true, EmitDefaultValue = true)]
+        public int Divisibility { get; set; }
+
+        /// <summary>
+        /// The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// </summary>
+        /// <value>The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
+        public string TotalSupply { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,9 +136,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PackageRoyaltyAccumulatorSubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  VaultEntity: ").Append(VaultEntity).Append("\n");
+            sb.Append("class FungibleResourceManagerSubstateAllOf {\n");
+            sb.Append("  Divisibility: ").Append(Divisibility).Append("\n");
+            sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -168,7 +147,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -180,25 +159,29 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PackageRoyaltyAccumulatorSubstate);
+            return this.Equals(input as FungibleResourceManagerSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if PackageRoyaltyAccumulatorSubstate instances are equal
+        /// Returns true if FungibleResourceManagerSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of PackageRoyaltyAccumulatorSubstate to be compared</param>
+        /// <param name="input">Instance of FungibleResourceManagerSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PackageRoyaltyAccumulatorSubstate input)
+        public bool Equals(FungibleResourceManagerSubstateAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.VaultEntity == input.VaultEntity ||
-                    (this.VaultEntity != null &&
-                    this.VaultEntity.Equals(input.VaultEntity))
+                    this.Divisibility == input.Divisibility ||
+                    this.Divisibility.Equals(input.Divisibility)
+                ) && 
+                (
+                    this.TotalSupply == input.TotalSupply ||
+                    (this.TotalSupply != null &&
+                    this.TotalSupply.Equals(input.TotalSupply))
                 );
         }
 
@@ -210,10 +193,11 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.VaultEntity != null)
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Divisibility.GetHashCode();
+                if (this.TotalSupply != null)
                 {
-                    hashCode = (hashCode * 59) + this.VaultEntity.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
                 }
                 return hashCode;
             }

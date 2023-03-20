@@ -98,22 +98,21 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
     [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
+    [JsonSubtypes.KnownSubType(typeof(ClockSubstate), "Clock")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
     [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
     [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerSubstate), "FungibleResourceManager")]
     [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
     [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerSubstate), "NonFungibleResourceManager")]
     [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
     [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
     [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
+    [JsonSubtypes.KnownSubType(typeof(PackageFunctionAccessRulesSubstate), "PackageFunctionAccessRules")]
     [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltySubstate), "PackageRoyalty")]
     [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
@@ -132,45 +131,23 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeInfoSubstate" /> class.
         /// </summary>
-        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
-        /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="global">global (required).</param>
+        /// <param name="details">details (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.TypeInfo).</param>
-        public TypeInfoSubstate(string packageAddress = default(string), string blueprintName = default(string), bool global = default(bool), SubstateType substateType = SubstateType.TypeInfo) : base(substateType)
+        public TypeInfoSubstate(TypeInfoDetails details = default(TypeInfoDetails), SubstateType substateType = SubstateType.TypeInfo) : base(substateType)
         {
-            // to ensure "packageAddress" is required (not null)
-            if (packageAddress == null)
+            // to ensure "details" is required (not null)
+            if (details == null)
             {
-                throw new ArgumentNullException("packageAddress is a required property for TypeInfoSubstate and cannot be null");
+                throw new ArgumentNullException("details is a required property for TypeInfoSubstate and cannot be null");
             }
-            this.PackageAddress = packageAddress;
-            // to ensure "blueprintName" is required (not null)
-            if (blueprintName == null)
-            {
-                throw new ArgumentNullException("blueprintName is a required property for TypeInfoSubstate and cannot be null");
-            }
-            this.BlueprintName = blueprintName;
-            this.Global = global;
+            this.Details = details;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the package address
+        /// Gets or Sets Details
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the package address</value>
-        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
-        public string PackageAddress { get; set; }
-
-        /// <summary>
-        /// Gets or Sets BlueprintName
-        /// </summary>
-        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
-        public string BlueprintName { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Global
-        /// </summary>
-        [DataMember(Name = "global", IsRequired = true, EmitDefaultValue = true)]
-        public bool Global { get; set; }
+        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
+        public TypeInfoDetails Details { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -181,9 +158,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TypeInfoSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
-            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
-            sb.Append("  Global: ").Append(Global).Append("\n");
+            sb.Append("  Details: ").Append(Details).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -220,18 +195,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.PackageAddress == input.PackageAddress ||
-                    (this.PackageAddress != null &&
-                    this.PackageAddress.Equals(input.PackageAddress))
-                ) && base.Equals(input) && 
-                (
-                    this.BlueprintName == input.BlueprintName ||
-                    (this.BlueprintName != null &&
-                    this.BlueprintName.Equals(input.BlueprintName))
-                ) && base.Equals(input) && 
-                (
-                    this.Global == input.Global ||
-                    this.Global.Equals(input.Global)
+                    this.Details == input.Details ||
+                    (this.Details != null &&
+                    this.Details.Equals(input.Details))
                 );
         }
 
@@ -244,15 +210,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.PackageAddress != null)
+                if (this.Details != null)
                 {
-                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
                 }
-                if (this.BlueprintName != null)
-                {
-                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.Global.GetHashCode();
                 return hashCode;
             }
         }

@@ -156,16 +156,10 @@ namespace RadixDlt.CoreApiSdk.Model
         KeyValueStore = 10,
 
         /// <summary>
-        /// Enum NonFungibleStore for value: NonFungibleStore
-        /// </summary>
-        [EnumMember(Value = "NonFungibleStore")]
-        NonFungibleStore = 11,
-
-        /// <summary>
         /// Enum Vault for value: Vault
         /// </summary>
         [EnumMember(Value = "Vault")]
-        Vault = 12
+        Vault = 11
 
     }
 

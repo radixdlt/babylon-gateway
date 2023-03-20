@@ -237,6 +237,9 @@ internal class PackageEntity : ComponentEntity
 {
     [Column("code")]
     public byte[] Code { get; set; }
+
+    [Column("code_type")]
+    public string CodeType { get; set; }
 }
 
 // This is transient model, not stored in database
@@ -250,10 +253,8 @@ internal class VirtualAccountComponentEntity : AccountComponentEntity
 
 internal class KeyValueStoreEntity : Entity
 {
-}
-
-internal class NonFungibleStoreEntity : Entity
-{
+    [Column("store_of_non_fungible_resource_manager_entity_id")]
+    public long? StoreOfNonFungibleResourceManagerEntityId { get; set; }
 }
 
 internal class AccessControllerEntity : Entity

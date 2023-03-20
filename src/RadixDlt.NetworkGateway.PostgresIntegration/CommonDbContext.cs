@@ -224,7 +224,6 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<PackageEntity>(EntityType.Package)
             .HasValue<KeyValueStoreEntity>(EntityType.KeyValueStore)
             .HasValue<VaultEntity>(EntityType.Vault)
-            .HasValue<NonFungibleStoreEntity>(EntityType.NonFungibleStore)
             .HasValue<ClockEntity>(EntityType.Clock)
             .HasValue<ValidatorEntity>(EntityType.Validator)
             .HasValue<AccessControllerEntity>(EntityType.AccessController)

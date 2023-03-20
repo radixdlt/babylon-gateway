@@ -97,172 +97,172 @@ namespace RadixDlt.CoreApiSdk.Model
     public enum SubstateKeyType
     {
         /// <summary>
+        /// Enum TypeInfo for value: TypeInfo
+        /// </summary>
+        [EnumMember(Value = "TypeInfo")]
+        TypeInfo = 1,
+
+        /// <summary>
         /// Enum MetadataEntry for value: MetadataEntry
         /// </summary>
         [EnumMember(Value = "MetadataEntry")]
-        MetadataEntry = 1,
+        MetadataEntry = 2,
 
         /// <summary>
         /// Enum AccessRules for value: AccessRules
         /// </summary>
         [EnumMember(Value = "AccessRules")]
-        AccessRules = 2,
-
-        /// <summary>
-        /// Enum FunctionAccessRules for value: FunctionAccessRules
-        /// </summary>
-        [EnumMember(Value = "FunctionAccessRules")]
-        FunctionAccessRules = 3,
-
-        /// <summary>
-        /// Enum TypeInfo for value: TypeInfo
-        /// </summary>
-        [EnumMember(Value = "TypeInfo")]
-        TypeInfo = 4,
+        AccessRules = 3,
 
         /// <summary>
         /// Enum ComponentState for value: ComponentState
         /// </summary>
         [EnumMember(Value = "ComponentState")]
-        ComponentState = 5,
+        ComponentState = 4,
 
         /// <summary>
         /// Enum ComponentRoyaltyConfig for value: ComponentRoyaltyConfig
         /// </summary>
         [EnumMember(Value = "ComponentRoyaltyConfig")]
-        ComponentRoyaltyConfig = 6,
+        ComponentRoyaltyConfig = 5,
 
         /// <summary>
         /// Enum ComponentRoyaltyAccumulator for value: ComponentRoyaltyAccumulator
         /// </summary>
         [EnumMember(Value = "ComponentRoyaltyAccumulator")]
-        ComponentRoyaltyAccumulator = 7,
+        ComponentRoyaltyAccumulator = 6,
 
         /// <summary>
         /// Enum PackageInfo for value: PackageInfo
         /// </summary>
         [EnumMember(Value = "PackageInfo")]
-        PackageInfo = 8,
+        PackageInfo = 7,
 
         /// <summary>
         /// Enum PackageCode for value: PackageCode
         /// </summary>
         [EnumMember(Value = "PackageCode")]
-        PackageCode = 9,
+        PackageCode = 8,
 
         /// <summary>
         /// Enum PackageCodeType for value: PackageCodeType
         /// </summary>
         [EnumMember(Value = "PackageCodeType")]
-        PackageCodeType = 10,
+        PackageCodeType = 9,
 
         /// <summary>
-        /// Enum PackageRoyaltyConfig for value: PackageRoyaltyConfig
+        /// Enum PackageRoyalty for value: PackageRoyalty
         /// </summary>
-        [EnumMember(Value = "PackageRoyaltyConfig")]
-        PackageRoyaltyConfig = 11,
+        [EnumMember(Value = "PackageRoyalty")]
+        PackageRoyalty = 10,
 
         /// <summary>
-        /// Enum PackageRoyaltyAccumulator for value: PackageRoyaltyAccumulator
+        /// Enum PackageFunctionAccessRules for value: PackageFunctionAccessRules
         /// </summary>
-        [EnumMember(Value = "PackageRoyaltyAccumulator")]
-        PackageRoyaltyAccumulator = 12,
-
-        /// <summary>
-        /// Enum ResourceManager for value: ResourceManager
-        /// </summary>
-        [EnumMember(Value = "ResourceManager")]
-        ResourceManager = 13,
-
-        /// <summary>
-        /// Enum EpochManager for value: EpochManager
-        /// </summary>
-        [EnumMember(Value = "EpochManager")]
-        EpochManager = 14,
-
-        /// <summary>
-        /// Enum CurrentValidatorSet for value: CurrentValidatorSet
-        /// </summary>
-        [EnumMember(Value = "CurrentValidatorSet")]
-        CurrentValidatorSet = 15,
-
-        /// <summary>
-        /// Enum PreparingValidatorSet for value: PreparingValidatorSet
-        /// </summary>
-        [EnumMember(Value = "PreparingValidatorSet")]
-        PreparingValidatorSet = 16,
-
-        /// <summary>
-        /// Enum Validator for value: Validator
-        /// </summary>
-        [EnumMember(Value = "Validator")]
-        Validator = 17,
-
-        /// <summary>
-        /// Enum ClockCurrentMinute for value: ClockCurrentMinute
-        /// </summary>
-        [EnumMember(Value = "ClockCurrentMinute")]
-        ClockCurrentMinute = 18,
-
-        /// <summary>
-        /// Enum KeyValueStoreEntry for value: KeyValueStoreEntry
-        /// </summary>
-        [EnumMember(Value = "KeyValueStoreEntry")]
-        KeyValueStoreEntry = 19,
-
-        /// <summary>
-        /// Enum NonFungibleStoreEntry for value: NonFungibleStoreEntry
-        /// </summary>
-        [EnumMember(Value = "NonFungibleStoreEntry")]
-        NonFungibleStoreEntry = 20,
-
-        /// <summary>
-        /// Enum VaultInfo for value: VaultInfo
-        /// </summary>
-        [EnumMember(Value = "VaultInfo")]
-        VaultInfo = 21,
-
-        /// <summary>
-        /// Enum VaultFungible for value: VaultFungible
-        /// </summary>
-        [EnumMember(Value = "VaultFungible")]
-        VaultFungible = 22,
-
-        /// <summary>
-        /// Enum VaultNonFungible for value: VaultNonFungible
-        /// </summary>
-        [EnumMember(Value = "VaultNonFungible")]
-        VaultNonFungible = 23,
-
-        /// <summary>
-        /// Enum VaultLockedFungible for value: VaultLockedFungible
-        /// </summary>
-        [EnumMember(Value = "VaultLockedFungible")]
-        VaultLockedFungible = 24,
-
-        /// <summary>
-        /// Enum VaultLockedNonFungible for value: VaultLockedNonFungible
-        /// </summary>
-        [EnumMember(Value = "VaultLockedNonFungible")]
-        VaultLockedNonFungible = 25,
-
-        /// <summary>
-        /// Enum AccessController for value: AccessController
-        /// </summary>
-        [EnumMember(Value = "AccessController")]
-        AccessController = 26,
-
-        /// <summary>
-        /// Enum Account for value: Account
-        /// </summary>
-        [EnumMember(Value = "Account")]
-        Account = 27,
+        [EnumMember(Value = "PackageFunctionAccessRules")]
+        PackageFunctionAccessRules = 11,
 
         /// <summary>
         /// Enum PackageEventSchema for value: PackageEventSchema
         /// </summary>
         [EnumMember(Value = "PackageEventSchema")]
-        PackageEventSchema = 28
+        PackageEventSchema = 12,
+
+        /// <summary>
+        /// Enum EitherResourceManager for value: EitherResourceManager
+        /// </summary>
+        [EnumMember(Value = "EitherResourceManager")]
+        EitherResourceManager = 13,
+
+        /// <summary>
+        /// Enum FungibleResourceManager for value: FungibleResourceManager
+        /// </summary>
+        [EnumMember(Value = "FungibleResourceManager")]
+        FungibleResourceManager = 14,
+
+        /// <summary>
+        /// Enum NonFungibleResourceManager for value: NonFungibleResourceManager
+        /// </summary>
+        [EnumMember(Value = "NonFungibleResourceManager")]
+        NonFungibleResourceManager = 15,
+
+        /// <summary>
+        /// Enum EpochManager for value: EpochManager
+        /// </summary>
+        [EnumMember(Value = "EpochManager")]
+        EpochManager = 16,
+
+        /// <summary>
+        /// Enum CurrentValidatorSet for value: CurrentValidatorSet
+        /// </summary>
+        [EnumMember(Value = "CurrentValidatorSet")]
+        CurrentValidatorSet = 17,
+
+        /// <summary>
+        /// Enum PreparingValidatorSet for value: PreparingValidatorSet
+        /// </summary>
+        [EnumMember(Value = "PreparingValidatorSet")]
+        PreparingValidatorSet = 18,
+
+        /// <summary>
+        /// Enum Validator for value: Validator
+        /// </summary>
+        [EnumMember(Value = "Validator")]
+        Validator = 19,
+
+        /// <summary>
+        /// Enum Clock for value: Clock
+        /// </summary>
+        [EnumMember(Value = "Clock")]
+        Clock = 20,
+
+        /// <summary>
+        /// Enum KeyValueStoreEntry for value: KeyValueStoreEntry
+        /// </summary>
+        [EnumMember(Value = "KeyValueStoreEntry")]
+        KeyValueStoreEntry = 21,
+
+        /// <summary>
+        /// Enum VaultInfo for value: VaultInfo
+        /// </summary>
+        [EnumMember(Value = "VaultInfo")]
+        VaultInfo = 22,
+
+        /// <summary>
+        /// Enum VaultFungible for value: VaultFungible
+        /// </summary>
+        [EnumMember(Value = "VaultFungible")]
+        VaultFungible = 23,
+
+        /// <summary>
+        /// Enum VaultNonFungible for value: VaultNonFungible
+        /// </summary>
+        [EnumMember(Value = "VaultNonFungible")]
+        VaultNonFungible = 24,
+
+        /// <summary>
+        /// Enum VaultLockedFungible for value: VaultLockedFungible
+        /// </summary>
+        [EnumMember(Value = "VaultLockedFungible")]
+        VaultLockedFungible = 25,
+
+        /// <summary>
+        /// Enum VaultLockedNonFungible for value: VaultLockedNonFungible
+        /// </summary>
+        [EnumMember(Value = "VaultLockedNonFungible")]
+        VaultLockedNonFungible = 26,
+
+        /// <summary>
+        /// Enum AccessController for value: AccessController
+        /// </summary>
+        [EnumMember(Value = "AccessController")]
+        AccessController = 27,
+
+        /// <summary>
+        /// Enum Account for value: Account
+        /// </summary>
+        [EnumMember(Value = "Account")]
+        Account = 28
 
     }
 

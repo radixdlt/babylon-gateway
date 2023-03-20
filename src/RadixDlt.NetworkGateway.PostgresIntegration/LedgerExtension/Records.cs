@@ -74,7 +74,7 @@ internal record FungibleVaultChange(ReferencedEntity ReferencedVault, Referenced
 
 internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, List<string> NonFungibleIds, long StateVersion);
 
-internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
+internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, CoreModel.SborData Data, long StateVersion);
 
 internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, string? Value, bool IsDeleted, long StateVersion); // TODO use ScryptoSbor.String/ValueButes Key, ScryptoSbor.Enum/ValueBytes? Value
 

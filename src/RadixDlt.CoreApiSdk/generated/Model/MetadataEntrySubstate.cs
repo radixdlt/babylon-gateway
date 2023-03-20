@@ -98,22 +98,21 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
     [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
+    [JsonSubtypes.KnownSubType(typeof(ClockSubstate), "Clock")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
     [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
     [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerSubstate), "FungibleResourceManager")]
     [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
     [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerSubstate), "NonFungibleResourceManager")]
     [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
     [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
     [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
+    [JsonSubtypes.KnownSubType(typeof(PackageFunctionAccessRulesSubstate), "PackageFunctionAccessRules")]
     [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltySubstate), "PackageRoyalty")]
     [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
@@ -133,9 +132,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="MetadataEntrySubstate" /> class.
         /// </summary>
         /// <param name="keyHex">The hex-encoded bytes of its key (required).</param>
+        /// <param name="isDeleted">isDeleted (required).</param>
         /// <param name="dataStruct">dataStruct.</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.MetadataEntry).</param>
-        public MetadataEntrySubstate(string keyHex = default(string), DataStruct dataStruct = default(DataStruct), SubstateType substateType = SubstateType.MetadataEntry) : base(substateType)
+        public MetadataEntrySubstate(string keyHex = default(string), bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct), SubstateType substateType = SubstateType.MetadataEntry) : base(substateType)
         {
             // to ensure "keyHex" is required (not null)
             if (keyHex == null)
@@ -143,6 +143,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("keyHex is a required property for MetadataEntrySubstate and cannot be null");
             }
             this.KeyHex = keyHex;
+            this.IsDeleted = isDeleted;
             this.DataStruct = dataStruct;
         }
 
@@ -152,6 +153,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <value>The hex-encoded bytes of its key</value>
         [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
         public string KeyHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IsDeleted
+        /// </summary>
+        [DataMember(Name = "is_deleted", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsDeleted { get; set; }
 
         /// <summary>
         /// Gets or Sets DataStruct
@@ -169,6 +176,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class MetadataEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
+            sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
             sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -211,6 +219,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.KeyHex.Equals(input.KeyHex))
                 ) && base.Equals(input) && 
                 (
+                    this.IsDeleted == input.IsDeleted ||
+                    this.IsDeleted.Equals(input.IsDeleted)
+                ) && base.Equals(input) && 
+                (
                     this.DataStruct == input.DataStruct ||
                     (this.DataStruct != null &&
                     this.DataStruct.Equals(input.DataStruct))
@@ -230,6 +242,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
                 if (this.DataStruct != null)
                 {
                     hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();

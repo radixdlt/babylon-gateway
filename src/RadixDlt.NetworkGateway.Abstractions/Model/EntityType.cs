@@ -74,7 +74,6 @@ public enum EntityType
     Package,
     KeyValueStore,
     Vault,
-    NonFungibleStore,
     Clock,
     Validator,
     AccessController,

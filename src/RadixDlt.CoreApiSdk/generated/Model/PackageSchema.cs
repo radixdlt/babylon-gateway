@@ -84,87 +84,42 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleStoreEntrySubstate
+    /// PackageSchema
     /// </summary>
-    [DataContract(Name = "NonFungibleStoreEntrySubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
-    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class NonFungibleStoreEntrySubstate : Substate, IEquatable<NonFungibleStoreEntrySubstate>
+    [DataContract(Name = "PackageSchema")]
+    public partial class PackageSchema : IEquatable<PackageSchema>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleStoreEntrySubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageSchema" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleStoreEntrySubstate() { }
+        protected PackageSchema() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleStoreEntrySubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageSchema" /> class.
         /// </summary>
-        /// <param name="nonFungibleId">nonFungibleId (required).</param>
-        /// <param name="nonFungibleData">nonFungibleData.</param>
-        /// <param name="isDeleted">isDeleted (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.NonFungibleStoreEntry).</param>
-        public NonFungibleStoreEntrySubstate(NonFungibleId nonFungibleId = default(NonFungibleId), NonFungibleData nonFungibleData = default(NonFungibleData), bool isDeleted = default(bool), SubstateType substateType = SubstateType.NonFungibleStoreEntry) : base(substateType)
+        /// <param name="blueprintSchemas">A map from the blueprint name to BlueprintSchema (required).</param>
+        public PackageSchema(Dictionary<string, BlueprintSchema> blueprintSchemas = default(Dictionary<string, BlueprintSchema>))
         {
-            // to ensure "nonFungibleId" is required (not null)
-            if (nonFungibleId == null)
+            // to ensure "blueprintSchemas" is required (not null)
+            if (blueprintSchemas == null)
             {
-                throw new ArgumentNullException("nonFungibleId is a required property for NonFungibleStoreEntrySubstate and cannot be null");
+                throw new ArgumentNullException("blueprintSchemas is a required property for PackageSchema and cannot be null");
             }
-            this.NonFungibleId = nonFungibleId;
-            this.IsDeleted = isDeleted;
-            this.NonFungibleData = nonFungibleData;
+            this.BlueprintSchemas = blueprintSchemas;
         }
 
         /// <summary>
-        /// Gets or Sets NonFungibleId
+        /// A map from the blueprint name to BlueprintSchema
         /// </summary>
-        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleId NonFungibleId { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NonFungibleData
-        /// </summary>
-        [DataMember(Name = "non_fungible_data", EmitDefaultValue = true)]
-        public NonFungibleData NonFungibleData { get; set; }
-
-        /// <summary>
-        /// Gets or Sets IsDeleted
-        /// </summary>
-        [DataMember(Name = "is_deleted", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsDeleted { get; set; }
+        /// <value>A map from the blueprint name to BlueprintSchema</value>
+        [DataMember(Name = "blueprint_schemas", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, BlueprintSchema> BlueprintSchemas { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -173,11 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleStoreEntrySubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
-            sb.Append("  NonFungibleData: ").Append(NonFungibleData).Append("\n");
-            sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
+            sb.Append("class PackageSchema {\n");
+            sb.Append("  BlueprintSchemas: ").Append(BlueprintSchemas).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -186,7 +138,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -198,34 +150,26 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleStoreEntrySubstate);
+            return this.Equals(input as PackageSchema);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleStoreEntrySubstate instances are equal
+        /// Returns true if PackageSchema instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleStoreEntrySubstate to be compared</param>
+        /// <param name="input">Instance of PackageSchema to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleStoreEntrySubstate input)
+        public bool Equals(PackageSchema input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.NonFungibleId == input.NonFungibleId ||
-                    (this.NonFungibleId != null &&
-                    this.NonFungibleId.Equals(input.NonFungibleId))
-                ) && base.Equals(input) && 
-                (
-                    this.NonFungibleData == input.NonFungibleData ||
-                    (this.NonFungibleData != null &&
-                    this.NonFungibleData.Equals(input.NonFungibleData))
-                ) && base.Equals(input) && 
-                (
-                    this.IsDeleted == input.IsDeleted ||
-                    this.IsDeleted.Equals(input.IsDeleted)
+                    this.BlueprintSchemas == input.BlueprintSchemas ||
+                    this.BlueprintSchemas != null &&
+                    input.BlueprintSchemas != null &&
+                    this.BlueprintSchemas.SequenceEqual(input.BlueprintSchemas)
                 );
         }
 
@@ -237,16 +181,11 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.NonFungibleId != null)
+                int hashCode = 41;
+                if (this.BlueprintSchemas != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.BlueprintSchemas.GetHashCode();
                 }
-                if (this.NonFungibleData != null)
-                {
-                    hashCode = (hashCode * 59) + this.NonFungibleData.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
                 return hashCode;
             }
         }

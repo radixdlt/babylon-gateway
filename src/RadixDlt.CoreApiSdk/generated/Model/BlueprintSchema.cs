@@ -90,68 +90,63 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ResourceManagerSubstateAllOf
+    /// BlueprintSchema
     /// </summary>
-    [DataContract(Name = "ResourceManagerSubstate_allOf")]
-    public partial class ResourceManagerSubstateAllOf : IEquatable<ResourceManagerSubstateAllOf>
+    [DataContract(Name = "BlueprintSchema")]
+    public partial class BlueprintSchema : IEquatable<BlueprintSchema>
     {
-
         /// <summary>
-        /// Gets or Sets ResourceType
-        /// </summary>
-        [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
-        public ResourceType ResourceType { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NonFungibleIdType
-        /// </summary>
-        [DataMember(Name = "non_fungible_id_type", EmitDefaultValue = true)]
-        public NonFungibleIdType? NonFungibleIdType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceManagerSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="BlueprintSchema" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ResourceManagerSubstateAllOf() { }
+        protected BlueprintSchema() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceManagerSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="BlueprintSchema" /> class.
         /// </summary>
-        /// <param name="resourceType">resourceType (required).</param>
-        /// <param name="fungibleDivisibility">fungibleDivisibility.</param>
-        /// <param name="nonFungibleIdType">nonFungibleIdType.</param>
-        /// <param name="totalSupply">The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
-        /// <param name="ownedNonFungibleStore">ownedNonFungibleStore.</param>
-        public ResourceManagerSubstateAllOf(ResourceType resourceType = default(ResourceType), int fungibleDivisibility = default(int), NonFungibleIdType? nonFungibleIdType = default(NonFungibleIdType?), string totalSupply = default(string), EntityReference ownedNonFungibleStore = default(EntityReference))
+        /// <param name="schema">schema (required).</param>
+        /// <param name="substates">The type index of the substates under the SELF module - in the context of the blueprint&#39;s SBOR schema.  (required).</param>
+        /// <param name="functionDefinitions">A map from the function name to the FunctionDefinition (required).</param>
+        public BlueprintSchema(SborData schema = default(SborData), List<LocalTypeIndex> substates = default(List<LocalTypeIndex>), Dictionary<string, FunctionDefinition> functionDefinitions = default(Dictionary<string, FunctionDefinition>))
         {
-            this.ResourceType = resourceType;
-            // to ensure "totalSupply" is required (not null)
-            if (totalSupply == null)
+            // to ensure "schema" is required (not null)
+            if (schema == null)
             {
-                throw new ArgumentNullException("totalSupply is a required property for ResourceManagerSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("schema is a required property for BlueprintSchema and cannot be null");
             }
-            this.TotalSupply = totalSupply;
-            this.FungibleDivisibility = fungibleDivisibility;
-            this.NonFungibleIdType = nonFungibleIdType;
-            this.OwnedNonFungibleStore = ownedNonFungibleStore;
+            this.Schema = schema;
+            // to ensure "substates" is required (not null)
+            if (substates == null)
+            {
+                throw new ArgumentNullException("substates is a required property for BlueprintSchema and cannot be null");
+            }
+            this.Substates = substates;
+            // to ensure "functionDefinitions" is required (not null)
+            if (functionDefinitions == null)
+            {
+                throw new ArgumentNullException("functionDefinitions is a required property for BlueprintSchema and cannot be null");
+            }
+            this.FunctionDefinitions = functionDefinitions;
         }
 
         /// <summary>
-        /// Gets or Sets FungibleDivisibility
+        /// Gets or Sets Schema
         /// </summary>
-        [DataMember(Name = "fungible_divisibility", EmitDefaultValue = true)]
-        public int FungibleDivisibility { get; set; }
+        [DataMember(Name = "schema", IsRequired = true, EmitDefaultValue = true)]
+        public SborData Schema { get; set; }
 
         /// <summary>
-        /// The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// The type index of the substates under the SELF module - in the context of the blueprint&#39;s SBOR schema. 
         /// </summary>
-        /// <value>The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
-        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
-        public string TotalSupply { get; set; }
+        /// <value>The type index of the substates under the SELF module - in the context of the blueprint&#39;s SBOR schema. </value>
+        [DataMember(Name = "substates", IsRequired = true, EmitDefaultValue = true)]
+        public List<LocalTypeIndex> Substates { get; set; }
 
         /// <summary>
-        /// Gets or Sets OwnedNonFungibleStore
+        /// A map from the function name to the FunctionDefinition
         /// </summary>
-        [DataMember(Name = "owned_non_fungible_store", EmitDefaultValue = true)]
-        public EntityReference OwnedNonFungibleStore { get; set; }
+        /// <value>A map from the function name to the FunctionDefinition</value>
+        [DataMember(Name = "function_definitions", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, FunctionDefinition> FunctionDefinitions { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -160,12 +155,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceManagerSubstateAllOf {\n");
-            sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
-            sb.Append("  FungibleDivisibility: ").Append(FungibleDivisibility).Append("\n");
-            sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
-            sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
-            sb.Append("  OwnedNonFungibleStore: ").Append(OwnedNonFungibleStore).Append("\n");
+            sb.Append("class BlueprintSchema {\n");
+            sb.Append("  Schema: ").Append(Schema).Append("\n");
+            sb.Append("  Substates: ").Append(Substates).Append("\n");
+            sb.Append("  FunctionDefinitions: ").Append(FunctionDefinitions).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -186,15 +179,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResourceManagerSubstateAllOf);
+            return this.Equals(input as BlueprintSchema);
         }
 
         /// <summary>
-        /// Returns true if ResourceManagerSubstateAllOf instances are equal
+        /// Returns true if BlueprintSchema instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResourceManagerSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of BlueprintSchema to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResourceManagerSubstateAllOf input)
+        public bool Equals(BlueprintSchema input)
         {
             if (input == null)
             {
@@ -202,26 +195,21 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ResourceType == input.ResourceType ||
-                    this.ResourceType.Equals(input.ResourceType)
+                    this.Schema == input.Schema ||
+                    (this.Schema != null &&
+                    this.Schema.Equals(input.Schema))
                 ) && 
                 (
-                    this.FungibleDivisibility == input.FungibleDivisibility ||
-                    this.FungibleDivisibility.Equals(input.FungibleDivisibility)
+                    this.Substates == input.Substates ||
+                    this.Substates != null &&
+                    input.Substates != null &&
+                    this.Substates.SequenceEqual(input.Substates)
                 ) && 
                 (
-                    this.NonFungibleIdType == input.NonFungibleIdType ||
-                    this.NonFungibleIdType.Equals(input.NonFungibleIdType)
-                ) && 
-                (
-                    this.TotalSupply == input.TotalSupply ||
-                    (this.TotalSupply != null &&
-                    this.TotalSupply.Equals(input.TotalSupply))
-                ) && 
-                (
-                    this.OwnedNonFungibleStore == input.OwnedNonFungibleStore ||
-                    (this.OwnedNonFungibleStore != null &&
-                    this.OwnedNonFungibleStore.Equals(input.OwnedNonFungibleStore))
+                    this.FunctionDefinitions == input.FunctionDefinitions ||
+                    this.FunctionDefinitions != null &&
+                    input.FunctionDefinitions != null &&
+                    this.FunctionDefinitions.SequenceEqual(input.FunctionDefinitions)
                 );
         }
 
@@ -234,16 +222,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
-                hashCode = (hashCode * 59) + this.FungibleDivisibility.GetHashCode();
-                hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
-                if (this.TotalSupply != null)
+                if (this.Schema != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Schema.GetHashCode();
                 }
-                if (this.OwnedNonFungibleStore != null)
+                if (this.Substates != null)
                 {
-                    hashCode = (hashCode * 59) + this.OwnedNonFungibleStore.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Substates.GetHashCode();
+                }
+                if (this.FunctionDefinitions != null)
+                {
+                    hashCode = (hashCode * 59) + this.FunctionDefinitions.GetHashCode();
                 }
                 return hashCode;
             }

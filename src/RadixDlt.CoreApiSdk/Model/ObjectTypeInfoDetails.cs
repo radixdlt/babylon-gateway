@@ -62,16 +62,14 @@
  * permissions under this License.
  */
 
-using System;
+using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class NonFungibleData
+public partial class ObjectTypeInfoDetails : IGlobalAddressPointer
 {
-    private byte[] _immutableDataRawHex;
-    private byte[] _mutableDataRawHex;
-
-    public byte[] GetImmutableDataRawBytes() => _immutableDataRawHex ??= Convert.FromHexString(ImmutableDataRawHex);
-
-    public byte[] GetMutableDataRawBytes() => _mutableDataRawHex ??= Convert.FromHexString(MutableDataRawHex);
+    public IEnumerable<string> GetGlobalAddresses()
+    {
+        yield return PackageAddress;
+    }
 }

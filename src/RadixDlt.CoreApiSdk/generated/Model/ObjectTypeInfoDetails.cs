@@ -91,58 +91,61 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ComponentRoyaltyAccumulatorSubstate
+    /// ObjectTypeInfoDetails
     /// </summary>
-    [DataContract(Name = "ComponentRoyaltyAccumulatorSubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockSubstate), "Clock")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerSubstate), "FungibleResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerSubstate), "NonFungibleResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFunctionAccessRulesSubstate), "PackageFunctionAccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltySubstate), "PackageRoyalty")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class ComponentRoyaltyAccumulatorSubstate : Substate, IEquatable<ComponentRoyaltyAccumulatorSubstate>
+    [DataContract(Name = "ObjectTypeInfoDetails")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreTypeInfoDetails), "KeyValueStore")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectTypeInfoDetails), "Object")]
+    public partial class ObjectTypeInfoDetails : TypeInfoDetails, IEquatable<ObjectTypeInfoDetails>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentRoyaltyAccumulatorSubstate" /> class.
+        /// Initializes a new instance of the <see cref="ObjectTypeInfoDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ComponentRoyaltyAccumulatorSubstate() { }
+        protected ObjectTypeInfoDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentRoyaltyAccumulatorSubstate" /> class.
+        /// Initializes a new instance of the <see cref="ObjectTypeInfoDetails" /> class.
         /// </summary>
-        /// <param name="vaultEntity">vaultEntity.</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.ComponentRoyaltyAccumulator).</param>
-        public ComponentRoyaltyAccumulatorSubstate(EntityReference vaultEntity = default(EntityReference), SubstateType substateType = SubstateType.ComponentRoyaltyAccumulator) : base(substateType)
+        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
+        /// <param name="blueprintName">blueprintName (required).</param>
+        /// <param name="global">global (required).</param>
+        /// <param name="type">type (required) (default to TypeInfoType.Object).</param>
+        public ObjectTypeInfoDetails(string packageAddress = default(string), string blueprintName = default(string), bool global = default(bool), TypeInfoType type = TypeInfoType.Object) : base(type)
         {
-            this.VaultEntity = vaultEntity;
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
+            {
+                throw new ArgumentNullException("packageAddress is a required property for ObjectTypeInfoDetails and cannot be null");
+            }
+            this.PackageAddress = packageAddress;
+            // to ensure "blueprintName" is required (not null)
+            if (blueprintName == null)
+            {
+                throw new ArgumentNullException("blueprintName is a required property for ObjectTypeInfoDetails and cannot be null");
+            }
+            this.BlueprintName = blueprintName;
+            this.Global = global;
         }
 
         /// <summary>
-        /// Gets or Sets VaultEntity
+        /// The Bech32m-encoded human readable version of the package address
         /// </summary>
-        [DataMember(Name = "vault_entity", EmitDefaultValue = true)]
-        public EntityReference VaultEntity { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the package address</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets BlueprintName
+        /// </summary>
+        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
+        public string BlueprintName { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Global
+        /// </summary>
+        [DataMember(Name = "global", IsRequired = true, EmitDefaultValue = true)]
+        public bool Global { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -151,9 +154,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ComponentRoyaltyAccumulatorSubstate {\n");
+            sb.Append("class ObjectTypeInfoDetails {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  VaultEntity: ").Append(VaultEntity).Append("\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
+            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
+            sb.Append("  Global: ").Append(Global).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +179,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ComponentRoyaltyAccumulatorSubstate);
+            return this.Equals(input as ObjectTypeInfoDetails);
         }
 
         /// <summary>
-        /// Returns true if ComponentRoyaltyAccumulatorSubstate instances are equal
+        /// Returns true if ObjectTypeInfoDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of ComponentRoyaltyAccumulatorSubstate to be compared</param>
+        /// <param name="input">Instance of ObjectTypeInfoDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ComponentRoyaltyAccumulatorSubstate input)
+        public bool Equals(ObjectTypeInfoDetails input)
         {
             if (input == null)
             {
@@ -190,9 +195,18 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.VaultEntity == input.VaultEntity ||
-                    (this.VaultEntity != null &&
-                    this.VaultEntity.Equals(input.VaultEntity))
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
+                ) && base.Equals(input) && 
+                (
+                    this.BlueprintName == input.BlueprintName ||
+                    (this.BlueprintName != null &&
+                    this.BlueprintName.Equals(input.BlueprintName))
+                ) && base.Equals(input) && 
+                (
+                    this.Global == input.Global ||
+                    this.Global.Equals(input.Global)
                 );
         }
 
@@ -205,10 +219,15 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.VaultEntity != null)
+                if (this.PackageAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.VaultEntity.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
                 }
+                if (this.BlueprintName != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.Global.GetHashCode();
                 return hashCode;
             }
         }

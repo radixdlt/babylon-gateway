@@ -104,9 +104,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="KeyValueStoreEntrySubstateAllOf" /> class.
         /// </summary>
         /// <param name="keyHex">The hex-encoded bytes of its key (required).</param>
+        /// <param name="keyNonFungibleLocalId">keyNonFungibleLocalId.</param>
         /// <param name="isDeleted">isDeleted (required).</param>
         /// <param name="dataStruct">dataStruct.</param>
-        public KeyValueStoreEntrySubstateAllOf(string keyHex = default(string), bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct))
+        public KeyValueStoreEntrySubstateAllOf(string keyHex = default(string), NonFungibleId keyNonFungibleLocalId = default(NonFungibleId), bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct))
         {
             // to ensure "keyHex" is required (not null)
             if (keyHex == null)
@@ -115,6 +116,7 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.KeyHex = keyHex;
             this.IsDeleted = isDeleted;
+            this.KeyNonFungibleLocalId = keyNonFungibleLocalId;
             this.DataStruct = dataStruct;
         }
 
@@ -124,6 +126,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <value>The hex-encoded bytes of its key</value>
         [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
         public string KeyHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets KeyNonFungibleLocalId
+        /// </summary>
+        [DataMember(Name = "key_non_fungible_local_id", EmitDefaultValue = true)]
+        public NonFungibleId KeyNonFungibleLocalId { get; set; }
 
         /// <summary>
         /// Gets or Sets IsDeleted
@@ -146,6 +154,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class KeyValueStoreEntrySubstateAllOf {\n");
             sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
+            sb.Append("  KeyNonFungibleLocalId: ").Append(KeyNonFungibleLocalId).Append("\n");
             sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
             sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
             sb.Append("}\n");
@@ -189,6 +198,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.KeyHex.Equals(input.KeyHex))
                 ) && 
                 (
+                    this.KeyNonFungibleLocalId == input.KeyNonFungibleLocalId ||
+                    (this.KeyNonFungibleLocalId != null &&
+                    this.KeyNonFungibleLocalId.Equals(input.KeyNonFungibleLocalId))
+                ) && 
+                (
                     this.IsDeleted == input.IsDeleted ||
                     this.IsDeleted.Equals(input.IsDeleted)
                 ) && 
@@ -211,6 +225,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.KeyHex != null)
                 {
                     hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
+                }
+                if (this.KeyNonFungibleLocalId != null)
+                {
+                    hashCode = (hashCode * 59) + this.KeyNonFungibleLocalId.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
                 if (this.DataStruct != null)

@@ -84,58 +84,49 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// FunctionAccessRulesSubstate
+    /// PackageRoyaltySubstateAllOf
     /// </summary>
-    [DataContract(Name = "FunctionAccessRulesSubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
-    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class FunctionAccessRulesSubstate : Substate, IEquatable<FunctionAccessRulesSubstate>
+    [DataContract(Name = "PackageRoyaltySubstate_allOf")]
+    public partial class PackageRoyaltySubstateAllOf : IEquatable<PackageRoyaltySubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FunctionAccessRulesSubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageRoyaltySubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected FunctionAccessRulesSubstate() { }
+        protected PackageRoyaltySubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="FunctionAccessRulesSubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageRoyaltySubstateAllOf" /> class.
         /// </summary>
-        /// <param name="substateType">substateType (required) (default to SubstateType.FunctionAccessRules).</param>
-        public FunctionAccessRulesSubstate(SubstateType substateType = SubstateType.FunctionAccessRules) : base(substateType)
+        /// <param name="vaultEntity">vaultEntity.</param>
+        /// <param name="blueprintRoyalties">blueprintRoyalties (required).</param>
+        public PackageRoyaltySubstateAllOf(EntityReference vaultEntity = default(EntityReference), List<BlueprintRoyaltyConfig> blueprintRoyalties = default(List<BlueprintRoyaltyConfig>))
         {
+            // to ensure "blueprintRoyalties" is required (not null)
+            if (blueprintRoyalties == null)
+            {
+                throw new ArgumentNullException("blueprintRoyalties is a required property for PackageRoyaltySubstateAllOf and cannot be null");
+            }
+            this.BlueprintRoyalties = blueprintRoyalties;
+            this.VaultEntity = vaultEntity;
         }
+
+        /// <summary>
+        /// Gets or Sets VaultEntity
+        /// </summary>
+        [DataMember(Name = "vault_entity", EmitDefaultValue = true)]
+        public EntityReference VaultEntity { get; set; }
+
+        /// <summary>
+        /// Gets or Sets BlueprintRoyalties
+        /// </summary>
+        [DataMember(Name = "blueprint_royalties", IsRequired = true, EmitDefaultValue = true)]
+        public List<BlueprintRoyaltyConfig> BlueprintRoyalties { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,8 +135,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class FunctionAccessRulesSubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("class PackageRoyaltySubstateAllOf {\n");
+            sb.Append("  VaultEntity: ").Append(VaultEntity).Append("\n");
+            sb.Append("  BlueprintRoyalties: ").Append(BlueprintRoyalties).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -154,7 +146,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -166,21 +158,32 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as FunctionAccessRulesSubstate);
+            return this.Equals(input as PackageRoyaltySubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if FunctionAccessRulesSubstate instances are equal
+        /// Returns true if PackageRoyaltySubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of FunctionAccessRulesSubstate to be compared</param>
+        /// <param name="input">Instance of PackageRoyaltySubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(FunctionAccessRulesSubstate input)
+        public bool Equals(PackageRoyaltySubstateAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input);
+            return 
+                (
+                    this.VaultEntity == input.VaultEntity ||
+                    (this.VaultEntity != null &&
+                    this.VaultEntity.Equals(input.VaultEntity))
+                ) && 
+                (
+                    this.BlueprintRoyalties == input.BlueprintRoyalties ||
+                    this.BlueprintRoyalties != null &&
+                    input.BlueprintRoyalties != null &&
+                    this.BlueprintRoyalties.SequenceEqual(input.BlueprintRoyalties)
+                );
         }
 
         /// <summary>
@@ -191,7 +194,15 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
+                int hashCode = 41;
+                if (this.VaultEntity != null)
+                {
+                    hashCode = (hashCode * 59) + this.VaultEntity.GetHashCode();
+                }
+                if (this.BlueprintRoyalties != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintRoyalties.GetHashCode();
+                }
                 return hashCode;
             }
         }

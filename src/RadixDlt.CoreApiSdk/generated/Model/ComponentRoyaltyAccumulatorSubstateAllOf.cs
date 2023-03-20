@@ -98,26 +98,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ComponentRoyaltyAccumulatorSubstateAllOf" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected ComponentRoyaltyAccumulatorSubstateAllOf() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentRoyaltyAccumulatorSubstateAllOf" /> class.
-        /// </summary>
-        /// <param name="vaultEntity">vaultEntity (required).</param>
+        /// <param name="vaultEntity">vaultEntity.</param>
         public ComponentRoyaltyAccumulatorSubstateAllOf(EntityReference vaultEntity = default(EntityReference))
         {
-            // to ensure "vaultEntity" is required (not null)
-            if (vaultEntity == null)
-            {
-                throw new ArgumentNullException("vaultEntity is a required property for ComponentRoyaltyAccumulatorSubstateAllOf and cannot be null");
-            }
             this.VaultEntity = vaultEntity;
         }
 
         /// <summary>
         /// Gets or Sets VaultEntity
         /// </summary>
-        [DataMember(Name = "vault_entity", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "vault_entity", EmitDefaultValue = true)]
         public EntityReference VaultEntity { get; set; }
 
         /// <summary>

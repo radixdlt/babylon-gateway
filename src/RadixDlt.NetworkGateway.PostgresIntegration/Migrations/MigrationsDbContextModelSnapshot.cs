@@ -90,7 +90,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "access_rules_chain_subtype", new[] { "none", "resource_manager_vault_access_rules_chain" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_type", new[] { "epoch_manager", "fungible_resource_manager", "non_fungible_resource_manager", "normal_component", "account_component", "package", "key_value_store", "vault", "non_fungible_store", "clock", "validator", "access_controller", "identity" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_type", new[] { "epoch_manager", "fungible_resource_manager", "non_fungible_resource_manager", "normal_component", "account_component", "package", "key_value_store", "vault", "clock", "validator", "access_controller", "identity" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_kind_filter_constraint", new[] { "user", "epoch_change" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_type", new[] { "user", "validator", "system" });
@@ -476,7 +476,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("error_message");
 
-                    b.Property<BigInteger>("FeePaid")
+                    b.Property<BigInteger?>("FeePaid")
                         .HasPrecision(1000)
                         .HasColumnType("numeric")
                         .HasColumnName("fee_paid");
@@ -527,7 +527,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("ledger_transaction_status")
                         .HasColumnName("status");
 
-                    b.Property<BigInteger>("TipPaid")
+                    b.Property<BigInteger?>("TipPaid")
                         .HasPrecision(1000)
                         .HasColumnType("numeric")
                         .HasColumnName("tip_paid");
@@ -1027,6 +1027,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<long?>("StoreOfNonFungibleResourceManagerEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("store_of_non_fungible_resource_manager_entity_id");
+
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue(EntityType.KeyValueStore);
@@ -1059,15 +1063,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue(EntityType.NonFungibleResourceManager);
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleStoreEntity", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
-
-                    b.ToTable("entities");
-
-                    b.HasDiscriminator().HasValue(EntityType.NonFungibleStore);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NormalComponentEntity", b =>
@@ -1109,6 +1104,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("code");
+
+                    b.Property<string>("CodeType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code_type");
 
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()

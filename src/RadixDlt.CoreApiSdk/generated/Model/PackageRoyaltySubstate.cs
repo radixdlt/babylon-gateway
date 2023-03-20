@@ -91,9 +91,9 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ComponentRoyaltyAccumulatorSubstate
+    /// PackageRoyaltySubstate
     /// </summary>
-    [DataContract(Name = "ComponentRoyaltyAccumulatorSubstate")]
+    [DataContract(Name = "PackageRoyaltySubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
@@ -121,20 +121,27 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class ComponentRoyaltyAccumulatorSubstate : Substate, IEquatable<ComponentRoyaltyAccumulatorSubstate>
+    public partial class PackageRoyaltySubstate : Substate, IEquatable<PackageRoyaltySubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentRoyaltyAccumulatorSubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageRoyaltySubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ComponentRoyaltyAccumulatorSubstate() { }
+        protected PackageRoyaltySubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentRoyaltyAccumulatorSubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageRoyaltySubstate" /> class.
         /// </summary>
         /// <param name="vaultEntity">vaultEntity.</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.ComponentRoyaltyAccumulator).</param>
-        public ComponentRoyaltyAccumulatorSubstate(EntityReference vaultEntity = default(EntityReference), SubstateType substateType = SubstateType.ComponentRoyaltyAccumulator) : base(substateType)
+        /// <param name="blueprintRoyalties">blueprintRoyalties (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.PackageRoyalty).</param>
+        public PackageRoyaltySubstate(EntityReference vaultEntity = default(EntityReference), List<BlueprintRoyaltyConfig> blueprintRoyalties = default(List<BlueprintRoyaltyConfig>), SubstateType substateType = SubstateType.PackageRoyalty) : base(substateType)
         {
+            // to ensure "blueprintRoyalties" is required (not null)
+            if (blueprintRoyalties == null)
+            {
+                throw new ArgumentNullException("blueprintRoyalties is a required property for PackageRoyaltySubstate and cannot be null");
+            }
+            this.BlueprintRoyalties = blueprintRoyalties;
             this.VaultEntity = vaultEntity;
         }
 
@@ -145,15 +152,22 @@ namespace RadixDlt.CoreApiSdk.Model
         public EntityReference VaultEntity { get; set; }
 
         /// <summary>
+        /// Gets or Sets BlueprintRoyalties
+        /// </summary>
+        [DataMember(Name = "blueprint_royalties", IsRequired = true, EmitDefaultValue = true)]
+        public List<BlueprintRoyaltyConfig> BlueprintRoyalties { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ComponentRoyaltyAccumulatorSubstate {\n");
+            sb.Append("class PackageRoyaltySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  VaultEntity: ").Append(VaultEntity).Append("\n");
+            sb.Append("  BlueprintRoyalties: ").Append(BlueprintRoyalties).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +188,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ComponentRoyaltyAccumulatorSubstate);
+            return this.Equals(input as PackageRoyaltySubstate);
         }
 
         /// <summary>
-        /// Returns true if ComponentRoyaltyAccumulatorSubstate instances are equal
+        /// Returns true if PackageRoyaltySubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of ComponentRoyaltyAccumulatorSubstate to be compared</param>
+        /// <param name="input">Instance of PackageRoyaltySubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ComponentRoyaltyAccumulatorSubstate input)
+        public bool Equals(PackageRoyaltySubstate input)
         {
             if (input == null)
             {
@@ -193,6 +207,12 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.VaultEntity == input.VaultEntity ||
                     (this.VaultEntity != null &&
                     this.VaultEntity.Equals(input.VaultEntity))
+                ) && base.Equals(input) && 
+                (
+                    this.BlueprintRoyalties == input.BlueprintRoyalties ||
+                    this.BlueprintRoyalties != null &&
+                    input.BlueprintRoyalties != null &&
+                    this.BlueprintRoyalties.SequenceEqual(input.BlueprintRoyalties)
                 );
         }
 
@@ -208,6 +228,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.VaultEntity != null)
                 {
                     hashCode = (hashCode * 59) + this.VaultEntity.GetHashCode();
+                }
+                if (this.BlueprintRoyalties != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintRoyalties.GetHashCode();
                 }
                 return hashCode;
             }
