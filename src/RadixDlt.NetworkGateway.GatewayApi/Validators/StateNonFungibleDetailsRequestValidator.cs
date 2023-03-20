@@ -83,7 +83,7 @@ internal class StateNonFungibleDetailsRequestValidator : AbstractValidator<Gatew
             {
                 RuleFor(x => x.NonFungibleIds.Count)
                     .GreaterThan(0)
-                    .LessThan(endpointOptionsSnapshot.Value.DefaultPageSize);
+                    .LessThan(endpointOptionsSnapshot.Value.MaxPageSize);
 
                 RuleForEach(x => x.NonFungibleIds)
                     .NotEmpty();

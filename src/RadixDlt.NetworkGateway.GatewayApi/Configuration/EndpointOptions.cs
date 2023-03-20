@@ -72,7 +72,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
 public sealed class EndpointOptions
 {
     [ConfigurationKeyName("MaxPageSize")]
-    public int MaxPageSize { get; set; } = 30;
+    public int MaxPageSize { get; set; } = 100;
 
     [ConfigurationKeyName("RequestTimeout")]
     public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(10);
