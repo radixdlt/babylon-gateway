@@ -135,6 +135,9 @@ tags:
   - name: State
     x-displayName: State Endpoints
     description: Query information snapshot about state of ledger entities at present or past time.
+  - name: SBOR
+    x-displayName: SBOR Endpoints
+    description: Encode and decode SBOR data.
 paths:
   "/status/gateway-status":
     post:
@@ -545,6 +548,49 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/StateValidatorsListResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /sbor/scrypto-encode:
+    post:
+      operationId: SborScryptoEncode
+      summary: Encode Scrypto SBOR JSON to binary
+      tags:
+        - SBOR
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SborScryptoEncodeRequest"
+      responses:
+        "200":
+          description: Compiled Scrypto SBOR
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SborScryptoEncodeResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+  /sbor/scrypto-decode:
+    post:
+      operationId: SborScryptoDecode
+      summary: Decode binary Scrypto SBOR to JSON
+      tags:
+        - SBOR
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SborScryptoDecodeRequest"
+      responses:
+        "200":
+          description: Decompiled Scrypto SBOR
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SborScryptoDecodeResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
@@ -1831,6 +1877,39 @@ components:
           properties:
             validators:
               $ref: "#/components/schemas/ValidatorCollection"
+
+    #
+    # /sbor/* Request & Response Types
+    #
+
+    SborScryptoEncodeRequest:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: object
+    SborScryptoEncodeResponse:
+      type: object
+      required:
+        - value_hex
+      properties:
+        value_hex:
+          $ref: "#/components/schemas/HexString"
+    SborScryptoDecodeRequest:
+      type: object
+      required:
+        - value_hex
+      properties:
+        value_hex:
+          $ref: "#/components/schemas/HexString"
+    SborScryptoDecodeResponse:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: object
 
     #
     # Errors
