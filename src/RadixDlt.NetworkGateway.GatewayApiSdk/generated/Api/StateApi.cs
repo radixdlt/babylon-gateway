@@ -218,26 +218,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of StateEntityNonFungiblesPageResponse</returns>
         ApiResponse<StateEntityNonFungiblesPageResponse> EntityNonFungiblesPageWithHttpInfo(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest);
         /// <summary>
-        /// Get Non-Fungible Data
+        /// Get Non-Fungible Details
         /// </summary>
         /// <remarks>
         /// Returns data associated with a given non-fungible ID of a given non-fungible resource. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleDataRequest"></param>
-        /// <returns>NonFungibleDataResponse</returns>
-        NonFungibleDataResponse NonFungibleIdData(NonFungibleDataRequest nonFungibleDataRequest);
+        /// <param name="stateNonFungibleDetailsRequest"></param>
+        /// <returns>StateNonFungibleDetailsResponse</returns>
+        StateNonFungibleDetailsResponse NonFungibleDetails(StateNonFungibleDetailsRequest stateNonFungibleDetailsRequest);
 
         /// <summary>
-        /// Get Non-Fungible Data
+        /// Get Non-Fungible Details
         /// </summary>
         /// <remarks>
         /// Returns data associated with a given non-fungible ID of a given non-fungible resource. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleDataRequest"></param>
-        /// <returns>ApiResponse of NonFungibleDataResponse</returns>
-        ApiResponse<NonFungibleDataResponse> NonFungibleIdDataWithHttpInfo(NonFungibleDataRequest nonFungibleDataRequest);
+        /// <param name="stateNonFungibleDetailsRequest"></param>
+        /// <returns>ApiResponse of StateNonFungibleDetailsResponse</returns>
+        ApiResponse<StateNonFungibleDetailsResponse> NonFungibleDetailsWithHttpInfo(StateNonFungibleDetailsRequest stateNonFungibleDetailsRequest);
         /// <summary>
         /// Get Non-Fungible Collection
         /// </summary>
@@ -245,9 +245,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleIdsRequest"></param>
-        /// <returns>NonFungibleIdsResponse</returns>
-        NonFungibleIdsResponse NonFungibleIds(NonFungibleIdsRequest nonFungibleIdsRequest);
+        /// <param name="stateNonFungibleIdsRequest"></param>
+        /// <returns>StateNonFungibleIdsResponse</returns>
+        StateNonFungibleIdsResponse NonFungibleIds(StateNonFungibleIdsRequest stateNonFungibleIdsRequest);
 
         /// <summary>
         /// Get Non-Fungible Collection
@@ -256,9 +256,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleIdsRequest"></param>
-        /// <returns>ApiResponse of NonFungibleIdsResponse</returns>
-        ApiResponse<NonFungibleIdsResponse> NonFungibleIdsWithHttpInfo(NonFungibleIdsRequest nonFungibleIdsRequest);
+        /// <param name="stateNonFungibleIdsRequest"></param>
+        /// <returns>ApiResponse of StateNonFungibleIdsResponse</returns>
+        ApiResponse<StateNonFungibleIdsResponse> NonFungibleIdsWithHttpInfo(StateNonFungibleIdsRequest stateNonFungibleIdsRequest);
         /// <summary>
         /// Get Entity Details
         /// </summary>
@@ -446,28 +446,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>Task of ApiResponse (StateEntityNonFungiblesPageResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<StateEntityNonFungiblesPageResponse>> EntityNonFungiblesPageWithHttpInfoAsync(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
-        /// Get Non-Fungible Data
+        /// Get Non-Fungible Details
         /// </summary>
         /// <remarks>
         /// Returns data associated with a given non-fungible ID of a given non-fungible resource. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleDataRequest"></param>
+        /// <param name="stateNonFungibleDetailsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of NonFungibleDataResponse</returns>
-        System.Threading.Tasks.Task<NonFungibleDataResponse> NonFungibleIdDataAsync(NonFungibleDataRequest nonFungibleDataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of StateNonFungibleDetailsResponse</returns>
+        System.Threading.Tasks.Task<StateNonFungibleDetailsResponse> NonFungibleDetailsAsync(StateNonFungibleDetailsRequest stateNonFungibleDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Get Non-Fungible Data
+        /// Get Non-Fungible Details
         /// </summary>
         /// <remarks>
         /// Returns data associated with a given non-fungible ID of a given non-fungible resource. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleDataRequest"></param>
+        /// <param name="stateNonFungibleDetailsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (NonFungibleDataResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<NonFungibleDataResponse>> NonFungibleIdDataWithHttpInfoAsync(NonFungibleDataRequest nonFungibleDataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (StateNonFungibleDetailsResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateNonFungibleDetailsResponse>> NonFungibleDetailsWithHttpInfoAsync(StateNonFungibleDetailsRequest stateNonFungibleDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Non-Fungible Collection
         /// </summary>
@@ -475,10 +475,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleIdsRequest"></param>
+        /// <param name="stateNonFungibleIdsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of NonFungibleIdsResponse</returns>
-        System.Threading.Tasks.Task<NonFungibleIdsResponse> NonFungibleIdsAsync(NonFungibleIdsRequest nonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of StateNonFungibleIdsResponse</returns>
+        System.Threading.Tasks.Task<StateNonFungibleIdsResponse> NonFungibleIdsAsync(StateNonFungibleIdsRequest stateNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Get Non-Fungible Collection
@@ -487,10 +487,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleIdsRequest"></param>
+        /// <param name="stateNonFungibleIdsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (NonFungibleIdsResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<NonFungibleIdsResponse>> NonFungibleIdsWithHttpInfoAsync(NonFungibleIdsRequest nonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (StateNonFungibleIdsResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateNonFungibleIdsResponse>> NonFungibleIdsWithHttpInfoAsync(StateNonFungibleIdsRequest stateNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Entity Details
         /// </summary>
@@ -1453,28 +1453,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Non-Fungible Data Returns data associated with a given non-fungible ID of a given non-fungible resource. 
+        /// Get Non-Fungible Details Returns data associated with a given non-fungible ID of a given non-fungible resource. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleDataRequest"></param>
-        /// <returns>NonFungibleDataResponse</returns>
-        public NonFungibleDataResponse NonFungibleIdData(NonFungibleDataRequest nonFungibleDataRequest)
+        /// <param name="stateNonFungibleDetailsRequest"></param>
+        /// <returns>StateNonFungibleDetailsResponse</returns>
+        public StateNonFungibleDetailsResponse NonFungibleDetails(StateNonFungibleDetailsRequest stateNonFungibleDetailsRequest)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<NonFungibleDataResponse> localVarResponse = NonFungibleIdDataWithHttpInfo(nonFungibleDataRequest);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleDetailsResponse> localVarResponse = NonFungibleDetailsWithHttpInfo(stateNonFungibleDetailsRequest);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Non-Fungible Data Returns data associated with a given non-fungible ID of a given non-fungible resource. 
+        /// Get Non-Fungible Details Returns data associated with a given non-fungible ID of a given non-fungible resource. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleDataRequest"></param>
-        /// <returns>ApiResponse of NonFungibleDataResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<NonFungibleDataResponse> NonFungibleIdDataWithHttpInfo(NonFungibleDataRequest nonFungibleDataRequest)
+        /// <param name="stateNonFungibleDetailsRequest"></param>
+        /// <returns>ApiResponse of StateNonFungibleDetailsResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleDetailsResponse> NonFungibleDetailsWithHttpInfo(StateNonFungibleDetailsRequest stateNonFungibleDetailsRequest)
         {
-            // verify the required parameter 'nonFungibleDataRequest' is set
-            if (nonFungibleDataRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'nonFungibleDataRequest' when calling StateApi->NonFungibleIdData");
+            // verify the required parameter 'stateNonFungibleDetailsRequest' is set
+            if (stateNonFungibleDetailsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateNonFungibleDetailsRequest' when calling StateApi->NonFungibleDetails");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -1493,15 +1493,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = nonFungibleDataRequest;
+            localVarRequestOptions.Data = stateNonFungibleDetailsRequest;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<NonFungibleDataResponse>("/non-fungible/data", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<StateNonFungibleDetailsResponse>("/state/non-fungible/details", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("NonFungibleIdData", localVarResponse);
+                Exception _exception = this.ExceptionFactory("NonFungibleDetails", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -1509,30 +1509,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get Non-Fungible Data Returns data associated with a given non-fungible ID of a given non-fungible resource. 
+        /// Get Non-Fungible Details Returns data associated with a given non-fungible ID of a given non-fungible resource. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleDataRequest"></param>
+        /// <param name="stateNonFungibleDetailsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of NonFungibleDataResponse</returns>
-        public async System.Threading.Tasks.Task<NonFungibleDataResponse> NonFungibleIdDataAsync(NonFungibleDataRequest nonFungibleDataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of StateNonFungibleDetailsResponse</returns>
+        public async System.Threading.Tasks.Task<StateNonFungibleDetailsResponse> NonFungibleDetailsAsync(StateNonFungibleDetailsRequest stateNonFungibleDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<NonFungibleDataResponse> localVarResponse = await NonFungibleIdDataWithHttpInfoAsync(nonFungibleDataRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleDetailsResponse> localVarResponse = await NonFungibleDetailsWithHttpInfoAsync(stateNonFungibleDetailsRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Non-Fungible Data Returns data associated with a given non-fungible ID of a given non-fungible resource. 
+        /// Get Non-Fungible Details Returns data associated with a given non-fungible ID of a given non-fungible resource. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleDataRequest"></param>
+        /// <param name="stateNonFungibleDetailsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (NonFungibleDataResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<NonFungibleDataResponse>> NonFungibleIdDataWithHttpInfoAsync(NonFungibleDataRequest nonFungibleDataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (StateNonFungibleDetailsResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleDetailsResponse>> NonFungibleDetailsWithHttpInfoAsync(StateNonFungibleDetailsRequest stateNonFungibleDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'nonFungibleDataRequest' is set
-            if (nonFungibleDataRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'nonFungibleDataRequest' when calling StateApi->NonFungibleIdData");
+            // verify the required parameter 'stateNonFungibleDetailsRequest' is set
+            if (stateNonFungibleDetailsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateNonFungibleDetailsRequest' when calling StateApi->NonFungibleDetails");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -1553,16 +1553,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = nonFungibleDataRequest;
+            localVarRequestOptions.Data = stateNonFungibleDetailsRequest;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<NonFungibleDataResponse>("/non-fungible/data", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateNonFungibleDetailsResponse>("/state/non-fungible/details", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("NonFungibleIdData", localVarResponse);
+                Exception _exception = this.ExceptionFactory("NonFungibleDetails", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -1573,11 +1573,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Non-Fungible Collection Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleIdsRequest"></param>
-        /// <returns>NonFungibleIdsResponse</returns>
-        public NonFungibleIdsResponse NonFungibleIds(NonFungibleIdsRequest nonFungibleIdsRequest)
+        /// <param name="stateNonFungibleIdsRequest"></param>
+        /// <returns>StateNonFungibleIdsResponse</returns>
+        public StateNonFungibleIdsResponse NonFungibleIds(StateNonFungibleIdsRequest stateNonFungibleIdsRequest)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<NonFungibleIdsResponse> localVarResponse = NonFungibleIdsWithHttpInfo(nonFungibleIdsRequest);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleIdsResponse> localVarResponse = NonFungibleIdsWithHttpInfo(stateNonFungibleIdsRequest);
             return localVarResponse.Data;
         }
 
@@ -1585,13 +1585,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Non-Fungible Collection Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleIdsRequest"></param>
-        /// <returns>ApiResponse of NonFungibleIdsResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<NonFungibleIdsResponse> NonFungibleIdsWithHttpInfo(NonFungibleIdsRequest nonFungibleIdsRequest)
+        /// <param name="stateNonFungibleIdsRequest"></param>
+        /// <returns>ApiResponse of StateNonFungibleIdsResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleIdsResponse> NonFungibleIdsWithHttpInfo(StateNonFungibleIdsRequest stateNonFungibleIdsRequest)
         {
-            // verify the required parameter 'nonFungibleIdsRequest' is set
-            if (nonFungibleIdsRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'nonFungibleIdsRequest' when calling StateApi->NonFungibleIds");
+            // verify the required parameter 'stateNonFungibleIdsRequest' is set
+            if (stateNonFungibleIdsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateNonFungibleIdsRequest' when calling StateApi->NonFungibleIds");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -1610,11 +1610,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = nonFungibleIdsRequest;
+            localVarRequestOptions.Data = stateNonFungibleIdsRequest;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<NonFungibleIdsResponse>("/non-fungible/ids", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<StateNonFungibleIdsResponse>("/state/non-fungible/ids", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1629,12 +1629,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Non-Fungible Collection Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleIdsRequest"></param>
+        /// <param name="stateNonFungibleIdsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of NonFungibleIdsResponse</returns>
-        public async System.Threading.Tasks.Task<NonFungibleIdsResponse> NonFungibleIdsAsync(NonFungibleIdsRequest nonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of StateNonFungibleIdsResponse</returns>
+        public async System.Threading.Tasks.Task<StateNonFungibleIdsResponse> NonFungibleIdsAsync(StateNonFungibleIdsRequest stateNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<NonFungibleIdsResponse> localVarResponse = await NonFungibleIdsWithHttpInfoAsync(nonFungibleIdsRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleIdsResponse> localVarResponse = await NonFungibleIdsWithHttpInfoAsync(stateNonFungibleIdsRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -1642,14 +1642,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Non-Fungible Collection Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="nonFungibleIdsRequest"></param>
+        /// <param name="stateNonFungibleIdsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (NonFungibleIdsResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<NonFungibleIdsResponse>> NonFungibleIdsWithHttpInfoAsync(NonFungibleIdsRequest nonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (StateNonFungibleIdsResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleIdsResponse>> NonFungibleIdsWithHttpInfoAsync(StateNonFungibleIdsRequest stateNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'nonFungibleIdsRequest' is set
-            if (nonFungibleIdsRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'nonFungibleIdsRequest' when calling StateApi->NonFungibleIds");
+            // verify the required parameter 'stateNonFungibleIdsRequest' is set
+            if (stateNonFungibleIdsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateNonFungibleIdsRequest' when calling StateApi->NonFungibleIds");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -1670,12 +1670,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = nonFungibleIdsRequest;
+            localVarRequestOptions.Data = stateNonFungibleIdsRequest;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<NonFungibleIdsResponse>("/non-fungible/ids", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateNonFungibleIdsResponse>("/state/non-fungible/ids", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {

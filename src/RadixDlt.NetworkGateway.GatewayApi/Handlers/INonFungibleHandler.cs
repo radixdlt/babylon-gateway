@@ -70,7 +70,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 public interface INonFungibleHandler
 {
-    Task<GatewayModel.NonFungibleIdsResponse> Ids(GatewayModel.NonFungibleIdsRequest request, CancellationToken token = default);
+    Task<GatewayModel.StateNonFungibleIdsResponse> Ids(GatewayModel.StateNonFungibleIdsRequest request, CancellationToken token = default);
 
-    Task<GatewayModel.NonFungibleDataResponse> Data(GatewayModel.NonFungibleDataRequest request, CancellationToken token = default);
+    Task<GatewayModel.StateNonFungibleDetailsResponse> Data(GatewayModel.StateNonFungibleDetailsRequest request, CancellationToken token = default);
 }

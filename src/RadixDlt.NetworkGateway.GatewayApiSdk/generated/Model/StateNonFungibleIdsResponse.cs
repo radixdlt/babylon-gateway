@@ -90,40 +90,40 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleIdsResponse
+    /// StateNonFungibleIdsResponse
     /// </summary>
-    [DataContract(Name = "NonFungibleIdsResponse")]
-    public partial class NonFungibleIdsResponse : IEquatable<NonFungibleIdsResponse>
+    [DataContract(Name = "StateNonFungibleIdsResponse")]
+    public partial class StateNonFungibleIdsResponse : IEquatable<StateNonFungibleIdsResponse>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleIdsResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleIdsResponse() { }
+        protected StateNonFungibleIdsResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleIdsResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
         /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
-        public NonFungibleIdsResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), NonFungibleIdsCollection nonFungibleIds = default(NonFungibleIdsCollection))
+        public StateNonFungibleIdsResponse(LedgerState ledgerState = default(LedgerState), string resourceAddress = default(string), NonFungibleIdsCollection nonFungibleIds = default(NonFungibleIdsCollection))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
             {
-                throw new ArgumentNullException("ledgerState is a required property for NonFungibleIdsResponse and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for StateNonFungibleIdsResponse and cannot be null");
             }
             this.LedgerState = ledgerState;
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("address is a required property for NonFungibleIdsResponse and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for StateNonFungibleIdsResponse and cannot be null");
             }
-            this.Address = address;
+            this.ResourceAddress = resourceAddress;
             // to ensure "nonFungibleIds" is required (not null)
             if (nonFungibleIds == null)
             {
-                throw new ArgumentNullException("nonFungibleIds is a required property for NonFungibleIdsResponse and cannot be null");
+                throw new ArgumentNullException("nonFungibleIds is a required property for StateNonFungibleIdsResponse and cannot be null");
             }
             this.NonFungibleIds = nonFungibleIds;
         }
@@ -135,11 +135,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Gets or Sets NonFungibleIds
@@ -154,9 +154,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleIdsResponse {\n");
+            sb.Append("class StateNonFungibleIdsResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -178,15 +178,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleIdsResponse);
+            return this.Equals(input as StateNonFungibleIdsResponse);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleIdsResponse instances are equal
+        /// Returns true if StateNonFungibleIdsResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleIdsResponse to be compared</param>
+        /// <param name="input">Instance of StateNonFungibleIdsResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleIdsResponse input)
+        public bool Equals(StateNonFungibleIdsResponse input)
         {
             if (input == null)
             {
@@ -199,9 +199,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 ) && 
                 (
                     this.NonFungibleIds == input.NonFungibleIds ||
@@ -223,9 +223,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
-                if (this.Address != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
                 if (this.NonFungibleIds != null)
                 {

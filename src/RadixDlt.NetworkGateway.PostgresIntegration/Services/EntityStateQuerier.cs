@@ -319,7 +319,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
             nonFungibleIds.Items, entity.GlobalAddress, resourceEntity.GlobalAddress);
     }
 
-    public async Task<GatewayModel.NonFungibleIdsResponse> NonFungibleIds(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState,
+    public async Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
         var entity = await GetEntity<NonFungibleResourceManagerEntity>(request.Address, ledgerState, token);
@@ -366,9 +366,9 @@ ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
             ? new GatewayModel.OffsetCursor(request.Offset + request.Limit).ToCursorString()
             : null;
 
-        return new GatewayModel.NonFungibleIdsResponse(
+        return new GatewayModel.StateNonFungibleIdsResponse(
             ledgerState: ledgerState,
-            address: request.Address.ToString(),
+            resourceAddress: request.Address.ToString(),
             nonFungibleIds: new GatewayModel.NonFungibleIdsCollection(
                 totalCount: totalCount,
                 previousCursor: previousCursor,
@@ -376,10 +376,9 @@ ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
                 items: items.Take(request.Limit).ToList()));
     }
 
-    public async Task<GatewayModel.NonFungibleDataResponse> NonFungibleIdData(GlobalAddress address, string nonFungibleId, GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default)
+    public async Task<GatewayModel.StateNonFungibleDetailsResponse> NonFungibleIdData(GlobalAddress resourceAddress, IList<string> nonFungibleIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
-        var entity = await GetEntity<NonFungibleResourceManagerEntity>(address, ledgerState, token);
+        var entity = await GetEntity<NonFungibleResourceManagerEntity>(resourceAddress, ledgerState, token);
 
         var cd = new CommandDefinition(
             commandText: @"
@@ -392,28 +391,34 @@ LEFT JOIN LATERAL (
     ORDER BY nfidmdh.from_state_version DESC
     LIMIT 1
 ) md ON TRUE
-WHERE nfid.from_state_version <= @stateVersion AND nfid.non_fungible_resource_manager_entity_id = @entityId AND nfid.non_fungible_id = @nonFungibleId
+WHERE nfid.from_state_version <= @stateVersion AND nfid.non_fungible_resource_manager_entity_id = @entityId AND nfid.non_fungible_id IN (@nonFungibleId)
 ORDER BY nfid.from_state_version DESC
 LIMIT 1
 ",
-            parameters: new { stateVersion = ledgerState.StateVersion, entityId = entity.Id, nonFungibleId = nonFungibleId, },
+            parameters: new
+            {
+                stateVersion = ledgerState.StateVersion,
+                entityId = entity.Id,
+                nonFungibleIds = nonFungibleIds,
+            },
             cancellationToken: token);
 
-        var data = await _dbContext.Database.GetDbConnection().QueryFirstOrDefaultAsync<NonFungibleIdDataViewModel>(cd);
+        var items = new List<GatewayModel.StateNonFungibleDetailsResponseItem>();
 
-        if (data == null || data.IsDeleted)
+        foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdDataViewModel>(cd))
         {
-            throw new EntityNotFoundException(address.ToString()); // TODO change it to some "resource not found"?
+            items.Add(new GatewayModel.StateNonFungibleDetailsResponseItem(
+                nonFungibleId: vm.NonFungibleId,
+                mutableData: ScryptoSborUtils.NonFungibleDataToGatewayScryptoSbor(vm.MutableData, _networkConfigurationProvider.GetNetworkId()),
+                immutableData: ScryptoSborUtils.NonFungibleDataToGatewayScryptoSbor(vm.ImmutableData, _networkConfigurationProvider.GetNetworkId()),
+                lastUpdatedAtStateVersion: vm.MutableDataLastUpdatedAtStateVersion));
         }
 
-        return new GatewayModel.NonFungibleDataResponse(
+        return new GatewayModel.StateNonFungibleDetailsResponse(
             ledgerState: ledgerState,
-            address: address.ToString(),
+            resourceAddress: resourceAddress.ToString(),
             nonFungibleIdType: entity.NonFungibleIdType.ToGatewayModel(),
-            nonFungibleId: data.NonFungibleId,
-            mutableDataHex: data.MutableData.ToHex(),
-            immutableDataHex: data.ImmutableData.ToHex(),
-            lastUpdatedAtStateVersion: data.MutableDataLastUpdatedAtStateVersion);
+            nonFungibleIds: items);
     }
 
     public async Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState,
@@ -548,7 +553,7 @@ INNER JOIN LATERAL (
         foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<MetadataViewModel>(cd))
         {
             var items = vm.Keys.Zip(vm.Values, vm.UpdatedAtStateVersions)
-                .Select(t => new GatewayModel.EntityMetadataItem(t.First, ScryptoSborUtils.MetadataValueToGatewayScryptoSborValue(t.Second, _networkConfigurationProvider.GetNetworkId()), t.Third))
+                .Select(t => new GatewayModel.EntityMetadataItem(t.First, ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(t.Second, _networkConfigurationProvider.GetNetworkId()), t.Third))
                 .ToList();
 
             var previousCursor = offset > 0

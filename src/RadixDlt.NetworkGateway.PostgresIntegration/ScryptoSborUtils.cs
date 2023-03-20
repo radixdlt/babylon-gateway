@@ -92,7 +92,7 @@ internal static class ScryptoSborUtils
         return value;
     }
 
-    public static GatewayModel.EntityMetadataItemValue MetadataValueToGatewayScryptoSborValue(byte[] rawScryptoSbor, byte networkId)
+    public static GatewayModel.EntityMetadataItemValue MetadataValueToGatewayMetadataItemValue(byte[] rawScryptoSbor, byte networkId)
     {
         var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(rawScryptoSbor, networkId);
 
@@ -156,5 +156,17 @@ internal static class ScryptoSborUtils
             rawJson: new JRaw(RadixEngineToolkit.RadixEngineToolkit.ScryptoSborEncodeJson(outerEnum)),
             asString: asString,
             asStringCollection: asStringCollection);
+    }
+
+    public static GatewayModel.ScryptoSborValue NonFungibleDataToGatewayScryptoSbor(byte[] rawScryptoSbor, byte networkId)
+    {
+        var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(rawScryptoSbor, networkId);
+
+        if (result is not ToolkitModel.Exchange.SborDecodeResponse.ScryptoSbor scryptoSbor)
+        {
+            throw new UnreachableException("Expected ScryptoSbor response");
+        }
+
+        return new GatewayModel.ScryptoSborValue(rawScryptoSbor.ToHex(), new JRaw(scryptoSbor.Value));
     }
 }

@@ -62,37 +62,29 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using System.Threading;
-using System.Threading.Tasks;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace GatewayApi.Controllers;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-[ApiController]
-[Route("non-fungible")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
-public class NonFungibleController : ControllerBase
+internal class StateNonFungibleIdsRequestValidator : AbstractValidator<GatewayModel.StateNonFungibleIdsRequest>
 {
-    private readonly INonFungibleHandler _nonFungibleHandler;
-
-    public NonFungibleController(INonFungibleHandler nonFungibleHandler)
+    public StateNonFungibleIdsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
-        _nonFungibleHandler = nonFungibleHandler;
-    }
+        RuleFor(x => x.ResourceAddress)
+            .NotEmpty()
+            .RadixAddress();
 
-    [HttpPost("ids")]
-    public async Task<GatewayModel.NonFungibleIdsResponse> Ids(GatewayModel.NonFungibleIdsRequest request, CancellationToken token)
-    {
-        return await _nonFungibleHandler.Ids(request, token);
-    }
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
 
-    [HttpPost("data")]
-    public async Task<GatewayModel.NonFungibleDataResponse> Data(GatewayModel.NonFungibleDataRequest request, CancellationToken token)
-    {
-        return await _nonFungibleHandler.Data(request, token);
+        RuleFor(x => x.Cursor)
+            .Base64();
+
+        RuleFor(x => x.LimitPerPage)
+            .GreaterThan(0)
+            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
     }
 }

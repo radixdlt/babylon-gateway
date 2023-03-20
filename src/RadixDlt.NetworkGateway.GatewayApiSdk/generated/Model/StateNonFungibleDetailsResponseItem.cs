@@ -90,49 +90,71 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleIdsResponseAllOf
+    /// StateNonFungibleDetailsResponseItem
     /// </summary>
-    [DataContract(Name = "NonFungibleIdsResponse_allOf")]
-    public partial class NonFungibleIdsResponseAllOf : IEquatable<NonFungibleIdsResponseAllOf>
+    [DataContract(Name = "StateNonFungibleDetailsResponseItem")]
+    public partial class StateNonFungibleDetailsResponseItem : IEquatable<StateNonFungibleDetailsResponseItem>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleDetailsResponseItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleIdsResponseAllOf() { }
+        protected StateNonFungibleDetailsResponseItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleDetailsResponseItem" /> class.
         /// </summary>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
-        /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
-        public NonFungibleIdsResponseAllOf(string address = default(string), NonFungibleIdsCollection nonFungibleIds = default(NonFungibleIdsCollection))
+        /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
+        /// <param name="mutableData">mutableData (required).</param>
+        /// <param name="immutableData">immutableData (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        public StateNonFungibleDetailsResponseItem(string nonFungibleId = default(string), ScryptoSborValue mutableData = default(ScryptoSborValue), ScryptoSborValue immutableData = default(ScryptoSborValue), long lastUpdatedAtStateVersion = default(long))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "nonFungibleId" is required (not null)
+            if (nonFungibleId == null)
             {
-                throw new ArgumentNullException("address is a required property for NonFungibleIdsResponseAllOf and cannot be null");
+                throw new ArgumentNullException("nonFungibleId is a required property for StateNonFungibleDetailsResponseItem and cannot be null");
             }
-            this.Address = address;
-            // to ensure "nonFungibleIds" is required (not null)
-            if (nonFungibleIds == null)
+            this.NonFungibleId = nonFungibleId;
+            // to ensure "mutableData" is required (not null)
+            if (mutableData == null)
             {
-                throw new ArgumentNullException("nonFungibleIds is a required property for NonFungibleIdsResponseAllOf and cannot be null");
+                throw new ArgumentNullException("mutableData is a required property for StateNonFungibleDetailsResponseItem and cannot be null");
             }
-            this.NonFungibleIds = nonFungibleIds;
+            this.MutableData = mutableData;
+            // to ensure "immutableData" is required (not null)
+            if (immutableData == null)
+            {
+                throw new ArgumentNullException("immutableData is a required property for StateNonFungibleDetailsResponseItem and cannot be null");
+            }
+            this.ImmutableData = immutableData;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// String-encoded non-fungible ID.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        /// <value>String-encoded non-fungible ID.</value>
+        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
+        public string NonFungibleId { get; set; }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIds
+        /// Gets or Sets MutableData
         /// </summary>
-        [DataMember(Name = "non_fungible_ids", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleIdsCollection NonFungibleIds { get; set; }
+        [DataMember(Name = "mutable_data", IsRequired = true, EmitDefaultValue = true)]
+        public ScryptoSborValue MutableData { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ImmutableData
+        /// </summary>
+        [DataMember(Name = "immutable_data", IsRequired = true, EmitDefaultValue = true)]
+        public ScryptoSborValue ImmutableData { get; set; }
+
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <value>TBD</value>
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,9 +163,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleIdsResponseAllOf {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
+            sb.Append("class StateNonFungibleDetailsResponseItem {\n");
+            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
+            sb.Append("  MutableData: ").Append(MutableData).Append("\n");
+            sb.Append("  ImmutableData: ").Append(ImmutableData).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,15 +188,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleIdsResponseAllOf);
+            return this.Equals(input as StateNonFungibleDetailsResponseItem);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleIdsResponseAllOf instances are equal
+        /// Returns true if StateNonFungibleDetailsResponseItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleIdsResponseAllOf to be compared</param>
+        /// <param name="input">Instance of StateNonFungibleDetailsResponseItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleIdsResponseAllOf input)
+        public bool Equals(StateNonFungibleDetailsResponseItem input)
         {
             if (input == null)
             {
@@ -180,14 +204,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.NonFungibleId == input.NonFungibleId ||
+                    (this.NonFungibleId != null &&
+                    this.NonFungibleId.Equals(input.NonFungibleId))
                 ) && 
                 (
-                    this.NonFungibleIds == input.NonFungibleIds ||
-                    (this.NonFungibleIds != null &&
-                    this.NonFungibleIds.Equals(input.NonFungibleIds))
+                    this.MutableData == input.MutableData ||
+                    (this.MutableData != null &&
+                    this.MutableData.Equals(input.MutableData))
+                ) && 
+                (
+                    this.ImmutableData == input.ImmutableData ||
+                    (this.ImmutableData != null &&
+                    this.ImmutableData.Equals(input.ImmutableData))
+                ) && 
+                (
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
         }
 
@@ -200,14 +233,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                if (this.NonFungibleId != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
                 }
-                if (this.NonFungibleIds != null)
+                if (this.MutableData != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleIds.GetHashCode();
+                    hashCode = (hashCode * 59) + this.MutableData.GetHashCode();
                 }
+                if (this.ImmutableData != null)
+                {
+                    hashCode = (hashCode * 59) + this.ImmutableData.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

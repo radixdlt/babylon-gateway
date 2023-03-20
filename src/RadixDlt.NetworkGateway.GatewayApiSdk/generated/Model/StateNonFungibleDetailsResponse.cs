@@ -90,10 +90,10 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleDataResponse
+    /// StateNonFungibleDetailsResponse
     /// </summary>
-    [DataContract(Name = "NonFungibleDataResponse")]
-    public partial class NonFungibleDataResponse : IEquatable<NonFungibleDataResponse>
+    [DataContract(Name = "StateNonFungibleDetailsResponse")]
+    public partial class StateNonFungibleDetailsResponse : IEquatable<StateNonFungibleDetailsResponse>
     {
 
         /// <summary>
@@ -102,54 +102,38 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         [DataMember(Name = "non_fungible_id_type", IsRequired = true, EmitDefaultValue = true)]
         public NonFungibleIdType NonFungibleIdType { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleDataResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleDetailsResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleDataResponse() { }
+        protected StateNonFungibleDetailsResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleDataResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleDetailsResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="address">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
         /// <param name="nonFungibleIdType">nonFungibleIdType (required).</param>
-        /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
-        /// <param name="mutableDataHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="immutableDataHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
-        public NonFungibleDataResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), string nonFungibleId = default(string), string mutableDataHex = default(string), string immutableDataHex = default(string), long lastUpdatedAtStateVersion = default(long))
+        /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
+        public StateNonFungibleDetailsResponse(LedgerState ledgerState = default(LedgerState), string resourceAddress = default(string), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), List<StateNonFungibleDetailsResponseItem> nonFungibleIds = default(List<StateNonFungibleDetailsResponseItem>))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
             {
-                throw new ArgumentNullException("ledgerState is a required property for NonFungibleDataResponse and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for StateNonFungibleDetailsResponse and cannot be null");
             }
             this.LedgerState = ledgerState;
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("address is a required property for NonFungibleDataResponse and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for StateNonFungibleDetailsResponse and cannot be null");
             }
-            this.Address = address;
+            this.ResourceAddress = resourceAddress;
             this.NonFungibleIdType = nonFungibleIdType;
-            // to ensure "nonFungibleId" is required (not null)
-            if (nonFungibleId == null)
+            // to ensure "nonFungibleIds" is required (not null)
+            if (nonFungibleIds == null)
             {
-                throw new ArgumentNullException("nonFungibleId is a required property for NonFungibleDataResponse and cannot be null");
+                throw new ArgumentNullException("nonFungibleIds is a required property for StateNonFungibleDetailsResponse and cannot be null");
             }
-            this.NonFungibleId = nonFungibleId;
-            // to ensure "mutableDataHex" is required (not null)
-            if (mutableDataHex == null)
-            {
-                throw new ArgumentNullException("mutableDataHex is a required property for NonFungibleDataResponse and cannot be null");
-            }
-            this.MutableDataHex = mutableDataHex;
-            // to ensure "immutableDataHex" is required (not null)
-            if (immutableDataHex == null)
-            {
-                throw new ArgumentNullException("immutableDataHex is a required property for NonFungibleDataResponse and cannot be null");
-            }
-            this.ImmutableDataHex = immutableDataHex;
-            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
+            this.NonFungibleIds = nonFungibleIds;
         }
 
         /// <summary>
@@ -162,36 +146,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
         /// </summary>
         /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// String-encoded non-fungible ID.
+        /// Gets or Sets NonFungibleIds
         /// </summary>
-        /// <value>String-encoded non-fungible ID.</value>
-        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
-        public string NonFungibleId { get; set; }
-
-        /// <summary>
-        /// Hex-encoded binary blob.
-        /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "mutable_data_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string MutableDataHex { get; set; }
-
-        /// <summary>
-        /// Hex-encoded binary blob.
-        /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "immutable_data_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string ImmutableDataHex { get; set; }
-
-        /// <summary>
-        /// TBD
-        /// </summary>
-        /// <value>TBD</value>
-        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long LastUpdatedAtStateVersion { get; set; }
+        [DataMember(Name = "non_fungible_ids", IsRequired = true, EmitDefaultValue = true)]
+        public List<StateNonFungibleDetailsResponseItem> NonFungibleIds { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -200,14 +162,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleDataResponse {\n");
+            sb.Append("class StateNonFungibleDetailsResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
-            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
-            sb.Append("  MutableDataHex: ").Append(MutableDataHex).Append("\n");
-            sb.Append("  ImmutableDataHex: ").Append(ImmutableDataHex).Append("\n");
-            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
+            sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -228,15 +187,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleDataResponse);
+            return this.Equals(input as StateNonFungibleDetailsResponse);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleDataResponse instances are equal
+        /// Returns true if StateNonFungibleDetailsResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleDataResponse to be compared</param>
+        /// <param name="input">Instance of StateNonFungibleDetailsResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleDataResponse input)
+        public bool Equals(StateNonFungibleDetailsResponse input)
         {
             if (input == null)
             {
@@ -249,32 +208,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 ) && 
                 (
                     this.NonFungibleIdType == input.NonFungibleIdType ||
                     this.NonFungibleIdType.Equals(input.NonFungibleIdType)
                 ) && 
                 (
-                    this.NonFungibleId == input.NonFungibleId ||
-                    (this.NonFungibleId != null &&
-                    this.NonFungibleId.Equals(input.NonFungibleId))
-                ) && 
-                (
-                    this.MutableDataHex == input.MutableDataHex ||
-                    (this.MutableDataHex != null &&
-                    this.MutableDataHex.Equals(input.MutableDataHex))
-                ) && 
-                (
-                    this.ImmutableDataHex == input.ImmutableDataHex ||
-                    (this.ImmutableDataHex != null &&
-                    this.ImmutableDataHex.Equals(input.ImmutableDataHex))
-                ) && 
-                (
-                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
-                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
+                    this.NonFungibleIds == input.NonFungibleIds ||
+                    this.NonFungibleIds != null &&
+                    input.NonFungibleIds != null &&
+                    this.NonFungibleIds.SequenceEqual(input.NonFungibleIds)
                 );
         }
 
@@ -291,24 +237,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
-                if (this.Address != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
-                if (this.NonFungibleId != null)
+                if (this.NonFungibleIds != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleIds.GetHashCode();
                 }
-                if (this.MutableDataHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.MutableDataHex.GetHashCode();
-                }
-                if (this.ImmutableDataHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.ImmutableDataHex.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

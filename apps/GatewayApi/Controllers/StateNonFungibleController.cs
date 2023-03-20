@@ -62,29 +62,37 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using System.Threading;
+using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+namespace GatewayApi.Controllers;
 
-internal class NonFungibleIdsRequestValidator : AbstractValidator<GatewayModel.NonFungibleIdsRequest>
+[ApiController]
+[Route("state/non-fungible")]
+[ServiceFilter(typeof(ExceptionFilter))]
+[ServiceFilter(typeof(InvalidModelStateFilter))]
+public class StateNonFungibleController : ControllerBase
 {
-    public NonFungibleIdsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    private readonly INonFungibleHandler _nonFungibleHandler;
+
+    public StateNonFungibleController(INonFungibleHandler nonFungibleHandler)
     {
-        RuleFor(x => x.Address)
-            .NotEmpty()
-            .RadixAddress();
+        _nonFungibleHandler = nonFungibleHandler;
+    }
 
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
+    [HttpPost("ids")]
+    public async Task<GatewayModel.StateNonFungibleIdsResponse> Ids(GatewayModel.StateNonFungibleIdsRequest request, CancellationToken token)
+    {
+        return await _nonFungibleHandler.Ids(request, token);
+    }
 
-        RuleFor(x => x.Cursor)
-            .Base64();
-
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
+    [HttpPost("data")]
+    public async Task<GatewayModel.StateNonFungibleDetailsResponse> Data(GatewayModel.StateNonFungibleDetailsRequest request, CancellationToken token)
+    {
+        return await _nonFungibleHandler.Data(request, token);
     }
 }
