@@ -430,7 +430,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 });
                                 break;
                             default:
-                                throw new UnreachableException();
+                                throw new UnreachableException($"Didn't expect '{typeInfoSubstate.Details.Type}' value");
                         }
                     }
 
@@ -716,26 +716,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         fungibleVaultChanges.Add(new FungibleVaultChange(referencedEntity, resourceEntity, amount, stateVersion));
                     }
 
-                    if (substateData is CoreModel.VaultLockedFungibleSubstate vaultLockedFungible)
-                    {
-                        var amount = TokenAmount.FromDecimalString(vaultLockedFungible.Amount);
-                        var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<VaultEntity>().ResourceEntityId);
-
-                        fungibleVaultChanges.Add(new FungibleVaultChange(referencedEntity, resourceEntity, amount, stateVersion));
-                    }
-
                     if (substateData is CoreModel.VaultNonFungibleSubstate vaultNonFungible)
                     {
                         var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<VaultEntity>().ResourceEntityId);
 
                         nonFungibleVaultChanges.Add(new NonFungibleVaultChange(referencedEntity, resourceEntity, vaultNonFungible.NonFungibleIds.Select(nfid => nfid.SimpleRep).ToList(), stateVersion));
-                    }
-
-                    if (substateData is CoreModel.VaultLockedNonFungibleSubstate vaultLockedNonFungible)
-                    {
-                        var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<VaultEntity>().ResourceEntityId);
-
-                        nonFungibleVaultChanges.Add(new NonFungibleVaultChange(referencedEntity, resourceEntity, vaultLockedNonFungible.NonFungibleIds.Select(nfid => nfid.SimpleRep).ToList(), stateVersion));
                     }
 
                     if (substateData is CoreModel.KeyValueStoreEntrySubstate keyValueStoreEntry)
@@ -747,7 +732,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             var resourceManagerEntity = referencedEntities.GetByDatabaseId(nfStoreOf.Value);
 
                             nonFungibleIdChanges.Add(new NonFungibleIdChange(referencedEntity, resourceManagerEntity, keyValueStoreEntry.KeyNonFungibleLocalId.SimpleRep,
-                                keyValueStoreEntry.IsDeleted, keyValueStoreEntry.DataStruct.StructData, stateVersion));
+                                keyValueStoreEntry.IsDeleted, keyValueStoreEntry.DataStruct?.StructData.GetDataBytes(), stateVersion));
                         }
                     }
 
@@ -903,13 +888,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         KeyValueStoreEntityId = e.ReferencedStore.DatabaseId,
                         NonFungibleResourceEntityId = e.ReferencedResource.DatabaseId,
                         NonFungibleId = e.NonFungibleId,
-                        // TODO ImmutableData = e.Data?.GetImmutableDataRawBytes() ?? Array.Empty<byte>(),
                     };
 
                     nonFungibleIdDataToAdd.Add(ret);
 
                     return ret;
                 });
+
                 var nonFungibleIdStore = nonFungibleIdStoreHistoryToAdd.GetOrAdd(new NonFungibleStoreLookup(e.ReferencedStore.DatabaseGlobalAncestorId, e.StateVersion), _ =>
                 {
                     IEnumerable<long> previousNonFungibleIdDataIds = mostRecentNonFungibleIdStoreHistory.ContainsKey(e.ReferencedStore.DatabaseGlobalAncestorId)
@@ -936,7 +921,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     FromStateVersion = e.StateVersion,
                     NonFungibleIdDataId = nonFungibleIdData.Id,
                     IsDeleted = e.IsDeleted,
-                    // TODO MutableData = e.Data?.GetMutableDataRawBytes() ?? Array.Empty<byte>(),
+                    MutableData = e.MutableData,
                 });
 
                 if (!nonFungibleIdStore.NonFungibleIdDataIds.Contains(nonFungibleIdData.Id))

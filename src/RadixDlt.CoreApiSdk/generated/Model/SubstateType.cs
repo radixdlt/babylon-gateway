@@ -222,28 +222,16 @@ namespace RadixDlt.CoreApiSdk.Model
         VaultNonFungible = 21,
 
         /// <summary>
-        /// Enum VaultLockedFungible for value: VaultLockedFungible
-        /// </summary>
-        [EnumMember(Value = "VaultLockedFungible")]
-        VaultLockedFungible = 22,
-
-        /// <summary>
-        /// Enum VaultLockedNonFungible for value: VaultLockedNonFungible
-        /// </summary>
-        [EnumMember(Value = "VaultLockedNonFungible")]
-        VaultLockedNonFungible = 23,
-
-        /// <summary>
         /// Enum AccessController for value: AccessController
         /// </summary>
         [EnumMember(Value = "AccessController")]
-        AccessController = 24,
+        AccessController = 22,
 
         /// <summary>
         /// Enum Account for value: Account
         /// </summary>
         [EnumMember(Value = "Account")]
-        Account = 25
+        Account = 23
 
     }
 

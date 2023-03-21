@@ -84,70 +84,50 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// VaultLockedFungibleSubstate
+    /// VaultInfoSubstateAllOf
     /// </summary>
-    [DataContract(Name = "VaultLockedFungibleSubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockSubstate), "Clock")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerSubstate), "FungibleResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerSubstate), "NonFungibleResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFunctionAccessRulesSubstate), "PackageFunctionAccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltySubstate), "PackageRoyalty")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class VaultLockedFungibleSubstate : Substate, IEquatable<VaultLockedFungibleSubstate>
+    [DataContract(Name = "VaultInfoSubstate_allOf")]
+    public partial class VaultInfoSubstateAllOf : IEquatable<VaultInfoSubstateAllOf>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="VaultLockedFungibleSubstate" /> class.
+        /// Gets or Sets ResourceType
+        /// </summary>
+        [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
+        public ResourceType ResourceType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VaultInfoSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected VaultLockedFungibleSubstate() { }
+        protected VaultInfoSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="VaultLockedFungibleSubstate" /> class.
+        /// Initializes a new instance of the <see cref="VaultInfoSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="amount">The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.VaultLockedFungible).</param>
-        public VaultLockedFungibleSubstate(string amount = default(string), SubstateType substateType = SubstateType.VaultLockedFungible) : base(substateType)
+        /// <param name="resourceType">resourceType (required).</param>
+        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        public VaultInfoSubstateAllOf(ResourceType resourceType = default(ResourceType), string resourceAddress = default(string))
         {
-            // to ensure "amount" is required (not null)
-            if (amount == null)
+            this.ResourceType = resourceType;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("amount is a required property for VaultLockedFungibleSubstate and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for VaultInfoSubstateAllOf and cannot be null");
             }
-            this.Amount = amount;
+            this.ResourceAddress = resourceAddress;
         }
 
         /// <summary>
-        /// The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// The Bech32m-encoded human readable version of the resource address
         /// </summary>
-        /// <value>The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public string Amount { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource address</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -156,9 +136,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class VaultLockedFungibleSubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("class VaultInfoSubstateAllOf {\n");
+            sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -167,7 +147,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -179,25 +159,29 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as VaultLockedFungibleSubstate);
+            return this.Equals(input as VaultInfoSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if VaultLockedFungibleSubstate instances are equal
+        /// Returns true if VaultInfoSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of VaultLockedFungibleSubstate to be compared</param>
+        /// <param name="input">Instance of VaultInfoSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(VaultLockedFungibleSubstate input)
+        public bool Equals(VaultInfoSubstateAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.Amount == input.Amount ||
-                    (this.Amount != null &&
-                    this.Amount.Equals(input.Amount))
+                    this.ResourceType == input.ResourceType ||
+                    this.ResourceType.Equals(input.ResourceType)
+                ) && 
+                (
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 );
         }
 
@@ -209,10 +193,11 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.Amount != null)
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
                 return hashCode;
             }

@@ -606,11 +606,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
 
-                    b.Property<byte[]>("ImmutableData")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("immutable_data");
-
                     b.Property<long>("KeyValueStoreEntityId")
                         .HasColumnType("bigint")
                         .HasColumnName("key_value_store_entity_id");
@@ -651,7 +646,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnName("is_deleted");
 
                     b.Property<byte[]>("MutableData")
-                        .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("mutable_data");
 

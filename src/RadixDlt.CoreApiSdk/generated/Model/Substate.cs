@@ -139,10 +139,6 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungibleSubstate")]
     [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
     [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfoSubstate")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungibleSubstate")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungibleSubstate")]
     [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungibleSubstate")]
     public partial class Substate : IEquatable<Substate>

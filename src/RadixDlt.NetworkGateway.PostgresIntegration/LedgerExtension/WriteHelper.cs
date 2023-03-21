@@ -377,7 +377,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY resource_manager_entity_supply_history (id, from_state_version, resource_manager_entity_id, total_supply, total_minted, total_burnt) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY resource_entity_supply_history (id, from_state_version, resource_entity_id, total_supply, total_minted, total_burnt) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -532,7 +532,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_id_data (id, from_state_version, key_value_store_entity_id, non_fungible_resource_entity_id, non_fungible_id, immutable_data) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_id_data (id, from_state_version, key_value_store_entity_id, non_fungible_resource_entity_id, non_fungible_id) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -542,7 +542,6 @@ internal class WriteHelper
             await writer.WriteAsync(e.KeyValueStoreEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.NonFungibleResourceEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.NonFungibleId, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(e.ImmutableData, NpgsqlDbType.Bytea, token);
         }
 
         await writer.CompleteAsync(token);
@@ -566,7 +565,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.NonFungibleIdDataId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
-            await writer.WriteAsync(e.MutableData, NpgsqlDbType.Bytea, token);
+            await writer.WriteNullableAsync(e.MutableData, NpgsqlDbType.Bytea, token);
         }
 
         await writer.CompleteAsync(token);

@@ -117,11 +117,15 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
     [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
     public partial class VaultInfoSubstate : Substate, IEquatable<VaultInfoSubstate>
     {
+
+        /// <summary>
+        /// Gets or Sets ResourceType
+        /// </summary>
+        [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
+        public ResourceType ResourceType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="VaultInfoSubstate" /> class.
         /// </summary>
@@ -130,10 +134,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="VaultInfoSubstate" /> class.
         /// </summary>
+        /// <param name="resourceType">resourceType (required).</param>
         /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.VaultInfo).</param>
-        public VaultInfoSubstate(string resourceAddress = default(string), SubstateType substateType = SubstateType.VaultInfo) : base(substateType)
+        public VaultInfoSubstate(ResourceType resourceType = default(ResourceType), string resourceAddress = default(string), SubstateType substateType = SubstateType.VaultInfo) : base(substateType)
         {
+            this.ResourceType = resourceType;
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
             {
@@ -158,6 +164,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class VaultInfoSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -195,6 +202,10 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
+                    this.ResourceType == input.ResourceType ||
+                    this.ResourceType.Equals(input.ResourceType)
+                ) && base.Equals(input) && 
+                (
                     this.ResourceAddress == input.ResourceAddress ||
                     (this.ResourceAddress != null &&
                     this.ResourceAddress.Equals(input.ResourceAddress))
@@ -210,6 +221,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
+                hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
                 if (this.ResourceAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();

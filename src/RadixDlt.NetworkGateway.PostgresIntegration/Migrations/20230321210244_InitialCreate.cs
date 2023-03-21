@@ -306,8 +306,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     key_value_store_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     non_fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    non_fungible_id = table.Column<string>(type: "text", nullable: false),
-                    immutable_data = table.Column<byte[]>(type: "bytea", nullable: false)
+                    non_fungible_id = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -323,7 +322,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     non_fungible_id_data_id = table.Column<long>(type: "bigint", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
-                    mutable_data = table.Column<byte[]>(type: "bytea", nullable: false)
+                    mutable_data = table.Column<byte[]>(type: "bytea", nullable: true)
                 },
                 constraints: table =>
                 {

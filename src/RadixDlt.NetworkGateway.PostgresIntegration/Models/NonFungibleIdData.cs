@@ -85,7 +85,4 @@ internal class NonFungibleIdData
 
     [Column("non_fungible_id")]
     public string NonFungibleId { get; set; }
-
-    [Column("immutable_data")]
-    public byte[] ImmutableData { get; set; }
 }
