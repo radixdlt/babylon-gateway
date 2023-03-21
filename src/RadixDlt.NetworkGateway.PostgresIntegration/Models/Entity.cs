@@ -118,17 +118,17 @@ internal abstract class Entity
     public bool HasParent => AncestorIds != null;
 }
 
-internal abstract class ResourceManagerEntity : ComponentEntity
+internal abstract class ResourceEntity : ComponentEntity
 {
 }
 
-internal class FungibleResourceManagerEntity : ResourceManagerEntity
+internal class FungibleResourceEntity : ResourceEntity
 {
     [Column("divisibility")]
     public int Divisibility { get; set; }
 }
 
-internal class NonFungibleResourceManagerEntity : ResourceManagerEntity
+internal class NonFungibleResourceEntity : ResourceEntity
 {
     [Column("non_fungible_id_type")]
     public NonFungibleIdType NonFungibleIdType { get; set; }
@@ -199,8 +199,8 @@ internal class ClockEntity : ComponentEntity
 
 internal class VaultEntity : ComponentEntity
 {
-    [Column("resource_manager_entity_id")]
-    public long ResourceManagerEntityId { get; set; }
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
 
     [Column("royalty_vault_of_entity_id")]
     public long? RoyaltyVaultOfEntityId { get; set; }
@@ -213,7 +213,7 @@ internal class VaultEntity : ComponentEntity
         {
             var ce = base.CorrelatedEntities;
 
-            ce.Add(ResourceManagerEntityId);
+            ce.Add(ResourceEntityId);
 
             if (RoyaltyVaultOfEntityId.HasValue)
             {
@@ -253,8 +253,8 @@ internal class VirtualAccountComponentEntity : AccountComponentEntity
 
 internal class KeyValueStoreEntity : Entity
 {
-    [Column("store_of_non_fungible_resource_manager_entity_id")]
-    public long? StoreOfNonFungibleResourceManagerEntityId { get; set; }
+    [Column("store_of_non_fungible_resource_entity_id")]
+    public long? StoreOfNonFungibleResourceEntityId { get; set; }
 }
 
 internal class AccessControllerEntity : Entity

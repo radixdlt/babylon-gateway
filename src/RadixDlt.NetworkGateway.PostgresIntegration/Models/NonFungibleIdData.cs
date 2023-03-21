@@ -80,8 +80,8 @@ internal class NonFungibleIdData
     [Column("non_fungible_store_entity_id")]
     public long NonFungibleStoreEntityId { get; set; }
 
-    [Column("non_fungible_resource_manager_entity_id")]
-    public long NonFungibleResourceManagerEntityId { get; set; }
+    [Column("non_fungible_resource_entity_id")]
+    public long NonFungibleResourceEntityId { get; set; }
 
     [Column("non_fungible_id")]
     public string NonFungibleId { get; set; }

@@ -175,7 +175,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         switch (entity)
         {
-            case FungibleResourceManagerEntity frme:
+            case FungibleResourceEntity frme:
             {
                 // TODO ideally we'd like to run those as either single query or separate ones but without await between them
 
@@ -185,8 +185,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     .FirstAsync(token);
 
                 var vaultAccessRulesChain = await _dbContext.EntityAccessRulesChainHistory
-                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == frme.Id &&
-                                e.Subtype == AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain)
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == frme.Id && e.Subtype == AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
@@ -198,7 +197,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 break;
             }
 
-            case NonFungibleResourceManagerEntity nfrme:
+            case NonFungibleResourceEntity nfrme:
             {
                 // TODO ideally we'd like to run those as either single query or separate ones but without await between them
 
@@ -289,7 +288,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
     public async Task<GatewayModel.StateEntityFungibleResourceVaultsPageResponse> EntityFungibleResourceVaults(IEntityStateQuerier.ResourceVaultsPageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity<ComponentEntity>(request.Address, ledgerState, token);
-        var resourceEntity = await GetEntity<FungibleResourceManagerEntity>(request.ResourceAddress, ledgerState, token);
+        var resourceEntity = await GetEntity<FungibleResourceEntity>(request.ResourceAddress, ledgerState, token);
         var fungibles = await GetFungibleResourceVaults(entity.Id, resourceEntity.Id, request.Offset, request.Limit, ledgerState, token);
 
         return new GatewayModel.StateEntityFungibleResourceVaultsPageResponse(
@@ -299,7 +298,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
     public async Task<GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse> EntityNonFungibleResourceVaults(IEntityStateQuerier.ResourceVaultsPageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity<ComponentEntity>(request.Address, ledgerState, token);
-        var resourceEntity = await GetEntity<NonFungibleResourceManagerEntity>(request.ResourceAddress, ledgerState, token);
+        var resourceEntity = await GetEntity<NonFungibleResourceEntity>(request.ResourceAddress, ledgerState, token);
         var nonFungibles = await GetNonFungibleResourceVaults(entity.Id, resourceEntity.Id, request.Offset, request.Limit, ledgerState, token);
 
         return new GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse(
@@ -310,7 +309,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         string vaultAddress, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity<ComponentEntity>(request.Address, ledgerState, token);
-        var resourceEntity = await GetEntity<NonFungibleResourceManagerEntity>(resourceAddress, ledgerState, token);
+        var resourceEntity = await GetEntity<NonFungibleResourceEntity>(resourceAddress, ledgerState, token);
         var vaultEntityId = await GetVaultEntityId(vaultAddress, ledgerState, token);
         var nonFungibleIds = await GetNonFungibleIdsSlice(entity.Id, resourceEntity.Id, vaultEntityId, request.Offset, request.Limit, ledgerState, token);
 
@@ -322,14 +321,14 @@ internal class EntityStateQuerier : IEntityStateQuerier
     public async Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
-        var entity = await GetEntity<NonFungibleResourceManagerEntity>(request.Address, ledgerState, token);
+        var entity = await GetEntity<NonFungibleResourceEntity>(request.Address, ledgerState, token);
 
         var cd = new CommandDefinition(
             commandText: @"
 WITH most_recent_non_fungible_id_store_history_slice (non_fungible_id_data_ids, non_fungible_ids_total_count) AS (
     SELECT non_fungible_id_data_ids[@offset:@limit], cardinality(non_fungible_id_data_ids)
     FROM non_fungible_id_store_history
-    WHERE from_state_version <= @stateVersion AND non_fungible_resource_manager_entity_id = @entityId
+    WHERE from_state_version <= @stateVersion AND non_fungible_resource_entity_id = @entityId
     ORDER BY from_state_version DESC
     LIMIT 1
 )
@@ -378,7 +377,7 @@ ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
 
     public async Task<GatewayModel.StateNonFungibleDetailsResponse> NonFungibleIdData(GlobalAddress resourceAddress, IList<string> nonFungibleIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
-        var entity = await GetEntity<NonFungibleResourceManagerEntity>(resourceAddress, ledgerState, token);
+        var entity = await GetEntity<NonFungibleResourceEntity>(resourceAddress, ledgerState, token);
 
         var cd = new CommandDefinition(
             commandText: @"
@@ -391,7 +390,7 @@ LEFT JOIN LATERAL (
     ORDER BY nfidmdh.from_state_version DESC
     LIMIT 1
 ) md ON TRUE
-WHERE nfid.from_state_version <= @stateVersion AND nfid.non_fungible_resource_manager_entity_id = @entityId AND nfid.non_fungible_id IN (@nonFungibleId)
+WHERE nfid.from_state_version <= @stateVersion AND nfid.non_fungible_resource_entity_id = @entityId AND nfid.non_fungible_id IN (@nonFungibleIds)
 ORDER BY nfid.from_state_version DESC
 LIMIT 1
 ",

@@ -82,7 +82,7 @@ internal class SequencesHolder
 
     public long EntityVaultHistorySequence { get; set; }
 
-    public long ResourceManagerEntitySupplyHistorySequence { get; set; }
+    public long ResourceEntitySupplyHistorySequence { get; set; }
 
     public long NonFungibleIdDataSequence { get; set; }
 

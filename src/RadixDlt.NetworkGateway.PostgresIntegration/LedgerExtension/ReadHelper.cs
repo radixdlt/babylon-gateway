@@ -162,18 +162,18 @@ INNER JOIN LATERAL (
         }
 
         var entityIds = new List<long>();
-        var resourceManagerEntityIds = new List<long>();
+        var resourceEntityIds = new List<long>();
 
         foreach (var d in data)
         {
             entityIds.Add(d.EntityId);
-            resourceManagerEntityIds.Add(d.ResourceManagerEntityId);
+            resourceEntityIds.Add(d.ResourceEntityId);
         }
 
         return await _dbContext.EntityResourceAggregatedVaultsHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id, resource_entity_id) AS (
-    SELECT UNNEST({entityIds}), UNNEST({resourceManagerEntityIds})
+    SELECT UNNEST({entityIds}), UNNEST({resourceEntityIds})
 )
 SELECT eravh.*
 FROM variables
@@ -205,18 +205,18 @@ INNER JOIN LATERAL (
         }
 
         var entityIds = new List<long>();
-        var resourceManagerEntityIds = new List<long>();
+        var resourceEntityIds = new List<long>();
 
         foreach (var d in data)
         {
             entityIds.Add(d.EntityId);
-            resourceManagerEntityIds.Add(d.ResourceManagerEntityId);
+            resourceEntityIds.Add(d.ResourceEntityId);
         }
 
         return await _dbContext.EntityResourceVaultAggregateHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id, resource_entity_id) AS (
-    SELECT UNNEST({entityIds}), UNNEST({resourceManagerEntityIds})
+    SELECT UNNEST({entityIds}), UNNEST({resourceEntityIds})
 )
 SELECT ervah.*
 FROM variables
@@ -245,34 +245,34 @@ FROM variables
 INNER JOIN LATERAL (
     SELECT *
     FROM non_fungible_id_store_history
-    WHERE non_fungible_resource_manager_entity_id = variables.entity_id
+    WHERE non_fungible_resource_entity_id = variables.entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) emh ON true;")
             .AsNoTracking()
-            .ToDictionaryAsync(e => e.NonFungibleResourceManagerEntityId, token);
+            .ToDictionaryAsync(e => e.NonFungibleResourceEntityId, token);
     }
 
-    public async Task<Dictionary<long, ResourceManagerEntitySupplyHistory>> MostRecentResourceManagerEntitySupplyHistoryFor(List<ResourceManagerSupplyChange> resourceManagerSupplyChanges, CancellationToken token)
+    public async Task<Dictionary<long, ResourceEntitySupplyHistory>> MostRecentResourceEntitySupplyHistoryFor(List<ResourceSupplyChange> resourceSupplyChanges, CancellationToken token)
     {
-        var ids = resourceManagerSupplyChanges.Select(c => c.ResourceEntity.DatabaseId).Distinct().ToList();
+        var ids = resourceSupplyChanges.Select(c => c.ResourceEntity.DatabaseId).Distinct().ToList();
 
-        return await _dbContext.ResourceManagerEntitySupplyHistory
+        return await _dbContext.ResourceEntitySupplyHistory
             .FromSqlInterpolated(@$"
-WITH variables (resource_manager_entity_id) AS (
+WITH variables (resource_entity_id) AS (
     SELECT UNNEST({ids})
 )
 SELECT rmesh.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
-    FROM resource_manager_entity_supply_history
-    WHERE resource_manager_entity_id = variables.resource_manager_entity_id
+    FROM resource_entity_supply_history
+    WHERE resource_entity_id = variables.resource_entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) rmesh ON true;")
             .AsNoTracking()
-            .ToDictionaryAsync(e => e.ResourceManagerEntityId, token);
+            .ToDictionaryAsync(e => e.ResourceEntityId, token);
     }
 
     public async Task<Dictionary<string, Entity>> ExistingEntitiesFor(ReferencedEntityDictionary referencedEntities, CancellationToken token)
@@ -298,7 +298,7 @@ WHERE id IN(
     public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
     {
         var nonFungibles = new HashSet<NonFungibleIdLookup>();
-        var resourceManagerEntityIds = new List<long>();
+        var resourceEntityIds = new List<long>();
         var nonFungibleIds = new List<string>();
 
         foreach (var nonFungibleIdChange in nonFungibleIdStoreChanges)
@@ -316,17 +316,17 @@ WHERE id IN(
 
         foreach (var nf in nonFungibles)
         {
-            resourceManagerEntityIds.Add(nf.ResourceManagerEntityId);
+            resourceEntityIds.Add(nf.ResourceEntityId);
             nonFungibleIds.Add(nf.NonFungibleId);
         }
 
         return await _dbContext.NonFungibleIdData
             .FromSqlInterpolated(@$"
-SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_manager_entity_id, non_fungible_id) IN (
-    SELECT UNNEST({resourceManagerEntityIds}), UNNEST({nonFungibleIds})
+SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_fungible_id) IN (
+    SELECT UNNEST({resourceEntityIds}), UNNEST({nonFungibleIds})
 )")
             .AsNoTracking()
-            .ToDictionaryAsync(e => new NonFungibleIdLookup(e.NonFungibleResourceManagerEntityId, e.NonFungibleId), token);
+            .ToDictionaryAsync(e => new NonFungibleIdLookup(e.NonFungibleResourceEntityId, e.NonFungibleId), token);
     }
 
     public async Task<Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>> ExistingValidatorKeysFor(List<ValidatorSetChange> validatorKeyLookups, CancellationToken token)
@@ -381,7 +381,7 @@ SELECT
     nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
     nextval('entity_resource_vault_aggregate_history_id_seq') AS EntityResourceVaultAggregateHistorySequence,
     nextval('entity_vault_history_id_seq') AS EntityVaultHistorySequence,
-    nextval('resource_manager_entity_supply_history_id_seq') AS ResourceManagerEntitySupplyHistorySequence,
+    nextval('resource_entity_supply_history_id_seq') AS ResourceEntitySupplyHistorySequence,
     nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
     nextval('non_fungible_id_mutable_data_history_id_seq') AS NonFungibleIdMutableDataHistorySequence,
     nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence,

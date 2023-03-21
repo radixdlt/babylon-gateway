@@ -67,8 +67,8 @@ namespace RadixDlt.NetworkGateway.Abstractions.Model;
 public enum EntityType
 {
     EpochManager,
-    FungibleResourceManager,
-    NonFungibleResourceManager,
+    FungibleResource,
+    NonFungibleResource,
     NormalComponent,
     AccountComponent,
     Package,
