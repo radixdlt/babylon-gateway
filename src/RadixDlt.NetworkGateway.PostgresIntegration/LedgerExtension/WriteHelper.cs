@@ -129,7 +129,7 @@ internal class WriteHelper
 
             if (e is KeyValueStoreEntity kvse)
             {
-                await writer.WriteNullableAsync(kvse.StoreOfNonFungibleResourceManagerEntityId, NpgsqlDbType.Boolean, token);
+                await writer.WriteNullableAsync(kvse.StoreOfNonFungibleResourceManagerEntityId, NpgsqlDbType.Bigint, token);
             }
             else
             {

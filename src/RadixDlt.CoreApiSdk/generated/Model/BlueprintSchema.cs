@@ -106,7 +106,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="schema">schema (required).</param>
         /// <param name="substates">The type index of the substates under the SELF module - in the context of the blueprint&#39;s SBOR schema.  (required).</param>
         /// <param name="functionDefinitions">A map from the function name to the FunctionDefinition (required).</param>
-        public BlueprintSchema(SborData schema = default(SborData), List<LocalTypeIndex> substates = default(List<LocalTypeIndex>), Dictionary<string, FunctionDefinition> functionDefinitions = default(Dictionary<string, FunctionDefinition>))
+        /// <param name="eventDefinitions">A map from the event name to the local type index for the event payload under the blueprint schema. (required).</param>
+        public BlueprintSchema(SborData schema = default(SborData), List<LocalTypeIndex> substates = default(List<LocalTypeIndex>), Dictionary<string, FunctionDefinition> functionDefinitions = default(Dictionary<string, FunctionDefinition>), Dictionary<string, LocalTypeIndex> eventDefinitions = default(Dictionary<string, LocalTypeIndex>))
         {
             // to ensure "schema" is required (not null)
             if (schema == null)
@@ -126,6 +127,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("functionDefinitions is a required property for BlueprintSchema and cannot be null");
             }
             this.FunctionDefinitions = functionDefinitions;
+            // to ensure "eventDefinitions" is required (not null)
+            if (eventDefinitions == null)
+            {
+                throw new ArgumentNullException("eventDefinitions is a required property for BlueprintSchema and cannot be null");
+            }
+            this.EventDefinitions = eventDefinitions;
         }
 
         /// <summary>
@@ -149,6 +156,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public Dictionary<string, FunctionDefinition> FunctionDefinitions { get; set; }
 
         /// <summary>
+        /// A map from the event name to the local type index for the event payload under the blueprint schema.
+        /// </summary>
+        /// <value>A map from the event name to the local type index for the event payload under the blueprint schema.</value>
+        [DataMember(Name = "event_definitions", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, LocalTypeIndex> EventDefinitions { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -159,6 +173,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  Schema: ").Append(Schema).Append("\n");
             sb.Append("  Substates: ").Append(Substates).Append("\n");
             sb.Append("  FunctionDefinitions: ").Append(FunctionDefinitions).Append("\n");
+            sb.Append("  EventDefinitions: ").Append(EventDefinitions).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -210,6 +225,12 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.FunctionDefinitions != null &&
                     input.FunctionDefinitions != null &&
                     this.FunctionDefinitions.SequenceEqual(input.FunctionDefinitions)
+                ) && 
+                (
+                    this.EventDefinitions == input.EventDefinitions ||
+                    this.EventDefinitions != null &&
+                    input.EventDefinitions != null &&
+                    this.EventDefinitions.SequenceEqual(input.EventDefinitions)
                 );
         }
 
@@ -233,6 +254,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.FunctionDefinitions != null)
                 {
                     hashCode = (hashCode * 59) + this.FunctionDefinitions.GetHashCode();
+                }
+                if (this.EventDefinitions != null)
+                {
+                    hashCode = (hashCode * 59) + this.EventDefinitions.GetHashCode();
                 }
                 return hashCode;
             }

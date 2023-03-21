@@ -162,100 +162,88 @@ namespace RadixDlt.CoreApiSdk.Model
         PackageFunctionAccessRules = 11,
 
         /// <summary>
-        /// Enum PackageEventSchema for value: PackageEventSchema
-        /// </summary>
-        [EnumMember(Value = "PackageEventSchema")]
-        PackageEventSchema = 12,
-
-        /// <summary>
-        /// Enum EitherResourceManager for value: EitherResourceManager
-        /// </summary>
-        [EnumMember(Value = "EitherResourceManager")]
-        EitherResourceManager = 13,
-
-        /// <summary>
         /// Enum FungibleResourceManager for value: FungibleResourceManager
         /// </summary>
         [EnumMember(Value = "FungibleResourceManager")]
-        FungibleResourceManager = 14,
+        FungibleResourceManager = 12,
 
         /// <summary>
         /// Enum NonFungibleResourceManager for value: NonFungibleResourceManager
         /// </summary>
         [EnumMember(Value = "NonFungibleResourceManager")]
-        NonFungibleResourceManager = 15,
+        NonFungibleResourceManager = 13,
 
         /// <summary>
         /// Enum EpochManager for value: EpochManager
         /// </summary>
         [EnumMember(Value = "EpochManager")]
-        EpochManager = 16,
+        EpochManager = 14,
 
         /// <summary>
         /// Enum ValidatorSet for value: ValidatorSet
         /// </summary>
         [EnumMember(Value = "ValidatorSet")]
-        ValidatorSet = 17,
+        ValidatorSet = 15,
 
         /// <summary>
         /// Enum Validator for value: Validator
         /// </summary>
         [EnumMember(Value = "Validator")]
-        Validator = 18,
+        Validator = 16,
 
         /// <summary>
         /// Enum Clock for value: Clock
         /// </summary>
         [EnumMember(Value = "Clock")]
-        Clock = 19,
+        Clock = 17,
 
         /// <summary>
         /// Enum KeyValueStoreEntry for value: KeyValueStoreEntry
         /// </summary>
         [EnumMember(Value = "KeyValueStoreEntry")]
-        KeyValueStoreEntry = 20,
+        KeyValueStoreEntry = 18,
 
         /// <summary>
         /// Enum VaultInfo for value: VaultInfo
         /// </summary>
         [EnumMember(Value = "VaultInfo")]
-        VaultInfo = 21,
+        VaultInfo = 19,
 
         /// <summary>
         /// Enum VaultFungible for value: VaultFungible
         /// </summary>
         [EnumMember(Value = "VaultFungible")]
-        VaultFungible = 22,
+        VaultFungible = 20,
 
         /// <summary>
         /// Enum VaultNonFungible for value: VaultNonFungible
         /// </summary>
         [EnumMember(Value = "VaultNonFungible")]
-        VaultNonFungible = 23,
+        VaultNonFungible = 21,
 
         /// <summary>
         /// Enum VaultLockedFungible for value: VaultLockedFungible
         /// </summary>
         [EnumMember(Value = "VaultLockedFungible")]
-        VaultLockedFungible = 24,
+        VaultLockedFungible = 22,
 
         /// <summary>
         /// Enum VaultLockedNonFungible for value: VaultLockedNonFungible
         /// </summary>
         [EnumMember(Value = "VaultLockedNonFungible")]
-        VaultLockedNonFungible = 25,
+        VaultLockedNonFungible = 23,
 
         /// <summary>
         /// Enum AccessController for value: AccessController
         /// </summary>
         [EnumMember(Value = "AccessController")]
-        AccessController = 26,
+        AccessController = 24,
 
         /// <summary>
         /// Enum Account for value: Account
         /// </summary>
         [EnumMember(Value = "Account")]
-        Account = 27
+        Account = 25
 
     }
 

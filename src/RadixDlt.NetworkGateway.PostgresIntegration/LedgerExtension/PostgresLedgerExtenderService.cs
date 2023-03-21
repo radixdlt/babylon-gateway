@@ -322,10 +322,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         );
 
                     referencedEntity.Globalize((GlobalAddress)newGlobalEntity.GlobalAddress);
-
-                    var typeHint = newGlobalEntity.EntityReference.EntityType switch
+                    referencedEntity.WithTypeHint(newGlobalEntity.EntityReference.EntityType switch
                     {
-                        CoreModel.EntityType.Component => typeof(NormalComponentEntity),
+                        CoreModel.EntityType.NormalComponent => typeof(NormalComponentEntity),
                         CoreModel.EntityType.Package => typeof(PackageEntity),
                         CoreModel.EntityType.EpochManager => typeof(EpochManagerEntity),
                         CoreModel.EntityType.Clock => typeof(ClockEntity),
@@ -335,14 +334,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         CoreModel.EntityType.Identity => typeof(IdentityEntity),
                         CoreModel.EntityType.KeyValueStore => typeof(KeyValueStoreEntity),
                         CoreModel.EntityType.Vault => typeof(VaultEntity),
-                        CoreModel.EntityType.ResourceManager => null, // Unable to determine type of resource manager based on entity type. It's handled later based on ResourceManagerSubstate.
+                        CoreModel.EntityType.FungibleResource => typeof(FungibleResourceManagerEntity),
+                        CoreModel.EntityType.NonFungibleResource => typeof(NonFungibleResourceManagerEntity),
                         _ => throw new ArgumentOutOfRangeException(),
-                    };
-
-                    if (typeHint != null)
-                    {
-                        referencedEntity.WithTypeHint(typeHint);
-                    }
+                    });
                 }
 
                 foreach (var substate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates).ToList())
@@ -391,7 +386,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (substateData is CoreModel.FungibleResourceManagerSubstate fungibleResourceManager)
                     {
-                        referencedEntity.WithTypeHint(typeof(FungibleResourceManagerEntity)); // TODO remove once CoreApi replace EitherResMgr with FunResMgr entity type
                         referencedEntity.PostResolveConfigure((FungibleResourceManagerEntity e) => e.Divisibility = fungibleResourceManager.Divisibility);
                     }
 
@@ -399,7 +393,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         var dataTable = nonFungibleResourceManager.NonFungibleDataTable;
 
-                        referencedEntity.WithTypeHint(typeof(NonFungibleResourceManagerEntity)); // TODO remove once CoreApi replace EitherResMgr with NonFunResMgr entity type
                         referencedEntity.PostResolveConfigure((NonFungibleResourceManagerEntity e) => e.NonFungibleIdType = nonFungibleResourceManager.NonFungibleIdType switch
                         {
                             CoreModel.NonFungibleIdType.String => NonFungibleIdType.String,
@@ -554,12 +547,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 {
                     EpochManagerEntity => CoreModel.EntityType.EpochManager,
                     AccountComponentEntity => CoreModel.EntityType.Account,
-                    ResourceManagerEntity => CoreModel.EntityType.ResourceManager,
+                    FungibleResourceManagerEntity => CoreModel.EntityType.FungibleResource,
+                    NonFungibleResourceManagerEntity => CoreModel.EntityType.NonFungibleResource,
                     ClockEntity => CoreModel.EntityType.Clock,
                     ValidatorEntity => CoreModel.EntityType.Validator,
                     VaultEntity => CoreModel.EntityType.Vault,
                     PackageEntity => CoreModel.EntityType.Package,
-                    ComponentEntity => CoreModel.EntityType.Component,
+                    ComponentEntity => CoreModel.EntityType.NormalComponent,
                     KeyValueStoreEntity => CoreModel.EntityType.KeyValueStore,
                     AccessControllerEntity => CoreModel.EntityType.AccessController,
                     IdentityEntity => CoreModel.EntityType.Identity,
@@ -581,10 +575,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 Entity dbEntity = referencedEntity.Type switch
                 {
                     CoreModel.EntityType.EpochManager => new EpochManagerEntity(),
-                    CoreModel.EntityType.ResourceManager => referencedEntity.CreateUsingTypeHint<ResourceManagerEntity>(),
+                    CoreModel.EntityType.FungibleResource => referencedEntity.CreateUsingTypeHint<FungibleResourceManagerEntity>(),
+                    CoreModel.EntityType.NonFungibleResource => referencedEntity.CreateUsingTypeHint<NonFungibleResourceManagerEntity>(),
                     // If the component is a local / owned component, it doesn't have a Component/Account type hint
                     // from the address, so assume it's a normal component for now until we can do better from the ComponentInfo
-                    CoreModel.EntityType.Component => referencedEntity.CreateUsingTypeHintOrDefault<ComponentEntity>(typeof(NormalComponentEntity)),
+                    CoreModel.EntityType.NormalComponent => referencedEntity.CreateUsingTypeHintOrDefault<ComponentEntity>(typeof(NormalComponentEntity)),
                     CoreModel.EntityType.Package => new PackageEntity(),
                     CoreModel.EntityType.Vault => new VaultEntity(),
                     CoreModel.EntityType.KeyValueStore => new KeyValueStoreEntity(),
@@ -908,7 +903,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         NonFungibleStoreEntityId = e.ReferencedStore.DatabaseId,
                         NonFungibleResourceManagerEntityId = e.ReferencedResource.DatabaseId,
                         NonFungibleId = e.NonFungibleId,
-                        // ImmutableData = e.Data?.GetImmutableDataRawBytes() ?? Array.Empty<byte>(),
+                        // TODO ImmutableData = e.Data?.GetImmutableDataRawBytes() ?? Array.Empty<byte>(),
                     };
 
                     nonFungibleIdDataToAdd.Add(ret);
@@ -941,7 +936,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     FromStateVersion = e.StateVersion,
                     NonFungibleIdDataId = nonFungibleIdData.Id,
                     IsDeleted = e.IsDeleted,
-                    // MutableData = e.Data?.GetMutableDataRawBytes() ?? Array.Empty<byte>(),
+                    // TODO MutableData = e.Data?.GetMutableDataRawBytes() ?? Array.Empty<byte>(),
                 });
 
                 if (!nonFungibleIdStore.NonFungibleIdDataIds.Contains(nonFungibleIdData.Id))

@@ -89,8 +89,8 @@ internal static class NpgsqlBinaryImporterExtensions
 
     public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, BigInteger? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
     {
-        return value != null
-            ? writer.WriteAsync(value, npgsqlDbType, cancellationToken)
+        return value.HasValue
+            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
             : writer.WriteNullAsync(cancellationToken);
     }
 

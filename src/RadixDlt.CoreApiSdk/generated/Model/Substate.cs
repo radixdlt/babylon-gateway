@@ -123,8 +123,6 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCodeSubstate")]
     [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
     [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeTypeSubstate")]
-    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
-    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchemaSubstate")]
     [JsonSubtypes.KnownSubType(typeof(PackageFunctionAccessRulesSubstate), "PackageFunctionAccessRules")]
     [JsonSubtypes.KnownSubType(typeof(PackageFunctionAccessRulesSubstate), "PackageFunctionAccessRulesSubstate")]
     [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]

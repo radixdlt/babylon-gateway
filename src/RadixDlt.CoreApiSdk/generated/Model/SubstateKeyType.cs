@@ -163,106 +163,94 @@ namespace RadixDlt.CoreApiSdk.Model
         PackageFunctionAccessRules = 11,
 
         /// <summary>
-        /// Enum PackageEventSchema for value: PackageEventSchema
-        /// </summary>
-        [EnumMember(Value = "PackageEventSchema")]
-        PackageEventSchema = 12,
-
-        /// <summary>
-        /// Enum EitherResourceManager for value: EitherResourceManager
-        /// </summary>
-        [EnumMember(Value = "EitherResourceManager")]
-        EitherResourceManager = 13,
-
-        /// <summary>
         /// Enum FungibleResourceManager for value: FungibleResourceManager
         /// </summary>
         [EnumMember(Value = "FungibleResourceManager")]
-        FungibleResourceManager = 14,
+        FungibleResourceManager = 12,
 
         /// <summary>
         /// Enum NonFungibleResourceManager for value: NonFungibleResourceManager
         /// </summary>
         [EnumMember(Value = "NonFungibleResourceManager")]
-        NonFungibleResourceManager = 15,
+        NonFungibleResourceManager = 13,
 
         /// <summary>
         /// Enum EpochManager for value: EpochManager
         /// </summary>
         [EnumMember(Value = "EpochManager")]
-        EpochManager = 16,
+        EpochManager = 14,
 
         /// <summary>
         /// Enum CurrentValidatorSet for value: CurrentValidatorSet
         /// </summary>
         [EnumMember(Value = "CurrentValidatorSet")]
-        CurrentValidatorSet = 17,
+        CurrentValidatorSet = 15,
 
         /// <summary>
         /// Enum PreparingValidatorSet for value: PreparingValidatorSet
         /// </summary>
         [EnumMember(Value = "PreparingValidatorSet")]
-        PreparingValidatorSet = 18,
+        PreparingValidatorSet = 16,
 
         /// <summary>
         /// Enum Validator for value: Validator
         /// </summary>
         [EnumMember(Value = "Validator")]
-        Validator = 19,
+        Validator = 17,
 
         /// <summary>
         /// Enum Clock for value: Clock
         /// </summary>
         [EnumMember(Value = "Clock")]
-        Clock = 20,
+        Clock = 18,
 
         /// <summary>
         /// Enum KeyValueStoreEntry for value: KeyValueStoreEntry
         /// </summary>
         [EnumMember(Value = "KeyValueStoreEntry")]
-        KeyValueStoreEntry = 21,
+        KeyValueStoreEntry = 19,
 
         /// <summary>
         /// Enum VaultInfo for value: VaultInfo
         /// </summary>
         [EnumMember(Value = "VaultInfo")]
-        VaultInfo = 22,
+        VaultInfo = 20,
 
         /// <summary>
         /// Enum VaultFungible for value: VaultFungible
         /// </summary>
         [EnumMember(Value = "VaultFungible")]
-        VaultFungible = 23,
+        VaultFungible = 21,
 
         /// <summary>
         /// Enum VaultNonFungible for value: VaultNonFungible
         /// </summary>
         [EnumMember(Value = "VaultNonFungible")]
-        VaultNonFungible = 24,
+        VaultNonFungible = 22,
 
         /// <summary>
         /// Enum VaultLockedFungible for value: VaultLockedFungible
         /// </summary>
         [EnumMember(Value = "VaultLockedFungible")]
-        VaultLockedFungible = 25,
+        VaultLockedFungible = 23,
 
         /// <summary>
         /// Enum VaultLockedNonFungible for value: VaultLockedNonFungible
         /// </summary>
         [EnumMember(Value = "VaultLockedNonFungible")]
-        VaultLockedNonFungible = 26,
+        VaultLockedNonFungible = 24,
 
         /// <summary>
         /// Enum AccessController for value: AccessController
         /// </summary>
         [EnumMember(Value = "AccessController")]
-        AccessController = 27,
+        AccessController = 25,
 
         /// <summary>
         /// Enum Account for value: Account
         /// </summary>
         [EnumMember(Value = "Account")]
-        Account = 28
+        Account = 26
 
     }
 

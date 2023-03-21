@@ -72,7 +72,8 @@ public sealed record HrpDefinition(
     string Identity,
     string EpochManager,
     string Clock,
-    string Resource
+    string FungibleResource,
+    string NonFungibleResource
 );
 
 public sealed record WellKnownAddresses(
@@ -86,18 +87,19 @@ public sealed record WellKnownAddresses(
 
 public enum AddressSubtype
 {
-    Resource,
     Package,
+    FungibleResource,
+    NonFungibleResource,
     NormalComponent,
     AccountComponent,
     EcdsaSecp256k1VirtualAccountComponent,
     EddsaEd25519VirtualAccountComponent,
-    EpochManager,
-    Clock,
-    Validator,
     IdentityComponent,
     EcdsaSecp256k1VirtualIdentityComponent,
     EddsaEd25519VirtualIdentityComponent,
+    EpochManager,
+    Validator,
+    Clock,
     AccessController,
 }
 
