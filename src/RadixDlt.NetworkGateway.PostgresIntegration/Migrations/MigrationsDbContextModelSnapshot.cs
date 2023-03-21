@@ -611,6 +611,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("immutable_data");
 
+                    b.Property<long>("KeyValueStoreEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("key_value_store_entity_id");
+
                     b.Property<string>("NonFungibleId")
                         .IsRequired()
                         .HasColumnType("text")
@@ -619,10 +623,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<long>("NonFungibleResourceEntityId")
                         .HasColumnType("bigint")
                         .HasColumnName("non_fungible_resource_entity_id");
-
-                    b.Property<long>("NonFungibleStoreEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("non_fungible_store_entity_id");
 
                     b.HasKey("Id");
 
@@ -679,6 +679,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
 
+                    b.Property<long>("KeyValueStoreEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("key_value_store_entity_id");
+
                     b.Property<List<long>>("NonFungibleIdDataIds")
                         .IsRequired()
                         .HasColumnType("bigint[]")
@@ -687,10 +691,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<long>("NonFungibleResourceEntityId")
                         .HasColumnType("bigint")
                         .HasColumnName("non_fungible_resource_entity_id");
-
-                    b.Property<long>("NonFungibleStoreEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("non_fungible_store_entity_id");
 
                     b.HasKey("Id");
 

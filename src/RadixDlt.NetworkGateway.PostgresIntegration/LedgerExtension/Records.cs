@@ -84,10 +84,9 @@ internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, T
 
 internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
 
-// TODO drop in favor of EntityResourceLookup?
 internal record struct EntityResourceVaultLookup(long EntityId, long ResourceEntityId);
 
-internal record struct NonFungibleStoreLookup(long NonFungibleResourceEntityId, long StateVersion);
+internal record struct NonFungibleStoreLookup(long NonFungibleEntityId, long StateVersion);
 
 internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFungibleId);
 

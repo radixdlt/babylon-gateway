@@ -304,7 +304,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    non_fungible_store_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    key_value_store_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     non_fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     non_fungible_id = table.Column<string>(type: "text", nullable: false),
                     immutable_data = table.Column<byte[]>(type: "bytea", nullable: false)
@@ -337,7 +337,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    non_fungible_store_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    key_value_store_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     non_fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     non_fungible_id_data_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
                 },

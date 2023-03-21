@@ -666,7 +666,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         var fungibleVaultChanges = new List<FungibleVaultChange>();
         var nonFungibleVaultChanges = new List<NonFungibleVaultChange>();
-        var nonFungibleIdStoreChanges = new List<NonFungibleIdChange>();
+        var nonFungibleIdChanges = new List<NonFungibleIdChange>();
         var metadataChanges = new List<MetadataChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
@@ -746,7 +746,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         {
                             var resourceManagerEntity = referencedEntities.GetByDatabaseId(nfStoreOf.Value);
 
-                            nonFungibleIdStoreChanges.Add(new NonFungibleIdChange(referencedEntity, resourceManagerEntity, keyValueStoreEntry.KeyNonFungibleLocalId.SimpleRep,
+                            nonFungibleIdChanges.Add(new NonFungibleIdChange(referencedEntity, resourceManagerEntity, keyValueStoreEntry.KeyNonFungibleLocalId.SimpleRep,
                                 keyValueStoreEntry.IsDeleted, keyValueStoreEntry.DataStruct.StructData, stateVersion));
                         }
                     }
@@ -829,9 +829,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var mostRecentEntityResourceAggregateHistory = await readHelper.MostRecentEntityResourceAggregateHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
             var mostRecentEntityResourceAggregatedVaultsHistory = await readHelper.MostRecentEntityResourceAggregatedVaultsHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
             var mostRecentEntityResourceVaultAggregateHistory = await readHelper.MostRecentEntityResourceVaultAggregateHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
-            var mostRecentNonFungibleIdStoreHistory = await readHelper.MostRecentNonFungibleIdStoreHistoryFor(nonFungibleIdStoreChanges, token);
+            var mostRecentNonFungibleIdStoreHistory = await readHelper.MostRecentNonFungibleIdStoreHistoryFor(nonFungibleIdChanges, token);
             var mostRecentResourceEntitySupplyHistory = await readHelper.MostRecentResourceEntitySupplyHistoryFor(resourceSupplyChanges, token);
-            var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdStoreChanges, nonFungibleVaultChanges, token);
+            var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, nonFungibleVaultChanges, token);
             var existingValidatorKeys = await readHelper.ExistingValidatorKeysFor(validatorSetChanges, token);
 
             dbReadDuration += sw.Elapsed;
@@ -892,7 +892,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 }
             }
 
-            foreach (var e in nonFungibleIdStoreChanges)
+            foreach (var e in nonFungibleIdChanges)
             {
                 var nonFungibleIdData = existingNonFungibleIdData.GetOrAdd(new NonFungibleIdLookup(e.ReferencedResource.DatabaseId, e.NonFungibleId), _ =>
                 {
@@ -900,7 +900,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         Id = sequences.NonFungibleIdDataSequence++,
                         FromStateVersion = e.StateVersion,
-                        NonFungibleStoreEntityId = e.ReferencedStore.DatabaseId,
+                        KeyValueStoreEntityId = e.ReferencedStore.DatabaseId,
                         NonFungibleResourceEntityId = e.ReferencedResource.DatabaseId,
                         NonFungibleId = e.NonFungibleId,
                         // TODO ImmutableData = e.Data?.GetImmutableDataRawBytes() ?? Array.Empty<byte>(),
@@ -920,7 +920,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         Id = sequences.NonFungibleIdStoreHistorySequence++,
                         FromStateVersion = e.StateVersion,
-                        NonFungibleStoreEntityId = e.ReferencedStore.DatabaseId,
+                        KeyValueStoreEntityId = e.ReferencedStore.DatabaseId,
                         NonFungibleResourceEntityId = e.ReferencedStore.DatabaseGlobalAncestorId,
                         NonFungibleIdDataIds = new List<long>(previousNonFungibleIdDataIds),
                     };
