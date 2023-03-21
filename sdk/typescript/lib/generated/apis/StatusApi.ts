@@ -15,11 +15,14 @@
 
 import * as runtime from '../runtime';
 import type {
-  GatewayInformationResponse,
+  GatewayStatusResponse,
+  NetworkConfigurationResponse,
 } from '../models';
 import {
-    GatewayInformationResponseFromJSON,
-    GatewayInformationResponseToJSON,
+    GatewayStatusResponseFromJSON,
+    GatewayStatusResponseToJSON,
+    NetworkConfigurationResponseFromJSON,
+    NetworkConfigurationResponseToJSON,
 } from '../models';
 
 /**
@@ -28,30 +31,58 @@ import {
 export class StatusApi extends runtime.BaseAPI {
 
     /**
-     * Returns the Gateway API version, current ledger state and well-known network addresses. 
-     * Get Gateway Information
+     * Returns the Gateway API version and current ledger state. 
+     * Get Gateway Status
      */
-    async gatewayInformationRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GatewayInformationResponse>> {
+    async gatewayStatusRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GatewayStatusResponse>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/gateway/information`,
+            path: `/status/gateway-status`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => GatewayInformationResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => GatewayStatusResponseFromJSON(jsonValue));
     }
 
     /**
-     * Returns the Gateway API version, current ledger state and well-known network addresses. 
-     * Get Gateway Information
+     * Returns the Gateway API version and current ledger state. 
+     * Get Gateway Status
      */
-    async gatewayInformation(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GatewayInformationResponse> {
-        const response = await this.gatewayInformationRaw(initOverrides);
+    async gatewayStatus(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GatewayStatusResponse> {
+        const response = await this.gatewayStatusRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Returns network identifier, network name and well-known network addresses. 
+     * Get Network Configuration
+     */
+    async networkConfigurationRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<NetworkConfigurationResponse>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/status/network-configuration`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => NetworkConfigurationResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns network identifier, network name and well-known network addresses. 
+     * Get Network Configuration
+     */
+    async networkConfiguration(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<NetworkConfigurationResponse> {
+        const response = await this.networkConfigurationRaw(initOverrides);
         return await response.value();
     }
 

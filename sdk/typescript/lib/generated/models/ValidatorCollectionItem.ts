@@ -33,7 +33,7 @@ import {
  */
 export interface ValidatorCollectionItem {
     /**
-     * Bech32m-encoded human readable version of the entity's global address.
+     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
      * @type {string}
      * @memberof ValidatorCollectionItem
      */
@@ -44,6 +44,12 @@ export interface ValidatorCollectionItem {
      * @memberof ValidatorCollectionItem
      */
     state?: object | null;
+    /**
+     * String-encoded decimal representing the amount of a related fungible resource.
+     * @type {string}
+     * @memberof ValidatorCollectionItem
+     */
+    current_stake: string;
     /**
      * 
      * @type {ValidatorCollectionItemActiveInEpoch}
@@ -64,6 +70,7 @@ export interface ValidatorCollectionItem {
 export function instanceOfValidatorCollectionItem(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "address" in value;
+    isInstance = isInstance && "current_stake" in value;
     isInstance = isInstance && "metadata" in value;
 
     return isInstance;
@@ -81,6 +88,7 @@ export function ValidatorCollectionItemFromJSONTyped(json: any, ignoreDiscrimina
         
         'address': json['address'],
         'state': !exists(json, 'state') ? undefined : json['state'],
+        'current_stake': json['current_stake'],
         'active_in_epoch': !exists(json, 'active_in_epoch') ? undefined : ValidatorCollectionItemActiveInEpochFromJSON(json['active_in_epoch']),
         'metadata': EntityMetadataCollectionFromJSON(json['metadata']),
     };
@@ -97,6 +105,7 @@ export function ValidatorCollectionItemToJSON(value?: ValidatorCollectionItem | 
         
         'address': value.address,
         'state': value.state,
+        'current_stake': value.current_stake,
         'active_in_epoch': ValidatorCollectionItemActiveInEpochToJSON(value.active_in_epoch),
         'metadata': EntityMetadataCollectionToJSON(value.metadata),
     };

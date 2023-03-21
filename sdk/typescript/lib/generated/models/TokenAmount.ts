@@ -26,7 +26,7 @@ export interface TokenAmount {
      */
     value: string;
     /**
-     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
+     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
      * @type {string}
      * @memberof TokenAmount
      */

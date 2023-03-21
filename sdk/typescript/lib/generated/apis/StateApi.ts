@@ -15,107 +15,107 @@
 
 import * as runtime from '../runtime';
 import type {
-  EntityDetailsRequest,
-  EntityDetailsResponse,
-  EntityFungiblesRequest,
-  EntityFungiblesResponse,
-  EntityMetadataRequest,
-  EntityMetadataResponse,
-  EntityNonFungibleIdsRequest,
-  EntityNonFungibleIdsResponse,
-  EntityNonFungiblesRequest,
-  EntityNonFungiblesResponse,
-  EntityOverviewRequest,
-  EntityOverviewResponse,
-  EntityResourcesRequest,
-  EntityResourcesResponse,
   ErrorResponse,
-  NonFungibleDataRequest,
-  NonFungibleDataResponse,
-  NonFungibleIdsRequest,
-  NonFungibleIdsResponse,
+  StateEntityDetailsRequest,
+  StateEntityDetailsResponse,
+  StateEntityFungibleResourceVaultsPageRequest,
+  StateEntityFungibleResourceVaultsPageResponse,
+  StateEntityFungiblesPageRequest,
+  StateEntityFungiblesPageResponse,
+  StateEntityMetadataPageRequest,
+  StateEntityMetadataPageResponse,
+  StateEntityNonFungibleIdsPageRequest,
+  StateEntityNonFungibleIdsPageResponse,
+  StateEntityNonFungibleResourceVaultsPageRequest,
+  StateEntityNonFungibleResourceVaultsPageResponse,
+  StateEntityNonFungiblesPageRequest,
+  StateEntityNonFungiblesPageResponse,
+  StateNonFungibleDetailsRequest,
+  StateNonFungibleDetailsResponse,
+  StateNonFungibleIdsRequest,
+  StateNonFungibleIdsResponse,
   StateValidatorsListRequest,
   StateValidatorsListResponse,
 } from '../models';
 import {
-    EntityDetailsRequestFromJSON,
-    EntityDetailsRequestToJSON,
-    EntityDetailsResponseFromJSON,
-    EntityDetailsResponseToJSON,
-    EntityFungiblesRequestFromJSON,
-    EntityFungiblesRequestToJSON,
-    EntityFungiblesResponseFromJSON,
-    EntityFungiblesResponseToJSON,
-    EntityMetadataRequestFromJSON,
-    EntityMetadataRequestToJSON,
-    EntityMetadataResponseFromJSON,
-    EntityMetadataResponseToJSON,
-    EntityNonFungibleIdsRequestFromJSON,
-    EntityNonFungibleIdsRequestToJSON,
-    EntityNonFungibleIdsResponseFromJSON,
-    EntityNonFungibleIdsResponseToJSON,
-    EntityNonFungiblesRequestFromJSON,
-    EntityNonFungiblesRequestToJSON,
-    EntityNonFungiblesResponseFromJSON,
-    EntityNonFungiblesResponseToJSON,
-    EntityOverviewRequestFromJSON,
-    EntityOverviewRequestToJSON,
-    EntityOverviewResponseFromJSON,
-    EntityOverviewResponseToJSON,
-    EntityResourcesRequestFromJSON,
-    EntityResourcesRequestToJSON,
-    EntityResourcesResponseFromJSON,
-    EntityResourcesResponseToJSON,
     ErrorResponseFromJSON,
     ErrorResponseToJSON,
-    NonFungibleDataRequestFromJSON,
-    NonFungibleDataRequestToJSON,
-    NonFungibleDataResponseFromJSON,
-    NonFungibleDataResponseToJSON,
-    NonFungibleIdsRequestFromJSON,
-    NonFungibleIdsRequestToJSON,
-    NonFungibleIdsResponseFromJSON,
-    NonFungibleIdsResponseToJSON,
+    StateEntityDetailsRequestFromJSON,
+    StateEntityDetailsRequestToJSON,
+    StateEntityDetailsResponseFromJSON,
+    StateEntityDetailsResponseToJSON,
+    StateEntityFungibleResourceVaultsPageRequestFromJSON,
+    StateEntityFungibleResourceVaultsPageRequestToJSON,
+    StateEntityFungibleResourceVaultsPageResponseFromJSON,
+    StateEntityFungibleResourceVaultsPageResponseToJSON,
+    StateEntityFungiblesPageRequestFromJSON,
+    StateEntityFungiblesPageRequestToJSON,
+    StateEntityFungiblesPageResponseFromJSON,
+    StateEntityFungiblesPageResponseToJSON,
+    StateEntityMetadataPageRequestFromJSON,
+    StateEntityMetadataPageRequestToJSON,
+    StateEntityMetadataPageResponseFromJSON,
+    StateEntityMetadataPageResponseToJSON,
+    StateEntityNonFungibleIdsPageRequestFromJSON,
+    StateEntityNonFungibleIdsPageRequestToJSON,
+    StateEntityNonFungibleIdsPageResponseFromJSON,
+    StateEntityNonFungibleIdsPageResponseToJSON,
+    StateEntityNonFungibleResourceVaultsPageRequestFromJSON,
+    StateEntityNonFungibleResourceVaultsPageRequestToJSON,
+    StateEntityNonFungibleResourceVaultsPageResponseFromJSON,
+    StateEntityNonFungibleResourceVaultsPageResponseToJSON,
+    StateEntityNonFungiblesPageRequestFromJSON,
+    StateEntityNonFungiblesPageRequestToJSON,
+    StateEntityNonFungiblesPageResponseFromJSON,
+    StateEntityNonFungiblesPageResponseToJSON,
+    StateNonFungibleDetailsRequestFromJSON,
+    StateNonFungibleDetailsRequestToJSON,
+    StateNonFungibleDetailsResponseFromJSON,
+    StateNonFungibleDetailsResponseToJSON,
+    StateNonFungibleIdsRequestFromJSON,
+    StateNonFungibleIdsRequestToJSON,
+    StateNonFungibleIdsResponseFromJSON,
+    StateNonFungibleIdsResponseToJSON,
     StateValidatorsListRequestFromJSON,
     StateValidatorsListRequestToJSON,
     StateValidatorsListResponseFromJSON,
     StateValidatorsListResponseToJSON,
 } from '../models';
 
-export interface EntityDetailsOperationRequest {
-    entityDetailsRequest: EntityDetailsRequest;
+export interface EntityFungibleResourceVaultPageRequest {
+    stateEntityFungibleResourceVaultsPageRequest: StateEntityFungibleResourceVaultsPageRequest;
 }
 
-export interface EntityFungiblesOperationRequest {
-    entityFungiblesRequest: EntityFungiblesRequest;
+export interface EntityFungiblesPageRequest {
+    stateEntityFungiblesPageRequest: StateEntityFungiblesPageRequest;
 }
 
-export interface EntityMetadataOperationRequest {
-    entityMetadataRequest: EntityMetadataRequest;
+export interface EntityMetadataPageRequest {
+    stateEntityMetadataPageRequest: StateEntityMetadataPageRequest;
 }
 
-export interface EntityNonFungibleIdsOperationRequest {
-    entityNonFungibleIdsRequest: EntityNonFungibleIdsRequest;
+export interface EntityNonFungibleIdsPageRequest {
+    stateEntityNonFungibleIdsPageRequest: StateEntityNonFungibleIdsPageRequest;
 }
 
-export interface EntityNonFungiblesOperationRequest {
-    entityNonFungiblesRequest: EntityNonFungiblesRequest;
+export interface EntityNonFungibleResourceVaultPageRequest {
+    stateEntityNonFungibleResourceVaultsPageRequest: StateEntityNonFungibleResourceVaultsPageRequest;
 }
 
-export interface EntityOverviewOperationRequest {
-    entityOverviewRequest: EntityOverviewRequest;
+export interface EntityNonFungiblesPageRequest {
+    stateEntityNonFungiblesPageRequest: StateEntityNonFungiblesPageRequest;
 }
 
-export interface EntityResourcesOperationRequest {
-    entityResourcesRequest: EntityResourcesRequest;
+export interface NonFungibleDetailsRequest {
+    stateNonFungibleDetailsRequest: StateNonFungibleDetailsRequest;
 }
 
-export interface NonFungibleIdDataRequest {
-    nonFungibleDataRequest: NonFungibleDataRequest;
+export interface NonFungibleIdsRequest {
+    stateNonFungibleIdsRequest: StateNonFungibleIdsRequest;
 }
 
-export interface NonFungibleIdsOperationRequest {
-    nonFungibleIdsRequest: NonFungibleIdsRequest;
+export interface StateEntityDetailsOperationRequest {
+    stateEntityDetailsRequest: StateEntityDetailsRequest;
 }
 
 export interface StateValidatorsListOperationRequest {
@@ -128,12 +128,12 @@ export interface StateValidatorsListOperationRequest {
 export class StateApi extends runtime.BaseAPI {
 
     /**
-     * Returns detailed information for a single entity. 
-     * Get Entity Details
+     * Returns vaults for fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource\'s first appearance on the ledger. 
+     * Get vault page of Entity Fungible resource aggregated per vault
      */
-    async entityDetailsRaw(requestParameters: EntityDetailsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityDetailsResponse>> {
-        if (requestParameters.entityDetailsRequest === null || requestParameters.entityDetailsRequest === undefined) {
-            throw new runtime.RequiredError('entityDetailsRequest','Required parameter requestParameters.entityDetailsRequest was null or undefined when calling entityDetails.');
+    async entityFungibleResourceVaultPageRaw(requestParameters: EntityFungibleResourceVaultPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateEntityFungibleResourceVaultsPageResponse>> {
+        if (requestParameters.stateEntityFungibleResourceVaultsPageRequest === null || requestParameters.stateEntityFungibleResourceVaultsPageRequest === undefined) {
+            throw new runtime.RequiredError('stateEntityFungibleResourceVaultsPageRequest','Required parameter requestParameters.stateEntityFungibleResourceVaultsPageRequest was null or undefined when calling entityFungibleResourceVaultPage.');
         }
 
         const queryParameters: any = {};
@@ -143,32 +143,32 @@ export class StateApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
-            path: `/entity/details`,
+            path: `/state/entity/page/fungible-vaults/`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: EntityDetailsRequestToJSON(requestParameters.entityDetailsRequest),
+            body: StateEntityFungibleResourceVaultsPageRequestToJSON(requestParameters.stateEntityFungibleResourceVaultsPageRequest),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => EntityDetailsResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => StateEntityFungibleResourceVaultsPageResponseFromJSON(jsonValue));
     }
 
     /**
-     * Returns detailed information for a single entity. 
-     * Get Entity Details
+     * Returns vaults for fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource\'s first appearance on the ledger. 
+     * Get vault page of Entity Fungible resource aggregated per vault
      */
-    async entityDetails(requestParameters: EntityDetailsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityDetailsResponse> {
-        const response = await this.entityDetailsRaw(requestParameters, initOverrides);
+    async entityFungibleResourceVaultPage(requestParameters: EntityFungibleResourceVaultPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateEntityFungibleResourceVaultsPageResponse> {
+        const response = await this.entityFungibleResourceVaultPageRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
-     * Returns the total amount of each fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource\'s first appearance on the ledger. 
-     * Get Entity Fungible Resource Totals
+     * Returns the total amount of each fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource\'s first appearance on the ledger. 
+     * Get Entity Fungible Resource Totals Page aggregated globally
      */
-    async entityFungiblesRaw(requestParameters: EntityFungiblesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityFungiblesResponse>> {
-        if (requestParameters.entityFungiblesRequest === null || requestParameters.entityFungiblesRequest === undefined) {
-            throw new runtime.RequiredError('entityFungiblesRequest','Required parameter requestParameters.entityFungiblesRequest was null or undefined when calling entityFungibles.');
+    async entityFungiblesPageRaw(requestParameters: EntityFungiblesPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateEntityFungiblesPageResponse>> {
+        if (requestParameters.stateEntityFungiblesPageRequest === null || requestParameters.stateEntityFungiblesPageRequest === undefined) {
+            throw new runtime.RequiredError('stateEntityFungiblesPageRequest','Required parameter requestParameters.stateEntityFungiblesPageRequest was null or undefined when calling entityFungiblesPage.');
         }
 
         const queryParameters: any = {};
@@ -178,32 +178,32 @@ export class StateApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
-            path: `/entity/fungibles`,
+            path: `/state/entity/page/fungibles/`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: EntityFungiblesRequestToJSON(requestParameters.entityFungiblesRequest),
+            body: StateEntityFungiblesPageRequestToJSON(requestParameters.stateEntityFungiblesPageRequest),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => EntityFungiblesResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => StateEntityFungiblesPageResponseFromJSON(jsonValue));
     }
 
     /**
-     * Returns the total amount of each fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource\'s first appearance on the ledger. 
-     * Get Entity Fungible Resource Totals
+     * Returns the total amount of each fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource\'s first appearance on the ledger. 
+     * Get Entity Fungible Resource Totals Page aggregated globally
      */
-    async entityFungibles(requestParameters: EntityFungiblesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityFungiblesResponse> {
-        const response = await this.entityFungiblesRaw(requestParameters, initOverrides);
+    async entityFungiblesPage(requestParameters: EntityFungiblesPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateEntityFungiblesPageResponse> {
+        const response = await this.entityFungiblesPageRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
      * Returns all the metadata properties associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
-     * Get Entity Metadata
+     * Get Entity Metadata Page
      */
-    async entityMetadataRaw(requestParameters: EntityMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityMetadataResponse>> {
-        if (requestParameters.entityMetadataRequest === null || requestParameters.entityMetadataRequest === undefined) {
-            throw new runtime.RequiredError('entityMetadataRequest','Required parameter requestParameters.entityMetadataRequest was null or undefined when calling entityMetadata.');
+    async entityMetadataPageRaw(requestParameters: EntityMetadataPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateEntityMetadataPageResponse>> {
+        if (requestParameters.stateEntityMetadataPageRequest === null || requestParameters.stateEntityMetadataPageRequest === undefined) {
+            throw new runtime.RequiredError('stateEntityMetadataPageRequest','Required parameter requestParameters.stateEntityMetadataPageRequest was null or undefined when calling entityMetadataPage.');
         }
 
         const queryParameters: any = {};
@@ -213,22 +213,22 @@ export class StateApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
-            path: `/entity/metadata`,
+            path: `/state/entity/page/metadata`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: EntityMetadataRequestToJSON(requestParameters.entityMetadataRequest),
+            body: StateEntityMetadataPageRequestToJSON(requestParameters.stateEntityMetadataPageRequest),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => EntityMetadataResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => StateEntityMetadataPageResponseFromJSON(jsonValue));
     }
 
     /**
      * Returns all the metadata properties associated with a given global entity. The returned response is in a paginated format, ordered by first appearance on the ledger. 
-     * Get Entity Metadata
+     * Get Entity Metadata Page
      */
-    async entityMetadata(requestParameters: EntityMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityMetadataResponse> {
-        const response = await this.entityMetadataRaw(requestParameters, initOverrides);
+    async entityMetadataPage(requestParameters: EntityMetadataPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateEntityMetadataPageResponse> {
+        const response = await this.entityMetadataPageRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -236,9 +236,9 @@ export class StateApi extends runtime.BaseAPI {
      * Returns all non-fungible IDs of a given non-fungible resource owned by a given entity. The returned response is in a paginated format, ordered by the resource\'s first appearence on the ledger. 
      * Get Entity Non-Fungible IDs
      */
-    async entityNonFungibleIdsRaw(requestParameters: EntityNonFungibleIdsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityNonFungibleIdsResponse>> {
-        if (requestParameters.entityNonFungibleIdsRequest === null || requestParameters.entityNonFungibleIdsRequest === undefined) {
-            throw new runtime.RequiredError('entityNonFungibleIdsRequest','Required parameter requestParameters.entityNonFungibleIdsRequest was null or undefined when calling entityNonFungibleIds.');
+    async entityNonFungibleIdsPageRaw(requestParameters: EntityNonFungibleIdsPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateEntityNonFungibleIdsPageResponse>> {
+        if (requestParameters.stateEntityNonFungibleIdsPageRequest === null || requestParameters.stateEntityNonFungibleIdsPageRequest === undefined) {
+            throw new runtime.RequiredError('stateEntityNonFungibleIdsPageRequest','Required parameter requestParameters.stateEntityNonFungibleIdsPageRequest was null or undefined when calling entityNonFungibleIdsPage.');
         }
 
         const queryParameters: any = {};
@@ -248,32 +248,32 @@ export class StateApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
-            path: `/entity/non-fungible/ids`,
+            path: `/state/entity/page/non-fungible-vault/ids`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: EntityNonFungibleIdsRequestToJSON(requestParameters.entityNonFungibleIdsRequest),
+            body: StateEntityNonFungibleIdsPageRequestToJSON(requestParameters.stateEntityNonFungibleIdsPageRequest),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => EntityNonFungibleIdsResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => StateEntityNonFungibleIdsPageResponseFromJSON(jsonValue));
     }
 
     /**
      * Returns all non-fungible IDs of a given non-fungible resource owned by a given entity. The returned response is in a paginated format, ordered by the resource\'s first appearence on the ledger. 
      * Get Entity Non-Fungible IDs
      */
-    async entityNonFungibleIds(requestParameters: EntityNonFungibleIdsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityNonFungibleIdsResponse> {
-        const response = await this.entityNonFungibleIdsRaw(requestParameters, initOverrides);
+    async entityNonFungibleIdsPage(requestParameters: EntityNonFungibleIdsPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateEntityNonFungibleIdsPageResponse> {
+        const response = await this.entityNonFungibleIdsPageRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
-     * Returns the total amount of each non-fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource\'s first appearance on the ledger. 
-     * Get Entity Non-Fungible Resource Totals
+     * Returns vaults for non fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource\'s first appearance on the ledger. 
+     * Get vault page of Entity Non Fungible aggregated per vault
      */
-    async entityNonFungiblesRaw(requestParameters: EntityNonFungiblesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityNonFungiblesResponse>> {
-        if (requestParameters.entityNonFungiblesRequest === null || requestParameters.entityNonFungiblesRequest === undefined) {
-            throw new runtime.RequiredError('entityNonFungiblesRequest','Required parameter requestParameters.entityNonFungiblesRequest was null or undefined when calling entityNonFungibles.');
+    async entityNonFungibleResourceVaultPageRaw(requestParameters: EntityNonFungibleResourceVaultPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateEntityNonFungibleResourceVaultsPageResponse>> {
+        if (requestParameters.stateEntityNonFungibleResourceVaultsPageRequest === null || requestParameters.stateEntityNonFungibleResourceVaultsPageRequest === undefined) {
+            throw new runtime.RequiredError('stateEntityNonFungibleResourceVaultsPageRequest','Required parameter requestParameters.stateEntityNonFungibleResourceVaultsPageRequest was null or undefined when calling entityNonFungibleResourceVaultPage.');
         }
 
         const queryParameters: any = {};
@@ -283,32 +283,32 @@ export class StateApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
-            path: `/entity/non-fungibles`,
+            path: `/state/entity/page/non-fungible-vaults/`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: EntityNonFungiblesRequestToJSON(requestParameters.entityNonFungiblesRequest),
+            body: StateEntityNonFungibleResourceVaultsPageRequestToJSON(requestParameters.stateEntityNonFungibleResourceVaultsPageRequest),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => EntityNonFungiblesResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => StateEntityNonFungibleResourceVaultsPageResponseFromJSON(jsonValue));
     }
 
     /**
-     * Returns the total amount of each non-fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource\'s first appearance on the ledger. 
-     * Get Entity Non-Fungible Resource Totals
+     * Returns vaults for non fungible resource owned by a given global entity. The returned response is in a paginated format, ordered by the resource\'s first appearance on the ledger. 
+     * Get vault page of Entity Non Fungible aggregated per vault
      */
-    async entityNonFungibles(requestParameters: EntityNonFungiblesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityNonFungiblesResponse> {
-        const response = await this.entityNonFungiblesRaw(requestParameters, initOverrides);
+    async entityNonFungibleResourceVaultPage(requestParameters: EntityNonFungibleResourceVaultPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateEntityNonFungibleResourceVaultsPageResponse> {
+        const response = await this.entityNonFungibleResourceVaultPageRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
-     * Returns basic information (incomplete metadata) for a given collection of entities. This endpoint is intended to be used for populating screens which contain a small bit of information about multiple entities. 
-     * Get Entities Overview
+     * Returns the total amount of each non-fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource\'s first appearance on the ledger. 
+     * Get Entity Non-Fungible Resource Totals Page aggregated globally
      */
-    async entityOverviewRaw(requestParameters: EntityOverviewOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityOverviewResponse>> {
-        if (requestParameters.entityOverviewRequest === null || requestParameters.entityOverviewRequest === undefined) {
-            throw new runtime.RequiredError('entityOverviewRequest','Required parameter requestParameters.entityOverviewRequest was null or undefined when calling entityOverview.');
+    async entityNonFungiblesPageRaw(requestParameters: EntityNonFungiblesPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateEntityNonFungiblesPageResponse>> {
+        if (requestParameters.stateEntityNonFungiblesPageRequest === null || requestParameters.stateEntityNonFungiblesPageRequest === undefined) {
+            throw new runtime.RequiredError('stateEntityNonFungiblesPageRequest','Required parameter requestParameters.stateEntityNonFungiblesPageRequest was null or undefined when calling entityNonFungiblesPage.');
         }
 
         const queryParameters: any = {};
@@ -318,67 +318,32 @@ export class StateApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
-            path: `/entity/overview`,
+            path: `/state/entity/page/non-fungibles/`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: EntityOverviewRequestToJSON(requestParameters.entityOverviewRequest),
+            body: StateEntityNonFungiblesPageRequestToJSON(requestParameters.stateEntityNonFungiblesPageRequest),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => EntityOverviewResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => StateEntityNonFungiblesPageResponseFromJSON(jsonValue));
     }
 
     /**
-     * Returns basic information (incomplete metadata) for a given collection of entities. This endpoint is intended to be used for populating screens which contain a small bit of information about multiple entities. 
-     * Get Entities Overview
+     * Returns the total amount of each non-fungible resource owned by a given global entity. Result can be aggregated globally or per vault. The returned response is in a paginated format, ordered by the resource\'s first appearance on the ledger. 
+     * Get Entity Non-Fungible Resource Totals Page aggregated globally
      */
-    async entityOverview(requestParameters: EntityOverviewOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityOverviewResponse> {
-        const response = await this.entityOverviewRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Returns the total amount of each fungible and non-fungible resources owned by a given global entity. The response for fungibles and non-fungibles is paginated, and only the first page of each is returned. The returned lists are ordered by the resource\'s first appearance on the ledger. For further pages, use the `entity/fungibles` and `entity/non-fungibles` endpoints. To get the owned non-fungible ids (instead of just the amount), use the `entity/non-fungible-ids` endpoint. 
-     * Get Entity Resource Totals
-     */
-    async entityResourcesRaw(requestParameters: EntityResourcesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityResourcesResponse>> {
-        if (requestParameters.entityResourcesRequest === null || requestParameters.entityResourcesRequest === undefined) {
-            throw new runtime.RequiredError('entityResourcesRequest','Required parameter requestParameters.entityResourcesRequest was null or undefined when calling entityResources.');
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/entity/resources`,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: EntityResourcesRequestToJSON(requestParameters.entityResourcesRequest),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => EntityResourcesResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Returns the total amount of each fungible and non-fungible resources owned by a given global entity. The response for fungibles and non-fungibles is paginated, and only the first page of each is returned. The returned lists are ordered by the resource\'s first appearance on the ledger. For further pages, use the `entity/fungibles` and `entity/non-fungibles` endpoints. To get the owned non-fungible ids (instead of just the amount), use the `entity/non-fungible-ids` endpoint. 
-     * Get Entity Resource Totals
-     */
-    async entityResources(requestParameters: EntityResourcesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityResourcesResponse> {
-        const response = await this.entityResourcesRaw(requestParameters, initOverrides);
+    async entityNonFungiblesPage(requestParameters: EntityNonFungiblesPageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateEntityNonFungiblesPageResponse> {
+        const response = await this.entityNonFungiblesPageRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
      * Returns data associated with a given non-fungible ID of a given non-fungible resource. 
-     * Get Non-Fungible Data
+     * Get Non-Fungible Details
      */
-    async nonFungibleIdDataRaw(requestParameters: NonFungibleIdDataRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<NonFungibleDataResponse>> {
-        if (requestParameters.nonFungibleDataRequest === null || requestParameters.nonFungibleDataRequest === undefined) {
-            throw new runtime.RequiredError('nonFungibleDataRequest','Required parameter requestParameters.nonFungibleDataRequest was null or undefined when calling nonFungibleIdData.');
+    async nonFungibleDetailsRaw(requestParameters: NonFungibleDetailsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateNonFungibleDetailsResponse>> {
+        if (requestParameters.stateNonFungibleDetailsRequest === null || requestParameters.stateNonFungibleDetailsRequest === undefined) {
+            throw new runtime.RequiredError('stateNonFungibleDetailsRequest','Required parameter requestParameters.stateNonFungibleDetailsRequest was null or undefined when calling nonFungibleDetails.');
         }
 
         const queryParameters: any = {};
@@ -388,22 +353,22 @@ export class StateApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
-            path: `/non-fungible/data`,
+            path: `/state/non-fungible/details`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: NonFungibleDataRequestToJSON(requestParameters.nonFungibleDataRequest),
+            body: StateNonFungibleDetailsRequestToJSON(requestParameters.stateNonFungibleDetailsRequest),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => NonFungibleDataResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => StateNonFungibleDetailsResponseFromJSON(jsonValue));
     }
 
     /**
      * Returns data associated with a given non-fungible ID of a given non-fungible resource. 
-     * Get Non-Fungible Data
+     * Get Non-Fungible Details
      */
-    async nonFungibleIdData(requestParameters: NonFungibleIdDataRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<NonFungibleDataResponse> {
-        const response = await this.nonFungibleIdDataRaw(requestParameters, initOverrides);
+    async nonFungibleDetails(requestParameters: NonFungibleDetailsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateNonFungibleDetailsResponse> {
+        const response = await this.nonFungibleDetailsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -411,9 +376,9 @@ export class StateApi extends runtime.BaseAPI {
      * Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
      * Get Non-Fungible Collection
      */
-    async nonFungibleIdsRaw(requestParameters: NonFungibleIdsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<NonFungibleIdsResponse>> {
-        if (requestParameters.nonFungibleIdsRequest === null || requestParameters.nonFungibleIdsRequest === undefined) {
-            throw new runtime.RequiredError('nonFungibleIdsRequest','Required parameter requestParameters.nonFungibleIdsRequest was null or undefined when calling nonFungibleIds.');
+    async nonFungibleIdsRaw(requestParameters: NonFungibleIdsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateNonFungibleIdsResponse>> {
+        if (requestParameters.stateNonFungibleIdsRequest === null || requestParameters.stateNonFungibleIdsRequest === undefined) {
+            throw new runtime.RequiredError('stateNonFungibleIdsRequest','Required parameter requestParameters.stateNonFungibleIdsRequest was null or undefined when calling nonFungibleIds.');
         }
 
         const queryParameters: any = {};
@@ -423,22 +388,57 @@ export class StateApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
-            path: `/non-fungible/ids`,
+            path: `/state/non-fungible/ids`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: NonFungibleIdsRequestToJSON(requestParameters.nonFungibleIdsRequest),
+            body: StateNonFungibleIdsRequestToJSON(requestParameters.stateNonFungibleIdsRequest),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => NonFungibleIdsResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => StateNonFungibleIdsResponseFromJSON(jsonValue));
     }
 
     /**
      * Returns the non-fungible IDs of a given non-fungible resource. Returned response is in a paginated format, ordered by their first appearance on the ledger. 
      * Get Non-Fungible Collection
      */
-    async nonFungibleIds(requestParameters: NonFungibleIdsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<NonFungibleIdsResponse> {
+    async nonFungibleIds(requestParameters: NonFungibleIdsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateNonFungibleIdsResponse> {
         const response = await this.nonFungibleIdsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Returns detailed information for collection of entities. Aggregate resources globally by default. 
+     * Get Entity Details
+     */
+    async stateEntityDetailsRaw(requestParameters: StateEntityDetailsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateEntityDetailsResponse>> {
+        if (requestParameters.stateEntityDetailsRequest === null || requestParameters.stateEntityDetailsRequest === undefined) {
+            throw new runtime.RequiredError('stateEntityDetailsRequest','Required parameter requestParameters.stateEntityDetailsRequest was null or undefined when calling stateEntityDetails.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/state/entity/details`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: StateEntityDetailsRequestToJSON(requestParameters.stateEntityDetailsRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => StateEntityDetailsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns detailed information for collection of entities. Aggregate resources globally by default. 
+     * Get Entity Details
+     */
+    async stateEntityDetails(requestParameters: StateEntityDetailsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateEntityDetailsResponse> {
+        const response = await this.stateEntityDetailsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

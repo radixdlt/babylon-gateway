@@ -18,11 +18,11 @@
  * @export
  */
 export const TransactionStatus = {
-    Unknown: 'unknown',
-    CommittedSuccess: 'committed_success',
-    CommittedFailure: 'committed_failure',
-    Pending: 'pending',
-    Rejected: 'rejected'
+    Unknown: 'Unknown',
+    CommittedSuccess: 'CommittedSuccess',
+    CommittedFailure: 'CommittedFailure',
+    Pending: 'Pending',
+    Rejected: 'Rejected'
 } as const;
 export type TransactionStatus = typeof TransactionStatus[keyof typeof TransactionStatus];
 
