@@ -21,7 +21,7 @@ import { exists, mapValues } from '../runtime';
  */
 export interface LedgerState {
     /**
-     * The name of the network against which the request is made.
+     * The logical name of the network
      * @type {string}
      * @memberof LedgerState
      */

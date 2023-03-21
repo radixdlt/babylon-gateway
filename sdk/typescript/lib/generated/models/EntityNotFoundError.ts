@@ -27,7 +27,7 @@ import {
  */
 export interface EntityNotFoundError extends GatewayError {
     /**
-     * Bech32m-encoded human readable version of the entity's global address.
+     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
      * @type {string}
      * @memberof EntityNotFoundError
      */

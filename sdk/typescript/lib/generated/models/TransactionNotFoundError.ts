@@ -19,12 +19,6 @@ import {
     GatewayErrorFromJSONTyped,
     GatewayErrorToJSON,
 } from './GatewayError';
-import type { TransactionCommittedDetailsRequestIdentifier } from './TransactionCommittedDetailsRequestIdentifier';
-import {
-    TransactionCommittedDetailsRequestIdentifierFromJSON,
-    TransactionCommittedDetailsRequestIdentifierFromJSONTyped,
-    TransactionCommittedDetailsRequestIdentifierToJSON,
-} from './TransactionCommittedDetailsRequestIdentifier';
 
 /**
  * 
@@ -33,11 +27,11 @@ import {
  */
 export interface TransactionNotFoundError extends GatewayError {
     /**
-     * 
-     * @type {TransactionCommittedDetailsRequestIdentifier}
+     * Hex-encoded SHA-256 hash.
+     * @type {string}
      * @memberof TransactionNotFoundError
      */
-    transaction_not_found: TransactionCommittedDetailsRequestIdentifier;
+    intent_hash_hex: string;
 }
 
 /**
@@ -45,7 +39,7 @@ export interface TransactionNotFoundError extends GatewayError {
  */
 export function instanceOfTransactionNotFoundError(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "transaction_not_found" in value;
+    isInstance = isInstance && "intent_hash_hex" in value;
 
     return isInstance;
 }
@@ -60,7 +54,7 @@ export function TransactionNotFoundErrorFromJSONTyped(json: any, ignoreDiscrimin
     }
     return {
         ...GatewayErrorFromJSONTyped(json, ignoreDiscriminator),
-        'transaction_not_found': TransactionCommittedDetailsRequestIdentifierFromJSON(json['transaction_not_found']),
+        'intent_hash_hex': json['intent_hash_hex'],
     };
 }
 
@@ -73,7 +67,7 @@ export function TransactionNotFoundErrorToJSON(value?: TransactionNotFoundError 
     }
     return {
         ...GatewayErrorToJSON(value),
-        'transaction_not_found': TransactionCommittedDetailsRequestIdentifierToJSON(value.transaction_not_found),
+        'intent_hash_hex': value.intent_hash_hex,
     };
 }
 

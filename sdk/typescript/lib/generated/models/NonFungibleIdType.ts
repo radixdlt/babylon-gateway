@@ -18,10 +18,10 @@
  * @export
  */
 export const NonFungibleIdType = {
-    String: 'string',
-    Number: 'number',
-    Bytes: 'bytes',
-    Uuid: 'uuid'
+    String: 'String',
+    Integer: 'Integer',
+    Bytes: 'Bytes',
+    Uuid: 'Uuid'
 } as const;
 export type NonFungibleIdType = typeof NonFungibleIdType[keyof typeof NonFungibleIdType];
 

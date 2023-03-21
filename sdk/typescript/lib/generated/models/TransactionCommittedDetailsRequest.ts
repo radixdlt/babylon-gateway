@@ -19,12 +19,6 @@ import {
     LedgerStateSelectorFromJSONTyped,
     LedgerStateSelectorToJSON,
 } from './LedgerStateSelector';
-import type { TransactionCommittedDetailsRequestIdentifier } from './TransactionCommittedDetailsRequestIdentifier';
-import {
-    TransactionCommittedDetailsRequestIdentifierFromJSON,
-    TransactionCommittedDetailsRequestIdentifierFromJSONTyped,
-    TransactionCommittedDetailsRequestIdentifierToJSON,
-} from './TransactionCommittedDetailsRequestIdentifier';
 
 /**
  * 
@@ -39,11 +33,11 @@ export interface TransactionCommittedDetailsRequest {
      */
     at_ledger_state?: LedgerStateSelector | null;
     /**
-     * 
-     * @type {TransactionCommittedDetailsRequestIdentifier}
+     * Hex-encoded SHA-256 hash.
+     * @type {string}
      * @memberof TransactionCommittedDetailsRequest
      */
-    transaction_identifier: TransactionCommittedDetailsRequestIdentifier;
+    intent_hash_hex: string;
 }
 
 /**
@@ -51,7 +45,7 @@ export interface TransactionCommittedDetailsRequest {
  */
 export function instanceOfTransactionCommittedDetailsRequest(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "transaction_identifier" in value;
+    isInstance = isInstance && "intent_hash_hex" in value;
 
     return isInstance;
 }
@@ -67,7 +61,7 @@ export function TransactionCommittedDetailsRequestFromJSONTyped(json: any, ignor
     return {
         
         'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
-        'transaction_identifier': TransactionCommittedDetailsRequestIdentifierFromJSON(json['transaction_identifier']),
+        'intent_hash_hex': json['intent_hash_hex'],
     };
 }
 
@@ -81,7 +75,7 @@ export function TransactionCommittedDetailsRequestToJSON(value?: TransactionComm
     return {
         
         'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
-        'transaction_identifier': TransactionCommittedDetailsRequestIdentifierToJSON(value.transaction_identifier),
+        'intent_hash_hex': value.intent_hash_hex,
     };
 }
 

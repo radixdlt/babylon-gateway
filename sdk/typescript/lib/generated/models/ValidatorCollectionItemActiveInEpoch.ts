@@ -13,24 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { EntityMetadataCollection } from './EntityMetadataCollection';
-import {
-    EntityMetadataCollectionFromJSON,
-    EntityMetadataCollectionFromJSONTyped,
-    EntityMetadataCollectionToJSON,
-} from './EntityMetadataCollection';
 import type { PublicKey } from './PublicKey';
 import {
     PublicKeyFromJSON,
     PublicKeyFromJSONTyped,
     PublicKeyToJSON,
 } from './PublicKey';
-import type { ValidatorCollectionItemActiveInEpochStake } from './ValidatorCollectionItemActiveInEpochStake';
-import {
-    ValidatorCollectionItemActiveInEpochStakeFromJSON,
-    ValidatorCollectionItemActiveInEpochStakeFromJSONTyped,
-    ValidatorCollectionItemActiveInEpochStakeToJSON,
-} from './ValidatorCollectionItemActiveInEpochStake';
 
 /**
  * 
@@ -39,23 +27,23 @@ import {
  */
 export interface ValidatorCollectionItemActiveInEpoch {
     /**
-     * 
-     * @type {ValidatorCollectionItemActiveInEpochStake}
+     * String-encoded decimal representing the amount of a related fungible resource.
+     * @type {string}
      * @memberof ValidatorCollectionItemActiveInEpoch
      */
-    stake: ValidatorCollectionItemActiveInEpochStake;
+    stake: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ValidatorCollectionItemActiveInEpoch
+     */
+    stake_percentage: number;
     /**
      * 
      * @type {PublicKey}
      * @memberof ValidatorCollectionItemActiveInEpoch
      */
     key: PublicKey;
-    /**
-     * 
-     * @type {EntityMetadataCollection}
-     * @memberof ValidatorCollectionItemActiveInEpoch
-     */
-    metadata?: EntityMetadataCollection;
 }
 
 /**
@@ -64,6 +52,7 @@ export interface ValidatorCollectionItemActiveInEpoch {
 export function instanceOfValidatorCollectionItemActiveInEpoch(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "stake" in value;
+    isInstance = isInstance && "stake_percentage" in value;
     isInstance = isInstance && "key" in value;
 
     return isInstance;
@@ -79,9 +68,9 @@ export function ValidatorCollectionItemActiveInEpochFromJSONTyped(json: any, ign
     }
     return {
         
-        'stake': ValidatorCollectionItemActiveInEpochStakeFromJSON(json['stake']),
+        'stake': json['stake'],
+        'stake_percentage': json['stake_percentage'],
         'key': PublicKeyFromJSON(json['key']),
-        'metadata': !exists(json, 'metadata') ? undefined : EntityMetadataCollectionFromJSON(json['metadata']),
     };
 }
 
@@ -94,9 +83,9 @@ export function ValidatorCollectionItemActiveInEpochToJSON(value?: ValidatorColl
     }
     return {
         
-        'stake': ValidatorCollectionItemActiveInEpochStakeToJSON(value.stake),
+        'stake': value.stake,
+        'stake_percentage': value.stake_percentage,
         'key': PublicKeyToJSON(value.key),
-        'metadata': EntityMetadataCollectionToJSON(value.metadata),
     };
 }
 

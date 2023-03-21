@@ -49,13 +49,13 @@ export interface CommittedTransactionInfo {
      * @type {string}
      * @memberof CommittedTransactionInfo
      */
-    payload_hash_hex: string;
+    payload_hash_hex?: string;
     /**
      * Hex-encoded SHA-256 hash.
      * @type {string}
      * @memberof CommittedTransactionInfo
      */
-    intent_hash_hex: string;
+    intent_hash_hex?: string;
     /**
      * 
      * @type {TokenAmount}
@@ -83,8 +83,6 @@ export function instanceOfCommittedTransactionInfo(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "state_version" in value;
     isInstance = isInstance && "transaction_status" in value;
-    isInstance = isInstance && "payload_hash_hex" in value;
-    isInstance = isInstance && "intent_hash_hex" in value;
 
     return isInstance;
 }
@@ -101,8 +99,8 @@ export function CommittedTransactionInfoFromJSONTyped(json: any, ignoreDiscrimin
         
         'state_version': json['state_version'],
         'transaction_status': TransactionStatusFromJSON(json['transaction_status']),
-        'payload_hash_hex': json['payload_hash_hex'],
-        'intent_hash_hex': json['intent_hash_hex'],
+        'payload_hash_hex': !exists(json, 'payload_hash_hex') ? undefined : json['payload_hash_hex'],
+        'intent_hash_hex': !exists(json, 'intent_hash_hex') ? undefined : json['intent_hash_hex'],
         'fee_paid': !exists(json, 'fee_paid') ? undefined : TokenAmountFromJSON(json['fee_paid']),
         'confirmed_at': !exists(json, 'confirmed_at') ? undefined : (json['confirmed_at'] === null ? null : new Date(json['confirmed_at'])),
         'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
