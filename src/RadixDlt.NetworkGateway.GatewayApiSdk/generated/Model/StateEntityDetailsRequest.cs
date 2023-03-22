@@ -95,6 +95,32 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [DataContract(Name = "StateEntityDetailsRequest")]
     public partial class StateEntityDetailsRequest : IEquatable<StateEntityDetailsRequest>
     {
+        /// <summary>
+        /// Defines OptInProperties
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum OptInPropertiesEnum
+        {
+            /// <summary>
+            /// Enum AncestorIdentities for value: ancestor_identities
+            /// </summary>
+            [EnumMember(Value = "ancestor_identities")]
+            AncestorIdentities = 1,
+
+            /// <summary>
+            /// Enum ComponentRoyaltyAggregatorBalance for value: component.royalty_aggregator_balance
+            /// </summary>
+            [EnumMember(Value = "component.royalty_aggregator_balance")]
+            ComponentRoyaltyAggregatorBalance = 2,
+
+            /// <summary>
+            /// Enum NonFungibleDataSchema for value: non_fungible.data_schema
+            /// </summary>
+            [EnumMember(Value = "non_fungible.data_schema")]
+            NonFungibleDataSchema = 3
+
+        }
+
 
         /// <summary>
         /// Gets or Sets AggregationLevel
@@ -110,9 +136,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StateEntityDetailsRequest" /> class.
         /// </summary>
         /// <param name="atLedgerState">atLedgerState.</param>
+        /// <param name="optInProperties">optInProperties.</param>
         /// <param name="addresses">addresses (required).</param>
         /// <param name="aggregationLevel">aggregationLevel.</param>
-        public StateEntityDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), List<string> addresses = default(List<string>), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
+        public StateEntityDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), List<OptInPropertiesEnum> optInProperties = default(List<OptInPropertiesEnum>), List<string> addresses = default(List<string>), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
         {
             // to ensure "addresses" is required (not null)
             if (addresses == null)
@@ -121,6 +148,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.Addresses = addresses;
             this.AtLedgerState = atLedgerState;
+            this.OptInProperties = optInProperties;
             this.AggregationLevel = aggregationLevel;
         }
 
@@ -129,6 +157,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
         public LedgerStateSelector AtLedgerState { get; set; }
+
+        /// <summary>
+        /// Gets or Sets OptInProperties
+        /// </summary>
+        [DataMember(Name = "opt_in_properties", EmitDefaultValue = true)]
+        public List<StateEntityDetailsRequest.OptInPropertiesEnum> OptInProperties { get; set; }
 
         /// <summary>
         /// Gets or Sets Addresses
@@ -145,6 +179,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityDetailsRequest {\n");
             sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
+            sb.Append("  OptInProperties: ").Append(OptInProperties).Append("\n");
             sb.Append("  Addresses: ").Append(Addresses).Append("\n");
             sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
             sb.Append("}\n");
@@ -188,6 +223,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.AtLedgerState.Equals(input.AtLedgerState))
                 ) && 
                 (
+                    this.OptInProperties == input.OptInProperties ||
+                    this.OptInProperties != null &&
+                    input.OptInProperties != null &&
+                    this.OptInProperties.SequenceEqual(input.OptInProperties)
+                ) && 
+                (
                     this.Addresses == input.Addresses ||
                     this.Addresses != null &&
                     input.Addresses != null &&
@@ -211,6 +252,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.AtLedgerState != null)
                 {
                     hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
+                if (this.OptInProperties != null)
+                {
+                    hashCode = (hashCode * 59) + this.OptInProperties.GetHashCode();
                 }
                 if (this.Addresses != null)
                 {

@@ -1043,6 +1043,23 @@ components:
         - Pending
         - Rejected
 
+    TransactionReceipt:
+      type: object
+      properties:
+        status:
+          type: object
+        fee_summary:
+          type: object
+        state_updates:
+          type: object
+        next_epoch:
+          type: object
+        items:
+          type: object
+        error_message:
+          type: string
+          nullable: true
+
     # TODO Obsolete - use BigDecimal instead
     TokenAmount:
       description: Represents a decimal amount of a given resource.
@@ -1359,8 +1376,18 @@ components:
           properties:
             intent_hash_hex:
               $ref: "#/components/schemas/HashHexString"
+            opt_in_properties:
+              $ref: "#/components/schemas/TransactionCommittedDetailsOptInProperties"
       example:
         intent_hash_hex: "<transaction-intent-hash>"
+    TransactionCommittedDetailsOptInProperties:
+      type: array
+      items:
+        type: string
+        enum:
+          - raw_payload
+          - receipt.state_changes
+          - receipt.fee_summary
     TransactionCommittedDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1376,14 +1403,13 @@ components:
     TransactionCommittedDetailsResponseDetails:
       type: object
       required:
-        - raw_hex
         - receipt
         - referenced_global_entities
       properties:
-        raw_hex:
+        raw_payload:
           $ref: "#/components/schemas/HexString"
         receipt:
-          type: object
+          $ref: "#/components/schemas/TransactionReceipt"
         referenced_global_entities:
           type: array
           items:
@@ -1444,6 +1470,8 @@ components:
           required:
             - addresses
           properties:
+            opt_in_properties:
+              $ref: "#/components/schemas/StateEntityDetailsOptInProperties"
             addresses:
               type: array
               items:
@@ -1453,6 +1481,14 @@ components:
       example:
         addresses:
           - "<entity-address>"
+    StateEntityDetailsOptInProperties:
+      type: array
+      items:
+        type: string
+        enum:
+          - ancestor_identities
+          - component.royalty_aggregator_balance
+          - non_fungible.data_schema
     StateEntityDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"

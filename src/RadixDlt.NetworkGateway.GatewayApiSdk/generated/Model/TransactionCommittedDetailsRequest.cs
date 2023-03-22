@@ -96,6 +96,32 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     public partial class TransactionCommittedDetailsRequest : IEquatable<TransactionCommittedDetailsRequest>
     {
         /// <summary>
+        /// Defines OptInProperties
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum OptInPropertiesEnum
+        {
+            /// <summary>
+            /// Enum RawPayload for value: raw_payload
+            /// </summary>
+            [EnumMember(Value = "raw_payload")]
+            RawPayload = 1,
+
+            /// <summary>
+            /// Enum ReceiptStateChanges for value: receipt.state_changes
+            /// </summary>
+            [EnumMember(Value = "receipt.state_changes")]
+            ReceiptStateChanges = 2,
+
+            /// <summary>
+            /// Enum ReceiptFeeSummary for value: receipt.fee_summary
+            /// </summary>
+            [EnumMember(Value = "receipt.fee_summary")]
+            ReceiptFeeSummary = 3
+
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="TransactionCommittedDetailsRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
@@ -105,7 +131,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="intentHashHex">Hex-encoded SHA-256 hash. (required).</param>
-        public TransactionCommittedDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string intentHashHex = default(string))
+        /// <param name="optInProperties">optInProperties.</param>
+        public TransactionCommittedDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string intentHashHex = default(string), List<OptInPropertiesEnum> optInProperties = default(List<OptInPropertiesEnum>))
         {
             // to ensure "intentHashHex" is required (not null)
             if (intentHashHex == null)
@@ -114,6 +141,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.IntentHashHex = intentHashHex;
             this.AtLedgerState = atLedgerState;
+            this.OptInProperties = optInProperties;
         }
 
         /// <summary>
@@ -130,6 +158,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string IntentHashHex { get; set; }
 
         /// <summary>
+        /// Gets or Sets OptInProperties
+        /// </summary>
+        [DataMember(Name = "opt_in_properties", EmitDefaultValue = true)]
+        public List<TransactionCommittedDetailsRequest.OptInPropertiesEnum> OptInProperties { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -139,6 +173,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class TransactionCommittedDetailsRequest {\n");
             sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
+            sb.Append("  OptInProperties: ").Append(OptInProperties).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -183,6 +218,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.IntentHashHex == input.IntentHashHex ||
                     (this.IntentHashHex != null &&
                     this.IntentHashHex.Equals(input.IntentHashHex))
+                ) && 
+                (
+                    this.OptInProperties == input.OptInProperties ||
+                    this.OptInProperties != null &&
+                    input.OptInProperties != null &&
+                    this.OptInProperties.SequenceEqual(input.OptInProperties)
                 );
         }
 
@@ -202,6 +243,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.IntentHashHex != null)
                 {
                     hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
+                }
+                if (this.OptInProperties != null)
+                {
+                    hashCode = (hashCode * 59) + this.OptInProperties.GetHashCode();
                 }
                 return hashCode;
             }

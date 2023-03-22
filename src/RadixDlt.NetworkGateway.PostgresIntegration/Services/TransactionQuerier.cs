@@ -102,7 +102,7 @@ internal class TransactionQuerier : ITransactionQuerier
         return new TransactionPageWithoutTotal(nextCursor, transactions);
     }
 
-    public async Task<DetailsLookupResult?> LookupCommittedTransaction(byte[] intentHash, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
+    public async Task<DetailsLookupResult?> LookupCommittedTransaction(byte[] intentHash, List<GatewayModel.TransactionCommittedDetailsRequest.OptInPropertiesEnum>? optInProperties, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
     {
         var stateVersion = await _dbContext.LedgerTransactions
             .OfType<UserLedgerTransaction>()
@@ -116,7 +116,7 @@ internal class TransactionQuerier : ITransactionQuerier
         }
 
         return withDetails
-            ? await GetTransactionWithDetails(stateVersion, token)
+            ? await GetTransactionWithDetails(stateVersion, optInProperties, token)
             : new DetailsLookupResult((await GetTransactions(new List<long> { stateVersion }, token)).First(), null);
     }
 
@@ -177,7 +177,7 @@ internal class TransactionQuerier : ITransactionQuerier
             .ToList();
     }
 
-    private async Task<DetailsLookupResult> GetTransactionWithDetails(long stateVersion, CancellationToken token)
+    private async Task<DetailsLookupResult> GetTransactionWithDetails(long stateVersion, List<GatewayModel.TransactionCommittedDetailsRequest.OptInPropertiesEnum>? optInProperties, CancellationToken token)
     {
         // TODO ideally we'd like to run those as either single query or separate ones but without await between them
 
@@ -196,18 +196,11 @@ internal class TransactionQuerier : ITransactionQuerier
                 .ToListAsync(token);
         }
 
-        return MapToGatewayAccountTransactionWithDetails(transaction, referencedEntities);
+        return MapToGatewayAccountTransactionWithDetails(transaction, referencedEntities, optInProperties);
     }
 
     private GatewayModel.CommittedTransactionInfo MapToGatewayAccountTransaction(LedgerTransaction lt)
     {
-        var status = lt.Status switch
-        {
-            LedgerTransactionStatus.Succeeded => GatewayModel.TransactionStatus.CommittedSuccess,
-            LedgerTransactionStatus.Failed => GatewayModel.TransactionStatus.CommittedFailure,
-            _ => throw new UnreachableException($"Didn't expect {lt.Status} value"),
-        };
-
         string? payloadHashHex = null;
         string? intentHashHex = null;
 
@@ -219,7 +212,7 @@ internal class TransactionQuerier : ITransactionQuerier
 
         return new GatewayModel.CommittedTransactionInfo(
             stateVersion: lt.StateVersion,
-            transactionStatus: status,
+            transactionStatus: MapTransactionStatus(lt.Status),
             payloadHashHex: payloadHashHex,
             intentHashHex: intentHashHex,
             feePaid: lt.FeePaid.HasValue ? new GatewayModel.TokenAmount(lt.FeePaid.Value.ToString(), _networkConfigurationProvider.GetWellKnownAddresses().Xrd) : null,
@@ -228,13 +221,32 @@ internal class TransactionQuerier : ITransactionQuerier
         );
     }
 
-    private DetailsLookupResult MapToGatewayAccountTransactionWithDetails(UserLedgerTransaction ult, List<Entity> referencedEntities)
+    private DetailsLookupResult MapToGatewayAccountTransactionWithDetails(UserLedgerTransaction ult, List<Entity> referencedEntities, List<GatewayModel.TransactionCommittedDetailsRequest.OptInPropertiesEnum>? optInProperties)
     {
+        var includeFeeSummary = optInProperties?.Contains(GatewayModel.TransactionCommittedDetailsRequest.OptInPropertiesEnum.ReceiptFeeSummary);
+        var includeStateChanges = optInProperties?.Contains(GatewayModel.TransactionCommittedDetailsRequest.OptInPropertiesEnum.ReceiptStateChanges);
+        var includeRawPayload = optInProperties?.Contains(GatewayModel.TransactionCommittedDetailsRequest.OptInPropertiesEnum.RawPayload);
+
         return new DetailsLookupResult(MapToGatewayAccountTransaction(ult), new GatewayModel.TransactionCommittedDetailsResponseDetails(
-            rawHex: ult.RawPayload.ToHex(),
-            receipt: new JRaw(ult.EngineReceipt),
+            rawPayload: includeRawPayload == true ? ult.RawPayload.ToHex() : null,
+            receipt: new GatewayModel.TransactionReceipt
+            {
+                ErrorMessage = ult.EngineReceipt.ErrorMessage,
+                Status = MapTransactionStatus(ult.EngineReceipt.Status),
+                Items = new JRaw(ult.EngineReceipt.Items),
+                FeeSummary = includeFeeSummary == true ? new JRaw(ult.EngineReceipt.FeeSummary) : null,
+                NextEpoch = ult.EngineReceipt.NextEpoch != null ? new JRaw(ult.EngineReceipt.NextEpoch) : null,
+                StateUpdates = includeStateChanges == true ? new JRaw(ult.EngineReceipt.StateUpdates) : null,
+            },
             referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.GlobalAddress.ToString()).ToList(),
             messageHex: ult.Message?.ToHex()
         ));
     }
+
+    private GatewayModel.TransactionStatus MapTransactionStatus(LedgerTransactionStatus status) => status switch
+    {
+        LedgerTransactionStatus.Succeeded => GatewayModel.TransactionStatus.CommittedSuccess,
+        LedgerTransactionStatus.Failed => GatewayModel.TransactionStatus.CommittedFailure,
+        _ => throw new UnreachableException($"Didn't expect {status} value"),
+    };
 }

@@ -193,7 +193,8 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, error_message, transaction_accumulator, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, kind_filter_constraint, raw_payload, engine_receipt, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync(
+            "COPY ledger_transactions (state_version, transaction_accumulator, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, kind_filter_constraint, raw_payload, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_error_message, receipt_items, receipt_next_epoch, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var lt in entities)
         {
@@ -201,8 +202,6 @@ internal class WriteHelper
 
             await writer.StartRowAsync(token);
             await writer.WriteAsync(lt.StateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(lt.Status, "ledger_transaction_status", token);
-            await writer.WriteAsync(lt.ErrorMessage, NpgsqlDbType.Text, token);
             await writer.WriteAsync(lt.TransactionAccumulator, NpgsqlDbType.Bytea, token);
             await writer.WriteNullableAsync(lt.Message, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(lt.Epoch, NpgsqlDbType.Bigint, token);
@@ -218,7 +217,13 @@ internal class WriteHelper
             await writer.WriteAsync(lt.NormalizedRoundTimestamp, NpgsqlDbType.TimestampTz, token);
             await writer.WriteNullableAsync(lt.KindFilterConstraint, "ledger_transaction_kind_filter_constraint", token);
             await writer.WriteAsync(lt.RawPayload, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(lt.EngineReceipt, NpgsqlDbType.Jsonb, token);
+
+            await writer.WriteAsync(lt.EngineReceipt.StateUpdates, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(lt.EngineReceipt.Status, "ledger_transaction_status", token);
+            await writer.WriteAsync(lt.EngineReceipt.FeeSummary, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(lt.EngineReceipt.ErrorMessage, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(lt.EngineReceipt.Items, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(lt.EngineReceipt.NextEpoch, NpgsqlDbType.Jsonb, token);
 
             switch (lt)
             {

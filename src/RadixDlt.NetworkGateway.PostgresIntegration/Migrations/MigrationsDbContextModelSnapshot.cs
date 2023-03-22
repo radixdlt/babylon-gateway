@@ -463,11 +463,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_timestamp");
 
-                    b.Property<string>("EngineReceipt")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("engine_receipt");
-
                     b.Property<long>("Epoch")
                         .HasColumnType("bigint")
                         .HasColumnName("epoch");
@@ -1335,6 +1330,51 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired();
 
                     b.Navigation("TopOfLedgerTransaction");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", b =>
+                {
+                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.TransactionReceipt", "EngineReceipt", b1 =>
+                        {
+                            b1.Property<long>("LedgerTransactionStateVersion")
+                                .HasColumnType("bigint");
+
+                            b1.Property<string>("ErrorMessage")
+                                .HasColumnType("text")
+                                .HasColumnName("receipt_error_message");
+
+                            b1.Property<string>("FeeSummary")
+                                .IsRequired()
+                                .HasColumnType("jsonb")
+                                .HasColumnName("receipt_fee_summary");
+
+                            b1.Property<string>("Items")
+                                .HasColumnType("jsonb")
+                                .HasColumnName("receipt_items");
+
+                            b1.Property<string>("NextEpoch")
+                                .HasColumnType("jsonb")
+                                .HasColumnName("receipt_next_epoch");
+
+                            b1.Property<string>("StateUpdates")
+                                .IsRequired()
+                                .HasColumnType("jsonb")
+                                .HasColumnName("receipt_state_updates");
+
+                            b1.Property<LedgerTransactionStatus>("Status")
+                                .HasColumnType("ledger_transaction_status")
+                                .HasColumnName("receipt_status");
+
+                            b1.HasKey("LedgerTransactionStateVersion");
+
+                            b1.ToTable("ledger_transactions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("LedgerTransactionStateVersion");
+                        });
+
+                    b.Navigation("EngineReceipt")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorActiveSetHistory", b =>
