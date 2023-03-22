@@ -90,46 +90,22 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines ModuleType
+    /// Defines TypeInfoType
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum ModuleType
+    public enum TypeInfoType
     {
         /// <summary>
-        /// Enum Self for value: Self
+        /// Enum Object for value: Object
         /// </summary>
-        [EnumMember(Value = "Self")]
-        Self = 1,
+        [EnumMember(Value = "Object")]
+        Object = 1,
 
         /// <summary>
-        /// Enum TypeInfo for value: TypeInfo
+        /// Enum KeyValueStore for value: KeyValueStore
         /// </summary>
-        [EnumMember(Value = "TypeInfo")]
-        TypeInfo = 2,
-
-        /// <summary>
-        /// Enum Metadata for value: Metadata
-        /// </summary>
-        [EnumMember(Value = "Metadata")]
-        Metadata = 3,
-
-        /// <summary>
-        /// Enum AccessRules for value: AccessRules
-        /// </summary>
-        [EnumMember(Value = "AccessRules")]
-        AccessRules = 4,
-
-        /// <summary>
-        /// Enum AccessRules1 for value: AccessRules1
-        /// </summary>
-        [EnumMember(Value = "AccessRules1")]
-        AccessRules1 = 5,
-
-        /// <summary>
-        /// Enum ComponentRoyalty for value: ComponentRoyalty
-        /// </summary>
-        [EnumMember(Value = "ComponentRoyalty")]
-        ComponentRoyalty = 6
+        [EnumMember(Value = "KeyValueStore")]
+        KeyValueStore = 2
 
     }
 

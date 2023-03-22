@@ -84,72 +84,50 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// VaultLockedFungibleSubstate
+    /// FungibleResourceManagerSubstateAllOf
     /// </summary>
-    [DataContract(Name = "VaultLockedFungibleSubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
-    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class VaultLockedFungibleSubstate : Substate, IEquatable<VaultLockedFungibleSubstate>
+    [DataContract(Name = "FungibleResourceManagerSubstate_allOf")]
+    public partial class FungibleResourceManagerSubstateAllOf : IEquatable<FungibleResourceManagerSubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="VaultLockedFungibleSubstate" /> class.
+        /// Initializes a new instance of the <see cref="FungibleResourceManagerSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected VaultLockedFungibleSubstate() { }
+        protected FungibleResourceManagerSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="VaultLockedFungibleSubstate" /> class.
+        /// Initializes a new instance of the <see cref="FungibleResourceManagerSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="amount">The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.VaultLockedFungible).</param>
-        public VaultLockedFungibleSubstate(string amount = default(string), SubstateType substateType = SubstateType.VaultLockedFungible) : base(substateType)
+        /// <param name="divisibility">divisibility (required).</param>
+        /// <param name="totalSupply">The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        public FungibleResourceManagerSubstateAllOf(int divisibility = default(int), string totalSupply = default(string))
         {
-            // to ensure "amount" is required (not null)
-            if (amount == null)
+            this.Divisibility = divisibility;
+            // to ensure "totalSupply" is required (not null)
+            if (totalSupply == null)
             {
-                throw new ArgumentNullException("amount is a required property for VaultLockedFungibleSubstate and cannot be null");
+                throw new ArgumentNullException("totalSupply is a required property for FungibleResourceManagerSubstateAllOf and cannot be null");
             }
-            this.Amount = amount;
+            this.TotalSupply = totalSupply;
         }
 
         /// <summary>
-        /// The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// Gets or Sets Divisibility
         /// </summary>
-        /// <value>The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public string Amount { get; set; }
+        [DataMember(Name = "divisibility", IsRequired = true, EmitDefaultValue = true)]
+        public int Divisibility { get; set; }
+
+        /// <summary>
+        /// The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// </summary>
+        /// <value>The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
+        public string TotalSupply { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -158,9 +136,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class VaultLockedFungibleSubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("class FungibleResourceManagerSubstateAllOf {\n");
+            sb.Append("  Divisibility: ").Append(Divisibility).Append("\n");
+            sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,7 +147,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -181,25 +159,29 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as VaultLockedFungibleSubstate);
+            return this.Equals(input as FungibleResourceManagerSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if VaultLockedFungibleSubstate instances are equal
+        /// Returns true if FungibleResourceManagerSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of VaultLockedFungibleSubstate to be compared</param>
+        /// <param name="input">Instance of FungibleResourceManagerSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(VaultLockedFungibleSubstate input)
+        public bool Equals(FungibleResourceManagerSubstateAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.Amount == input.Amount ||
-                    (this.Amount != null &&
-                    this.Amount.Equals(input.Amount))
+                    this.Divisibility == input.Divisibility ||
+                    this.Divisibility.Equals(input.Divisibility)
+                ) && 
+                (
+                    this.TotalSupply == input.TotalSupply ||
+                    (this.TotalSupply != null &&
+                    this.TotalSupply.Equals(input.TotalSupply))
                 );
         }
 
@@ -211,10 +193,11 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.Amount != null)
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Divisibility.GetHashCode();
+                if (this.TotalSupply != null)
                 {
-                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
                 }
                 return hashCode;
             }

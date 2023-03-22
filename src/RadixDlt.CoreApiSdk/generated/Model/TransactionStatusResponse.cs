@@ -96,9 +96,9 @@ namespace RadixDlt.CoreApiSdk.Model
     public partial class TransactionStatusResponse : IEquatable<TransactionStatusResponse>
     {
         /// <summary>
-        /// The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction  
+        /// The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction 
         /// </summary>
-        /// <value>The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction  </value>
+        /// <value>The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction </value>
         [JsonConverter(typeof(StringEnumConverter))]
         public enum IntentStatusEnum
         {
@@ -148,9 +148,9 @@ namespace RadixDlt.CoreApiSdk.Model
 
 
         /// <summary>
-        /// The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction  
+        /// The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction 
         /// </summary>
-        /// <value>The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction  </value>
+        /// <value>The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction </value>
         [DataMember(Name = "intent_status", IsRequired = true, EmitDefaultValue = true)]
         public IntentStatusEnum IntentStatus { get; set; }
         /// <summary>
@@ -161,7 +161,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionStatusResponse" /> class.
         /// </summary>
-        /// <param name="intentStatus">The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction   (required).</param>
+        /// <param name="intentStatus">The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction  (required).</param>
         /// <param name="statusDescription">An explanation as to why the intent status is resolved as it is.  (required).</param>
         /// <param name="invalidFromEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the intent status is InMempool or Unknown and we know about a payload. .</param>
         /// <param name="knownPayloads">knownPayloads (required).</param>

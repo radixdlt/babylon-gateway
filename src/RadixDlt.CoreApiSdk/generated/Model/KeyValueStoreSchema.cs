@@ -84,67 +84,76 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TypeInfoSubstate
+    /// KeyValueStoreSchema
     /// </summary>
-    [DataContract(Name = "TypeInfoSubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockSubstate), "Clock")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerSubstate), "FungibleResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerSubstate), "NonFungibleResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFunctionAccessRulesSubstate), "PackageFunctionAccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltySubstate), "PackageRoyalty")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
-    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class TypeInfoSubstate : Substate, IEquatable<TypeInfoSubstate>
+    [DataContract(Name = "KeyValueStoreSchema")]
+    public partial class KeyValueStoreSchema : IEquatable<KeyValueStoreSchema>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypeInfoSubstate" /> class.
+        /// Initializes a new instance of the <see cref="KeyValueStoreSchema" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TypeInfoSubstate() { }
+        protected KeyValueStoreSchema() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypeInfoSubstate" /> class.
+        /// Initializes a new instance of the <see cref="KeyValueStoreSchema" /> class.
         /// </summary>
-        /// <param name="details">details (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.TypeInfo).</param>
-        public TypeInfoSubstate(TypeInfoDetails details = default(TypeInfoDetails), SubstateType substateType = SubstateType.TypeInfo) : base(substateType)
+        /// <param name="schema">schema (required).</param>
+        /// <param name="keyType">keyType (required).</param>
+        /// <param name="valueType">valueType (required).</param>
+        /// <param name="canOwn">Whether the key value store can own any children. (required).</param>
+        public KeyValueStoreSchema(SborData schema = default(SborData), LocalTypeIndex keyType = default(LocalTypeIndex), LocalTypeIndex valueType = default(LocalTypeIndex), bool canOwn = default(bool))
         {
-            // to ensure "details" is required (not null)
-            if (details == null)
+            // to ensure "schema" is required (not null)
+            if (schema == null)
             {
-                throw new ArgumentNullException("details is a required property for TypeInfoSubstate and cannot be null");
+                throw new ArgumentNullException("schema is a required property for KeyValueStoreSchema and cannot be null");
             }
-            this.Details = details;
+            this.Schema = schema;
+            // to ensure "keyType" is required (not null)
+            if (keyType == null)
+            {
+                throw new ArgumentNullException("keyType is a required property for KeyValueStoreSchema and cannot be null");
+            }
+            this.KeyType = keyType;
+            // to ensure "valueType" is required (not null)
+            if (valueType == null)
+            {
+                throw new ArgumentNullException("valueType is a required property for KeyValueStoreSchema and cannot be null");
+            }
+            this.ValueType = valueType;
+            this.CanOwn = canOwn;
         }
 
         /// <summary>
-        /// Gets or Sets Details
+        /// Gets or Sets Schema
         /// </summary>
-        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
-        public TypeInfoDetails Details { get; set; }
+        [DataMember(Name = "schema", IsRequired = true, EmitDefaultValue = true)]
+        public SborData Schema { get; set; }
+
+        /// <summary>
+        /// Gets or Sets KeyType
+        /// </summary>
+        [DataMember(Name = "key_type", IsRequired = true, EmitDefaultValue = true)]
+        public LocalTypeIndex KeyType { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ValueType
+        /// </summary>
+        [DataMember(Name = "value_type", IsRequired = true, EmitDefaultValue = true)]
+        public LocalTypeIndex ValueType { get; set; }
+
+        /// <summary>
+        /// Whether the key value store can own any children.
+        /// </summary>
+        /// <value>Whether the key value store can own any children.</value>
+        [DataMember(Name = "can_own", IsRequired = true, EmitDefaultValue = true)]
+        public bool CanOwn { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -153,9 +162,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TypeInfoSubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Details: ").Append(Details).Append("\n");
+            sb.Append("class KeyValueStoreSchema {\n");
+            sb.Append("  Schema: ").Append(Schema).Append("\n");
+            sb.Append("  KeyType: ").Append(KeyType).Append("\n");
+            sb.Append("  ValueType: ").Append(ValueType).Append("\n");
+            sb.Append("  CanOwn: ").Append(CanOwn).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,7 +175,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -176,25 +187,39 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TypeInfoSubstate);
+            return this.Equals(input as KeyValueStoreSchema);
         }
 
         /// <summary>
-        /// Returns true if TypeInfoSubstate instances are equal
+        /// Returns true if KeyValueStoreSchema instances are equal
         /// </summary>
-        /// <param name="input">Instance of TypeInfoSubstate to be compared</param>
+        /// <param name="input">Instance of KeyValueStoreSchema to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TypeInfoSubstate input)
+        public bool Equals(KeyValueStoreSchema input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.Details == input.Details ||
-                    (this.Details != null &&
-                    this.Details.Equals(input.Details))
+                    this.Schema == input.Schema ||
+                    (this.Schema != null &&
+                    this.Schema.Equals(input.Schema))
+                ) && 
+                (
+                    this.KeyType == input.KeyType ||
+                    (this.KeyType != null &&
+                    this.KeyType.Equals(input.KeyType))
+                ) && 
+                (
+                    this.ValueType == input.ValueType ||
+                    (this.ValueType != null &&
+                    this.ValueType.Equals(input.ValueType))
+                ) && 
+                (
+                    this.CanOwn == input.CanOwn ||
+                    this.CanOwn.Equals(input.CanOwn)
                 );
         }
 
@@ -206,11 +231,20 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.Details != null)
+                int hashCode = 41;
+                if (this.Schema != null)
                 {
-                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Schema.GetHashCode();
                 }
+                if (this.KeyType != null)
+                {
+                    hashCode = (hashCode * 59) + this.KeyType.GetHashCode();
+                }
+                if (this.ValueType != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValueType.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.CanOwn.GetHashCode();
                 return hashCode;
             }
         }

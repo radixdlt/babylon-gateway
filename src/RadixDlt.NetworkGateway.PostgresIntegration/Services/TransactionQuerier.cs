@@ -222,7 +222,7 @@ internal class TransactionQuerier : ITransactionQuerier
             transactionStatus: status,
             payloadHashHex: payloadHashHex,
             intentHashHex: intentHashHex,
-            feePaid: new GatewayModel.TokenAmount(lt.FeePaid.ToString(), _networkConfigurationProvider.GetWellKnownAddresses().Xrd),
+            feePaid: lt.FeePaid.HasValue ? new GatewayModel.TokenAmount(lt.FeePaid.Value.ToString(), _networkConfigurationProvider.GetWellKnownAddresses().Xrd) : null,
             confirmedAt: lt.RoundTimestamp,
             errorMessage: lt.ErrorMessage
         );

@@ -90,66 +90,44 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Only present if the non fungible isn&#39;t deleted. NOTE: Currently there is no schema for mutable/immutable data, and it&#39;s not even guaranteed to be SBOR-encoded. But from scrypto, it likely always will be. For now, immutable_data / mutable_data is optional, and only included if the data is valid SBOR. When the payload is validated, &#x60;immutable_data_raw_hex&#x60; / &#x60;mutable_data_raw_hex&#x60; will be removed. 
+    /// VaultInfoSubstateAllOf
     /// </summary>
-    [DataContract(Name = "NonFungibleData")]
-    public partial class NonFungibleData : IEquatable<NonFungibleData>
+    [DataContract(Name = "VaultInfoSubstate_allOf")]
+    public partial class VaultInfoSubstateAllOf : IEquatable<VaultInfoSubstateAllOf>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleData" /> class.
+        /// Gets or Sets ResourceType
+        /// </summary>
+        [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
+        public ResourceType ResourceType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VaultInfoSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleData() { }
+        protected VaultInfoSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleData" /> class.
+        /// Initializes a new instance of the <see cref="VaultInfoSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="immutableData">immutableData.</param>
-        /// <param name="immutableDataRawHex">The hex-encoded raw bytes of the immutable data of the NF.  (required).</param>
-        /// <param name="mutableData">mutableData.</param>
-        /// <param name="mutableDataRawHex">The hex-encoded raw bytes of the mutadata data of the NF.  (required).</param>
-        public NonFungibleData(DataStruct immutableData = default(DataStruct), string immutableDataRawHex = default(string), DataStruct mutableData = default(DataStruct), string mutableDataRawHex = default(string))
+        /// <param name="resourceType">resourceType (required).</param>
+        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        public VaultInfoSubstateAllOf(ResourceType resourceType = default(ResourceType), string resourceAddress = default(string))
         {
-            // to ensure "immutableDataRawHex" is required (not null)
-            if (immutableDataRawHex == null)
+            this.ResourceType = resourceType;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("immutableDataRawHex is a required property for NonFungibleData and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for VaultInfoSubstateAllOf and cannot be null");
             }
-            this.ImmutableDataRawHex = immutableDataRawHex;
-            // to ensure "mutableDataRawHex" is required (not null)
-            if (mutableDataRawHex == null)
-            {
-                throw new ArgumentNullException("mutableDataRawHex is a required property for NonFungibleData and cannot be null");
-            }
-            this.MutableDataRawHex = mutableDataRawHex;
-            this.ImmutableData = immutableData;
-            this.MutableData = mutableData;
+            this.ResourceAddress = resourceAddress;
         }
 
         /// <summary>
-        /// Gets or Sets ImmutableData
+        /// The Bech32m-encoded human readable version of the resource address
         /// </summary>
-        [DataMember(Name = "immutable_data", EmitDefaultValue = true)]
-        public DataStruct ImmutableData { get; set; }
-
-        /// <summary>
-        /// The hex-encoded raw bytes of the immutable data of the NF. 
-        /// </summary>
-        /// <value>The hex-encoded raw bytes of the immutable data of the NF. </value>
-        [DataMember(Name = "immutable_data_raw_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string ImmutableDataRawHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets MutableData
-        /// </summary>
-        [DataMember(Name = "mutable_data", EmitDefaultValue = true)]
-        public DataStruct MutableData { get; set; }
-
-        /// <summary>
-        /// The hex-encoded raw bytes of the mutadata data of the NF. 
-        /// </summary>
-        /// <value>The hex-encoded raw bytes of the mutadata data of the NF. </value>
-        [DataMember(Name = "mutable_data_raw_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string MutableDataRawHex { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource address</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -158,11 +136,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleData {\n");
-            sb.Append("  ImmutableData: ").Append(ImmutableData).Append("\n");
-            sb.Append("  ImmutableDataRawHex: ").Append(ImmutableDataRawHex).Append("\n");
-            sb.Append("  MutableData: ").Append(MutableData).Append("\n");
-            sb.Append("  MutableDataRawHex: ").Append(MutableDataRawHex).Append("\n");
+            sb.Append("class VaultInfoSubstateAllOf {\n");
+            sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -183,15 +159,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleData);
+            return this.Equals(input as VaultInfoSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleData instances are equal
+        /// Returns true if VaultInfoSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleData to be compared</param>
+        /// <param name="input">Instance of VaultInfoSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleData input)
+        public bool Equals(VaultInfoSubstateAllOf input)
         {
             if (input == null)
             {
@@ -199,24 +175,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ImmutableData == input.ImmutableData ||
-                    (this.ImmutableData != null &&
-                    this.ImmutableData.Equals(input.ImmutableData))
+                    this.ResourceType == input.ResourceType ||
+                    this.ResourceType.Equals(input.ResourceType)
                 ) && 
                 (
-                    this.ImmutableDataRawHex == input.ImmutableDataRawHex ||
-                    (this.ImmutableDataRawHex != null &&
-                    this.ImmutableDataRawHex.Equals(input.ImmutableDataRawHex))
-                ) && 
-                (
-                    this.MutableData == input.MutableData ||
-                    (this.MutableData != null &&
-                    this.MutableData.Equals(input.MutableData))
-                ) && 
-                (
-                    this.MutableDataRawHex == input.MutableDataRawHex ||
-                    (this.MutableDataRawHex != null &&
-                    this.MutableDataRawHex.Equals(input.MutableDataRawHex))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 );
         }
 
@@ -229,21 +194,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ImmutableData != null)
+                hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.ImmutableData.GetHashCode();
-                }
-                if (this.ImmutableDataRawHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.ImmutableDataRawHex.GetHashCode();
-                }
-                if (this.MutableData != null)
-                {
-                    hashCode = (hashCode * 59) + this.MutableData.GetHashCode();
-                }
-                if (this.MutableDataRawHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.MutableDataRawHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
                 return hashCode;
             }

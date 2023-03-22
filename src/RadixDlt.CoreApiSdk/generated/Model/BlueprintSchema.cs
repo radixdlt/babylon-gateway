@@ -90,51 +90,77 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleStoreEntrySubstateAllOf
+    /// BlueprintSchema
     /// </summary>
-    [DataContract(Name = "NonFungibleStoreEntrySubstate_allOf")]
-    public partial class NonFungibleStoreEntrySubstateAllOf : IEquatable<NonFungibleStoreEntrySubstateAllOf>
+    [DataContract(Name = "BlueprintSchema")]
+    public partial class BlueprintSchema : IEquatable<BlueprintSchema>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleStoreEntrySubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="BlueprintSchema" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleStoreEntrySubstateAllOf() { }
+        protected BlueprintSchema() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleStoreEntrySubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="BlueprintSchema" /> class.
         /// </summary>
-        /// <param name="nonFungibleId">nonFungibleId (required).</param>
-        /// <param name="nonFungibleData">nonFungibleData.</param>
-        /// <param name="isDeleted">isDeleted (required).</param>
-        public NonFungibleStoreEntrySubstateAllOf(NonFungibleId nonFungibleId = default(NonFungibleId), NonFungibleData nonFungibleData = default(NonFungibleData), bool isDeleted = default(bool))
+        /// <param name="schema">schema (required).</param>
+        /// <param name="substates">The type index of the substates under the SELF module - in the context of the blueprint&#39;s SBOR schema.  (required).</param>
+        /// <param name="functionDefinitions">A map from the function name to the FunctionDefinition (required).</param>
+        /// <param name="eventDefinitions">A map from the event name to the local type index for the event payload under the blueprint schema. (required).</param>
+        public BlueprintSchema(SborData schema = default(SborData), List<LocalTypeIndex> substates = default(List<LocalTypeIndex>), Dictionary<string, FunctionDefinition> functionDefinitions = default(Dictionary<string, FunctionDefinition>), Dictionary<string, LocalTypeIndex> eventDefinitions = default(Dictionary<string, LocalTypeIndex>))
         {
-            // to ensure "nonFungibleId" is required (not null)
-            if (nonFungibleId == null)
+            // to ensure "schema" is required (not null)
+            if (schema == null)
             {
-                throw new ArgumentNullException("nonFungibleId is a required property for NonFungibleStoreEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("schema is a required property for BlueprintSchema and cannot be null");
             }
-            this.NonFungibleId = nonFungibleId;
-            this.IsDeleted = isDeleted;
-            this.NonFungibleData = nonFungibleData;
+            this.Schema = schema;
+            // to ensure "substates" is required (not null)
+            if (substates == null)
+            {
+                throw new ArgumentNullException("substates is a required property for BlueprintSchema and cannot be null");
+            }
+            this.Substates = substates;
+            // to ensure "functionDefinitions" is required (not null)
+            if (functionDefinitions == null)
+            {
+                throw new ArgumentNullException("functionDefinitions is a required property for BlueprintSchema and cannot be null");
+            }
+            this.FunctionDefinitions = functionDefinitions;
+            // to ensure "eventDefinitions" is required (not null)
+            if (eventDefinitions == null)
+            {
+                throw new ArgumentNullException("eventDefinitions is a required property for BlueprintSchema and cannot be null");
+            }
+            this.EventDefinitions = eventDefinitions;
         }
 
         /// <summary>
-        /// Gets or Sets NonFungibleId
+        /// Gets or Sets Schema
         /// </summary>
-        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleId NonFungibleId { get; set; }
+        [DataMember(Name = "schema", IsRequired = true, EmitDefaultValue = true)]
+        public SborData Schema { get; set; }
 
         /// <summary>
-        /// Gets or Sets NonFungibleData
+        /// The type index of the substates under the SELF module - in the context of the blueprint&#39;s SBOR schema. 
         /// </summary>
-        [DataMember(Name = "non_fungible_data", EmitDefaultValue = true)]
-        public NonFungibleData NonFungibleData { get; set; }
+        /// <value>The type index of the substates under the SELF module - in the context of the blueprint&#39;s SBOR schema. </value>
+        [DataMember(Name = "substates", IsRequired = true, EmitDefaultValue = true)]
+        public List<LocalTypeIndex> Substates { get; set; }
 
         /// <summary>
-        /// Gets or Sets IsDeleted
+        /// A map from the function name to the FunctionDefinition
         /// </summary>
-        [DataMember(Name = "is_deleted", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsDeleted { get; set; }
+        /// <value>A map from the function name to the FunctionDefinition</value>
+        [DataMember(Name = "function_definitions", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, FunctionDefinition> FunctionDefinitions { get; set; }
+
+        /// <summary>
+        /// A map from the event name to the local type index for the event payload under the blueprint schema.
+        /// </summary>
+        /// <value>A map from the event name to the local type index for the event payload under the blueprint schema.</value>
+        [DataMember(Name = "event_definitions", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, LocalTypeIndex> EventDefinitions { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,10 +169,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleStoreEntrySubstateAllOf {\n");
-            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
-            sb.Append("  NonFungibleData: ").Append(NonFungibleData).Append("\n");
-            sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
+            sb.Append("class BlueprintSchema {\n");
+            sb.Append("  Schema: ").Append(Schema).Append("\n");
+            sb.Append("  Substates: ").Append(Substates).Append("\n");
+            sb.Append("  FunctionDefinitions: ").Append(FunctionDefinitions).Append("\n");
+            sb.Append("  EventDefinitions: ").Append(EventDefinitions).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -167,15 +194,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleStoreEntrySubstateAllOf);
+            return this.Equals(input as BlueprintSchema);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleStoreEntrySubstateAllOf instances are equal
+        /// Returns true if BlueprintSchema instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleStoreEntrySubstateAllOf to be compared</param>
+        /// <param name="input">Instance of BlueprintSchema to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleStoreEntrySubstateAllOf input)
+        public bool Equals(BlueprintSchema input)
         {
             if (input == null)
             {
@@ -183,18 +210,27 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.NonFungibleId == input.NonFungibleId ||
-                    (this.NonFungibleId != null &&
-                    this.NonFungibleId.Equals(input.NonFungibleId))
+                    this.Schema == input.Schema ||
+                    (this.Schema != null &&
+                    this.Schema.Equals(input.Schema))
                 ) && 
                 (
-                    this.NonFungibleData == input.NonFungibleData ||
-                    (this.NonFungibleData != null &&
-                    this.NonFungibleData.Equals(input.NonFungibleData))
+                    this.Substates == input.Substates ||
+                    this.Substates != null &&
+                    input.Substates != null &&
+                    this.Substates.SequenceEqual(input.Substates)
                 ) && 
                 (
-                    this.IsDeleted == input.IsDeleted ||
-                    this.IsDeleted.Equals(input.IsDeleted)
+                    this.FunctionDefinitions == input.FunctionDefinitions ||
+                    this.FunctionDefinitions != null &&
+                    input.FunctionDefinitions != null &&
+                    this.FunctionDefinitions.SequenceEqual(input.FunctionDefinitions)
+                ) && 
+                (
+                    this.EventDefinitions == input.EventDefinitions ||
+                    this.EventDefinitions != null &&
+                    input.EventDefinitions != null &&
+                    this.EventDefinitions.SequenceEqual(input.EventDefinitions)
                 );
         }
 
@@ -207,15 +243,22 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.NonFungibleId != null)
+                if (this.Schema != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Schema.GetHashCode();
                 }
-                if (this.NonFungibleData != null)
+                if (this.Substates != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleData.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Substates.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
+                if (this.FunctionDefinitions != null)
+                {
+                    hashCode = (hashCode * 59) + this.FunctionDefinitions.GetHashCode();
+                }
+                if (this.EventDefinitions != null)
+                {
+                    hashCode = (hashCode * 59) + this.EventDefinitions.GetHashCode();
+                }
                 return hashCode;
             }
         }

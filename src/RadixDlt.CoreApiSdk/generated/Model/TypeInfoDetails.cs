@@ -91,64 +91,35 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// PackageRoyaltyConfigSubstate
+    /// TypeInfoDetails
     /// </summary>
-    [DataContract(Name = "PackageRoyaltyConfigSubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
-    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class PackageRoyaltyConfigSubstate : Substate, IEquatable<PackageRoyaltyConfigSubstate>
+    [DataContract(Name = "TypeInfoDetails")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreTypeInfoDetails), "KeyValueStore")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreTypeInfoDetails), "KeyValueStoreTypeInfoDetails")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectTypeInfoDetails), "Object")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectTypeInfoDetails), "ObjectTypeInfoDetails")]
+    public partial class TypeInfoDetails : IEquatable<TypeInfoDetails>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PackageRoyaltyConfigSubstate" /> class.
-        /// </summary>
-        [JsonConstructorAttribute]
-        protected PackageRoyaltyConfigSubstate() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PackageRoyaltyConfigSubstate" /> class.
-        /// </summary>
-        /// <param name="blueprintRoyalties">blueprintRoyalties (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.PackageRoyaltyConfig).</param>
-        public PackageRoyaltyConfigSubstate(List<BlueprintRoyaltyConfig> blueprintRoyalties = default(List<BlueprintRoyaltyConfig>), SubstateType substateType = SubstateType.PackageRoyaltyConfig) : base(substateType)
-        {
-            // to ensure "blueprintRoyalties" is required (not null)
-            if (blueprintRoyalties == null)
-            {
-                throw new ArgumentNullException("blueprintRoyalties is a required property for PackageRoyaltyConfigSubstate and cannot be null");
-            }
-            this.BlueprintRoyalties = blueprintRoyalties;
-        }
 
         /// <summary>
-        /// Gets or Sets BlueprintRoyalties
+        /// Gets or Sets Type
         /// </summary>
-        [DataMember(Name = "blueprint_royalties", IsRequired = true, EmitDefaultValue = true)]
-        public List<BlueprintRoyaltyConfig> BlueprintRoyalties { get; set; }
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public TypeInfoType Type { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TypeInfoDetails" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected TypeInfoDetails() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TypeInfoDetails" /> class.
+        /// </summary>
+        /// <param name="type">type (required).</param>
+        public TypeInfoDetails(TypeInfoType type = default(TypeInfoType))
+        {
+            this.Type = type;
+        }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,9 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PackageRoyaltyConfigSubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  BlueprintRoyalties: ").Append(BlueprintRoyalties).Append("\n");
+            sb.Append("class TypeInfoDetails {\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -168,7 +138,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -180,26 +150,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PackageRoyaltyConfigSubstate);
+            return this.Equals(input as TypeInfoDetails);
         }
 
         /// <summary>
-        /// Returns true if PackageRoyaltyConfigSubstate instances are equal
+        /// Returns true if TypeInfoDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of PackageRoyaltyConfigSubstate to be compared</param>
+        /// <param name="input">Instance of TypeInfoDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PackageRoyaltyConfigSubstate input)
+        public bool Equals(TypeInfoDetails input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.BlueprintRoyalties == input.BlueprintRoyalties ||
-                    this.BlueprintRoyalties != null &&
-                    input.BlueprintRoyalties != null &&
-                    this.BlueprintRoyalties.SequenceEqual(input.BlueprintRoyalties)
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
                 );
         }
 
@@ -211,11 +179,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.BlueprintRoyalties != null)
-                {
-                    hashCode = (hashCode * 59) + this.BlueprintRoyalties.GetHashCode();
-                }
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
                 return hashCode;
             }
         }

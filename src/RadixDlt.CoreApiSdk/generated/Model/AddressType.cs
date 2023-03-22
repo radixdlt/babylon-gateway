@@ -102,82 +102,88 @@ namespace RadixDlt.CoreApiSdk.Model
         public enum SubtypeEnum
         {
             /// <summary>
-            /// Enum Resource for value: Resource
-            /// </summary>
-            [EnumMember(Value = "Resource")]
-            Resource = 1,
-
-            /// <summary>
             /// Enum Package for value: Package
             /// </summary>
             [EnumMember(Value = "Package")]
-            Package = 2,
+            Package = 1,
+
+            /// <summary>
+            /// Enum FungibleResource for value: FungibleResource
+            /// </summary>
+            [EnumMember(Value = "FungibleResource")]
+            FungibleResource = 2,
+
+            /// <summary>
+            /// Enum NonFungibleResource for value: NonFungibleResource
+            /// </summary>
+            [EnumMember(Value = "NonFungibleResource")]
+            NonFungibleResource = 3,
 
             /// <summary>
             /// Enum NormalComponent for value: NormalComponent
             /// </summary>
             [EnumMember(Value = "NormalComponent")]
-            NormalComponent = 3,
+            NormalComponent = 4,
 
             /// <summary>
             /// Enum AccountComponent for value: AccountComponent
             /// </summary>
             [EnumMember(Value = "AccountComponent")]
-            AccountComponent = 4,
+            AccountComponent = 5,
 
             /// <summary>
             /// Enum EcdsaSecp256k1VirtualAccountComponent for value: EcdsaSecp256k1VirtualAccountComponent
             /// </summary>
             [EnumMember(Value = "EcdsaSecp256k1VirtualAccountComponent")]
-            EcdsaSecp256k1VirtualAccountComponent = 5,
+            EcdsaSecp256k1VirtualAccountComponent = 6,
 
             /// <summary>
             /// Enum EddsaEd25519VirtualAccountComponent for value: EddsaEd25519VirtualAccountComponent
             /// </summary>
             [EnumMember(Value = "EddsaEd25519VirtualAccountComponent")]
-            EddsaEd25519VirtualAccountComponent = 6,
+            EddsaEd25519VirtualAccountComponent = 7,
 
             /// <summary>
             /// Enum IdentityComponent for value: IdentityComponent
             /// </summary>
             [EnumMember(Value = "IdentityComponent")]
-            IdentityComponent = 7,
+            IdentityComponent = 8,
 
             /// <summary>
             /// Enum EcdsaSecp256k1VirtualIdentityComponent for value: EcdsaSecp256k1VirtualIdentityComponent
             /// </summary>
             [EnumMember(Value = "EcdsaSecp256k1VirtualIdentityComponent")]
-            EcdsaSecp256k1VirtualIdentityComponent = 8,
+            EcdsaSecp256k1VirtualIdentityComponent = 9,
 
             /// <summary>
             /// Enum EddsaEd25519VirtualIdentityComponent for value: EddsaEd25519VirtualIdentityComponent
             /// </summary>
             [EnumMember(Value = "EddsaEd25519VirtualIdentityComponent")]
-            EddsaEd25519VirtualIdentityComponent = 9,
+            EddsaEd25519VirtualIdentityComponent = 10,
 
             /// <summary>
             /// Enum EpochManager for value: EpochManager
             /// </summary>
             [EnumMember(Value = "EpochManager")]
-            EpochManager = 10,
+            EpochManager = 11,
 
             /// <summary>
             /// Enum Validator for value: Validator
             /// </summary>
             [EnumMember(Value = "Validator")]
-            Validator = 11,
+            Validator = 12,
 
             /// <summary>
             /// Enum Clock for value: Clock
             /// </summary>
             [EnumMember(Value = "Clock")]
-            Clock = 12,
+            Clock = 13,
 
             /// <summary>
             /// Enum AccessController for value: AccessController
             /// </summary>
             [EnumMember(Value = "AccessController")]
-            AccessController = 13
+            AccessController = 14
 
         }
 

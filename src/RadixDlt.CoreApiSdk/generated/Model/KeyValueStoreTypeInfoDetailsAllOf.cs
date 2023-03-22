@@ -90,35 +90,35 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// BlueprintData
+    /// KeyValueStoreTypeInfoDetailsAllOf
     /// </summary>
-    [DataContract(Name = "BlueprintData")]
-    public partial class BlueprintData : IEquatable<BlueprintData>
+    [DataContract(Name = "KeyValueStoreTypeInfoDetails_allOf")]
+    public partial class KeyValueStoreTypeInfoDetailsAllOf : IEquatable<KeyValueStoreTypeInfoDetailsAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="BlueprintData" /> class.
+        /// Initializes a new instance of the <see cref="KeyValueStoreTypeInfoDetailsAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected BlueprintData() { }
+        protected KeyValueStoreTypeInfoDetailsAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="BlueprintData" /> class.
+        /// Initializes a new instance of the <see cref="KeyValueStoreTypeInfoDetailsAllOf" /> class.
         /// </summary>
-        /// <param name="abi">abi (required).</param>
-        public BlueprintData(SborData abi = default(SborData))
+        /// <param name="keyValueStoreSchema">keyValueStoreSchema (required).</param>
+        public KeyValueStoreTypeInfoDetailsAllOf(KeyValueStoreSchema keyValueStoreSchema = default(KeyValueStoreSchema))
         {
-            // to ensure "abi" is required (not null)
-            if (abi == null)
+            // to ensure "keyValueStoreSchema" is required (not null)
+            if (keyValueStoreSchema == null)
             {
-                throw new ArgumentNullException("abi is a required property for BlueprintData and cannot be null");
+                throw new ArgumentNullException("keyValueStoreSchema is a required property for KeyValueStoreTypeInfoDetailsAllOf and cannot be null");
             }
-            this.Abi = abi;
+            this.KeyValueStoreSchema = keyValueStoreSchema;
         }
 
         /// <summary>
-        /// Gets or Sets Abi
+        /// Gets or Sets KeyValueStoreSchema
         /// </summary>
-        [DataMember(Name = "abi", IsRequired = true, EmitDefaultValue = true)]
-        public SborData Abi { get; set; }
+        [DataMember(Name = "key_value_store_schema", IsRequired = true, EmitDefaultValue = true)]
+        public KeyValueStoreSchema KeyValueStoreSchema { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class BlueprintData {\n");
-            sb.Append("  Abi: ").Append(Abi).Append("\n");
+            sb.Append("class KeyValueStoreTypeInfoDetailsAllOf {\n");
+            sb.Append("  KeyValueStoreSchema: ").Append(KeyValueStoreSchema).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +149,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as BlueprintData);
+            return this.Equals(input as KeyValueStoreTypeInfoDetailsAllOf);
         }
 
         /// <summary>
-        /// Returns true if BlueprintData instances are equal
+        /// Returns true if KeyValueStoreTypeInfoDetailsAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of BlueprintData to be compared</param>
+        /// <param name="input">Instance of KeyValueStoreTypeInfoDetailsAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(BlueprintData input)
+        public bool Equals(KeyValueStoreTypeInfoDetailsAllOf input)
         {
             if (input == null)
             {
@@ -165,9 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Abi == input.Abi ||
-                    (this.Abi != null &&
-                    this.Abi.Equals(input.Abi))
+                    this.KeyValueStoreSchema == input.KeyValueStoreSchema ||
+                    (this.KeyValueStoreSchema != null &&
+                    this.KeyValueStoreSchema.Equals(input.KeyValueStoreSchema))
                 );
         }
 
@@ -180,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Abi != null)
+                if (this.KeyValueStoreSchema != null)
                 {
-                    hashCode = (hashCode * 59) + this.Abi.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyValueStoreSchema.GetHashCode();
                 }
                 return hashCode;
             }

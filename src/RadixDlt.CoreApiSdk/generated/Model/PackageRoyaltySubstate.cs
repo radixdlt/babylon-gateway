@@ -91,9 +91,9 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TypeInfoSubstate
+    /// PackageRoyaltySubstate
     /// </summary>
-    [DataContract(Name = "TypeInfoSubstate")]
+    [DataContract(Name = "PackageRoyaltySubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
@@ -118,33 +118,41 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
     [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class TypeInfoSubstate : Substate, IEquatable<TypeInfoSubstate>
+    public partial class PackageRoyaltySubstate : Substate, IEquatable<PackageRoyaltySubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypeInfoSubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageRoyaltySubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TypeInfoSubstate() { }
+        protected PackageRoyaltySubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypeInfoSubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageRoyaltySubstate" /> class.
         /// </summary>
-        /// <param name="details">details (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.TypeInfo).</param>
-        public TypeInfoSubstate(TypeInfoDetails details = default(TypeInfoDetails), SubstateType substateType = SubstateType.TypeInfo) : base(substateType)
+        /// <param name="vaultEntity">vaultEntity.</param>
+        /// <param name="blueprintRoyalties">blueprintRoyalties (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.PackageRoyalty).</param>
+        public PackageRoyaltySubstate(EntityReference vaultEntity = default(EntityReference), List<BlueprintRoyaltyConfig> blueprintRoyalties = default(List<BlueprintRoyaltyConfig>), SubstateType substateType = SubstateType.PackageRoyalty) : base(substateType)
         {
-            // to ensure "details" is required (not null)
-            if (details == null)
+            // to ensure "blueprintRoyalties" is required (not null)
+            if (blueprintRoyalties == null)
             {
-                throw new ArgumentNullException("details is a required property for TypeInfoSubstate and cannot be null");
+                throw new ArgumentNullException("blueprintRoyalties is a required property for PackageRoyaltySubstate and cannot be null");
             }
-            this.Details = details;
+            this.BlueprintRoyalties = blueprintRoyalties;
+            this.VaultEntity = vaultEntity;
         }
 
         /// <summary>
-        /// Gets or Sets Details
+        /// Gets or Sets VaultEntity
         /// </summary>
-        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
-        public TypeInfoDetails Details { get; set; }
+        [DataMember(Name = "vault_entity", EmitDefaultValue = true)]
+        public EntityReference VaultEntity { get; set; }
+
+        /// <summary>
+        /// Gets or Sets BlueprintRoyalties
+        /// </summary>
+        [DataMember(Name = "blueprint_royalties", IsRequired = true, EmitDefaultValue = true)]
+        public List<BlueprintRoyaltyConfig> BlueprintRoyalties { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -153,9 +161,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TypeInfoSubstate {\n");
+            sb.Append("class PackageRoyaltySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Details: ").Append(Details).Append("\n");
+            sb.Append("  VaultEntity: ").Append(VaultEntity).Append("\n");
+            sb.Append("  BlueprintRoyalties: ").Append(BlueprintRoyalties).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -176,15 +185,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TypeInfoSubstate);
+            return this.Equals(input as PackageRoyaltySubstate);
         }
 
         /// <summary>
-        /// Returns true if TypeInfoSubstate instances are equal
+        /// Returns true if PackageRoyaltySubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of TypeInfoSubstate to be compared</param>
+        /// <param name="input">Instance of PackageRoyaltySubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TypeInfoSubstate input)
+        public bool Equals(PackageRoyaltySubstate input)
         {
             if (input == null)
             {
@@ -192,9 +201,15 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Details == input.Details ||
-                    (this.Details != null &&
-                    this.Details.Equals(input.Details))
+                    this.VaultEntity == input.VaultEntity ||
+                    (this.VaultEntity != null &&
+                    this.VaultEntity.Equals(input.VaultEntity))
+                ) && base.Equals(input) && 
+                (
+                    this.BlueprintRoyalties == input.BlueprintRoyalties ||
+                    this.BlueprintRoyalties != null &&
+                    input.BlueprintRoyalties != null &&
+                    this.BlueprintRoyalties.SequenceEqual(input.BlueprintRoyalties)
                 );
         }
 
@@ -207,9 +222,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Details != null)
+                if (this.VaultEntity != null)
                 {
-                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
+                    hashCode = (hashCode * 59) + this.VaultEntity.GetHashCode();
+                }
+                if (this.BlueprintRoyalties != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintRoyalties.GetHashCode();
                 }
                 return hashCode;
             }

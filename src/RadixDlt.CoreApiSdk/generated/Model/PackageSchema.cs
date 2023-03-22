@@ -90,35 +90,36 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ClockCurrentMinuteSubstateAllOf
+    /// PackageSchema
     /// </summary>
-    [DataContract(Name = "ClockCurrentMinuteSubstate_allOf")]
-    public partial class ClockCurrentMinuteSubstateAllOf : IEquatable<ClockCurrentMinuteSubstateAllOf>
+    [DataContract(Name = "PackageSchema")]
+    public partial class PackageSchema : IEquatable<PackageSchema>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ClockCurrentMinuteSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageSchema" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ClockCurrentMinuteSubstateAllOf() { }
+        protected PackageSchema() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ClockCurrentMinuteSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageSchema" /> class.
         /// </summary>
-        /// <param name="timestampRoundedDownToMinute">timestampRoundedDownToMinute (required).</param>
-        public ClockCurrentMinuteSubstateAllOf(Instant timestampRoundedDownToMinute = default(Instant))
+        /// <param name="blueprintSchemas">A map from the blueprint name to BlueprintSchema (required).</param>
+        public PackageSchema(Dictionary<string, BlueprintSchema> blueprintSchemas = default(Dictionary<string, BlueprintSchema>))
         {
-            // to ensure "timestampRoundedDownToMinute" is required (not null)
-            if (timestampRoundedDownToMinute == null)
+            // to ensure "blueprintSchemas" is required (not null)
+            if (blueprintSchemas == null)
             {
-                throw new ArgumentNullException("timestampRoundedDownToMinute is a required property for ClockCurrentMinuteSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("blueprintSchemas is a required property for PackageSchema and cannot be null");
             }
-            this.TimestampRoundedDownToMinute = timestampRoundedDownToMinute;
+            this.BlueprintSchemas = blueprintSchemas;
         }
 
         /// <summary>
-        /// Gets or Sets TimestampRoundedDownToMinute
+        /// A map from the blueprint name to BlueprintSchema
         /// </summary>
-        [DataMember(Name = "timestamp_rounded_down_to_minute", IsRequired = true, EmitDefaultValue = true)]
-        public Instant TimestampRoundedDownToMinute { get; set; }
+        /// <value>A map from the blueprint name to BlueprintSchema</value>
+        [DataMember(Name = "blueprint_schemas", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, BlueprintSchema> BlueprintSchemas { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ClockCurrentMinuteSubstateAllOf {\n");
-            sb.Append("  TimestampRoundedDownToMinute: ").Append(TimestampRoundedDownToMinute).Append("\n");
+            sb.Append("class PackageSchema {\n");
+            sb.Append("  BlueprintSchemas: ").Append(BlueprintSchemas).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +150,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ClockCurrentMinuteSubstateAllOf);
+            return this.Equals(input as PackageSchema);
         }
 
         /// <summary>
-        /// Returns true if ClockCurrentMinuteSubstateAllOf instances are equal
+        /// Returns true if PackageSchema instances are equal
         /// </summary>
-        /// <param name="input">Instance of ClockCurrentMinuteSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of PackageSchema to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ClockCurrentMinuteSubstateAllOf input)
+        public bool Equals(PackageSchema input)
         {
             if (input == null)
             {
@@ -165,9 +166,10 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.TimestampRoundedDownToMinute == input.TimestampRoundedDownToMinute ||
-                    (this.TimestampRoundedDownToMinute != null &&
-                    this.TimestampRoundedDownToMinute.Equals(input.TimestampRoundedDownToMinute))
+                    this.BlueprintSchemas == input.BlueprintSchemas ||
+                    this.BlueprintSchemas != null &&
+                    input.BlueprintSchemas != null &&
+                    this.BlueprintSchemas.SequenceEqual(input.BlueprintSchemas)
                 );
         }
 
@@ -180,9 +182,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TimestampRoundedDownToMinute != null)
+                if (this.BlueprintSchemas != null)
                 {
-                    hashCode = (hashCode * 59) + this.TimestampRoundedDownToMinute.GetHashCode();
+                    hashCode = (hashCode * 59) + this.BlueprintSchemas.GetHashCode();
                 }
                 return hashCode;
             }

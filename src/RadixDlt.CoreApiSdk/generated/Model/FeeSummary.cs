@@ -107,13 +107,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;255&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
         /// <param name="costUnitLimit">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the maximum amount of cost units available for the transaction execution. (required).</param>
         /// <param name="costUnitsConsumed">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the amount of cost units consumed by the transaction execution. (required).</param>
+        /// <param name="costUnitExecutionBreakdown">A breakdown of where the execution cost went.  (required).</param>
         /// <param name="xrdTotalExecutionCost">The string-encoded decimal representing the total amount of XRD burned in the transaction as part of execution costs. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
         /// <param name="xrdTotalRoyaltyCost">The string-encoded decimal representing the total amount of XRD paid in royalties as part of the transaction. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
         /// <param name="xrdTotalTipped">The string-encoded decimal representing the total amount of XRD tipped to validators in the transaction. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
-        /// <param name="xrdVaultPayments">A summary of which vaults were used to pay the fee. This is only present if the transaction was committed. .</param>
-        /// <param name="costUnitExecutionBreakdown">A summary of where the execution cost went.  (required).</param>
-        /// <param name="costUnitRoyaltyBreakdown">A summary of where the royalties were paid to.  (required).</param>
-        public FeeSummary(string costUnitPrice = default(string), int tipPercentage = default(int), long costUnitLimit = default(long), long costUnitsConsumed = default(long), string xrdTotalExecutionCost = default(string), string xrdTotalRoyaltyCost = default(string), string xrdTotalTipped = default(string), List<VaultPayment> xrdVaultPayments = default(List<VaultPayment>), Dictionary<string, long> costUnitExecutionBreakdown = default(Dictionary<string, long>), List<RoyaltyPayment> costUnitRoyaltyBreakdown = default(List<RoyaltyPayment>))
+        /// <param name="xrdVaultPayments">A breakdown of which vaults were used to pay the fee.  (required).</param>
+        /// <param name="xrdRoyaltyReceivers">A breakdown of where the royalties were paid to.  (required).</param>
+        public FeeSummary(string costUnitPrice = default(string), int tipPercentage = default(int), long costUnitLimit = default(long), long costUnitsConsumed = default(long), Dictionary<string, long> costUnitExecutionBreakdown = default(Dictionary<string, long>), string xrdTotalExecutionCost = default(string), string xrdTotalRoyaltyCost = default(string), string xrdTotalTipped = default(string), List<VaultPayment> xrdVaultPayments = default(List<VaultPayment>), List<RoyaltyPayment> xrdRoyaltyReceivers = default(List<RoyaltyPayment>))
         {
             // to ensure "costUnitPrice" is required (not null)
             if (costUnitPrice == null)
@@ -124,6 +124,12 @@ namespace RadixDlt.CoreApiSdk.Model
             this.TipPercentage = tipPercentage;
             this.CostUnitLimit = costUnitLimit;
             this.CostUnitsConsumed = costUnitsConsumed;
+            // to ensure "costUnitExecutionBreakdown" is required (not null)
+            if (costUnitExecutionBreakdown == null)
+            {
+                throw new ArgumentNullException("costUnitExecutionBreakdown is a required property for FeeSummary and cannot be null");
+            }
+            this.CostUnitExecutionBreakdown = costUnitExecutionBreakdown;
             // to ensure "xrdTotalExecutionCost" is required (not null)
             if (xrdTotalExecutionCost == null)
             {
@@ -142,19 +148,18 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("xrdTotalTipped is a required property for FeeSummary and cannot be null");
             }
             this.XrdTotalTipped = xrdTotalTipped;
-            // to ensure "costUnitExecutionBreakdown" is required (not null)
-            if (costUnitExecutionBreakdown == null)
+            // to ensure "xrdVaultPayments" is required (not null)
+            if (xrdVaultPayments == null)
             {
-                throw new ArgumentNullException("costUnitExecutionBreakdown is a required property for FeeSummary and cannot be null");
+                throw new ArgumentNullException("xrdVaultPayments is a required property for FeeSummary and cannot be null");
             }
-            this.CostUnitExecutionBreakdown = costUnitExecutionBreakdown;
-            // to ensure "costUnitRoyaltyBreakdown" is required (not null)
-            if (costUnitRoyaltyBreakdown == null)
-            {
-                throw new ArgumentNullException("costUnitRoyaltyBreakdown is a required property for FeeSummary and cannot be null");
-            }
-            this.CostUnitRoyaltyBreakdown = costUnitRoyaltyBreakdown;
             this.XrdVaultPayments = xrdVaultPayments;
+            // to ensure "xrdRoyaltyReceivers" is required (not null)
+            if (xrdRoyaltyReceivers == null)
+            {
+                throw new ArgumentNullException("xrdRoyaltyReceivers is a required property for FeeSummary and cannot be null");
+            }
+            this.XrdRoyaltyReceivers = xrdRoyaltyReceivers;
         }
 
         /// <summary>
@@ -186,6 +191,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public long CostUnitsConsumed { get; set; }
 
         /// <summary>
+        /// A breakdown of where the execution cost went. 
+        /// </summary>
+        /// <value>A breakdown of where the execution cost went. </value>
+        [DataMember(Name = "cost_unit_execution_breakdown", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, long> CostUnitExecutionBreakdown { get; set; }
+
+        /// <summary>
         /// The string-encoded decimal representing the total amount of XRD burned in the transaction as part of execution costs. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
         /// </summary>
         /// <value>The string-encoded decimal representing the total amount of XRD burned in the transaction as part of execution costs. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
@@ -207,25 +219,18 @@ namespace RadixDlt.CoreApiSdk.Model
         public string XrdTotalTipped { get; set; }
 
         /// <summary>
-        /// A summary of which vaults were used to pay the fee. This is only present if the transaction was committed. 
+        /// A breakdown of which vaults were used to pay the fee. 
         /// </summary>
-        /// <value>A summary of which vaults were used to pay the fee. This is only present if the transaction was committed. </value>
-        [DataMember(Name = "xrd_vault_payments", EmitDefaultValue = true)]
+        /// <value>A breakdown of which vaults were used to pay the fee. </value>
+        [DataMember(Name = "xrd_vault_payments", IsRequired = true, EmitDefaultValue = true)]
         public List<VaultPayment> XrdVaultPayments { get; set; }
 
         /// <summary>
-        /// A summary of where the execution cost went. 
+        /// A breakdown of where the royalties were paid to. 
         /// </summary>
-        /// <value>A summary of where the execution cost went. </value>
-        [DataMember(Name = "cost_unit_execution_breakdown", IsRequired = true, EmitDefaultValue = true)]
-        public Dictionary<string, long> CostUnitExecutionBreakdown { get; set; }
-
-        /// <summary>
-        /// A summary of where the royalties were paid to. 
-        /// </summary>
-        /// <value>A summary of where the royalties were paid to. </value>
-        [DataMember(Name = "cost_unit_royalty_breakdown", IsRequired = true, EmitDefaultValue = true)]
-        public List<RoyaltyPayment> CostUnitRoyaltyBreakdown { get; set; }
+        /// <value>A breakdown of where the royalties were paid to. </value>
+        [DataMember(Name = "xrd_royalty_receivers", IsRequired = true, EmitDefaultValue = true)]
+        public List<RoyaltyPayment> XrdRoyaltyReceivers { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -239,12 +244,12 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  TipPercentage: ").Append(TipPercentage).Append("\n");
             sb.Append("  CostUnitLimit: ").Append(CostUnitLimit).Append("\n");
             sb.Append("  CostUnitsConsumed: ").Append(CostUnitsConsumed).Append("\n");
+            sb.Append("  CostUnitExecutionBreakdown: ").Append(CostUnitExecutionBreakdown).Append("\n");
             sb.Append("  XrdTotalExecutionCost: ").Append(XrdTotalExecutionCost).Append("\n");
             sb.Append("  XrdTotalRoyaltyCost: ").Append(XrdTotalRoyaltyCost).Append("\n");
             sb.Append("  XrdTotalTipped: ").Append(XrdTotalTipped).Append("\n");
             sb.Append("  XrdVaultPayments: ").Append(XrdVaultPayments).Append("\n");
-            sb.Append("  CostUnitExecutionBreakdown: ").Append(CostUnitExecutionBreakdown).Append("\n");
-            sb.Append("  CostUnitRoyaltyBreakdown: ").Append(CostUnitRoyaltyBreakdown).Append("\n");
+            sb.Append("  XrdRoyaltyReceivers: ").Append(XrdRoyaltyReceivers).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -298,6 +303,12 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.CostUnitsConsumed.Equals(input.CostUnitsConsumed)
                 ) && 
                 (
+                    this.CostUnitExecutionBreakdown == input.CostUnitExecutionBreakdown ||
+                    this.CostUnitExecutionBreakdown != null &&
+                    input.CostUnitExecutionBreakdown != null &&
+                    this.CostUnitExecutionBreakdown.SequenceEqual(input.CostUnitExecutionBreakdown)
+                ) && 
+                (
                     this.XrdTotalExecutionCost == input.XrdTotalExecutionCost ||
                     (this.XrdTotalExecutionCost != null &&
                     this.XrdTotalExecutionCost.Equals(input.XrdTotalExecutionCost))
@@ -319,16 +330,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.XrdVaultPayments.SequenceEqual(input.XrdVaultPayments)
                 ) && 
                 (
-                    this.CostUnitExecutionBreakdown == input.CostUnitExecutionBreakdown ||
-                    this.CostUnitExecutionBreakdown != null &&
-                    input.CostUnitExecutionBreakdown != null &&
-                    this.CostUnitExecutionBreakdown.SequenceEqual(input.CostUnitExecutionBreakdown)
-                ) && 
-                (
-                    this.CostUnitRoyaltyBreakdown == input.CostUnitRoyaltyBreakdown ||
-                    this.CostUnitRoyaltyBreakdown != null &&
-                    input.CostUnitRoyaltyBreakdown != null &&
-                    this.CostUnitRoyaltyBreakdown.SequenceEqual(input.CostUnitRoyaltyBreakdown)
+                    this.XrdRoyaltyReceivers == input.XrdRoyaltyReceivers ||
+                    this.XrdRoyaltyReceivers != null &&
+                    input.XrdRoyaltyReceivers != null &&
+                    this.XrdRoyaltyReceivers.SequenceEqual(input.XrdRoyaltyReceivers)
                 );
         }
 
@@ -348,6 +353,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
                 hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
                 hashCode = (hashCode * 59) + this.CostUnitsConsumed.GetHashCode();
+                if (this.CostUnitExecutionBreakdown != null)
+                {
+                    hashCode = (hashCode * 59) + this.CostUnitExecutionBreakdown.GetHashCode();
+                }
                 if (this.XrdTotalExecutionCost != null)
                 {
                     hashCode = (hashCode * 59) + this.XrdTotalExecutionCost.GetHashCode();
@@ -364,13 +373,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.XrdVaultPayments.GetHashCode();
                 }
-                if (this.CostUnitExecutionBreakdown != null)
+                if (this.XrdRoyaltyReceivers != null)
                 {
-                    hashCode = (hashCode * 59) + this.CostUnitExecutionBreakdown.GetHashCode();
-                }
-                if (this.CostUnitRoyaltyBreakdown != null)
-                {
-                    hashCode = (hashCode * 59) + this.CostUnitRoyaltyBreakdown.GetHashCode();
+                    hashCode = (hashCode * 59) + this.XrdRoyaltyReceivers.GetHashCode();
                 }
                 return hashCode;
             }

@@ -91,9 +91,9 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TypeInfoSubstate
+    /// PackageFunctionAccessRulesSubstate
     /// </summary>
-    [DataContract(Name = "TypeInfoSubstate")]
+    [DataContract(Name = "PackageFunctionAccessRulesSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
@@ -118,33 +118,46 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
     [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class TypeInfoSubstate : Substate, IEquatable<TypeInfoSubstate>
+    public partial class PackageFunctionAccessRulesSubstate : Substate, IEquatable<PackageFunctionAccessRulesSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypeInfoSubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageFunctionAccessRulesSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TypeInfoSubstate() { }
+        protected PackageFunctionAccessRulesSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypeInfoSubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageFunctionAccessRulesSubstate" /> class.
         /// </summary>
-        /// <param name="details">details (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.TypeInfo).</param>
-        public TypeInfoSubstate(TypeInfoDetails details = default(TypeInfoDetails), SubstateType substateType = SubstateType.TypeInfo) : base(substateType)
+        /// <param name="functionAuth">functionAuth (required).</param>
+        /// <param name="defaultAuth">defaultAuth (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.PackageFunctionAccessRules).</param>
+        public PackageFunctionAccessRulesSubstate(List<PackageFunctionAccessRule> functionAuth = default(List<PackageFunctionAccessRule>), AccessRule defaultAuth = default(AccessRule), SubstateType substateType = SubstateType.PackageFunctionAccessRules) : base(substateType)
         {
-            // to ensure "details" is required (not null)
-            if (details == null)
+            // to ensure "functionAuth" is required (not null)
+            if (functionAuth == null)
             {
-                throw new ArgumentNullException("details is a required property for TypeInfoSubstate and cannot be null");
+                throw new ArgumentNullException("functionAuth is a required property for PackageFunctionAccessRulesSubstate and cannot be null");
             }
-            this.Details = details;
+            this.FunctionAuth = functionAuth;
+            // to ensure "defaultAuth" is required (not null)
+            if (defaultAuth == null)
+            {
+                throw new ArgumentNullException("defaultAuth is a required property for PackageFunctionAccessRulesSubstate and cannot be null");
+            }
+            this.DefaultAuth = defaultAuth;
         }
 
         /// <summary>
-        /// Gets or Sets Details
+        /// Gets or Sets FunctionAuth
         /// </summary>
-        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
-        public TypeInfoDetails Details { get; set; }
+        [DataMember(Name = "function_auth", IsRequired = true, EmitDefaultValue = true)]
+        public List<PackageFunctionAccessRule> FunctionAuth { get; set; }
+
+        /// <summary>
+        /// Gets or Sets DefaultAuth
+        /// </summary>
+        [DataMember(Name = "default_auth", IsRequired = true, EmitDefaultValue = true)]
+        public AccessRule DefaultAuth { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -153,9 +166,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TypeInfoSubstate {\n");
+            sb.Append("class PackageFunctionAccessRulesSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Details: ").Append(Details).Append("\n");
+            sb.Append("  FunctionAuth: ").Append(FunctionAuth).Append("\n");
+            sb.Append("  DefaultAuth: ").Append(DefaultAuth).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -176,15 +190,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TypeInfoSubstate);
+            return this.Equals(input as PackageFunctionAccessRulesSubstate);
         }
 
         /// <summary>
-        /// Returns true if TypeInfoSubstate instances are equal
+        /// Returns true if PackageFunctionAccessRulesSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of TypeInfoSubstate to be compared</param>
+        /// <param name="input">Instance of PackageFunctionAccessRulesSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TypeInfoSubstate input)
+        public bool Equals(PackageFunctionAccessRulesSubstate input)
         {
             if (input == null)
             {
@@ -192,9 +206,15 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Details == input.Details ||
-                    (this.Details != null &&
-                    this.Details.Equals(input.Details))
+                    this.FunctionAuth == input.FunctionAuth ||
+                    this.FunctionAuth != null &&
+                    input.FunctionAuth != null &&
+                    this.FunctionAuth.SequenceEqual(input.FunctionAuth)
+                ) && base.Equals(input) && 
+                (
+                    this.DefaultAuth == input.DefaultAuth ||
+                    (this.DefaultAuth != null &&
+                    this.DefaultAuth.Equals(input.DefaultAuth))
                 );
         }
 
@@ -207,9 +227,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Details != null)
+                if (this.FunctionAuth != null)
                 {
-                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FunctionAuth.GetHashCode();
+                }
+                if (this.DefaultAuth != null)
+                {
+                    hashCode = (hashCode * 59) + this.DefaultAuth.GetHashCode();
                 }
                 return hashCode;
             }

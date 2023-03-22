@@ -91,9 +91,9 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TypeInfoSubstate
+    /// ClockSubstate
     /// </summary>
-    [DataContract(Name = "TypeInfoSubstate")]
+    [DataContract(Name = "ClockSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
@@ -118,33 +118,33 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
     [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class TypeInfoSubstate : Substate, IEquatable<TypeInfoSubstate>
+    public partial class ClockSubstate : Substate, IEquatable<ClockSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypeInfoSubstate" /> class.
+        /// Initializes a new instance of the <see cref="ClockSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TypeInfoSubstate() { }
+        protected ClockSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypeInfoSubstate" /> class.
+        /// Initializes a new instance of the <see cref="ClockSubstate" /> class.
         /// </summary>
-        /// <param name="details">details (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.TypeInfo).</param>
-        public TypeInfoSubstate(TypeInfoDetails details = default(TypeInfoDetails), SubstateType substateType = SubstateType.TypeInfo) : base(substateType)
+        /// <param name="timestampRoundedDownToMinute">timestampRoundedDownToMinute (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.Clock).</param>
+        public ClockSubstate(Instant timestampRoundedDownToMinute = default(Instant), SubstateType substateType = SubstateType.Clock) : base(substateType)
         {
-            // to ensure "details" is required (not null)
-            if (details == null)
+            // to ensure "timestampRoundedDownToMinute" is required (not null)
+            if (timestampRoundedDownToMinute == null)
             {
-                throw new ArgumentNullException("details is a required property for TypeInfoSubstate and cannot be null");
+                throw new ArgumentNullException("timestampRoundedDownToMinute is a required property for ClockSubstate and cannot be null");
             }
-            this.Details = details;
+            this.TimestampRoundedDownToMinute = timestampRoundedDownToMinute;
         }
 
         /// <summary>
-        /// Gets or Sets Details
+        /// Gets or Sets TimestampRoundedDownToMinute
         /// </summary>
-        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
-        public TypeInfoDetails Details { get; set; }
+        [DataMember(Name = "timestamp_rounded_down_to_minute", IsRequired = true, EmitDefaultValue = true)]
+        public Instant TimestampRoundedDownToMinute { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -153,9 +153,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TypeInfoSubstate {\n");
+            sb.Append("class ClockSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Details: ").Append(Details).Append("\n");
+            sb.Append("  TimestampRoundedDownToMinute: ").Append(TimestampRoundedDownToMinute).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -176,15 +176,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TypeInfoSubstate);
+            return this.Equals(input as ClockSubstate);
         }
 
         /// <summary>
-        /// Returns true if TypeInfoSubstate instances are equal
+        /// Returns true if ClockSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of TypeInfoSubstate to be compared</param>
+        /// <param name="input">Instance of ClockSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TypeInfoSubstate input)
+        public bool Equals(ClockSubstate input)
         {
             if (input == null)
             {
@@ -192,9 +192,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Details == input.Details ||
-                    (this.Details != null &&
-                    this.Details.Equals(input.Details))
+                    this.TimestampRoundedDownToMinute == input.TimestampRoundedDownToMinute ||
+                    (this.TimestampRoundedDownToMinute != null &&
+                    this.TimestampRoundedDownToMinute.Equals(input.TimestampRoundedDownToMinute))
                 );
         }
 
@@ -207,9 +207,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Details != null)
+                if (this.TimestampRoundedDownToMinute != null)
                 {
-                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TimestampRoundedDownToMinute.GetHashCode();
                 }
                 return hashCode;
             }

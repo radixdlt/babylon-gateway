@@ -63,10 +63,13 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class AccountSubstate : IEntityOwner
+public partial class AccountSubstate : IEntityOwner, IGlobalAddressPointer
 {
     public IEnumerable<EntityReference> GetOwnedEntities() => DataStruct.OwnedEntities;
+
+    public IEnumerable<string> GetGlobalAddresses() => DataStruct.ReferencedEntities.Select(re => re.GlobalAddress);
 }

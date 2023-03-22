@@ -103,44 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeInfoSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
-        /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="global">global (required).</param>
-        public TypeInfoSubstateAllOf(string packageAddress = default(string), string blueprintName = default(string), bool global = default(bool))
+        /// <param name="details">details (required).</param>
+        public TypeInfoSubstateAllOf(TypeInfoDetails details = default(TypeInfoDetails))
         {
-            // to ensure "packageAddress" is required (not null)
-            if (packageAddress == null)
+            // to ensure "details" is required (not null)
+            if (details == null)
             {
-                throw new ArgumentNullException("packageAddress is a required property for TypeInfoSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("details is a required property for TypeInfoSubstateAllOf and cannot be null");
             }
-            this.PackageAddress = packageAddress;
-            // to ensure "blueprintName" is required (not null)
-            if (blueprintName == null)
-            {
-                throw new ArgumentNullException("blueprintName is a required property for TypeInfoSubstateAllOf and cannot be null");
-            }
-            this.BlueprintName = blueprintName;
-            this.Global = global;
+            this.Details = details;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the package address
+        /// Gets or Sets Details
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the package address</value>
-        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
-        public string PackageAddress { get; set; }
-
-        /// <summary>
-        /// Gets or Sets BlueprintName
-        /// </summary>
-        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
-        public string BlueprintName { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Global
-        /// </summary>
-        [DataMember(Name = "global", IsRequired = true, EmitDefaultValue = true)]
-        public bool Global { get; set; }
+        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
+        public TypeInfoDetails Details { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,9 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TypeInfoSubstateAllOf {\n");
-            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
-            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
-            sb.Append("  Global: ").Append(Global).Append("\n");
+            sb.Append("  Details: ").Append(Details).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -189,18 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.PackageAddress == input.PackageAddress ||
-                    (this.PackageAddress != null &&
-                    this.PackageAddress.Equals(input.PackageAddress))
-                ) && 
-                (
-                    this.BlueprintName == input.BlueprintName ||
-                    (this.BlueprintName != null &&
-                    this.BlueprintName.Equals(input.BlueprintName))
-                ) && 
-                (
-                    this.Global == input.Global ||
-                    this.Global.Equals(input.Global)
+                    this.Details == input.Details ||
+                    (this.Details != null &&
+                    this.Details.Equals(input.Details))
                 );
         }
 
@@ -213,15 +180,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.PackageAddress != null)
+                if (this.Details != null)
                 {
-                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
                 }
-                if (this.BlueprintName != null)
-                {
-                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.Global.GetHashCode();
                 return hashCode;
             }
         }

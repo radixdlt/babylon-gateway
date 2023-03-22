@@ -96,82 +96,82 @@ namespace RadixDlt.CoreApiSdk.Model
     public enum SubstateType
     {
         /// <summary>
+        /// Enum TypeInfo for value: TypeInfo
+        /// </summary>
+        [EnumMember(Value = "TypeInfo")]
+        TypeInfo = 1,
+
+        /// <summary>
         /// Enum MetadataEntry for value: MetadataEntry
         /// </summary>
         [EnumMember(Value = "MetadataEntry")]
-        MetadataEntry = 1,
+        MetadataEntry = 2,
 
         /// <summary>
         /// Enum AccessRules for value: AccessRules
         /// </summary>
         [EnumMember(Value = "AccessRules")]
-        AccessRules = 2,
-
-        /// <summary>
-        /// Enum FunctionAccessRules for value: FunctionAccessRules
-        /// </summary>
-        [EnumMember(Value = "FunctionAccessRules")]
-        FunctionAccessRules = 3,
-
-        /// <summary>
-        /// Enum TypeInfo for value: TypeInfo
-        /// </summary>
-        [EnumMember(Value = "TypeInfo")]
-        TypeInfo = 4,
+        AccessRules = 3,
 
         /// <summary>
         /// Enum ComponentState for value: ComponentState
         /// </summary>
         [EnumMember(Value = "ComponentState")]
-        ComponentState = 5,
+        ComponentState = 4,
 
         /// <summary>
         /// Enum ComponentRoyaltyConfig for value: ComponentRoyaltyConfig
         /// </summary>
         [EnumMember(Value = "ComponentRoyaltyConfig")]
-        ComponentRoyaltyConfig = 6,
+        ComponentRoyaltyConfig = 5,
 
         /// <summary>
         /// Enum ComponentRoyaltyAccumulator for value: ComponentRoyaltyAccumulator
         /// </summary>
         [EnumMember(Value = "ComponentRoyaltyAccumulator")]
-        ComponentRoyaltyAccumulator = 7,
+        ComponentRoyaltyAccumulator = 6,
 
         /// <summary>
         /// Enum PackageInfo for value: PackageInfo
         /// </summary>
         [EnumMember(Value = "PackageInfo")]
-        PackageInfo = 8,
+        PackageInfo = 7,
 
         /// <summary>
         /// Enum PackageCode for value: PackageCode
         /// </summary>
         [EnumMember(Value = "PackageCode")]
-        PackageCode = 9,
+        PackageCode = 8,
 
         /// <summary>
         /// Enum PackageCodeType for value: PackageCodeType
         /// </summary>
         [EnumMember(Value = "PackageCodeType")]
-        PackageCodeType = 10,
+        PackageCodeType = 9,
 
         /// <summary>
-        /// Enum PackageRoyaltyConfig for value: PackageRoyaltyConfig
+        /// Enum PackageRoyalty for value: PackageRoyalty
         /// </summary>
-        [EnumMember(Value = "PackageRoyaltyConfig")]
-        PackageRoyaltyConfig = 11,
+        [EnumMember(Value = "PackageRoyalty")]
+        PackageRoyalty = 10,
 
         /// <summary>
-        /// Enum PackageRoyaltyAccumulator for value: PackageRoyaltyAccumulator
+        /// Enum PackageFunctionAccessRules for value: PackageFunctionAccessRules
         /// </summary>
-        [EnumMember(Value = "PackageRoyaltyAccumulator")]
-        PackageRoyaltyAccumulator = 12,
+        [EnumMember(Value = "PackageFunctionAccessRules")]
+        PackageFunctionAccessRules = 11,
 
         /// <summary>
-        /// Enum ResourceManager for value: ResourceManager
+        /// Enum FungibleResourceManager for value: FungibleResourceManager
         /// </summary>
-        [EnumMember(Value = "ResourceManager")]
-        ResourceManager = 13,
+        [EnumMember(Value = "FungibleResourceManager")]
+        FungibleResourceManager = 12,
+
+        /// <summary>
+        /// Enum NonFungibleResourceManager for value: NonFungibleResourceManager
+        /// </summary>
+        [EnumMember(Value = "NonFungibleResourceManager")]
+        NonFungibleResourceManager = 13,
 
         /// <summary>
         /// Enum EpochManager for value: EpochManager
@@ -192,10 +192,10 @@ namespace RadixDlt.CoreApiSdk.Model
         Validator = 16,
 
         /// <summary>
-        /// Enum ClockCurrentMinute for value: ClockCurrentMinute
+        /// Enum Clock for value: Clock
         /// </summary>
-        [EnumMember(Value = "ClockCurrentMinute")]
-        ClockCurrentMinute = 17,
+        [EnumMember(Value = "Clock")]
+        Clock = 17,
 
         /// <summary>
         /// Enum KeyValueStoreEntry for value: KeyValueStoreEntry
@@ -204,58 +204,34 @@ namespace RadixDlt.CoreApiSdk.Model
         KeyValueStoreEntry = 18,
 
         /// <summary>
-        /// Enum NonFungibleStoreEntry for value: NonFungibleStoreEntry
-        /// </summary>
-        [EnumMember(Value = "NonFungibleStoreEntry")]
-        NonFungibleStoreEntry = 19,
-
-        /// <summary>
         /// Enum VaultInfo for value: VaultInfo
         /// </summary>
         [EnumMember(Value = "VaultInfo")]
-        VaultInfo = 20,
+        VaultInfo = 19,
 
         /// <summary>
         /// Enum VaultFungible for value: VaultFungible
         /// </summary>
         [EnumMember(Value = "VaultFungible")]
-        VaultFungible = 21,
+        VaultFungible = 20,
 
         /// <summary>
         /// Enum VaultNonFungible for value: VaultNonFungible
         /// </summary>
         [EnumMember(Value = "VaultNonFungible")]
-        VaultNonFungible = 22,
-
-        /// <summary>
-        /// Enum VaultLockedFungible for value: VaultLockedFungible
-        /// </summary>
-        [EnumMember(Value = "VaultLockedFungible")]
-        VaultLockedFungible = 23,
-
-        /// <summary>
-        /// Enum VaultLockedNonFungible for value: VaultLockedNonFungible
-        /// </summary>
-        [EnumMember(Value = "VaultLockedNonFungible")]
-        VaultLockedNonFungible = 24,
+        VaultNonFungible = 21,
 
         /// <summary>
         /// Enum AccessController for value: AccessController
         /// </summary>
         [EnumMember(Value = "AccessController")]
-        AccessController = 25,
+        AccessController = 22,
 
         /// <summary>
         /// Enum Account for value: Account
         /// </summary>
         [EnumMember(Value = "Account")]
-        Account = 26,
-
-        /// <summary>
-        /// Enum PackageEventSchema for value: PackageEventSchema
-        /// </summary>
-        [EnumMember(Value = "PackageEventSchema")]
-        PackageEventSchema = 27
+        Account = 23
 
     }
 

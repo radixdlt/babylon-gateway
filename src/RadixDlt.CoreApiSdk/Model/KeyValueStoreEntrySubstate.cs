@@ -67,12 +67,19 @@ using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class KeyValueStoreEntrySubstate : IEntityOwner
+public partial class KeyValueStoreEntrySubstate : IEntityOwner, IGlobalAddressPointer
 {
     public IEnumerable<EntityReference> GetOwnedEntities()
     {
         return DataStruct != null
             ? DataStruct.OwnedEntities
             : Enumerable.Empty<EntityReference>();
+    }
+
+    public IEnumerable<string> GetGlobalAddresses()
+    {
+        return DataStruct != null
+            ? DataStruct.ReferencedEntities.Select(re => re.GlobalAddress)
+            : Enumerable.Empty<string>();
     }
 }

@@ -104,10 +104,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="StatePackageResponse" /> class.
         /// </summary>
         /// <param name="info">info (required).</param>
-        /// <param name="royaltyConfig">royaltyConfig (required).</param>
-        /// <param name="royaltyAccumulator">royaltyAccumulator (required).</param>
+        /// <param name="royalty">royalty (required).</param>
         /// <param name="accessRules">accessRules (required).</param>
-        public StatePackageResponse(Substate info = default(Substate), Substate royaltyConfig = default(Substate), Substate royaltyAccumulator = default(Substate), Substate accessRules = default(Substate))
+        public StatePackageResponse(Substate info = default(Substate), Substate royalty = default(Substate), Substate accessRules = default(Substate))
         {
             // to ensure "info" is required (not null)
             if (info == null)
@@ -115,18 +114,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("info is a required property for StatePackageResponse and cannot be null");
             }
             this.Info = info;
-            // to ensure "royaltyConfig" is required (not null)
-            if (royaltyConfig == null)
+            // to ensure "royalty" is required (not null)
+            if (royalty == null)
             {
-                throw new ArgumentNullException("royaltyConfig is a required property for StatePackageResponse and cannot be null");
+                throw new ArgumentNullException("royalty is a required property for StatePackageResponse and cannot be null");
             }
-            this.RoyaltyConfig = royaltyConfig;
-            // to ensure "royaltyAccumulator" is required (not null)
-            if (royaltyAccumulator == null)
-            {
-                throw new ArgumentNullException("royaltyAccumulator is a required property for StatePackageResponse and cannot be null");
-            }
-            this.RoyaltyAccumulator = royaltyAccumulator;
+            this.Royalty = royalty;
             // to ensure "accessRules" is required (not null)
             if (accessRules == null)
             {
@@ -142,16 +135,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public Substate Info { get; set; }
 
         /// <summary>
-        /// Gets or Sets RoyaltyConfig
+        /// Gets or Sets Royalty
         /// </summary>
-        [DataMember(Name = "royalty_config", IsRequired = true, EmitDefaultValue = true)]
-        public Substate RoyaltyConfig { get; set; }
-
-        /// <summary>
-        /// Gets or Sets RoyaltyAccumulator
-        /// </summary>
-        [DataMember(Name = "royalty_accumulator", IsRequired = true, EmitDefaultValue = true)]
-        public Substate RoyaltyAccumulator { get; set; }
+        [DataMember(Name = "royalty", IsRequired = true, EmitDefaultValue = true)]
+        public Substate Royalty { get; set; }
 
         /// <summary>
         /// Gets or Sets AccessRules
@@ -168,8 +155,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StatePackageResponse {\n");
             sb.Append("  Info: ").Append(Info).Append("\n");
-            sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
-            sb.Append("  RoyaltyAccumulator: ").Append(RoyaltyAccumulator).Append("\n");
+            sb.Append("  Royalty: ").Append(Royalty).Append("\n");
             sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -212,14 +198,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Info.Equals(input.Info))
                 ) && 
                 (
-                    this.RoyaltyConfig == input.RoyaltyConfig ||
-                    (this.RoyaltyConfig != null &&
-                    this.RoyaltyConfig.Equals(input.RoyaltyConfig))
-                ) && 
-                (
-                    this.RoyaltyAccumulator == input.RoyaltyAccumulator ||
-                    (this.RoyaltyAccumulator != null &&
-                    this.RoyaltyAccumulator.Equals(input.RoyaltyAccumulator))
+                    this.Royalty == input.Royalty ||
+                    (this.Royalty != null &&
+                    this.Royalty.Equals(input.Royalty))
                 ) && 
                 (
                     this.AccessRules == input.AccessRules ||
@@ -241,13 +222,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Info.GetHashCode();
                 }
-                if (this.RoyaltyConfig != null)
+                if (this.Royalty != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoyaltyConfig.GetHashCode();
-                }
-                if (this.RoyaltyAccumulator != null)
-                {
-                    hashCode = (hashCode * 59) + this.RoyaltyAccumulator.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Royalty.GetHashCode();
                 }
                 if (this.AccessRules != null)
                 {

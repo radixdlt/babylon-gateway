@@ -110,26 +110,21 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
         /// </summary>
         /// <param name="status">status (required).</param>
-        /// <param name="feeSummary">feeSummary (required).</param>
+        /// <param name="feeSummary">feeSummary.</param>
         /// <param name="stateUpdates">stateUpdates (required).</param>
         /// <param name="nextEpoch">nextEpoch.</param>
-        /// <param name="output">The manifest line-by-line engine return data (only present if status is Succeeded).</param>
-        /// <param name="errorMessage">Error message (only present if status is Failed or Rejected).</param>
+        /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).</param>
+        /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
         public TransactionReceipt(TransactionStatus status = default(TransactionStatus), FeeSummary feeSummary = default(FeeSummary), StateUpdates stateUpdates = default(StateUpdates), NextEpoch nextEpoch = default(NextEpoch), List<SborData> output = default(List<SborData>), string errorMessage = default(string))
         {
             this.Status = status;
-            // to ensure "feeSummary" is required (not null)
-            if (feeSummary == null)
-            {
-                throw new ArgumentNullException("feeSummary is a required property for TransactionReceipt and cannot be null");
-            }
-            this.FeeSummary = feeSummary;
             // to ensure "stateUpdates" is required (not null)
             if (stateUpdates == null)
             {
                 throw new ArgumentNullException("stateUpdates is a required property for TransactionReceipt and cannot be null");
             }
             this.StateUpdates = stateUpdates;
+            this.FeeSummary = feeSummary;
             this.NextEpoch = nextEpoch;
             this.Output = output;
             this.ErrorMessage = errorMessage;
@@ -138,7 +133,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Gets or Sets FeeSummary
         /// </summary>
-        [DataMember(Name = "fee_summary", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "fee_summary", EmitDefaultValue = true)]
         public FeeSummary FeeSummary { get; set; }
 
         /// <summary>
@@ -154,16 +149,16 @@ namespace RadixDlt.CoreApiSdk.Model
         public NextEpoch NextEpoch { get; set; }
 
         /// <summary>
-        /// The manifest line-by-line engine return data (only present if status is Succeeded)
+        /// The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)
         /// </summary>
-        /// <value>The manifest line-by-line engine return data (only present if status is Succeeded)</value>
+        /// <value>The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)</value>
         [DataMember(Name = "output", EmitDefaultValue = true)]
         public List<SborData> Output { get; set; }
 
         /// <summary>
-        /// Error message (only present if status is Failed or Rejected)
+        /// Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)
         /// </summary>
-        /// <value>Error message (only present if status is Failed or Rejected)</value>
+        /// <value>Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)</value>
         [DataMember(Name = "error_message", EmitDefaultValue = true)]
         public string ErrorMessage { get; set; }
 

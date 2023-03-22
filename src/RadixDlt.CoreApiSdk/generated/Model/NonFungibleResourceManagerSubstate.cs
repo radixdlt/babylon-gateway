@@ -91,9 +91,9 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TypeInfoSubstate
+    /// NonFungibleResourceManagerSubstate
     /// </summary>
-    [DataContract(Name = "TypeInfoSubstate")]
+    [DataContract(Name = "NonFungibleResourceManagerSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
@@ -118,33 +118,82 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
     [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class TypeInfoSubstate : Substate, IEquatable<TypeInfoSubstate>
+    public partial class NonFungibleResourceManagerSubstate : Substate, IEquatable<NonFungibleResourceManagerSubstate>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypeInfoSubstate" /> class.
+        /// Gets or Sets NonFungibleIdType
+        /// </summary>
+        [DataMember(Name = "non_fungible_id_type", IsRequired = true, EmitDefaultValue = true)]
+        public NonFungibleIdType NonFungibleIdType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NonFungibleResourceManagerSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TypeInfoSubstate() { }
+        protected NonFungibleResourceManagerSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypeInfoSubstate" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleResourceManagerSubstate" /> class.
         /// </summary>
-        /// <param name="details">details (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.TypeInfo).</param>
-        public TypeInfoSubstate(TypeInfoDetails details = default(TypeInfoDetails), SubstateType substateType = SubstateType.TypeInfo) : base(substateType)
+        /// <param name="nonFungibleIdType">nonFungibleIdType (required).</param>
+        /// <param name="totalSupply">The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        /// <param name="nonFungibleDataTable">nonFungibleDataTable (required).</param>
+        /// <param name="nonFungibleDataTypeIndex">nonFungibleDataTypeIndex (required).</param>
+        /// <param name="nonFungibleDataMutableFields">The field names of the NF Metadata which are mutable.  (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.NonFungibleResourceManager).</param>
+        public NonFungibleResourceManagerSubstate(NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), string totalSupply = default(string), EntityReference nonFungibleDataTable = default(EntityReference), LocalTypeIndex nonFungibleDataTypeIndex = default(LocalTypeIndex), List<string> nonFungibleDataMutableFields = default(List<string>), SubstateType substateType = SubstateType.NonFungibleResourceManager) : base(substateType)
         {
-            // to ensure "details" is required (not null)
-            if (details == null)
+            this.NonFungibleIdType = nonFungibleIdType;
+            // to ensure "totalSupply" is required (not null)
+            if (totalSupply == null)
             {
-                throw new ArgumentNullException("details is a required property for TypeInfoSubstate and cannot be null");
+                throw new ArgumentNullException("totalSupply is a required property for NonFungibleResourceManagerSubstate and cannot be null");
             }
-            this.Details = details;
+            this.TotalSupply = totalSupply;
+            // to ensure "nonFungibleDataTable" is required (not null)
+            if (nonFungibleDataTable == null)
+            {
+                throw new ArgumentNullException("nonFungibleDataTable is a required property for NonFungibleResourceManagerSubstate and cannot be null");
+            }
+            this.NonFungibleDataTable = nonFungibleDataTable;
+            // to ensure "nonFungibleDataTypeIndex" is required (not null)
+            if (nonFungibleDataTypeIndex == null)
+            {
+                throw new ArgumentNullException("nonFungibleDataTypeIndex is a required property for NonFungibleResourceManagerSubstate and cannot be null");
+            }
+            this.NonFungibleDataTypeIndex = nonFungibleDataTypeIndex;
+            // to ensure "nonFungibleDataMutableFields" is required (not null)
+            if (nonFungibleDataMutableFields == null)
+            {
+                throw new ArgumentNullException("nonFungibleDataMutableFields is a required property for NonFungibleResourceManagerSubstate and cannot be null");
+            }
+            this.NonFungibleDataMutableFields = nonFungibleDataMutableFields;
         }
 
         /// <summary>
-        /// Gets or Sets Details
+        /// The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
         /// </summary>
-        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
-        public TypeInfoDetails Details { get; set; }
+        /// <value>The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
+        public string TotalSupply { get; set; }
+
+        /// <summary>
+        /// Gets or Sets NonFungibleDataTable
+        /// </summary>
+        [DataMember(Name = "non_fungible_data_table", IsRequired = true, EmitDefaultValue = true)]
+        public EntityReference NonFungibleDataTable { get; set; }
+
+        /// <summary>
+        /// Gets or Sets NonFungibleDataTypeIndex
+        /// </summary>
+        [DataMember(Name = "non_fungible_data_type_index", IsRequired = true, EmitDefaultValue = true)]
+        public LocalTypeIndex NonFungibleDataTypeIndex { get; set; }
+
+        /// <summary>
+        /// The field names of the NF Metadata which are mutable. 
+        /// </summary>
+        /// <value>The field names of the NF Metadata which are mutable. </value>
+        [DataMember(Name = "non_fungible_data_mutable_fields", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> NonFungibleDataMutableFields { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -153,9 +202,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TypeInfoSubstate {\n");
+            sb.Append("class NonFungibleResourceManagerSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Details: ").Append(Details).Append("\n");
+            sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
+            sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
+            sb.Append("  NonFungibleDataTable: ").Append(NonFungibleDataTable).Append("\n");
+            sb.Append("  NonFungibleDataTypeIndex: ").Append(NonFungibleDataTypeIndex).Append("\n");
+            sb.Append("  NonFungibleDataMutableFields: ").Append(NonFungibleDataMutableFields).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -176,15 +229,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TypeInfoSubstate);
+            return this.Equals(input as NonFungibleResourceManagerSubstate);
         }
 
         /// <summary>
-        /// Returns true if TypeInfoSubstate instances are equal
+        /// Returns true if NonFungibleResourceManagerSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of TypeInfoSubstate to be compared</param>
+        /// <param name="input">Instance of NonFungibleResourceManagerSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TypeInfoSubstate input)
+        public bool Equals(NonFungibleResourceManagerSubstate input)
         {
             if (input == null)
             {
@@ -192,9 +245,29 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Details == input.Details ||
-                    (this.Details != null &&
-                    this.Details.Equals(input.Details))
+                    this.NonFungibleIdType == input.NonFungibleIdType ||
+                    this.NonFungibleIdType.Equals(input.NonFungibleIdType)
+                ) && base.Equals(input) && 
+                (
+                    this.TotalSupply == input.TotalSupply ||
+                    (this.TotalSupply != null &&
+                    this.TotalSupply.Equals(input.TotalSupply))
+                ) && base.Equals(input) && 
+                (
+                    this.NonFungibleDataTable == input.NonFungibleDataTable ||
+                    (this.NonFungibleDataTable != null &&
+                    this.NonFungibleDataTable.Equals(input.NonFungibleDataTable))
+                ) && base.Equals(input) && 
+                (
+                    this.NonFungibleDataTypeIndex == input.NonFungibleDataTypeIndex ||
+                    (this.NonFungibleDataTypeIndex != null &&
+                    this.NonFungibleDataTypeIndex.Equals(input.NonFungibleDataTypeIndex))
+                ) && base.Equals(input) && 
+                (
+                    this.NonFungibleDataMutableFields == input.NonFungibleDataMutableFields ||
+                    this.NonFungibleDataMutableFields != null &&
+                    input.NonFungibleDataMutableFields != null &&
+                    this.NonFungibleDataMutableFields.SequenceEqual(input.NonFungibleDataMutableFields)
                 );
         }
 
@@ -207,9 +280,22 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Details != null)
+                hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
+                if (this.TotalSupply != null)
                 {
-                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
+                }
+                if (this.NonFungibleDataTable != null)
+                {
+                    hashCode = (hashCode * 59) + this.NonFungibleDataTable.GetHashCode();
+                }
+                if (this.NonFungibleDataTypeIndex != null)
+                {
+                    hashCode = (hashCode * 59) + this.NonFungibleDataTypeIndex.GetHashCode();
+                }
+                if (this.NonFungibleDataMutableFields != null)
+                {
+                    hashCode = (hashCode * 59) + this.NonFungibleDataMutableFields.GetHashCode();
                 }
                 return hashCode;
             }

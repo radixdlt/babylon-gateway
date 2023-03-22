@@ -84,71 +84,67 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// VaultLockedNonFungibleSubstate
+    /// LocalTypeIndex
     /// </summary>
-    [DataContract(Name = "VaultLockedNonFungibleSubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
-    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class VaultLockedNonFungibleSubstate : Substate, IEquatable<VaultLockedNonFungibleSubstate>
+    [DataContract(Name = "LocalTypeIndex")]
+    public partial class LocalTypeIndex : IEquatable<LocalTypeIndex>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="VaultLockedNonFungibleSubstate" /> class.
+        /// The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema. 
+        /// </summary>
+        /// <value>The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema. </value>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum KindEnum
+        {
+            /// <summary>
+            /// Enum WellKnown for value: WellKnown
+            /// </summary>
+            [EnumMember(Value = "WellKnown")]
+            WellKnown = 1,
+
+            /// <summary>
+            /// Enum SchemaLocal for value: SchemaLocal
+            /// </summary>
+            [EnumMember(Value = "SchemaLocal")]
+            SchemaLocal = 2
+
+        }
+
+
+        /// <summary>
+        /// The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema. 
+        /// </summary>
+        /// <value>The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema. </value>
+        [DataMember(Name = "kind", IsRequired = true, EmitDefaultValue = true)]
+        public KindEnum Kind { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LocalTypeIndex" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected VaultLockedNonFungibleSubstate() { }
+        protected LocalTypeIndex() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="VaultLockedNonFungibleSubstate" /> class.
+        /// Initializes a new instance of the <see cref="LocalTypeIndex" /> class.
         /// </summary>
-        /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.VaultLockedNonFungible).</param>
-        public VaultLockedNonFungibleSubstate(List<NonFungibleId> nonFungibleIds = default(List<NonFungibleId>), SubstateType substateType = SubstateType.VaultLockedNonFungible) : base(substateType)
+        /// <param name="kind">The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema.  (required).</param>
+        /// <param name="index">Either the well known identifier, of the schema-local index, depending on the kind.  (required).</param>
+        public LocalTypeIndex(KindEnum kind = default(KindEnum), int index = default(int))
         {
-            // to ensure "nonFungibleIds" is required (not null)
-            if (nonFungibleIds == null)
-            {
-                throw new ArgumentNullException("nonFungibleIds is a required property for VaultLockedNonFungibleSubstate and cannot be null");
-            }
-            this.NonFungibleIds = nonFungibleIds;
+            this.Kind = kind;
+            this.Index = index;
         }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIds
+        /// Either the well known identifier, of the schema-local index, depending on the kind. 
         /// </summary>
-        [DataMember(Name = "non_fungible_ids", IsRequired = true, EmitDefaultValue = true)]
-        public List<NonFungibleId> NonFungibleIds { get; set; }
+        /// <value>Either the well known identifier, of the schema-local index, depending on the kind. </value>
+        [DataMember(Name = "index", IsRequired = true, EmitDefaultValue = true)]
+        public int Index { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,9 +153,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class VaultLockedNonFungibleSubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
+            sb.Append("class LocalTypeIndex {\n");
+            sb.Append("  Kind: ").Append(Kind).Append("\n");
+            sb.Append("  Index: ").Append(Index).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -168,7 +164,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -180,26 +176,28 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as VaultLockedNonFungibleSubstate);
+            return this.Equals(input as LocalTypeIndex);
         }
 
         /// <summary>
-        /// Returns true if VaultLockedNonFungibleSubstate instances are equal
+        /// Returns true if LocalTypeIndex instances are equal
         /// </summary>
-        /// <param name="input">Instance of VaultLockedNonFungibleSubstate to be compared</param>
+        /// <param name="input">Instance of LocalTypeIndex to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(VaultLockedNonFungibleSubstate input)
+        public bool Equals(LocalTypeIndex input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.NonFungibleIds == input.NonFungibleIds ||
-                    this.NonFungibleIds != null &&
-                    input.NonFungibleIds != null &&
-                    this.NonFungibleIds.SequenceEqual(input.NonFungibleIds)
+                    this.Kind == input.Kind ||
+                    this.Kind.Equals(input.Kind)
+                ) && 
+                (
+                    this.Index == input.Index ||
+                    this.Index.Equals(input.Index)
                 );
         }
 
@@ -211,11 +209,9 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.NonFungibleIds != null)
-                {
-                    hashCode = (hashCode * 59) + this.NonFungibleIds.GetHashCode();
-                }
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Kind.GetHashCode();
+                hashCode = (hashCode * 59) + this.Index.GetHashCode();
                 return hashCode;
             }
         }

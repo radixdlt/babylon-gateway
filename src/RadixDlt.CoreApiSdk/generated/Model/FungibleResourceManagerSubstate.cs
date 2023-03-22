@@ -91,64 +91,69 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ClockCurrentMinuteSubstate
+    /// FungibleResourceManagerSubstate
     /// </summary>
-    [DataContract(Name = "ClockCurrentMinuteSubstate")]
+    [DataContract(Name = "FungibleResourceManagerSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
     [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
+    [JsonSubtypes.KnownSubType(typeof(ClockSubstate), "Clock")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
     [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
     [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerSubstate), "FungibleResourceManager")]
     [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
     [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerSubstate), "NonFungibleResourceManager")]
     [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
     [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
+    [JsonSubtypes.KnownSubType(typeof(PackageFunctionAccessRulesSubstate), "PackageFunctionAccessRules")]
     [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltySubstate), "PackageRoyalty")]
     [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
     [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class ClockCurrentMinuteSubstate : Substate, IEquatable<ClockCurrentMinuteSubstate>
+    public partial class FungibleResourceManagerSubstate : Substate, IEquatable<FungibleResourceManagerSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ClockCurrentMinuteSubstate" /> class.
+        /// Initializes a new instance of the <see cref="FungibleResourceManagerSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ClockCurrentMinuteSubstate() { }
+        protected FungibleResourceManagerSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ClockCurrentMinuteSubstate" /> class.
+        /// Initializes a new instance of the <see cref="FungibleResourceManagerSubstate" /> class.
         /// </summary>
-        /// <param name="timestampRoundedDownToMinute">timestampRoundedDownToMinute (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.ClockCurrentMinute).</param>
-        public ClockCurrentMinuteSubstate(Instant timestampRoundedDownToMinute = default(Instant), SubstateType substateType = SubstateType.ClockCurrentMinute) : base(substateType)
+        /// <param name="divisibility">divisibility (required).</param>
+        /// <param name="totalSupply">The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.FungibleResourceManager).</param>
+        public FungibleResourceManagerSubstate(int divisibility = default(int), string totalSupply = default(string), SubstateType substateType = SubstateType.FungibleResourceManager) : base(substateType)
         {
-            // to ensure "timestampRoundedDownToMinute" is required (not null)
-            if (timestampRoundedDownToMinute == null)
+            this.Divisibility = divisibility;
+            // to ensure "totalSupply" is required (not null)
+            if (totalSupply == null)
             {
-                throw new ArgumentNullException("timestampRoundedDownToMinute is a required property for ClockCurrentMinuteSubstate and cannot be null");
+                throw new ArgumentNullException("totalSupply is a required property for FungibleResourceManagerSubstate and cannot be null");
             }
-            this.TimestampRoundedDownToMinute = timestampRoundedDownToMinute;
+            this.TotalSupply = totalSupply;
         }
 
         /// <summary>
-        /// Gets or Sets TimestampRoundedDownToMinute
+        /// Gets or Sets Divisibility
         /// </summary>
-        [DataMember(Name = "timestamp_rounded_down_to_minute", IsRequired = true, EmitDefaultValue = true)]
-        public Instant TimestampRoundedDownToMinute { get; set; }
+        [DataMember(Name = "divisibility", IsRequired = true, EmitDefaultValue = true)]
+        public int Divisibility { get; set; }
+
+        /// <summary>
+        /// The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// </summary>
+        /// <value>The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
+        public string TotalSupply { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,9 +162,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ClockCurrentMinuteSubstate {\n");
+            sb.Append("class FungibleResourceManagerSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  TimestampRoundedDownToMinute: ").Append(TimestampRoundedDownToMinute).Append("\n");
+            sb.Append("  Divisibility: ").Append(Divisibility).Append("\n");
+            sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -180,15 +186,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ClockCurrentMinuteSubstate);
+            return this.Equals(input as FungibleResourceManagerSubstate);
         }
 
         /// <summary>
-        /// Returns true if ClockCurrentMinuteSubstate instances are equal
+        /// Returns true if FungibleResourceManagerSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of ClockCurrentMinuteSubstate to be compared</param>
+        /// <param name="input">Instance of FungibleResourceManagerSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ClockCurrentMinuteSubstate input)
+        public bool Equals(FungibleResourceManagerSubstate input)
         {
             if (input == null)
             {
@@ -196,9 +202,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.TimestampRoundedDownToMinute == input.TimestampRoundedDownToMinute ||
-                    (this.TimestampRoundedDownToMinute != null &&
-                    this.TimestampRoundedDownToMinute.Equals(input.TimestampRoundedDownToMinute))
+                    this.Divisibility == input.Divisibility ||
+                    this.Divisibility.Equals(input.Divisibility)
+                ) && base.Equals(input) && 
+                (
+                    this.TotalSupply == input.TotalSupply ||
+                    (this.TotalSupply != null &&
+                    this.TotalSupply.Equals(input.TotalSupply))
                 );
         }
 
@@ -211,9 +221,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.TimestampRoundedDownToMinute != null)
+                hashCode = (hashCode * 59) + this.Divisibility.GetHashCode();
+                if (this.TotalSupply != null)
                 {
-                    hashCode = (hashCode * 59) + this.TimestampRoundedDownToMinute.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
                 }
                 return hashCode;
             }

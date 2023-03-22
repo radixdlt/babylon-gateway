@@ -104,8 +104,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="MetadataEntrySubstateAllOf" /> class.
         /// </summary>
         /// <param name="keyHex">The hex-encoded bytes of its key (required).</param>
+        /// <param name="isDeleted">isDeleted (required).</param>
         /// <param name="dataStruct">dataStruct.</param>
-        public MetadataEntrySubstateAllOf(string keyHex = default(string), DataStruct dataStruct = default(DataStruct))
+        public MetadataEntrySubstateAllOf(string keyHex = default(string), bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct))
         {
             // to ensure "keyHex" is required (not null)
             if (keyHex == null)
@@ -113,6 +114,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("keyHex is a required property for MetadataEntrySubstateAllOf and cannot be null");
             }
             this.KeyHex = keyHex;
+            this.IsDeleted = isDeleted;
             this.DataStruct = dataStruct;
         }
 
@@ -122,6 +124,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <value>The hex-encoded bytes of its key</value>
         [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
         public string KeyHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IsDeleted
+        /// </summary>
+        [DataMember(Name = "is_deleted", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsDeleted { get; set; }
 
         /// <summary>
         /// Gets or Sets DataStruct
@@ -138,6 +146,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class MetadataEntrySubstateAllOf {\n");
             sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
+            sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
             sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -180,6 +189,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.KeyHex.Equals(input.KeyHex))
                 ) && 
                 (
+                    this.IsDeleted == input.IsDeleted ||
+                    this.IsDeleted.Equals(input.IsDeleted)
+                ) && 
+                (
                     this.DataStruct == input.DataStruct ||
                     (this.DataStruct != null &&
                     this.DataStruct.Equals(input.DataStruct))
@@ -199,6 +212,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
                 if (this.DataStruct != null)
                 {
                     hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();

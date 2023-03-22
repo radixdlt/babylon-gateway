@@ -100,7 +100,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityVaultHistory> EntityVaultHistory => Set<EntityVaultHistory>();
 
-    public DbSet<ResourceManagerEntitySupplyHistory> ResourceManagerEntitySupplyHistory => Set<ResourceManagerEntitySupplyHistory>();
+    public DbSet<ResourceEntitySupplyHistory> ResourceEntitySupplyHistory => Set<ResourceEntitySupplyHistory>();
 
     public DbSet<NonFungibleIdData> NonFungibleIdData => Set<NonFungibleIdData>();
 
@@ -217,14 +217,13 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<Entity>()
             .HasDiscriminator<EntityType>(DiscriminatorColumnName)
             .HasValue<EpochManagerEntity>(EntityType.EpochManager)
-            .HasValue<FungibleResourceManagerEntity>(EntityType.FungibleResourceManager)
-            .HasValue<NonFungibleResourceManagerEntity>(EntityType.NonFungibleResourceManager)
+            .HasValue<FungibleResourceEntity>(EntityType.FungibleResource)
+            .HasValue<NonFungibleResourceEntity>(EntityType.NonFungibleResource)
             .HasValue<NormalComponentEntity>(EntityType.NormalComponent)
             .HasValue<AccountComponentEntity>(EntityType.AccountComponent)
             .HasValue<PackageEntity>(EntityType.Package)
             .HasValue<KeyValueStoreEntity>(EntityType.KeyValueStore)
             .HasValue<VaultEntity>(EntityType.Vault)
-            .HasValue<NonFungibleStoreEntity>(EntityType.NonFungibleStore)
             .HasValue<ClockEntity>(EntityType.Clock)
             .HasValue<ValidatorEntity>(EntityType.Validator)
             .HasValue<AccessControllerEntity>(EntityType.AccessController)
@@ -270,20 +269,20 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<EntityVaultHistory>()
             .HasIndex(e => new { e.GlobalEntityId, e.VaultEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<ResourceManagerEntitySupplyHistory>()
-            .HasIndex(e => new { e.ResourceManagerEntityId, e.FromStateVersion });
+        modelBuilder.Entity<ResourceEntitySupplyHistory>()
+            .HasIndex(e => new { ResourceManagerEntityId = e.ResourceEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleIdData>()
-            .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.FromStateVersion });
+            .HasIndex(e => new { NonFungibleResourceManagerEntityId = e.NonFungibleResourceEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleIdData>()
-            .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.NonFungibleId, e.FromStateVersion });
+            .HasIndex(e => new { NonFungibleResourceManagerEntityId = e.NonFungibleResourceEntityId, e.NonFungibleId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleIdMutableDataHistory>()
             .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleIdStoreHistory>()
-            .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.FromStateVersion });
+            .HasIndex(e => new { NonFungibleResourceManagerEntityId = e.NonFungibleResourceEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityStateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });

@@ -84,87 +84,63 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleStoreEntrySubstate
+    /// ObjectTypeInfoDetailsAllOf
     /// </summary>
-    [DataContract(Name = "NonFungibleStoreEntrySubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
-    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class NonFungibleStoreEntrySubstate : Substate, IEquatable<NonFungibleStoreEntrySubstate>
+    [DataContract(Name = "ObjectTypeInfoDetails_allOf")]
+    public partial class ObjectTypeInfoDetailsAllOf : IEquatable<ObjectTypeInfoDetailsAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleStoreEntrySubstate" /> class.
+        /// Initializes a new instance of the <see cref="ObjectTypeInfoDetailsAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleStoreEntrySubstate() { }
+        protected ObjectTypeInfoDetailsAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleStoreEntrySubstate" /> class.
+        /// Initializes a new instance of the <see cref="ObjectTypeInfoDetailsAllOf" /> class.
         /// </summary>
-        /// <param name="nonFungibleId">nonFungibleId (required).</param>
-        /// <param name="nonFungibleData">nonFungibleData.</param>
-        /// <param name="isDeleted">isDeleted (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.NonFungibleStoreEntry).</param>
-        public NonFungibleStoreEntrySubstate(NonFungibleId nonFungibleId = default(NonFungibleId), NonFungibleData nonFungibleData = default(NonFungibleData), bool isDeleted = default(bool), SubstateType substateType = SubstateType.NonFungibleStoreEntry) : base(substateType)
+        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
+        /// <param name="blueprintName">blueprintName (required).</param>
+        /// <param name="global">global (required).</param>
+        public ObjectTypeInfoDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), bool global = default(bool))
         {
-            // to ensure "nonFungibleId" is required (not null)
-            if (nonFungibleId == null)
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
             {
-                throw new ArgumentNullException("nonFungibleId is a required property for NonFungibleStoreEntrySubstate and cannot be null");
+                throw new ArgumentNullException("packageAddress is a required property for ObjectTypeInfoDetailsAllOf and cannot be null");
             }
-            this.NonFungibleId = nonFungibleId;
-            this.IsDeleted = isDeleted;
-            this.NonFungibleData = nonFungibleData;
+            this.PackageAddress = packageAddress;
+            // to ensure "blueprintName" is required (not null)
+            if (blueprintName == null)
+            {
+                throw new ArgumentNullException("blueprintName is a required property for ObjectTypeInfoDetailsAllOf and cannot be null");
+            }
+            this.BlueprintName = blueprintName;
+            this.Global = global;
         }
 
         /// <summary>
-        /// Gets or Sets NonFungibleId
+        /// The Bech32m-encoded human readable version of the package address
         /// </summary>
-        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleId NonFungibleId { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the package address</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets NonFungibleData
+        /// Gets or Sets BlueprintName
         /// </summary>
-        [DataMember(Name = "non_fungible_data", EmitDefaultValue = true)]
-        public NonFungibleData NonFungibleData { get; set; }
+        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
+        public string BlueprintName { get; set; }
 
         /// <summary>
-        /// Gets or Sets IsDeleted
+        /// Gets or Sets Global
         /// </summary>
-        [DataMember(Name = "is_deleted", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsDeleted { get; set; }
+        [DataMember(Name = "global", IsRequired = true, EmitDefaultValue = true)]
+        public bool Global { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -173,11 +149,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleStoreEntrySubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
-            sb.Append("  NonFungibleData: ").Append(NonFungibleData).Append("\n");
-            sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
+            sb.Append("class ObjectTypeInfoDetailsAllOf {\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
+            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
+            sb.Append("  Global: ").Append(Global).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -186,7 +161,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -198,34 +173,34 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleStoreEntrySubstate);
+            return this.Equals(input as ObjectTypeInfoDetailsAllOf);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleStoreEntrySubstate instances are equal
+        /// Returns true if ObjectTypeInfoDetailsAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleStoreEntrySubstate to be compared</param>
+        /// <param name="input">Instance of ObjectTypeInfoDetailsAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleStoreEntrySubstate input)
+        public bool Equals(ObjectTypeInfoDetailsAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.NonFungibleId == input.NonFungibleId ||
-                    (this.NonFungibleId != null &&
-                    this.NonFungibleId.Equals(input.NonFungibleId))
-                ) && base.Equals(input) && 
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
+                ) && 
                 (
-                    this.NonFungibleData == input.NonFungibleData ||
-                    (this.NonFungibleData != null &&
-                    this.NonFungibleData.Equals(input.NonFungibleData))
-                ) && base.Equals(input) && 
+                    this.BlueprintName == input.BlueprintName ||
+                    (this.BlueprintName != null &&
+                    this.BlueprintName.Equals(input.BlueprintName))
+                ) && 
                 (
-                    this.IsDeleted == input.IsDeleted ||
-                    this.IsDeleted.Equals(input.IsDeleted)
+                    this.Global == input.Global ||
+                    this.Global.Equals(input.Global)
                 );
         }
 
@@ -237,16 +212,16 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.NonFungibleId != null)
+                int hashCode = 41;
+                if (this.PackageAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
                 }
-                if (this.NonFungibleData != null)
+                if (this.BlueprintName != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleData.GetHashCode();
+                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
+                hashCode = (hashCode * 59) + this.Global.GetHashCode();
                 return hashCode;
             }
         }

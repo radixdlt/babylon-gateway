@@ -190,7 +190,8 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 Identity: GetHrpPrefix(at, AddressSubtype.IdentityComponent),
                 EpochManager: GetHrpPrefix(at, AddressSubtype.EpochManager),
                 Clock: GetHrpPrefix(at, AddressSubtype.Clock),
-                Resource: GetHrpPrefix(at, AddressSubtype.Resource)
+                FungibleResource: GetHrpPrefix(at, AddressSubtype.FungibleResource),
+                NonFungibleResource: GetHrpPrefix(at, AddressSubtype.NonFungibleResource)
             ),
             WellKnownAddresses = new WellKnownAddresses(
                 Faucet: wka.Faucet,

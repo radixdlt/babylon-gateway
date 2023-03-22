@@ -63,6 +63,7 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
@@ -70,6 +71,11 @@ public partial class TypeInfoSubstate : IGlobalAddressPointer
 {
     public IEnumerable<string> GetGlobalAddresses()
     {
-        yield return PackageAddress;
+        if (Details is ObjectTypeInfoDetails otid)
+        {
+            return otid.GetGlobalAddresses();
+        }
+
+        return Enumerable.Empty<string>();
     }
 }

@@ -84,58 +84,41 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// FunctionAccessRulesSubstate
+    /// ClockSubstateAllOf
     /// </summary>
-    [DataContract(Name = "FunctionAccessRulesSubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
-    [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
-    public partial class FunctionAccessRulesSubstate : Substate, IEquatable<FunctionAccessRulesSubstate>
+    [DataContract(Name = "ClockSubstate_allOf")]
+    public partial class ClockSubstateAllOf : IEquatable<ClockSubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FunctionAccessRulesSubstate" /> class.
+        /// Initializes a new instance of the <see cref="ClockSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected FunctionAccessRulesSubstate() { }
+        protected ClockSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="FunctionAccessRulesSubstate" /> class.
+        /// Initializes a new instance of the <see cref="ClockSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="substateType">substateType (required) (default to SubstateType.FunctionAccessRules).</param>
-        public FunctionAccessRulesSubstate(SubstateType substateType = SubstateType.FunctionAccessRules) : base(substateType)
+        /// <param name="timestampRoundedDownToMinute">timestampRoundedDownToMinute (required).</param>
+        public ClockSubstateAllOf(Instant timestampRoundedDownToMinute = default(Instant))
         {
+            // to ensure "timestampRoundedDownToMinute" is required (not null)
+            if (timestampRoundedDownToMinute == null)
+            {
+                throw new ArgumentNullException("timestampRoundedDownToMinute is a required property for ClockSubstateAllOf and cannot be null");
+            }
+            this.TimestampRoundedDownToMinute = timestampRoundedDownToMinute;
         }
+
+        /// <summary>
+        /// Gets or Sets TimestampRoundedDownToMinute
+        /// </summary>
+        [DataMember(Name = "timestamp_rounded_down_to_minute", IsRequired = true, EmitDefaultValue = true)]
+        public Instant TimestampRoundedDownToMinute { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,8 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class FunctionAccessRulesSubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("class ClockSubstateAllOf {\n");
+            sb.Append("  TimestampRoundedDownToMinute: ").Append(TimestampRoundedDownToMinute).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -154,7 +137,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -166,21 +149,26 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as FunctionAccessRulesSubstate);
+            return this.Equals(input as ClockSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if FunctionAccessRulesSubstate instances are equal
+        /// Returns true if ClockSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of FunctionAccessRulesSubstate to be compared</param>
+        /// <param name="input">Instance of ClockSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(FunctionAccessRulesSubstate input)
+        public bool Equals(ClockSubstateAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input);
+            return 
+                (
+                    this.TimestampRoundedDownToMinute == input.TimestampRoundedDownToMinute ||
+                    (this.TimestampRoundedDownToMinute != null &&
+                    this.TimestampRoundedDownToMinute.Equals(input.TimestampRoundedDownToMinute))
+                );
         }
 
         /// <summary>
@@ -191,7 +179,11 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
+                int hashCode = 41;
+                if (this.TimestampRoundedDownToMinute != null)
+                {
+                    hashCode = (hashCode * 59) + this.TimestampRoundedDownToMinute.GetHashCode();
+                }
                 return hashCode;
             }
         }

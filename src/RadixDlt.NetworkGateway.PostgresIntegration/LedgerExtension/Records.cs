@@ -74,21 +74,20 @@ internal record FungibleVaultChange(ReferencedEntity ReferencedVault, Referenced
 
 internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, List<string> NonFungibleIds, long StateVersion);
 
-internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
+internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, byte[]? MutableData, long StateVersion);
 
 internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, string? Value, bool IsDeleted, long StateVersion); // TODO use ScryptoSbor.String/ValueButes Key, ScryptoSbor.Enum/ValueBytes? Value
 
-internal record ResourceManagerSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);
+internal record ResourceSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);
 
 internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
 
-internal record struct EntityResourceLookup(long EntityId, long ResourceManagerEntityId);
+internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
 
-// TODO drop in favor of EntityResourceLookup?
-internal record struct EntityResourceVaultLookup(long EntityId, long ResourceManagerEntityId);
+internal record struct EntityResourceVaultLookup(long EntityId, long ResourceEntityId);
 
-internal record struct NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, long StateVersion);
+internal record struct NonFungibleStoreLookup(long NonFungibleEntityId, long StateVersion);
 
-internal record struct NonFungibleIdLookup(long ResourceManagerEntityId, string NonFungibleId);
+internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFungibleId);
 
 internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);

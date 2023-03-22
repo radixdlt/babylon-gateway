@@ -98,29 +98,25 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(AccessControllerSubstate), "AccessController")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesSubstate), "AccessRules")]
     [JsonSubtypes.KnownSubType(typeof(AccountSubstate), "Account")]
-    [JsonSubtypes.KnownSubType(typeof(ClockCurrentMinuteSubstate), "ClockCurrentMinute")]
+    [JsonSubtypes.KnownSubType(typeof(ClockSubstate), "Clock")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyAccumulatorSubstate), "ComponentRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(ComponentRoyaltyConfigSubstate), "ComponentRoyaltyConfig")]
     [JsonSubtypes.KnownSubType(typeof(ComponentStateSubstate), "ComponentState")]
     [JsonSubtypes.KnownSubType(typeof(EpochManagerSubstate), "EpochManager")]
-    [JsonSubtypes.KnownSubType(typeof(FunctionAccessRulesSubstate), "FunctionAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerSubstate), "FungibleResourceManager")]
     [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntrySubstate), "KeyValueStoreEntry")]
     [JsonSubtypes.KnownSubType(typeof(MetadataEntrySubstate), "MetadataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleStoreEntrySubstate), "NonFungibleStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerSubstate), "NonFungibleResourceManager")]
     [JsonSubtypes.KnownSubType(typeof(PackageCodeSubstate), "PackageCode")]
     [JsonSubtypes.KnownSubType(typeof(PackageCodeTypeSubstate), "PackageCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageEventSchemaSubstate), "PackageEventSchema")]
+    [JsonSubtypes.KnownSubType(typeof(PackageFunctionAccessRulesSubstate), "PackageFunctionAccessRules")]
     [JsonSubtypes.KnownSubType(typeof(PackageInfoSubstate), "PackageInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyAccumulatorSubstate), "PackageRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltyConfigSubstate), "PackageRoyaltyConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ResourceManagerSubstate), "ResourceManager")]
+    [JsonSubtypes.KnownSubType(typeof(PackageRoyaltySubstate), "PackageRoyalty")]
     [JsonSubtypes.KnownSubType(typeof(TypeInfoSubstate), "TypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSubstate), "Validator")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorSetSubstate), "ValidatorSet")]
     [JsonSubtypes.KnownSubType(typeof(VaultFungibleSubstate), "VaultFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultInfoSubstate), "VaultInfo")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedFungibleSubstate), "VaultLockedFungible")]
-    [JsonSubtypes.KnownSubType(typeof(VaultLockedNonFungibleSubstate), "VaultLockedNonFungible")]
     [JsonSubtypes.KnownSubType(typeof(VaultNonFungibleSubstate), "VaultNonFungible")]
     public partial class KeyValueStoreEntrySubstate : Substate, IEquatable<KeyValueStoreEntrySubstate>
     {
@@ -133,10 +129,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="KeyValueStoreEntrySubstate" /> class.
         /// </summary>
         /// <param name="keyHex">The hex-encoded bytes of its key (required).</param>
+        /// <param name="keyNonFungibleLocalId">keyNonFungibleLocalId.</param>
         /// <param name="isDeleted">isDeleted (required).</param>
         /// <param name="dataStruct">dataStruct.</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.KeyValueStoreEntry).</param>
-        public KeyValueStoreEntrySubstate(string keyHex = default(string), bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct), SubstateType substateType = SubstateType.KeyValueStoreEntry) : base(substateType)
+        public KeyValueStoreEntrySubstate(string keyHex = default(string), NonFungibleId keyNonFungibleLocalId = default(NonFungibleId), bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct), SubstateType substateType = SubstateType.KeyValueStoreEntry) : base(substateType)
         {
             // to ensure "keyHex" is required (not null)
             if (keyHex == null)
@@ -145,6 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.KeyHex = keyHex;
             this.IsDeleted = isDeleted;
+            this.KeyNonFungibleLocalId = keyNonFungibleLocalId;
             this.DataStruct = dataStruct;
         }
 
@@ -154,6 +152,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <value>The hex-encoded bytes of its key</value>
         [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
         public string KeyHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets KeyNonFungibleLocalId
+        /// </summary>
+        [DataMember(Name = "key_non_fungible_local_id", EmitDefaultValue = true)]
+        public NonFungibleId KeyNonFungibleLocalId { get; set; }
 
         /// <summary>
         /// Gets or Sets IsDeleted
@@ -177,6 +181,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class KeyValueStoreEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
+            sb.Append("  KeyNonFungibleLocalId: ").Append(KeyNonFungibleLocalId).Append("\n");
             sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
             sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
             sb.Append("}\n");
@@ -220,6 +225,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.KeyHex.Equals(input.KeyHex))
                 ) && base.Equals(input) && 
                 (
+                    this.KeyNonFungibleLocalId == input.KeyNonFungibleLocalId ||
+                    (this.KeyNonFungibleLocalId != null &&
+                    this.KeyNonFungibleLocalId.Equals(input.KeyNonFungibleLocalId))
+                ) && base.Equals(input) && 
+                (
                     this.IsDeleted == input.IsDeleted ||
                     this.IsDeleted.Equals(input.IsDeleted)
                 ) && base.Equals(input) && 
@@ -242,6 +252,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.KeyHex != null)
                 {
                     hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
+                }
+                if (this.KeyNonFungibleLocalId != null)
+                {
+                    hashCode = (hashCode * 59) + this.KeyNonFungibleLocalId.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
                 if (this.DataStruct != null)

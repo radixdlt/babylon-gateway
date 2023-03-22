@@ -96,70 +96,70 @@ namespace RadixDlt.CoreApiSdk.Model
     public enum EntityType
     {
         /// <summary>
-        /// Enum Component for value: Component
-        /// </summary>
-        [EnumMember(Value = "Component")]
-        Component = 1,
-
-        /// <summary>
         /// Enum Package for value: Package
         /// </summary>
         [EnumMember(Value = "Package")]
-        Package = 2,
+        Package = 1,
 
         /// <summary>
-        /// Enum ResourceManager for value: ResourceManager
+        /// Enum NonFungibleResource for value: NonFungibleResource
         /// </summary>
-        [EnumMember(Value = "ResourceManager")]
-        ResourceManager = 3,
+        [EnumMember(Value = "NonFungibleResource")]
+        NonFungibleResource = 2,
 
         /// <summary>
-        /// Enum EpochManager for value: EpochManager
+        /// Enum FungibleResource for value: FungibleResource
         /// </summary>
-        [EnumMember(Value = "EpochManager")]
-        EpochManager = 4,
+        [EnumMember(Value = "FungibleResource")]
+        FungibleResource = 3,
 
         /// <summary>
-        /// Enum Clock for value: Clock
+        /// Enum NormalComponent for value: NormalComponent
         /// </summary>
-        [EnumMember(Value = "Clock")]
-        Clock = 5,
-
-        /// <summary>
-        /// Enum Validator for value: Validator
-        /// </summary>
-        [EnumMember(Value = "Validator")]
-        Validator = 6,
-
-        /// <summary>
-        /// Enum AccessController for value: AccessController
-        /// </summary>
-        [EnumMember(Value = "AccessController")]
-        AccessController = 7,
+        [EnumMember(Value = "NormalComponent")]
+        NormalComponent = 4,
 
         /// <summary>
         /// Enum Account for value: Account
         /// </summary>
         [EnumMember(Value = "Account")]
-        Account = 8,
+        Account = 5,
 
         /// <summary>
         /// Enum Identity for value: Identity
         /// </summary>
         [EnumMember(Value = "Identity")]
-        Identity = 9,
+        Identity = 6,
+
+        /// <summary>
+        /// Enum EpochManager for value: EpochManager
+        /// </summary>
+        [EnumMember(Value = "EpochManager")]
+        EpochManager = 7,
+
+        /// <summary>
+        /// Enum Validator for value: Validator
+        /// </summary>
+        [EnumMember(Value = "Validator")]
+        Validator = 8,
+
+        /// <summary>
+        /// Enum Clock for value: Clock
+        /// </summary>
+        [EnumMember(Value = "Clock")]
+        Clock = 9,
+
+        /// <summary>
+        /// Enum AccessController for value: AccessController
+        /// </summary>
+        [EnumMember(Value = "AccessController")]
+        AccessController = 10,
 
         /// <summary>
         /// Enum KeyValueStore for value: KeyValueStore
         /// </summary>
         [EnumMember(Value = "KeyValueStore")]
-        KeyValueStore = 10,
-
-        /// <summary>
-        /// Enum NonFungibleStore for value: NonFungibleStore
-        /// </summary>
-        [EnumMember(Value = "NonFungibleStore")]
-        NonFungibleStore = 11,
+        KeyValueStore = 11,
 
         /// <summary>
         /// Enum Vault for value: Vault
