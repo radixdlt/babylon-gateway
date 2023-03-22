@@ -83,7 +83,6 @@ internal class DefaultSborHandler : ISborHandler
         _networkConfigurationProvider = networkConfigurationProvider;
     }
 
-    // TODO handle exceptions and errors
     public Task<GatewayModel.SborScryptoEncodeResponse> Encode(GatewayModel.SborScryptoEncodeRequest request, CancellationToken token = default)
     {
         var value = RadixEngineToolkit.RadixEngineToolkit.ScryptoSborDecodeJson(JsonConvert.SerializeObject(request.Value));
@@ -92,12 +91,11 @@ internal class DefaultSborHandler : ISborHandler
         return Task.FromResult(new GatewayModel.SborScryptoEncodeResponse(result.ToHex()));
     }
 
-    // TODO handle exceptions and errors
     public Task<GatewayModel.SborScryptoDecodeResponse> Decode(GatewayModel.SborScryptoDecodeRequest request, CancellationToken token = default)
     {
-        var decomipled = RadixEngineToolkit.RadixEngineToolkit.SborDecode(request.GetValueBytes(), _networkConfigurationProvider.GetNetworkId());
+        var decompiled = RadixEngineToolkit.RadixEngineToolkit.SborDecode(request.GetValueBytes(), _networkConfigurationProvider.GetNetworkId());
 
-        if (decomipled is not ToolkitModel.Exchange.SborDecodeResponse.ScryptoSbor scryptoSbor)
+        if (decompiled is not ToolkitModel.Exchange.SborDecodeResponse.ScryptoSbor scryptoSbor)
         {
             throw new UnreachableException("Expected ScryptoSbor response");
         }

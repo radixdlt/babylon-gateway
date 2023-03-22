@@ -8,6 +8,6 @@ public class SborScryptoEncodeRequestValidator : AbstractValidator<GatewayModel.
     public SborScryptoEncodeRequestValidator()
     {
         RuleFor(x => x.Value)
-            .NotNull();
+            .NotEmpty();
     }
 }
