@@ -167,6 +167,8 @@ internal static class ScryptoSborUtils
             throw new UnreachableException("Expected ScryptoSbor response");
         }
 
-        return new GatewayModel.ScryptoSborValue(rawScryptoSbor.ToHex(), new JRaw(scryptoSbor.Value));
+        return new GatewayModel.ScryptoSborValue(
+            rawHex: rawScryptoSbor.ToHex(),
+            rawJson: new JRaw(RadixEngineToolkit.RadixEngineToolkit.ScryptoSborEncodeJson(scryptoSbor.Value)));
     }
 }

@@ -91,7 +91,7 @@ public class StateNonFungibleController : ControllerBase
     }
 
     [HttpPost("data")]
-    public async Task<GatewayModel.StateNonFungibleDetailsResponse> Data(GatewayModel.StateNonFungibleDetailsRequest request, CancellationToken token)
+    public async Task<GatewayModel.StateNonFungibleDataResponse> Data(GatewayModel.StateNonFungibleDataRequest request, CancellationToken token)
     {
         return await _nonFungibleHandler.Data(request, token);
     }

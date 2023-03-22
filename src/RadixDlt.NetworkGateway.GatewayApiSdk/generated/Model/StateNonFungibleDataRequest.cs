@@ -90,36 +90,36 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateNonFungibleDetailsRequest
+    /// StateNonFungibleDataRequest
     /// </summary>
-    [DataContract(Name = "StateNonFungibleDetailsRequest")]
-    public partial class StateNonFungibleDetailsRequest : IEquatable<StateNonFungibleDetailsRequest>
+    [DataContract(Name = "StateNonFungibleDataRequest")]
+    public partial class StateNonFungibleDataRequest : IEquatable<StateNonFungibleDataRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateNonFungibleDetailsRequest" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleDataRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateNonFungibleDetailsRequest() { }
+        protected StateNonFungibleDataRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateNonFungibleDetailsRequest" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleDataRequest" /> class.
         /// </summary>
         /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limitPerPage">The page size requested..</param>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
         /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
-        public StateNonFungibleDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string resourceAddress = default(string), List<string> nonFungibleIds = default(List<string>))
+        public StateNonFungibleDataRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string resourceAddress = default(string), List<string> nonFungibleIds = default(List<string>))
         {
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
             {
-                throw new ArgumentNullException("resourceAddress is a required property for StateNonFungibleDetailsRequest and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for StateNonFungibleDataRequest and cannot be null");
             }
             this.ResourceAddress = resourceAddress;
             // to ensure "nonFungibleIds" is required (not null)
             if (nonFungibleIds == null)
             {
-                throw new ArgumentNullException("nonFungibleIds is a required property for StateNonFungibleDetailsRequest and cannot be null");
+                throw new ArgumentNullException("nonFungibleIds is a required property for StateNonFungibleDataRequest and cannot be null");
             }
             this.NonFungibleIds = nonFungibleIds;
             this.AtLedgerState = atLedgerState;
@@ -167,7 +167,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateNonFungibleDetailsRequest {\n");
+            sb.Append("class StateNonFungibleDataRequest {\n");
             sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
             sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
@@ -193,15 +193,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateNonFungibleDetailsRequest);
+            return this.Equals(input as StateNonFungibleDataRequest);
         }
 
         /// <summary>
-        /// Returns true if StateNonFungibleDetailsRequest instances are equal
+        /// Returns true if StateNonFungibleDataRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateNonFungibleDetailsRequest to be compared</param>
+        /// <param name="input">Instance of StateNonFungibleDataRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateNonFungibleDetailsRequest input)
+        public bool Equals(StateNonFungibleDataRequest input)
         {
             if (input == null)
             {

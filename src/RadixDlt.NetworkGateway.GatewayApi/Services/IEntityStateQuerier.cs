@@ -92,7 +92,7 @@ public interface IEntityStateQuerier
 
     Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
-    Task<GatewayModel.StateNonFungibleDetailsResponse> NonFungibleIdData(GlobalAddress resourceAddress, IList<string> nonFungibleIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.StateNonFungibleDataResponse> NonFungibleIdData(GlobalAddress resourceAddress, IList<string> nonFungibleIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
     Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 }

@@ -69,7 +69,7 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class StateNonFungibleDetailsRequestValidator : AbstractValidator<GatewayModel.StateNonFungibleDetailsRequest>
+internal class StateNonFungibleDetailsRequestValidator : AbstractValidator<GatewayModel.StateNonFungibleDataRequest>
 {
     public StateNonFungibleDetailsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {

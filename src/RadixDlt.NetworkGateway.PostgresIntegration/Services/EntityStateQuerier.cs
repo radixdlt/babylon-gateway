@@ -79,6 +79,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.Intrinsics.X86;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -105,7 +106,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record NonFungibleIdViewModel(string NonFungibleId, int NonFungibleIdsTotalCount);
 
-    private record NonFungibleIdDataViewModel(string NonFungibleId, bool IsDeleted, byte[] ImmutableData, byte[] MutableData, long MutableDataLastUpdatedAtStateVersion);
+    private record NonFungibleIdDataViewModel(string NonFungibleId, bool IsDeleted, byte[] MutableData, long MutableDataLastUpdatedAtStateVersion);
 
     private readonly TokenAmount _tokenAmount100 = TokenAmount.FromDecimalString("100");
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
@@ -375,13 +376,13 @@ ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
                 items: items.Take(request.Limit).ToList()));
     }
 
-    public async Task<GatewayModel.StateNonFungibleDetailsResponse> NonFungibleIdData(GlobalAddress resourceAddress, IList<string> nonFungibleIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.StateNonFungibleDataResponse> NonFungibleIdData(GlobalAddress resourceAddress, IList<string> nonFungibleIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity<NonFungibleResourceEntity>(resourceAddress, ledgerState, token);
 
         var cd = new CommandDefinition(
             commandText: @"
-SELECT nfid.non_fungible_id AS NonFungibleId, md.is_deleted AS IsDeleted, nfid.immutable_data AS ImmutableData, md.mutable_data AS MutableData, md.from_state_version AS MutableDataLastUpdatedAtStateVersion
+SELECT nfid.non_fungible_id AS NonFungibleId, md.is_deleted AS IsDeleted, md.mutable_data AS MutableData, md.from_state_version AS MutableDataLastUpdatedAtStateVersion
 FROM non_fungible_id_data nfid
 LEFT JOIN LATERAL (
     SELECT mutable_data, is_deleted, from_state_version
@@ -390,7 +391,7 @@ LEFT JOIN LATERAL (
     ORDER BY nfidmdh.from_state_version DESC
     LIMIT 1
 ) md ON TRUE
-WHERE nfid.from_state_version <= @stateVersion AND nfid.non_fungible_resource_entity_id = @entityId AND nfid.non_fungible_id IN (@nonFungibleIds)
+WHERE nfid.from_state_version <= @stateVersion AND nfid.non_fungible_resource_entity_id = @entityId AND nfid.non_fungible_id = ANY(@nonFungibleIds)
 ORDER BY nfid.from_state_version DESC
 LIMIT 1
 ",
@@ -406,14 +407,18 @@ LIMIT 1
 
         foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdDataViewModel>(cd))
         {
+            if (vm.IsDeleted)
+            {
+                continue;
+            }
+
             items.Add(new GatewayModel.StateNonFungibleDetailsResponseItem(
                 nonFungibleId: vm.NonFungibleId,
                 mutableData: ScryptoSborUtils.NonFungibleDataToGatewayScryptoSbor(vm.MutableData, _networkConfigurationProvider.GetNetworkId()),
-                immutableData: ScryptoSborUtils.NonFungibleDataToGatewayScryptoSbor(vm.ImmutableData, _networkConfigurationProvider.GetNetworkId()),
                 lastUpdatedAtStateVersion: vm.MutableDataLastUpdatedAtStateVersion));
         }
 
-        return new GatewayModel.StateNonFungibleDetailsResponse(
+        return new GatewayModel.StateNonFungibleDataResponse(
             ledgerState: ledgerState,
             resourceAddress: resourceAddress.ToString(),
             nonFungibleIdType: entity.NonFungibleIdType.ToGatewayModel(),

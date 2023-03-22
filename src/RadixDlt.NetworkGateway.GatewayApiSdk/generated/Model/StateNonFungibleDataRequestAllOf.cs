@@ -90,41 +90,33 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateNonFungibleDetailsResponseAllOf
+    /// StateNonFungibleDataRequestAllOf
     /// </summary>
-    [DataContract(Name = "StateNonFungibleDetailsResponse_allOf")]
-    public partial class StateNonFungibleDetailsResponseAllOf : IEquatable<StateNonFungibleDetailsResponseAllOf>
+    [DataContract(Name = "StateNonFungibleDataRequest_allOf")]
+    public partial class StateNonFungibleDataRequestAllOf : IEquatable<StateNonFungibleDataRequestAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets NonFungibleIdType
-        /// </summary>
-        [DataMember(Name = "non_fungible_id_type", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleIdType NonFungibleIdType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StateNonFungibleDetailsResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleDataRequestAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateNonFungibleDetailsResponseAllOf() { }
+        protected StateNonFungibleDataRequestAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateNonFungibleDetailsResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleDataRequestAllOf" /> class.
         /// </summary>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
-        /// <param name="nonFungibleIdType">nonFungibleIdType (required).</param>
         /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
-        public StateNonFungibleDetailsResponseAllOf(string resourceAddress = default(string), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), List<StateNonFungibleDetailsResponseItem> nonFungibleIds = default(List<StateNonFungibleDetailsResponseItem>))
+        public StateNonFungibleDataRequestAllOf(string resourceAddress = default(string), List<string> nonFungibleIds = default(List<string>))
         {
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
             {
-                throw new ArgumentNullException("resourceAddress is a required property for StateNonFungibleDetailsResponseAllOf and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for StateNonFungibleDataRequestAllOf and cannot be null");
             }
             this.ResourceAddress = resourceAddress;
-            this.NonFungibleIdType = nonFungibleIdType;
             // to ensure "nonFungibleIds" is required (not null)
             if (nonFungibleIds == null)
             {
-                throw new ArgumentNullException("nonFungibleIds is a required property for StateNonFungibleDetailsResponseAllOf and cannot be null");
+                throw new ArgumentNullException("nonFungibleIds is a required property for StateNonFungibleDataRequestAllOf and cannot be null");
             }
             this.NonFungibleIds = nonFungibleIds;
         }
@@ -140,7 +132,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets NonFungibleIds
         /// </summary>
         [DataMember(Name = "non_fungible_ids", IsRequired = true, EmitDefaultValue = true)]
-        public List<StateNonFungibleDetailsResponseItem> NonFungibleIds { get; set; }
+        public List<string> NonFungibleIds { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -149,9 +141,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateNonFungibleDetailsResponseAllOf {\n");
+            sb.Append("class StateNonFungibleDataRequestAllOf {\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
             sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -173,15 +164,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateNonFungibleDetailsResponseAllOf);
+            return this.Equals(input as StateNonFungibleDataRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if StateNonFungibleDetailsResponseAllOf instances are equal
+        /// Returns true if StateNonFungibleDataRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateNonFungibleDetailsResponseAllOf to be compared</param>
+        /// <param name="input">Instance of StateNonFungibleDataRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateNonFungibleDetailsResponseAllOf input)
+        public bool Equals(StateNonFungibleDataRequestAllOf input)
         {
             if (input == null)
             {
@@ -192,10 +183,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ResourceAddress == input.ResourceAddress ||
                     (this.ResourceAddress != null &&
                     this.ResourceAddress.Equals(input.ResourceAddress))
-                ) && 
-                (
-                    this.NonFungibleIdType == input.NonFungibleIdType ||
-                    this.NonFungibleIdType.Equals(input.NonFungibleIdType)
                 ) && 
                 (
                     this.NonFungibleIds == input.NonFungibleIds ||
@@ -218,7 +205,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
                 if (this.NonFungibleIds != null)
                 {
                     hashCode = (hashCode * 59) + this.NonFungibleIds.GetHashCode();
