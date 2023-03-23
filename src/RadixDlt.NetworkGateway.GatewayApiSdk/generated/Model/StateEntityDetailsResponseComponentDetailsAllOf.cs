@@ -103,19 +103,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsAllOf" /> class.
         /// </summary>
-        /// <param name="packageAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="packageAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id..</param>
         /// <param name="blueprintName">blueprintName (required).</param>
         /// <param name="state">state.</param>
         /// <param name="accessRulesChain">accessRulesChain (required).</param>
         /// <param name="royaltyAggregator">royaltyAggregator.</param>
         public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), Object accessRulesChain = default(Object), FungibleResourcesCollectionItemGloballyAggregated royaltyAggregator = default(FungibleResourcesCollectionItemGloballyAggregated))
         {
-            // to ensure "packageAddress" is required (not null)
-            if (packageAddress == null)
-            {
-                throw new ArgumentNullException("packageAddress is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
-            }
-            this.PackageAddress = packageAddress;
             // to ensure "blueprintName" is required (not null)
             if (blueprintName == null)
             {
@@ -128,6 +122,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("accessRulesChain is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
             }
             this.AccessRulesChain = accessRulesChain;
+            this.PackageAddress = packageAddress;
             this.State = state;
             this.RoyaltyAggregator = royaltyAggregator;
         }
@@ -136,7 +131,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
         /// </summary>
         /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
-        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "package_address", EmitDefaultValue = true)]
         public string PackageAddress { get; set; }
 
         /// <summary>
