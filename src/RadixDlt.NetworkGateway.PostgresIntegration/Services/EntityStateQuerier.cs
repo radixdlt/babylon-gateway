@@ -78,6 +78,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Intrinsics.X86;
@@ -151,6 +152,18 @@ internal class EntityStateQuerier : IEntityStateQuerier
         return new GatewayModel.StateEntityNonFungiblesPageResponse(ledgerState, result.TotalCount, result.PreviousCursor, result.NextCursor, result.Items, pageRequest.Address);
     }
 
+    public async Task<GatewayModel.FungibleResourcesCollectionItemGloballyAggregated?> RoayltyAggregatedBalance(long entityId, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    {
+        var royaltyAggregatedBalance = await GetFungiblesSliceAggregatedPerResource(entityId, 0, 2, ledgerState, token);
+
+        if (royaltyAggregatedBalance.Items?.Count > 1)
+        {
+            throw new UnreachableException("Roaylty vaults should have only 1 type of fungible resources");
+        }
+
+        return royaltyAggregatedBalance.Items?.FirstOrDefault() as GatewayModel.FungibleResourcesCollectionItemGloballyAggregated;
+    }
+
     public async Task<GatewayModel.FungibleResourcesCollection> EntityFungibleResourcesPageSlice(long entityId, bool aggregatePerVault, int offset, int limit, GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
@@ -171,7 +184,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         return nonFungibles;
     }
 
-    public async Task<GatewayModel.StateEntityDetailsResponseItem> EntityDetailsItem(GlobalAddress address, bool aggregatePerVault, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.StateEntityDetailsResponseItem> EntityDetailsItem(GlobalAddress address, bool aggregatePerVault, List<GatewayModel.StateEntityDetailsRequest.OptInPropertiesEnum>? optInProperties, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity(address, ledgerState, token);
 
@@ -258,16 +271,26 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
+                var includeRoyaltyAggregator = optInProperties?.Contains(GatewayModel.StateEntityDetailsRequest.OptInPropertiesEnum.ComponentRoyaltyAggregatorBalance) == true;
+
+                var royaltyAggregator = includeRoyaltyAggregator && ce.RoyaltyVaultEntityId.HasValue
+                    ? await RoayltyAggregatedBalance(ce.RoyaltyVaultEntityId.Value, ledgerState, token)
+                    : null;
+
                 details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                     packageAddress: package.GlobalAddress,
                     blueprintName: ce.BlueprintName,
                     state: state != null ? new JRaw(state.State) : null,
+                    royaltyAggregator: royaltyAggregator,
                     accessRulesChain: new JRaw(accessRulesLayers.AccessRulesChain));
                 break;
         }
 
         var metadata = await GetMetadataSlice(entity.Id, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
-        var ancestorIdentities = entity.HasParent
+
+        var includeAncestorIdentities = optInProperties?.Contains(GatewayModel.StateEntityDetailsRequest.OptInPropertiesEnum.AncestorIdentities) == true;
+
+        var ancestorIdentities = includeAncestorIdentities && entity.HasParent
             ? await GetAncestorIdentities(entity, token)
             : null;
 

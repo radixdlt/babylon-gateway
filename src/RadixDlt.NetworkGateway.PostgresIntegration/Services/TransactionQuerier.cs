@@ -212,12 +212,12 @@ internal class TransactionQuerier : ITransactionQuerier
 
         return new GatewayModel.CommittedTransactionInfo(
             stateVersion: lt.StateVersion,
-            transactionStatus: MapTransactionStatus(lt.Status),
+            transactionStatus: MapTransactionStatus(lt.EngineReceipt.Status),
             payloadHashHex: payloadHashHex,
             intentHashHex: intentHashHex,
             feePaid: lt.FeePaid.HasValue ? new GatewayModel.TokenAmount(lt.FeePaid.Value.ToString(), _networkConfigurationProvider.GetWellKnownAddresses().Xrd) : null,
             confirmedAt: lt.RoundTimestamp,
-            errorMessage: lt.ErrorMessage
+            errorMessage: lt.EngineReceipt.ErrorMessage
         );
     }
 

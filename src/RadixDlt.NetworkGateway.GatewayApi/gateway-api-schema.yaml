@@ -1488,7 +1488,6 @@ components:
         enum:
           - ancestor_identities
           - component.royalty_aggregator_balance
-          - non_fungible.data_schema
     StateEntityDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"

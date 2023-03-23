@@ -97,7 +97,7 @@ internal class DefaultEntityHandler : IEntityHandler
 
         foreach (var address in request.Addresses.Select(v => (GlobalAddress)v).Distinct())
         {
-            var item = await _entityStateQuerier.EntityDetailsItem(address, aggregatePerVault, ledgerState, token);
+            var item = await _entityStateQuerier.EntityDetailsItem(address, aggregatePerVault, request.OptInProperties, ledgerState, token);
             result.Add(item);
         }
 

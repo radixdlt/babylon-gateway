@@ -111,13 +111,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             /// Enum ComponentRoyaltyAggregatorBalance for value: component.royalty_aggregator_balance
             /// </summary>
             [EnumMember(Value = "component.royalty_aggregator_balance")]
-            ComponentRoyaltyAggregatorBalance = 2,
-
-            /// <summary>
-            /// Enum NonFungibleDataSchema for value: non_fungible.data_schema
-            /// </summary>
-            [EnumMember(Value = "non_fungible.data_schema")]
-            NonFungibleDataSchema = 3
+            ComponentRoyaltyAggregatorBalance = 2
 
         }
 

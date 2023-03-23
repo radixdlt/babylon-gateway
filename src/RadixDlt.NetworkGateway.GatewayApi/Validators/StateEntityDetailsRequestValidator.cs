@@ -76,6 +76,9 @@ internal class StateEntityDetailsRequestValidator : AbstractValidator<GatewayMod
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
 
+        RuleForEach(x => x.OptInProperties)
+            .IsInEnum();
+
         RuleFor(x => x.Addresses)
             .NotEmpty()
             .DependentRules(() =>
