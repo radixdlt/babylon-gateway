@@ -842,7 +842,7 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/FungibleResourcesCollectionItem"
-    FungibleResourcesCollectionItem:
+    FungibleResourcesCollectionItemBase:
       type: object
       required:
         - aggregation_level
@@ -852,6 +852,10 @@ components:
           $ref: "#/components/schemas/ResourceAggregationLevel"
         resource_address:
           $ref: "#/components/schemas/ResourceAddress"
+    FungibleResourcesCollectionItem:
+      oneOf:      
+        - $ref: "#/components/schemas/FungibleResourcesCollectionItemGloballyAggregated"
+        - $ref: "#/components/schemas/FungibleResourcesCollectionItemVaultAggregated"
       discriminator:
         propertyName: aggregation_level
         mapping:
@@ -860,7 +864,7 @@ components:
           Vault: '#/components/schemas/FungibleResourcesCollectionItemVaultAggregated'
     FungibleResourcesCollectionItemGloballyAggregated:
       allOf:
-        - $ref: "#/components/schemas/FungibleResourcesCollectionItem"
+        - $ref: "#/components/schemas/FungibleResourcesCollectionItemBase"
         - type: object
           required:
             - amount
@@ -872,7 +876,7 @@ components:
               $ref: "#/components/schemas/LastUpdatedAtStateVersion"
     FungibleResourcesCollectionItemVaultAggregated:
       allOf:
-        - $ref: "#/components/schemas/FungibleResourcesCollectionItem"
+        - $ref: "#/components/schemas/FungibleResourcesCollectionItemBase"
         - type: object
           required:
             - vaults
@@ -916,7 +920,7 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/NonFungibleResourcesCollectionItem"
-    NonFungibleResourcesCollectionItem:
+    NonFungibleResourcesCollectionItemBase:
       type: object
       required:
         - aggregation_level
@@ -926,6 +930,10 @@ components:
           $ref: "#/components/schemas/ResourceAggregationLevel"
         resource_address:
           $ref: "#/components/schemas/ResourceAddress"
+    NonFungibleResourcesCollectionItem:
+      oneOf: 
+        - $ref: "#/components/schemas/NonFungibleResourcesCollectionItemGloballyAggregated"
+        - $ref: "#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregated"
       discriminator:
         propertyName: aggregation_level
         mapping:
@@ -934,7 +942,7 @@ components:
           Vault: '#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregated'
     NonFungibleResourcesCollectionItemGloballyAggregated:
       allOf:
-        - $ref: "#/components/schemas/NonFungibleResourcesCollectionItem"
+        - $ref: "#/components/schemas/NonFungibleResourcesCollectionItemBase"
         - type: object
           required:
             - amount
@@ -948,7 +956,7 @@ components:
               $ref: "#/components/schemas/LastUpdatedAtStateVersion"
     NonFungibleResourcesCollectionItemVaultAggregated:
       allOf:
-        - $ref: "#/components/schemas/NonFungibleResourcesCollectionItem"
+        - $ref: "#/components/schemas/NonFungibleResourcesCollectionItemBase"
         - type: object
           required:
             - vaults
