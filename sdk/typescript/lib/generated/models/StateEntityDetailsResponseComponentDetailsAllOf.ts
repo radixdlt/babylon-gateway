@@ -31,7 +31,7 @@ export interface StateEntityDetailsResponseComponentDetailsAllOf {
      * @type {string}
      * @memberof StateEntityDetailsResponseComponentDetailsAllOf
      */
-    package_address: string;
+    package_address?: string;
     /**
      * 
      * @type {string}
@@ -63,7 +63,6 @@ export interface StateEntityDetailsResponseComponentDetailsAllOf {
  */
 export function instanceOfStateEntityDetailsResponseComponentDetailsAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "package_address" in value;
     isInstance = isInstance && "blueprint_name" in value;
     isInstance = isInstance && "access_rules_chain" in value;
 
@@ -80,7 +79,7 @@ export function StateEntityDetailsResponseComponentDetailsAllOfFromJSONTyped(jso
     }
     return {
         
-        'package_address': json['package_address'],
+        'package_address': !exists(json, 'package_address') ? undefined : json['package_address'],
         'blueprint_name': json['blueprint_name'],
         'state': !exists(json, 'state') ? undefined : json['state'],
         'access_rules_chain': json['access_rules_chain'],

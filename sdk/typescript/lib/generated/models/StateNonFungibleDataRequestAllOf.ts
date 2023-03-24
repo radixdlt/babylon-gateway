@@ -16,27 +16,27 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface StateNonFungibleDetailsRequestAllOf
+ * @interface StateNonFungibleDataRequestAllOf
  */
-export interface StateNonFungibleDetailsRequestAllOf {
+export interface StateNonFungibleDataRequestAllOf {
     /**
      * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
      * @type {string}
-     * @memberof StateNonFungibleDetailsRequestAllOf
+     * @memberof StateNonFungibleDataRequestAllOf
      */
     resource_address: string;
     /**
      * 
      * @type {Array<string>}
-     * @memberof StateNonFungibleDetailsRequestAllOf
+     * @memberof StateNonFungibleDataRequestAllOf
      */
     non_fungible_ids: Array<string>;
 }
 
 /**
- * Check if a given object implements the StateNonFungibleDetailsRequestAllOf interface.
+ * Check if a given object implements the StateNonFungibleDataRequestAllOf interface.
  */
-export function instanceOfStateNonFungibleDetailsRequestAllOf(value: object): boolean {
+export function instanceOfStateNonFungibleDataRequestAllOf(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "resource_address" in value;
     isInstance = isInstance && "non_fungible_ids" in value;
@@ -44,11 +44,11 @@ export function instanceOfStateNonFungibleDetailsRequestAllOf(value: object): bo
     return isInstance;
 }
 
-export function StateNonFungibleDetailsRequestAllOfFromJSON(json: any): StateNonFungibleDetailsRequestAllOf {
-    return StateNonFungibleDetailsRequestAllOfFromJSONTyped(json, false);
+export function StateNonFungibleDataRequestAllOfFromJSON(json: any): StateNonFungibleDataRequestAllOf {
+    return StateNonFungibleDataRequestAllOfFromJSONTyped(json, false);
 }
 
-export function StateNonFungibleDetailsRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateNonFungibleDetailsRequestAllOf {
+export function StateNonFungibleDataRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateNonFungibleDataRequestAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -59,7 +59,7 @@ export function StateNonFungibleDetailsRequestAllOfFromJSONTyped(json: any, igno
     };
 }
 
-export function StateNonFungibleDetailsRequestAllOfToJSON(value?: StateNonFungibleDetailsRequestAllOf | null): any {
+export function StateNonFungibleDataRequestAllOfToJSON(value?: StateNonFungibleDataRequestAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }

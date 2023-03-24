@@ -39,12 +39,6 @@ export interface StateNonFungibleDetailsResponseItem {
      */
     mutable_data: ScryptoSborValue;
     /**
-     * 
-     * @type {ScryptoSborValue}
-     * @memberof StateNonFungibleDetailsResponseItem
-     */
-    immutable_data: ScryptoSborValue;
-    /**
      * TBD
      * @type {number}
      * @memberof StateNonFungibleDetailsResponseItem
@@ -59,7 +53,6 @@ export function instanceOfStateNonFungibleDetailsResponseItem(value: object): bo
     let isInstance = true;
     isInstance = isInstance && "non_fungible_id" in value;
     isInstance = isInstance && "mutable_data" in value;
-    isInstance = isInstance && "immutable_data" in value;
     isInstance = isInstance && "last_updated_at_state_version" in value;
 
     return isInstance;
@@ -77,7 +70,6 @@ export function StateNonFungibleDetailsResponseItemFromJSONTyped(json: any, igno
         
         'non_fungible_id': json['non_fungible_id'],
         'mutable_data': ScryptoSborValueFromJSON(json['mutable_data']),
-        'immutable_data': ScryptoSborValueFromJSON(json['immutable_data']),
         'last_updated_at_state_version': json['last_updated_at_state_version'],
     };
 }
@@ -93,7 +85,6 @@ export function StateNonFungibleDetailsResponseItemToJSON(value?: StateNonFungib
         
         'non_fungible_id': value.non_fungible_id,
         'mutable_data': ScryptoSborValueToJSON(value.mutable_data),
-        'immutable_data': ScryptoSborValueToJSON(value.immutable_data),
         'last_updated_at_state_version': value.last_updated_at_state_version,
     };
 }
