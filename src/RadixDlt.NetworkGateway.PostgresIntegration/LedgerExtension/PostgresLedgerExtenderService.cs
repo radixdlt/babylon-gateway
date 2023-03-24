@@ -553,10 +553,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     ValidatorEntity => CoreModel.EntityType.Validator,
                     VaultEntity => CoreModel.EntityType.Vault,
                     PackageEntity => CoreModel.EntityType.Package,
+                    IdentityEntity => CoreModel.EntityType.Identity,
                     ComponentEntity => CoreModel.EntityType.NormalComponent,
                     KeyValueStoreEntity => CoreModel.EntityType.KeyValueStore,
                     AccessControllerEntity => CoreModel.EntityType.AccessController,
-                    IdentityEntity => CoreModel.EntityType.Identity,
                     _ => throw new ArgumentOutOfRangeException(nameof(knownDbEntity), knownDbEntity.GetType().Name),
                 };
 
