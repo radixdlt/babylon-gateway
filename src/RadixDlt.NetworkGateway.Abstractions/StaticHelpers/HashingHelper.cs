@@ -62,76 +62,36 @@
  * permissions under this License.
  */
 
-using Org.BouncyCastle.Crypto.Digests;
 using System;
 
 namespace RadixDlt.NetworkGateway.Abstractions.StaticHelpers;
+
 public static class HashingHelper
 {
-    private const int DigestSize = 256;
-
-    public static byte[] ComputeCombinedHash(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2)
-    {
-        var destination = new byte[32];
-        ComputeCombinedHash(hash1, hash2, destination);
-        return destination;
-    }
-
-    public static bool ComputeAndVerifyCombinedHash(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, ReadOnlySpan<byte> hashToVerify)
-    {
-        if (hashToVerify.Length != 32)
-        {
-            return false;
-        }
-
-        Span<byte> hashResult = stackalloc byte[32];
-        ComputeCombinedHash(hash1, hash2, hashResult);
-        return hashToVerify.SequenceEqual(hashResult);
-    }
-
     public static bool VerifyHash(ReadOnlySpan<byte> source, ReadOnlySpan<byte> hashToVerify)
     {
-        if (hashToVerify.Length != 32)
-        {
-            return false;
-        }
-
-        Span<byte> hashResult = stackalloc byte[32];
-        Hash(source, hashResult);
-        return hashToVerify.SequenceEqual(hashResult);
+        var hash = RadixEngineToolkit.RadixEngineToolkit.Hash(source.ToArray());
+        return hashToVerify.SequenceEqual(hash);
     }
 
     public static byte[] Hash(ReadOnlySpan<byte> source)
     {
-        Span<byte> result = stackalloc byte[32];
-        Hash(source, result);
-        return result.ToArray();
+        return RadixEngineToolkit.RadixEngineToolkit.Hash(source.ToArray()).ToArray();
     }
 
-    private static void Hash(ReadOnlySpan<byte> source, Span<byte> result)
+    public static byte[] ComputeCombinedHash(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2)
     {
-        var blake2bDigesterLocal = new Blake2bDigest(DigestSize);
-        blake2bDigesterLocal.Reset();
-        blake2bDigesterLocal.BlockUpdate(source);
-        blake2bDigesterLocal.DoFinal(result);
-    }
-
-    private static void ComputeCombinedHash(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, Span<byte> destination)
-    {
-        if (hash1.Length != 32)
-        {
-            throw new ArgumentException("must to be 32 bytes long", nameof(hash1));
-        }
-
-        if (hash2.Length != 32)
-        {
-            throw new ArgumentException("must to be 32 bytes long", nameof(hash2));
-        }
-
-        Span<byte> aggregate = stackalloc byte[64];
+        Span<byte> aggregate = stackalloc byte[hash1.Length + hash2.Length];
         hash1.CopyTo(aggregate);
-        hash2.CopyTo(aggregate[32..]);
+        hash2.CopyTo(aggregate[hash1.Length..]);
 
-        Hash(aggregate, destination);
+        return RadixEngineToolkit.RadixEngineToolkit.Hash(aggregate).ToArray();
+    }
+
+    public static bool ComputeAndVerifyCombinedHash(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, ReadOnlySpan<byte> hashToVerify)
+    {
+        Span<byte> combined = stackalloc byte[hash1.Length + hash2.Length];
+        var hash = ComputeCombinedHash(hash1, hash2);
+        return hashToVerify.SequenceEqual(hash);
     }
 }
