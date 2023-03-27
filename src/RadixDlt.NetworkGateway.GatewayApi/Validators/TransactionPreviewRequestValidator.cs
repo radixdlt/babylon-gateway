@@ -74,9 +74,6 @@ internal class TransactionPreviewRequestValidator : AbstractValidator<GatewayMod
         RuleFor(x => x.Manifest)
             .NotEmpty();
 
-        RuleFor(x => x.BlobsHex)
-            .NotNull();
-
         RuleForEach(x => x.BlobsHex)
             .Hex();
 
