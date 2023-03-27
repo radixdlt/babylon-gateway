@@ -134,7 +134,7 @@ internal class PreviewService : IPreviewService
             blobsHex: request.BlobsHex,
             startEpochInclusive: request.StartEpochInclusive,
             endEpochExclusive: request.EndEpochExclusive,
-            notaryPublicKey: ToCoreModel(request.NotaryPublicKey),
+            notaryPublicKey: request.NotaryPublicKey != null ? ToCoreModel(request.NotaryPublicKey) : null,
             notaryAsSignatory: request.NotaryAsSignatory,
             costUnitLimit: request.CostUnitLimit,
             tipPercentage: request.TipPercentage,
