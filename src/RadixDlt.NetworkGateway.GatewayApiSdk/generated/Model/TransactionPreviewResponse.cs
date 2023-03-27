@@ -103,11 +103,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionPreviewResponse" /> class.
         /// </summary>
+        /// <param name="encodedReceipt">Hex-encoded binary blob. (required).</param>
         /// <param name="receipt">receipt (required).</param>
         /// <param name="resourceChanges">resourceChanges (required).</param>
         /// <param name="logs">logs (required).</param>
-        public TransactionPreviewResponse(Object receipt = default(Object), List<Object> resourceChanges = default(List<Object>), List<TransactionPreviewResponseLogsInner> logs = default(List<TransactionPreviewResponseLogsInner>))
+        public TransactionPreviewResponse(string encodedReceipt = default(string), Object receipt = default(Object), List<Object> resourceChanges = default(List<Object>), List<TransactionPreviewResponseLogsInner> logs = default(List<TransactionPreviewResponseLogsInner>))
         {
+            // to ensure "encodedReceipt" is required (not null)
+            if (encodedReceipt == null)
+            {
+                throw new ArgumentNullException("encodedReceipt is a required property for TransactionPreviewResponse and cannot be null");
+            }
+            this.EncodedReceipt = encodedReceipt;
             // to ensure "receipt" is required (not null)
             if (receipt == null)
             {
@@ -127,6 +134,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.Logs = logs;
         }
+
+        /// <summary>
+        /// Hex-encoded binary blob.
+        /// </summary>
+        /// <value>Hex-encoded binary blob.</value>
+        [DataMember(Name = "encoded_receipt", IsRequired = true, EmitDefaultValue = true)]
+        public string EncodedReceipt { get; set; }
 
         /// <summary>
         /// Gets or Sets Receipt
@@ -154,6 +168,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionPreviewResponse {\n");
+            sb.Append("  EncodedReceipt: ").Append(EncodedReceipt).Append("\n");
             sb.Append("  Receipt: ").Append(Receipt).Append("\n");
             sb.Append("  ResourceChanges: ").Append(ResourceChanges).Append("\n");
             sb.Append("  Logs: ").Append(Logs).Append("\n");
@@ -193,6 +208,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.EncodedReceipt == input.EncodedReceipt ||
+                    (this.EncodedReceipt != null &&
+                    this.EncodedReceipt.Equals(input.EncodedReceipt))
+                ) && 
+                (
                     this.Receipt == input.Receipt ||
                     (this.Receipt != null &&
                     this.Receipt.Equals(input.Receipt))
@@ -220,6 +240,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.EncodedReceipt != null)
+                {
+                    hashCode = (hashCode * 59) + this.EncodedReceipt.GetHashCode();
+                }
                 if (this.Receipt != null)
                 {
                     hashCode = (hashCode * 59) + this.Receipt.GetHashCode();

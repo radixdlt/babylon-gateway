@@ -1256,10 +1256,13 @@ components:
     TransactionPreviewResponse:
       type: object
       required:
+        - encoded_receipt
         - receipt
         - resource_changes
         - logs
       properties:
+        encoded_receipt:
+          $ref: "#/components/schemas/HexString"
         receipt:
           type: object
         resource_changes:
