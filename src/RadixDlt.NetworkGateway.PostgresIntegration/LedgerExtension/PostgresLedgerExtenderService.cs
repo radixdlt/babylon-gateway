@@ -554,9 +554,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     VaultEntity => CoreModel.EntityType.Vault,
                     PackageEntity => CoreModel.EntityType.Package,
                     IdentityEntity => CoreModel.EntityType.Identity,
+                    AccessControllerEntity => CoreModel.EntityType.AccessController,
                     ComponentEntity => CoreModel.EntityType.NormalComponent,
                     KeyValueStoreEntity => CoreModel.EntityType.KeyValueStore,
-                    AccessControllerEntity => CoreModel.EntityType.AccessController,
                     _ => throw new ArgumentOutOfRangeException(nameof(knownDbEntity), knownDbEntity.GetType().Name),
                 };
 
@@ -616,7 +616,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     allAncestors.Add(currentParent.DatabaseId);
                     parentId ??= currentParent.DatabaseId;
 
-                    if (!ownerId.HasValue && currentParent.CanBeOwner)
+                    if (!ownerId.HasValue && currentParent.CanBeOwnerAncestor)
                     {
                         ownerId = currentParent.DatabaseId;
                     }

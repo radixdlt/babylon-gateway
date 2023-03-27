@@ -270,6 +270,6 @@ internal class KeyValueStoreEntity : Entity
     public long? StoreOfNonFungibleResourceEntityId { get; set; }
 }
 
-internal class AccessControllerEntity : Entity
+internal class AccessControllerEntity : ComponentEntity
 {
 }
