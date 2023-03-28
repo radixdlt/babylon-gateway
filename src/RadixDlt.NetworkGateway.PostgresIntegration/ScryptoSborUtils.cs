@@ -64,6 +64,7 @@
 
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -113,38 +114,41 @@ internal static class ScryptoSborUtils
         {
             case 0:
             {
-                if (outerEnum.Fields is not [ToolkitModel.Value.ScryptoSbor.Enum innerEnum])
+                if (outerEnum.Fields is [ToolkitModel.Value.ScryptoSbor.Enum innerEnum])
                 {
-                    throw new UnreachableException("Expected ScryptoSbor.Enum");
+                    if (innerEnum.Variant == 0 && innerEnum.Fields is [ToolkitModel.Value.ScryptoSbor.String value])
+                    {
+                        asString = value.Value;
+                    }
                 }
-
-                if (innerEnum.Variant != 0 || innerEnum.Fields is not [ToolkitModel.Value.ScryptoSbor.String value])
-                {
-                    throw new UnreachableException("Expected ScryptoSbor.Enum with String-only fields");
-                }
-
-                asString = value.Value;
 
                 break;
             }
 
             case 1:
             {
-                if (outerEnum.Fields == null || outerEnum.Fields.Any(f => f is not ToolkitModel.Value.ScryptoSbor.Enum))
+                if (outerEnum.Fields is [ToolkitModel.Value.ScryptoSbor.Array innerArray] && innerArray.ElementKind == ValueKind.Enum)
                 {
-                    throw new UnreachableException("Expected ScryptoSbor.Enum with Enum-only fields");
-                }
+                    var isValid = true;
+                    var asStringCollectionCandidate = new List<string>();
 
-                asStringCollection = new List<string>(outerEnum.Fields.Length);
-
-                foreach (var innerEnum in outerEnum.Fields.Cast<ToolkitModel.Value.ScryptoSbor.Enum>())
-                {
-                    if (innerEnum.Variant != 0 || innerEnum.Fields is not [ToolkitModel.Value.ScryptoSbor.String value])
+                    foreach (var innerEnum in innerArray.Elements.Cast<ToolkitModel.Value.ScryptoSbor.Enum>())
                     {
-                        throw new UnreachableException("Expected ScryptoSbor.Enum with String-only fields");
+                        if (innerEnum.Variant == 0 && innerEnum.Fields is [ToolkitModel.Value.ScryptoSbor.String value])
+                        {
+                            asStringCollectionCandidate.Add(value.Value);
+                        }
+                        else
+                        {
+                            isValid = false;
+                            break;
+                        }
                     }
 
-                    asStringCollection.Add(value.Value);
+                    if (isValid)
+                    {
+                        asStringCollection = asStringCollectionCandidate;
+                    }
                 }
 
                 break;
