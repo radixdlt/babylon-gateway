@@ -19,7 +19,7 @@ info:
     which is configured to read from [full node(s)](https://github.com/radixdlt/babylon-node) to extract
     and index data from the network.
 servers: # TODO define mainnet / betanet endpoints?
-  - url: https://betanet.radixdlt.com
+  - url: https://rcnet.radixdlt.com
   - url: http://localhost:5208
 x-tagGroups:
   - name: Overview

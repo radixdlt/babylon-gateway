@@ -13,7 +13,7 @@
  */
 
 
-export const BASE_PATH = "https://betanet.radixdlt.com".replace(/\/+$/, "");
+export const BASE_PATH = "https://rcnet.radixdlt.com".replace(/\/+$/, "");
 
 export interface ConfigurationParameters {
     basePath?: string; // override base path
