@@ -681,21 +681,21 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 var stateVersion = committedTransaction.StateVersion;
                 var stateUpdates = committedTransaction.Receipt.StateUpdates;
 
-                foreach (var newSubstate in stateUpdates.UpdatedSubstates.Concat(stateUpdates.CreatedSubstates))
+                foreach (var substate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
                 {
-                    var substateId = newSubstate.SubstateId;
-                    var substateData = newSubstate.SubstateData;
+                    var substateId = substate.SubstateId;
+                    var substateData = substate.SubstateData;
 
                     var referencedEntity = referencedEntities.Get(substateId.EntityIdHex);
 
                     if (substateData is CoreModel.MetadataEntrySubstate metadata)
                     {
                         // TODO decompile SBOR or use ValueBytes
-                        var key = metadata.KeyHex;
-                        var value = metadata.DataStruct?.StructData.DataHex;
+                        var keyHex = metadata.KeyHex;
+                        var valueHex = metadata.DataStruct?.StructData.DataHex;
                         var isDeleted = metadata.IsDeleted;
 
-                        metadataChanges.Add(new MetadataChange(referencedEntity, key, value, isDeleted, stateVersion));
+                        metadataChanges.Add(new MetadataChange(referencedEntity, keyHex, valueHex, isDeleted, stateVersion));
                     }
 
                     if (substateData is CoreModel.FungibleResourceManagerSubstate fungibleResourceManager)
@@ -860,7 +860,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     metadataHistory = previous;
                 }
 
-                var currentPosition = metadataHistory.Keys.IndexOf(metadataChange.Key);
+                var key = ScryptoSborUtils.ConvertFromScryptoSborString(metadataChange.KeyHex, _networkConfigurationProvider.GetNetworkId());
+                var currentPosition = metadataHistory.Keys.IndexOf(key);
 
                 if (currentPosition != -1)
                 {
@@ -871,8 +872,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 if (!metadataChange.IsDeleted)
                 {
-                    metadataHistory.Keys.Insert(0, ScryptoSborUtils.ConvertFromScryptoSborString(metadataChange.Key, _networkConfigurationProvider.GetNetworkId()));
-                    metadataHistory.Values.Insert(0, metadataChange.Value?.ConvertFromHex() ?? throw new InvalidOperationException("impossible x3")); // TODO improve
+                    metadataHistory.Keys.Insert(0, key);
+                    metadataHistory.Values.Insert(0, metadataChange.ValueHex?.ConvertFromHex() ?? throw new InvalidOperationException("impossible x3")); // TODO improve
                     metadataHistory.UpdatedAtStateVersions.Insert(0, metadataChange.StateVersion);
                 }
             }
