@@ -84,91 +84,68 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// The transaction execution receipt
+    /// FunctionEventEmitterIdentifier
     /// </summary>
-    [DataContract(Name = "TransactionReceipt")]
-    public partial class TransactionReceipt : IEquatable<TransactionReceipt>
+    [DataContract(Name = "FunctionEventEmitterIdentifier")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(FunctionEventEmitterIdentifier), "Function")]
+    [JsonSubtypes.KnownSubType(typeof(MethodEventEmitterIdentifier), "Method")]
+    public partial class FunctionEventEmitterIdentifier : EventEmitterIdentifier, IEquatable<FunctionEventEmitterIdentifier>
     {
 
         /// <summary>
-        /// Gets or Sets Status
+        /// Gets or Sets ModuleType
         /// </summary>
-        [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionStatus Status { get; set; }
+        [DataMember(Name = "module_type", IsRequired = true, EmitDefaultValue = true)]
+        public ModuleType ModuleType { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
+        /// Initializes a new instance of the <see cref="FunctionEventEmitterIdentifier" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionReceipt() { }
+        protected FunctionEventEmitterIdentifier() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
+        /// Initializes a new instance of the <see cref="FunctionEventEmitterIdentifier" /> class.
         /// </summary>
-        /// <param name="status">status (required).</param>
-        /// <param name="feeSummary">feeSummary.</param>
-        /// <param name="stateUpdates">stateUpdates (required).</param>
-        /// <param name="events">events.</param>
-        /// <param name="nextEpoch">nextEpoch.</param>
-        /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).</param>
-        /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
-        public TransactionReceipt(TransactionStatus status = default(TransactionStatus), FeeSummary feeSummary = default(FeeSummary), StateUpdates stateUpdates = default(StateUpdates), List<Event> events = default(List<Event>), NextEpoch nextEpoch = default(NextEpoch), List<SborData> output = default(List<SborData>), string errorMessage = default(string))
+        /// <param name="entity">entity (required).</param>
+        /// <param name="moduleType">moduleType (required).</param>
+        /// <param name="blueprintName">Blueprint name. (required).</param>
+        /// <param name="type">type (required) (default to EventEmitterIdentifierType.Function).</param>
+        public FunctionEventEmitterIdentifier(EntityReference entity = default(EntityReference), ModuleType moduleType = default(ModuleType), string blueprintName = default(string), EventEmitterIdentifierType type = EventEmitterIdentifierType.Function) : base(type)
         {
-            this.Status = status;
-            // to ensure "stateUpdates" is required (not null)
-            if (stateUpdates == null)
+            // to ensure "entity" is required (not null)
+            if (entity == null)
             {
-                throw new ArgumentNullException("stateUpdates is a required property for TransactionReceipt and cannot be null");
+                throw new ArgumentNullException("entity is a required property for FunctionEventEmitterIdentifier and cannot be null");
             }
-            this.StateUpdates = stateUpdates;
-            this.FeeSummary = feeSummary;
-            this.Events = events;
-            this.NextEpoch = nextEpoch;
-            this.Output = output;
-            this.ErrorMessage = errorMessage;
+            this.Entity = entity;
+            this.ModuleType = moduleType;
+            // to ensure "blueprintName" is required (not null)
+            if (blueprintName == null)
+            {
+                throw new ArgumentNullException("blueprintName is a required property for FunctionEventEmitterIdentifier and cannot be null");
+            }
+            this.BlueprintName = blueprintName;
         }
 
         /// <summary>
-        /// Gets or Sets FeeSummary
+        /// Gets or Sets Entity
         /// </summary>
-        [DataMember(Name = "fee_summary", EmitDefaultValue = true)]
-        public FeeSummary FeeSummary { get; set; }
+        [DataMember(Name = "entity", IsRequired = true, EmitDefaultValue = true)]
+        public EntityReference Entity { get; set; }
 
         /// <summary>
-        /// Gets or Sets StateUpdates
+        /// Blueprint name.
         /// </summary>
-        [DataMember(Name = "state_updates", IsRequired = true, EmitDefaultValue = true)]
-        public StateUpdates StateUpdates { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Events
-        /// </summary>
-        [DataMember(Name = "events", EmitDefaultValue = true)]
-        public List<Event> Events { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NextEpoch
-        /// </summary>
-        [DataMember(Name = "next_epoch", EmitDefaultValue = true)]
-        public NextEpoch NextEpoch { get; set; }
-
-        /// <summary>
-        /// The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)
-        /// </summary>
-        /// <value>The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)</value>
-        [DataMember(Name = "output", EmitDefaultValue = true)]
-        public List<SborData> Output { get; set; }
-
-        /// <summary>
-        /// Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)
-        /// </summary>
-        /// <value>Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)</value>
-        [DataMember(Name = "error_message", EmitDefaultValue = true)]
-        public string ErrorMessage { get; set; }
+        /// <value>Blueprint name.</value>
+        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
+        public string BlueprintName { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -177,14 +154,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionReceipt {\n");
-            sb.Append("  Status: ").Append(Status).Append("\n");
-            sb.Append("  FeeSummary: ").Append(FeeSummary).Append("\n");
-            sb.Append("  StateUpdates: ").Append(StateUpdates).Append("\n");
-            sb.Append("  Events: ").Append(Events).Append("\n");
-            sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
-            sb.Append("  Output: ").Append(Output).Append("\n");
-            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
+            sb.Append("class FunctionEventEmitterIdentifier {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  Entity: ").Append(Entity).Append("\n");
+            sb.Append("  ModuleType: ").Append(ModuleType).Append("\n");
+            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -193,7 +167,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -205,56 +179,34 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionReceipt);
+            return this.Equals(input as FunctionEventEmitterIdentifier);
         }
 
         /// <summary>
-        /// Returns true if TransactionReceipt instances are equal
+        /// Returns true if FunctionEventEmitterIdentifier instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionReceipt to be compared</param>
+        /// <param name="input">Instance of FunctionEventEmitterIdentifier to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionReceipt input)
+        public bool Equals(FunctionEventEmitterIdentifier input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.Status == input.Status ||
-                    this.Status.Equals(input.Status)
-                ) && 
+                    this.Entity == input.Entity ||
+                    (this.Entity != null &&
+                    this.Entity.Equals(input.Entity))
+                ) && base.Equals(input) && 
                 (
-                    this.FeeSummary == input.FeeSummary ||
-                    (this.FeeSummary != null &&
-                    this.FeeSummary.Equals(input.FeeSummary))
-                ) && 
+                    this.ModuleType == input.ModuleType ||
+                    this.ModuleType.Equals(input.ModuleType)
+                ) && base.Equals(input) && 
                 (
-                    this.StateUpdates == input.StateUpdates ||
-                    (this.StateUpdates != null &&
-                    this.StateUpdates.Equals(input.StateUpdates))
-                ) && 
-                (
-                    this.Events == input.Events ||
-                    this.Events != null &&
-                    input.Events != null &&
-                    this.Events.SequenceEqual(input.Events)
-                ) && 
-                (
-                    this.NextEpoch == input.NextEpoch ||
-                    (this.NextEpoch != null &&
-                    this.NextEpoch.Equals(input.NextEpoch))
-                ) && 
-                (
-                    this.Output == input.Output ||
-                    this.Output != null &&
-                    input.Output != null &&
-                    this.Output.SequenceEqual(input.Output)
-                ) && 
-                (
-                    this.ErrorMessage == input.ErrorMessage ||
-                    (this.ErrorMessage != null &&
-                    this.ErrorMessage.Equals(input.ErrorMessage))
+                    this.BlueprintName == input.BlueprintName ||
+                    (this.BlueprintName != null &&
+                    this.BlueprintName.Equals(input.BlueprintName))
                 );
         }
 
@@ -266,31 +218,15 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Status.GetHashCode();
-                if (this.FeeSummary != null)
+                int hashCode = base.GetHashCode();
+                if (this.Entity != null)
                 {
-                    hashCode = (hashCode * 59) + this.FeeSummary.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Entity.GetHashCode();
                 }
-                if (this.StateUpdates != null)
+                hashCode = (hashCode * 59) + this.ModuleType.GetHashCode();
+                if (this.BlueprintName != null)
                 {
-                    hashCode = (hashCode * 59) + this.StateUpdates.GetHashCode();
-                }
-                if (this.Events != null)
-                {
-                    hashCode = (hashCode * 59) + this.Events.GetHashCode();
-                }
-                if (this.NextEpoch != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextEpoch.GetHashCode();
-                }
-                if (this.Output != null)
-                {
-                    hashCode = (hashCode * 59) + this.Output.GetHashCode();
-                }
-                if (this.ErrorMessage != null)
-                {
-                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
+                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
                 }
                 return hashCode;
             }

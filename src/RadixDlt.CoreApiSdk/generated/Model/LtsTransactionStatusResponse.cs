@@ -90,85 +90,66 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// The transaction execution receipt
+    /// LtsTransactionStatusResponse
     /// </summary>
-    [DataContract(Name = "TransactionReceipt")]
-    public partial class TransactionReceipt : IEquatable<TransactionReceipt>
+    [DataContract(Name = "LtsTransactionStatusResponse")]
+    public partial class LtsTransactionStatusResponse : IEquatable<LtsTransactionStatusResponse>
     {
 
         /// <summary>
-        /// Gets or Sets Status
+        /// Gets or Sets IntentStatus
         /// </summary>
-        [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionStatus Status { get; set; }
+        [DataMember(Name = "intent_status", IsRequired = true, EmitDefaultValue = true)]
+        public LtsTransactionIntentStatus IntentStatus { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
+        /// Initializes a new instance of the <see cref="LtsTransactionStatusResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionReceipt() { }
+        protected LtsTransactionStatusResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
+        /// Initializes a new instance of the <see cref="LtsTransactionStatusResponse" /> class.
         /// </summary>
-        /// <param name="status">status (required).</param>
-        /// <param name="feeSummary">feeSummary.</param>
-        /// <param name="stateUpdates">stateUpdates (required).</param>
-        /// <param name="events">events.</param>
-        /// <param name="nextEpoch">nextEpoch.</param>
-        /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).</param>
-        /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
-        public TransactionReceipt(TransactionStatus status = default(TransactionStatus), FeeSummary feeSummary = default(FeeSummary), StateUpdates stateUpdates = default(StateUpdates), List<Event> events = default(List<Event>), NextEpoch nextEpoch = default(NextEpoch), List<SborData> output = default(List<SborData>), string errorMessage = default(string))
+        /// <param name="intentStatus">intentStatus (required).</param>
+        /// <param name="statusDescription">An explanation as to why the intent status is resolved as it is.  (required).</param>
+        /// <param name="invalidFromEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the intent status is InMempool or Unknown and we know about a payload. .</param>
+        /// <param name="knownPayloads">knownPayloads (required).</param>
+        public LtsTransactionStatusResponse(LtsTransactionIntentStatus intentStatus = default(LtsTransactionIntentStatus), string statusDescription = default(string), long invalidFromEpoch = default(long), List<LtsTransactionPayloadStatus> knownPayloads = default(List<LtsTransactionPayloadStatus>))
         {
-            this.Status = status;
-            // to ensure "stateUpdates" is required (not null)
-            if (stateUpdates == null)
+            this.IntentStatus = intentStatus;
+            // to ensure "statusDescription" is required (not null)
+            if (statusDescription == null)
             {
-                throw new ArgumentNullException("stateUpdates is a required property for TransactionReceipt and cannot be null");
+                throw new ArgumentNullException("statusDescription is a required property for LtsTransactionStatusResponse and cannot be null");
             }
-            this.StateUpdates = stateUpdates;
-            this.FeeSummary = feeSummary;
-            this.Events = events;
-            this.NextEpoch = nextEpoch;
-            this.Output = output;
-            this.ErrorMessage = errorMessage;
+            this.StatusDescription = statusDescription;
+            // to ensure "knownPayloads" is required (not null)
+            if (knownPayloads == null)
+            {
+                throw new ArgumentNullException("knownPayloads is a required property for LtsTransactionStatusResponse and cannot be null");
+            }
+            this.KnownPayloads = knownPayloads;
+            this.InvalidFromEpoch = invalidFromEpoch;
         }
 
         /// <summary>
-        /// Gets or Sets FeeSummary
+        /// An explanation as to why the intent status is resolved as it is. 
         /// </summary>
-        [DataMember(Name = "fee_summary", EmitDefaultValue = true)]
-        public FeeSummary FeeSummary { get; set; }
+        /// <value>An explanation as to why the intent status is resolved as it is. </value>
+        [DataMember(Name = "status_description", IsRequired = true, EmitDefaultValue = true)]
+        public string StatusDescription { get; set; }
 
         /// <summary>
-        /// Gets or Sets StateUpdates
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the intent status is InMempool or Unknown and we know about a payload. 
         /// </summary>
-        [DataMember(Name = "state_updates", IsRequired = true, EmitDefaultValue = true)]
-        public StateUpdates StateUpdates { get; set; }
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the intent status is InMempool or Unknown and we know about a payload. </value>
+        [DataMember(Name = "invalid_from_epoch", EmitDefaultValue = true)]
+        public long InvalidFromEpoch { get; set; }
 
         /// <summary>
-        /// Gets or Sets Events
+        /// Gets or Sets KnownPayloads
         /// </summary>
-        [DataMember(Name = "events", EmitDefaultValue = true)]
-        public List<Event> Events { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NextEpoch
-        /// </summary>
-        [DataMember(Name = "next_epoch", EmitDefaultValue = true)]
-        public NextEpoch NextEpoch { get; set; }
-
-        /// <summary>
-        /// The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)
-        /// </summary>
-        /// <value>The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)</value>
-        [DataMember(Name = "output", EmitDefaultValue = true)]
-        public List<SborData> Output { get; set; }
-
-        /// <summary>
-        /// Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)
-        /// </summary>
-        /// <value>Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)</value>
-        [DataMember(Name = "error_message", EmitDefaultValue = true)]
-        public string ErrorMessage { get; set; }
+        [DataMember(Name = "known_payloads", IsRequired = true, EmitDefaultValue = true)]
+        public List<LtsTransactionPayloadStatus> KnownPayloads { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -177,14 +158,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionReceipt {\n");
-            sb.Append("  Status: ").Append(Status).Append("\n");
-            sb.Append("  FeeSummary: ").Append(FeeSummary).Append("\n");
-            sb.Append("  StateUpdates: ").Append(StateUpdates).Append("\n");
-            sb.Append("  Events: ").Append(Events).Append("\n");
-            sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
-            sb.Append("  Output: ").Append(Output).Append("\n");
-            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
+            sb.Append("class LtsTransactionStatusResponse {\n");
+            sb.Append("  IntentStatus: ").Append(IntentStatus).Append("\n");
+            sb.Append("  StatusDescription: ").Append(StatusDescription).Append("\n");
+            sb.Append("  InvalidFromEpoch: ").Append(InvalidFromEpoch).Append("\n");
+            sb.Append("  KnownPayloads: ").Append(KnownPayloads).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -205,15 +183,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionReceipt);
+            return this.Equals(input as LtsTransactionStatusResponse);
         }
 
         /// <summary>
-        /// Returns true if TransactionReceipt instances are equal
+        /// Returns true if LtsTransactionStatusResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionReceipt to be compared</param>
+        /// <param name="input">Instance of LtsTransactionStatusResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionReceipt input)
+        public bool Equals(LtsTransactionStatusResponse input)
         {
             if (input == null)
             {
@@ -221,40 +199,23 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Status == input.Status ||
-                    this.Status.Equals(input.Status)
+                    this.IntentStatus == input.IntentStatus ||
+                    this.IntentStatus.Equals(input.IntentStatus)
                 ) && 
                 (
-                    this.FeeSummary == input.FeeSummary ||
-                    (this.FeeSummary != null &&
-                    this.FeeSummary.Equals(input.FeeSummary))
+                    this.StatusDescription == input.StatusDescription ||
+                    (this.StatusDescription != null &&
+                    this.StatusDescription.Equals(input.StatusDescription))
                 ) && 
                 (
-                    this.StateUpdates == input.StateUpdates ||
-                    (this.StateUpdates != null &&
-                    this.StateUpdates.Equals(input.StateUpdates))
+                    this.InvalidFromEpoch == input.InvalidFromEpoch ||
+                    this.InvalidFromEpoch.Equals(input.InvalidFromEpoch)
                 ) && 
                 (
-                    this.Events == input.Events ||
-                    this.Events != null &&
-                    input.Events != null &&
-                    this.Events.SequenceEqual(input.Events)
-                ) && 
-                (
-                    this.NextEpoch == input.NextEpoch ||
-                    (this.NextEpoch != null &&
-                    this.NextEpoch.Equals(input.NextEpoch))
-                ) && 
-                (
-                    this.Output == input.Output ||
-                    this.Output != null &&
-                    input.Output != null &&
-                    this.Output.SequenceEqual(input.Output)
-                ) && 
-                (
-                    this.ErrorMessage == input.ErrorMessage ||
-                    (this.ErrorMessage != null &&
-                    this.ErrorMessage.Equals(input.ErrorMessage))
+                    this.KnownPayloads == input.KnownPayloads ||
+                    this.KnownPayloads != null &&
+                    input.KnownPayloads != null &&
+                    this.KnownPayloads.SequenceEqual(input.KnownPayloads)
                 );
         }
 
@@ -267,30 +228,15 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Status.GetHashCode();
-                if (this.FeeSummary != null)
+                hashCode = (hashCode * 59) + this.IntentStatus.GetHashCode();
+                if (this.StatusDescription != null)
                 {
-                    hashCode = (hashCode * 59) + this.FeeSummary.GetHashCode();
+                    hashCode = (hashCode * 59) + this.StatusDescription.GetHashCode();
                 }
-                if (this.StateUpdates != null)
+                hashCode = (hashCode * 59) + this.InvalidFromEpoch.GetHashCode();
+                if (this.KnownPayloads != null)
                 {
-                    hashCode = (hashCode * 59) + this.StateUpdates.GetHashCode();
-                }
-                if (this.Events != null)
-                {
-                    hashCode = (hashCode * 59) + this.Events.GetHashCode();
-                }
-                if (this.NextEpoch != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextEpoch.GetHashCode();
-                }
-                if (this.Output != null)
-                {
-                    hashCode = (hashCode * 59) + this.Output.GetHashCode();
-                }
-                if (this.ErrorMessage != null)
-                {
-                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KnownPayloads.GetHashCode();
                 }
                 return hashCode;
             }

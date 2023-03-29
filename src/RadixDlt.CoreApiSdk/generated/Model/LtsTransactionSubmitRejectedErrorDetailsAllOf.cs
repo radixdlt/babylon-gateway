@@ -90,18 +90,18 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionSubmitRejectedErrorDetailsAllOf
+    /// LtsTransactionSubmitRejectedErrorDetailsAllOf
     /// </summary>
-    [DataContract(Name = "TransactionSubmitRejectedErrorDetails_allOf")]
-    public partial class TransactionSubmitRejectedErrorDetailsAllOf : IEquatable<TransactionSubmitRejectedErrorDetailsAllOf>
+    [DataContract(Name = "LtsTransactionSubmitRejectedErrorDetails_allOf")]
+    public partial class LtsTransactionSubmitRejectedErrorDetailsAllOf : IEquatable<LtsTransactionSubmitRejectedErrorDetailsAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitRejectedErrorDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="LtsTransactionSubmitRejectedErrorDetailsAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionSubmitRejectedErrorDetailsAllOf() { }
+        protected LtsTransactionSubmitRejectedErrorDetailsAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitRejectedErrorDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="LtsTransactionSubmitRejectedErrorDetailsAllOf" /> class.
         /// </summary>
         /// <param name="errorMessage">An explanation of the error (required).</param>
         /// <param name="isFresh">Whether (true) this rejected status has just been calculated fresh, or (false) the status is from the pending transaction result cache.  (required).</param>
@@ -111,12 +111,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="retryFromTimestamp">retryFromTimestamp.</param>
         /// <param name="retryFromEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch after which the node will consider recalculating the validity of the transaction. Only present if the rejection is temporary due to a header specifying a \&quot;from epoch\&quot; in the future. .</param>
         /// <param name="invalidFromEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the rejection isn&#39;t permanent. .</param>
-        public TransactionSubmitRejectedErrorDetailsAllOf(string errorMessage = default(string), bool isFresh = default(bool), bool isPayloadRejectionPermanent = default(bool), bool isIntentRejectionPermanent = default(bool), bool isRejectedBecauseIntentAlreadyCommitted = default(bool), Instant retryFromTimestamp = default(Instant), long retryFromEpoch = default(long), long invalidFromEpoch = default(long))
+        public LtsTransactionSubmitRejectedErrorDetailsAllOf(string errorMessage = default(string), bool isFresh = default(bool), bool isPayloadRejectionPermanent = default(bool), bool isIntentRejectionPermanent = default(bool), bool isRejectedBecauseIntentAlreadyCommitted = default(bool), Instant retryFromTimestamp = default(Instant), long retryFromEpoch = default(long), long invalidFromEpoch = default(long))
         {
             // to ensure "errorMessage" is required (not null)
             if (errorMessage == null)
             {
-                throw new ArgumentNullException("errorMessage is a required property for TransactionSubmitRejectedErrorDetailsAllOf and cannot be null");
+                throw new ArgumentNullException("errorMessage is a required property for LtsTransactionSubmitRejectedErrorDetailsAllOf and cannot be null");
             }
             this.ErrorMessage = errorMessage;
             this.IsFresh = isFresh;
@@ -190,7 +190,7 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionSubmitRejectedErrorDetailsAllOf {\n");
+            sb.Append("class LtsTransactionSubmitRejectedErrorDetailsAllOf {\n");
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("  IsFresh: ").Append(IsFresh).Append("\n");
             sb.Append("  IsPayloadRejectionPermanent: ").Append(IsPayloadRejectionPermanent).Append("\n");
@@ -219,15 +219,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionSubmitRejectedErrorDetailsAllOf);
+            return this.Equals(input as LtsTransactionSubmitRejectedErrorDetailsAllOf);
         }
 
         /// <summary>
-        /// Returns true if TransactionSubmitRejectedErrorDetailsAllOf instances are equal
+        /// Returns true if LtsTransactionSubmitRejectedErrorDetailsAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionSubmitRejectedErrorDetailsAllOf to be compared</param>
+        /// <param name="input">Instance of LtsTransactionSubmitRejectedErrorDetailsAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionSubmitRejectedErrorDetailsAllOf input)
+        public bool Equals(LtsTransactionSubmitRejectedErrorDetailsAllOf input)
         {
             if (input == null)
             {

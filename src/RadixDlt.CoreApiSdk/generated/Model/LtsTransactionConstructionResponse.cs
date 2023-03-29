@@ -90,30 +90,44 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionSubmitMempoolFullErrorDetailsAllOf
+    /// LtsTransactionConstructionResponse
     /// </summary>
-    [DataContract(Name = "TransactionSubmitMempoolFullErrorDetails_allOf")]
-    public partial class TransactionSubmitMempoolFullErrorDetailsAllOf : IEquatable<TransactionSubmitMempoolFullErrorDetailsAllOf>
+    [DataContract(Name = "LtsTransactionConstructionResponse")]
+    public partial class LtsTransactionConstructionResponse : IEquatable<LtsTransactionConstructionResponse>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitMempoolFullErrorDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="LtsTransactionConstructionResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionSubmitMempoolFullErrorDetailsAllOf() { }
+        protected LtsTransactionConstructionResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitMempoolFullErrorDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="LtsTransactionConstructionResponse" /> class.
         /// </summary>
-        /// <param name="mempoolCapacity">mempoolCapacity (required).</param>
-        public TransactionSubmitMempoolFullErrorDetailsAllOf(int mempoolCapacity = default(int))
+        /// <param name="currentEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch (required).</param>
+        /// <param name="ledgerClock">ledgerClock (required).</param>
+        public LtsTransactionConstructionResponse(long currentEpoch = default(long), Instant ledgerClock = default(Instant))
         {
-            this.MempoolCapacity = mempoolCapacity;
+            this.CurrentEpoch = currentEpoch;
+            // to ensure "ledgerClock" is required (not null)
+            if (ledgerClock == null)
+            {
+                throw new ArgumentNullException("ledgerClock is a required property for LtsTransactionConstructionResponse and cannot be null");
+            }
+            this.LedgerClock = ledgerClock;
         }
 
         /// <summary>
-        /// Gets or Sets MempoolCapacity
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch
         /// </summary>
-        [DataMember(Name = "mempool_capacity", IsRequired = true, EmitDefaultValue = true)]
-        public int MempoolCapacity { get; set; }
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch</value>
+        [DataMember(Name = "current_epoch", IsRequired = true, EmitDefaultValue = true)]
+        public long CurrentEpoch { get; set; }
+
+        /// <summary>
+        /// Gets or Sets LedgerClock
+        /// </summary>
+        [DataMember(Name = "ledger_clock", IsRequired = true, EmitDefaultValue = true)]
+        public Instant LedgerClock { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -122,8 +136,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionSubmitMempoolFullErrorDetailsAllOf {\n");
-            sb.Append("  MempoolCapacity: ").Append(MempoolCapacity).Append("\n");
+            sb.Append("class LtsTransactionConstructionResponse {\n");
+            sb.Append("  CurrentEpoch: ").Append(CurrentEpoch).Append("\n");
+            sb.Append("  LedgerClock: ").Append(LedgerClock).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -144,15 +159,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionSubmitMempoolFullErrorDetailsAllOf);
+            return this.Equals(input as LtsTransactionConstructionResponse);
         }
 
         /// <summary>
-        /// Returns true if TransactionSubmitMempoolFullErrorDetailsAllOf instances are equal
+        /// Returns true if LtsTransactionConstructionResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionSubmitMempoolFullErrorDetailsAllOf to be compared</param>
+        /// <param name="input">Instance of LtsTransactionConstructionResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionSubmitMempoolFullErrorDetailsAllOf input)
+        public bool Equals(LtsTransactionConstructionResponse input)
         {
             if (input == null)
             {
@@ -160,8 +175,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.MempoolCapacity == input.MempoolCapacity ||
-                    this.MempoolCapacity.Equals(input.MempoolCapacity)
+                    this.CurrentEpoch == input.CurrentEpoch ||
+                    this.CurrentEpoch.Equals(input.CurrentEpoch)
+                ) && 
+                (
+                    this.LedgerClock == input.LedgerClock ||
+                    (this.LedgerClock != null &&
+                    this.LedgerClock.Equals(input.LedgerClock))
                 );
         }
 
@@ -174,7 +194,11 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.MempoolCapacity.GetHashCode();
+                hashCode = (hashCode * 59) + this.CurrentEpoch.GetHashCode();
+                if (this.LedgerClock != null)
+                {
+                    hashCode = (hashCode * 59) + this.LedgerClock.GetHashCode();
+                }
                 return hashCode;
             }
         }

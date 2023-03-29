@@ -90,85 +90,63 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// The transaction execution receipt
+    /// LtsStreamAccountTransactionsBasicOutcomesResponse
     /// </summary>
-    [DataContract(Name = "TransactionReceipt")]
-    public partial class TransactionReceipt : IEquatable<TransactionReceipt>
+    [DataContract(Name = "LtsStreamAccountTransactionsBasicOutcomesResponse")]
+    public partial class LtsStreamAccountTransactionsBasicOutcomesResponse : IEquatable<LtsStreamAccountTransactionsBasicOutcomesResponse>
     {
-
         /// <summary>
-        /// Gets or Sets Status
-        /// </summary>
-        [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionStatus Status { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
+        /// Initializes a new instance of the <see cref="LtsStreamAccountTransactionsBasicOutcomesResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionReceipt() { }
+        protected LtsStreamAccountTransactionsBasicOutcomesResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
+        /// Initializes a new instance of the <see cref="LtsStreamAccountTransactionsBasicOutcomesResponse" /> class.
         /// </summary>
-        /// <param name="status">status (required).</param>
-        /// <param name="feeSummary">feeSummary.</param>
-        /// <param name="stateUpdates">stateUpdates (required).</param>
-        /// <param name="events">events.</param>
-        /// <param name="nextEpoch">nextEpoch.</param>
-        /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).</param>
-        /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
-        public TransactionReceipt(TransactionStatus status = default(TransactionStatus), FeeSummary feeSummary = default(FeeSummary), StateUpdates stateUpdates = default(StateUpdates), List<Event> events = default(List<Event>), NextEpoch nextEpoch = default(NextEpoch), List<SborData> output = default(List<SborData>), string errorMessage = default(string))
+        /// <param name="fromStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version in the returned response (if any). This matches the &#x60;from_state_version&#x60; in the request.  (required).</param>
+        /// <param name="count">An integer between &#x60;0&#x60; and &#x60;10000&#x60;, giving the total count of transactions in the returned response (required).</param>
+        /// <param name="maxLedgerStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the maximum state version currently committed on this node&#39;s ledger. (required).</param>
+        /// <param name="committedTransactionOutcomes">A committed transaction outcomes list starting from the &#x60;from_state_version&#x60; (inclusive). (required).</param>
+        public LtsStreamAccountTransactionsBasicOutcomesResponse(long fromStateVersion = default(long), int count = default(int), long maxLedgerStateVersion = default(long), List<LtsCommittedTransactionOutcome> committedTransactionOutcomes = default(List<LtsCommittedTransactionOutcome>))
         {
-            this.Status = status;
-            // to ensure "stateUpdates" is required (not null)
-            if (stateUpdates == null)
+            this.FromStateVersion = fromStateVersion;
+            this.Count = count;
+            this.MaxLedgerStateVersion = maxLedgerStateVersion;
+            // to ensure "committedTransactionOutcomes" is required (not null)
+            if (committedTransactionOutcomes == null)
             {
-                throw new ArgumentNullException("stateUpdates is a required property for TransactionReceipt and cannot be null");
+                throw new ArgumentNullException("committedTransactionOutcomes is a required property for LtsStreamAccountTransactionsBasicOutcomesResponse and cannot be null");
             }
-            this.StateUpdates = stateUpdates;
-            this.FeeSummary = feeSummary;
-            this.Events = events;
-            this.NextEpoch = nextEpoch;
-            this.Output = output;
-            this.ErrorMessage = errorMessage;
+            this.CommittedTransactionOutcomes = committedTransactionOutcomes;
         }
 
         /// <summary>
-        /// Gets or Sets FeeSummary
+        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version in the returned response (if any). This matches the &#x60;from_state_version&#x60; in the request. 
         /// </summary>
-        [DataMember(Name = "fee_summary", EmitDefaultValue = true)]
-        public FeeSummary FeeSummary { get; set; }
+        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version in the returned response (if any). This matches the &#x60;from_state_version&#x60; in the request. </value>
+        [DataMember(Name = "from_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long FromStateVersion { get; set; }
 
         /// <summary>
-        /// Gets or Sets StateUpdates
+        /// An integer between &#x60;0&#x60; and &#x60;10000&#x60;, giving the total count of transactions in the returned response
         /// </summary>
-        [DataMember(Name = "state_updates", IsRequired = true, EmitDefaultValue = true)]
-        public StateUpdates StateUpdates { get; set; }
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10000&#x60;, giving the total count of transactions in the returned response</value>
+        [DataMember(Name = "count", IsRequired = true, EmitDefaultValue = true)]
+        public int Count { get; set; }
 
         /// <summary>
-        /// Gets or Sets Events
+        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the maximum state version currently committed on this node&#39;s ledger.
         /// </summary>
-        [DataMember(Name = "events", EmitDefaultValue = true)]
-        public List<Event> Events { get; set; }
+        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the maximum state version currently committed on this node&#39;s ledger.</value>
+        [DataMember(Name = "max_ledger_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long MaxLedgerStateVersion { get; set; }
 
         /// <summary>
-        /// Gets or Sets NextEpoch
+        /// A committed transaction outcomes list starting from the &#x60;from_state_version&#x60; (inclusive).
         /// </summary>
-        [DataMember(Name = "next_epoch", EmitDefaultValue = true)]
-        public NextEpoch NextEpoch { get; set; }
-
-        /// <summary>
-        /// The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)
-        /// </summary>
-        /// <value>The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)</value>
-        [DataMember(Name = "output", EmitDefaultValue = true)]
-        public List<SborData> Output { get; set; }
-
-        /// <summary>
-        /// Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)
-        /// </summary>
-        /// <value>Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)</value>
-        [DataMember(Name = "error_message", EmitDefaultValue = true)]
-        public string ErrorMessage { get; set; }
+        /// <value>A committed transaction outcomes list starting from the &#x60;from_state_version&#x60; (inclusive).</value>
+        [DataMember(Name = "committed_transaction_outcomes", IsRequired = true, EmitDefaultValue = true)]
+        public List<LtsCommittedTransactionOutcome> CommittedTransactionOutcomes { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -177,14 +155,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionReceipt {\n");
-            sb.Append("  Status: ").Append(Status).Append("\n");
-            sb.Append("  FeeSummary: ").Append(FeeSummary).Append("\n");
-            sb.Append("  StateUpdates: ").Append(StateUpdates).Append("\n");
-            sb.Append("  Events: ").Append(Events).Append("\n");
-            sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
-            sb.Append("  Output: ").Append(Output).Append("\n");
-            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
+            sb.Append("class LtsStreamAccountTransactionsBasicOutcomesResponse {\n");
+            sb.Append("  FromStateVersion: ").Append(FromStateVersion).Append("\n");
+            sb.Append("  Count: ").Append(Count).Append("\n");
+            sb.Append("  MaxLedgerStateVersion: ").Append(MaxLedgerStateVersion).Append("\n");
+            sb.Append("  CommittedTransactionOutcomes: ").Append(CommittedTransactionOutcomes).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -205,15 +180,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionReceipt);
+            return this.Equals(input as LtsStreamAccountTransactionsBasicOutcomesResponse);
         }
 
         /// <summary>
-        /// Returns true if TransactionReceipt instances are equal
+        /// Returns true if LtsStreamAccountTransactionsBasicOutcomesResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionReceipt to be compared</param>
+        /// <param name="input">Instance of LtsStreamAccountTransactionsBasicOutcomesResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionReceipt input)
+        public bool Equals(LtsStreamAccountTransactionsBasicOutcomesResponse input)
         {
             if (input == null)
             {
@@ -221,40 +196,22 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Status == input.Status ||
-                    this.Status.Equals(input.Status)
+                    this.FromStateVersion == input.FromStateVersion ||
+                    this.FromStateVersion.Equals(input.FromStateVersion)
                 ) && 
                 (
-                    this.FeeSummary == input.FeeSummary ||
-                    (this.FeeSummary != null &&
-                    this.FeeSummary.Equals(input.FeeSummary))
+                    this.Count == input.Count ||
+                    this.Count.Equals(input.Count)
                 ) && 
                 (
-                    this.StateUpdates == input.StateUpdates ||
-                    (this.StateUpdates != null &&
-                    this.StateUpdates.Equals(input.StateUpdates))
+                    this.MaxLedgerStateVersion == input.MaxLedgerStateVersion ||
+                    this.MaxLedgerStateVersion.Equals(input.MaxLedgerStateVersion)
                 ) && 
                 (
-                    this.Events == input.Events ||
-                    this.Events != null &&
-                    input.Events != null &&
-                    this.Events.SequenceEqual(input.Events)
-                ) && 
-                (
-                    this.NextEpoch == input.NextEpoch ||
-                    (this.NextEpoch != null &&
-                    this.NextEpoch.Equals(input.NextEpoch))
-                ) && 
-                (
-                    this.Output == input.Output ||
-                    this.Output != null &&
-                    input.Output != null &&
-                    this.Output.SequenceEqual(input.Output)
-                ) && 
-                (
-                    this.ErrorMessage == input.ErrorMessage ||
-                    (this.ErrorMessage != null &&
-                    this.ErrorMessage.Equals(input.ErrorMessage))
+                    this.CommittedTransactionOutcomes == input.CommittedTransactionOutcomes ||
+                    this.CommittedTransactionOutcomes != null &&
+                    input.CommittedTransactionOutcomes != null &&
+                    this.CommittedTransactionOutcomes.SequenceEqual(input.CommittedTransactionOutcomes)
                 );
         }
 
@@ -267,30 +224,12 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Status.GetHashCode();
-                if (this.FeeSummary != null)
+                hashCode = (hashCode * 59) + this.FromStateVersion.GetHashCode();
+                hashCode = (hashCode * 59) + this.Count.GetHashCode();
+                hashCode = (hashCode * 59) + this.MaxLedgerStateVersion.GetHashCode();
+                if (this.CommittedTransactionOutcomes != null)
                 {
-                    hashCode = (hashCode * 59) + this.FeeSummary.GetHashCode();
-                }
-                if (this.StateUpdates != null)
-                {
-                    hashCode = (hashCode * 59) + this.StateUpdates.GetHashCode();
-                }
-                if (this.Events != null)
-                {
-                    hashCode = (hashCode * 59) + this.Events.GetHashCode();
-                }
-                if (this.NextEpoch != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextEpoch.GetHashCode();
-                }
-                if (this.Output != null)
-                {
-                    hashCode = (hashCode * 59) + this.Output.GetHashCode();
-                }
-                if (this.ErrorMessage != null)
-                {
-                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
+                    hashCode = (hashCode * 59) + this.CommittedTransactionOutcomes.GetHashCode();
                 }
                 return hashCode;
             }

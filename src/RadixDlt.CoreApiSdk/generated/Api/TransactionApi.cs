@@ -92,6 +92,69 @@ namespace RadixDlt.CoreApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
+        /// Get Transaction Construction
+        /// </summary>
+        /// <remarks>
+        /// Returns information necessary to build a transaction
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionConstructionRequest"></param>
+        /// <returns>LtsTransactionConstructionResponse</returns>
+        LtsTransactionConstructionResponse LtsTransactionConstructionPost(LtsTransactionConstructionRequest ltsTransactionConstructionRequest);
+
+        /// <summary>
+        /// Get Transaction Construction
+        /// </summary>
+        /// <remarks>
+        /// Returns information necessary to build a transaction
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionConstructionRequest"></param>
+        /// <returns>ApiResponse of LtsTransactionConstructionResponse</returns>
+        ApiResponse<LtsTransactionConstructionResponse> LtsTransactionConstructionPostWithHttpInfo(LtsTransactionConstructionRequest ltsTransactionConstructionRequest);
+        /// <summary>
+        /// Get Transaction Status
+        /// </summary>
+        /// <remarks>
+        /// Shares the node&#39;s knowledge of any payloads associated with the given intent hash. Generally there will be a single payload for a given intent, but it&#39;s theoretically possible there may be multiple. This knowledge is summarised into a status for the intent. This summarised status in the response is likely sufficient for most clients. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionStatusRequest"></param>
+        /// <returns>LtsTransactionStatusResponse</returns>
+        LtsTransactionStatusResponse LtsTransactionStatusPost(LtsTransactionStatusRequest ltsTransactionStatusRequest);
+
+        /// <summary>
+        /// Get Transaction Status
+        /// </summary>
+        /// <remarks>
+        /// Shares the node&#39;s knowledge of any payloads associated with the given intent hash. Generally there will be a single payload for a given intent, but it&#39;s theoretically possible there may be multiple. This knowledge is summarised into a status for the intent. This summarised status in the response is likely sufficient for most clients. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionStatusRequest"></param>
+        /// <returns>ApiResponse of LtsTransactionStatusResponse</returns>
+        ApiResponse<LtsTransactionStatusResponse> LtsTransactionStatusPostWithHttpInfo(LtsTransactionStatusRequest ltsTransactionStatusRequest);
+        /// <summary>
+        /// Transaction Submit
+        /// </summary>
+        /// <remarks>
+        /// Submits a notarized transaction to the network. Returns whether the transaction submission was already included in the node&#39;s mempool. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionSubmitRequest"></param>
+        /// <returns>LtsTransactionSubmitResponse</returns>
+        LtsTransactionSubmitResponse LtsTransactionSubmitPost(LtsTransactionSubmitRequest ltsTransactionSubmitRequest);
+
+        /// <summary>
+        /// Transaction Submit
+        /// </summary>
+        /// <remarks>
+        /// Submits a notarized transaction to the network. Returns whether the transaction submission was already included in the node&#39;s mempool. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionSubmitRequest"></param>
+        /// <returns>ApiResponse of LtsTransactionSubmitResponse</returns>
+        ApiResponse<LtsTransactionSubmitResponse> LtsTransactionSubmitPostWithHttpInfo(LtsTransactionSubmitRequest ltsTransactionSubmitRequest);
+        /// <summary>
         /// Scrypto Call Preview
         /// </summary>
         /// <remarks>
@@ -226,6 +289,75 @@ namespace RadixDlt.CoreApiSdk.Api
     public interface ITransactionApiAsync : IApiAccessor
     {
         #region Asynchronous Operations
+        /// <summary>
+        /// Get Transaction Construction
+        /// </summary>
+        /// <remarks>
+        /// Returns information necessary to build a transaction
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionConstructionRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of LtsTransactionConstructionResponse</returns>
+        System.Threading.Tasks.Task<LtsTransactionConstructionResponse> LtsTransactionConstructionPostAsync(LtsTransactionConstructionRequest ltsTransactionConstructionRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Transaction Construction
+        /// </summary>
+        /// <remarks>
+        /// Returns information necessary to build a transaction
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionConstructionRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (LtsTransactionConstructionResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<LtsTransactionConstructionResponse>> LtsTransactionConstructionPostWithHttpInfoAsync(LtsTransactionConstructionRequest ltsTransactionConstructionRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Transaction Status
+        /// </summary>
+        /// <remarks>
+        /// Shares the node&#39;s knowledge of any payloads associated with the given intent hash. Generally there will be a single payload for a given intent, but it&#39;s theoretically possible there may be multiple. This knowledge is summarised into a status for the intent. This summarised status in the response is likely sufficient for most clients. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionStatusRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of LtsTransactionStatusResponse</returns>
+        System.Threading.Tasks.Task<LtsTransactionStatusResponse> LtsTransactionStatusPostAsync(LtsTransactionStatusRequest ltsTransactionStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Transaction Status
+        /// </summary>
+        /// <remarks>
+        /// Shares the node&#39;s knowledge of any payloads associated with the given intent hash. Generally there will be a single payload for a given intent, but it&#39;s theoretically possible there may be multiple. This knowledge is summarised into a status for the intent. This summarised status in the response is likely sufficient for most clients. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionStatusRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (LtsTransactionStatusResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<LtsTransactionStatusResponse>> LtsTransactionStatusPostWithHttpInfoAsync(LtsTransactionStatusRequest ltsTransactionStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Transaction Submit
+        /// </summary>
+        /// <remarks>
+        /// Submits a notarized transaction to the network. Returns whether the transaction submission was already included in the node&#39;s mempool. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionSubmitRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of LtsTransactionSubmitResponse</returns>
+        System.Threading.Tasks.Task<LtsTransactionSubmitResponse> LtsTransactionSubmitPostAsync(LtsTransactionSubmitRequest ltsTransactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Transaction Submit
+        /// </summary>
+        /// <remarks>
+        /// Submits a notarized transaction to the network. Returns whether the transaction submission was already included in the node&#39;s mempool. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionSubmitRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (LtsTransactionSubmitResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<LtsTransactionSubmitResponse>> LtsTransactionSubmitPostWithHttpInfoAsync(LtsTransactionSubmitRequest ltsTransactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Scrypto Call Preview
         /// </summary>
@@ -575,6 +707,357 @@ namespace RadixDlt.CoreApiSdk.Api
                 return _exceptionFactory;
             }
             set { _exceptionFactory = value; }
+        }
+
+        /// <summary>
+        /// Get Transaction Construction Returns information necessary to build a transaction
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionConstructionRequest"></param>
+        /// <returns>LtsTransactionConstructionResponse</returns>
+        public LtsTransactionConstructionResponse LtsTransactionConstructionPost(LtsTransactionConstructionRequest ltsTransactionConstructionRequest)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<LtsTransactionConstructionResponse> localVarResponse = LtsTransactionConstructionPostWithHttpInfo(ltsTransactionConstructionRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Transaction Construction Returns information necessary to build a transaction
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionConstructionRequest"></param>
+        /// <returns>ApiResponse of LtsTransactionConstructionResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<LtsTransactionConstructionResponse> LtsTransactionConstructionPostWithHttpInfo(LtsTransactionConstructionRequest ltsTransactionConstructionRequest)
+        {
+            // verify the required parameter 'ltsTransactionConstructionRequest' is set
+            if (ltsTransactionConstructionRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'ltsTransactionConstructionRequest' when calling TransactionApi->LtsTransactionConstructionPost");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = ltsTransactionConstructionRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<LtsTransactionConstructionResponse>("/lts/transaction/construction", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("LtsTransactionConstructionPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Transaction Construction Returns information necessary to build a transaction
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionConstructionRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of LtsTransactionConstructionResponse</returns>
+        public async System.Threading.Tasks.Task<LtsTransactionConstructionResponse> LtsTransactionConstructionPostAsync(LtsTransactionConstructionRequest ltsTransactionConstructionRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<LtsTransactionConstructionResponse> localVarResponse = await LtsTransactionConstructionPostWithHttpInfoAsync(ltsTransactionConstructionRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Transaction Construction Returns information necessary to build a transaction
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionConstructionRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (LtsTransactionConstructionResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<LtsTransactionConstructionResponse>> LtsTransactionConstructionPostWithHttpInfoAsync(LtsTransactionConstructionRequest ltsTransactionConstructionRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'ltsTransactionConstructionRequest' is set
+            if (ltsTransactionConstructionRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'ltsTransactionConstructionRequest' when calling TransactionApi->LtsTransactionConstructionPost");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = ltsTransactionConstructionRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<LtsTransactionConstructionResponse>("/lts/transaction/construction", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("LtsTransactionConstructionPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Transaction Status Shares the node&#39;s knowledge of any payloads associated with the given intent hash. Generally there will be a single payload for a given intent, but it&#39;s theoretically possible there may be multiple. This knowledge is summarised into a status for the intent. This summarised status in the response is likely sufficient for most clients. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionStatusRequest"></param>
+        /// <returns>LtsTransactionStatusResponse</returns>
+        public LtsTransactionStatusResponse LtsTransactionStatusPost(LtsTransactionStatusRequest ltsTransactionStatusRequest)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<LtsTransactionStatusResponse> localVarResponse = LtsTransactionStatusPostWithHttpInfo(ltsTransactionStatusRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Transaction Status Shares the node&#39;s knowledge of any payloads associated with the given intent hash. Generally there will be a single payload for a given intent, but it&#39;s theoretically possible there may be multiple. This knowledge is summarised into a status for the intent. This summarised status in the response is likely sufficient for most clients. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionStatusRequest"></param>
+        /// <returns>ApiResponse of LtsTransactionStatusResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<LtsTransactionStatusResponse> LtsTransactionStatusPostWithHttpInfo(LtsTransactionStatusRequest ltsTransactionStatusRequest)
+        {
+            // verify the required parameter 'ltsTransactionStatusRequest' is set
+            if (ltsTransactionStatusRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'ltsTransactionStatusRequest' when calling TransactionApi->LtsTransactionStatusPost");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = ltsTransactionStatusRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<LtsTransactionStatusResponse>("/lts/transaction/status", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("LtsTransactionStatusPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Transaction Status Shares the node&#39;s knowledge of any payloads associated with the given intent hash. Generally there will be a single payload for a given intent, but it&#39;s theoretically possible there may be multiple. This knowledge is summarised into a status for the intent. This summarised status in the response is likely sufficient for most clients. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionStatusRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of LtsTransactionStatusResponse</returns>
+        public async System.Threading.Tasks.Task<LtsTransactionStatusResponse> LtsTransactionStatusPostAsync(LtsTransactionStatusRequest ltsTransactionStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<LtsTransactionStatusResponse> localVarResponse = await LtsTransactionStatusPostWithHttpInfoAsync(ltsTransactionStatusRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Transaction Status Shares the node&#39;s knowledge of any payloads associated with the given intent hash. Generally there will be a single payload for a given intent, but it&#39;s theoretically possible there may be multiple. This knowledge is summarised into a status for the intent. This summarised status in the response is likely sufficient for most clients. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionStatusRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (LtsTransactionStatusResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<LtsTransactionStatusResponse>> LtsTransactionStatusPostWithHttpInfoAsync(LtsTransactionStatusRequest ltsTransactionStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'ltsTransactionStatusRequest' is set
+            if (ltsTransactionStatusRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'ltsTransactionStatusRequest' when calling TransactionApi->LtsTransactionStatusPost");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = ltsTransactionStatusRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<LtsTransactionStatusResponse>("/lts/transaction/status", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("LtsTransactionStatusPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Transaction Submit Submits a notarized transaction to the network. Returns whether the transaction submission was already included in the node&#39;s mempool. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionSubmitRequest"></param>
+        /// <returns>LtsTransactionSubmitResponse</returns>
+        public LtsTransactionSubmitResponse LtsTransactionSubmitPost(LtsTransactionSubmitRequest ltsTransactionSubmitRequest)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<LtsTransactionSubmitResponse> localVarResponse = LtsTransactionSubmitPostWithHttpInfo(ltsTransactionSubmitRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Transaction Submit Submits a notarized transaction to the network. Returns whether the transaction submission was already included in the node&#39;s mempool. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionSubmitRequest"></param>
+        /// <returns>ApiResponse of LtsTransactionSubmitResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<LtsTransactionSubmitResponse> LtsTransactionSubmitPostWithHttpInfo(LtsTransactionSubmitRequest ltsTransactionSubmitRequest)
+        {
+            // verify the required parameter 'ltsTransactionSubmitRequest' is set
+            if (ltsTransactionSubmitRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'ltsTransactionSubmitRequest' when calling TransactionApi->LtsTransactionSubmitPost");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = ltsTransactionSubmitRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<LtsTransactionSubmitResponse>("/lts/transaction/submit", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("LtsTransactionSubmitPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Transaction Submit Submits a notarized transaction to the network. Returns whether the transaction submission was already included in the node&#39;s mempool. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionSubmitRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of LtsTransactionSubmitResponse</returns>
+        public async System.Threading.Tasks.Task<LtsTransactionSubmitResponse> LtsTransactionSubmitPostAsync(LtsTransactionSubmitRequest ltsTransactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<LtsTransactionSubmitResponse> localVarResponse = await LtsTransactionSubmitPostWithHttpInfoAsync(ltsTransactionSubmitRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Transaction Submit Submits a notarized transaction to the network. Returns whether the transaction submission was already included in the node&#39;s mempool. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsTransactionSubmitRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (LtsTransactionSubmitResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<LtsTransactionSubmitResponse>> LtsTransactionSubmitPostWithHttpInfoAsync(LtsTransactionSubmitRequest ltsTransactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'ltsTransactionSubmitRequest' is set
+            if (ltsTransactionSubmitRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'ltsTransactionSubmitRequest' when calling TransactionApi->LtsTransactionSubmitPost");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = ltsTransactionSubmitRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<LtsTransactionSubmitResponse>("/lts/transaction/submit", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("LtsTransactionSubmitPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
         }
 
         /// <summary>

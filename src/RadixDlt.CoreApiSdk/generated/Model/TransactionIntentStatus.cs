@@ -90,118 +90,53 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// EntityReference
+    /// The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction 
     /// </summary>
-    [DataContract(Name = "EntityReference")]
-    public partial class EntityReference : IEquatable<EntityReference>
+    /// <value>The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction </value>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum TransactionIntentStatus
     {
+        /// <summary>
+        /// Enum CommittedSuccess for value: CommittedSuccess
+        /// </summary>
+        [EnumMember(Value = "CommittedSuccess")]
+        CommittedSuccess = 1,
 
         /// <summary>
-        /// Gets or Sets EntityType
+        /// Enum CommittedFailure for value: CommittedFailure
         /// </summary>
-        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
-        public EntityType EntityType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityReference" /> class.
-        /// </summary>
-        [JsonConstructorAttribute]
-        protected EntityReference() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityReference" /> class.
-        /// </summary>
-        /// <param name="entityType">entityType (required).</param>
-        /// <param name="entityIdHex">The hex-encoded bytes of the entity id. (required).</param>
-        public EntityReference(EntityType entityType = default(EntityType), string entityIdHex = default(string))
-        {
-            this.EntityType = entityType;
-            // to ensure "entityIdHex" is required (not null)
-            if (entityIdHex == null)
-            {
-                throw new ArgumentNullException("entityIdHex is a required property for EntityReference and cannot be null");
-            }
-            this.EntityIdHex = entityIdHex;
-        }
+        [EnumMember(Value = "CommittedFailure")]
+        CommittedFailure = 2,
 
         /// <summary>
-        /// The hex-encoded bytes of the entity id.
+        /// Enum PermanentRejection for value: PermanentRejection
         /// </summary>
-        /// <value>The hex-encoded bytes of the entity id.</value>
-        [DataMember(Name = "entity_id_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string EntityIdHex { get; set; }
+        [EnumMember(Value = "PermanentRejection")]
+        PermanentRejection = 3,
 
         /// <summary>
-        /// Returns the string presentation of the object
+        /// Enum InMempool for value: InMempool
         /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityReference {\n");
-            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
-            sb.Append("  EntityIdHex: ").Append(EntityIdHex).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
+        [EnumMember(Value = "InMempool")]
+        InMempool = 4,
 
         /// <summary>
-        /// Returns the JSON string presentation of the object
+        /// Enum NotSeen for value: NotSeen
         /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
+        [EnumMember(Value = "NotSeen")]
+        NotSeen = 5,
 
         /// <summary>
-        /// Returns true if objects are equal
+        /// Enum FateUncertain for value: FateUncertain
         /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as EntityReference);
-        }
+        [EnumMember(Value = "FateUncertain")]
+        FateUncertain = 6,
 
         /// <summary>
-        /// Returns true if EntityReference instances are equal
+        /// Enum FateUncertainButLikelyRejection for value: FateUncertainButLikelyRejection
         /// </summary>
-        /// <param name="input">Instance of EntityReference to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(EntityReference input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.EntityType == input.EntityType ||
-                    this.EntityType.Equals(input.EntityType)
-                ) && 
-                (
-                    this.EntityIdHex == input.EntityIdHex ||
-                    (this.EntityIdHex != null &&
-                    this.EntityIdHex.Equals(input.EntityIdHex))
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
-                if (this.EntityIdHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.EntityIdHex.GetHashCode();
-                }
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "FateUncertainButLikelyRejection")]
+        FateUncertainButLikelyRejection = 7
 
     }
 

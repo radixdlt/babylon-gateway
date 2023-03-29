@@ -95,6 +95,12 @@ namespace RadixDlt.CoreApiSdk.Model
     [DataContract(Name = "LocalMethodReference")]
     public partial class LocalMethodReference : IEquatable<LocalMethodReference>
     {
+
+        /// <summary>
+        /// Gets or Sets Module
+        /// </summary>
+        [DataMember(Name = "module", IsRequired = true, EmitDefaultValue = true)]
+        public ModuleType Module { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalMethodReference" /> class.
         /// </summary>
@@ -103,9 +109,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalMethodReference" /> class.
         /// </summary>
-        /// <param name="name">name (required).</param>
-        public LocalMethodReference(string name = default(string))
+        /// <param name="module">module (required).</param>
+        /// <param name="name">The name of the method (required).</param>
+        public LocalMethodReference(ModuleType module = default(ModuleType), string name = default(string))
         {
+            this.Module = module;
             // to ensure "name" is required (not null)
             if (name == null)
             {
@@ -115,8 +123,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets Name
+        /// The name of the method
         /// </summary>
+        /// <value>The name of the method</value>
         [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
         public string Name { get; set; }
 
@@ -128,6 +137,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class LocalMethodReference {\n");
+            sb.Append("  Module: ").Append(Module).Append("\n");
             sb.Append("  Name: ").Append(Name).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -165,6 +175,10 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.Module == input.Module ||
+                    this.Module.Equals(input.Module)
+                ) && 
+                (
                     this.Name == input.Name ||
                     (this.Name != null &&
                     this.Name.Equals(input.Name))
@@ -180,6 +194,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Module.GetHashCode();
                 if (this.Name != null)
                 {
                     hashCode = (hashCode * 59) + this.Name.GetHashCode();

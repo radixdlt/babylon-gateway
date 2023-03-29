@@ -84,72 +84,45 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionStatusResponse
+    /// LtsTransactionSubmitErrorResponse
     /// </summary>
-    [DataContract(Name = "TransactionStatusResponse")]
-    public partial class TransactionStatusResponse : IEquatable<TransactionStatusResponse>
+    [DataContract(Name = "LtsTransactionSubmitErrorResponse")]
+    [JsonConverter(typeof(JsonSubtypes), "error_type")]
+    [JsonSubtypes.KnownSubType(typeof(BasicErrorResponse), "Basic")]
+    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitErrorResponse), "LtsTransactionSubmit")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitErrorResponse), "TransactionSubmit")]
+    public partial class LtsTransactionSubmitErrorResponse : ErrorResponse, IEquatable<LtsTransactionSubmitErrorResponse>
     {
-
         /// <summary>
-        /// Gets or Sets IntentStatus
-        /// </summary>
-        [DataMember(Name = "intent_status", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionIntentStatus IntentStatus { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionStatusResponse" /> class.
+        /// Initializes a new instance of the <see cref="LtsTransactionSubmitErrorResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionStatusResponse() { }
+        protected LtsTransactionSubmitErrorResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionStatusResponse" /> class.
+        /// Initializes a new instance of the <see cref="LtsTransactionSubmitErrorResponse" /> class.
         /// </summary>
-        /// <param name="intentStatus">intentStatus (required).</param>
-        /// <param name="statusDescription">An explanation as to why the intent status is resolved as it is.  (required).</param>
-        /// <param name="invalidFromEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the intent status is InMempool or Unknown and we know about a payload. .</param>
-        /// <param name="knownPayloads">knownPayloads (required).</param>
-        public TransactionStatusResponse(TransactionIntentStatus intentStatus = default(TransactionIntentStatus), string statusDescription = default(string), long invalidFromEpoch = default(long), List<TransactionPayloadStatus> knownPayloads = default(List<TransactionPayloadStatus>))
+        /// <param name="details">details.</param>
+        /// <param name="errorType">errorType (required) (default to ErrorResponseType.LtsTransactionSubmit).</param>
+        /// <param name="code">A numeric code corresponding to the given HTTP error code. (required).</param>
+        /// <param name="message">A human-readable error message. (required).</param>
+        /// <param name="traceId">A GUID to be used when reporting errors, to allow correlation with the Core API&#39;s error logs, in the case where the Core API details are hidden..</param>
+        public LtsTransactionSubmitErrorResponse(LtsTransactionSubmitErrorDetails details = default(LtsTransactionSubmitErrorDetails), ErrorResponseType errorType = ErrorResponseType.LtsTransactionSubmit, int code = default(int), string message = default(string), string traceId = default(string)) : base(errorType, code, message, traceId)
         {
-            this.IntentStatus = intentStatus;
-            // to ensure "statusDescription" is required (not null)
-            if (statusDescription == null)
-            {
-                throw new ArgumentNullException("statusDescription is a required property for TransactionStatusResponse and cannot be null");
-            }
-            this.StatusDescription = statusDescription;
-            // to ensure "knownPayloads" is required (not null)
-            if (knownPayloads == null)
-            {
-                throw new ArgumentNullException("knownPayloads is a required property for TransactionStatusResponse and cannot be null");
-            }
-            this.KnownPayloads = knownPayloads;
-            this.InvalidFromEpoch = invalidFromEpoch;
+            this.Details = details;
         }
 
         /// <summary>
-        /// An explanation as to why the intent status is resolved as it is. 
+        /// Gets or Sets Details
         /// </summary>
-        /// <value>An explanation as to why the intent status is resolved as it is. </value>
-        [DataMember(Name = "status_description", IsRequired = true, EmitDefaultValue = true)]
-        public string StatusDescription { get; set; }
-
-        /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the intent status is InMempool or Unknown and we know about a payload. 
-        /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the intent status is InMempool or Unknown and we know about a payload. </value>
-        [DataMember(Name = "invalid_from_epoch", EmitDefaultValue = true)]
-        public long InvalidFromEpoch { get; set; }
-
-        /// <summary>
-        /// Gets or Sets KnownPayloads
-        /// </summary>
-        [DataMember(Name = "known_payloads", IsRequired = true, EmitDefaultValue = true)]
-        public List<TransactionPayloadStatus> KnownPayloads { get; set; }
+        [DataMember(Name = "details", EmitDefaultValue = true)]
+        public LtsTransactionSubmitErrorDetails Details { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -158,11 +131,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionStatusResponse {\n");
-            sb.Append("  IntentStatus: ").Append(IntentStatus).Append("\n");
-            sb.Append("  StatusDescription: ").Append(StatusDescription).Append("\n");
-            sb.Append("  InvalidFromEpoch: ").Append(InvalidFromEpoch).Append("\n");
-            sb.Append("  KnownPayloads: ").Append(KnownPayloads).Append("\n");
+            sb.Append("class LtsTransactionSubmitErrorResponse {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  Details: ").Append(Details).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -171,7 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -183,39 +154,25 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionStatusResponse);
+            return this.Equals(input as LtsTransactionSubmitErrorResponse);
         }
 
         /// <summary>
-        /// Returns true if TransactionStatusResponse instances are equal
+        /// Returns true if LtsTransactionSubmitErrorResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionStatusResponse to be compared</param>
+        /// <param name="input">Instance of LtsTransactionSubmitErrorResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionStatusResponse input)
+        public bool Equals(LtsTransactionSubmitErrorResponse input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.IntentStatus == input.IntentStatus ||
-                    this.IntentStatus.Equals(input.IntentStatus)
-                ) && 
-                (
-                    this.StatusDescription == input.StatusDescription ||
-                    (this.StatusDescription != null &&
-                    this.StatusDescription.Equals(input.StatusDescription))
-                ) && 
-                (
-                    this.InvalidFromEpoch == input.InvalidFromEpoch ||
-                    this.InvalidFromEpoch.Equals(input.InvalidFromEpoch)
-                ) && 
-                (
-                    this.KnownPayloads == input.KnownPayloads ||
-                    this.KnownPayloads != null &&
-                    input.KnownPayloads != null &&
-                    this.KnownPayloads.SequenceEqual(input.KnownPayloads)
+                    this.Details == input.Details ||
+                    (this.Details != null &&
+                    this.Details.Equals(input.Details))
                 );
         }
 
@@ -227,16 +184,10 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.IntentStatus.GetHashCode();
-                if (this.StatusDescription != null)
+                int hashCode = base.GetHashCode();
+                if (this.Details != null)
                 {
-                    hashCode = (hashCode * 59) + this.StatusDescription.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.InvalidFromEpoch.GetHashCode();
-                if (this.KnownPayloads != null)
-                {
-                    hashCode = (hashCode * 59) + this.KnownPayloads.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
                 }
                 return hashCode;
             }

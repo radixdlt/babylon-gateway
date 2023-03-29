@@ -105,7 +105,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum TransactionSubmit for value: TransactionSubmit
         /// </summary>
         [EnumMember(Value = "TransactionSubmit")]
-        TransactionSubmit = 2
+        TransactionSubmit = 2,
+
+        /// <summary>
+        /// Enum LtsTransactionSubmit for value: LtsTransactionSubmit
+        /// </summary>
+        [EnumMember(Value = "LtsTransactionSubmit")]
+        LtsTransactionSubmit = 3
 
     }
 

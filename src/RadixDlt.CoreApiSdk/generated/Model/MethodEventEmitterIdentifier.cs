@@ -84,72 +84,54 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionStatusResponse
+    /// MethodEventEmitterIdentifier
     /// </summary>
-    [DataContract(Name = "TransactionStatusResponse")]
-    public partial class TransactionStatusResponse : IEquatable<TransactionStatusResponse>
+    [DataContract(Name = "MethodEventEmitterIdentifier")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(FunctionEventEmitterIdentifier), "Function")]
+    [JsonSubtypes.KnownSubType(typeof(MethodEventEmitterIdentifier), "Method")]
+    public partial class MethodEventEmitterIdentifier : EventEmitterIdentifier, IEquatable<MethodEventEmitterIdentifier>
     {
 
         /// <summary>
-        /// Gets or Sets IntentStatus
+        /// Gets or Sets ModuleType
         /// </summary>
-        [DataMember(Name = "intent_status", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionIntentStatus IntentStatus { get; set; }
+        [DataMember(Name = "module_type", IsRequired = true, EmitDefaultValue = true)]
+        public ModuleType ModuleType { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionStatusResponse" /> class.
+        /// Initializes a new instance of the <see cref="MethodEventEmitterIdentifier" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionStatusResponse() { }
+        protected MethodEventEmitterIdentifier() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionStatusResponse" /> class.
+        /// Initializes a new instance of the <see cref="MethodEventEmitterIdentifier" /> class.
         /// </summary>
-        /// <param name="intentStatus">intentStatus (required).</param>
-        /// <param name="statusDescription">An explanation as to why the intent status is resolved as it is.  (required).</param>
-        /// <param name="invalidFromEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the intent status is InMempool or Unknown and we know about a payload. .</param>
-        /// <param name="knownPayloads">knownPayloads (required).</param>
-        public TransactionStatusResponse(TransactionIntentStatus intentStatus = default(TransactionIntentStatus), string statusDescription = default(string), long invalidFromEpoch = default(long), List<TransactionPayloadStatus> knownPayloads = default(List<TransactionPayloadStatus>))
+        /// <param name="entity">entity (required).</param>
+        /// <param name="moduleType">moduleType (required).</param>
+        /// <param name="type">type (required) (default to EventEmitterIdentifierType.Method).</param>
+        public MethodEventEmitterIdentifier(EntityReference entity = default(EntityReference), ModuleType moduleType = default(ModuleType), EventEmitterIdentifierType type = EventEmitterIdentifierType.Method) : base(type)
         {
-            this.IntentStatus = intentStatus;
-            // to ensure "statusDescription" is required (not null)
-            if (statusDescription == null)
+            // to ensure "entity" is required (not null)
+            if (entity == null)
             {
-                throw new ArgumentNullException("statusDescription is a required property for TransactionStatusResponse and cannot be null");
+                throw new ArgumentNullException("entity is a required property for MethodEventEmitterIdentifier and cannot be null");
             }
-            this.StatusDescription = statusDescription;
-            // to ensure "knownPayloads" is required (not null)
-            if (knownPayloads == null)
-            {
-                throw new ArgumentNullException("knownPayloads is a required property for TransactionStatusResponse and cannot be null");
-            }
-            this.KnownPayloads = knownPayloads;
-            this.InvalidFromEpoch = invalidFromEpoch;
+            this.Entity = entity;
+            this.ModuleType = moduleType;
         }
 
         /// <summary>
-        /// An explanation as to why the intent status is resolved as it is. 
+        /// Gets or Sets Entity
         /// </summary>
-        /// <value>An explanation as to why the intent status is resolved as it is. </value>
-        [DataMember(Name = "status_description", IsRequired = true, EmitDefaultValue = true)]
-        public string StatusDescription { get; set; }
-
-        /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the intent status is InMempool or Unknown and we know about a payload. 
-        /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the intent status is InMempool or Unknown and we know about a payload. </value>
-        [DataMember(Name = "invalid_from_epoch", EmitDefaultValue = true)]
-        public long InvalidFromEpoch { get; set; }
-
-        /// <summary>
-        /// Gets or Sets KnownPayloads
-        /// </summary>
-        [DataMember(Name = "known_payloads", IsRequired = true, EmitDefaultValue = true)]
-        public List<TransactionPayloadStatus> KnownPayloads { get; set; }
+        [DataMember(Name = "entity", IsRequired = true, EmitDefaultValue = true)]
+        public EntityReference Entity { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -158,11 +140,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionStatusResponse {\n");
-            sb.Append("  IntentStatus: ").Append(IntentStatus).Append("\n");
-            sb.Append("  StatusDescription: ").Append(StatusDescription).Append("\n");
-            sb.Append("  InvalidFromEpoch: ").Append(InvalidFromEpoch).Append("\n");
-            sb.Append("  KnownPayloads: ").Append(KnownPayloads).Append("\n");
+            sb.Append("class MethodEventEmitterIdentifier {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  Entity: ").Append(Entity).Append("\n");
+            sb.Append("  ModuleType: ").Append(ModuleType).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -171,7 +152,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -183,39 +164,29 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionStatusResponse);
+            return this.Equals(input as MethodEventEmitterIdentifier);
         }
 
         /// <summary>
-        /// Returns true if TransactionStatusResponse instances are equal
+        /// Returns true if MethodEventEmitterIdentifier instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionStatusResponse to be compared</param>
+        /// <param name="input">Instance of MethodEventEmitterIdentifier to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionStatusResponse input)
+        public bool Equals(MethodEventEmitterIdentifier input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.IntentStatus == input.IntentStatus ||
-                    this.IntentStatus.Equals(input.IntentStatus)
-                ) && 
+                    this.Entity == input.Entity ||
+                    (this.Entity != null &&
+                    this.Entity.Equals(input.Entity))
+                ) && base.Equals(input) && 
                 (
-                    this.StatusDescription == input.StatusDescription ||
-                    (this.StatusDescription != null &&
-                    this.StatusDescription.Equals(input.StatusDescription))
-                ) && 
-                (
-                    this.InvalidFromEpoch == input.InvalidFromEpoch ||
-                    this.InvalidFromEpoch.Equals(input.InvalidFromEpoch)
-                ) && 
-                (
-                    this.KnownPayloads == input.KnownPayloads ||
-                    this.KnownPayloads != null &&
-                    input.KnownPayloads != null &&
-                    this.KnownPayloads.SequenceEqual(input.KnownPayloads)
+                    this.ModuleType == input.ModuleType ||
+                    this.ModuleType.Equals(input.ModuleType)
                 );
         }
 
@@ -227,17 +198,12 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.IntentStatus.GetHashCode();
-                if (this.StatusDescription != null)
+                int hashCode = base.GetHashCode();
+                if (this.Entity != null)
                 {
-                    hashCode = (hashCode * 59) + this.StatusDescription.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Entity.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.InvalidFromEpoch.GetHashCode();
-                if (this.KnownPayloads != null)
-                {
-                    hashCode = (hashCode * 59) + this.KnownPayloads.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.ModuleType.GetHashCode();
                 return hashCode;
             }
         }

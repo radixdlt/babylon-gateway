@@ -90,85 +90,48 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// The transaction execution receipt
+    /// Identifier of a specific event schema.
     /// </summary>
-    [DataContract(Name = "TransactionReceipt")]
-    public partial class TransactionReceipt : IEquatable<TransactionReceipt>
+    [DataContract(Name = "EventTypeIdentifier")]
+    public partial class EventTypeIdentifier : IEquatable<EventTypeIdentifier>
     {
-
         /// <summary>
-        /// Gets or Sets Status
-        /// </summary>
-        [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionStatus Status { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
+        /// Initializes a new instance of the <see cref="EventTypeIdentifier" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionReceipt() { }
+        protected EventTypeIdentifier() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
+        /// Initializes a new instance of the <see cref="EventTypeIdentifier" /> class.
         /// </summary>
-        /// <param name="status">status (required).</param>
-        /// <param name="feeSummary">feeSummary.</param>
-        /// <param name="stateUpdates">stateUpdates (required).</param>
-        /// <param name="events">events.</param>
-        /// <param name="nextEpoch">nextEpoch.</param>
-        /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).</param>
-        /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
-        public TransactionReceipt(TransactionStatus status = default(TransactionStatus), FeeSummary feeSummary = default(FeeSummary), StateUpdates stateUpdates = default(StateUpdates), List<Event> events = default(List<Event>), NextEpoch nextEpoch = default(NextEpoch), List<SborData> output = default(List<SborData>), string errorMessage = default(string))
+        /// <param name="emitter">emitter (required).</param>
+        /// <param name="localTypeIndex">localTypeIndex (required).</param>
+        public EventTypeIdentifier(EventEmitterIdentifier emitter = default(EventEmitterIdentifier), LocalTypeIndex localTypeIndex = default(LocalTypeIndex))
         {
-            this.Status = status;
-            // to ensure "stateUpdates" is required (not null)
-            if (stateUpdates == null)
+            // to ensure "emitter" is required (not null)
+            if (emitter == null)
             {
-                throw new ArgumentNullException("stateUpdates is a required property for TransactionReceipt and cannot be null");
+                throw new ArgumentNullException("emitter is a required property for EventTypeIdentifier and cannot be null");
             }
-            this.StateUpdates = stateUpdates;
-            this.FeeSummary = feeSummary;
-            this.Events = events;
-            this.NextEpoch = nextEpoch;
-            this.Output = output;
-            this.ErrorMessage = errorMessage;
+            this.Emitter = emitter;
+            // to ensure "localTypeIndex" is required (not null)
+            if (localTypeIndex == null)
+            {
+                throw new ArgumentNullException("localTypeIndex is a required property for EventTypeIdentifier and cannot be null");
+            }
+            this.LocalTypeIndex = localTypeIndex;
         }
 
         /// <summary>
-        /// Gets or Sets FeeSummary
+        /// Gets or Sets Emitter
         /// </summary>
-        [DataMember(Name = "fee_summary", EmitDefaultValue = true)]
-        public FeeSummary FeeSummary { get; set; }
+        [DataMember(Name = "emitter", IsRequired = true, EmitDefaultValue = true)]
+        public EventEmitterIdentifier Emitter { get; set; }
 
         /// <summary>
-        /// Gets or Sets StateUpdates
+        /// Gets or Sets LocalTypeIndex
         /// </summary>
-        [DataMember(Name = "state_updates", IsRequired = true, EmitDefaultValue = true)]
-        public StateUpdates StateUpdates { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Events
-        /// </summary>
-        [DataMember(Name = "events", EmitDefaultValue = true)]
-        public List<Event> Events { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NextEpoch
-        /// </summary>
-        [DataMember(Name = "next_epoch", EmitDefaultValue = true)]
-        public NextEpoch NextEpoch { get; set; }
-
-        /// <summary>
-        /// The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)
-        /// </summary>
-        /// <value>The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)</value>
-        [DataMember(Name = "output", EmitDefaultValue = true)]
-        public List<SborData> Output { get; set; }
-
-        /// <summary>
-        /// Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)
-        /// </summary>
-        /// <value>Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)</value>
-        [DataMember(Name = "error_message", EmitDefaultValue = true)]
-        public string ErrorMessage { get; set; }
+        [DataMember(Name = "local_type_index", IsRequired = true, EmitDefaultValue = true)]
+        public LocalTypeIndex LocalTypeIndex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -177,14 +140,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionReceipt {\n");
-            sb.Append("  Status: ").Append(Status).Append("\n");
-            sb.Append("  FeeSummary: ").Append(FeeSummary).Append("\n");
-            sb.Append("  StateUpdates: ").Append(StateUpdates).Append("\n");
-            sb.Append("  Events: ").Append(Events).Append("\n");
-            sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
-            sb.Append("  Output: ").Append(Output).Append("\n");
-            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
+            sb.Append("class EventTypeIdentifier {\n");
+            sb.Append("  Emitter: ").Append(Emitter).Append("\n");
+            sb.Append("  LocalTypeIndex: ").Append(LocalTypeIndex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -205,15 +163,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionReceipt);
+            return this.Equals(input as EventTypeIdentifier);
         }
 
         /// <summary>
-        /// Returns true if TransactionReceipt instances are equal
+        /// Returns true if EventTypeIdentifier instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionReceipt to be compared</param>
+        /// <param name="input">Instance of EventTypeIdentifier to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionReceipt input)
+        public bool Equals(EventTypeIdentifier input)
         {
             if (input == null)
             {
@@ -221,40 +179,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Status == input.Status ||
-                    this.Status.Equals(input.Status)
+                    this.Emitter == input.Emitter ||
+                    (this.Emitter != null &&
+                    this.Emitter.Equals(input.Emitter))
                 ) && 
                 (
-                    this.FeeSummary == input.FeeSummary ||
-                    (this.FeeSummary != null &&
-                    this.FeeSummary.Equals(input.FeeSummary))
-                ) && 
-                (
-                    this.StateUpdates == input.StateUpdates ||
-                    (this.StateUpdates != null &&
-                    this.StateUpdates.Equals(input.StateUpdates))
-                ) && 
-                (
-                    this.Events == input.Events ||
-                    this.Events != null &&
-                    input.Events != null &&
-                    this.Events.SequenceEqual(input.Events)
-                ) && 
-                (
-                    this.NextEpoch == input.NextEpoch ||
-                    (this.NextEpoch != null &&
-                    this.NextEpoch.Equals(input.NextEpoch))
-                ) && 
-                (
-                    this.Output == input.Output ||
-                    this.Output != null &&
-                    input.Output != null &&
-                    this.Output.SequenceEqual(input.Output)
-                ) && 
-                (
-                    this.ErrorMessage == input.ErrorMessage ||
-                    (this.ErrorMessage != null &&
-                    this.ErrorMessage.Equals(input.ErrorMessage))
+                    this.LocalTypeIndex == input.LocalTypeIndex ||
+                    (this.LocalTypeIndex != null &&
+                    this.LocalTypeIndex.Equals(input.LocalTypeIndex))
                 );
         }
 
@@ -267,30 +199,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Status.GetHashCode();
-                if (this.FeeSummary != null)
+                if (this.Emitter != null)
                 {
-                    hashCode = (hashCode * 59) + this.FeeSummary.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Emitter.GetHashCode();
                 }
-                if (this.StateUpdates != null)
+                if (this.LocalTypeIndex != null)
                 {
-                    hashCode = (hashCode * 59) + this.StateUpdates.GetHashCode();
-                }
-                if (this.Events != null)
-                {
-                    hashCode = (hashCode * 59) + this.Events.GetHashCode();
-                }
-                if (this.NextEpoch != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextEpoch.GetHashCode();
-                }
-                if (this.Output != null)
-                {
-                    hashCode = (hashCode * 59) + this.Output.GetHashCode();
-                }
-                if (this.ErrorMessage != null)
-                {
-                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LocalTypeIndex.GetHashCode();
                 }
                 return hashCode;
             }

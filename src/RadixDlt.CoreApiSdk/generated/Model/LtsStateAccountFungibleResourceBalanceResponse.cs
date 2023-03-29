@@ -90,85 +90,58 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// The transaction execution receipt
+    /// LtsStateAccountFungibleResourceBalanceResponse
     /// </summary>
-    [DataContract(Name = "TransactionReceipt")]
-    public partial class TransactionReceipt : IEquatable<TransactionReceipt>
+    [DataContract(Name = "LtsStateAccountFungibleResourceBalanceResponse")]
+    public partial class LtsStateAccountFungibleResourceBalanceResponse : IEquatable<LtsStateAccountFungibleResourceBalanceResponse>
     {
-
         /// <summary>
-        /// Gets or Sets Status
-        /// </summary>
-        [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionStatus Status { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
+        /// Initializes a new instance of the <see cref="LtsStateAccountFungibleResourceBalanceResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionReceipt() { }
+        protected LtsStateAccountFungibleResourceBalanceResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
+        /// Initializes a new instance of the <see cref="LtsStateAccountFungibleResourceBalanceResponse" /> class.
         /// </summary>
-        /// <param name="status">status (required).</param>
-        /// <param name="feeSummary">feeSummary.</param>
-        /// <param name="stateUpdates">stateUpdates (required).</param>
-        /// <param name="events">events.</param>
-        /// <param name="nextEpoch">nextEpoch.</param>
-        /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).</param>
-        /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
-        public TransactionReceipt(TransactionStatus status = default(TransactionStatus), FeeSummary feeSummary = default(FeeSummary), StateUpdates stateUpdates = default(StateUpdates), List<Event> events = default(List<Event>), NextEpoch nextEpoch = default(NextEpoch), List<SborData> output = default(List<SborData>), string errorMessage = default(string))
+        /// <param name="stateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the state version at which the account was read.  (required).</param>
+        /// <param name="accountAddress">The Bech32m-encoded human readable version of the account&#39;s address (required).</param>
+        /// <param name="fungibleResourceBalance">fungibleResourceBalance (required).</param>
+        public LtsStateAccountFungibleResourceBalanceResponse(long stateVersion = default(long), string accountAddress = default(string), LtsFungibleResourceBalance fungibleResourceBalance = default(LtsFungibleResourceBalance))
         {
-            this.Status = status;
-            // to ensure "stateUpdates" is required (not null)
-            if (stateUpdates == null)
+            this.StateVersion = stateVersion;
+            // to ensure "accountAddress" is required (not null)
+            if (accountAddress == null)
             {
-                throw new ArgumentNullException("stateUpdates is a required property for TransactionReceipt and cannot be null");
+                throw new ArgumentNullException("accountAddress is a required property for LtsStateAccountFungibleResourceBalanceResponse and cannot be null");
             }
-            this.StateUpdates = stateUpdates;
-            this.FeeSummary = feeSummary;
-            this.Events = events;
-            this.NextEpoch = nextEpoch;
-            this.Output = output;
-            this.ErrorMessage = errorMessage;
+            this.AccountAddress = accountAddress;
+            // to ensure "fungibleResourceBalance" is required (not null)
+            if (fungibleResourceBalance == null)
+            {
+                throw new ArgumentNullException("fungibleResourceBalance is a required property for LtsStateAccountFungibleResourceBalanceResponse and cannot be null");
+            }
+            this.FungibleResourceBalance = fungibleResourceBalance;
         }
 
         /// <summary>
-        /// Gets or Sets FeeSummary
+        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the state version at which the account was read. 
         /// </summary>
-        [DataMember(Name = "fee_summary", EmitDefaultValue = true)]
-        public FeeSummary FeeSummary { get; set; }
+        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the state version at which the account was read. </value>
+        [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long StateVersion { get; set; }
 
         /// <summary>
-        /// Gets or Sets StateUpdates
+        /// The Bech32m-encoded human readable version of the account&#39;s address
         /// </summary>
-        [DataMember(Name = "state_updates", IsRequired = true, EmitDefaultValue = true)]
-        public StateUpdates StateUpdates { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the account&#39;s address</value>
+        [DataMember(Name = "account_address", IsRequired = true, EmitDefaultValue = true)]
+        public string AccountAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets Events
+        /// Gets or Sets FungibleResourceBalance
         /// </summary>
-        [DataMember(Name = "events", EmitDefaultValue = true)]
-        public List<Event> Events { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NextEpoch
-        /// </summary>
-        [DataMember(Name = "next_epoch", EmitDefaultValue = true)]
-        public NextEpoch NextEpoch { get; set; }
-
-        /// <summary>
-        /// The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)
-        /// </summary>
-        /// <value>The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)</value>
-        [DataMember(Name = "output", EmitDefaultValue = true)]
-        public List<SborData> Output { get; set; }
-
-        /// <summary>
-        /// Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)
-        /// </summary>
-        /// <value>Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)</value>
-        [DataMember(Name = "error_message", EmitDefaultValue = true)]
-        public string ErrorMessage { get; set; }
+        [DataMember(Name = "fungible_resource_balance", IsRequired = true, EmitDefaultValue = true)]
+        public LtsFungibleResourceBalance FungibleResourceBalance { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -177,14 +150,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionReceipt {\n");
-            sb.Append("  Status: ").Append(Status).Append("\n");
-            sb.Append("  FeeSummary: ").Append(FeeSummary).Append("\n");
-            sb.Append("  StateUpdates: ").Append(StateUpdates).Append("\n");
-            sb.Append("  Events: ").Append(Events).Append("\n");
-            sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
-            sb.Append("  Output: ").Append(Output).Append("\n");
-            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
+            sb.Append("class LtsStateAccountFungibleResourceBalanceResponse {\n");
+            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
+            sb.Append("  AccountAddress: ").Append(AccountAddress).Append("\n");
+            sb.Append("  FungibleResourceBalance: ").Append(FungibleResourceBalance).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -205,15 +174,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionReceipt);
+            return this.Equals(input as LtsStateAccountFungibleResourceBalanceResponse);
         }
 
         /// <summary>
-        /// Returns true if TransactionReceipt instances are equal
+        /// Returns true if LtsStateAccountFungibleResourceBalanceResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionReceipt to be compared</param>
+        /// <param name="input">Instance of LtsStateAccountFungibleResourceBalanceResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionReceipt input)
+        public bool Equals(LtsStateAccountFungibleResourceBalanceResponse input)
         {
             if (input == null)
             {
@@ -221,40 +190,18 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Status == input.Status ||
-                    this.Status.Equals(input.Status)
+                    this.StateVersion == input.StateVersion ||
+                    this.StateVersion.Equals(input.StateVersion)
                 ) && 
                 (
-                    this.FeeSummary == input.FeeSummary ||
-                    (this.FeeSummary != null &&
-                    this.FeeSummary.Equals(input.FeeSummary))
+                    this.AccountAddress == input.AccountAddress ||
+                    (this.AccountAddress != null &&
+                    this.AccountAddress.Equals(input.AccountAddress))
                 ) && 
                 (
-                    this.StateUpdates == input.StateUpdates ||
-                    (this.StateUpdates != null &&
-                    this.StateUpdates.Equals(input.StateUpdates))
-                ) && 
-                (
-                    this.Events == input.Events ||
-                    this.Events != null &&
-                    input.Events != null &&
-                    this.Events.SequenceEqual(input.Events)
-                ) && 
-                (
-                    this.NextEpoch == input.NextEpoch ||
-                    (this.NextEpoch != null &&
-                    this.NextEpoch.Equals(input.NextEpoch))
-                ) && 
-                (
-                    this.Output == input.Output ||
-                    this.Output != null &&
-                    input.Output != null &&
-                    this.Output.SequenceEqual(input.Output)
-                ) && 
-                (
-                    this.ErrorMessage == input.ErrorMessage ||
-                    (this.ErrorMessage != null &&
-                    this.ErrorMessage.Equals(input.ErrorMessage))
+                    this.FungibleResourceBalance == input.FungibleResourceBalance ||
+                    (this.FungibleResourceBalance != null &&
+                    this.FungibleResourceBalance.Equals(input.FungibleResourceBalance))
                 );
         }
 
@@ -267,30 +214,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Status.GetHashCode();
-                if (this.FeeSummary != null)
+                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
+                if (this.AccountAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.FeeSummary.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccountAddress.GetHashCode();
                 }
-                if (this.StateUpdates != null)
+                if (this.FungibleResourceBalance != null)
                 {
-                    hashCode = (hashCode * 59) + this.StateUpdates.GetHashCode();
-                }
-                if (this.Events != null)
-                {
-                    hashCode = (hashCode * 59) + this.Events.GetHashCode();
-                }
-                if (this.NextEpoch != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextEpoch.GetHashCode();
-                }
-                if (this.Output != null)
-                {
-                    hashCode = (hashCode * 59) + this.Output.GetHashCode();
-                }
-                if (this.ErrorMessage != null)
-                {
-                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FungibleResourceBalance.GetHashCode();
                 }
                 return hashCode;
             }

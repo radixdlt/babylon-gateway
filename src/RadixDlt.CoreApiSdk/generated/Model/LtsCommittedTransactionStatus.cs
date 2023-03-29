@@ -90,118 +90,23 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// EntityReference
+    /// The status of the transaction
     /// </summary>
-    [DataContract(Name = "EntityReference")]
-    public partial class EntityReference : IEquatable<EntityReference>
+    /// <value>The status of the transaction</value>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum LtsCommittedTransactionStatus
     {
+        /// <summary>
+        /// Enum Succeeded for value: Succeeded
+        /// </summary>
+        [EnumMember(Value = "Succeeded")]
+        Succeeded = 1,
 
         /// <summary>
-        /// Gets or Sets EntityType
+        /// Enum Failed for value: Failed
         /// </summary>
-        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
-        public EntityType EntityType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityReference" /> class.
-        /// </summary>
-        [JsonConstructorAttribute]
-        protected EntityReference() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityReference" /> class.
-        /// </summary>
-        /// <param name="entityType">entityType (required).</param>
-        /// <param name="entityIdHex">The hex-encoded bytes of the entity id. (required).</param>
-        public EntityReference(EntityType entityType = default(EntityType), string entityIdHex = default(string))
-        {
-            this.EntityType = entityType;
-            // to ensure "entityIdHex" is required (not null)
-            if (entityIdHex == null)
-            {
-                throw new ArgumentNullException("entityIdHex is a required property for EntityReference and cannot be null");
-            }
-            this.EntityIdHex = entityIdHex;
-        }
-
-        /// <summary>
-        /// The hex-encoded bytes of the entity id.
-        /// </summary>
-        /// <value>The hex-encoded bytes of the entity id.</value>
-        [DataMember(Name = "entity_id_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string EntityIdHex { get; set; }
-
-        /// <summary>
-        /// Returns the string presentation of the object
-        /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityReference {\n");
-            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
-            sb.Append("  EntityIdHex: ").Append(EntityIdHex).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Returns the JSON string presentation of the object
-        /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Returns true if objects are equal
-        /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as EntityReference);
-        }
-
-        /// <summary>
-        /// Returns true if EntityReference instances are equal
-        /// </summary>
-        /// <param name="input">Instance of EntityReference to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(EntityReference input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.EntityType == input.EntityType ||
-                    this.EntityType.Equals(input.EntityType)
-                ) && 
-                (
-                    this.EntityIdHex == input.EntityIdHex ||
-                    (this.EntityIdHex != null &&
-                    this.EntityIdHex.Equals(input.EntityIdHex))
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
-                if (this.EntityIdHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.EntityIdHex.GetHashCode();
-                }
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "Failed")]
+        Failed = 2
 
     }
 

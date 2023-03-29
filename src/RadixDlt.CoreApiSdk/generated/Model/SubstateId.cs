@@ -128,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="SubstateId" /> class.
         /// </summary>
         /// <param name="entityType">entityType (required).</param>
-        /// <param name="entityIdHex">The hex-encoded bytes of the entity id (required).</param>
+        /// <param name="entityIdHex">The hex-encoded bytes of the entity id. (required).</param>
         /// <param name="moduleType">moduleType (required).</param>
         /// <param name="substateType">substateType (required).</param>
         /// <param name="substateKeyType">substateKeyType (required).</param>
@@ -154,9 +154,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The hex-encoded bytes of the entity id
+        /// The hex-encoded bytes of the entity id.
         /// </summary>
-        /// <value>The hex-encoded bytes of the entity id</value>
+        /// <value>The hex-encoded bytes of the entity id.</value>
         [DataMember(Name = "entity_id_hex", IsRequired = true, EmitDefaultValue = true)]
         public string EntityIdHex { get; set; }
 
