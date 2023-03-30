@@ -83,7 +83,7 @@ public partial class LedgerTransaction
     // This is rcnet quick fix for returning transaction hex that's not boxed in user/validator/system enum by node.
     // Boxed payload is not supported by the toolkit and client's can't actually do anything about it.
     // Needs revisiting.
-    public byte[] GetUnboxedPayloadBytes()
+    public byte[] GetUnwrappedPayloadBytes()
     {
         return this switch
         {
