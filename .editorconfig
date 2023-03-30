@@ -261,6 +261,8 @@ dotnet_diagnostic.CS0618.severity = suggestion
 # Broken with C#10
 
 dotnet_diagnostic.SA1313.severity = none # SA1313ParameterNamesMustBeginWithLowerCaseLetter - breaks with record structs
+dotnet_diagnostic.SA1011.severity = none # SA1011ClosingSquareBracketsMustBeSpacedCorrectly - breaks with case guards "when xyz is [X]:"
+dotnet_diagnostic.SA1024.severity = none # SA1024ColonsMustBeSpacedCorrectly - breaks with case guards "when xyz is [X]:"
 
 # Documentation - the net effect is to recommend public docs with a summary tag (via CS1591 and SA1604), but not be too critical of the rest
 dotnet_diagnostic.SA1600.severity = none # SA1600ElementsMustBeDocumented - Duplicates CS1591 - let's just use CS1591 instead

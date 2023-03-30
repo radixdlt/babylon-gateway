@@ -64,13 +64,20 @@
 
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.RadixEngineToolkit.Model.Exchange;
 using RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
+using Array = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Array;
+using Decimal = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Decimal;
+using Enum = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Enum;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using String = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.String;
 using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
+using Tuple = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Tuple;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
@@ -80,12 +87,12 @@ internal static class ScryptoSborUtils
     {
         var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(Convert.FromHexString(input), networkId);
 
-        if (result is not ToolkitModel.Exchange.SborDecodeResponse.ScryptoSbor scryptoSbor)
+        if (result is not SborDecodeResponse.ScryptoSbor scryptoSbor)
         {
             throw new UnreachableException("Expected ScryptoSbor response");
         }
 
-        if (scryptoSbor.Value is not ToolkitModel.Value.ScryptoSbor.String value)
+        if (scryptoSbor.Value is not String value)
         {
             throw new UnreachableException("Expected ScryptoSbor.String");
         }
@@ -97,12 +104,12 @@ internal static class ScryptoSborUtils
     {
         var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(rawScryptoSbor, networkId);
 
-        if (result is not ToolkitModel.Exchange.SborDecodeResponse.ScryptoSbor scryptoSbor)
+        if (result is not SborDecodeResponse.ScryptoSbor scryptoSbor)
         {
             throw new UnreachableException("Expected ScryptoSbor response");
         }
 
-        if (scryptoSbor.Value is not ToolkitModel.Value.ScryptoSbor.Enum outerEnum)
+        if (scryptoSbor.Value is not Enum outerEnum)
         {
             throw new UnreachableException("Expected ScryptoSbor.Enum");
         }
@@ -112,47 +119,19 @@ internal static class ScryptoSborUtils
 
         switch (outerEnum.Variant)
         {
-            case 0:
-            {
-                if (outerEnum.Fields is [ToolkitModel.Value.ScryptoSbor.Enum innerEnum])
+            case 0 when outerEnum.Fields is [Enum innerEnum]:
+                asString = GetSimpleStringOfMetadataValue(innerEnum);
+                break;
+            case 1 when outerEnum.Fields is [Array innerArray]:
+                if (innerArray.ElementKind == ValueKind.Enum)
                 {
-                    if (innerEnum.Variant == 0 && innerEnum.Fields is [ToolkitModel.Value.ScryptoSbor.String value])
-                    {
-                        asString = value.Value;
-                    }
+                    // For RCNet, Dashboard would rather have asString also populated for arrays
+                    // For Mainnet, we may wish to give more structured metadata values from the Gateway API
+                    asStringCollection = innerArray.Elements.OfType<Enum>().Select(GetSimpleStringOfMetadataValue).ToList();
+                    asString = string.Join(", ", asStringCollection);
                 }
 
                 break;
-            }
-
-            case 1:
-            {
-                if (outerEnum.Fields is [ToolkitModel.Value.ScryptoSbor.Array innerArray] && innerArray.ElementKind == ValueKind.Enum)
-                {
-                    var isValid = true;
-                    var asStringCollectionCandidate = new List<string>();
-
-                    foreach (var innerEnum in innerArray.Elements.Cast<ToolkitModel.Value.ScryptoSbor.Enum>())
-                    {
-                        if (innerEnum.Variant == 0 && innerEnum.Fields is [ToolkitModel.Value.ScryptoSbor.String value])
-                        {
-                            asStringCollectionCandidate.Add(value.Value);
-                        }
-                        else
-                        {
-                            isValid = false;
-                            break;
-                        }
-                    }
-
-                    if (isValid)
-                    {
-                        asStringCollection = asStringCollectionCandidate;
-                    }
-                }
-
-                break;
-            }
         }
 
         return new GatewayModel.EntityMetadataItemValue(
@@ -162,11 +141,99 @@ internal static class ScryptoSborUtils
             asStringCollection: asStringCollection);
     }
 
+    public static string GetSimpleStringOfMetadataValue(Enum variantEnum)
+    {
+        switch (variantEnum.Variant)
+        {
+            // See https://github.com/radixdlt/radixdlt-scrypto/blob/release/rcnet-v1/transaction/examples/metadata/metadata.rtm
+            case 0 when variantEnum.Fields is [String value]:
+                return value.Value;
+            case 1 when variantEnum.Fields is [Bool value]:
+                return value.Value.ToString();
+            case 2 when variantEnum.Fields is [U8 value]:
+                return value.Value.ToString();
+            case 3 when variantEnum.Fields is [U32 value]:
+                return value.Value.ToString();
+            case 4 when variantEnum.Fields is [U64 value]:
+                return value.Value.ToString();
+            case 5 when variantEnum.Fields is [I32 value]:
+                return value.Value.ToString();
+            case 6 when variantEnum.Fields is [I64 value]:
+                return value.Value.ToString();
+            case 7 when variantEnum.Fields is [Decimal value]:
+                return value.Value;
+            case 8 when variantEnum.Fields is [Address value]:
+                return value.TmpAddress;
+            case 9 when variantEnum.Fields is [Enum publicKeyEnum]:
+                var keyName = publicKeyEnum.Variant switch
+                {
+                    0 => "EcdsaSecp256k1PublicKey",
+                    1 => "EddsaEd25519PublicKey",
+                    _ => $"PublicKeyType[{publicKeyEnum.Variant}]", // Fallback
+                };
+
+                if (publicKeyEnum.Fields is [Array keyBytes])
+                {
+                    try
+                    {
+                        var bytes = keyBytes.Elements.Cast<U8>().Select(byteValue => byteValue.Value).ToArray();
+                        return $"{keyName}(\"{Convert.ToHexString(bytes).ToLowerInvariant()}\")";
+                    }
+                    catch (InvalidCastException)
+                    {
+                        // Fallthrough to default
+                    }
+                }
+
+                break;
+            case 10 when variantEnum.Fields is [Tuple nonFungibleGlobalId]:
+                if (nonFungibleGlobalId.Elements is [Address nonFungibleResourceAddress, NonFungibleLocalId nonFungibleLocalId])
+                {
+                    return nonFungibleResourceAddress.TmpAddress + ":" + FormatNonFungibleLocalId(nonFungibleLocalId.Value);
+                }
+
+                break;
+            case 11 when variantEnum.Fields is [NonFungibleLocalId value]:
+                return FormatNonFungibleLocalId(value.Value);
+            case 12 when variantEnum.Fields is [Tuple instant]:
+                if (instant.Elements is [I64 unixTimestampSeconds])
+                {
+                    return DateTimeOffset.FromUnixTimeSeconds(unixTimestampSeconds.Value).AsUtcIsoDateAtSecondsPrecisionString();
+                }
+
+                break;
+            case 13 when variantEnum.Fields is [String url]:
+                return url.Value;
+        }
+
+        return "[UnrecognizedValue]";
+    }
+
+    public static String FormatNonFungibleLocalId(ToolkitModel.INonFungibleLocalId nonFungibleLocalId)
+    {
+        switch (nonFungibleLocalId)
+        {
+            case ToolkitModel.INonFungibleLocalId.Bytes bytes:
+                return $"[{Convert.ToHexString(bytes.Value).ToLowerInvariant()}]";
+            case ToolkitModel.INonFungibleLocalId.Integer integer:
+                return $"#{integer.Value}#";
+            case ToolkitModel.INonFungibleLocalId.String s:
+                return $"<{s.Value}>";
+            case ToolkitModel.INonFungibleLocalId.UUID uuid:
+                // Checked that this matches the representation in the Engine.
+                // EG 5c220001220b01c0031c8cb574c04c44b2aa87263a00000000 should be {1c8cb574-c04c-44b2-aa87-263a00000000}
+                // This should probably be lifted into the toolkit wrapper and a Guid be wrapped.
+                return Guid.ParseExact(Convert.ToHexString(BigInteger.Parse(uuid.Value).ToByteArray(isUnsigned: true, isBigEndian: true)), "N").ToString("B");
+            default:
+                throw new ArgumentOutOfRangeException(nameof(nonFungibleLocalId));
+        }
+    }
+
     public static GatewayModel.ScryptoSborValue NonFungibleDataToGatewayScryptoSbor(byte[] rawScryptoSbor, byte networkId)
     {
         var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(rawScryptoSbor, networkId);
 
-        if (result is not ToolkitModel.Exchange.SborDecodeResponse.ScryptoSbor scryptoSbor)
+        if (result is not SborDecodeResponse.ScryptoSbor scryptoSbor)
         {
             throw new UnreachableException("Expected ScryptoSbor response");
         }
