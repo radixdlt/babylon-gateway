@@ -122,7 +122,6 @@ jobs:
         env:
           NAMESPACE: "ng-mardunet"
           EVENT_TYPE: "ng_babylon_mardunet"
-        if: steps.changed-files.outputs.any_changed == 'true'
         run: |
           curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/${{secrets.DISPATCH_REPO}}/dispatches' \
             --header 'Accept: application/vnd.github.v3+json' \
@@ -132,6 +131,7 @@ jobs:
                 "event_type": "${{env.EVENT_TYPE}}",
                 "client_payload": {
                   "namespace_postfix": "${{env.NAMESPACE}}",
+                  "ci_env_changed": "${{steps.changed-files.outputs.any_changed}}",
                   "data_aggregator_image_tag": "${{ needs.setup-tags.outputs.data-aggregator-tag }}",
                   "gateway_api_image_tag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
                   "database_migrations_image_tag": "${{ needs.setup-tags.outputs.database-migrations-tag }}",
