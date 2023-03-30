@@ -217,7 +217,7 @@ internal static class ScryptoSborUtils
         return "[UnrecognizedMetadataValue]";
     }
 
-    public static String FormatNonFungibleLocalId(ToolkitModel.INonFungibleLocalId nonFungibleLocalId)
+    public static string FormatNonFungibleLocalId(ToolkitModel.INonFungibleLocalId nonFungibleLocalId)
     {
         switch (nonFungibleLocalId)
         {
