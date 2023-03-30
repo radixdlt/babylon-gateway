@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <LangVersion>11</LangVersion>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\RadixDlt.NetworkGateway.Abstractions\RadixDlt.NetworkGateway.Abstractions.csproj" />
     <ProjectReference Include="..\RadixDlt.NetworkGateway.DataAggregator\RadixDlt.NetworkGateway.DataAggregator.csproj" />
