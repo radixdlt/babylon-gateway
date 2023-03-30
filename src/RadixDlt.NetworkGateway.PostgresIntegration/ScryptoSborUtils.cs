@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.RadixEngineToolkit.Model.Exchange;
@@ -100,7 +101,7 @@ internal static class ScryptoSborUtils
         return value;
     }
 
-    public static GatewayModel.EntityMetadataItemValue MetadataValueToGatewayMetadataItemValue(byte[] rawScryptoSbor, byte networkId)
+    public static GatewayModel.EntityMetadataItemValue MetadataValueToGatewayMetadataItemValue(ILogger logger, byte[] rawScryptoSbor, byte networkId)
     {
         var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(rawScryptoSbor, networkId);
 
@@ -109,7 +110,7 @@ internal static class ScryptoSborUtils
             throw new UnreachableException("Expected ScryptoSbor response");
         }
 
-        if (scryptoSbor.Value is not Enum outerEnum)
+        if (scryptoSbor.Value is not Enum metadataEntry)
         {
             throw new UnreachableException("Expected ScryptoSbor.Enum");
         }
@@ -117,31 +118,37 @@ internal static class ScryptoSborUtils
         string? asString = null;
         List<string>? asStringCollection = null;
 
-        switch (outerEnum.Variant)
+        switch (metadataEntry.Variant)
         {
-            case 0 when outerEnum.Fields is [Enum innerEnum]:
-                asString = GetSimpleStringOfMetadataValue(innerEnum);
+            case 0 when metadataEntry.Fields is [Enum variantEnum]:
+                asString = GetSimpleStringOfMetadataValue(logger, variantEnum);
                 break;
-            case 1 when outerEnum.Fields is [Array innerArray]:
+            case 1 when metadataEntry.Fields is [Array innerArray]:
                 if (innerArray.ElementKind == ValueKind.Enum)
                 {
                     // For RCNet, Dashboard would rather have asString also populated for arrays
                     // For Mainnet, we may wish to give more structured metadata values from the Gateway API
-                    asStringCollection = innerArray.Elements.OfType<Enum>().Select(GetSimpleStringOfMetadataValue).ToList();
+                    asStringCollection = innerArray.Elements.OfType<Enum>().Select(variantEnum => GetSimpleStringOfMetadataValue(logger, variantEnum)).ToList();
                     asString = string.Join(", ", asStringCollection);
                 }
 
                 break;
         }
 
+        if (asString == null)
+        {
+            logger.LogWarning("Unknown MetadataEntry variant: {}", metadataEntry.Variant);
+            asString = "[UnrecognizedMetadataEntry]";
+        }
+
         return new GatewayModel.EntityMetadataItemValue(
             rawHex: rawScryptoSbor.ToHex(),
-            rawJson: new JRaw(RadixEngineToolkit.RadixEngineToolkit.ScryptoSborEncodeJson(outerEnum)),
+            rawJson: new JRaw(RadixEngineToolkit.RadixEngineToolkit.ScryptoSborEncodeJson(metadataEntry)),
             asString: asString,
             asStringCollection: asStringCollection);
     }
 
-    public static string GetSimpleStringOfMetadataValue(Enum variantEnum)
+    public static string GetSimpleStringOfMetadataValue(ILogger logger, Enum variantEnum)
     {
         switch (variantEnum.Variant)
         {
@@ -189,7 +196,7 @@ internal static class ScryptoSborUtils
             case 10 when variantEnum.Fields is [Tuple nonFungibleGlobalId]:
                 if (nonFungibleGlobalId.Elements is [Address nonFungibleResourceAddress, NonFungibleLocalId nonFungibleLocalId])
                 {
-                    return nonFungibleResourceAddress.TmpAddress + ":" + FormatNonFungibleLocalId(nonFungibleLocalId.Value);
+                    return $"{nonFungibleResourceAddress.TmpAddress}:{FormatNonFungibleLocalId(nonFungibleLocalId.Value)}";
                 }
 
                 break;
@@ -206,7 +213,8 @@ internal static class ScryptoSborUtils
                 return url.Value;
         }
 
-        return "[UnrecognizedValue]";
+        logger.LogWarning("MetadataValue variant could not be mapped successfully: {}", variantEnum.Variant);
+        return "[UnrecognizedMetadataValue]";
     }
 
     public static String FormatNonFungibleLocalId(ToolkitModel.INonFungibleLocalId nonFungibleLocalId)
