@@ -524,7 +524,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
                 ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
                 ledgerTransaction.KindFilterConstraint = kindFilterConstraint;
-                ledgerTransaction.RawPayload = commitedTransaction.LedgerTransaction.GetPayloadBytes();
+                ledgerTransaction.RawPayload = commitedTransaction.LedgerTransaction.GetUnwrappedPayloadBytes();
                 ledgerTransaction.EngineReceipt = commitedTransaction.Receipt.ToJson();
 
                 ledgerTransactionsToAdd.Add(ledgerTransaction);
