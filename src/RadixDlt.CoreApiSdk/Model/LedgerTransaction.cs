@@ -78,4 +78,19 @@ public partial class LedgerTransaction
             _ => throw new UnreachableException($"Didn't expect {this.GetType().Name} type"),
         };
     }
+
+    // TODO:
+    // This is rcnet quick fix for returning transaction hex that's not boxed in user/validator/system enum by node.
+    // Boxed payload is not supported by the toolkit and client's can't actually do anything about it.
+    // Needs revisiting.
+    public byte[] GetUnboxedPayloadBytes()
+    {
+        return this switch
+        {
+            UserLedgerTransaction ult => ult.NotarizedTransaction.GetPayloadBytes(),
+            ValidatorLedgerTransaction vlt => vlt.GetPayloadBytes(),
+            SystemLedgerTransaction slt => slt.SystemTransaction.GetPayloadBytes(),
+            _ => throw new UnreachableException($"Didn't expect {this.GetType().Name} type"),
+        };
+    }
 }
