@@ -65,6 +65,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Npgsql;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
@@ -73,6 +74,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -86,12 +88,12 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 {
     private static readonly Regex _oasVersionRegex = new("Version of the API: (\\d+\\.\\d+\\.\\d+)", RegexOptions.Compiled | RegexOptions.Multiline);
 
+    private static string _gatewayVersion = GetGatewayProductVersion();
     private static string _oasVersion = GetOpenApiSchemaVersion();
 
     private readonly ILogger<LedgerStateQuerier> _logger;
     private readonly ReadOnlyDbContext _dbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IOptionsMonitor<EndpointOptions> _endpointOptionsMonitor;
     private readonly IOptionsMonitor<AcceptableLedgerLagOptions> _acceptableLedgerLagOptionsMonitor;
     private readonly IEnumerable<ILedgerStateQuerierObserver> _observers;
     private readonly IClock _clock;
@@ -100,7 +102,6 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         ILogger<LedgerStateQuerier> logger,
         ReadOnlyDbContext dbContext,
         INetworkConfigurationProvider networkConfigurationProvider,
-        IOptionsMonitor<EndpointOptions> endpointOptionsMonitor,
         IOptionsMonitor<AcceptableLedgerLagOptions> acceptableLedgerLagOptionsMonitor,
         IEnumerable<ILedgerStateQuerierObserver> observers,
         IClock clock)
@@ -108,18 +109,16 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         _logger = logger;
         _dbContext = dbContext;
         _networkConfigurationProvider = networkConfigurationProvider;
-        _endpointOptionsMonitor = endpointOptionsMonitor;
         _acceptableLedgerLagOptionsMonitor = acceptableLedgerLagOptionsMonitor;
         _observers = observers;
         _clock = clock;
     }
 
-    public async Task<GatewayModel.GatewayInformationResponse> GetGatewayInformation(CancellationToken token)
+    public async Task<GatewayModel.GatewayStatusResponse> GetGatewayStatus(CancellationToken token)
     {
         var ledgerStatus = await GetLedgerStatus(token);
-        var wellKnownAddresses = _networkConfigurationProvider.GetWellKnownAddresses();
 
-        return new GatewayModel.GatewayInformationResponse(
+        return new GatewayModel.GatewayStatusResponse(
             new GatewayModel.LedgerState(
                 _networkConfigurationProvider.GetNetworkName(),
                 ledgerStatus.TopOfLedgerTransaction.StateVersion,
@@ -127,17 +126,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
                 ledgerStatus.TopOfLedgerTransaction.Epoch,
                 ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
             ),
-            new GatewayModel.GatewayInfoResponseKnownTarget(ledgerStatus.TargetStateVersion),
-            new GatewayModel.GatewayInfoResponseReleaseInfo(_endpointOptionsMonitor.CurrentValue.GatewayApiVersion, _oasVersion),
-            new GatewayModel.GatewayInformationResponseAllOfWellKnownAddresses(
-                wellKnownAddresses.AccountPackage,
-                wellKnownAddresses.Faucet,
-                wellKnownAddresses.EpochManager,
-                wellKnownAddresses.Clock,
-                wellKnownAddresses.EcdsaSecp256k1,
-                wellKnownAddresses.EddsaEd25519,
-                wellKnownAddresses.Xrd
-            )
+            new GatewayModel.GatewayInfoResponseReleaseInfo(_gatewayVersion, _oasVersion)
         );
     }
 
@@ -182,15 +171,15 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
     {
         LedgerStateReport? ledgerStateReport = null;
 
-        if (fromLedgerStateIdentifier?.HasStateVersion == true)
+        if (fromLedgerStateIdentifier?.HasStateVersion() == true)
         {
             ledgerStateReport = await GetLedgerStateAfterStateVersion(fromLedgerStateIdentifier.StateVersion.Value, token);
         }
-        else if (fromLedgerStateIdentifier?.HasTimestamp == true)
+        else if (fromLedgerStateIdentifier?.HasTimestamp() == true)
         {
             ledgerStateReport = await GetLedgerStateAfterTimestamp(fromLedgerStateIdentifier.Timestamp.Value, token);
         }
-        else if (fromLedgerStateIdentifier?.HasEpoch == true)
+        else if (fromLedgerStateIdentifier?.HasEpoch() == true)
         {
             ledgerStateReport = await GetLedgerStateAfterEpochAndRound(fromLedgerStateIdentifier.Epoch.Value, fromLedgerStateIdentifier.Round ?? 0, token);
         }
@@ -242,6 +231,13 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerStatus.TopOfLedgerStateVersion;
     }
 
+    private static string GetGatewayProductVersion()
+    {
+        var version = FileVersionInfo.GetVersionInfo(typeof(NetworkGatewayConstants).Assembly.Location).ProductVersion;
+
+        return version ?? throw new InvalidOperationException("Unable to determine product version");
+    }
+
     private static string GetOpenApiSchemaVersion()
     {
         var match = _oasVersionRegex.Match(GatewayClient.Configuration.ToDebugReport());
@@ -256,16 +252,31 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
     private async Task<LedgerStatus> GetLedgerStatus(CancellationToken token)
     {
-        var ledgerStatus = await _dbContext.LedgerStatus
-            .Include(ls => ls.TopOfLedgerTransaction)
-            .SingleOrDefaultAsync(token);
-
-        if (ledgerStatus == null)
+        try
         {
-            throw new InvalidStateException("There are no transactions in the database");
-        }
+            var ledgerStatus = await _dbContext.LedgerStatus
+                .Include(ls => ls.TopOfLedgerTransaction)
+                .SingleOrDefaultAsync(token);
 
-        return ledgerStatus;
+            if (ledgerStatus == null)
+            {
+                throw new InvalidStateException("There are no transactions in the database");
+            }
+
+            return ledgerStatus;
+        }
+        catch (Exception ex)
+        {
+            // TODO NG-256 fix it permanently
+            if (ex.Message.Contains("Can't cast"))
+            {
+                await _dbContext.Database.OpenConnectionAsync(token);
+                await ((NpgsqlConnection)_dbContext.Database.GetDbConnection()).ReloadTypesAsync();
+                await _dbContext.Database.CloseConnectionAsync();
+            }
+
+            throw;
+        }
     }
 
     private record LedgerStateReport(GatewayModel.LedgerState LedgerState, DateTime RoundTimestamp, bool TopOfLedgerResolved);
@@ -274,15 +285,15 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
     {
         LedgerStateReport result;
 
-        if (at?.HasStateVersion == true)
+        if (at?.HasStateVersion() == true)
         {
             result = await GetLedgerStateBeforeStateVersion(at.StateVersion.Value, token);
         }
-        else if (at?.HasTimestamp == true)
+        else if (at?.HasTimestamp() == true)
         {
             result = await GetLedgerStateBeforeTimestamp(at.Timestamp.Value, token);
         }
-        else if (at?.HasEpoch == true)
+        else if (at?.HasEpoch() == true)
         {
             result = await GetLedgerStateAtEpochAndRound(at.Epoch.Value, at.Round ?? 0, token);
         }

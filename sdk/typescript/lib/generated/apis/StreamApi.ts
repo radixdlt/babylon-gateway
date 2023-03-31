@@ -16,20 +16,20 @@
 import * as runtime from '../runtime';
 import type {
   ErrorResponse,
-  TransactionRecentRequest,
-  TransactionRecentResponse,
+  StreamTransactionsRequest,
+  StreamTransactionsResponse,
 } from '../models';
 import {
     ErrorResponseFromJSON,
     ErrorResponseToJSON,
-    TransactionRecentRequestFromJSON,
-    TransactionRecentRequestToJSON,
-    TransactionRecentResponseFromJSON,
-    TransactionRecentResponseToJSON,
+    StreamTransactionsRequestFromJSON,
+    StreamTransactionsRequestToJSON,
+    StreamTransactionsResponseFromJSON,
+    StreamTransactionsResponseToJSON,
 } from '../models';
 
-export interface TransactionRecentOperationRequest {
-    transactionRecentRequest: TransactionRecentRequest;
+export interface StreamTransactionsOperationRequest {
+    streamTransactionsRequest: StreamTransactionsRequest;
 }
 
 /**
@@ -38,12 +38,12 @@ export interface TransactionRecentOperationRequest {
 export class StreamApi extends runtime.BaseAPI {
 
     /**
-     * Returns user-initiated transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
-     * Get Recent Transactions
+     * Returns transactions which have been committed to the ledger. 
+     * Get Transactions Stream
      */
-    async transactionRecentRaw(requestParameters: TransactionRecentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionRecentResponse>> {
-        if (requestParameters.transactionRecentRequest === null || requestParameters.transactionRecentRequest === undefined) {
-            throw new runtime.RequiredError('transactionRecentRequest','Required parameter requestParameters.transactionRecentRequest was null or undefined when calling transactionRecent.');
+    async streamTransactionsRaw(requestParameters: StreamTransactionsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StreamTransactionsResponse>> {
+        if (requestParameters.streamTransactionsRequest === null || requestParameters.streamTransactionsRequest === undefined) {
+            throw new runtime.RequiredError('streamTransactionsRequest','Required parameter requestParameters.streamTransactionsRequest was null or undefined when calling streamTransactions.');
         }
 
         const queryParameters: any = {};
@@ -53,22 +53,22 @@ export class StreamApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
-            path: `/transaction/recent`,
+            path: `/stream/transactions`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: TransactionRecentRequestToJSON(requestParameters.transactionRecentRequest),
+            body: StreamTransactionsRequestToJSON(requestParameters.streamTransactionsRequest),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => TransactionRecentResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => StreamTransactionsResponseFromJSON(jsonValue));
     }
 
     /**
-     * Returns user-initiated transactions which have been committed to the ledger. The returned response is in a paginated format, ordered by most recently committed. 
-     * Get Recent Transactions
+     * Returns transactions which have been committed to the ledger. 
+     * Get Transactions Stream
      */
-    async transactionRecent(requestParameters: TransactionRecentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionRecentResponse> {
-        const response = await this.transactionRecentRaw(requestParameters, initOverrides);
+    async streamTransactions(requestParameters: StreamTransactionsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StreamTransactionsResponse> {
+        const response = await this.streamTransactionsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

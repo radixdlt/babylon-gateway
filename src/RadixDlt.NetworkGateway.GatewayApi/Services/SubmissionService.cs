@@ -63,9 +63,10 @@
  */
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
@@ -74,6 +75,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -88,6 +90,7 @@ internal class SubmissionService : ISubmissionService
     private readonly ISubmissionTrackingService _submissionTrackingService;
     private readonly IClock _clock;
     private readonly IEnumerable<ISubmissionServiceObserver> _observers;
+    private readonly IOptionsMonitor<CoreApiIntegrationOptions> _coreApiIntegrationOptions;
     private readonly ILogger _logger;
 
     public SubmissionService(
@@ -95,18 +98,20 @@ internal class SubmissionService : ISubmissionService
         ISubmissionTrackingService submissionTrackingService,
         IClock clock,
         IEnumerable<ISubmissionServiceObserver> observers,
-        ILogger<SubmissionService> logger)
+        ILogger<SubmissionService> logger,
+        IOptionsMonitor<CoreApiIntegrationOptions> coreApiIntegrationOptions)
     {
         _coreApiHandler = coreApiHandler;
         _submissionTrackingService = submissionTrackingService;
         _clock = clock;
         _observers = observers;
         _logger = logger;
+        _coreApiIntegrationOptions = coreApiIntegrationOptions;
     }
 
     public async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
-        var parsedTransaction = await HandlePreSubmissionParseTransaction(request, token);
+        var parsedTransaction = await HandlePreSubmissionParseTransaction(request);
         var submittedTimestamp = _clock.UtcNow;
 
         var trackingGuidance = await _submissionTrackingService.TrackInitialSubmission(
@@ -150,40 +155,28 @@ internal class SubmissionService : ISubmissionService
         }
     }
 
-    private async Task<CoreModel.NotarizedTransaction> HandlePreSubmissionParseTransaction(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
+    private async Task<ToolkitModel.Transaction.NotarizedTransaction> HandlePreSubmissionParseTransaction(GatewayModel.TransactionSubmitRequest request)
     {
         try
         {
-            var response = await _coreApiHandler.ParseTransaction(
-                new CoreModel.TransactionParseRequest(
-                    network: _coreApiHandler.GetNetworkIdentifier(),
-                    payloadHex: request.NotarizedTransactionHex,
-                    parseMode: CoreModel.TransactionParseRequest.ParseModeEnum.Notarized,
-                    validationMode: CoreModel.TransactionParseRequest.ValidationModeEnum.Static,
-                    responseMode: CoreModel.TransactionParseRequest.ResponseModeEnum.Full),
-                token);
+            var notarizedTransaction = ToolkitModel.Transaction.NotarizedTransaction.Decompile(request.GetNotarizedTransactionBytes());
+            var validationConfig = new ToolkitModel.Exchange.ValidationConfig(_coreApiHandler.GetNetworkId());
+            var staticValidationResult = notarizedTransaction.StaticallyValidate(validationConfig);
 
-            if (response.Parsed.ActualInstance is not CoreModel.ParsedNotarizedTransaction parsed)
+            if (staticValidationResult is ToolkitModel.Exchange.StaticallyValidateTransactionResponse.Invalid invalid)
             {
-                await _observers.ForEachAsync(x => x.ParsedTransactionUnsupportedPayloadType(request, response));
+                await _observers.ForEachAsync(x => x.ParsedTransactionStaticallyInvalid(request, invalid.Error));
 
-                throw InvalidTransactionException.FromUnsupportedPayloadType();
+                throw InvalidTransactionException.FromStaticallyInvalid(staticValidationResult.ToString());
             }
 
-            if (parsed.ValidationError != null)
-            {
-                await _observers.ForEachAsync(x => x.ParsedTransactionStaticallyInvalid(request, response));
-
-                throw InvalidTransactionException.FromStaticallyInvalid(parsed.ValidationError.Reason);
-            }
-
-            return parsed.NotarizedTransaction;
+            return notarizedTransaction;
         }
-        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Permanent)
+        catch (RadixEngineToolkit.Exceptions.EngineToolkitRequestError ex)
         {
-            await _observers.ForEachAsync(x => x.ParseTransactionFailedInvalidTransaction(request, ex));
+            await _observers.ForEachAsync(x => x.ParsedTransactionUnsupportedPayloadType(request, ex));
 
-            throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(ex);
+            throw InvalidTransactionException.FromUnsupportedPayloadType();
         }
         catch (Exception ex)
         {
@@ -195,60 +188,73 @@ internal class SubmissionService : ISubmissionService
 
     private async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitAndCreateResponse(
         GatewayModel.TransactionSubmitRequest request,
-        CoreModel.NotarizedTransaction parsedTransaction,
+        ToolkitModel.Transaction.NotarizedTransaction parsedTransaction,
         CancellationToken token)
     {
-        using var timeoutTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3)); // TODO configurable
+        using var timeoutTokenSource = new CancellationTokenSource(_coreApiIntegrationOptions.CurrentValue.SubmitTransactionTimeout);
         using var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutTokenSource.Token, token);
 
         try
         {
             var result = await _coreApiHandler.SubmitTransaction(
                 new CoreModel.TransactionSubmitRequest(
-                    _coreApiHandler.GetNetworkIdentifier(),
+                    _coreApiHandler.GetNetworkName(),
                     request.NotarizedTransactionHex
                 ),
                 finalTokenSource.Token
             );
 
-            if (result.Duplicate)
+            if (result.Succeeded)
             {
-                await _observers.ForEachAsync(x => x.SubmissionDuplicate(request, result));
+                var response = result.SuccessResponse;
+
+                if (response.Duplicate)
+                {
+                    await _observers.ForEachAsync(x => x.SubmissionDuplicate(request, response));
+                }
+                else
+                {
+                    await _observers.ForEachAsync(x => x.SubmissionSucceeded(request, response));
+                }
+
+                return new GatewayModel.TransactionSubmitResponse(
+                    duplicate: response.Duplicate
+                );
+            }
+
+            var details = result.FailureResponse.Details;
+            var isPermanent = false;
+            var message = result.FailureResponse.Message;
+            var detailedMessage = (string?)null;
+
+            switch (details)
+            {
+                case CoreModel.TransactionSubmitMempoolFullErrorDetails mempoolFull:
+                    detailedMessage = $"max mempool capacity of {mempoolFull.MempoolCapacity} exceeded";
+                    break;
+                case CoreModel.TransactionSubmitRejectedErrorDetails rejected:
+                    isPermanent = rejected.IsIntentRejectionPermanent || rejected.IsPayloadRejectionPermanent;
+                    detailedMessage = rejected.ErrorMessage;
+                    break;
+            }
+
+            if (isPermanent)
+            {
+                await _observers.ForEachAsync(x => x.HandleSubmissionFailedPermanently(request, result.FailureResponse));
             }
             else
             {
-                await _observers.ForEachAsync(x => x.SubmissionSucceeded(request, result));
+                await _observers.ForEachAsync(x => x.HandleSubmissionFailedTemporary(request, result.FailureResponse));
             }
 
-            return new GatewayModel.TransactionSubmitResponse(
-                duplicate: result.Duplicate
-            );
-        }
-        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Permanent)
-        {
-            // Any other known Core exception which can't result in the transaction being submitted
-            await _observers.ForEachAsync(x => x.HandleSubmissionFailedPermanently(request, ex));
-
-            await _submissionTrackingService.MarkAsFailed(
-                true,
-                parsedTransaction.HashBytes,
-                ex.Error.Message,
+            await _submissionTrackingService.MarkInitialFailure(
+                isPermanent,
+                parsedTransaction.Hash(),
+                message + (detailedMessage != null ? " (" + detailedMessage + ")" : string.Empty),
                 token
             );
 
-            throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(ex);
-        }
-        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Transient)
-        {
-            // Any other known Core exception which can't result in the transaction being submitted
-            await _observers.ForEachAsync(x => x.HandleSubmissionFailedTemporary(request, ex));
-
-            await _submissionTrackingService.MarkAsFailed(
-                false,
-                parsedTransaction.HashBytes,
-                ex.Error.Message,
-                token
-            );
+            throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiError(result.FailureResponse);
         }
         catch (OperationCanceledException ex) when (timeoutTokenSource.Token.IsCancellationRequested)
         {

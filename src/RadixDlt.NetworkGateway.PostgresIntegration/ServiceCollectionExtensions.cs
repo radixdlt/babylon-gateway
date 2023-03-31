@@ -65,6 +65,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Npgsql;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
@@ -72,13 +77,43 @@ public static class ServiceCollectionExtensions
 {
     public static void AddNetworkGatewayPostgresMigrations(this IServiceCollection services)
     {
+        CustomTypes.EnsureConfigured();
+
         services
+            .AddNpgsqlDataSourceHolder<MigrationsDbContext>(PostgresIntegrationConstants.Configuration.MigrationsConnectionStringName)
             .AddDbContextFactory<MigrationsDbContext>((serviceProvider, options) =>
             {
-                // https://www.npgsql.org/efcore/index.html
                 options.UseNpgsql(
-                    serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.MigrationsConnectionStringName),
+                    serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<MigrationsDbContext>>().NpgsqlDataSource,
                     o => o.MigrationsAssembly(typeof(MigrationsDbContext).Assembly.GetName().Name));
             });
+    }
+
+    // TODO the moment we eliminate multiple data sources per application we could roll back to Npgsql.DependencyInjection and its AddNpgsqlDataSource
+    internal static IServiceCollection AddNpgsqlDataSourceHolder<T>(this IServiceCollection services, string connectionStringName)
+    {
+        services.TryAdd(new ServiceDescriptor(
+            typeof(NpgsqlDataSourceHolder<T>),
+            sp =>
+            {
+                var connectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString(connectionStringName);
+                var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+
+                dataSourceBuilder.UseLoggerFactory(sp.GetService<ILoggerFactory>());
+                dataSourceBuilder.MapEnum<AccessRulesChainSubtype>();
+                dataSourceBuilder.MapEnum<EntityType>();
+                dataSourceBuilder.MapEnum<LedgerTransactionKindFilterConstraint>();
+                dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
+                dataSourceBuilder.MapEnum<LedgerTransactionType>();
+                dataSourceBuilder.MapEnum<NonFungibleIdType>();
+                dataSourceBuilder.MapEnum<PendingTransactionStatus>();
+                dataSourceBuilder.MapEnum<PublicKeyType>();
+                dataSourceBuilder.MapEnum<ResourceType>();
+
+                return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
+            },
+            ServiceLifetime.Singleton));
+
+        return services;
     }
 }

@@ -77,10 +77,12 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 {
     Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token);
 
+    byte GetNetworkId();
+
     string GetNetworkName();
 }
 
-public sealed record CapturedConfig(string NetworkName, HrpDefinition HrpDefinition, WellKnownAddresses WellKnownAddresses, AddressTypeDefinition[] AddressTypeDefinitions);
+public sealed record CapturedConfig(byte NetworkId, string NetworkName, HrpDefinition HrpDefinition, WellKnownAddresses WellKnownAddresses, AddressTypeDefinition[] AddressTypeDefinitions);
 
 public interface ICapturedConfigProvider
 {
@@ -105,6 +107,11 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 
             _capturedConfig = capturedConfig;
         }
+    }
+
+    public byte GetNetworkId()
+    {
+        return GetCapturedConfig().NetworkId;
     }
 
     public string GetNetworkName()

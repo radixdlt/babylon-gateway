@@ -15,13 +15,6 @@
                 "DOTNET_ENVIRONMENT": "Development",
                 "WIPE_DATABASE": "true"
             }
-        },
-        "Database Migrations (Production)": {
-            "commandName": "Project",
-            "dotnetRunMessages": true,
-            "environmentVariables": {
-                "DOTNET_ENVIRONMENT": "Production"
-            }
         }
     }
 }

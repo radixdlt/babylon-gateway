@@ -13,6 +13,13 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { EntityMetadataItemValue } from './EntityMetadataItemValue';
+import {
+    EntityMetadataItemValueFromJSON,
+    EntityMetadataItemValueFromJSONTyped,
+    EntityMetadataItemValueToJSON,
+} from './EntityMetadataItemValue';
+
 /**
  * Entity metadata key-value pair.
  * @export
@@ -26,11 +33,17 @@ export interface EntityMetadataItem {
      */
     key: string;
     /**
-     * Entity metadata value.
-     * @type {string}
+     * 
+     * @type {EntityMetadataItemValue}
      * @memberof EntityMetadataItem
      */
-    value: string;
+    value: EntityMetadataItemValue;
+    /**
+     * TBD
+     * @type {number}
+     * @memberof EntityMetadataItem
+     */
+    last_updated_at_state_version: number;
 }
 
 /**
@@ -40,6 +53,7 @@ export function instanceOfEntityMetadataItem(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "key" in value;
     isInstance = isInstance && "value" in value;
+    isInstance = isInstance && "last_updated_at_state_version" in value;
 
     return isInstance;
 }
@@ -55,7 +69,8 @@ export function EntityMetadataItemFromJSONTyped(json: any, ignoreDiscriminator: 
     return {
         
         'key': json['key'],
-        'value': json['value'],
+        'value': EntityMetadataItemValueFromJSON(json['value']),
+        'last_updated_at_state_version': json['last_updated_at_state_version'],
     };
 }
 
@@ -69,7 +84,8 @@ export function EntityMetadataItemToJSON(value?: EntityMetadataItem | null): any
     return {
         
         'key': value.key,
-        'value': value.value,
+        'value': EntityMetadataItemValueToJSON(value.value),
+        'last_updated_at_state_version': value.last_updated_at_state_version,
     };
 }
 

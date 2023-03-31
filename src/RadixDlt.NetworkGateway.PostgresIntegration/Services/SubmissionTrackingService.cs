@@ -75,6 +75,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -96,21 +97,22 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
 
     public async Task<TackingGuidance> TrackInitialSubmission(
         DateTime submittedTimestamp,
-        CoreModel.NotarizedTransaction notarizedTransaction,
+        ToolkitModel.Transaction.NotarizedTransaction notarizedTransaction,
         string submittedToNodeName,
         CancellationToken token = default
     )
     {
-        var existingPendingTransaction = await GetPendingTransaction(notarizedTransaction.HashBytes, token);
+        var existingPendingTransaction = await GetPendingTransaction(notarizedTransaction.Hash(), token);
 
         if (existingPendingTransaction != null)
         {
             if (existingPendingTransaction.Status is PendingTransactionStatus.RejectedPermanently or PendingTransactionStatus.RejectedTemporarily)
             {
-                return new TackingGuidance(ShouldSubmitToNode: false, FailureReason: existingPendingTransaction.FailureReason);
+                return new TackingGuidance(ShouldSubmitToNode: false, FailureReason: existingPendingTransaction.LastFailureReason);
             }
 
             existingPendingTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
+
             await _dbContext.SaveChangesAsync(token);
 
             // It's already been submitted to a node - this will be handled by the resubmission service if appropriate
@@ -118,10 +120,9 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         }
 
         var pendingTransaction = PendingTransaction.NewAsSubmittedForFirstTimeByGateway(
-            notarizedTransaction.HashBytes,
-            notarizedTransaction.SignedIntent.Intent.HashBytes,
-            notarizedTransaction.SignedIntent.HashBytes,
-            notarizedTransaction.PayloadBytes,
+            notarizedTransaction.Hash(),
+            notarizedTransaction.TransactionHash(),
+            notarizedTransaction.Compile(),
             submittedToNodeName,
             submittedTimestamp
         );
@@ -145,7 +146,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         }
     }
 
-    public async Task MarkAsFailed(bool permanent, byte[] payloadHash, string failureReason, CancellationToken token = default)
+    public async Task MarkInitialFailure(bool permanent, byte[] payloadHash, string failureReason, CancellationToken token = default)
     {
         var pendingTransaction = await GetPendingTransaction(payloadHash, token);
 

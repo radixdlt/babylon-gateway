@@ -84,5 +84,5 @@ internal class NonFungibleIdMutableDataHistory
     public bool IsDeleted { get; set; }
 
     [Column("mutable_data")]
-    public byte[] MutableData { get; set; }
+    public byte[]? MutableData { get; set; }
 }

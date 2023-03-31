@@ -76,30 +76,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 internal class PendingTransaction
 {
     [Key]
+    [Column("id")]
     public long Id { get; set; }
 
     [Column("payload_hash")]
-    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local - Needed for EF Core
     public byte[] PayloadHash { get; private set; }
 
     [Column("intent_hash")]
-    // OnModelCreating: Add intent_hash as alternate key.
-    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local - Needed for EF Core
     public byte[] IntentHash { get; private set; }
-
-    [Column("signed_intent_hash")]
-    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local - Needed for EF Core
-    public byte[] SignedIntentHash { get; private set; }
 
     /// <summary>
     /// The payload of the transaction.
     /// </summary>
     [Column("notarized_transaction_blob")]
-    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local - Needed for EF Core
     public byte[] NotarizedTransactionBlob { get; private set; }
 
     [Column("status")]
-    [ConcurrencyCheck]
     public PendingTransactionStatus Status { get; private set; }
 
     /// <summary>
@@ -154,11 +146,22 @@ internal class PendingTransaction
     [Column("commit_timestamp")]
     public DateTime? CommitTimestamp { get; private set; }
 
-    [Column("failure_reason")]
-    public string? FailureReason { get; private set; }
+    [Column("last_failure_reason")]
+    public string? LastFailureReason { get; private set; }
 
-    [Column("failure_timestamp")]
-    public DateTime? FailureTimestamp { get; private set; }
+    [Column("last_failure_timestamp")]
+    public DateTime? LastFailureTimestamp { get; private set; }
+
+    /// <summary>
+    /// Used as optimistic locking guard where we increase this value on every significant update.
+    /// </summary>
+    /// <remarks>
+    /// Ledger extender service might update this entity without any checks as it is considered to have highest priority and it is expected that other services should detect
+    /// concurrency issues instead.
+    /// </remarks>
+    [Column("xmin")]
+    [Timestamp]
+    public uint VersionControl { get; private set; }
 
     public static PendingTransaction NewFirstSeenInMempool(
         byte[] payloadHash,
@@ -167,23 +170,22 @@ internal class PendingTransaction
         DateTime firstSeenAt
     )
     {
-        var mempoolTransaction = new PendingTransaction
+        var pt = new PendingTransaction
         {
             PayloadHash = payloadHash,
             IntentHash = intentHash,
             NotarizedTransactionBlob = notarizedTransaction,
         };
 
-        mempoolTransaction.MarkAsSeenInAMempool(firstSeenAt);
+        pt.MarkAsSeenInAMempool(firstSeenAt);
 
-        return mempoolTransaction;
+        return pt;
     }
 
     public static PendingTransaction NewAsSubmittedForFirstTimeByGateway(
         byte[] payloadHash,
         byte[] intentHash,
-        byte[] signedIntentHash,
-        byte[] notarizedTransactionBlob,
+        byte[] notarizedTransaction,
         string submittedToNodeName,
         DateTime submittedTimestamp
     )
@@ -192,8 +194,7 @@ internal class PendingTransaction
         {
             PayloadHash = payloadHash,
             IntentHash = intentHash,
-            SignedIntentHash = signedIntentHash,
-            NotarizedTransactionBlob = notarizedTransactionBlob,
+            NotarizedTransactionBlob = notarizedTransaction,
             FirstSubmittedToGatewayTimestamp = submittedTimestamp,
         };
 
@@ -212,12 +213,13 @@ internal class PendingTransaction
         LastDroppedOutOfMempoolTimestamp = timestamp;
     }
 
-    public void MarkAsCommitted(bool succeeded, DateTime timestamp)
+    // TODO drop in favor of batch UPDATE in PostgresLedgerExtenderService
+    public void MarkAsCommitted(PendingTransactionStatus status, DateTime timestamp)
     {
-        Status = succeeded ? PendingTransactionStatus.CommittedSuccess : PendingTransactionStatus.CommittedFailure;
+        Status = status;
         CommitTimestamp = timestamp;
-        FailureReason = null;
-        FailureTimestamp = null;
+        LastFailureReason = null;
+        LastFailureTimestamp = null;
     }
 
     public void MarkAsSeenInAMempool(DateTime timestamp)
@@ -229,8 +231,8 @@ internal class PendingTransaction
     public void MarkAsRejected(bool permanent, string failureReason, DateTime timestamp)
     {
         Status = permanent ? PendingTransactionStatus.RejectedPermanently : PendingTransactionStatus.RejectedTemporarily;
-        FailureReason = failureReason;
-        FailureTimestamp = timestamp;
+        LastFailureReason = failureReason;
+        LastFailureTimestamp = timestamp;
     }
 
     public void MarkAsSubmittedToGateway(DateTime submittedAt)

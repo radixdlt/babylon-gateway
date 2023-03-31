@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -74,4 +75,4 @@ public interface IPendingTransactionPrunerServiceObserver
     ValueTask PreMempoolTransactionPruned(int count);
 }
 
-public sealed record PendingTransactionStatusCount(string Status, int Count);
+public sealed record PendingTransactionStatusCount(PendingTransactionStatus Status, int Count);

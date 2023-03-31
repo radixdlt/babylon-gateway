@@ -9,7 +9,7 @@ The system is in three main parts:
 
 ## Using the Gateway API
 
-For documentation on the Gateway API, see the [Gateway API docs on ReDocly](https://betanet-gateway.redoc.ly/).
+For documentation on the Gateway API, see the [RCNet-V1 Gateway API docs on ReDocly](https://radix-rcnet-v1-gateway.redoc.ly/).
 
 ## Technical Docs
 

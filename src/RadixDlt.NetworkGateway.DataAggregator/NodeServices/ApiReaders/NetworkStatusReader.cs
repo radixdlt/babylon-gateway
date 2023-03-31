@@ -93,13 +93,11 @@ internal class NetworkStatusReader : INetworkStatusReader
     {
         try
         {
-            return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
-                await _statusApi.StatusNetworkStatusPostAsync(
-                    new CoreModel.NetworkStatusRequest(
-                        network: _networkConfigurationProvider.GetNetworkName()
-                    ),
-                    token
-                )
+            return await _statusApi.StatusNetworkStatusPostAsync(
+                new CoreModel.NetworkStatusRequest(
+                    network: _networkConfigurationProvider.GetNetworkName()
+                ),
+                token
             );
         }
         catch (Exception ex)

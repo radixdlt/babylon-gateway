@@ -63,72 +63,37 @@
  */
 
 using Newtonsoft.Json;
-using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using System;
-using System.Net;
 using System.Threading.Tasks;
 using CoreClient = RadixDlt.CoreApiSdk.Client;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 
+// TODO refactor into extension method?
 public static class CoreApiErrorWrapper
 {
-    public static string GetDetailedExceptionName(this WrappedCoreApiException wrappedCoreApiException)
-    {
-        return $"{nameof(WrappedCoreApiException)}<{wrappedCoreApiException.Error.GetType().Name}>";
-    }
-
-    public static async Task<T> ExtractCoreApiErrors<T>(Func<Task<T>> requestAction)
+    public static async Task<ResponseOrError<TResponse, TError>> ResultOrError<TResponse, TError>(Func<Task<TResponse>> requestAction)
+        where TResponse : class
+        where TError : CoreApiSdk.Model.ErrorResponse
     {
         try
         {
-            return await requestAction();
+            return ResponseOrError<TResponse, TError>.Ok(await requestAction());
         }
         catch (CoreClient.ApiException apiException)
         {
-            var wrappedException = ExtractWrappedCoreApiException(apiException);
+            var errorResponse = ExtractErrorResponse(apiException.ErrorContent?.ToString());
 
-            if (wrappedException == null)
+            if (errorResponse is TError error)
             {
-                throw; // Throw unwrapped ApiException
+                error.OriginalApiException = apiException;
+
+                return ResponseOrError<TResponse, TError>.Fail(error);
             }
 
-            throw wrappedException;
+            throw;
         }
-    }
-
-    private static WrappedCoreApiException? ExtractWrappedCoreApiException(CoreClient.ApiException apiException)
-    {
-        var errorResponse = ExtractErrorResponse(apiException.ErrorContent?.ToString());
-
-        if (errorResponse == null)
-        {
-            return null;
-        }
-
-        if (errorResponse.Code == (int)HttpStatusCode.BadRequest)
-        {
-            return errorResponse.Message switch
-            {
-                "Mempool is full" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Transient)),
-                "Rejected: ExecutionError" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Permanent)),
-                "Rejected: ValidationError" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Permanent)),
-                "Rejected: IntentHashCommitted" => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Permanent)),
-                _ => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Transient)),
-            };
-        }
-
-        if (errorResponse.Code == (int)HttpStatusCode.NotFound)
-        {
-            return errorResponse.Message switch
-            {
-                "Transaction with given payload hash is not in the mempool" => WrappedCoreApiException.Of(apiException, new CoreModel.MempoolTransactionNotFoundError(), new CoreApiErrorProperties(CoreApiErrorTransience.Transient)),
-                _ => WrappedCoreApiException.Of(apiException, errorResponse, new CoreApiErrorProperties(CoreApiErrorTransience.Transient)),
-            };
-        }
-
-        return null;
     }
 
     private static CoreModel.ErrorResponse? ExtractErrorResponse(string? errorResponse)

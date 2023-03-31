@@ -62,11 +62,11 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json.Linq;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -76,6 +76,8 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 internal class DefaultTransactionHandler : ITransactionHandler
 {
+    private const int DefaultPageLimit = 10; // TODO make it configurable
+
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly ITransactionQuerier _transactionQuerier;
     private readonly IPreviewService _previewService;
@@ -95,37 +97,16 @@ internal class DefaultTransactionHandler : ITransactionHandler
 
     public async Task<GatewayModel.TransactionConstructionResponse> Construction(CancellationToken token = default)
     {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(null, token);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForConstructionRequest(null, token);
 
         return new GatewayModel.TransactionConstructionResponse(ledgerState);
     }
 
-    public async Task<GatewayModel.TransactionRecentResponse> Recent(GatewayModel.TransactionRecentRequest request, CancellationToken token = default)
-    {
-        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromLedgerState, token);
-
-        var transactionsPageRequest = new RecentTransactionPageRequest(
-            Cursor: GatewayModel.LedgerTransactionsCursor.FromCursorString(request.Cursor),
-            PageSize: request.Limit ?? 10
-        );
-
-        var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState, token);
-
-        // NB - We don't return a total here as we don't have an index on user transactions
-        return new GatewayModel.TransactionRecentResponse(
-            atLedgerState,
-            nextCursor: results.NextPageCursor?.ToCursorString(),
-            items: results.Transactions
-        );
-    }
-
     public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token = default)
     {
-        var identifier = new GatewayModel.TransactionCommittedDetailsRequestIdentifier(GatewayModel.TransactionCommittedDetailsRequestIdentifierType.IntentHash, request.IntentHashHex);
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(identifier, ledgerState, false, token);
-        var pendingTransactions = await _transactionQuerier.LookupPendingTransactionsByIntentHash(request.IntentHashBytes, token);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(null, token);
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.GetIntentHashBytes(), ledgerState, false, token);
+        var pendingTransactions = await _transactionQuerier.LookupPendingTransactionsByIntentHash(request.GetIntentHashBytes(), token);
         var remainingPendingTransactions = pendingTransactions.Where(pt => pt.PayloadHashHex != committedTransaction?.Info.PayloadHashHex).ToList();
 
         var status = GatewayModel.TransactionStatus.Unknown;
@@ -158,17 +139,17 @@ internal class DefaultTransactionHandler : ITransactionHandler
     public async Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.TransactionIdentifier, ledgerState, true, token);
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.GetIntentHashBytes(), ledgerState, true, token);
 
         if (committedTransaction != null)
         {
             return new GatewayModel.TransactionCommittedDetailsResponse(ledgerState, committedTransaction.Info, committedTransaction.Details);
         }
 
-        throw new TransactionNotFoundException(request.TransactionIdentifier);
+        throw new TransactionNotFoundException(request.IntentHashHex);
     }
 
-    public async Task<object> Preview(JToken request, CancellationToken token = default)
+    public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default)
     {
         return await _previewService.HandlePreviewRequest(request, token);
     }
@@ -176,5 +157,37 @@ internal class DefaultTransactionHandler : ITransactionHandler
     public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
         return await _submissionService.HandleSubmitRequest(request, token);
+    }
+
+    public async Task<GatewayModel.StreamTransactionsResponse> StreamTransactions(GatewayModel.StreamTransactionsRequest request, CancellationToken token = default)
+    {
+        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromLedgerState, token) ?? atLedgerState;
+
+        var kindFilter = request.KindFilter switch
+        {
+            GatewayModel.StreamTransactionsRequest.KindFilterEnum.All => LedgerTransactionKindFilter.AllAnnotated,
+            GatewayModel.StreamTransactionsRequest.KindFilterEnum.User => LedgerTransactionKindFilter.UserOnly,
+            GatewayModel.StreamTransactionsRequest.KindFilterEnum.EpochChange => LedgerTransactionKindFilter.EpochChangeOnly,
+            null => LedgerTransactionKindFilter.UserOnly,
+            _ => throw new UnreachableException($"Didn't expect {request.KindFilter} value"),
+        };
+
+        var transactionsPageRequest = new TransactionStreamPageRequest(
+            FromStateVersion: fromLedgerState.StateVersion,
+            Cursor: GatewayModel.LedgerTransactionsCursor.FromCursorString(request.Cursor),
+            PageSize: request.LimitPerPage ?? DefaultPageLimit,
+            AscendingOrder: request.Order == GatewayModel.StreamTransactionsRequest.OrderEnum.Asc,
+            KindFilter: kindFilter
+        );
+
+        var results = await _transactionQuerier.GetTransactionStream(transactionsPageRequest, atLedgerState, token);
+
+        // NB - We don't return a total here as we don't have an index on user transactions
+        return new GatewayModel.StreamTransactionsResponse(
+            atLedgerState,
+            nextCursor: results.NextPageCursor?.ToCursorString(),
+            items: results.Transactions
+        );
     }
 }

@@ -92,8 +92,6 @@ public sealed class Base64Validator<T> : PropertyValidator<T, string?>
 
         if (!Convert.TryFromBase64String(value, buffer, out var bytesWritten))
         {
-            context.AddFailure("'{PropertyName}' must be Base64-encoded value.");
-
             return false;
         }
 
@@ -109,5 +107,10 @@ public sealed class Base64Validator<T> : PropertyValidator<T, string?>
         }
 
         return true;
+    }
+
+    protected override string GetDefaultMessageTemplate(string errorCode)
+    {
+        return "'{PropertyName}' must be Base64-encoded value.";
     }
 }

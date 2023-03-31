@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Threading;
 using System.Threading.Tasks;
@@ -83,26 +83,24 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
         _entityStateQuerier = entityStateQuerier;
     }
 
-    public async Task<GatewayModel.NonFungibleIdsResponse> Ids(GatewayModel.NonFungibleIdsRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.StateNonFungibleIdsResponse> Ids(GatewayModel.StateNonFungibleIdsRequest request, CancellationToken token = default)
     {
-        var address = RadixAddressCodec.Decode(request.Address);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
-        var cursor = GatewayModel.NonFungibleIdsRequestCursor.FromCursorString(request.Cursor);
+        var cursor = GatewayModel.OffsetCursor.FromCursorString(request.Cursor);
         var pageRequest = new IEntityStateQuerier.PageRequest(
-            Address: address,
+            Address: (GlobalAddress)request.ResourceAddress,
             Offset: cursor?.Offset ?? 0,
-            Limit: request.Limit ?? DefaultPageLimit
+            Limit: request.LimitPerPage ?? DefaultPageLimit
         );
 
         return await _entityStateQuerier.NonFungibleIds(pageRequest, ledgerState, token);
     }
 
-    public async Task<GatewayModel.NonFungibleDataResponse> Data(GatewayModel.NonFungibleDataRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.StateNonFungibleDataResponse> Data(GatewayModel.StateNonFungibleDataRequest request, CancellationToken token = default)
     {
-        var address = RadixAddressCodec.Decode(request.Address);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
-        return await _entityStateQuerier.NonFungibleIdData(address, request.NonFungibleId, ledgerState, token);
+        return await _entityStateQuerier.NonFungibleIdData((GlobalAddress)request.ResourceAddress, request.NonFungibleIds, ledgerState, token);
     }
 }

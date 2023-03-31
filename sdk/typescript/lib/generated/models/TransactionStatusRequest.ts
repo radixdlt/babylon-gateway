@@ -13,25 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { LedgerStateSelector } from './LedgerStateSelector';
-import {
-    LedgerStateSelectorFromJSON,
-    LedgerStateSelectorFromJSONTyped,
-    LedgerStateSelectorToJSON,
-} from './LedgerStateSelector';
-
 /**
  * 
  * @export
  * @interface TransactionStatusRequest
  */
 export interface TransactionStatusRequest {
-    /**
-     * 
-     * @type {LedgerStateSelector}
-     * @memberof TransactionStatusRequest
-     */
-    at_ledger_state?: LedgerStateSelector | null;
     /**
      * Hex-encoded SHA-256 hash.
      * @type {string}
@@ -60,7 +47,6 @@ export function TransactionStatusRequestFromJSONTyped(json: any, ignoreDiscrimin
     }
     return {
         
-        'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
         'intent_hash_hex': json['intent_hash_hex'],
     };
 }
@@ -74,7 +60,6 @@ export function TransactionStatusRequestToJSON(value?: TransactionStatusRequest 
     }
     return {
         
-        'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
         'intent_hash_hex': value.intent_hash_hex,
     };
 }

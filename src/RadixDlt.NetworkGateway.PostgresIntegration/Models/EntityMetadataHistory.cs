@@ -85,5 +85,8 @@ internal class EntityMetadataHistory
     public List<string> Keys { get; set; }
 
     [Column("values")]
-    public List<string> Values { get; set; }
+    public List<byte[]> Values { get; set; }
+
+    [Column("updated_at_state_versions")]
+    public List<long> UpdatedAtStateVersions { get; set; }
 }

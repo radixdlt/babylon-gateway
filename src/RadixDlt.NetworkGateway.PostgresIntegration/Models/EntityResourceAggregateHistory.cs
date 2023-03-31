@@ -62,15 +62,21 @@
  * permissions under this License.
  */
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("entity_resource_aggregate_history")]
 internal class EntityResourceAggregateHistory
 {
+    private long[]? _originalFungibleResourceEntityIds;
+    private long[]? _originalNonFungibleResourceEntityIds;
+
     [Key]
     [Column("id")]
     public long Id { get; set; }
@@ -81,12 +87,147 @@ internal class EntityResourceAggregateHistory
     [Column("entity_id")]
     public long EntityId { get; set; }
 
-    [Column("is_most_recent")]
-    public bool IsMostRecent { get; set; }
-
+    /// <summary>
+    /// Contains the aggregate list of all related fungible resources ordered by most recent updated.
+    /// </summary>
     [Column("fungible_resource_entity_ids")]
     public List<long> FungibleResourceEntityIds { get; set; }
 
+    /// <summary>
+    /// Contains the last significant update state_version for resources stored in <see cref="FungibleResourceEntityIds"/>.
+    /// </summary>
+    [Column("fungible_resource_significant_update_state_versions")]
+    public List<long> FungibleResourceSignificantUpdateStateVersions { get; set; }
+
+    /// <summary>
+    /// Contains the aggregate list of all related non-fungible resources ordered by most recent updated.
+    /// </summary>
     [Column("non_fungible_resource_entity_ids")]
     public List<long> NonFungibleResourceEntityIds { get; set; }
+
+    /// <summary>
+    /// Contains the last significant update state_version for resources stored in <see cref="NonFungibleResourceEntityIds"/>.
+    /// </summary>
+    [Column("non_fungible_resource_significant_update_state_versions")]
+    public List<long> NonFungibleResourceSignificantUpdateStateVersions { get; set; }
+
+    public static EntityResourceAggregateHistory Create(long databaseId, long entityId, long stateVersion)
+    {
+        return CopyOrCreate(databaseId, null, entityId, stateVersion);
+    }
+
+    public static EntityResourceAggregateHistory CopyOf(long databaseId, EntityResourceAggregateHistory other, long stateVersion)
+    {
+        return CopyOrCreate(databaseId, other, other.EntityId, stateVersion);
+    }
+
+    /// <summary>
+    /// Attempts to add new or update existing fungible resource unless it is already the most recently modified one.
+    /// </summary>
+    /// <returns>true if added or modified, otherwise false.</returns>
+    public bool TryUpsertFungible(long resourceId, long stateVersion)
+    {
+        var currentIndex = FungibleResourceEntityIds.IndexOf(resourceId);
+
+        // we're already the most recent one and there's no point potential second resource with same state_version
+        if (currentIndex == 0 && FungibleResourceEntityIds.Count == 1)
+        {
+            return false;
+        }
+
+        // we're already the most recent one but there might be second resource with matching state_version
+        // so in order to guarantee that we'll be unambiguously earlier in the overall sequence we might potentially
+        // want to update anyways
+        if (currentIndex == 0 && FungibleResourceEntityIds.Count > 1 && FungibleResourceSignificantUpdateStateVersions[1] < FungibleResourceSignificantUpdateStateVersions[0])
+        {
+            return false;
+        }
+
+        if (currentIndex != -1)
+        {
+            FungibleResourceEntityIds.RemoveAt(currentIndex);
+            FungibleResourceSignificantUpdateStateVersions.RemoveAt(currentIndex);
+        }
+
+        FungibleResourceEntityIds.Insert(0, resourceId);
+        FungibleResourceSignificantUpdateStateVersions.Insert(0, stateVersion);
+
+        return true;
+    }
+
+    /// <summary>
+    /// Attempts to add new or update existing non-fungible resource unless it is already the most recently modified one.
+    /// </summary>
+    /// <returns>true if added or modified, otherwise false.</returns>
+    public bool TryUpsertNonFungible(long resourceId, long stateVersion)
+    {
+        var currentIndex = NonFungibleResourceEntityIds.IndexOf(resourceId);
+
+        // we're already the most recent one and there's no point potential second resource with same state_version
+        if (currentIndex == 0 && NonFungibleResourceEntityIds.Count == 1)
+        {
+            return false;
+        }
+
+        // we're already the most recent one but there might be second resource with matching state_version
+        // so in order to guarantee that we'll be unambiguously earlier in the overall sequence we might potentially
+        // want to update anyways
+        if (currentIndex == 0 && NonFungibleResourceEntityIds.Count > 1 && NonFungibleResourceSignificantUpdateStateVersions[1] < NonFungibleResourceSignificantUpdateStateVersions[0])
+        {
+            return false;
+        }
+
+        if (currentIndex != -1)
+        {
+            NonFungibleResourceEntityIds.RemoveAt(currentIndex);
+            NonFungibleResourceSignificantUpdateStateVersions.RemoveAt(currentIndex);
+        }
+
+        NonFungibleResourceEntityIds.Insert(0, resourceId);
+        NonFungibleResourceSignificantUpdateStateVersions.Insert(0, stateVersion);
+
+        return true;
+    }
+
+    public bool ShouldBePersisted()
+    {
+        if (_originalFungibleResourceEntityIds == null || _originalNonFungibleResourceEntityIds == null)
+        {
+            return true;
+        }
+
+        if (!_originalFungibleResourceEntityIds.SequenceEqual(FungibleResourceEntityIds.ToArray()))
+        {
+            return true;
+        }
+
+        if (!_originalNonFungibleResourceEntityIds.SequenceEqual(NonFungibleResourceEntityIds.ToArray()))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static EntityResourceAggregateHistory CopyOrCreate(long databaseId, EntityResourceAggregateHistory? other, long entityId, long stateVersion)
+    {
+        var ret = new EntityResourceAggregateHistory
+        {
+            Id = databaseId,
+            FromStateVersion = stateVersion,
+            EntityId = entityId,
+            FungibleResourceEntityIds = new List<long>(other?.FungibleResourceEntityIds.ToArray() ?? Array.Empty<long>()),
+            FungibleResourceSignificantUpdateStateVersions = new List<long>(other?.FungibleResourceSignificantUpdateStateVersions.ToArray() ?? Array.Empty<long>()),
+            NonFungibleResourceEntityIds = new List<long>(other?.NonFungibleResourceEntityIds.ToArray() ?? Array.Empty<long>()),
+            NonFungibleResourceSignificantUpdateStateVersions = new List<long>(other?.NonFungibleResourceSignificantUpdateStateVersions.ToArray() ?? Array.Empty<long>()),
+        };
+
+        if (other != null)
+        {
+            ret._originalFungibleResourceEntityIds = ret.FungibleResourceEntityIds.ToArray();
+            ret._originalNonFungibleResourceEntityIds = ret.NonFungibleResourceEntityIds.ToArray();
+        }
+
+        return ret;
+    }
 }

@@ -71,7 +71,6 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -114,7 +113,7 @@ internal class PendingTransactionPrunerService : IPendingTransactionPrunerServic
             .ToListAsync(token);
 
         var countByStatus = rawCountByStatus
-            .Select(g => new PendingTransactionStatusCount(PendingTransactionStatusValueConverter.Conversion[g.Status], g.Count))
+            .Select(g => new PendingTransactionStatusCount(g.Status, g.Count))
             .ToList();
 
         await _observers.ForEachAsync(x => x.PrePendingTransactionPrune(countByStatus));

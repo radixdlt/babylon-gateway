@@ -65,7 +65,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
@@ -109,7 +108,7 @@ internal class ExceptionHandler : IExceptionHandler
             traceId: traceId
         ))
         {
-            StatusCode = (int)HttpStatusCode.NotImplemented,
+            StatusCode = (int)HttpStatusCode.InternalServerError,
         };
     }
 
@@ -117,27 +116,6 @@ internal class ExceptionHandler : IExceptionHandler
     {
         switch (exception)
         {
-            // case InvalidTransactionException invalidTransactionException:
-            //     var mappedCoreApiException = ExtractKnownGatewayExceptionFromWrappedCoreApiExceptionOrNull(invalidTransactionException.WrappedCoreApiException);
-            //     if (mappedCoreApiException != null)
-            //     {
-            //         _logger.Log(
-            //             _knownGatewayErrorLogLevel,
-            //             mappedCoreApiException,
-            //             "Recognised / mapped exception from upstream core API [RequestTrace={TraceId}]",
-            //             traceId
-            //         );
-            //         return mappedCoreApiException;
-            //     }
-            //
-            //     _logger.Log(
-            //         _knownGatewayErrorLogLevel,
-            //         exception,
-            //         "General invalid transaction exception [RequestTrace={TraceId}]",
-            //         traceId
-            //     );
-            //     return invalidTransactionException;
-
             case KnownGatewayErrorException knownGatewayErrorException:
                 _logger.Log(
                     _knownGatewayErrorLogLevel,
@@ -157,38 +135,12 @@ internal class ExceptionHandler : IExceptionHandler
                 );
                 return InternalServerException.OfInvalidGatewayException(traceId);
 
-            // WrappedCoreApiException is returned if we get a 500 from upstream and could parse out the error response
-            case WrappedCoreApiException wrappedCoreApiException:
-                var mappedException = ExtractKnownGatewayExceptionFromWrappedCoreApiExceptionOrNull(wrappedCoreApiException);
-
-                if (mappedException != null)
-                {
-                    _logger.Log(
-                        _knownGatewayErrorLogLevel,
-                        mappedException,
-                        "Returning mapped exception from upstream core API [RequestTrace={TraceId}]",
-                        traceId
-                    );
-                    return mappedException;
-                }
-
-                _logger.Log(
-                    LogLevel.Warning,
-                    exception,
-                    "Unhandled error response from upstream core API [RequestTrace={TraceId}]",
-                    traceId
-                );
-                return InternalServerException.OfUnhandledCoreApiException(
-                    wrappedCoreApiException.ApiException.ErrorContent.ToString() ?? string.Empty,
-                    traceId
-                );
-
             // CoreClient.ApiException is returned if we get a 500 from upstream but couldn't extract a WrappedCoreApiException
             case CoreClient.ApiException coreApiException:
                 _logger.Log(
                     LogLevel.Warning,
                     exception,
-                    "Unhandled error response from upstream core API, which didn't parse correctly into a known ErrorType we could wrap [RequestTrace={TraceId}]",
+                    "Unhandled error response from upstream core API, which didn't parse correctly into a known ErrorType we could wrap or unexpected ErrorType [RequestTrace={TraceId}]",
                     traceId
                 );
                 return InternalServerException.OfUnhandledCoreApiException(
@@ -217,63 +169,5 @@ internal class ExceptionHandler : IExceptionHandler
                 );
                 return InternalServerException.OfHiddenException(exception, traceId);
         }
-    }
-
-    private KnownGatewayErrorException? ExtractKnownGatewayExceptionFromWrappedCoreApiExceptionOrNull(WrappedCoreApiException? wrappedCoreApiException)
-    {
-        if (wrappedCoreApiException == null)
-        {
-            return null;
-        }
-
-        /*
-         * Not all of the errors can be converted sensibly at this point. Errors fall into various categories:
-         * 1) Client errors due to how the Gateway API has constructed a Core API request - these are Gateway API bugs
-         *   and should be Gateway 500s
-         * 2) Client errors which are errors of the Gateway API client - and which are specific enough to be passed
-         *   through directly to the client - these are mapped below for ease
-         * 3) Client errors which are errors of the Gateway API client - but which the errors at the Gateway API
-         *   abstraction level are more detailed. These fall into two sub-categories:
-         *   3a) Errors which should be noticed before sending the Core API request. So if we received a Core API error of
-         *     this type, we should return a 500 (eg a Core.NotEnoughResourcesError which doesn't relate to fees - which
-         *     we should have already mapped into a more specific type like Gateway.NotEnoughTokensForTransferError in
-         *     the TransactionBuilder)
-         *   3b) Errors which need to be remapped/re-interpreted by the Gateway service. EG extracting a
-         *     Gateway.NotEnoughNativeTokensForFeeError from a Core.NotEnoughResourcesError or
-         *     Core.NotEnoughNativeTokensForFeesError in the SubmissionService
-         *     If these errors propagate to this point, we should also return a 500.
-         * 4) Core API Internal server errors - we return Gateway 500s for these.
-         *
-         * Essentially only errors of type (2) can and should be mapped below - the rest are unmapped and will return
-         * as a 500.
-         */
-        return wrappedCoreApiException switch
-        {
-            // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-            // WrappedCoreApiException<AboveMaximumValidatorFeeIncreaseError> ex => InvalidRequestException.FromOtherError(
-            //     $"You attempted to increase validator fee by {ex.Error.AttemptedValidatorFeeIncrease}, larger than the maximum of {ex.Error.MaximumValidatorFeeIncrease}"
-            // ),
-            // WrappedCoreApiException<CoreModel.BelowMinimumStakeError> ex => new BelowMinimumStakeException(
-            //     requestedAmount: ex.Error.MinimumStake.AsGatewayTokenAmount(),
-            //     minimumAmount: ex.Error.MinimumStake.AsGatewayTokenAmount()
-            // ),
-            // WrappedCoreApiException<FeeConstructionError> ex => new CouldNotConstructFeesException(ex.Error.Attempts),
-            // WrappedCoreApiException<CoreModel.InvalidPublicKeyError> ex => new InvalidPublicKeyException(
-            //     new Gateway.PublicKey(ex.Error.InvalidPublicKey.Hex),
-            //     "Invalid public key"
-            // ),
-            // WrappedCoreApiException<CoreModel.MessageTooLongError> ex => new MessageTooLongException(
-            //     ex.Error.MaximumMessageLength,
-            //     ex.Error.AttemptedMessageLength
-            // ),
-            // WrappedCoreApiException<PublicKeyNotSupportedError> ex => new InvalidPublicKeyException(
-            //     new Gateway.PublicKey(ex.Error.UnsupportedPublicKey.Hex),
-            //     "Public key is not supported"
-            // ),
-            // WrappedCoreApiException<CoreModel.TransactionNotFoundError> ex => new TransactionNotFoundException(
-            //     new Gateway.TransactionIdentifier(ex.Error.TransactionIdentifier.Hash)
-            // ),
-            _ => null,
-        };
     }
 }

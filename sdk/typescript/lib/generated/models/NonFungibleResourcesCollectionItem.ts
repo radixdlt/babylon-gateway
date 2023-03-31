@@ -13,6 +13,18 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { ResourceAggregationLevel } from './ResourceAggregationLevel';
+import {
+    ResourceAggregationLevelFromJSON,
+    ResourceAggregationLevelFromJSONTyped,
+    ResourceAggregationLevelToJSON,
+} from './ResourceAggregationLevel';
+
+import {
+     NonFungibleResourcesCollectionItemGloballyAggregatedFromJSONTyped,
+     NonFungibleResourcesCollectionItemVaultAggregatedFromJSONTyped
+} from './';
+
 /**
  * 
  * @export
@@ -20,17 +32,17 @@ import { exists, mapValues } from '../runtime';
  */
 export interface NonFungibleResourcesCollectionItem {
     /**
-     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
+     * 
+     * @type {ResourceAggregationLevel}
+     * @memberof NonFungibleResourcesCollectionItem
+     */
+    aggregation_level: ResourceAggregationLevel;
+    /**
+     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
      * @type {string}
      * @memberof NonFungibleResourcesCollectionItem
      */
-    address: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof NonFungibleResourcesCollectionItem
-     */
-    amount: number;
+    resource_address: string;
 }
 
 /**
@@ -38,8 +50,8 @@ export interface NonFungibleResourcesCollectionItem {
  */
 export function instanceOfNonFungibleResourcesCollectionItem(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "address" in value;
-    isInstance = isInstance && "amount" in value;
+    isInstance = isInstance && "aggregation_level" in value;
+    isInstance = isInstance && "resource_address" in value;
 
     return isInstance;
 }
@@ -52,10 +64,18 @@ export function NonFungibleResourcesCollectionItemFromJSONTyped(json: any, ignor
     if ((json === undefined) || (json === null)) {
         return json;
     }
+    if (!ignoreDiscriminator) {
+        if (json['aggregation_level'] === 'Global') {
+            return NonFungibleResourcesCollectionItemGloballyAggregatedFromJSONTyped(json, true);
+        }
+        if (json['aggregation_level'] === 'Vault') {
+            return NonFungibleResourcesCollectionItemVaultAggregatedFromJSONTyped(json, true);
+        }
+    }
     return {
         
-        'address': json['address'],
-        'amount': json['amount'],
+        'aggregation_level': ResourceAggregationLevelFromJSON(json['aggregation_level']),
+        'resource_address': json['resource_address'],
     };
 }
 
@@ -68,8 +88,8 @@ export function NonFungibleResourcesCollectionItemToJSON(value?: NonFungibleReso
     }
     return {
         
-        'address': value.address,
-        'amount': value.amount,
+        'aggregation_level': ResourceAggregationLevelToJSON(value.aggregation_level),
+        'resource_address': value.resource_address,
     };
 }
 

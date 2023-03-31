@@ -71,6 +71,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
+internal enum LedgerTransactionKindFilterConstraint
+{
+    User,
+    EpochChange,
+}
+
 /// <summary>
 /// A transaction committed onto the radix ledger.
 /// This table forms a shell, to which other properties are connected.
@@ -98,26 +104,26 @@ internal abstract class LedgerTransaction
     [Column("epoch")]
     public long Epoch { get; set; }
 
-    [Column("index_in_epoch")]
-    public long IndexInEpoch { get; set; }
-
     [Column("round_in_epoch")]
     public long RoundInEpoch { get; set; }
 
-    [Column("is_start_of_epoch")]
-    public bool IsStartOfEpoch { get; set; }
+    [Column("index_in_epoch")]
+    public long IndexInEpoch { get; set; }
 
-    [Column("is_start_of_round")]
-    public bool IsStartOfRound { get; set; }
+    [Column("index_in_round")]
+    public long IndexInRound { get; set; }
+
+    [Column("is_end_of_epoch")]
+    public bool IsEndOfEpoch { get; set; }
 
     [Column("referenced_entities")]
     public List<long> ReferencedEntities { get; set; }
 
     [Column("fee_paid")]
-    public TokenAmount FeePaid { get; set; }
+    public TokenAmount? FeePaid { get; set; }
 
     [Column("tip_paid")]
-    public TokenAmount TipPaid { get; set; }
+    public TokenAmount? TipPaid { get; set; }
 
     /// <summary>
     /// The round timestamp of a round where vertex V was voted on is derived as the median of the timestamp of the
@@ -140,6 +146,21 @@ internal abstract class LedgerTransaction
     /// </summary>
     [Column("normalized_round_timestamp")]
     public DateTime NormalizedRoundTimestamp { get; set; }
+
+    /// <summary>
+    /// Transaction kind filter used as optional filter constraint in transaction stream endpoint.
+    /// </summary>
+    [Column("kind_filter_constraint")]
+    public LedgerTransactionKindFilterConstraint? KindFilterConstraint { get; set; }
+
+    /// <summary>
+    /// The raw payload of the transaction.
+    /// </summary>
+    [Column("raw_payload")]
+    public byte[] RawPayload { get; set; }
+
+    [Column("engine_receipt", TypeName = "jsonb")]
+    public string EngineReceipt { get; set; }
 }
 
 internal class UserLedgerTransaction : LedgerTransaction
@@ -166,5 +187,9 @@ internal class UserLedgerTransaction : LedgerTransaction
 }
 
 internal class ValidatorLedgerTransaction : LedgerTransaction
+{
+}
+
+internal class SystemLedgerTransaction : LedgerTransaction
 {
 }

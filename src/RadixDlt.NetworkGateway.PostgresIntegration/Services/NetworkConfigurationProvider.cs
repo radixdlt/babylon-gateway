@@ -148,6 +148,11 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return true;
     }
 
+    public byte GetNetworkId()
+    {
+        return GetCapturedConfig().NetworkId;
+    }
+
     public string GetNetworkName()
     {
         return GetCapturedConfig().NetworkName;
@@ -175,17 +180,20 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 
         return new NetworkConfiguration
         {
+            NetworkId = (byte)networkConfiguration.NetworkId,
             NetworkName = networkConfiguration.Network,
             HrpDefinition = new HrpDefinition(
                 Package: GetHrpPrefix(at, AddressSubtype.Package),
                 NormalComponent: GetHrpPrefix(at, AddressSubtype.NormalComponent),
                 AccountComponent: GetHrpPrefix(at, AddressSubtype.AccountComponent),
+                ValidatorComponent: GetHrpPrefix(at, AddressSubtype.Validator),
+                Identity: GetHrpPrefix(at, AddressSubtype.IdentityComponent),
                 EpochManager: GetHrpPrefix(at, AddressSubtype.EpochManager),
                 Clock: GetHrpPrefix(at, AddressSubtype.Clock),
-                Resource: GetHrpPrefix(at, AddressSubtype.Resource)
+                FungibleResource: GetHrpPrefix(at, AddressSubtype.FungibleResource),
+                NonFungibleResource: GetHrpPrefix(at, AddressSubtype.NonFungibleResource)
             ),
             WellKnownAddresses = new WellKnownAddresses(
-                AccountPackage: wka.AccountPackage,
                 Faucet: wka.Faucet,
                 EpochManager: wka.EpochManager,
                 Clock: wka.Clock,

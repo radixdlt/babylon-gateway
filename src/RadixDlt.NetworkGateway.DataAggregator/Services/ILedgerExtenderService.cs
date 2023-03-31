@@ -83,10 +83,10 @@ public sealed record TransactionSummary(
     DateTime NormalizedRoundTimestamp,
     DateTime CreatedTimestamp,
     long Epoch,
-    long IndexInEpoch,
     long RoundInEpoch,
-    bool IsStartOfEpoch,
-    bool IsStartOfRound,
+    long IndexInEpoch,
+    long IndexInRound,
+    bool IsEndOfEpoch,
     byte[] TransactionAccumulator
 );
 
@@ -102,10 +102,8 @@ public sealed record ConsistentLedgerExtension(
 public sealed record CommitTransactionsReport(
     int TransactionsCommittedCount,
     TransactionSummary FinalTransaction,
-    long RawTxnPersistenceMs,
-    long MempoolTransactionUpdateMs,
-    long TransactionContentHandlingMs,
+    long ContentHandlingMs,
     long DbDependenciesLoadingMs,
-    long DbPersistanceMs,
-    int DbEntriesWritten
+    long DbPersistenceMs,
+    int DbEntriesTouched
 );

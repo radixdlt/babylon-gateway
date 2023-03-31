@@ -63,12 +63,12 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
@@ -86,7 +86,7 @@ internal abstract class Entity
     public RadixAddress Address { get; set; }
 
     [Column("global_address")]
-    public RadixAddress? GlobalAddress { get; set; }
+    public GlobalAddress? GlobalAddress { get; set; }
 
     [Column("ancestor_ids")]
     public List<long>? AncestorIds { get; set; }
@@ -100,55 +100,129 @@ internal abstract class Entity
     [Column("global_ancestor_id")]
     public long? GlobalAncestorId { get; set; }
 
-    public string? BuildHrpGlobalAddress(HrpDefinition hrp)
+    [Column("correlated_entities")]
+    public virtual List<long> CorrelatedEntities
     {
-        return GlobalAddress == null
-            ? null
-            : RadixAddressCodec.Encode(SelectHrp(hrp), GlobalAddress);
-    }
-
-    private string SelectHrp(HrpDefinition hrp)
-    {
-        return this switch
+        get
         {
-            PackageEntity => hrp.Package,
-            NormalComponentEntity => hrp.NormalComponent,
-            AccountComponentEntity => hrp.AccountComponent,
-            EpochManagerEntity => hrp.EpochManager,
-            ClockEntity => hrp.Clock,
-            ResourceManagerEntity => hrp.Resource,
-            _ => throw new InvalidOperationException("Unable to build HRP address on entity of type " + GetType().Name),
-        };
+            return new List<long>(AncestorIds?.ToArray() ?? Array.Empty<long>());
+        }
+
+        private set
+        {
+            /* setter needed for EF Core only */
+        }
     }
+
+    [MemberNotNullWhen(true, nameof(AncestorIds), nameof(ParentAncestorId), nameof(OwnerAncestorId), nameof(GlobalAncestorId))]
+    public bool HasParent => AncestorIds != null;
 }
 
-internal class EpochManagerEntity : Entity
+internal abstract class ResourceEntity : ComponentEntity
 {
 }
 
-internal abstract class ResourceManagerEntity : Entity
-{
-}
-
-internal class FungibleResourceManagerEntity : ResourceManagerEntity
+internal class FungibleResourceEntity : ResourceEntity
 {
     [Column("divisibility")]
     public int Divisibility { get; set; }
 }
 
-internal class NonFungibleResourceManagerEntity : ResourceManagerEntity
+internal class NonFungibleResourceEntity : ResourceEntity
 {
     [Column("non_fungible_id_type")]
     public NonFungibleIdType NonFungibleIdType { get; set; }
 }
 
-internal abstract class ComponentEntity : Entity
+internal abstract class ComponentEntity : Entity, IRoyaltyVaultHolder
 {
     [Column("package_id")]
     public long PackageId { get; set; }
 
     [Column("blueprint_name")]
     public string BlueprintName { get; set; }
+
+    [Column("royalty_vault_entity_id")]
+    public long? RoyaltyVaultEntityId { get; set; }
+
+    public override List<long> CorrelatedEntities
+    {
+        get
+        {
+            var ce = base.CorrelatedEntities;
+
+            ce.Add(PackageId);
+
+            if (RoyaltyVaultEntityId.HasValue)
+            {
+                ce.Add(RoyaltyVaultEntityId.Value);
+            }
+
+            return ce;
+        }
+    }
+}
+
+internal class ValidatorEntity : ComponentEntity
+{
+    [Column("stake_vault_entity_id")]
+    public long StakeVaultEntityId { get; set; }
+
+    [Column("unstake_vault_entity_id")]
+    public long UnstakeVaultEntityId { get; set; }
+
+    [Column("epoch_manager_entity_id")]
+    public long EpochManagerEntityId { get; set; }
+
+    public override List<long> CorrelatedEntities
+    {
+        get
+        {
+            var ce = base.CorrelatedEntities;
+
+            ce.Add(StakeVaultEntityId);
+            ce.Add(UnstakeVaultEntityId);
+            ce.Add(EpochManagerEntityId);
+
+            return ce;
+        }
+    }
+}
+
+internal class EpochManagerEntity : ComponentEntity
+{
+}
+
+internal class ClockEntity : ComponentEntity
+{
+}
+
+internal class VaultEntity : ComponentEntity
+{
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+
+    [Column("royalty_vault_of_entity_id")]
+    public long? RoyaltyVaultOfEntityId { get; set; }
+
+    public bool IsRoyaltyVault => RoyaltyVaultOfEntityId != null;
+
+    public override List<long> CorrelatedEntities
+    {
+        get
+        {
+            var ce = base.CorrelatedEntities;
+
+            ce.Add(ResourceEntityId);
+
+            if (RoyaltyVaultOfEntityId.HasValue)
+            {
+                ce.Add(RoyaltyVaultOfEntityId.Value);
+            }
+
+            return ce;
+        }
+    }
 }
 
 internal class NormalComponentEntity : ComponentEntity
@@ -159,33 +233,43 @@ internal class AccountComponentEntity : ComponentEntity
 {
 }
 
+internal class IdentityEntity : ComponentEntity
+{
+}
+
+internal class PackageEntity : ComponentEntity
+{
+    [Column("code")]
+    public byte[] Code { get; set; }
+
+    [Column("code_type")]
+    public string CodeType { get; set; }
+}
+
 // This is transient model, not stored in database
 internal class VirtualAccountComponentEntity : AccountComponentEntity
 {
-    public VirtualAccountComponentEntity(byte[] globalAddress)
+    public VirtualAccountComponentEntity(GlobalAddress globalAddress)
     {
         GlobalAddress = globalAddress;
     }
 }
 
-internal class PackageEntity : Entity
+// This is transient model, not stored in database
+internal class VirtualIdentityEntity : IdentityEntity
 {
-    [Column("code")]
-    public byte[] Code { get; set; }
+    public VirtualIdentityEntity(GlobalAddress globalAddress)
+    {
+        GlobalAddress = globalAddress;
+    }
 }
 
 internal class KeyValueStoreEntity : Entity
 {
+    [Column("store_of_non_fungible_resource_entity_id")]
+    public long? StoreOfNonFungibleResourceEntityId { get; set; }
 }
 
-internal class VaultEntity : Entity
-{
-}
-
-internal class NonFungibleStoreEntity : Entity
-{
-}
-
-internal class ClockEntity : Entity
+internal class AccessControllerEntity : ComponentEntity
 {
 }

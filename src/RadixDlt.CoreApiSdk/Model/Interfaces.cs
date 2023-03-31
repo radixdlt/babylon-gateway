@@ -63,20 +63,21 @@
  */
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-// TODO rename
-// a) indicates that this model type is owner_ancestor_id
-// b) has owned_entities
-public interface IOwner
+public interface IEntityOwner
 {
-    public IEnumerable<EntityReference> OwnedEntities { get; }
+    public IEnumerable<EntityReference> GetOwnedEntities();
 }
 
-public interface IGlobalResourcePointer
+public interface IRoyaltyVaultHolder
 {
-    public IEnumerable<GlobalResourcePointer> Pointers { get; }
+    public bool TryGetRoyaltyVault([NotNullWhen(true)] out EntityReference royaltyVault);
 }
 
-public record GlobalResourcePointer(ResourceType Type, string GlobalAddress);
+public interface IGlobalAddressPointer
+{
+    public IEnumerable<string> GetGlobalAddresses();
+}

@@ -5,17 +5,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        dotnet-version: ['7.0.x']
     environment: release
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-      - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+      - name: Setup .NET SDK
         uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a
         with:
-          dotnet-version: ${{ matrix.dotnet-version }}
-          include-prerelease: true
+          dotnet-version: 7.0.x
       - name: Get release
         id: get_release
         uses: bruceadams/get-release@f589ce0779c7bef1faf175f7488c972eb47dc046
@@ -24,13 +20,10 @@ jobs:
       - name: Build linux binaries
         run: |
           cd apps/DataAggregator
-          echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' appsettings.json )" > appsettings.json
           dotnet publish --runtime linux-x64 --configuration Release --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false --output ./output
           cd ../DatabaseMigrations
-          echo "$( jq '.+{DatabaseMigrationsVersion:"${{ steps.get_release.outputs.tag_name }}"}' appsettings.json )" > appsettings.json
           dotnet publish --runtime linux-x64 --configuration Release --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false --output ./output
           cd ../GatewayApi
-          echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' appsettings.json )" > appsettings.json
           dotnet publish --runtime linux-x64 --configuration Release --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false --output ./output
           cd ../..
           zip -r data-aggregator.zip apps/DataAggregator/output/
@@ -65,75 +58,120 @@ jobs:
           asset_name: database-migrations-${{ github.event.release.tag_name }}-linux-x64.zip
           asset_content_type: application/zip
 
-
-  publish-docker:
+  setup-tags:
     runs-on: ubuntu-22.04
-    environment: release
+    outputs:
+      database-migrations-tag: ${{ steps.setup_tags.outputs.database-migrations-tag }}
+      data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag }}
+      gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag }}
     steps:
-      - name: Dump context
-        uses: crazy-max/ghaction-dump-context@516dbb0c760f39b4cdd750ae095f1688780f68f4
-
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-        with:
-          fetch-depth: 0
-
-      - name: Get release
+      - name: Get rele ase
         id: get_release
         uses: bruceadams/get-release@f589ce0779c7bef1faf175f7488c972eb47dc046
         env:
           GITHUB_TOKEN: ${{ github.token }}
-
-      - name: Login to Dockerhub (release)
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
       - name: Setup tags for docker image
         id: setup_tags
         uses: ./.github/actions/set-variables
         with:
           github_event_name: ${{ github.event_name }}
           github_action_name: ${{ github.event.action}}
-
       - name: Setup application version
         run: |
           echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/DataAggregator/appsettings.json )" > src/DataAggregator/appsettings.json
           echo "$( jq '.+{DatabaseMigrationsVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/DatabaseMigrations/appsettings.json )" > src/DatabaseMigrations/appsettings.json
           echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/GatewayApi/appsettings.json )" > src/GatewayAPI/appsettings.json
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8c0edbc76e98fa90f69d9a2c020dcb50019dc325
-
-      - name: Docker build and push DataAggregator
-        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
+      - name: Publish Gateway Settings
+        uses: actions/upload-artifact@v3
         with:
-          file: ./apps/DataAggregator/Dockerfile
-          tags: |
-            ${{ steps.setup_tags.outputs.data_aggregator_tags }}
-          push: true
-          platforms: linux/amd64,linux/arm64
-          context: ./
-
-      - name: Docker build and push Gateway API
-        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
+          path: src/GatewayAPI/appsettings.json
+          name: gateway
+          retention-days: 1
+      - name: Publish DatabaseMigrations Settings
+        uses: actions/upload-artifact@v3
         with:
-          file: ./apps/GatewayApi/Dockerfile
-          tags: |
-            ${{ steps.setup_tags.outputs.gateway_api_tags }}
-          push: true
-          platforms: linux/amd64,linux/arm64
-          context: ./
-
-      - name: Docker build and push Database Migrations
-        uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
+          path: src/DatabaseMigrations/appsettings.json
+          name: migrations
+          retention-days: 1
+      - name: Publish DataAggregator Settings
+        uses: actions/upload-artifact@v3
         with:
-          file: ./apps/DatabaseMigrations/Dockerfile
-          tags: |
-            ${{ steps.setup_tags.outputs.database_migrations_tags }}
-          push: true
-          platforms: linux/amd64,linux/arm64
-          context: ./
+          path: src/DataAggregator/appsettings.json
+          name: aggregator
+          retention-days: 1
+
+  docker-database-migrations-dockerhub:
+    name: (DatabaseMigrations) Docker
+    needs:
+      - setup-tags
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    with:
+      runs_on: ubuntu-22.04
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "babylon-ng-database-migrations"
+      tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}
+      context: "."
+      dockerfile: "./apps/DatabaseMigrations/Dockerfile"
+      platforms: "linux/amd64"
+      environment: release
+      cache_tag_suffix: "release"
+      enable_dockerhub: "true"
+      restore_artifact: "true"
+      artifact_location: "src/DatabaseMigrations/appsettings.json"
+      artifact_name: "migrations"
+    secrets:
+      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
+      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      role_to_assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
+  
+  docker-data-aggregator-dockerhub:
+    name: (DataAggregator) Docker
+    needs:
+      - setup-tags
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    with:
+      runs_on: ubuntu-22.04
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "babylon-ng-data-aggregator"
+      tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}
+      context: "."
+      dockerfile: "./apps/DataAggregator/Dockerfile"
+      platforms: "linux/amd64"
+      environment: release
+      cache_tag_suffix: "release"
+      enable_dockerhub: "true"
+      restore_artifact: "true"
+      artifact_location: "src/DataAggregator/appsettings.json"
+      artifact_name: "aggregator"
+    secrets:
+      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
+      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      role_to_assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
+  
+  docker-gateway-api-dockerhub:
+    name: (GatewayApi) Docker
+    needs:
+      - setup-tags
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    with:
+      runs_on: ubuntu-22.04
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "babylon-ng-gateway-api"
+      tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}
+      context: "."
+      dockerfile: "./apps/GatewayApi/Dockerfile"
+      platforms: "linux/amd64"
+      environment: release
+      cache_tag_suffix: "release"
+      enable_dockerhub: "true"
+      restore_artifact: "true"
+      artifact_location: "src/GatewayAPI/appsettings.json"
+      artifact_name: "gateway"
+    secrets:
+      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
+      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      role_to_assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}

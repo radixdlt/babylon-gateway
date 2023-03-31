@@ -63,73 +63,35 @@
  */
 
 using System;
-using System.Security.Cryptography;
 
 namespace RadixDlt.NetworkGateway.Abstractions.StaticHelpers;
 
 public static class HashingHelper
 {
-    public static void ConcatHashesAndTakeSha256Twice(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, Span<byte> destination)
+    public static bool VerifyHash(ReadOnlySpan<byte> source, ReadOnlySpan<byte> hashToVerify)
     {
-        if (hash1.Length != 32)
-        {
-            throw new ArgumentException("must to be 32 bytes long", nameof(hash1));
-        }
+        var hash = RadixEngineToolkit.RadixEngineToolkit.Hash(source.ToArray());
+        return hashToVerify.SequenceEqual(hash);
+    }
 
-        if (hash2.Length != 32)
-        {
-            throw new ArgumentException("must to be 32 bytes long", nameof(hash2));
-        }
+    public static byte[] Hash(ReadOnlySpan<byte> source)
+    {
+        return RadixEngineToolkit.RadixEngineToolkit.Hash(source.ToArray()).ToArray();
+    }
 
-        Span<byte> aggregate = stackalloc byte[64];
+    public static byte[] ComputeCombinedHash(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2)
+    {
+        Span<byte> aggregate = stackalloc byte[hash1.Length + hash2.Length];
         hash1.CopyTo(aggregate);
-        hash2.CopyTo(aggregate[32..]);
+        hash2.CopyTo(aggregate[hash1.Length..]);
 
-        Sha256Twice(aggregate, destination);
+        return RadixEngineToolkit.RadixEngineToolkit.Hash(aggregate).ToArray();
     }
 
-    public static byte[] ConcatHashesAndTakeSha256Twice(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2)
+    public static bool ComputeAndVerifyCombinedHash(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, ReadOnlySpan<byte> hashToVerify)
     {
-        var destination = new byte[32];
-        ConcatHashesAndTakeSha256Twice(hash1, hash2, destination);
-        return destination;
-    }
-
-    public static bool VerifyConcatHashesAndTakeSha256Twice(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, ReadOnlySpan<byte> hashToVerify)
-    {
-        if (hashToVerify.Length != 32)
-        {
-            return false;
-        }
-
-        Span<byte> hashResult = stackalloc byte[32];
-        ConcatHashesAndTakeSha256Twice(hash1, hash2, hashResult);
-        return hashToVerify.SequenceEqual(hashResult);
-    }
-
-    public static void Sha256Twice(ReadOnlySpan<byte> source, Span<byte> destination)
-    {
-        Span<byte> hashResult1 = stackalloc byte[32];
-        SHA256.HashData(source, hashResult1);
-        SHA256.HashData(hashResult1, destination);
-    }
-
-    public static byte[] Sha256Twice(ReadOnlySpan<byte> source)
-    {
-        Span<byte> hashResult1 = stackalloc byte[32];
-        SHA256.HashData(source, hashResult1);
-        return SHA256.HashData(hashResult1);
-    }
-
-    public static bool VerifySha256TwiceHash(ReadOnlySpan<byte> source, ReadOnlySpan<byte> hashToVerify)
-    {
-        if (hashToVerify.Length != 32)
-        {
-            return false;
-        }
-
-        Span<byte> hashResult = stackalloc byte[32];
-        Sha256Twice(source, hashResult);
-        return hashToVerify.SequenceEqual(hashResult);
+        Span<byte> combined = stackalloc byte[hash1.Length + hash2.Length];
+        var hash = ComputeCombinedHash(hash1, hash2);
+        return hashToVerify.SequenceEqual(hash);
     }
 }

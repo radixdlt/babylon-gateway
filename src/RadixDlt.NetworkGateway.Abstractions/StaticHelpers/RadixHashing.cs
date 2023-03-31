@@ -70,7 +70,7 @@ public static class RadixHashing
 {
     public static bool IsValidAccumulator(ReadOnlySpan<byte> parentAccumulator, ReadOnlySpan<byte> childHash, ReadOnlySpan<byte> newAccumulator)
     {
-        return HashingHelper.VerifyConcatHashesAndTakeSha256Twice(parentAccumulator, childHash, newAccumulator);
+        return HashingHelper.ComputeAndVerifyCombinedHash(parentAccumulator, childHash, newAccumulator);
     }
 
     // NB - There is some repetition with the above for performance gains regarding stackalloc.
@@ -87,7 +87,7 @@ public static class RadixHashing
             throw new ArgumentException("Child hash must to be 32 bytes long", nameof(childHash));
         }
 
-        return HashingHelper.ConcatHashesAndTakeSha256Twice(parentAccumulator, childHash);
+        return HashingHelper.ComputeCombinedHash(parentAccumulator, childHash);
     }
 
     /// <summary>
@@ -95,11 +95,11 @@ public static class RadixHashing
     /// </summary>
     public static byte[] CreateTransactionPayloadHash(ReadOnlySpan<byte> payload)
     {
-        return HashingHelper.Sha256Twice(payload);
+        return HashingHelper.Hash(payload);
     }
 
     public static bool IsValidTransactionPayloadHash(ReadOnlySpan<byte> payload, ReadOnlySpan<byte> payloadHash)
     {
-        return HashingHelper.VerifySha256TwiceHash(payload, payloadHash);
+        return HashingHelper.VerifyHash(payload, payloadHash);
     }
 }

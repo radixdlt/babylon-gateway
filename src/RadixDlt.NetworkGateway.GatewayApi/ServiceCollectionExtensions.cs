@@ -99,6 +99,7 @@ public static class ServiceCollectionExtensions
 
         services
             .AddValidatableOptionsAtSection<EndpointOptions, EndpointOptionsValidator>("GatewayApi:Endpoint")
+            .AddValidatableOptionsAtSection<CoreApiIntegrationOptions, CoreApiIntegrationOptionsValidator>("GatewayApi:CoreApiIntegration")
             .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("GatewayApi:Network")
             .AddValidatableOptionsAtSection<AcceptableLedgerLagOptions, AcceptableLedgerLagOptionsValidator>("GatewayApi:AcceptableLedgerLag");
 
@@ -142,8 +143,9 @@ public static class ServiceCollectionExtensions
             .AddScoped<InvalidModelStateFilter>();
 
         services.TryAddScoped<IEntityHandler, DefaultEntityHandler>();
-        services.TryAddScoped<IGatewayHandler, DefaultGatewayHandler>();
+        services.TryAddScoped<IStatusHandler, DefaultStatusHandler>();
         services.TryAddScoped<ITransactionHandler, DefaultTransactionHandler>();
+        services.TryAddScoped<IValidatorStateHandler, DefaultValidatorStateHandler>();
         services.TryAddScoped<INonFungibleHandler, DefaultNonFungibleHandler>();
         services.TryAddScoped<IPreviewService, PreviewService>();
         services.TryAddScoped<ISubmissionService, SubmissionService>();
@@ -176,6 +178,10 @@ public static class ServiceCollectionExtensions
         {
             httpClientHandler.Proxy = new WebProxy(o.CoreApiHttpProxyAddress);
         }
+
+        // Enables gzip,deflate,brotli for Core API requests
+        // See https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpclienthandler.automaticdecompression?view=net-7.0
+        httpClientHandler.AutomaticDecompression = DecompressionMethods.All;
 
         return httpClientHandler;
     }

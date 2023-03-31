@@ -8,6 +8,9 @@ inputs:
     description: "Github action name"
     required: true
 outputs:
+  version-suffix:
+    description: "Value of <VersionSuffix> used by MSBuild"
+    value: ${{ steps.set_variables.outputs.version-suffix }}
   version-tag:
     description: "General-purpose image tag"
     value: ${{ steps.set_variables.outputs.version-tag }}
@@ -39,63 +42,48 @@ runs:
         GH_ACTION_NAME=${{ inputs.github_action_name }}
         GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g')
         GIT_COMMIT=$(git log -1 --format=%h )
-        DOCKER_TAG=${GIT_BRANCH}-${GIT_COMMIT}
-        if [[ ! -z $GH_EVENT_NAME ]] && [[ "$GH_EVENT_NAME" == "release" ]] ;then
-            DOCKER_REPO_DATA_AGGREGATOR="eu.gcr.io/dev-container-repo/babylon-ng-data-aggregator"
-            DOCKER_REPO_GATEWAY_API="eu.gcr.io/dev-container-repo/babylon-ng-gateway-api"
-            DOCKER_REPO_DATABASE_MIGRATIONS="eu.gcr.io/dev-container-repo/babylon-ng-database-migrations"
+        NORMALIZED_SUFFIX=$(echo "${GIT_BRANCH}-${GIT_COMMIT}" | tr -cd '[:alnum:]-')
+        DOCKER_TAG=${NORMALIZED_SUFFIX}
+        VERSION_SUFFIX=${NORMALIZED_SUFFIX}
 
+        DOCKER_REPO_DATA_AGGREGATOR="eu.gcr.io/dev-container-repo/babylon-ng-data-aggregator"
+        DOCKER_REPO_GATEWAY_API="eu.gcr.io/dev-container-repo/babylon-ng-gateway-api"
+        DOCKER_REPO_DATABASE_MIGRATIONS="eu.gcr.io/dev-container-repo/babylon-ng-database-migrations"
 
-            case "${GH_EVENT_NAME}" in
-                release)
-                    DOCKER_REPO_DATA_AGGREGATOR="radixdlt/babylon-ng-data-aggregator"
-                    DOCKER_REPO_DATABASE_MIGRATIONS="radixdlt/babylon-ng-database-migrations"
-                    DOCKER_REPO_GATEWAY_API="radixdlt/babylon-ng-gateway-api"
-                    DATA_AGGREGATOR_TAGS="${DOCKER_REPO_DATA_AGGREGATOR}:${{ github.event.release.tag_name }}"
-                    DATABASE_MIGRATIONS_TAGS="${DOCKER_REPO_DATABASE_MIGRATIONS}:${{ github.event.release.tag_name }}"
-                    GATEWAY_API_TAGS="${DOCKER_REPO_GATEWAY_API}:${{ github.event.release.tag_name }}"
-                ;;
-                *)
-                    echo "${GH_EVENT_NAME} not implemented yet"
-                    exit 1
-                ;;
-            esac
+        case "${GH_EVENT_NAME}" in
+            release)
+                VERSION_SUFFIX=""
 
-            echo "DATA_AGGREGATOR_TAGS: $DATA_AGGREGATOR_TAGS"
-            echo "DATABASE_MIGRATIONS_TAGS: $DATABASE_MIGRATIONS_TAGS"
-            echo "GATEWAY_API_TAGS: $GATEWAY_API_TAGS"
+                DOCKER_REPO_DATA_AGGREGATOR="radixdlt/babylon-ng-data-aggregator"
+                DOCKER_REPO_DATABASE_MIGRATIONS="radixdlt/babylon-ng-database-migrations"
+                DOCKER_REPO_GATEWAY_API="radixdlt/babylon-ng-gateway-api"
 
-            echo "::set-output name=version-tag::$DOCKER_TAG"
+                DATA_AGGREGATOR_TAGS="${DOCKER_REPO_DATA_AGGREGATOR}:${{ github.event.release.tag_name }}"
+                DATABASE_MIGRATIONS_TAGS="${DOCKER_REPO_DATABASE_MIGRATIONS}:${{ github.event.release.tag_name }}"
+                GATEWAY_API_TAGS="${DOCKER_REPO_GATEWAY_API}:${{ github.event.release.tag_name }}"
+            ;;
+            *)
+                DATA_AGGREGATOR_TAGS="${DOCKER_REPO_DATA_AGGREGATOR}:${DOCKER_TAG}"
+                DATABASE_MIGRATIONS_TAGS="${DOCKER_REPO_DATABASE_MIGRATIONS}:${DOCKER_TAG}"
+                GATEWAY_API_TAGS="${DOCKER_REPO_GATEWAY_API}:${DOCKER_TAG}"
+            ;;
+        esac
 
-            echo "::set-output name=data_aggregator_tags::$DATA_AGGREGATOR_TAGS"
-            echo "::set-output name=gateway_api_tags::$GATEWAY_API_TAGS"
-            echo "::set-output name=database_migrations_tags::$DATABASE_MIGRATIONS_TAGS"
+        echo "VERSION_SUFFIX: $VERSION_SUFFIX"
+        echo "DATA_AGGREGATOR_TAGS: $DATA_AGGREGATOR_TAGS"
+        echo "DATABASE_MIGRATIONS_TAGS: $DATABASE_MIGRATIONS_TAGS"
+        echo "GATEWAY_API_TAGS: $GATEWAY_API_TAGS"
 
-            echo "::set-output name=data-aggregator-tag::$DOCKER_TAG"
-            echo "::set-output name=database-migrations-tag::$DOCKER_TAG"
-            echo "::set-output name=gateway-api-tag::$DOCKER_TAG"
+        echo "version-suffix=$VERSION_SUFFIX" >> $GITHUB_OUTPUT
+        echo "version-tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
 
-        else
-            DOCKER_REPO_DATA_AGGREGATOR="eu.gcr.io/dev-container-repo/babylon-ng-data-aggregator"
-            DOCKER_REPO_GATEWAY_API="eu.gcr.io/dev-container-repo/babylon-ng-gateway-api"
-            DOCKER_REPO_DATABASE_MIGRATIONS="eu.gcr.io/dev-container-repo/babylon-ng-database-migrations"
+        echo "data_aggregator_tags=$DATA_AGGREGATOR_TAGS" >> $GITHUB_OUTPUT
+        echo "gateway_api_tags=$GATEWAY_API_TAGS" >> $GITHUB_OUTPUT
+        echo "database_migrations_tags=$DATABASE_MIGRATIONS_TAGS" >> $GITHUB_OUTPUT
 
-            DATA_AGGREGATOR_TAGS="${DOCKER_REPO_DATA_AGGREGATOR}:${DOCKER_TAG}"
-            DATABASE_MIGRATIONS_TAGS="${DOCKER_REPO_DATABASE_MIGRATIONS}:${DOCKER_TAG}"
-            GATEWAY_API_TAGS="${DOCKER_REPO_GATEWAY_API}:${DOCKER_TAG}"
+        echo "data-aggregator-tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
+        echo "database-migrations-tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
+        echo "gateway-api-tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
 
-            echo "DATA_AGGREGATOR_TAGS: $DATA_AGGREGATOR_TAGS"
-            echo "DATABASE_MIGRATIONS_TAGS: $DATABASE_MIGRATION_TAGS"
-            echo "GATEWAY_API_TAGS: $GATEWAY_API_TAGS"
-
-            echo "::set-output name=version-tag::$DOCKER_TAG"
-
-            echo "::set-output name=data_aggregator_tags::$DATA_AGGREGATOR_TAGS"
-            echo "::set-output name=database_migrations_tags::$DATABASE_MIGRATIONS_TAGS"
-            echo "::set-output name=gateway_api_tags::$GATEWAY_API_TAGS"
-
-            echo "::set-output name=data-aggregator-tag::$DOCKER_TAG"
-            echo "::set-output name=database-migrations-tag::$DOCKER_TAG"
-            echo "::set-output name=gateway-api-tag::$DOCKER_TAG"
-        fi
+        sed -i "s/\(<VersionSuffix>\)[^<>]*\(<\/VersionSuffix>\)/\1$VERSION_SUFFIX\2/g" Directory.Build.props
       shell: bash

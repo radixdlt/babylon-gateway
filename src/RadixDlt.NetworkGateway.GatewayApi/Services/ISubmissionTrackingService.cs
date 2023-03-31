@@ -62,11 +62,11 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -74,12 +74,12 @@ public interface ISubmissionTrackingService
 {
     Task<TackingGuidance> TrackInitialSubmission(
         DateTime submittedTimestamp,
-        CoreModel.NotarizedTransaction notarizedTransaction,
+        ToolkitModel.Transaction.NotarizedTransaction notarizedTransaction,
         string submittedToNodeName,
         CancellationToken token = default
     );
 
-    Task MarkAsFailed(
+    Task MarkInitialFailure(
         bool permanent,
         byte[] payloadHash,
         string failureReason,

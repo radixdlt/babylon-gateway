@@ -84,9 +84,14 @@ namespace GatewayApi;
 
 public static class OpenApiDocumentHandler
 {
-    public static async Task Handle([FromServices] INetworkConfigurationProvider networkConfigurationProvider, [FromServices] ITransactionHandler transactionHandler, HttpContext context, CancellationToken token = default)
+    public static async Task Handle(
+        [FromServices] INetworkConfigurationProvider networkConfigurationProvider,
+        [FromServices] ITransactionHandler transactionHandler,
+        [FromServices] ILedgerStateQuerier ledgerStateQuerier,
+        HttpContext context,
+        CancellationToken token = default)
     {
-        var placeholderReplacements = await GetPlaceholderReplacements(networkConfigurationProvider, transactionHandler, token);
+        var placeholderReplacements = await GetPlaceholderReplacements(networkConfigurationProvider, transactionHandler, ledgerStateQuerier, token);
 
         var assembly = typeof(GatewayApiBuilder).Assembly;
         var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.gateway-api-schema.yaml");
@@ -111,8 +116,9 @@ public static class OpenApiDocumentHandler
 
         response = OptionalReplace(response, "<entity-address>", placeholderReplacements.ResourceAddress);
         response = OptionalReplace(response, "<component-entity-address>", placeholderReplacements.ComponentAddress);
-        response = OptionalReplace(response, "<transaction-payload-hash>", placeholderReplacements.TransactionPayloadHex);
-
+        response = OptionalReplace(response, "<transaction-intent-hash>", placeholderReplacements.CommittedTransactionIntentHex);
+        response = OptionalReplace(response, "<network-id>", placeholderReplacements.NetworkId?.ToString());
+        response = OptionalReplace(response, "<network-name>", placeholderReplacements.NetworkName);
         await context.Response.WriteAsync(response, Encoding.UTF8, token);
     }
 
@@ -127,17 +133,28 @@ public static class OpenApiDocumentHandler
 
         public string? ComponentAddress { get; set; }
 
-        public string? TransactionPayloadHex { get; set; }
+        public string? CommittedTransactionIntentHex { get; set; }
+
+        public byte? NetworkId { get; set; }
+
+        public string? NetworkName { get; set; }
+
+        public long LedgerStateVersion { get; set; }
     }
 
-    private static async Task<PlaceholderReplacements> GetPlaceholderReplacements(INetworkConfigurationProvider networkConfigurationProvider, ITransactionHandler transactionHandler, CancellationToken token)
+    private static async Task<PlaceholderReplacements> GetPlaceholderReplacements(
+        INetworkConfigurationProvider networkConfigurationProvider, ITransactionHandler transactionHandler,
+        ILedgerStateQuerier ledgerStateQuerier, CancellationToken token)
     {
         var placeholderReplacements = new PlaceholderReplacements();
+
         try
         {
             var wellKnownAddresses = networkConfigurationProvider.GetWellKnownAddresses();
             placeholderReplacements.ResourceAddress = wellKnownAddresses.Xrd;
             placeholderReplacements.ComponentAddress = wellKnownAddresses.Faucet;
+            placeholderReplacements.NetworkId = networkConfigurationProvider.GetNetworkId();
+            placeholderReplacements.NetworkName = networkConfigurationProvider.GetNetworkName();
         }
         catch (Exception)
         {
@@ -146,8 +163,8 @@ public static class OpenApiDocumentHandler
 
         try
         {
-            var sampleTransaction = (await transactionHandler.Recent(new TransactionRecentRequest(limit: 1), token)).Items.FirstOrDefault();
-            placeholderReplacements.TransactionPayloadHex = sampleTransaction?.PayloadHashHex;
+            var sampleTransaction = (await transactionHandler.StreamTransactions(new StreamTransactionsRequest(limitPerPage: 1), token)).Items.FirstOrDefault();
+            placeholderReplacements.CommittedTransactionIntentHex = sampleTransaction?.IntentHashHex;
         }
         catch (Exception)
         {

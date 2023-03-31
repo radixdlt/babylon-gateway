@@ -91,8 +91,6 @@ public sealed class HexValidator<T> : PropertyValidator<T, string?>
 
         if (!value.All(c => c is >= '0' and <= '9' or >= 'a' and <= 'f' or >= 'A' and <= 'F') || value.Length % 2 == 1)
         {
-            context.AddFailure("'{PropertyName}' must be HEX-encoded value.");
-
             return false;
         }
 
@@ -113,5 +111,10 @@ public sealed class HexValidator<T> : PropertyValidator<T, string?>
         }
 
         return true;
+    }
+
+    protected override string GetDefaultMessageTemplate(string errorCode)
+    {
+        return "'{PropertyName}' must be HEX-encoded value.";
     }
 }

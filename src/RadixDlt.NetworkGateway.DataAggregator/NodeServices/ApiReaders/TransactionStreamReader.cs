@@ -78,7 +78,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 internal class TransactionStreamReader : ITransactionStreamReader
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly CoreApi.TransactionApi _transactionsApi;
+    private readonly CoreApi.StreamApi _streamApi;
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IEnumerable<ITransactionStreamReaderObserver> _observers;
 
@@ -87,22 +87,20 @@ internal class TransactionStreamReader : ITransactionStreamReader
         _networkConfigurationProvider = networkConfigurationProvider;
         _nodeConfigProvider = nodeConfigProvider;
         _observers = observers;
-        _transactionsApi = coreApiProvider.TransactionsApi;
+        _streamApi = coreApiProvider.StreamApi;
     }
 
-    public async Task<CoreModel.CommittedTransactionsResponse> GetTransactionStream(long fromStateVersion, int count, CancellationToken token)
+    public async Task<CoreModel.StreamTransactionsResponse> GetTransactionStream(long fromStateVersion, int count, CancellationToken token)
     {
         try
         {
-            return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
-                await _transactionsApi.TransactionStreamPostAsync(
-                    new CoreModel.CommittedTransactionsRequest(
-                        network: _networkConfigurationProvider.GetNetworkName(),
-                        fromStateVersion: fromStateVersion,
-                        limit: count
-                    ),
-                    token
-                )
+            return await _streamApi.StreamTransactionsPostAsync(
+                new CoreModel.StreamTransactionsRequest(
+                    network: _networkConfigurationProvider.GetNetworkName(),
+                    fromStateVersion: fromStateVersion,
+                    limit: count
+                ),
+                token
             );
         }
         catch (Exception ex)

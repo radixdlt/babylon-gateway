@@ -62,13 +62,14 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class ComponentStateSubstate : IOwner
+public partial class ComponentStateSubstate : IEntityOwner, IGlobalAddressPointer
 {
-    [JsonIgnore]
-    public IEnumerable<EntityReference> OwnedEntities => DataStruct.OwnedEntities;
+    public IEnumerable<EntityReference> GetOwnedEntities() => DataStruct.OwnedEntities;
+
+    public IEnumerable<string> GetGlobalAddresses() => DataStruct.ReferencedEntities.Select(re => re.GlobalAddress);
 }

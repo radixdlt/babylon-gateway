@@ -19,6 +19,8 @@ import type {
   TransactionCommittedDetailsRequest,
   TransactionCommittedDetailsResponse,
   TransactionConstructionResponse,
+  TransactionPreviewRequest,
+  TransactionPreviewResponse,
   TransactionStatusRequest,
   TransactionStatusResponse,
   TransactionSubmitRequest,
@@ -33,6 +35,10 @@ import {
     TransactionCommittedDetailsResponseToJSON,
     TransactionConstructionResponseFromJSON,
     TransactionConstructionResponseToJSON,
+    TransactionPreviewRequestFromJSON,
+    TransactionPreviewRequestToJSON,
+    TransactionPreviewResponseFromJSON,
+    TransactionPreviewResponseToJSON,
     TransactionStatusRequestFromJSON,
     TransactionStatusRequestToJSON,
     TransactionStatusResponseFromJSON,
@@ -47,8 +53,8 @@ export interface TransactionCommittedDetailsOperationRequest {
     transactionCommittedDetailsRequest: TransactionCommittedDetailsRequest;
 }
 
-export interface TransactionPreviewRequest {
-    body: object;
+export interface TransactionPreviewOperationRequest {
+    transactionPreviewRequest: TransactionPreviewRequest;
 }
 
 export interface TransactionStatusOperationRequest {
@@ -131,9 +137,9 @@ export class TransactionApi extends runtime.BaseAPI {
      * Previews transaction against the network. This endpoint is effectively a proxy towards CoreApi\'s `/v0/transaction/preview` endpoint. See CoreApi\'s documentation for more details. 
      * Preview Transaction
      */
-    async transactionPreviewRaw(requestParameters: TransactionPreviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters.body === null || requestParameters.body === undefined) {
-            throw new runtime.RequiredError('body','Required parameter requestParameters.body was null or undefined when calling transactionPreview.');
+    async transactionPreviewRaw(requestParameters: TransactionPreviewOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionPreviewResponse>> {
+        if (requestParameters.transactionPreviewRequest === null || requestParameters.transactionPreviewRequest === undefined) {
+            throw new runtime.RequiredError('transactionPreviewRequest','Required parameter requestParameters.transactionPreviewRequest was null or undefined when calling transactionPreview.');
         }
 
         const queryParameters: any = {};
@@ -147,17 +153,17 @@ export class TransactionApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: requestParameters.body as any,
+            body: TransactionPreviewRequestToJSON(requestParameters.transactionPreviewRequest),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse<any>(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => TransactionPreviewResponseFromJSON(jsonValue));
     }
 
     /**
      * Previews transaction against the network. This endpoint is effectively a proxy towards CoreApi\'s `/v0/transaction/preview` endpoint. See CoreApi\'s documentation for more details. 
      * Preview Transaction
      */
-    async transactionPreview(requestParameters: TransactionPreviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+    async transactionPreview(requestParameters: TransactionPreviewOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionPreviewResponse> {
         const response = await this.transactionPreviewRaw(requestParameters, initOverrides);
         return await response.value();
     }

@@ -62,8 +62,11 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
+using System.Diagnostics;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
@@ -75,8 +78,7 @@ internal static class GatewayModelExtensions
         return nonFungibleIdType switch
         {
             NonFungibleIdType.String => GatewayModel.NonFungibleIdType.String,
-            NonFungibleIdType.U32 => GatewayModel.NonFungibleIdType.U32,
-            NonFungibleIdType.U64 => GatewayModel.NonFungibleIdType.U64,
+            NonFungibleIdType.Integer => GatewayModel.NonFungibleIdType.Integer,
             NonFungibleIdType.Bytes => GatewayModel.NonFungibleIdType.Bytes,
             NonFungibleIdType.UUID => GatewayModel.NonFungibleIdType.Uuid,
             _ => throw new ArgumentOutOfRangeException(nameof(nonFungibleIdType), nonFungibleIdType, null),
@@ -89,12 +91,23 @@ internal static class GatewayModelExtensions
         {
             PendingTransactionStatus.SubmittedOrKnownInNodeMempool => GatewayModel.TransactionStatus.Pending,
             PendingTransactionStatus.Missing => GatewayModel.TransactionStatus.Pending,
-            PendingTransactionStatus.ResolvedButUnknownTillSyncedUp => GatewayModel.TransactionStatus.Pending,
             PendingTransactionStatus.RejectedTemporarily => GatewayModel.TransactionStatus.Pending,
             PendingTransactionStatus.RejectedPermanently => GatewayModel.TransactionStatus.Rejected,
             PendingTransactionStatus.CommittedSuccess => GatewayModel.TransactionStatus.CommittedSuccess,
             PendingTransactionStatus.CommittedFailure => GatewayModel.TransactionStatus.CommittedFailure,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
+        };
+    }
+
+    public static GatewayModel.PublicKey ToGatewayPublicKey(this ValidatorPublicKeyHistory validatorPublicKey)
+    {
+        var keyHex = validatorPublicKey.Key.ToHex();
+
+        return validatorPublicKey.KeyType switch
+        {
+            PublicKeyType.EcdsaSecp256k1 => new GatewayModel.PublicKeyEcdsaSecp256k1(keyHex),
+            PublicKeyType.EddsaEd25519 => new GatewayModel.PublicKeyEddsaEd25519(keyHex),
+            _ => throw new UnreachableException($"Didn't expect {validatorPublicKey.KeyType} value"),
         };
     }
 }

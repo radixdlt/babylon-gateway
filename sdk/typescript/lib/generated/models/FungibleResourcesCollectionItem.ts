@@ -13,12 +13,17 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { TokenAmount } from './TokenAmount';
+import type { ResourceAggregationLevel } from './ResourceAggregationLevel';
 import {
-    TokenAmountFromJSON,
-    TokenAmountFromJSONTyped,
-    TokenAmountToJSON,
-} from './TokenAmount';
+    ResourceAggregationLevelFromJSON,
+    ResourceAggregationLevelFromJSONTyped,
+    ResourceAggregationLevelToJSON,
+} from './ResourceAggregationLevel';
+
+import {
+     FungibleResourcesCollectionItemGloballyAggregatedFromJSONTyped,
+     FungibleResourcesCollectionItemVaultAggregatedFromJSONTyped
+} from './';
 
 /**
  * 
@@ -27,17 +32,17 @@ import {
  */
 export interface FungibleResourcesCollectionItem {
     /**
-     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
+     * 
+     * @type {ResourceAggregationLevel}
+     * @memberof FungibleResourcesCollectionItem
+     */
+    aggregation_level: ResourceAggregationLevel;
+    /**
+     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
      * @type {string}
      * @memberof FungibleResourcesCollectionItem
      */
-    address: string;
-    /**
-     * 
-     * @type {TokenAmount}
-     * @memberof FungibleResourcesCollectionItem
-     */
-    amount: TokenAmount;
+    resource_address: string;
 }
 
 /**
@@ -45,8 +50,8 @@ export interface FungibleResourcesCollectionItem {
  */
 export function instanceOfFungibleResourcesCollectionItem(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "address" in value;
-    isInstance = isInstance && "amount" in value;
+    isInstance = isInstance && "aggregation_level" in value;
+    isInstance = isInstance && "resource_address" in value;
 
     return isInstance;
 }
@@ -59,10 +64,18 @@ export function FungibleResourcesCollectionItemFromJSONTyped(json: any, ignoreDi
     if ((json === undefined) || (json === null)) {
         return json;
     }
+    if (!ignoreDiscriminator) {
+        if (json['aggregation_level'] === 'Global') {
+            return FungibleResourcesCollectionItemGloballyAggregatedFromJSONTyped(json, true);
+        }
+        if (json['aggregation_level'] === 'Vault') {
+            return FungibleResourcesCollectionItemVaultAggregatedFromJSONTyped(json, true);
+        }
+    }
     return {
         
-        'address': json['address'],
-        'amount': TokenAmountFromJSON(json['amount']),
+        'aggregation_level': ResourceAggregationLevelFromJSON(json['aggregation_level']),
+        'resource_address': json['resource_address'],
     };
 }
 
@@ -75,8 +88,8 @@ export function FungibleResourcesCollectionItemToJSON(value?: FungibleResourcesC
     }
     return {
         
-        'address': value.address,
-        'amount': TokenAmountToJSON(value.amount),
+        'aggregation_level': ResourceAggregationLevelToJSON(value.aggregation_level),
+        'resource_address': value.resource_address,
     };
 }
 

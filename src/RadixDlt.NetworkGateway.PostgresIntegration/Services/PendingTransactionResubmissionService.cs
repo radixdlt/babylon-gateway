@@ -68,12 +68,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
-using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
-using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
@@ -96,7 +94,6 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     private readonly IOptionsMonitor<NetworkOptions> _networkOptionsMonitor;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly ISystemStatusService _systemStatusService;
     private readonly IClock _clock;
     private readonly IEnumerable<IPendingTransactionResubmissionServiceObserver> _observers;
     private readonly ILogger _logger;
@@ -107,7 +104,6 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         IOptionsMonitor<NetworkOptions> networkOptionsMonitor,
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         INetworkConfigurationProvider networkConfigurationProvider,
-        ISystemStatusService systemStatusService,
         IClock clock,
         IEnumerable<IPendingTransactionResubmissionServiceObserver> observers,
         ILogger<PendingTransactionResubmissionService> logger)
@@ -117,7 +113,6 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
         _networkOptionsMonitor = networkOptionsMonitor;
         _mempoolOptionsMonitor = mempoolOptionsMonitor;
         _networkConfigurationProvider = networkConfigurationProvider;
-        _systemStatusService = systemStatusService;
         _clock = clock;
         _observers = observers;
         _logger = logger;
@@ -229,7 +224,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
                 transaction.MarkAsRejected(
                     true,
-                    "The transaction keeps dropping out of the mempool, so we're not resubmitting it",
+                    $"The transaction keeps dropping out of the mempool, so we're not resubmitting it. Initial failure reason: {transaction.LastFailureReason}",
                     submittedAt
                 );
             }
@@ -244,7 +239,6 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     {
         var allowResubmissionIfLastSubmittedBefore = currentTimestamp - mempoolOptions.MinDelayBetweenResubmissions;
         var allowResubmissionIfDroppedOutOfMempoolBefore = currentTimestamp - mempoolOptions.MinDelayBetweenMissingFromMempoolAndResubmission;
-        var isEssentiallySyncedUpNow = _systemStatusService.IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(TimeSpan.FromSeconds(60));
 
         return dbContext.PendingTransactions
             .Where(mt =>
@@ -255,10 +249,6 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
                     /* Transactions get marked RejectedTemporarily by PendingTransactionResubmissionService */
                     || mt.Status == PendingTransactionStatus.RejectedTemporarily
-
-                    /* If we're synced up now, try submitting transactions with unknown status again. They almost
-                       certainly failed due to a real double spend - so we'll detect it now and can mark them failed */
-                    || (isEssentiallySyncedUpNow && mt.Status == PendingTransactionStatus.ResolvedButUnknownTillSyncedUp)
                 )
                 && (mt.LastDroppedOutOfMempoolTimestamp!.Value < allowResubmissionIfDroppedOutOfMempoolBefore)
                 && (mt.LastSubmittedToNodeTimestamp!.Value < allowResubmissionIfLastSubmittedBefore)
@@ -318,34 +308,55 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
         try
         {
-            var result = await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await
-                coreApiProvider.TransactionsApi.TransactionSubmitPostAsync(submitRequest, cancellationToken)
-            );
+            var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionSubmitResponse, CoreModel.TransactionSubmitErrorResponse>(() =>
+                coreApiProvider.TransactionsApi.TransactionSubmitPostAsync(submitRequest, cancellationToken));
 
             await _observers.ForEachAsync(x => x.PostResubmit(notarizedTransaction));
 
-            if (result.Duplicate)
+            if (result.Succeeded)
             {
-                await _observers.ForEachAsync(x => x.PostResubmitDuplicate(notarizedTransaction));
+                var response = result.SuccessResponse;
+
+                if (response.Duplicate)
+                {
+                    await _observers.ForEachAsync(x => x.PostResubmitDuplicate(notarizedTransaction));
+                }
+                else
+                {
+                    await _observers.ForEachAsync(x => x.PostResubmitSucceeded(notarizedTransaction));
+                }
+
+                return new SubmissionResult(transaction, false, null, chosenNode.Name);
+            }
+
+            // TODO we need to somehow extract this common logic and share it with GatewayApi's SubmissionService
+
+            var details = result.FailureResponse.Details;
+            var isPermanent = false;
+            var message = result.FailureResponse.Message;
+            var detailedMessage = (string?)null;
+
+            switch (details)
+            {
+                case CoreModel.TransactionSubmitMempoolFullErrorDetails mempoolFull:
+                    detailedMessage = $"max mempool capacity of {mempoolFull.MempoolCapacity} exceeded";
+                    break;
+                case CoreModel.TransactionSubmitRejectedErrorDetails rejected:
+                    isPermanent = rejected.IsIntentRejectionPermanent || rejected.IsPayloadRejectionPermanent;
+                    detailedMessage = rejected.ErrorMessage;
+                    break;
+            }
+
+            if (isPermanent)
+            {
+                await _observers.ForEachAsync(x => x.ResubmitFailedPermanently(notarizedTransaction, result.FailureResponse));
             }
             else
             {
-                await _observers.ForEachAsync(x => x.PostResubmitSucceeded(notarizedTransaction));
+                await _observers.ForEachAsync(x => x.ResubmitFailedTemporary(notarizedTransaction, result.FailureResponse));
             }
 
-            return new SubmissionResult(transaction, false, null, chosenNode.Name);
-        }
-        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Permanent)
-        {
-            await _observers.ForEachAsync(x => x.ResubmitFailedPermanently(notarizedTransaction, ex));
-
-            return new SubmissionResult(transaction, true, ex.Error.Message, chosenNode.Name);
-        }
-        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == CoreApiErrorTransience.Transient)
-        {
-            await _observers.ForEachAsync(x => x.ResubmitFailedTemporary(notarizedTransaction, ex));
-
-            return new SubmissionResult(transaction, false, ex.Error.Message, chosenNode.Name);
+            return new SubmissionResult(transaction, isPermanent, message + (detailedMessage != null ? " (" + detailedMessage + ")" : string.Empty), chosenNode.Name);
         }
         catch (OperationCanceledException ex)
         {

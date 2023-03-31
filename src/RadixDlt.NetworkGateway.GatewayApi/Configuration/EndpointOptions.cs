@@ -71,23 +71,32 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
 
 public sealed class EndpointOptions
 {
-    // TODO replace with <Version> in Directory.Build.Props
-    [ConfigurationKeyName("GatewayApiVersion")]
-    public string GatewayApiVersion { get; set; } = "UNKNOWN";
-
     [ConfigurationKeyName("MaxPageSize")]
-    public int MaxPageSize { get; set; } = 30;
+    public int MaxPageSize { get; set; } = 100;
 
     [ConfigurationKeyName("RequestTimeout")]
     public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(10);
+
+    [ConfigurationKeyName("DefaultPageSize")]
+    public int DefaultPageSize { get; set; } = 100;
+
+    [ConfigurationKeyName("ValidatorsPageSize")]
+    public int ValidatorsPageSize { get; set; } = 1000;
+
+    // NOTE: Changed to 1000 to work around bugs in the RCNet Dashboard and Wallet
+    // Should he changed back to ~20 or so for mainnet launch
+    [ConfigurationKeyName("StateEntityDetailsPageSize")]
+    public int StateEntityDetailsMaxPageSize { get; set; } = 1000;
 }
 
 internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptions>
 {
     public EndpointOptionsValidator()
     {
-        RuleFor(x => x.GatewayApiVersion).NotNull();
         RuleFor(x => x.MaxPageSize).GreaterThan(0);
         RuleFor(x => x.RequestTimeout).GreaterThan(TimeSpan.Zero);
+        RuleFor(x => x.DefaultPageSize).GreaterThan(0);
+        RuleFor(x => x.ValidatorsPageSize).GreaterThan(0);
+        RuleFor(x => x.StateEntityDetailsMaxPageSize).GreaterThan(0);
     }
 }

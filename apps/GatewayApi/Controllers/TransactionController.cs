@@ -63,7 +63,6 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using System.Threading;
@@ -91,12 +90,6 @@ public sealed class TransactionController : ControllerBase
         return await _transactionHandler.Construction(token);
     }
 
-    [HttpPost("recent")]
-    public async Task<GatewayModel.TransactionRecentResponse> Recent(GatewayModel.TransactionRecentRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.Recent(request, token);
-    }
-
     [HttpPost("status")]
     public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token)
     {
@@ -110,7 +103,7 @@ public sealed class TransactionController : ControllerBase
     }
 
     [HttpPost("preview")]
-    public async Task<object> Preview(JToken request, CancellationToken token)
+    public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
     {
         return await _transactionHandler.Preview(request, token);
     }

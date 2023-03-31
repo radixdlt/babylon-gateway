@@ -62,27 +62,35 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json;
-using System;
+using System.Diagnostics;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class LedgerTransaction
 {
-    [JsonIgnore]
-    public byte[] PayloadBytes
+    public byte[] GetPayloadBytes()
     {
-        get
+        return this switch
         {
-            switch (ActualInstance)
-            {
-                case UserLedgerTransaction ult:
-                    return ult.PayloadBytes;
-                case ValidatorLedgerTransaction vlt:
-                    return vlt.PayloadBytes;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(ActualInstance), ActualInstance, null);
-            }
-        }
+            UserLedgerTransaction ult => ult.GetPayloadBytes(),
+            ValidatorLedgerTransaction vlt => vlt.GetPayloadBytes(),
+            SystemLedgerTransaction slt => slt.GetPayloadBytes(),
+            _ => throw new UnreachableException($"Didn't expect {this.GetType().Name} type"),
+        };
+    }
+
+    // TODO:
+    // This is rcnet quick fix for returning transaction hex that's not boxed in user/validator/system enum by node.
+    // Boxed payload is not supported by the toolkit and client's can't actually do anything about it.
+    // Needs revisiting.
+    public byte[] GetUnwrappedPayloadBytes()
+    {
+        return this switch
+        {
+            UserLedgerTransaction ult => ult.NotarizedTransaction.GetPayloadBytes(),
+            ValidatorLedgerTransaction vlt => vlt.GetPayloadBytes(),
+            SystemLedgerTransaction slt => slt.SystemTransaction.GetPayloadBytes(),
+            _ => throw new UnreachableException($"Didn't expect {this.GetType().Name} type"),
+        };
     }
 }

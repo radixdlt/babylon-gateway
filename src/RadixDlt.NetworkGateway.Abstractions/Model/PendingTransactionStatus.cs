@@ -75,15 +75,10 @@ public enum PendingTransactionStatus
     // Gateway DB time to sync and mark it committed
     Missing,
 
-    // A transaction has been marked as substate not found by a node at resubmission, but we've yet to see it on ledger
-    // because the aggregator service is not sufficiently synced up - so we don't know if it's been committed
-    // and detected itself, or clashed with another transaction.
-    ResolvedButUnknownTillSyncedUp,
-
     // A transaction which we have tried to (re)submit, but it returns a temporary/transient error from the node (e.g. mempool exhausted)
     RejectedTemporarily,
 
-    // A transaction which we have tried to (re)submit, but it returns a permanent error from the node (e.g. substate clash)
+    // A transaction which we have tried to (re)submit, but it returns a permanent error from the node (e.g. invalid signature)
     RejectedPermanently,
 
     // A transaction which we know got successfully committed to the ledger

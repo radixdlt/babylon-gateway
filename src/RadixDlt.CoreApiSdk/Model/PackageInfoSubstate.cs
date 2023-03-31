@@ -62,15 +62,22 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json;
-using System;
+using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class PackageInfoSubstate
+public partial class PackageInfoSubstate : IGlobalAddressPointer
 {
-    private byte[] _codeBytes;
+    public IEnumerable<string> GetGlobalAddresses()
+    {
+        foreach (var dependentResource in DependentResources)
+        {
+            yield return dependentResource;
+        }
 
-    [JsonIgnore]
-    public byte[] CodeBytes => _codeBytes ??= Convert.FromHexString(CodeHex);
+        foreach (var dependentComponent in DependentComponents)
+        {
+            yield return dependentComponent;
+        }
+    }
 }

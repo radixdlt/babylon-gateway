@@ -64,6 +64,8 @@
 
 using Npgsql;
 using NpgsqlTypes;
+using System;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -85,6 +87,13 @@ internal static class NpgsqlBinaryImporterExtensions
             : writer.WriteNullAsync(cancellationToken);
     }
 
+    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, BigInteger? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
+    {
+        return value.HasValue
+            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
+            : writer.WriteNullAsync(cancellationToken);
+    }
+
     public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, byte[]? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
     {
         return value != null
@@ -96,6 +105,14 @@ internal static class NpgsqlBinaryImporterExtensions
     {
         return value != null
             ? writer.WriteAsync(value, npgsqlDbType, cancellationToken)
+            : writer.WriteNullAsync(cancellationToken);
+    }
+
+    public static Task WriteNullableAsync<T>(this NpgsqlBinaryImporter writer, T? value, string dataTypeName, CancellationToken cancellationToken = default)
+        where T : struct
+    {
+        return value.HasValue
+            ? writer.WriteAsync(value.Value, dataTypeName, cancellationToken)
             : writer.WriteNullAsync(cancellationToken);
     }
 }

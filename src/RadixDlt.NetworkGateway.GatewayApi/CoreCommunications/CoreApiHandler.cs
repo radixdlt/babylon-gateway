@@ -74,15 +74,15 @@ namespace RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 
 public interface ICoreApiHandler
 {
-    string GetNetworkIdentifier();
+    string GetNetworkName();
+
+    byte GetNetworkId();
 
     CoreApiNode GetCoreNodeConnectedTo();
 
-    Task<CoreModel.TransactionParseResponse> ParseTransaction(CoreModel.TransactionParseRequest request, CancellationToken token = default);
+    Task<ResponseOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default);
 
-    Task<CoreModel.TransactionPreviewResponse> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default);
-
-    Task<CoreModel.TransactionSubmitResponse> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default);
+    Task<ResponseOrError<CoreModel.TransactionSubmitResponse, CoreModel.TransactionSubmitErrorResponse>> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default);
 }
 
 /// <summary>
@@ -103,7 +103,12 @@ internal class CoreApiHandler : ICoreApiHandler
         _coreApiProvider = ChooseCoreApiProvider(coreNodesSelectorService, httpClient);
     }
 
-    public string GetNetworkIdentifier()
+    public byte GetNetworkId()
+    {
+        return _networkConfigurationProvider.GetNetworkId();
+    }
+
+    public string GetNetworkName()
     {
         return _networkConfigurationProvider.GetNetworkName();
     }
@@ -113,19 +118,14 @@ internal class CoreApiHandler : ICoreApiHandler
         return _coreApiProvider.CoreApiNode;
     }
 
-    public async Task<CoreModel.TransactionParseResponse> ParseTransaction(CoreModel.TransactionParseRequest request, CancellationToken token = default)
+    public async Task<ResponseOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default)
     {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.TransactionApi.TransactionParsePostAsync(request, token));
+        return await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionPreviewResponse, CoreModel.BasicErrorResponse>(() => _coreApiProvider.TransactionApi.TransactionPreviewPostAsync(request, token));
     }
 
-    public async Task<CoreModel.TransactionPreviewResponse> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default)
+    public async Task<ResponseOrError<CoreModel.TransactionSubmitResponse, CoreModel.TransactionSubmitErrorResponse>> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.TransactionApi.TransactionPreviewPostAsync(request, token));
-    }
-
-    public async Task<CoreModel.TransactionSubmitResponse> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.TransactionApi.TransactionSubmitPostAsync(request, token));
+        return await CoreApiErrorWrapper.ResultOrError<CoreModel.TransactionSubmitResponse, CoreModel.TransactionSubmitErrorResponse>(() => _coreApiProvider.TransactionApi.TransactionSubmitPostAsync(request, token));
     }
 
     private static ICoreApiProvider ChooseCoreApiProvider(ICoreNodesSelectorService coreNodesSelectorService, HttpClient httpClient)

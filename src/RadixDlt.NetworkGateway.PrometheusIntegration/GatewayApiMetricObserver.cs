@@ -63,9 +63,7 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using Prometheus;
-using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
@@ -232,7 +230,7 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.ParseTransactionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException wrappedCoreApiException)
+    ValueTask ISubmissionServiceObserver.ParseTransactionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, Exception exception)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_invalid_transaction").Inc();
 
@@ -246,14 +244,14 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionParseResponse response)
+    ValueTask ISubmissionServiceObserver.ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, RadixEngineToolkit.Exceptions.EngineToolkitRequestError ex)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("parsed_unsupported_payload_type").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.ParsedTransactionStaticallyInvalid(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionParseResponse response)
+    ValueTask ISubmissionServiceObserver.ParsedTransactionStaticallyInvalid(GatewayModel.TransactionSubmitRequest request, string error)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("parsed_statically_invalid").Inc();
 
@@ -288,21 +286,21 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception)
+    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, Exception exception)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("invalid_transaction").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedPermanently(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception)
+    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedPermanently(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("unknown_permanent_error").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedTemporary(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception)
+    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedTemporary(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitErrorResponse? errorResponse)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("unknown_temporary_error").Inc();
 
@@ -330,21 +328,21 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPreviewServiceObserver.PreHandlePreviewRequest(JToken request)
+    ValueTask IPreviewServiceObserver.PreHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request)
     {
         _transactionPreviewRequestCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPreviewServiceObserver.PostHandlePreviewRequest(JToken request, object response)
+    ValueTask IPreviewServiceObserver.PostHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, GatewayModel.TransactionPreviewResponse response)
     {
         _transactionPreviewSuccessCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPreviewServiceObserver.HandlePreviewRequestFailed(JToken request, Exception exception)
+    ValueTask IPreviewServiceObserver.HandlePreviewRequestFailed(GatewayModel.TransactionPreviewRequest request, Exception exception)
     {
         _transactionPreviewErrorCount.Inc();
 

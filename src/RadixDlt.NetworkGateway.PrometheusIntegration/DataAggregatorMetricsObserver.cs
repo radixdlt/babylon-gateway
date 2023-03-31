@@ -213,13 +213,6 @@ internal class DataAggregatorMetricsObserver :
             new GaugeConfiguration { LabelNames = new[] { "node" } }
         );
 
-    private static readonly Gauge _nodeLedgerTargetStateVersion = Metrics
-        .CreateGauge(
-            "ng_node_ledger_target_state_version",
-            "The state version which the node reports as the highest seen on the network.",
-            new GaugeConfiguration { LabelNames = new[] { "node" } }
-        );
-
     private static readonly Gauge _nodeLedgerTipIsConsistentWithQuorumStatus = Metrics
         .CreateGauge(
             "ng_node_ledger_tip_is_consistent_with_quorum_status",
@@ -471,23 +464,22 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    void ILedgerConfirmationServiceObserver.PreSubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, long targetStateVersion)
+    void ILedgerConfirmationServiceObserver.PreSubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion)
     {
         _nodeLedgerTipStateVersion.WithLabels(nodeName).Set(ledgerTipStateVersion);
-        _nodeLedgerTargetStateVersion.WithLabels(nodeName).Set(targetStateVersion);
     }
 
-    void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusUnknown(string nodeName, long ledgerTipStateVersion, long targetStateVersion)
+    void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusUnknown(string nodeName, long ledgerTipStateVersion)
     {
         _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.Unknown);
     }
 
-    void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusUpToDate(string nodeName, long ledgerTipStateVersion, long targetStateVersion)
+    void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusUpToDate(string nodeName, long ledgerTipStateVersion)
     {
         _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.Yes);
     }
 
-    void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusOutOfDate(string nodeName, long ledgerTipStateVersion, long targetStateVersion)
+    void ILedgerConfirmationServiceObserver.SubmitNodeNetworkStatusOutOfDate(string nodeName, long ledgerTipStateVersion)
     {
         _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.No);
     }
@@ -547,8 +539,8 @@ internal class DataAggregatorMetricsObserver :
 
         foreach (var countByStatus in mempoolCountByStatus)
         {
-            _mempoolDbSizeByStatus.WithLabels(countByStatus.Status).Set(countByStatus.Count);
-            existingStatusLabelsNeedingUpdating.Remove(countByStatus.Status);
+            _mempoolDbSizeByStatus.WithLabels(countByStatus.Status.ToString()).Set(countByStatus.Count);
+            existingStatusLabelsNeedingUpdating.Remove(countByStatus.Status.ToString());
         }
 
         // If a known status doesn't appear in the database, it should be set to 0.
@@ -626,7 +618,7 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedPermanently(byte[] notarizedTransaction, WrappedCoreApiException wrappedCoreApiException)
+    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedPermanently(byte[] notarizedTransaction, CoreModel.TransactionSubmitErrorResponse? errorResponse)
     {
         _transactionResubmissionErrorCount.Inc();
         _transactionResubmissionResolutionByResultCount.WithLabels("unknown_permanent_error").Inc();
@@ -634,7 +626,7 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedTemporary(byte[] notarizedTransaction, WrappedCoreApiException wrappedCoreApiException)
+    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedTemporary(byte[] notarizedTransaction, CoreModel.TransactionSubmitErrorResponse? errorResponse)
     {
         _transactionResubmissionErrorCount.Inc();
         _transactionResubmissionResolutionByResultCount.WithLabels("unknown_temporary_error").Inc();

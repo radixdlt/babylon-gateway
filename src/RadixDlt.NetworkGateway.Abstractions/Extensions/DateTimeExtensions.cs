@@ -76,6 +76,11 @@ public static class DateTimeExtensions
         return instant.ToString(@"yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK");
     }
 
+    public static string AsUtcIsoDateAtSecondsPrecisionString(this DateTimeOffset instant)
+    {
+        return instant.ToString(@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'");
+    }
+
     public static string AsUtcIsoDateToSecondsForLogs(this DateTime instant)
     {
         return instant.ToString(@"yyyy'-'MM'-'dd'T'HH':'mm':'ssK");

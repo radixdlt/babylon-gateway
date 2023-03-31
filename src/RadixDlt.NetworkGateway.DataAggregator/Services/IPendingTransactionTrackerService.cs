@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Utilities;
+using RadixDlt.NetworkGateway.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -70,19 +70,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-// TODO we should introduce custom type over byte[] and make it "compare by value" by default
-public readonly record struct PendingTransactionHashPair(byte[] IntentHash, byte[] PayloadHash)
-{
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(ByteArrayEqualityComparer.Default.GetHashCode(IntentHash), ByteArrayEqualityComparer.Default.GetHashCode(PayloadHash));
-    }
-
-    public bool Equals(PendingTransactionHashPair other)
-    {
-        return ByteArrayEqualityComparer.Default.Equals(IntentHash, other.IntentHash) && ByteArrayEqualityComparer.Default.Equals(PayloadHash, other.PayloadHash);
-    }
-}
+public readonly record struct PendingTransactionHashPair(ValueBytes IntentHash, ValueBytes PayloadHash);
 
 public sealed record PendingTransactionData(PendingTransactionHashPair Hashes, DateTime SeenAt, byte[] Payload);
 
@@ -108,5 +96,5 @@ public interface IPendingTransactionTrackerService
     /// from another node in the mean-time.
     /// </summary>
     /// <returns>If the transaction was first seen (true) or (false).</returns>
-    bool TransactionContentsStillNeedFetching(PendingTransactionHashPair transactionIdentifier);
+    bool TransactionContentsStillNeedFetching(PendingTransactionHashPair hashPair);
 }

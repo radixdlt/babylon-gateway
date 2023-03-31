@@ -173,6 +173,10 @@ public static class ServiceCollectionExtensions
             httpClientHandler.Proxy = new WebProxy(o.CoreApiHttpProxyAddress);
         }
 
+        // Enables gzip,deflate,brotli for Core API requests
+        // See https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpclienthandler.automaticdecompression?view=net-7.0
+        httpClientHandler.AutomaticDecompression = DecompressionMethods.All;
+
         return httpClientHandler;
     }
 }

@@ -137,7 +137,7 @@ internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
             .Where(n => n.Enabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
             .Select(n => GetCoreNodeStateVersion(n, _networkOptionsMonitor.CurrentValue.NetworkName, cancellationToken));
 
-        var topOfLedgerStateVersionTask = _ledgerStateQuerier.GetTopOfLedgerStateVersion();
+        var topOfLedgerStateVersionTask = _ledgerStateQuerier.GetTopOfLedgerStateVersion(cancellationToken);
 
         var nodesStateVersions = (await Task.WhenAll(enabledCoreNodeStateVersionLookupTasks))
             .ToDictionary(p => p.CoreApiNode, p => (p.CoreApiNode, p.StateVersion, p.Exception));

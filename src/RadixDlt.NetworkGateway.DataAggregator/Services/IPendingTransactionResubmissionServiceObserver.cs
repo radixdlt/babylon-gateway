@@ -62,9 +62,9 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using System;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
@@ -88,9 +88,9 @@ public interface IPendingTransactionResubmissionServiceObserver
 
     ValueTask PostResubmitSucceeded(byte[] notarizedTransaction);
 
-    ValueTask ResubmitFailedPermanently(byte[] notarizedTransaction, WrappedCoreApiException wrappedCoreApiException);
+    ValueTask ResubmitFailedPermanently(byte[] notarizedTransaction, CoreModel.TransactionSubmitErrorResponse? errorResponse = null);
 
-    ValueTask ResubmitFailedTemporary(byte[] notarizedTransaction, WrappedCoreApiException wrappedCoreApiException);
+    ValueTask ResubmitFailedTemporary(byte[] notarizedTransaction, CoreModel.TransactionSubmitErrorResponse? errorResponse = null);
 
     ValueTask ResubmitFailedTimeout(byte[] notarizedTransaction, OperationCanceledException operationCanceledException);
 
