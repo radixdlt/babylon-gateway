@@ -233,6 +233,10 @@ internal class AccountComponentEntity : ComponentEntity
 {
 }
 
+internal class IdentityEntity : ComponentEntity
+{
+}
+
 internal class PackageEntity : ComponentEntity
 {
     [Column("code")]
@@ -251,20 +255,6 @@ internal class VirtualAccountComponentEntity : AccountComponentEntity
     }
 }
 
-internal class KeyValueStoreEntity : Entity
-{
-    [Column("store_of_non_fungible_resource_entity_id")]
-    public long? StoreOfNonFungibleResourceEntityId { get; set; }
-}
-
-internal class AccessControllerEntity : Entity
-{
-}
-
-internal class IdentityEntity : Entity
-{
-}
-
 // This is transient model, not stored in database
 internal class VirtualIdentityEntity : IdentityEntity
 {
@@ -272,4 +262,14 @@ internal class VirtualIdentityEntity : IdentityEntity
     {
         GlobalAddress = globalAddress;
     }
+}
+
+internal class KeyValueStoreEntity : Entity
+{
+    [Column("store_of_non_fungible_resource_entity_id")]
+    public long? StoreOfNonFungibleResourceEntityId { get; set; }
+}
+
+internal class AccessControllerEntity : ComponentEntity
+{
 }

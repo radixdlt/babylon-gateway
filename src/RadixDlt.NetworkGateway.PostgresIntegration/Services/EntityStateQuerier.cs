@@ -64,6 +64,7 @@
 
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
@@ -79,6 +80,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.Intrinsics.X86;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -105,22 +107,24 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record NonFungibleIdViewModel(string NonFungibleId, int NonFungibleIdsTotalCount);
 
-    private record NonFungibleIdDataViewModel(string NonFungibleId, bool IsDeleted, byte[] ImmutableData, byte[] MutableData, long MutableDataLastUpdatedAtStateVersion);
+    private record NonFungibleIdDataViewModel(string NonFungibleId, bool IsDeleted, byte[] MutableData, long MutableDataLastUpdatedAtStateVersion);
 
     private readonly TokenAmount _tokenAmount100 = TokenAmount.FromDecimalString("100");
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
     private readonly ReadOnlyDbContext _dbContext;
+    private readonly ILogger<EntityStateQuerier> _logger;
     private readonly byte _ecdsaSecp256k1VirtualAccountAddressPrefix;
     private readonly byte _eddsaEd25519VirtualAccountAddressPrefix;
     private readonly byte _ecdsaSecp256k1VirtualIdentityAddressPrefix;
     private readonly byte _eddsaEd25519VirtualIdentityAddressPrefix;
 
-    public EntityStateQuerier(INetworkConfigurationProvider networkConfigurationProvider, ReadOnlyDbContext dbContext, IOptionsSnapshot<EndpointOptions> endpointConfiguration)
+    public EntityStateQuerier(INetworkConfigurationProvider networkConfigurationProvider, ReadOnlyDbContext dbContext, IOptionsSnapshot<EndpointOptions> endpointConfiguration, ILogger<EntityStateQuerier> logger)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _dbContext = dbContext;
         _endpointConfiguration = endpointConfiguration;
+        _logger = logger;
 
         _ecdsaSecp256k1VirtualAccountAddressPrefix =
             (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EcdsaSecp256k1VirtualAccountComponent).AddressBytePrefix;
@@ -375,13 +379,13 @@ ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
                 items: items.Take(request.Limit).ToList()));
     }
 
-    public async Task<GatewayModel.StateNonFungibleDetailsResponse> NonFungibleIdData(GlobalAddress resourceAddress, IList<string> nonFungibleIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.StateNonFungibleDataResponse> NonFungibleIdData(GlobalAddress resourceAddress, IList<string> nonFungibleIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity<NonFungibleResourceEntity>(resourceAddress, ledgerState, token);
 
         var cd = new CommandDefinition(
             commandText: @"
-SELECT nfid.non_fungible_id AS NonFungibleId, md.is_deleted AS IsDeleted, nfid.immutable_data AS ImmutableData, md.mutable_data AS MutableData, md.from_state_version AS MutableDataLastUpdatedAtStateVersion
+SELECT nfid.non_fungible_id AS NonFungibleId, md.is_deleted AS IsDeleted, md.mutable_data AS MutableData, md.from_state_version AS MutableDataLastUpdatedAtStateVersion
 FROM non_fungible_id_data nfid
 LEFT JOIN LATERAL (
     SELECT mutable_data, is_deleted, from_state_version
@@ -390,7 +394,7 @@ LEFT JOIN LATERAL (
     ORDER BY nfidmdh.from_state_version DESC
     LIMIT 1
 ) md ON TRUE
-WHERE nfid.from_state_version <= @stateVersion AND nfid.non_fungible_resource_entity_id = @entityId AND nfid.non_fungible_id IN (@nonFungibleIds)
+WHERE nfid.from_state_version <= @stateVersion AND nfid.non_fungible_resource_entity_id = @entityId AND nfid.non_fungible_id = ANY(@nonFungibleIds)
 ORDER BY nfid.from_state_version DESC
 LIMIT 1
 ",
@@ -406,14 +410,18 @@ LIMIT 1
 
         foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdDataViewModel>(cd))
         {
+            if (vm.IsDeleted)
+            {
+                continue;
+            }
+
             items.Add(new GatewayModel.StateNonFungibleDetailsResponseItem(
                 nonFungibleId: vm.NonFungibleId,
                 mutableData: ScryptoSborUtils.NonFungibleDataToGatewayScryptoSbor(vm.MutableData, _networkConfigurationProvider.GetNetworkId()),
-                immutableData: ScryptoSborUtils.NonFungibleDataToGatewayScryptoSbor(vm.ImmutableData, _networkConfigurationProvider.GetNetworkId()),
                 lastUpdatedAtStateVersion: vm.MutableDataLastUpdatedAtStateVersion));
         }
 
-        return new GatewayModel.StateNonFungibleDetailsResponse(
+        return new GatewayModel.StateNonFungibleDataResponse(
             ledgerState: ledgerState,
             resourceAddress: resourceAddress.ToString(),
             nonFungibleIdType: entity.NonFungibleIdType.ToGatewayModel(),
@@ -552,7 +560,7 @@ INNER JOIN LATERAL (
         foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<MetadataViewModel>(cd))
         {
             var items = vm.Keys.Zip(vm.Values, vm.UpdatedAtStateVersions)
-                .Select(t => new GatewayModel.EntityMetadataItem(t.First, ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(t.Second, _networkConfigurationProvider.GetNetworkId()), t.Third))
+                .Select(t => new GatewayModel.EntityMetadataItem(t.First, ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(_logger, t.Second, _networkConfigurationProvider.GetNetworkId()), t.Third))
                 .ToList();
 
             var previousCursor = offset > 0

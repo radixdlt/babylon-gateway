@@ -92,6 +92,48 @@ namespace RadixDlt.CoreApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
+        /// Get All Resources Balances
+        /// </summary>
+        /// <remarks>
+        /// Returns balances for all resources associated with an account
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountAllFungibleResourceBalancesRequest"></param>
+        /// <returns>LtsStateAccountAllFungibleResourceBalancesResponse</returns>
+        LtsStateAccountAllFungibleResourceBalancesResponse LtsStateAccountAllFungibleResourceBalancesPost(LtsStateAccountAllFungibleResourceBalancesRequest ltsStateAccountAllFungibleResourceBalancesRequest);
+
+        /// <summary>
+        /// Get All Resources Balances
+        /// </summary>
+        /// <remarks>
+        /// Returns balances for all resources associated with an account
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountAllFungibleResourceBalancesRequest"></param>
+        /// <returns>ApiResponse of LtsStateAccountAllFungibleResourceBalancesResponse</returns>
+        ApiResponse<LtsStateAccountAllFungibleResourceBalancesResponse> LtsStateAccountAllFungibleResourceBalancesPostWithHttpInfo(LtsStateAccountAllFungibleResourceBalancesRequest ltsStateAccountAllFungibleResourceBalancesRequest);
+        /// <summary>
+        /// Get Resource Balance
+        /// </summary>
+        /// <remarks>
+        /// Returns balance of the resource for an account
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountFungibleResourceBalanceRequest"></param>
+        /// <returns>LtsStateAccountFungibleResourceBalanceResponse</returns>
+        LtsStateAccountFungibleResourceBalanceResponse LtsStateAccountFungibleResourceBalancePost(LtsStateAccountFungibleResourceBalanceRequest ltsStateAccountFungibleResourceBalanceRequest);
+
+        /// <summary>
+        /// Get Resource Balance
+        /// </summary>
+        /// <remarks>
+        /// Returns balance of the resource for an account
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountFungibleResourceBalanceRequest"></param>
+        /// <returns>ApiResponse of LtsStateAccountFungibleResourceBalanceResponse</returns>
+        ApiResponse<LtsStateAccountFungibleResourceBalanceResponse> LtsStateAccountFungibleResourceBalancePostWithHttpInfo(LtsStateAccountFungibleResourceBalanceRequest ltsStateAccountFungibleResourceBalanceRequest);
+        /// <summary>
         /// Get Access Controller Details
         /// </summary>
         /// <remarks>
@@ -268,6 +310,52 @@ namespace RadixDlt.CoreApiSdk.Api
     public interface IStateApiAsync : IApiAccessor
     {
         #region Asynchronous Operations
+        /// <summary>
+        /// Get All Resources Balances
+        /// </summary>
+        /// <remarks>
+        /// Returns balances for all resources associated with an account
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountAllFungibleResourceBalancesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of LtsStateAccountAllFungibleResourceBalancesResponse</returns>
+        System.Threading.Tasks.Task<LtsStateAccountAllFungibleResourceBalancesResponse> LtsStateAccountAllFungibleResourceBalancesPostAsync(LtsStateAccountAllFungibleResourceBalancesRequest ltsStateAccountAllFungibleResourceBalancesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get All Resources Balances
+        /// </summary>
+        /// <remarks>
+        /// Returns balances for all resources associated with an account
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountAllFungibleResourceBalancesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (LtsStateAccountAllFungibleResourceBalancesResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<LtsStateAccountAllFungibleResourceBalancesResponse>> LtsStateAccountAllFungibleResourceBalancesPostWithHttpInfoAsync(LtsStateAccountAllFungibleResourceBalancesRequest ltsStateAccountAllFungibleResourceBalancesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Resource Balance
+        /// </summary>
+        /// <remarks>
+        /// Returns balance of the resource for an account
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountFungibleResourceBalanceRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of LtsStateAccountFungibleResourceBalanceResponse</returns>
+        System.Threading.Tasks.Task<LtsStateAccountFungibleResourceBalanceResponse> LtsStateAccountFungibleResourceBalancePostAsync(LtsStateAccountFungibleResourceBalanceRequest ltsStateAccountFungibleResourceBalanceRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Resource Balance
+        /// </summary>
+        /// <remarks>
+        /// Returns balance of the resource for an account
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountFungibleResourceBalanceRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (LtsStateAccountFungibleResourceBalanceResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<LtsStateAccountFungibleResourceBalanceResponse>> LtsStateAccountFungibleResourceBalancePostWithHttpInfoAsync(LtsStateAccountFungibleResourceBalanceRequest ltsStateAccountFungibleResourceBalanceRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Access Controller Details
         /// </summary>
@@ -663,6 +751,240 @@ namespace RadixDlt.CoreApiSdk.Api
                 return _exceptionFactory;
             }
             set { _exceptionFactory = value; }
+        }
+
+        /// <summary>
+        /// Get All Resources Balances Returns balances for all resources associated with an account
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountAllFungibleResourceBalancesRequest"></param>
+        /// <returns>LtsStateAccountAllFungibleResourceBalancesResponse</returns>
+        public LtsStateAccountAllFungibleResourceBalancesResponse LtsStateAccountAllFungibleResourceBalancesPost(LtsStateAccountAllFungibleResourceBalancesRequest ltsStateAccountAllFungibleResourceBalancesRequest)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<LtsStateAccountAllFungibleResourceBalancesResponse> localVarResponse = LtsStateAccountAllFungibleResourceBalancesPostWithHttpInfo(ltsStateAccountAllFungibleResourceBalancesRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get All Resources Balances Returns balances for all resources associated with an account
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountAllFungibleResourceBalancesRequest"></param>
+        /// <returns>ApiResponse of LtsStateAccountAllFungibleResourceBalancesResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<LtsStateAccountAllFungibleResourceBalancesResponse> LtsStateAccountAllFungibleResourceBalancesPostWithHttpInfo(LtsStateAccountAllFungibleResourceBalancesRequest ltsStateAccountAllFungibleResourceBalancesRequest)
+        {
+            // verify the required parameter 'ltsStateAccountAllFungibleResourceBalancesRequest' is set
+            if (ltsStateAccountAllFungibleResourceBalancesRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'ltsStateAccountAllFungibleResourceBalancesRequest' when calling StateApi->LtsStateAccountAllFungibleResourceBalancesPost");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = ltsStateAccountAllFungibleResourceBalancesRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<LtsStateAccountAllFungibleResourceBalancesResponse>("/lts/state/account-all-fungible-resource-balances", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("LtsStateAccountAllFungibleResourceBalancesPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get All Resources Balances Returns balances for all resources associated with an account
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountAllFungibleResourceBalancesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of LtsStateAccountAllFungibleResourceBalancesResponse</returns>
+        public async System.Threading.Tasks.Task<LtsStateAccountAllFungibleResourceBalancesResponse> LtsStateAccountAllFungibleResourceBalancesPostAsync(LtsStateAccountAllFungibleResourceBalancesRequest ltsStateAccountAllFungibleResourceBalancesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<LtsStateAccountAllFungibleResourceBalancesResponse> localVarResponse = await LtsStateAccountAllFungibleResourceBalancesPostWithHttpInfoAsync(ltsStateAccountAllFungibleResourceBalancesRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get All Resources Balances Returns balances for all resources associated with an account
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountAllFungibleResourceBalancesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (LtsStateAccountAllFungibleResourceBalancesResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<LtsStateAccountAllFungibleResourceBalancesResponse>> LtsStateAccountAllFungibleResourceBalancesPostWithHttpInfoAsync(LtsStateAccountAllFungibleResourceBalancesRequest ltsStateAccountAllFungibleResourceBalancesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'ltsStateAccountAllFungibleResourceBalancesRequest' is set
+            if (ltsStateAccountAllFungibleResourceBalancesRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'ltsStateAccountAllFungibleResourceBalancesRequest' when calling StateApi->LtsStateAccountAllFungibleResourceBalancesPost");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = ltsStateAccountAllFungibleResourceBalancesRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<LtsStateAccountAllFungibleResourceBalancesResponse>("/lts/state/account-all-fungible-resource-balances", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("LtsStateAccountAllFungibleResourceBalancesPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Resource Balance Returns balance of the resource for an account
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountFungibleResourceBalanceRequest"></param>
+        /// <returns>LtsStateAccountFungibleResourceBalanceResponse</returns>
+        public LtsStateAccountFungibleResourceBalanceResponse LtsStateAccountFungibleResourceBalancePost(LtsStateAccountFungibleResourceBalanceRequest ltsStateAccountFungibleResourceBalanceRequest)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<LtsStateAccountFungibleResourceBalanceResponse> localVarResponse = LtsStateAccountFungibleResourceBalancePostWithHttpInfo(ltsStateAccountFungibleResourceBalanceRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Resource Balance Returns balance of the resource for an account
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountFungibleResourceBalanceRequest"></param>
+        /// <returns>ApiResponse of LtsStateAccountFungibleResourceBalanceResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<LtsStateAccountFungibleResourceBalanceResponse> LtsStateAccountFungibleResourceBalancePostWithHttpInfo(LtsStateAccountFungibleResourceBalanceRequest ltsStateAccountFungibleResourceBalanceRequest)
+        {
+            // verify the required parameter 'ltsStateAccountFungibleResourceBalanceRequest' is set
+            if (ltsStateAccountFungibleResourceBalanceRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'ltsStateAccountFungibleResourceBalanceRequest' when calling StateApi->LtsStateAccountFungibleResourceBalancePost");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = ltsStateAccountFungibleResourceBalanceRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<LtsStateAccountFungibleResourceBalanceResponse>("/lts/state/account-fungible-resource-balance", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("LtsStateAccountFungibleResourceBalancePost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Resource Balance Returns balance of the resource for an account
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountFungibleResourceBalanceRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of LtsStateAccountFungibleResourceBalanceResponse</returns>
+        public async System.Threading.Tasks.Task<LtsStateAccountFungibleResourceBalanceResponse> LtsStateAccountFungibleResourceBalancePostAsync(LtsStateAccountFungibleResourceBalanceRequest ltsStateAccountFungibleResourceBalanceRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<LtsStateAccountFungibleResourceBalanceResponse> localVarResponse = await LtsStateAccountFungibleResourceBalancePostWithHttpInfoAsync(ltsStateAccountFungibleResourceBalanceRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Resource Balance Returns balance of the resource for an account
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="ltsStateAccountFungibleResourceBalanceRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (LtsStateAccountFungibleResourceBalanceResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<LtsStateAccountFungibleResourceBalanceResponse>> LtsStateAccountFungibleResourceBalancePostWithHttpInfoAsync(LtsStateAccountFungibleResourceBalanceRequest ltsStateAccountFungibleResourceBalanceRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'ltsStateAccountFungibleResourceBalanceRequest' is set
+            if (ltsStateAccountFungibleResourceBalanceRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'ltsStateAccountFungibleResourceBalanceRequest' when calling StateApi->LtsStateAccountFungibleResourceBalancePost");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = ltsStateAccountFungibleResourceBalanceRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<LtsStateAccountFungibleResourceBalanceResponse>("/lts/state/account-fungible-resource-balance", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("LtsStateAccountFungibleResourceBalancePost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
         }
 
         /// <summary>

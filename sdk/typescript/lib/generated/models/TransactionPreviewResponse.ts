@@ -27,6 +27,12 @@ import {
  */
 export interface TransactionPreviewResponse {
     /**
+     * Hex-encoded binary blob.
+     * @type {string}
+     * @memberof TransactionPreviewResponse
+     */
+    encoded_receipt: string;
+    /**
      * 
      * @type {object}
      * @memberof TransactionPreviewResponse
@@ -51,6 +57,7 @@ export interface TransactionPreviewResponse {
  */
 export function instanceOfTransactionPreviewResponse(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "encoded_receipt" in value;
     isInstance = isInstance && "receipt" in value;
     isInstance = isInstance && "resource_changes" in value;
     isInstance = isInstance && "logs" in value;
@@ -68,6 +75,7 @@ export function TransactionPreviewResponseFromJSONTyped(json: any, ignoreDiscrim
     }
     return {
         
+        'encoded_receipt': json['encoded_receipt'],
         'receipt': json['receipt'],
         'resource_changes': json['resource_changes'],
         'logs': ((json['logs'] as Array<any>).map(TransactionPreviewResponseLogsInnerFromJSON)),
@@ -83,6 +91,7 @@ export function TransactionPreviewResponseToJSON(value?: TransactionPreviewRespo
     }
     return {
         
+        'encoded_receipt': value.encoded_receipt,
         'receipt': value.receipt,
         'resource_changes': value.resource_changes,
         'logs': ((value.logs as Array<any>).map(TransactionPreviewResponseLogsInnerToJSON)),

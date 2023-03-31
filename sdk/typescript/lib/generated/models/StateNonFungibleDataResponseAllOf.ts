@@ -13,12 +13,6 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { LedgerState } from './LedgerState';
-import {
-    LedgerStateFromJSON,
-    LedgerStateFromJSONTyped,
-    LedgerStateToJSON,
-} from './LedgerState';
 import type { NonFungibleIdType } from './NonFungibleIdType';
 import {
     NonFungibleIdTypeFromJSON,
@@ -35,41 +29,34 @@ import {
 /**
  * 
  * @export
- * @interface StateNonFungibleDetailsResponse
+ * @interface StateNonFungibleDataResponseAllOf
  */
-export interface StateNonFungibleDetailsResponse {
-    /**
-     * 
-     * @type {LedgerState}
-     * @memberof StateNonFungibleDetailsResponse
-     */
-    ledger_state: LedgerState;
+export interface StateNonFungibleDataResponseAllOf {
     /**
      * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
      * @type {string}
-     * @memberof StateNonFungibleDetailsResponse
+     * @memberof StateNonFungibleDataResponseAllOf
      */
     resource_address: string;
     /**
      * 
      * @type {NonFungibleIdType}
-     * @memberof StateNonFungibleDetailsResponse
+     * @memberof StateNonFungibleDataResponseAllOf
      */
     non_fungible_id_type: NonFungibleIdType;
     /**
      * 
      * @type {Array<StateNonFungibleDetailsResponseItem>}
-     * @memberof StateNonFungibleDetailsResponse
+     * @memberof StateNonFungibleDataResponseAllOf
      */
     non_fungible_ids: Array<StateNonFungibleDetailsResponseItem>;
 }
 
 /**
- * Check if a given object implements the StateNonFungibleDetailsResponse interface.
+ * Check if a given object implements the StateNonFungibleDataResponseAllOf interface.
  */
-export function instanceOfStateNonFungibleDetailsResponse(value: object): boolean {
+export function instanceOfStateNonFungibleDataResponseAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "ledger_state" in value;
     isInstance = isInstance && "resource_address" in value;
     isInstance = isInstance && "non_fungible_id_type" in value;
     isInstance = isInstance && "non_fungible_ids" in value;
@@ -77,24 +64,23 @@ export function instanceOfStateNonFungibleDetailsResponse(value: object): boolea
     return isInstance;
 }
 
-export function StateNonFungibleDetailsResponseFromJSON(json: any): StateNonFungibleDetailsResponse {
-    return StateNonFungibleDetailsResponseFromJSONTyped(json, false);
+export function StateNonFungibleDataResponseAllOfFromJSON(json: any): StateNonFungibleDataResponseAllOf {
+    return StateNonFungibleDataResponseAllOfFromJSONTyped(json, false);
 }
 
-export function StateNonFungibleDetailsResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateNonFungibleDetailsResponse {
+export function StateNonFungibleDataResponseAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateNonFungibleDataResponseAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'ledger_state': LedgerStateFromJSON(json['ledger_state']),
         'resource_address': json['resource_address'],
         'non_fungible_id_type': NonFungibleIdTypeFromJSON(json['non_fungible_id_type']),
         'non_fungible_ids': ((json['non_fungible_ids'] as Array<any>).map(StateNonFungibleDetailsResponseItemFromJSON)),
     };
 }
 
-export function StateNonFungibleDetailsResponseToJSON(value?: StateNonFungibleDetailsResponse | null): any {
+export function StateNonFungibleDataResponseAllOfToJSON(value?: StateNonFungibleDataResponseAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -103,7 +89,6 @@ export function StateNonFungibleDetailsResponseToJSON(value?: StateNonFungibleDe
     }
     return {
         
-        'ledger_state': LedgerStateToJSON(value.ledger_state),
         'resource_address': value.resource_address,
         'non_fungible_id_type': NonFungibleIdTypeToJSON(value.non_fungible_id_type),
         'non_fungible_ids': ((value.non_fungible_ids as Array<any>).map(StateNonFungibleDetailsResponseItemToJSON)),

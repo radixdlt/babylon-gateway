@@ -13,6 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { LedgerState } from './LedgerState';
+import {
+    LedgerStateFromJSON,
+    LedgerStateFromJSONTyped,
+    LedgerStateToJSON,
+} from './LedgerState';
 import type { NonFungibleIdType } from './NonFungibleIdType';
 import {
     NonFungibleIdTypeFromJSON,
@@ -29,34 +35,41 @@ import {
 /**
  * 
  * @export
- * @interface StateNonFungibleDetailsResponseAllOf
+ * @interface StateNonFungibleDataResponse
  */
-export interface StateNonFungibleDetailsResponseAllOf {
+export interface StateNonFungibleDataResponse {
+    /**
+     * 
+     * @type {LedgerState}
+     * @memberof StateNonFungibleDataResponse
+     */
+    ledger_state: LedgerState;
     /**
      * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
      * @type {string}
-     * @memberof StateNonFungibleDetailsResponseAllOf
+     * @memberof StateNonFungibleDataResponse
      */
     resource_address: string;
     /**
      * 
      * @type {NonFungibleIdType}
-     * @memberof StateNonFungibleDetailsResponseAllOf
+     * @memberof StateNonFungibleDataResponse
      */
     non_fungible_id_type: NonFungibleIdType;
     /**
      * 
      * @type {Array<StateNonFungibleDetailsResponseItem>}
-     * @memberof StateNonFungibleDetailsResponseAllOf
+     * @memberof StateNonFungibleDataResponse
      */
     non_fungible_ids: Array<StateNonFungibleDetailsResponseItem>;
 }
 
 /**
- * Check if a given object implements the StateNonFungibleDetailsResponseAllOf interface.
+ * Check if a given object implements the StateNonFungibleDataResponse interface.
  */
-export function instanceOfStateNonFungibleDetailsResponseAllOf(value: object): boolean {
+export function instanceOfStateNonFungibleDataResponse(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "ledger_state" in value;
     isInstance = isInstance && "resource_address" in value;
     isInstance = isInstance && "non_fungible_id_type" in value;
     isInstance = isInstance && "non_fungible_ids" in value;
@@ -64,23 +77,24 @@ export function instanceOfStateNonFungibleDetailsResponseAllOf(value: object): b
     return isInstance;
 }
 
-export function StateNonFungibleDetailsResponseAllOfFromJSON(json: any): StateNonFungibleDetailsResponseAllOf {
-    return StateNonFungibleDetailsResponseAllOfFromJSONTyped(json, false);
+export function StateNonFungibleDataResponseFromJSON(json: any): StateNonFungibleDataResponse {
+    return StateNonFungibleDataResponseFromJSONTyped(json, false);
 }
 
-export function StateNonFungibleDetailsResponseAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateNonFungibleDetailsResponseAllOf {
+export function StateNonFungibleDataResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateNonFungibleDataResponse {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
+        'ledger_state': LedgerStateFromJSON(json['ledger_state']),
         'resource_address': json['resource_address'],
         'non_fungible_id_type': NonFungibleIdTypeFromJSON(json['non_fungible_id_type']),
         'non_fungible_ids': ((json['non_fungible_ids'] as Array<any>).map(StateNonFungibleDetailsResponseItemFromJSON)),
     };
 }
 
-export function StateNonFungibleDetailsResponseAllOfToJSON(value?: StateNonFungibleDetailsResponseAllOf | null): any {
+export function StateNonFungibleDataResponseToJSON(value?: StateNonFungibleDataResponse | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -89,6 +103,7 @@ export function StateNonFungibleDetailsResponseAllOfToJSON(value?: StateNonFungi
     }
     return {
         
+        'ledger_state': LedgerStateToJSON(value.ledger_state),
         'resource_address': value.resource_address,
         'non_fungible_id_type': NonFungibleIdTypeToJSON(value.non_fungible_id_type),
         'non_fungible_ids': ((value.non_fungible_ids as Array<any>).map(StateNonFungibleDetailsResponseItemToJSON)),

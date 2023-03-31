@@ -92,7 +92,7 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
 
     public long DatabaseGlobalAncestorId => GetDatabaseEntityInternal().GlobalAncestorId ?? throw new InvalidOperationException("GlobalAncestorId not set, probably global entity or incorrectly configured one.");
 
-    public bool CanBeOwner => Type is CoreModel.EntityType.Account or CoreModel.EntityType.NormalComponent or CoreModel.EntityType.FungibleResource or CoreModel.EntityType.NonFungibleResource or CoreModel.EntityType.Package or CoreModel.EntityType.Validator;
+    public bool CanBeOwnerAncestor => Type is not CoreModel.EntityType.KeyValueStore;
 
     public bool IsGlobal => GlobalAddress != null || GetDatabaseEntityInternal().GlobalAddress != null;
 

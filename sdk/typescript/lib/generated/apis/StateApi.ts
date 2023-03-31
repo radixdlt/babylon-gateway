@@ -30,8 +30,8 @@ import type {
   StateEntityNonFungibleResourceVaultsPageResponse,
   StateEntityNonFungiblesPageRequest,
   StateEntityNonFungiblesPageResponse,
-  StateNonFungibleDetailsRequest,
-  StateNonFungibleDetailsResponse,
+  StateNonFungibleDataRequest,
+  StateNonFungibleDataResponse,
   StateNonFungibleIdsRequest,
   StateNonFungibleIdsResponse,
   StateValidatorsListRequest,
@@ -68,10 +68,10 @@ import {
     StateEntityNonFungiblesPageRequestToJSON,
     StateEntityNonFungiblesPageResponseFromJSON,
     StateEntityNonFungiblesPageResponseToJSON,
-    StateNonFungibleDetailsRequestFromJSON,
-    StateNonFungibleDetailsRequestToJSON,
-    StateNonFungibleDetailsResponseFromJSON,
-    StateNonFungibleDetailsResponseToJSON,
+    StateNonFungibleDataRequestFromJSON,
+    StateNonFungibleDataRequestToJSON,
+    StateNonFungibleDataResponseFromJSON,
+    StateNonFungibleDataResponseToJSON,
     StateNonFungibleIdsRequestFromJSON,
     StateNonFungibleIdsRequestToJSON,
     StateNonFungibleIdsResponseFromJSON,
@@ -106,8 +106,8 @@ export interface EntityNonFungiblesPageRequest {
     stateEntityNonFungiblesPageRequest: StateEntityNonFungiblesPageRequest;
 }
 
-export interface NonFungibleDetailsRequest {
-    stateNonFungibleDetailsRequest: StateNonFungibleDetailsRequest;
+export interface NonFungibleDataRequest {
+    stateNonFungibleDataRequest: StateNonFungibleDataRequest;
 }
 
 export interface NonFungibleIdsRequest {
@@ -339,11 +339,11 @@ export class StateApi extends runtime.BaseAPI {
 
     /**
      * Returns data associated with a given non-fungible ID of a given non-fungible resource. 
-     * Get Non-Fungible Details
+     * Get Non-Fungible Data
      */
-    async nonFungibleDetailsRaw(requestParameters: NonFungibleDetailsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateNonFungibleDetailsResponse>> {
-        if (requestParameters.stateNonFungibleDetailsRequest === null || requestParameters.stateNonFungibleDetailsRequest === undefined) {
-            throw new runtime.RequiredError('stateNonFungibleDetailsRequest','Required parameter requestParameters.stateNonFungibleDetailsRequest was null or undefined when calling nonFungibleDetails.');
+    async nonFungibleDataRaw(requestParameters: NonFungibleDataRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateNonFungibleDataResponse>> {
+        if (requestParameters.stateNonFungibleDataRequest === null || requestParameters.stateNonFungibleDataRequest === undefined) {
+            throw new runtime.RequiredError('stateNonFungibleDataRequest','Required parameter requestParameters.stateNonFungibleDataRequest was null or undefined when calling nonFungibleData.');
         }
 
         const queryParameters: any = {};
@@ -353,22 +353,22 @@ export class StateApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
-            path: `/state/non-fungible/details`,
+            path: `/state/non-fungible/data`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: StateNonFungibleDetailsRequestToJSON(requestParameters.stateNonFungibleDetailsRequest),
+            body: StateNonFungibleDataRequestToJSON(requestParameters.stateNonFungibleDataRequest),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => StateNonFungibleDetailsResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => StateNonFungibleDataResponseFromJSON(jsonValue));
     }
 
     /**
      * Returns data associated with a given non-fungible ID of a given non-fungible resource. 
-     * Get Non-Fungible Details
+     * Get Non-Fungible Data
      */
-    async nonFungibleDetails(requestParameters: NonFungibleDetailsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateNonFungibleDetailsResponse> {
-        const response = await this.nonFungibleDetailsRaw(requestParameters, initOverrides);
+    async nonFungibleData(requestParameters: NonFungibleDataRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateNonFungibleDataResponse> {
+        const response = await this.nonFungibleDataRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

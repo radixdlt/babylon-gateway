@@ -97,7 +97,7 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
         return await _entityStateQuerier.NonFungibleIds(pageRequest, ledgerState, token);
     }
 
-    public async Task<GatewayModel.StateNonFungibleDetailsResponse> Data(GatewayModel.StateNonFungibleDetailsRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.StateNonFungibleDataResponse> Data(GatewayModel.StateNonFungibleDataRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 

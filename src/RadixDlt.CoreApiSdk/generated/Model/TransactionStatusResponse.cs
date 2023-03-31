@@ -95,64 +95,12 @@ namespace RadixDlt.CoreApiSdk.Model
     [DataContract(Name = "TransactionStatusResponse")]
     public partial class TransactionStatusResponse : IEquatable<TransactionStatusResponse>
     {
-        /// <summary>
-        /// The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction 
-        /// </summary>
-        /// <value>The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction </value>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum IntentStatusEnum
-        {
-            /// <summary>
-            /// Enum CommittedSuccess for value: CommittedSuccess
-            /// </summary>
-            [EnumMember(Value = "CommittedSuccess")]
-            CommittedSuccess = 1,
-
-            /// <summary>
-            /// Enum CommittedFailure for value: CommittedFailure
-            /// </summary>
-            [EnumMember(Value = "CommittedFailure")]
-            CommittedFailure = 2,
-
-            /// <summary>
-            /// Enum PermanentRejection for value: PermanentRejection
-            /// </summary>
-            [EnumMember(Value = "PermanentRejection")]
-            PermanentRejection = 3,
-
-            /// <summary>
-            /// Enum InMempool for value: InMempool
-            /// </summary>
-            [EnumMember(Value = "InMempool")]
-            InMempool = 4,
-
-            /// <summary>
-            /// Enum NotSeen for value: NotSeen
-            /// </summary>
-            [EnumMember(Value = "NotSeen")]
-            NotSeen = 5,
-
-            /// <summary>
-            /// Enum FateUncertain for value: FateUncertain
-            /// </summary>
-            [EnumMember(Value = "FateUncertain")]
-            FateUncertain = 6,
-
-            /// <summary>
-            /// Enum FateUncertainButLikelyRejection for value: FateUncertainButLikelyRejection
-            /// </summary>
-            [EnumMember(Value = "FateUncertainButLikelyRejection")]
-            FateUncertainButLikelyRejection = 7
-
-        }
-
 
         /// <summary>
-        /// The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction 
+        /// Gets or Sets IntentStatus
         /// </summary>
-        /// <value>The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction </value>
         [DataMember(Name = "intent_status", IsRequired = true, EmitDefaultValue = true)]
-        public IntentStatusEnum IntentStatus { get; set; }
+        public TransactionIntentStatus IntentStatus { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionStatusResponse" /> class.
         /// </summary>
@@ -161,11 +109,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionStatusResponse" /> class.
         /// </summary>
-        /// <param name="intentStatus">The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction  (required).</param>
+        /// <param name="intentStatus">intentStatus (required).</param>
         /// <param name="statusDescription">An explanation as to why the intent status is resolved as it is.  (required).</param>
         /// <param name="invalidFromEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the intent status is InMempool or Unknown and we know about a payload. .</param>
         /// <param name="knownPayloads">knownPayloads (required).</param>
-        public TransactionStatusResponse(IntentStatusEnum intentStatus = default(IntentStatusEnum), string statusDescription = default(string), long invalidFromEpoch = default(long), List<TransactionPayloadStatus> knownPayloads = default(List<TransactionPayloadStatus>))
+        public TransactionStatusResponse(TransactionIntentStatus intentStatus = default(TransactionIntentStatus), string statusDescription = default(string), long invalidFromEpoch = default(long), List<TransactionPayloadStatus> knownPayloads = default(List<TransactionPayloadStatus>))
         {
             this.IntentStatus = intentStatus;
             // to ensure "statusDescription" is required (not null)

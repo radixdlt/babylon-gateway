@@ -105,9 +105,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
         /// <param name="mutableData">mutableData (required).</param>
-        /// <param name="immutableData">immutableData (required).</param>
         /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
-        public StateNonFungibleDetailsResponseItem(string nonFungibleId = default(string), ScryptoSborValue mutableData = default(ScryptoSborValue), ScryptoSborValue immutableData = default(ScryptoSborValue), long lastUpdatedAtStateVersion = default(long))
+        public StateNonFungibleDetailsResponseItem(string nonFungibleId = default(string), ScryptoSborValue mutableData = default(ScryptoSborValue), long lastUpdatedAtStateVersion = default(long))
         {
             // to ensure "nonFungibleId" is required (not null)
             if (nonFungibleId == null)
@@ -121,12 +120,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("mutableData is a required property for StateNonFungibleDetailsResponseItem and cannot be null");
             }
             this.MutableData = mutableData;
-            // to ensure "immutableData" is required (not null)
-            if (immutableData == null)
-            {
-                throw new ArgumentNullException("immutableData is a required property for StateNonFungibleDetailsResponseItem and cannot be null");
-            }
-            this.ImmutableData = immutableData;
             this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
@@ -142,12 +135,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "mutable_data", IsRequired = true, EmitDefaultValue = true)]
         public ScryptoSborValue MutableData { get; set; }
-
-        /// <summary>
-        /// Gets or Sets ImmutableData
-        /// </summary>
-        [DataMember(Name = "immutable_data", IsRequired = true, EmitDefaultValue = true)]
-        public ScryptoSborValue ImmutableData { get; set; }
 
         /// <summary>
         /// TBD
@@ -166,7 +153,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class StateNonFungibleDetailsResponseItem {\n");
             sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("  MutableData: ").Append(MutableData).Append("\n");
-            sb.Append("  ImmutableData: ").Append(ImmutableData).Append("\n");
             sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -214,11 +200,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.MutableData.Equals(input.MutableData))
                 ) && 
                 (
-                    this.ImmutableData == input.ImmutableData ||
-                    (this.ImmutableData != null &&
-                    this.ImmutableData.Equals(input.ImmutableData))
-                ) && 
-                (
                     this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
                     this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
@@ -240,10 +221,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.MutableData != null)
                 {
                     hashCode = (hashCode * 59) + this.MutableData.GetHashCode();
-                }
-                if (this.ImmutableData != null)
-                {
-                    hashCode = (hashCode * 59) + this.ImmutableData.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;

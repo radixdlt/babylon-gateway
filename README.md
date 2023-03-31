@@ -9,7 +9,7 @@ The system is in three main parts:
 
 ## Using the Gateway API
 
-For documentation on the Gateway API, see the [Gateway API docs on ReDocly](https://betanet-gateway.redoc.ly/).
+For documentation on the Gateway API, see the [RCNet-V1 Gateway API docs on ReDocly](https://radix-rcnet-v1-gateway.redoc.ly/).
 
 ## Technical Docs
 
@@ -18,7 +18,3 @@ For docs giving an overview of the Network Gateway and its place in the Radix Ec
 For docs related to development on the Network Gateway, see the [docs folder](./docs).
 
 For docs related to running a Network Gateway locally, see the instructions about running a local toy deployment in the [deployment folder](./deployment).
-
-## Known Bugs
-
-- `/entity/non-fungible/ids` endpoint returns NFIDs from single Vault only

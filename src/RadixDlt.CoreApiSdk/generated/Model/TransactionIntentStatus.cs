@@ -90,94 +90,53 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionSubmitMempoolFullErrorDetailsAllOf
+    /// The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction 
     /// </summary>
-    [DataContract(Name = "TransactionSubmitMempoolFullErrorDetails_allOf")]
-    public partial class TransactionSubmitMempoolFullErrorDetailsAllOf : IEquatable<TransactionSubmitMempoolFullErrorDetailsAllOf>
+    /// <value>The status of the transaction intent, as determined by the node. FateUncertain or FateUncertainButLikelyRejection mean that it&#39;s still possible that a payload containing the transaction </value>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum TransactionIntentStatus
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitMempoolFullErrorDetailsAllOf" /> class.
+        /// Enum CommittedSuccess for value: CommittedSuccess
         /// </summary>
-        [JsonConstructorAttribute]
-        protected TransactionSubmitMempoolFullErrorDetailsAllOf() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitMempoolFullErrorDetailsAllOf" /> class.
-        /// </summary>
-        /// <param name="mempoolCapacity">mempoolCapacity (required).</param>
-        public TransactionSubmitMempoolFullErrorDetailsAllOf(int mempoolCapacity = default(int))
-        {
-            this.MempoolCapacity = mempoolCapacity;
-        }
+        [EnumMember(Value = "CommittedSuccess")]
+        CommittedSuccess = 1,
 
         /// <summary>
-        /// Gets or Sets MempoolCapacity
+        /// Enum CommittedFailure for value: CommittedFailure
         /// </summary>
-        [DataMember(Name = "mempool_capacity", IsRequired = true, EmitDefaultValue = true)]
-        public int MempoolCapacity { get; set; }
+        [EnumMember(Value = "CommittedFailure")]
+        CommittedFailure = 2,
 
         /// <summary>
-        /// Returns the string presentation of the object
+        /// Enum PermanentRejection for value: PermanentRejection
         /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionSubmitMempoolFullErrorDetailsAllOf {\n");
-            sb.Append("  MempoolCapacity: ").Append(MempoolCapacity).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
+        [EnumMember(Value = "PermanentRejection")]
+        PermanentRejection = 3,
 
         /// <summary>
-        /// Returns the JSON string presentation of the object
+        /// Enum InMempool for value: InMempool
         /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
+        [EnumMember(Value = "InMempool")]
+        InMempool = 4,
 
         /// <summary>
-        /// Returns true if objects are equal
+        /// Enum NotSeen for value: NotSeen
         /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as TransactionSubmitMempoolFullErrorDetailsAllOf);
-        }
+        [EnumMember(Value = "NotSeen")]
+        NotSeen = 5,
 
         /// <summary>
-        /// Returns true if TransactionSubmitMempoolFullErrorDetailsAllOf instances are equal
+        /// Enum FateUncertain for value: FateUncertain
         /// </summary>
-        /// <param name="input">Instance of TransactionSubmitMempoolFullErrorDetailsAllOf to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(TransactionSubmitMempoolFullErrorDetailsAllOf input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.MempoolCapacity == input.MempoolCapacity ||
-                    this.MempoolCapacity.Equals(input.MempoolCapacity)
-                );
-        }
+        [EnumMember(Value = "FateUncertain")]
+        FateUncertain = 6,
 
         /// <summary>
-        /// Gets the hash code
+        /// Enum FateUncertainButLikelyRejection for value: FateUncertainButLikelyRejection
         /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.MempoolCapacity.GetHashCode();
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "FateUncertainButLikelyRejection")]
+        FateUncertainButLikelyRejection = 7
 
     }
 

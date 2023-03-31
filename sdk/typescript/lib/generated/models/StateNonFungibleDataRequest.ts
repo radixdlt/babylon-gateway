@@ -23,45 +23,45 @@ import {
 /**
  * 
  * @export
- * @interface StateNonFungibleDetailsRequest
+ * @interface StateNonFungibleDataRequest
  */
-export interface StateNonFungibleDetailsRequest {
+export interface StateNonFungibleDataRequest {
     /**
      * 
      * @type {LedgerStateSelector}
-     * @memberof StateNonFungibleDetailsRequest
+     * @memberof StateNonFungibleDataRequest
      */
     at_ledger_state?: LedgerStateSelector | null;
     /**
      * This cursor allows forward pagination, by providing the cursor from the previous request.
      * @type {string}
-     * @memberof StateNonFungibleDetailsRequest
+     * @memberof StateNonFungibleDataRequest
      */
     cursor?: string | null;
     /**
      * The page size requested.
      * @type {number}
-     * @memberof StateNonFungibleDetailsRequest
+     * @memberof StateNonFungibleDataRequest
      */
     limit_per_page?: number | null;
     /**
      * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
      * @type {string}
-     * @memberof StateNonFungibleDetailsRequest
+     * @memberof StateNonFungibleDataRequest
      */
     resource_address: string;
     /**
      * 
      * @type {Array<string>}
-     * @memberof StateNonFungibleDetailsRequest
+     * @memberof StateNonFungibleDataRequest
      */
     non_fungible_ids: Array<string>;
 }
 
 /**
- * Check if a given object implements the StateNonFungibleDetailsRequest interface.
+ * Check if a given object implements the StateNonFungibleDataRequest interface.
  */
-export function instanceOfStateNonFungibleDetailsRequest(value: object): boolean {
+export function instanceOfStateNonFungibleDataRequest(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "resource_address" in value;
     isInstance = isInstance && "non_fungible_ids" in value;
@@ -69,11 +69,11 @@ export function instanceOfStateNonFungibleDetailsRequest(value: object): boolean
     return isInstance;
 }
 
-export function StateNonFungibleDetailsRequestFromJSON(json: any): StateNonFungibleDetailsRequest {
-    return StateNonFungibleDetailsRequestFromJSONTyped(json, false);
+export function StateNonFungibleDataRequestFromJSON(json: any): StateNonFungibleDataRequest {
+    return StateNonFungibleDataRequestFromJSONTyped(json, false);
 }
 
-export function StateNonFungibleDetailsRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateNonFungibleDetailsRequest {
+export function StateNonFungibleDataRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateNonFungibleDataRequest {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -87,7 +87,7 @@ export function StateNonFungibleDetailsRequestFromJSONTyped(json: any, ignoreDis
     };
 }
 
-export function StateNonFungibleDetailsRequestToJSON(value?: StateNonFungibleDetailsRequest | null): any {
+export function StateNonFungibleDataRequestToJSON(value?: StateNonFungibleDataRequest | null): any {
     if (value === undefined) {
         return undefined;
     }

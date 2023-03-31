@@ -96,6 +96,7 @@ namespace RadixDlt.CoreApiSdk.Model
     [DataContract(Name = "TransactionSubmitErrorResponse")]
     [JsonConverter(typeof(JsonSubtypes), "error_type")]
     [JsonSubtypes.KnownSubType(typeof(BasicErrorResponse), "Basic")]
+    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitErrorResponse), "LtsTransactionSubmit")]
     [JsonSubtypes.KnownSubType(typeof(TransactionSubmitErrorResponse), "TransactionSubmit")]
     public partial class TransactionSubmitErrorResponse : ErrorResponse, IEquatable<TransactionSubmitErrorResponse>
     {
