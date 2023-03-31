@@ -20,5 +20,6 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "DataAggregator.dll"]
+COPY Directory.Build.props .
 
 # TODO use local paths and adjust context for CI/CD
