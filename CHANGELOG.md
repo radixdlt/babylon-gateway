@@ -1,5 +1,10 @@
-## 0.2.0 - RCNet
-_Release Date: ???_
+## 0.4.0 - RCNet-V2
+_Release Date: Unreleased_
+
+Changelog will appear here when changes are merged.
+
+## 0.3.0 - RCNet-V1
+_Release Date: 31.02.2023_
 
 - `/entity/overview` and `/entity/details` endpoints replaced with single `/state/entity/details`.
 - Fungible and non-fungible resources are now ordered by the most recently updated.
@@ -13,8 +18,8 @@ _Release Date: ???_
 - new paginable endpoints `/state/entity/page/{x}` for metadata, fungibles, fungible-vaults, non-fungibles, non-fungible-vaults and non-fungible-vault/ids. Cursors returned from `state/entity/details` can be later used to query for next pages in specific endpoints.
 - `/transaction/committed-details` endpoint operates on `intent_hash_hex` only now
 
-### 0.1.1 - Betanet V2
-_Release Date: 14.02.2022_
+## 0.1.1 - Betanet V2
+_Release Date: 14.02.2023_
 
 - Added `/state/validators/list` endpoint: returns paginable collection of all validators ever observed; validators that are part of so called active-set (i.e. participate in consensus for current/requested epoch) are decorated with some extra information like their public_key and stake.
 - `NonFungibleIdType`s `u32` and `u64` have been replaced with single `Number`.
@@ -31,10 +36,10 @@ Fixes for the following issues:
 ## 0.1.0 - Betanet V1
 _Release Date: 20.12.2022_
 
-### 0.0.3
+## 0.0.3
 _Release Date: 17.11.2022_
 
-### 0.0.2
+## 0.0.2
 _Release Date: 14.11.2022_
 
 ## 0.0.1 - Alphanet
