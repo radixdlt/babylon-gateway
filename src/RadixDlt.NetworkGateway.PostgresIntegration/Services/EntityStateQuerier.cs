@@ -417,7 +417,7 @@ LIMIT 1
 
             items.Add(new GatewayModel.StateNonFungibleDetailsResponseItem(
                 nonFungibleId: vm.NonFungibleId,
-                mutableData: ScryptoSborUtils.NonFungibleDataToGatewayScryptoSbor(vm.MutableData, _networkConfigurationProvider.GetNetworkId()),
+                data: ScryptoSborUtils.NonFungibleDataToGatewayScryptoSbor(vm.MutableData, _networkConfigurationProvider.GetNetworkId()),
                 lastUpdatedAtStateVersion: vm.MutableDataLastUpdatedAtStateVersion));
         }
 
