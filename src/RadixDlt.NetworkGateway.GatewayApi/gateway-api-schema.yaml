@@ -1814,12 +1814,12 @@ components:
       type: object
       required:
         - non_fungible_id
-        - data
+        - mutable_data
         - last_updated_at_state_version
       properties:
         non_fungible_id:
           $ref: "#/components/schemas/NonFungibleId"
-        data:
+        mutable_data:
           $ref: "#/components/schemas/ScryptoSborValue"
         last_updated_at_state_version:
           $ref: "#/components/schemas/LastUpdatedAtStateVersion"

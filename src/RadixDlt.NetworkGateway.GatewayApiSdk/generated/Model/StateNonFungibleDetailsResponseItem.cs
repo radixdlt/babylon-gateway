@@ -104,9 +104,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StateNonFungibleDetailsResponseItem" /> class.
         /// </summary>
         /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
-        /// <param name="data">data (required).</param>
+        /// <param name="mutableData">mutableData (required).</param>
         /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
-        public StateNonFungibleDetailsResponseItem(string nonFungibleId = default(string), ScryptoSborValue data = default(ScryptoSborValue), long lastUpdatedAtStateVersion = default(long))
+        public StateNonFungibleDetailsResponseItem(string nonFungibleId = default(string), ScryptoSborValue mutableData = default(ScryptoSborValue), long lastUpdatedAtStateVersion = default(long))
         {
             // to ensure "nonFungibleId" is required (not null)
             if (nonFungibleId == null)
@@ -114,12 +114,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("nonFungibleId is a required property for StateNonFungibleDetailsResponseItem and cannot be null");
             }
             this.NonFungibleId = nonFungibleId;
-            // to ensure "data" is required (not null)
-            if (data == null)
+            // to ensure "mutableData" is required (not null)
+            if (mutableData == null)
             {
-                throw new ArgumentNullException("data is a required property for StateNonFungibleDetailsResponseItem and cannot be null");
+                throw new ArgumentNullException("mutableData is a required property for StateNonFungibleDetailsResponseItem and cannot be null");
             }
-            this.Data = data;
+            this.MutableData = mutableData;
             this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
@@ -131,10 +131,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string NonFungibleId { get; set; }
 
         /// <summary>
-        /// Gets or Sets Data
+        /// Gets or Sets MutableData
         /// </summary>
-        [DataMember(Name = "data", IsRequired = true, EmitDefaultValue = true)]
-        public ScryptoSborValue Data { get; set; }
+        [DataMember(Name = "mutable_data", IsRequired = true, EmitDefaultValue = true)]
+        public ScryptoSborValue MutableData { get; set; }
 
         /// <summary>
         /// TBD
@@ -152,7 +152,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateNonFungibleDetailsResponseItem {\n");
             sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
-            sb.Append("  Data: ").Append(Data).Append("\n");
+            sb.Append("  MutableData: ").Append(MutableData).Append("\n");
             sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -195,9 +195,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.NonFungibleId.Equals(input.NonFungibleId))
                 ) && 
                 (
-                    this.Data == input.Data ||
-                    (this.Data != null &&
-                    this.Data.Equals(input.Data))
+                    this.MutableData == input.MutableData ||
+                    (this.MutableData != null &&
+                    this.MutableData.Equals(input.MutableData))
                 ) && 
                 (
                     this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
@@ -218,9 +218,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
                 }
-                if (this.Data != null)
+                if (this.MutableData != null)
                 {
-                    hashCode = (hashCode * 59) + this.Data.GetHashCode();
+                    hashCode = (hashCode * 59) + this.MutableData.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
