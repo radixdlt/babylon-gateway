@@ -1792,7 +1792,7 @@ components:
                 $ref: "#/components/schemas/NonFungibleId"
       example:
         resource_address: "<non-fungible-entity-address>"
-        non_fungible_ids: ["0a0100000000"]
+        non_fungible_ids: ["#1#"]
     StateNonFungibleDataResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1814,12 +1814,12 @@ components:
       type: object
       required:
         - non_fungible_id
-        - mutable_data
+        - data
         - last_updated_at_state_version
       properties:
         non_fungible_id:
           $ref: "#/components/schemas/NonFungibleId"
-        mutable_data:
+        data:
           $ref: "#/components/schemas/ScryptoSborValue"
         last_updated_at_state_version:
           $ref: "#/components/schemas/LastUpdatedAtStateVersion"
