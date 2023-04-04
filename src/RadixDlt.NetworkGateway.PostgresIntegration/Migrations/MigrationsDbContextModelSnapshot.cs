@@ -628,7 +628,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("non_fungible_id_data");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleIdMutableDataHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleIdDataHistory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -636,6 +636,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<byte[]>("Data")
+                        .HasColumnType("bytea")
+                        .HasColumnName("data");
 
                     b.Property<long>("FromStateVersion")
                         .HasColumnType("bigint")
@@ -645,10 +649,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
 
-                    b.Property<byte[]>("MutableData")
-                        .HasColumnType("bytea")
-                        .HasColumnName("mutable_data");
-
                     b.Property<long>("NonFungibleIdDataId")
                         .HasColumnType("bigint")
                         .HasColumnName("non_fungible_id_data_id");
@@ -657,7 +657,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("NonFungibleIdDataId", "FromStateVersion");
 
-                    b.ToTable("non_fungible_id_mutable_data_history");
+                    b.ToTable("non_fungible_id_data_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleIdStoreHistory", b =>
@@ -897,6 +897,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccessControllerEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.Property<string>("BlueprintName")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_name");
+
+                    b.Property<long>("PackageId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("package_id");
+
+                    b.Property<long?>("RoyaltyVaultEntityId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("royalty_vault_entity_id");
 
                     b.ToTable("entities");
 

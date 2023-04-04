@@ -67,8 +67,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("non_fungible_id_mutable_data_history")]
-internal class NonFungibleIdMutableDataHistory
+[Table("non_fungible_id_data_history")]
+internal class NonFungibleIdDataHistory
 {
     [Key]
     [Column("id")]
@@ -83,6 +83,6 @@ internal class NonFungibleIdMutableDataHistory
     [Column("is_deleted")]
     public bool IsDeleted { get; set; }
 
-    [Column("mutable_data")]
-    public byte[]? MutableData { get; set; }
+    [Column("data")]
+    public byte[]? Data { get; set; }
 }

@@ -549,14 +549,14 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyNonFungibleIdMutableDataHistory(ICollection<NonFungibleIdMutableDataHistory> entities, CancellationToken token)
+    public async Task<int> CopyNonFungibleIdDataHistory(ICollection<NonFungibleIdDataHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_id_mutable_data_history (id, from_state_version, non_fungible_id_data_id, is_deleted, mutable_data) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_id_data_history (id, from_state_version, non_fungible_id_data_id, is_deleted, data) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -565,7 +565,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.NonFungibleIdDataId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
-            await writer.WriteNullableAsync(e.MutableData, NpgsqlDbType.Bytea, token);
+            await writer.WriteNullableAsync(e.Data, NpgsqlDbType.Bytea, token);
         }
 
         await writer.CompleteAsync(token);
@@ -612,7 +612,7 @@ SELECT
     setval('entity_vault_history_id_seq', @entityVaultHistorySequence),
     setval('resource_entity_supply_history_id_seq', @resourceEntitySupplyHistorySequence),
     setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
-    setval('non_fungible_id_mutable_data_history_id_seq', @nonFungibleIdMutableDataHistorySequence),
+    setval('non_fungible_id_data_history_id_seq', @nonFungibleIdDataHistorySequence),
     setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence),
     setval('validator_public_key_history_id_seq', @validatorPublicKeyHistorySequence),
     setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence)",
@@ -628,7 +628,7 @@ SELECT
                 entityVaultHistorySequence = sequences.EntityVaultHistorySequence,
                 resourceEntitySupplyHistorySequence = sequences.ResourceEntitySupplyHistorySequence,
                 nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
-                nonFungibleIdMutableDataHistorySequence = sequences.NonFungibleIdMutableDataHistorySequence,
+                nonFungibleIdDataHistorySequence = sequences.NonFungibleIdDataHistorySequence,
                 nonFungibleIdStoreHistorySequence = sequences.NonFungibleIdStoreHistorySequence,
                 validatorPublicKeyHistorySequence = sequences.ValidatorPublicKeyHistorySequence,
                 validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,

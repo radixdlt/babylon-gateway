@@ -104,7 +104,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<NonFungibleIdData> NonFungibleIdData => Set<NonFungibleIdData>();
 
-    public DbSet<NonFungibleIdMutableDataHistory> NonFungibleIdMutableDataHistory => Set<NonFungibleIdMutableDataHistory>();
+    public DbSet<NonFungibleIdDataHistory> NonFungibleIdDataHistory => Set<NonFungibleIdDataHistory>();
 
     public DbSet<NonFungibleIdStoreHistory> NonFungibleIdStoreHistory => Set<NonFungibleIdStoreHistory>();
 
@@ -278,7 +278,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<NonFungibleIdData>()
             .HasIndex(e => new { NonFungibleResourceManagerEntityId = e.NonFungibleResourceEntityId, e.NonFungibleId, e.FromStateVersion });
 
-        modelBuilder.Entity<NonFungibleIdMutableDataHistory>()
+        modelBuilder.Entity<NonFungibleIdDataHistory>()
             .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleIdStoreHistory>()

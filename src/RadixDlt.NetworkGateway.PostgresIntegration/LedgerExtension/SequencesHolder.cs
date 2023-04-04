@@ -86,7 +86,7 @@ internal class SequencesHolder
 
     public long NonFungibleIdDataSequence { get; set; }
 
-    public long NonFungibleIdMutableDataHistorySequence { get; set; }
+    public long NonFungibleIdDataHistorySequence { get; set; }
 
     public long NonFungibleIdStoreHistorySequence { get; set; }
 

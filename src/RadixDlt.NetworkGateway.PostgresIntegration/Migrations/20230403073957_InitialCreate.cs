@@ -314,7 +314,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "non_fungible_id_mutable_data_history",
+                name: "non_fungible_id_data_history",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -322,11 +322,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     non_fungible_id_data_id = table.Column<long>(type: "bigint", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
-                    mutable_data = table.Column<byte[]>(type: "bytea", nullable: true)
+                    data = table.Column<byte[]>(type: "bytea", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_non_fungible_id_mutable_data_history", x => x.id);
+                    table.PrimaryKey("PK_non_fungible_id_data_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -541,8 +541,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "non_fungible_resource_entity_id", "non_fungible_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_non_fungible_id_mutable_data_history_non_fungible_id_data_i~",
-                table: "non_fungible_id_mutable_data_history",
+                name: "IX_non_fungible_id_data_history_non_fungible_id_data_id_from_s~",
+                table: "non_fungible_id_data_history",
                 columns: new[] { "non_fungible_id_data_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
@@ -634,7 +634,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "non_fungible_id_data");
 
             migrationBuilder.DropTable(
-                name: "non_fungible_id_mutable_data_history");
+                name: "non_fungible_id_data_history");
 
             migrationBuilder.DropTable(
                 name: "non_fungible_id_store_history");

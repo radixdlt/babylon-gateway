@@ -107,7 +107,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record NonFungibleIdViewModel(string NonFungibleId, int NonFungibleIdsTotalCount);
 
-    private record NonFungibleIdDataViewModel(string NonFungibleId, bool IsDeleted, byte[] MutableData, long MutableDataLastUpdatedAtStateVersion);
+    private record NonFungibleIdDataViewModel(string NonFungibleId, bool IsDeleted, byte[] Data, long DataLastUpdatedAtStateVersion);
 
     private readonly TokenAmount _tokenAmount100 = TokenAmount.FromDecimalString("100");
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
@@ -385,13 +385,13 @@ ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
 
         var cd = new CommandDefinition(
             commandText: @"
-SELECT nfid.non_fungible_id AS NonFungibleId, md.is_deleted AS IsDeleted, md.mutable_data AS MutableData, md.from_state_version AS MutableDataLastUpdatedAtStateVersion
+SELECT nfid.non_fungible_id AS NonFungibleId, md.is_deleted AS IsDeleted, md.data AS Data, md.from_state_version AS DataLastUpdatedAtStateVersion
 FROM non_fungible_id_data nfid
 LEFT JOIN LATERAL (
-    SELECT mutable_data, is_deleted, from_state_version
-    FROM non_fungible_id_mutable_data_history nfidmdh
-    WHERE nfidmdh.non_fungible_id_data_id = nfid.id AND nfidmdh.from_state_version <= @stateVersion
-    ORDER BY nfidmdh.from_state_version DESC
+    SELECT data, is_deleted, from_state_version
+    FROM non_fungible_id_data_history nfiddh
+    WHERE nfiddh.non_fungible_id_data_id = nfid.id AND nfiddh.from_state_version <= @stateVersion
+    ORDER BY nfiddh.from_state_version DESC
     LIMIT 1
 ) md ON TRUE
 WHERE nfid.from_state_version <= @stateVersion AND nfid.non_fungible_resource_entity_id = @entityId AND nfid.non_fungible_id = ANY(@nonFungibleIds)
@@ -417,8 +417,8 @@ LIMIT 1
 
             items.Add(new GatewayModel.StateNonFungibleDetailsResponseItem(
                 nonFungibleId: vm.NonFungibleId,
-                mutableData: ScryptoSborUtils.NonFungibleDataToGatewayScryptoSbor(vm.MutableData, _networkConfigurationProvider.GetNetworkId()),
-                lastUpdatedAtStateVersion: vm.MutableDataLastUpdatedAtStateVersion));
+                data: ScryptoSborUtils.NonFungibleDataToGatewayScryptoSbor(vm.Data, _networkConfigurationProvider.GetNetworkId()),
+                lastUpdatedAtStateVersion: vm.DataLastUpdatedAtStateVersion));
         }
 
         return new GatewayModel.StateNonFungibleDataResponse(

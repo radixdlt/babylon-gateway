@@ -383,7 +383,7 @@ SELECT
     nextval('entity_vault_history_id_seq') AS EntityVaultHistorySequence,
     nextval('resource_entity_supply_history_id_seq') AS ResourceEntitySupplyHistorySequence,
     nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
-    nextval('non_fungible_id_mutable_data_history_id_seq') AS NonFungibleIdMutableDataHistorySequence,
+    nextval('non_fungible_id_data_history_id_seq') AS NonFungibleIdDataHistorySequence,
     nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence,
     nextval('validator_public_key_history_id_seq') AS ValidatorPublicKeyHistorySequence,
     nextval('validator_active_set_history_id_seq') AS ValidatorActiveSetHistorySequence",
