@@ -211,8 +211,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     .FirstAsync(token);
 
                 var vaultAccessRulesChain = await _dbContext.EntityAccessRulesChainHistory
-                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == nfrme.Id &&
-                                e.Subtype == AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain)
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == nfrme.Id && e.Subtype == AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
@@ -255,7 +254,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     .FirstOrDefaultAsync(token);
 
                 var accessRulesLayers = await _dbContext.EntityAccessRulesChainHistory
-                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == ce.Id)
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == ce.Id && e.Subtype == AccessRulesChainSubtype.None)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
