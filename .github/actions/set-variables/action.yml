@@ -52,7 +52,7 @@ runs:
 
         case "${GH_EVENT_NAME}" in
             release)
-                VERSION_SUFFIX=""
+                VERSION_SUFFIX="${{ github.event.release.tag_name }}"
 
                 DOCKER_REPO_DATA_AGGREGATOR="radixdlt/babylon-ng-data-aggregator"
                 DOCKER_REPO_DATABASE_MIGRATIONS="radixdlt/babylon-ng-database-migrations"
