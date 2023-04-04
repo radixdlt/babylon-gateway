@@ -105,7 +105,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="releaseVersion">The release that is currently deployed to the Gateway API. (required).</param>
         /// <param name="openApiSchemaVersion">The Open API Schema version that was used to generate the API models. (required).</param>
-        public GatewayInfoResponseReleaseInfo(string releaseVersion = default(string), string openApiSchemaVersion = default(string))
+        /// <param name="imageTag">Image tag that is currently deployed to the Gateway API. (required).</param>
+        public GatewayInfoResponseReleaseInfo(string releaseVersion = default(string), string openApiSchemaVersion = default(string), string imageTag = default(string))
         {
             // to ensure "releaseVersion" is required (not null)
             if (releaseVersion == null)
@@ -119,6 +120,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("openApiSchemaVersion is a required property for GatewayInfoResponseReleaseInfo and cannot be null");
             }
             this.OpenApiSchemaVersion = openApiSchemaVersion;
+            // to ensure "imageTag" is required (not null)
+            if (imageTag == null)
+            {
+                throw new ArgumentNullException("imageTag is a required property for GatewayInfoResponseReleaseInfo and cannot be null");
+            }
+            this.ImageTag = imageTag;
         }
 
         /// <summary>
@@ -136,6 +143,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string OpenApiSchemaVersion { get; set; }
 
         /// <summary>
+        /// Image tag that is currently deployed to the Gateway API.
+        /// </summary>
+        /// <value>Image tag that is currently deployed to the Gateway API.</value>
+        [DataMember(Name = "image_tag", IsRequired = true, EmitDefaultValue = true)]
+        public string ImageTag { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -145,6 +159,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class GatewayInfoResponseReleaseInfo {\n");
             sb.Append("  ReleaseVersion: ").Append(ReleaseVersion).Append("\n");
             sb.Append("  OpenApiSchemaVersion: ").Append(OpenApiSchemaVersion).Append("\n");
+            sb.Append("  ImageTag: ").Append(ImageTag).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -189,6 +204,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.OpenApiSchemaVersion == input.OpenApiSchemaVersion ||
                     (this.OpenApiSchemaVersion != null &&
                     this.OpenApiSchemaVersion.Equals(input.OpenApiSchemaVersion))
+                ) && 
+                (
+                    this.ImageTag == input.ImageTag ||
+                    (this.ImageTag != null &&
+                    this.ImageTag.Equals(input.ImageTag))
                 );
         }
 
@@ -208,6 +228,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.OpenApiSchemaVersion != null)
                 {
                     hashCode = (hashCode * 59) + this.OpenApiSchemaVersion.GetHashCode();
+                }
+                if (this.ImageTag != null)
+                {
+                    hashCode = (hashCode * 59) + this.ImageTag.GetHashCode();
                 }
                 return hashCode;
             }

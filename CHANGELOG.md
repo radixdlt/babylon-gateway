@@ -2,6 +2,7 @@
 _Release Date: Unreleased_
 
 - renamed `mutable_data` property to `data` in `/state/non-fungible/data` endpoint.
+- added `image_tag` with currently deployed image tag to release information.
 
 
 ## 0.3.0 - RCNet-V1

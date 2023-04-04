@@ -88,7 +88,8 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 {
     private static readonly Regex _oasVersionRegex = new("Version of the API: (\\d+\\.\\d+\\.\\d+)", RegexOptions.Compiled | RegexOptions.Multiline);
 
-    private static string _gatewayVersion = GetGatewayProductVersion();
+    private static string _gatewayVersion;
+    private static string _deployedImage;
     private static string _oasVersion = GetOpenApiSchemaVersion();
 
     private readonly ILogger<LedgerStateQuerier> _logger;
@@ -97,6 +98,13 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
     private readonly IOptionsMonitor<AcceptableLedgerLagOptions> _acceptableLedgerLagOptionsMonitor;
     private readonly IEnumerable<ILedgerStateQuerierObserver> _observers;
     private readonly IClock _clock;
+
+    static LedgerStateQuerier()
+    {
+        var productVersion = GetGatewayProductVersion();
+        _gatewayVersion = productVersion.FullVersion;
+        _deployedImage = productVersion.DeployedImage;
+    }
 
     public LedgerStateQuerier(
         ILogger<LedgerStateQuerier> logger,
@@ -126,7 +134,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
                 ledgerStatus.TopOfLedgerTransaction.Epoch,
                 ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
             ),
-            new GatewayModel.GatewayInfoResponseReleaseInfo(_gatewayVersion, _oasVersion)
+            new GatewayModel.GatewayInfoResponseReleaseInfo(_gatewayVersion, _oasVersion, _deployedImage)
         );
     }
 
@@ -231,11 +239,16 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerStatus.TopOfLedgerStateVersion;
     }
 
-    private static string GetGatewayProductVersion()
+    private static (string FullVersion, string DeployedImage) GetGatewayProductVersion()
     {
-        var version = FileVersionInfo.GetVersionInfo(typeof(NetworkGatewayConstants).Assembly.Location).ProductVersion;
+        var productVersion = FileVersionInfo.GetVersionInfo(typeof(NetworkGatewayConstants).Assembly.Location).ProductVersion;
+        if (productVersion == null)
+        {
+            throw new InvalidOperationException("Unable to determine product version");
+        }
 
-        return version ?? throw new InvalidOperationException("Unable to determine product version");
+        string image = productVersion.Substring(productVersion.IndexOf('-') + 1, productVersion.Length - productVersion.IndexOf('-') - 1);
+        return (productVersion, image);
     }
 
     private static string GetOpenApiSchemaVersion()

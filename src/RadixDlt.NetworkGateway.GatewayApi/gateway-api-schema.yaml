@@ -1168,6 +1168,7 @@ components:
       type: object
       required:
         - release_version
+        - image_tag
         - open_api_schema_version
       properties:
         release_version:
@@ -1175,6 +1176,9 @@ components:
           type: string
         open_api_schema_version:
           description: The Open API Schema version that was used to generate the API models.
+          type: string
+        image_tag:
+          description: Image tag that is currently deployed to the Gateway API.
           type: string
 
     #
