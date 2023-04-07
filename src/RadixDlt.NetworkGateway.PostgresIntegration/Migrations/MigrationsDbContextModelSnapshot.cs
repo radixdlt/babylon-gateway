@@ -1335,6 +1335,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("receipt_error_message");
 
+                            b1.Property<string>("Events")
+                                .HasColumnType("jsonb")
+                                .HasColumnName("receipt_events");
+
                             b1.Property<string>("FeeSummary")
                                 .IsRequired()
                                 .HasColumnType("jsonb")

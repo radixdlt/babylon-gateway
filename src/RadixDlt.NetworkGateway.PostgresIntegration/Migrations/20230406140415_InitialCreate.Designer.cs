@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230406133125_InitialCreate")]
+    [Migration("20230406140415_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1337,6 +1337,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                             b1.Property<string>("ErrorMessage")
                                 .HasColumnType("text")
                                 .HasColumnName("receipt_error_message");
+
+                            b1.Property<string>("Events")
+                                .HasColumnType("jsonb")
+                                .HasColumnName("receipt_events");
 
                             b1.Property<string>("FeeSummary")
                                 .IsRequired()

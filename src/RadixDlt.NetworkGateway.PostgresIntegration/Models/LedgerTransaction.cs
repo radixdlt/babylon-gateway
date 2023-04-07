@@ -177,6 +177,9 @@ internal class TransactionReceipt
 
     [Column("receipt_error_message")]
     public string? ErrorMessage { get; set; }
+
+    [Column("receipt_events", TypeName = "jsonb")]
+    public string? Events { get; set; }
 }
 
 internal class UserLedgerTransaction : LedgerTransaction

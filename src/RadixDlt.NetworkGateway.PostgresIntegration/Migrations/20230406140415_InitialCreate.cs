@@ -274,6 +274,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     receipt_next_epoch = table.Column<string>(type: "jsonb", nullable: true),
                     receipt_items = table.Column<string>(type: "jsonb", nullable: true),
                     receipt_error_message = table.Column<string>(type: "text", nullable: true),
+                    receipt_events = table.Column<string>(type: "jsonb", nullable: true),
                     discriminator = table.Column<LedgerTransactionType>(type: "ledger_transaction_type", nullable: false),
                     payload_hash = table.Column<byte[]>(type: "bytea", nullable: true),
                     intent_hash = table.Column<byte[]>(type: "bytea", nullable: true),
