@@ -412,6 +412,7 @@ LIMIT 1
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.GetType() == typeof(ValidatorEntity))
             .Where(e => e.FromStateVersion > fromStateVersion)
             .OrderBy(e => e.FromStateVersion)
+            .ThenBy(e => e.Id)
             .Take(validatorsPageSize + 1)
             .ToListAsync(token);
 
@@ -436,7 +437,7 @@ LIMIT 1
         var cd = new CommandDefinition(
             commandText: @"
 WITH variables (validator_entity_id) AS (SELECT UNNEST(@validatorIds))
-SELECT e.id as ValidatorId, CAST(evh.balance AS text) AS Balance, esh.state AS State, evh.from_state_version AS BalanceLastUpdatedAtStateVersion, esh.from_state_version AS StateLastUpdatedAtStateVersion
+SELECT e.id AS ValidatorId, CAST(evh.balance AS text) AS Balance, esh.state AS State, evh.from_state_version AS BalanceLastUpdatedAtStateVersion, esh.from_state_version AS StateLastUpdatedAtStateVersion
 FROM variables
 INNER JOIN entities e ON e.id = variables.validator_entity_id AND from_state_version <= @stateVersion
 INNER JOIN LATERAL (
@@ -503,8 +504,11 @@ INNER JOIN LATERAL (
 
         var cd = new CommandDefinition(
             commandText: @"
-WITH variables (entity_id) AS (
-    SELECT UNNEST(@entityIds)
+WITH variables (entity_id, ord) AS (
+    SELECT
+        a.val AS entity_id,
+        a.ord AS ord
+     FROM UNNEST(@entityIds) WITH ORDINALITY AS a(val, ord)
 )
 SELECT emh.*
 FROM variables
@@ -514,7 +518,8 @@ INNER JOIN LATERAL (
     WHERE entity_id = variables.entity_id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
-) emh ON true;",
+) emh ON true
+ORDER BY variables.ord;",
             parameters: new
             {
                 entityIds = entityIds,
@@ -562,10 +567,15 @@ WITH most_recent_entity_resource_aggregate_history_nested AS (
     LIMIT 1
 ),
 most_recent_entity_resource_aggregate_history AS (
-    SELECT UNNEST(fungible_resource_entity_ids[@offset:@limit]) AS fungible_resource_entity_id, cardinality(fungible_resource_entity_ids) AS resources_total_count
+    SELECT a.val AS fungible_resource_entity_id, cardinality(fungible_resource_entity_ids) AS resources_total_count, a.ord AS ord
     FROM most_recent_entity_resource_aggregate_history_nested
+    LEFT JOIN LATERAL UNNEST(fungible_resource_entity_ids[@offset:@limit]) WITH ORDINALITY AS a(val,ord) ON true
 )
-SELECT e.global_address AS ResourceEntityGlobalAddress, CAST(eravh.balance AS text) AS Balance, ah.resources_total_count AS ResourcesTotalCount, eravh.from_state_version AS LastUpdatedAtStateVersion
+SELECT
+    e.global_address AS ResourceEntityGlobalAddress,
+    CAST(eravh.balance AS text) AS Balance,
+    ah.resources_total_count AS ResourcesTotalCount,
+    eravh.from_state_version AS LastUpdatedAtStateVersion
 FROM most_recent_entity_resource_aggregate_history ah
 INNER JOIN LATERAL (
     SELECT balance, from_state_version
@@ -575,6 +585,7 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) eravh ON TRUE
 INNER JOIN entities e ON ah.fungible_resource_entity_id = e.id
+order by ah.ord
 ",
             parameters: new
             {
@@ -623,11 +634,12 @@ WITH most_recent_entity_resource_aggregate_history_nested AS (
     LIMIT 1
 ),
 most_recent_entity_resource_aggregate_history AS (
-    SELECT UNNEST(fungible_resource_entity_ids[@resourceOffset:@resourceLimit]) AS fungible_resource_entity_id, cardinality(fungible_resource_entity_ids) AS resource_total_count
+    SELECT a.val AS fungible_resource_entity_id, cardinality(fungible_resource_entity_ids) AS resource_total_count, a.ord AS resource_order
     FROM most_recent_entity_resource_aggregate_history_nested
+    LEFT JOIN LATERAL UNNEST(fungible_resource_entity_ids[@resourceOffset:@resourceLimit]) WITH ORDINALITY AS a(val,ord) ON true
 ),
 most_recent_entity_resource_vault_aggregate_history_nested AS (
-    SELECT rah.fungible_resource_entity_id, rah.resource_total_count, vah.vault_entity_ids
+    SELECT rah.fungible_resource_entity_id, rah.resource_total_count, vah.vault_entity_ids, rah.resource_order
     FROM most_recent_entity_resource_aggregate_history rah
     INNER JOIN LATERAL (
         SELECT vault_entity_ids
@@ -638,10 +650,23 @@ most_recent_entity_resource_vault_aggregate_history_nested AS (
     ) vah ON TRUE
 ),
 most_recent_entity_resource_vault_aggregate_history AS (
-    SELECT ahn.fungible_resource_entity_id, ahn.resource_total_count, UNNEST(vault_entity_ids[@vaultOffset:@vaultLimit]) AS vault_entity_id, cardinality(vault_entity_ids) AS vault_total_count
+    SELECT
+        ahn.fungible_resource_entity_id,
+        ahn.resource_total_count,
+        a.val AS vault_entity_id,
+        cardinality(vault_entity_ids) AS vault_total_count,
+        ahn.resource_order,
+        a.ord AS vault_order
     FROM most_recent_entity_resource_vault_aggregate_history_nested ahn
+    LEFT JOIN LATERAL UNNEST(vault_entity_ids[@vaultOffset:@vaultLimit]) WITH ORDINALITY AS a(val,ord) ON true
 )
-SELECT er.global_address AS ResourceEntityGlobalAddress, ENCODE(ev.address, 'hex') AS VaultAddress, CAST(vh.balance AS text) AS Balance, vah.resource_total_count AS ResourceTotalCount, vah.vault_total_count AS VaultTotalCount, vh.from_state_version AS LastUpdatedAtStateVersion
+SELECT
+    er.global_address AS ResourceEntityGlobalAddress,
+    ENCODE(ev.address, 'hex') AS VaultAddress,
+    CAST(vh.balance AS text) AS Balance,
+    vah.resource_total_count AS ResourceTotalCount,
+    vah.vault_total_count AS VaultTotalCount,
+    vh.from_state_version AS LastUpdatedAtStateVersion
 FROM most_recent_entity_resource_vault_aggregate_history vah
 INNER JOIN LATERAL (
     SELECT balance, from_state_version
@@ -651,7 +676,8 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) vh ON TRUE
 INNER JOIN entities er ON vah.fungible_resource_entity_id = er.id
-INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
+INNER JOIN entities ev ON vah.vault_entity_id = ev.id
+ORDER BY vah.resource_order, vah.vault_order;
 ",
             parameters: new
             {
@@ -720,7 +746,7 @@ WITH most_recent_entity_resource_aggregate_history_nested AS (
 most_recent_entity_resource_vault_aggregate_history_nested AS (
     SELECT vah.vault_entity_ids
     FROM most_recent_entity_resource_aggregate_history_nested rah
-             INNER JOIN LATERAL (
+    INNER JOIN LATERAL (
         SELECT vault_entity_ids
         FROM entity_resource_vault_aggregate_history
         WHERE from_state_version <= @stateVersion AND entity_id = @entityId AND resource_entity_id = @resourceEntityId
@@ -729,8 +755,9 @@ most_recent_entity_resource_vault_aggregate_history_nested AS (
         ) vah ON TRUE
 ),
 most_recent_entity_resource_vault_aggregate_history AS (
-    SELECT UNNEST(vault_entity_ids[@vaultOffset:@vaultLimit]) AS vault_entity_id, cardinality(vault_entity_ids) AS vault_total_count
+    SELECT a.val AS vault_entity_id, cardinality(vault_entity_ids) AS vault_total_count, a.ord AS ord
     FROM most_recent_entity_resource_vault_aggregate_history_nested ahn
+    LEFT JOIN LATERAL UNNEST(vault_entity_ids[@vaultOffset:@vaultLimit]) WITH ORDINALITY a(val,ord) ON true
 )
 SELECT er.global_address AS ResourceEntityGlobalAddress, ENCODE(ev.address, 'hex') AS VaultAddress, CAST(vh.balance AS text) AS Balance, vah.vault_total_count AS VaultTotalCount, vh.from_state_version AS LastUpdatedAtStateVersion
 FROM most_recent_entity_resource_vault_aggregate_history vah
@@ -742,7 +769,8 @@ INNER JOIN LATERAL (
     LIMIT 1
     ) vh ON TRUE
 INNER JOIN entities er ON er.id = @resourceEntityId
-INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
+INNER JOIN entities ev ON vah.vault_entity_id = ev.id
+ORDER BY vah.ord;
 ",
             parameters: new
             {
@@ -787,10 +815,15 @@ WITH most_recent_entity_resource_aggregate_history_nested AS (
     LIMIT 1
 ),
 most_recent_entity_resource_aggregate_history AS (
-    SELECT UNNEST(non_fungible_resource_entity_ids[@offset:@limit]) AS non_fungible_resource_entity_id, cardinality(non_fungible_resource_entity_ids) AS resources_total_count
+    SELECT a.val AS non_fungible_resource_entity_id, cardinality(non_fungible_resource_entity_ids) AS resources_total_count, a.ord AS ord
     FROM most_recent_entity_resource_aggregate_history_nested
+    LEFT JOIN LATERAL UNNEST(non_fungible_resource_entity_ids[@offset:@limit]) WITH ORDINALITY a(val,ord)  ON true
 )
-SELECT e.global_address AS ResourceEntityGlobalAddress, eravh.total_count AS NonFungibleIdsCount, ah.resources_total_count AS ResourcesTotalCount, eravh.from_state_version AS LastUpdatedAtStateVersion
+SELECT
+    e.global_address AS ResourceEntityGlobalAddress,
+    eravh.total_count AS NonFungibleIdsCount,
+    ah.resources_total_count AS ResourcesTotalCount,
+    eravh.from_state_version AS LastUpdatedAtStateVersion
 FROM most_recent_entity_resource_aggregate_history ah
 INNER JOIN LATERAL (
     SELECT total_count, from_state_version
@@ -798,8 +831,9 @@ INNER JOIN LATERAL (
     WHERE from_state_version <= @stateVersion AND entity_id = @entityId AND resource_entity_id = ah.non_fungible_resource_entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
-) eravh ON TRUE
-INNER JOIN entities e ON ah.non_fungible_resource_entity_id = e.id;
+    ) eravh ON TRUE
+INNER JOIN entities e ON ah.non_fungible_resource_entity_id = e.id
+order by ah.ord;
 ",
             parameters: new
             {
@@ -848,11 +882,12 @@ WITH most_recent_entity_resource_aggregate_history_nested AS (
     LIMIT 1
 ),
 most_recent_entity_resource_aggregate_history AS (
-    SELECT UNNEST(non_fungible_resource_entity_ids[@resourceOffset:@resourceLimit]) AS non_fungible_resource_entity_id, cardinality(non_fungible_resource_entity_ids) AS resource_total_count
+    SELECT a.val AS non_fungible_resource_entity_id, cardinality(non_fungible_resource_entity_ids) AS resource_total_count, a.ord AS resource_order
     FROM most_recent_entity_resource_aggregate_history_nested
+    LEFT JOIN LATERAL UNNEST(non_fungible_resource_entity_ids[@resourceOffset:@resourceLimit]) WITH ORDINALITY a(val,ord) ON true
 ),
 most_recent_entity_resource_vault_aggregate_history_nested AS (
-    SELECT rah.non_fungible_resource_entity_id, rah.resource_total_count, vah.vault_entity_ids
+    SELECT rah.non_fungible_resource_entity_id, rah.resource_total_count, vah.vault_entity_ids, rah.resource_order
     FROM most_recent_entity_resource_aggregate_history rah
     INNER JOIN LATERAL (
         SELECT vault_entity_ids
@@ -863,10 +898,23 @@ most_recent_entity_resource_vault_aggregate_history_nested AS (
     ) vah ON TRUE
 ),
 most_recent_entity_resource_vault_aggregate_history AS (
-    SELECT ahn.non_fungible_resource_entity_id, ahn.resource_total_count, UNNEST(vault_entity_ids[@vaultOffset:@vaultLimit]) AS vault_entity_id, cardinality(vault_entity_ids) AS vault_total_count
+    SELECT
+        ahn.non_fungible_resource_entity_id,
+        ahn.resource_total_count,
+        a.val AS vault_entity_id,
+        cardinality(vault_entity_ids) AS vault_total_count,
+        ahn.resource_order,
+        a.ord AS vault_order
     FROM most_recent_entity_resource_vault_aggregate_history_nested ahn
+    LEFT JOIN LATERAL UNNEST(vault_entity_ids[@vaultOffset:@vaultLimit]) WITH ORDINALITY a(val,ord) ON true
 )
-SELECT er.global_address AS ResourceEntityGlobalAddress, ENCODE(ev.address, 'hex') AS VaultAddress, vh.NonFungibleIdsCount, vah.resource_total_count AS ResourceTotalCount, vah.vault_total_count AS VaultTotalCount, vh.from_state_version AS LastUpdatedAtStateVersion
+SELECT
+    er.global_address AS ResourceEntityGlobalAddress,
+    ENCODE(ev.address, 'hex') AS VaultAddress,
+    vh.NonFungibleIdsCount,
+    vah.resource_total_count AS ResourceTotalCount,
+    vah.vault_total_count AS VaultTotalCount,
+    vh.from_state_version AS LastUpdatedAtStateVersion
 FROM most_recent_entity_resource_vault_aggregate_history vah
 INNER JOIN LATERAL (
     SELECT CAST(cardinality(non_fungible_ids) AS bigint) AS NonFungibleIdsCount, from_state_version
@@ -876,7 +924,8 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) vh ON TRUE
 INNER JOIN entities er ON vah.non_fungible_resource_entity_id = er.id
-INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
+INNER JOIN entities ev ON vah.vault_entity_id = ev.id
+ORDER BY vah.resource_order, vah.vault_order;
 ",
             parameters: new
             {
@@ -946,29 +995,31 @@ WITH most_recent_entity_resource_aggregate_history_nested AS (
 most_recent_entity_resource_vault_aggregate_history_nested AS (
     SELECT vah.vault_entity_ids
     FROM most_recent_entity_resource_aggregate_history_nested rah
-             INNER JOIN LATERAL (
+    INNER JOIN LATERAL (
         SELECT vault_entity_ids
         FROM entity_resource_vault_aggregate_history
         WHERE from_state_version <= @stateVersion AND entity_id = @entityId AND resource_entity_id = @resourceEntityId
         ORDER BY from_state_version DESC
         LIMIT 1
         ) vah ON TRUE
- ),
+),
 most_recent_entity_resource_vault_aggregate_history AS (
-    SELECT UNNEST(vault_entity_ids[@vaultOffset:@vaultLimit]) AS vault_entity_id, cardinality(vault_entity_ids) AS vault_total_count
+    SELECT a.val AS vault_entity_id, cardinality(vault_entity_ids) AS vault_total_count, a.ord AS ord
     FROM most_recent_entity_resource_vault_aggregate_history_nested ahn
+    LEFT JOIN LATERAL UNNEST(vault_entity_ids[@vaultOffset:@vaultLimit]) WITH ORDINALITY a(val,ord) ON true
 )
 SELECT er.global_address AS ResourceEntityGlobalAddress, ENCODE(ev.address, 'hex') AS VaultAddress, vh.NonFungibleIdsCount, vah.vault_total_count AS VaultTotalCount, vh.from_state_version AS LastUpdatedAtStateVersion
 FROM most_recent_entity_resource_vault_aggregate_history vah
- INNER JOIN LATERAL (
+INNER JOIN LATERAL (
     SELECT CAST(cardinality(non_fungible_ids) AS bigint) AS NonFungibleIdsCount, from_state_version
     FROM entity_vault_history
     WHERE from_state_version <= @stateVersion AND global_entity_id = @entityId AND resource_entity_id = @resourceEntityId AND vault_entity_id = vah.vault_entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
-) vh ON TRUE
+    ) vh ON TRUE
 INNER JOIN entities er ON  er.id = @resourceEntityId
-INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
+INNER JOIN entities ev ON vah.vault_entity_id = ev.id
+ORDER BY vah.ord;
 ",
             parameters: new
             {
@@ -1007,8 +1058,9 @@ INNER JOIN entities ev ON vah.vault_entity_id = ev.id;
             commandText: @"
 SELECT nfid.non_fungible_id AS NonFungibleId, final.total_count AS NonFungibleIdsTotalCount
 FROM (
-    SELECT UNNEST(non_fungible_ids[@offset:@limit]) AS non_fungible_id_data_id, cardinality(non_fungible_ids) AS total_count
+    SELECT a.val AS non_fungible_id_data_id, cardinality(non_fungible_ids) AS total_count, a.ord AS ord
     FROM entity_vault_history
+    LEFT JOIN LATERAL UNNEST(non_fungible_ids[@offset:@limit]) WITH ORDINALITY a(val,ord) ON true
     WHERE id = (
         SELECT id
         FROM entity_vault_history
@@ -1018,6 +1070,7 @@ FROM (
     )
 ) final
 INNER JOIN non_fungible_id_data nfid ON nfid.id = final.non_fungible_id_data_id
+order by ord
 ",
             parameters: new
             {
