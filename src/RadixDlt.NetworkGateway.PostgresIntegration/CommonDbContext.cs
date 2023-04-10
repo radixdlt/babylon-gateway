@@ -195,7 +195,7 @@ internal abstract class CommonDbContext : DbContext
 
         // This index lets you quickly filter out transaction stream
         modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => new { FilterType = lt.KindFilterConstraint, lt.StateVersion })
+            .HasIndex(lt => new { lt.KindFilterConstraint, lt.StateVersion })
             .HasFilter("kind_filter_constraint IS NOT NULL");
     }
 
@@ -270,19 +270,20 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.GlobalEntityId, e.VaultEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<ResourceEntitySupplyHistory>()
-            .HasIndex(e => new { ResourceManagerEntityId = e.ResourceEntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleIdData>()
-            .HasIndex(e => new { NonFungibleResourceManagerEntityId = e.NonFungibleResourceEntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.NonFungibleResourceEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleIdData>()
-            .HasIndex(e => new { NonFungibleResourceManagerEntityId = e.NonFungibleResourceEntityId, e.NonFungibleId, e.FromStateVersion });
+            .HasIndex(e => new { e.NonFungibleResourceEntityId, e.NonFungibleId, e.FromStateVersion })
+            .IsUnique();
 
         modelBuilder.Entity<NonFungibleIdDataHistory>()
             .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleIdStoreHistory>()
-            .HasIndex(e => new { NonFungibleResourceManagerEntityId = e.NonFungibleResourceEntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.NonFungibleResourceEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityStateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });

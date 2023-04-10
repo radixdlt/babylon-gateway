@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -538,7 +538,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_non_fungible_id_data_non_fungible_resource_entity_id_non_fu~",
                 table: "non_fungible_id_data",
-                columns: new[] { "non_fungible_resource_entity_id", "non_fungible_id", "from_state_version" });
+                columns: new[] { "non_fungible_resource_entity_id", "non_fungible_id", "from_state_version" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_non_fungible_id_data_history_non_fungible_id_data_id_from_s~",

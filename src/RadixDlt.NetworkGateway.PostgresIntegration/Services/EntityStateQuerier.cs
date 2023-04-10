@@ -370,7 +370,6 @@ LEFT JOIN LATERAL (
 ) md ON TRUE
 WHERE nfid.from_state_version <= @stateVersion AND nfid.non_fungible_resource_entity_id = @entityId AND nfid.non_fungible_id = ANY(@nonFungibleIds)
 ORDER BY nfid.from_state_version DESC
-LIMIT 1
 ",
             parameters: new
             {
