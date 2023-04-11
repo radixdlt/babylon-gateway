@@ -90,49 +90,41 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionCommittedDetailsOptInProperties
+    /// StateEntityDetailsOptIns
     /// </summary>
-    [DataContract(Name = "TransactionCommittedDetailsOptInProperties")]
-    public partial class TransactionCommittedDetailsOptInProperties : IEquatable<TransactionCommittedDetailsOptInProperties>
+    [DataContract(Name = "StateEntityDetailsOptIns")]
+    public partial class StateEntityDetailsOptIns : IEquatable<StateEntityDetailsOptIns>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsOptInProperties" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsOptIns" /> class.
         /// </summary>
-        /// <param name="rawHex">rawHex.</param>
-        /// <param name="receiptStateChanges">receiptStateChanges.</param>
-        /// <param name="receiptFeeSummary">receiptFeeSummary.</param>
-        /// <param name="receiptEvents">receiptEvents.</param>
-        public TransactionCommittedDetailsOptInProperties(bool rawHex = default(bool), bool receiptStateChanges = default(bool), bool receiptFeeSummary = default(bool), bool receiptEvents = default(bool))
+        /// <param name="ancestorIdentities">ancestorIdentities.</param>
+        /// <param name="componentRoyaltyVaultBalance">componentRoyaltyVaultBalance.</param>
+        /// <param name="packageRoyaltyVaultBalance">packageRoyaltyVaultBalance.</param>
+        public StateEntityDetailsOptIns(bool ancestorIdentities = default(bool), bool componentRoyaltyVaultBalance = default(bool), bool packageRoyaltyVaultBalance = default(bool))
         {
-            this.RawHex = rawHex;
-            this.ReceiptStateChanges = receiptStateChanges;
-            this.ReceiptFeeSummary = receiptFeeSummary;
-            this.ReceiptEvents = receiptEvents;
+            this.AncestorIdentities = ancestorIdentities;
+            this.ComponentRoyaltyVaultBalance = componentRoyaltyVaultBalance;
+            this.PackageRoyaltyVaultBalance = packageRoyaltyVaultBalance;
         }
 
         /// <summary>
-        /// Gets or Sets RawHex
+        /// Gets or Sets AncestorIdentities
         /// </summary>
-        [DataMember(Name = "raw_hex", EmitDefaultValue = true)]
-        public bool RawHex { get; set; }
+        [DataMember(Name = "ancestor_identities", EmitDefaultValue = true)]
+        public bool AncestorIdentities { get; set; }
 
         /// <summary>
-        /// Gets or Sets ReceiptStateChanges
+        /// Gets or Sets ComponentRoyaltyVaultBalance
         /// </summary>
-        [DataMember(Name = "receipt_state_changes", EmitDefaultValue = true)]
-        public bool ReceiptStateChanges { get; set; }
+        [DataMember(Name = "component_royalty_vault_balance", EmitDefaultValue = true)]
+        public bool ComponentRoyaltyVaultBalance { get; set; }
 
         /// <summary>
-        /// Gets or Sets ReceiptFeeSummary
+        /// Gets or Sets PackageRoyaltyVaultBalance
         /// </summary>
-        [DataMember(Name = "receipt_fee_summary", EmitDefaultValue = true)]
-        public bool ReceiptFeeSummary { get; set; }
-
-        /// <summary>
-        /// Gets or Sets ReceiptEvents
-        /// </summary>
-        [DataMember(Name = "receipt_events", EmitDefaultValue = true)]
-        public bool ReceiptEvents { get; set; }
+        [DataMember(Name = "package_royalty_vault_balance", EmitDefaultValue = true)]
+        public bool PackageRoyaltyVaultBalance { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,11 +133,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionCommittedDetailsOptInProperties {\n");
-            sb.Append("  RawHex: ").Append(RawHex).Append("\n");
-            sb.Append("  ReceiptStateChanges: ").Append(ReceiptStateChanges).Append("\n");
-            sb.Append("  ReceiptFeeSummary: ").Append(ReceiptFeeSummary).Append("\n");
-            sb.Append("  ReceiptEvents: ").Append(ReceiptEvents).Append("\n");
+            sb.Append("class StateEntityDetailsOptIns {\n");
+            sb.Append("  AncestorIdentities: ").Append(AncestorIdentities).Append("\n");
+            sb.Append("  ComponentRoyaltyVaultBalance: ").Append(ComponentRoyaltyVaultBalance).Append("\n");
+            sb.Append("  PackageRoyaltyVaultBalance: ").Append(PackageRoyaltyVaultBalance).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,15 +157,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionCommittedDetailsOptInProperties);
+            return this.Equals(input as StateEntityDetailsOptIns);
         }
 
         /// <summary>
-        /// Returns true if TransactionCommittedDetailsOptInProperties instances are equal
+        /// Returns true if StateEntityDetailsOptIns instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionCommittedDetailsOptInProperties to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsOptIns to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionCommittedDetailsOptInProperties input)
+        public bool Equals(StateEntityDetailsOptIns input)
         {
             if (input == null)
             {
@@ -182,20 +173,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.RawHex == input.RawHex ||
-                    this.RawHex.Equals(input.RawHex)
+                    this.AncestorIdentities == input.AncestorIdentities ||
+                    this.AncestorIdentities.Equals(input.AncestorIdentities)
                 ) && 
                 (
-                    this.ReceiptStateChanges == input.ReceiptStateChanges ||
-                    this.ReceiptStateChanges.Equals(input.ReceiptStateChanges)
+                    this.ComponentRoyaltyVaultBalance == input.ComponentRoyaltyVaultBalance ||
+                    this.ComponentRoyaltyVaultBalance.Equals(input.ComponentRoyaltyVaultBalance)
                 ) && 
                 (
-                    this.ReceiptFeeSummary == input.ReceiptFeeSummary ||
-                    this.ReceiptFeeSummary.Equals(input.ReceiptFeeSummary)
-                ) && 
-                (
-                    this.ReceiptEvents == input.ReceiptEvents ||
-                    this.ReceiptEvents.Equals(input.ReceiptEvents)
+                    this.PackageRoyaltyVaultBalance == input.PackageRoyaltyVaultBalance ||
+                    this.PackageRoyaltyVaultBalance.Equals(input.PackageRoyaltyVaultBalance)
                 );
         }
 
@@ -208,10 +195,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
-                hashCode = (hashCode * 59) + this.ReceiptStateChanges.GetHashCode();
-                hashCode = (hashCode * 59) + this.ReceiptFeeSummary.GetHashCode();
-                hashCode = (hashCode * 59) + this.ReceiptEvents.GetHashCode();
+                hashCode = (hashCode * 59) + this.AncestorIdentities.GetHashCode();
+                hashCode = (hashCode * 59) + this.ComponentRoyaltyVaultBalance.GetHashCode();
+                hashCode = (hashCode * 59) + this.PackageRoyaltyVaultBalance.GetHashCode();
                 return hashCode;
             }
         }

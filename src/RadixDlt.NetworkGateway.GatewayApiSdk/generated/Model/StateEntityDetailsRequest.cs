@@ -110,10 +110,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StateEntityDetailsRequest" /> class.
         /// </summary>
         /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="optInProperties">optInProperties.</param>
+        /// <param name="optIns">optIns.</param>
         /// <param name="addresses">addresses (required).</param>
         /// <param name="aggregationLevel">aggregationLevel.</param>
-        public StateEntityDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), StateEntityDetailsOptInProperties optInProperties = default(StateEntityDetailsOptInProperties), List<string> addresses = default(List<string>), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
+        public StateEntityDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), StateEntityDetailsOptIns optIns = default(StateEntityDetailsOptIns), List<string> addresses = default(List<string>), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
         {
             // to ensure "addresses" is required (not null)
             if (addresses == null)
@@ -122,7 +122,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.Addresses = addresses;
             this.AtLedgerState = atLedgerState;
-            this.OptInProperties = optInProperties;
+            this.OptIns = optIns;
             this.AggregationLevel = aggregationLevel;
         }
 
@@ -133,10 +133,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
-        /// Gets or Sets OptInProperties
+        /// Gets or Sets OptIns
         /// </summary>
-        [DataMember(Name = "opt_in_properties", EmitDefaultValue = true)]
-        public StateEntityDetailsOptInProperties OptInProperties { get; set; }
+        [DataMember(Name = "opt_ins", EmitDefaultValue = true)]
+        public StateEntityDetailsOptIns OptIns { get; set; }
 
         /// <summary>
         /// Gets or Sets Addresses
@@ -153,7 +153,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityDetailsRequest {\n");
             sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
-            sb.Append("  OptInProperties: ").Append(OptInProperties).Append("\n");
+            sb.Append("  OptIns: ").Append(OptIns).Append("\n");
             sb.Append("  Addresses: ").Append(Addresses).Append("\n");
             sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
             sb.Append("}\n");
@@ -197,9 +197,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.AtLedgerState.Equals(input.AtLedgerState))
                 ) && 
                 (
-                    this.OptInProperties == input.OptInProperties ||
-                    (this.OptInProperties != null &&
-                    this.OptInProperties.Equals(input.OptInProperties))
+                    this.OptIns == input.OptIns ||
+                    (this.OptIns != null &&
+                    this.OptIns.Equals(input.OptIns))
                 ) && 
                 (
                     this.Addresses == input.Addresses ||
@@ -226,9 +226,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
                 }
-                if (this.OptInProperties != null)
+                if (this.OptIns != null)
                 {
-                    hashCode = (hashCode * 59) + this.OptInProperties.GetHashCode();
+                    hashCode = (hashCode * 59) + this.OptIns.GetHashCode();
                 }
                 if (this.Addresses != null)
                 {

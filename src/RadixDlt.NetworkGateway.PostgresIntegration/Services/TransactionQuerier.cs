@@ -102,7 +102,7 @@ internal class TransactionQuerier : ITransactionQuerier
         return new TransactionPageWithoutTotal(nextCursor, transactions);
     }
 
-    public async Task<DetailsLookupResult?> LookupCommittedTransaction(byte[] intentHash, GatewayModel.TransactionCommittedDetailsOptInProperties? optInProperties, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
+    public async Task<DetailsLookupResult?> LookupCommittedTransaction(byte[] intentHash, GatewayModel.TransactionCommittedDetailsOptIns optIns, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
     {
         var stateVersion = await _dbContext.LedgerTransactions
             .OfType<UserLedgerTransaction>()
@@ -116,7 +116,7 @@ internal class TransactionQuerier : ITransactionQuerier
         }
 
         return withDetails
-            ? await GetTransactionWithDetails(stateVersion, optInProperties, token)
+            ? await GetTransactionWithDetails(stateVersion, optIns, token)
             : new DetailsLookupResult((await GetTransactions(new List<long> { stateVersion }, token)).First(), null);
     }
 
@@ -177,7 +177,7 @@ internal class TransactionQuerier : ITransactionQuerier
             .ToList();
     }
 
-    private async Task<DetailsLookupResult> GetTransactionWithDetails(long stateVersion, GatewayModel.TransactionCommittedDetailsOptInProperties? optInProperties, CancellationToken token)
+    private async Task<DetailsLookupResult> GetTransactionWithDetails(long stateVersion, GatewayModel.TransactionCommittedDetailsOptIns optInProperties, CancellationToken token)
     {
         // TODO ideally we'd like to run those as either single query or separate ones but without await between them
 
@@ -221,19 +221,19 @@ internal class TransactionQuerier : ITransactionQuerier
         );
     }
 
-    private DetailsLookupResult MapToGatewayAccountTransactionWithDetails(UserLedgerTransaction ult, List<Entity> referencedEntities, GatewayModel.TransactionCommittedDetailsOptInProperties? optInProperties)
+    private DetailsLookupResult MapToGatewayAccountTransactionWithDetails(UserLedgerTransaction ult, List<Entity> referencedEntities, GatewayModel.TransactionCommittedDetailsOptIns optIns)
     {
         return new DetailsLookupResult(MapToGatewayAccountTransaction(ult), new GatewayModel.TransactionCommittedDetailsResponseDetails(
-            rawHex : optInProperties?.RawHex == true ? ult.RawPayload.ToHex() : null,
+            rawHex : optIns.RawHex ? ult.RawPayload.ToHex() : null,
             receipt: new GatewayModel.TransactionReceipt
             {
                 ErrorMessage = ult.EngineReceipt.ErrorMessage,
                 Status = MapTransactionStatus(ult.EngineReceipt.Status),
                 Items = new JRaw(ult.EngineReceipt.Items),
-                FeeSummary = optInProperties?.ReceiptFeeSummary == true ? new JRaw(ult.EngineReceipt.FeeSummary) : null,
+                FeeSummary = optIns.ReceiptFeeSummary ? new JRaw(ult.EngineReceipt.FeeSummary) : null,
                 NextEpoch = ult.EngineReceipt.NextEpoch != null ? new JRaw(ult.EngineReceipt.NextEpoch) : null,
-                StateUpdates = optInProperties?.ReceiptStateChanges == true ? new JRaw(ult.EngineReceipt.StateUpdates) : null,
-                Events = optInProperties?.ReceiptEvents == true ? new JRaw(ult.EngineReceipt.Events) : null,
+                StateUpdates = optIns.ReceiptStateChanges ? new JRaw(ult.EngineReceipt.StateUpdates) : null,
+                Events = optIns.ReceiptEvents ? new JRaw(ult.EngineReceipt.Events) : null,
             },
             referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.GlobalAddress.ToString()).ToList(),
             messageHex: ult.Message?.ToHex()

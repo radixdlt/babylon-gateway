@@ -1385,11 +1385,11 @@ components:
           properties:
             intent_hash_hex:
               $ref: "#/components/schemas/HashHexString"
-            opt_in_properties:
-              $ref: "#/components/schemas/TransactionCommittedDetailsOptInProperties"
+            opt_ins:
+              $ref: "#/components/schemas/TransactionCommittedDetailsOptIns"
       example:
         intent_hash_hex: "<transaction-intent-hash>"
-    TransactionCommittedDetailsOptInProperties:
+    TransactionCommittedDetailsOptIns:
       type: object
       properties:
         raw_hex:
@@ -1482,8 +1482,8 @@ components:
           required:
             - addresses
           properties:
-            opt_in_properties:
-              $ref: "#/components/schemas/StateEntityDetailsOptInProperties"
+            opt_ins:
+              $ref: "#/components/schemas/StateEntityDetailsOptIns"
             addresses:
               type: array
               items:
@@ -1493,7 +1493,7 @@ components:
       example:
         addresses:
           - "<entity-address>"
-    StateEntityDetailsOptInProperties:
+    StateEntityDetailsOptIns:
       type: object
       properties:
         ancestor_identities:

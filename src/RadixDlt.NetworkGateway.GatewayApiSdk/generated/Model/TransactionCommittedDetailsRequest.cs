@@ -105,8 +105,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="intentHashHex">Hex-encoded SHA-256 hash. (required).</param>
-        /// <param name="optInProperties">optInProperties.</param>
-        public TransactionCommittedDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string intentHashHex = default(string), TransactionCommittedDetailsOptInProperties optInProperties = default(TransactionCommittedDetailsOptInProperties))
+        /// <param name="optIns">optIns.</param>
+        public TransactionCommittedDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string intentHashHex = default(string), TransactionCommittedDetailsOptIns optIns = default(TransactionCommittedDetailsOptIns))
         {
             // to ensure "intentHashHex" is required (not null)
             if (intentHashHex == null)
@@ -115,7 +115,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.IntentHashHex = intentHashHex;
             this.AtLedgerState = atLedgerState;
-            this.OptInProperties = optInProperties;
+            this.OptIns = optIns;
         }
 
         /// <summary>
@@ -132,10 +132,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string IntentHashHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets OptInProperties
+        /// Gets or Sets OptIns
         /// </summary>
-        [DataMember(Name = "opt_in_properties", EmitDefaultValue = true)]
-        public TransactionCommittedDetailsOptInProperties OptInProperties { get; set; }
+        [DataMember(Name = "opt_ins", EmitDefaultValue = true)]
+        public TransactionCommittedDetailsOptIns OptIns { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -147,7 +147,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class TransactionCommittedDetailsRequest {\n");
             sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
-            sb.Append("  OptInProperties: ").Append(OptInProperties).Append("\n");
+            sb.Append("  OptIns: ").Append(OptIns).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -194,9 +194,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.IntentHashHex.Equals(input.IntentHashHex))
                 ) && 
                 (
-                    this.OptInProperties == input.OptInProperties ||
-                    (this.OptInProperties != null &&
-                    this.OptInProperties.Equals(input.OptInProperties))
+                    this.OptIns == input.OptIns ||
+                    (this.OptIns != null &&
+                    this.OptIns.Equals(input.OptIns))
                 );
         }
 
@@ -217,9 +217,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
                 }
-                if (this.OptInProperties != null)
+                if (this.OptIns != null)
                 {
-                    hashCode = (hashCode * 59) + this.OptInProperties.GetHashCode();
+                    hashCode = (hashCode * 59) + this.OptIns.GetHashCode();
                 }
                 return hashCode;
             }
