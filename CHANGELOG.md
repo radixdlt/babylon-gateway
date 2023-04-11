@@ -5,6 +5,10 @@ _Release Date: Unreleased_
 - added `image_tag` with currently deployed image tag to release information.
 
 
+### 0.3.1
+
+- Fix `/state/non-fungible/data` to return data for all NFIDs
+
 ## 0.3.0 - RCNet-V1
 _Release Date: 31.03.2023_
 
