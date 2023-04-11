@@ -109,9 +109,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsRequestAllOf" /> class.
         /// </summary>
+        /// <param name="optIns">optIns.</param>
         /// <param name="addresses">addresses (required).</param>
         /// <param name="aggregationLevel">aggregationLevel.</param>
-        public StateEntityDetailsRequestAllOf(List<string> addresses = default(List<string>), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
+        public StateEntityDetailsRequestAllOf(StateEntityDetailsOptIns optIns = default(StateEntityDetailsOptIns), List<string> addresses = default(List<string>), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
         {
             // to ensure "addresses" is required (not null)
             if (addresses == null)
@@ -119,8 +120,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("addresses is a required property for StateEntityDetailsRequestAllOf and cannot be null");
             }
             this.Addresses = addresses;
+            this.OptIns = optIns;
             this.AggregationLevel = aggregationLevel;
         }
+
+        /// <summary>
+        /// Gets or Sets OptIns
+        /// </summary>
+        [DataMember(Name = "opt_ins", EmitDefaultValue = true)]
+        public StateEntityDetailsOptIns OptIns { get; set; }
 
         /// <summary>
         /// Gets or Sets Addresses
@@ -136,6 +144,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityDetailsRequestAllOf {\n");
+            sb.Append("  OptIns: ").Append(OptIns).Append("\n");
             sb.Append("  Addresses: ").Append(Addresses).Append("\n");
             sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
             sb.Append("}\n");
@@ -174,6 +183,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.OptIns == input.OptIns ||
+                    (this.OptIns != null &&
+                    this.OptIns.Equals(input.OptIns))
+                ) && 
+                (
                     this.Addresses == input.Addresses ||
                     this.Addresses != null &&
                     input.Addresses != null &&
@@ -194,6 +208,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.OptIns != null)
+                {
+                    hashCode = (hashCode * 59) + this.OptIns.GetHashCode();
+                }
                 if (this.Addresses != null)
                 {
                     hashCode = (hashCode * 59) + this.Addresses.GetHashCode();

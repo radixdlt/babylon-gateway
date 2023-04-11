@@ -105,7 +105,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="intentHashHex">Hex-encoded SHA-256 hash. (required).</param>
-        public TransactionCommittedDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string intentHashHex = default(string))
+        /// <param name="optIns">optIns.</param>
+        public TransactionCommittedDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string intentHashHex = default(string), TransactionCommittedDetailsOptIns optIns = default(TransactionCommittedDetailsOptIns))
         {
             // to ensure "intentHashHex" is required (not null)
             if (intentHashHex == null)
@@ -114,6 +115,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.IntentHashHex = intentHashHex;
             this.AtLedgerState = atLedgerState;
+            this.OptIns = optIns;
         }
 
         /// <summary>
@@ -130,6 +132,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string IntentHashHex { get; set; }
 
         /// <summary>
+        /// Gets or Sets OptIns
+        /// </summary>
+        [DataMember(Name = "opt_ins", EmitDefaultValue = true)]
+        public TransactionCommittedDetailsOptIns OptIns { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -139,6 +147,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class TransactionCommittedDetailsRequest {\n");
             sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
+            sb.Append("  OptIns: ").Append(OptIns).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -183,6 +192,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.IntentHashHex == input.IntentHashHex ||
                     (this.IntentHashHex != null &&
                     this.IntentHashHex.Equals(input.IntentHashHex))
+                ) && 
+                (
+                    this.OptIns == input.OptIns ||
+                    (this.OptIns != null &&
+                    this.OptIns.Equals(input.OptIns))
                 );
         }
 
@@ -202,6 +216,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.IntentHashHex != null)
                 {
                     hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
+                }
+                if (this.OptIns != null)
+                {
+                    hashCode = (hashCode * 59) + this.OptIns.GetHashCode();
                 }
                 return hashCode;
             }

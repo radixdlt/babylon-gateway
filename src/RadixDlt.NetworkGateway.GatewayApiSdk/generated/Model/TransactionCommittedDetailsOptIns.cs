@@ -90,74 +90,49 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponseComponentDetailsAllOf
+    /// TransactionCommittedDetailsOptIns
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponseComponentDetails_allOf")]
-    public partial class StateEntityDetailsResponseComponentDetailsAllOf : IEquatable<StateEntityDetailsResponseComponentDetailsAllOf>
+    [DataContract(Name = "TransactionCommittedDetailsOptIns")]
+    public partial class TransactionCommittedDetailsOptIns : IEquatable<TransactionCommittedDetailsOptIns>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsOptIns" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected StateEntityDetailsResponseComponentDetailsAllOf() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsAllOf" /> class.
-        /// </summary>
-        /// <param name="packageAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id..</param>
-        /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="state">state.</param>
-        /// <param name="accessRulesChain">accessRulesChain (required).</param>
-        /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
-        public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), Object accessRulesChain = default(Object), string royaltyVaultBalance = default(string))
+        /// <param name="rawHex">rawHex.</param>
+        /// <param name="receiptStateChanges">receiptStateChanges.</param>
+        /// <param name="receiptFeeSummary">receiptFeeSummary.</param>
+        /// <param name="receiptEvents">receiptEvents.</param>
+        public TransactionCommittedDetailsOptIns(bool rawHex = default(bool), bool receiptStateChanges = default(bool), bool receiptFeeSummary = default(bool), bool receiptEvents = default(bool))
         {
-            // to ensure "blueprintName" is required (not null)
-            if (blueprintName == null)
-            {
-                throw new ArgumentNullException("blueprintName is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
-            }
-            this.BlueprintName = blueprintName;
-            // to ensure "accessRulesChain" is required (not null)
-            if (accessRulesChain == null)
-            {
-                throw new ArgumentNullException("accessRulesChain is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
-            }
-            this.AccessRulesChain = accessRulesChain;
-            this.PackageAddress = packageAddress;
-            this.State = state;
-            this.RoyaltyVaultBalance = royaltyVaultBalance;
+            this.RawHex = rawHex;
+            this.ReceiptStateChanges = receiptStateChanges;
+            this.ReceiptFeeSummary = receiptFeeSummary;
+            this.ReceiptEvents = receiptEvents;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// Gets or Sets RawHex
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
-        [DataMember(Name = "package_address", EmitDefaultValue = true)]
-        public string PackageAddress { get; set; }
+        [DataMember(Name = "raw_hex", EmitDefaultValue = true)]
+        public bool RawHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets BlueprintName
+        /// Gets or Sets ReceiptStateChanges
         /// </summary>
-        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
-        public string BlueprintName { get; set; }
+        [DataMember(Name = "receipt_state_changes", EmitDefaultValue = true)]
+        public bool ReceiptStateChanges { get; set; }
 
         /// <summary>
-        /// Gets or Sets State
+        /// Gets or Sets ReceiptFeeSummary
         /// </summary>
-        [DataMember(Name = "state", EmitDefaultValue = true)]
-        public Object State { get; set; }
+        [DataMember(Name = "receipt_fee_summary", EmitDefaultValue = true)]
+        public bool ReceiptFeeSummary { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccessRulesChain
+        /// Gets or Sets ReceiptEvents
         /// </summary>
-        [DataMember(Name = "access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
-        public Object AccessRulesChain { get; set; }
-
-        /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
-        /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "royalty_vault_balance", EmitDefaultValue = true)]
-        public string RoyaltyVaultBalance { get; set; }
+        [DataMember(Name = "receipt_events", EmitDefaultValue = true)]
+        public bool ReceiptEvents { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -166,12 +141,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponseComponentDetailsAllOf {\n");
-            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
-            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
-            sb.Append("  State: ").Append(State).Append("\n");
-            sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
-            sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
+            sb.Append("class TransactionCommittedDetailsOptIns {\n");
+            sb.Append("  RawHex: ").Append(RawHex).Append("\n");
+            sb.Append("  ReceiptStateChanges: ").Append(ReceiptStateChanges).Append("\n");
+            sb.Append("  ReceiptFeeSummary: ").Append(ReceiptFeeSummary).Append("\n");
+            sb.Append("  ReceiptEvents: ").Append(ReceiptEvents).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -192,15 +166,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponseComponentDetailsAllOf);
+            return this.Equals(input as TransactionCommittedDetailsOptIns);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponseComponentDetailsAllOf instances are equal
+        /// Returns true if TransactionCommittedDetailsOptIns instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponseComponentDetailsAllOf to be compared</param>
+        /// <param name="input">Instance of TransactionCommittedDetailsOptIns to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponseComponentDetailsAllOf input)
+        public bool Equals(TransactionCommittedDetailsOptIns input)
         {
             if (input == null)
             {
@@ -208,29 +182,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.PackageAddress == input.PackageAddress ||
-                    (this.PackageAddress != null &&
-                    this.PackageAddress.Equals(input.PackageAddress))
+                    this.RawHex == input.RawHex ||
+                    this.RawHex.Equals(input.RawHex)
                 ) && 
                 (
-                    this.BlueprintName == input.BlueprintName ||
-                    (this.BlueprintName != null &&
-                    this.BlueprintName.Equals(input.BlueprintName))
+                    this.ReceiptStateChanges == input.ReceiptStateChanges ||
+                    this.ReceiptStateChanges.Equals(input.ReceiptStateChanges)
                 ) && 
                 (
-                    this.State == input.State ||
-                    (this.State != null &&
-                    this.State.Equals(input.State))
+                    this.ReceiptFeeSummary == input.ReceiptFeeSummary ||
+                    this.ReceiptFeeSummary.Equals(input.ReceiptFeeSummary)
                 ) && 
                 (
-                    this.AccessRulesChain == input.AccessRulesChain ||
-                    (this.AccessRulesChain != null &&
-                    this.AccessRulesChain.Equals(input.AccessRulesChain))
-                ) && 
-                (
-                    this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
-                    (this.RoyaltyVaultBalance != null &&
-                    this.RoyaltyVaultBalance.Equals(input.RoyaltyVaultBalance))
+                    this.ReceiptEvents == input.ReceiptEvents ||
+                    this.ReceiptEvents.Equals(input.ReceiptEvents)
                 );
         }
 
@@ -243,26 +208,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.PackageAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
-                }
-                if (this.BlueprintName != null)
-                {
-                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
-                }
-                if (this.State != null)
-                {
-                    hashCode = (hashCode * 59) + this.State.GetHashCode();
-                }
-                if (this.AccessRulesChain != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccessRulesChain.GetHashCode();
-                }
-                if (this.RoyaltyVaultBalance != null)
-                {
-                    hashCode = (hashCode * 59) + this.RoyaltyVaultBalance.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
+                hashCode = (hashCode * 59) + this.ReceiptStateChanges.GetHashCode();
+                hashCode = (hashCode * 59) + this.ReceiptFeeSummary.GetHashCode();
+                hashCode = (hashCode * 59) + this.ReceiptEvents.GetHashCode();
                 return hashCode;
             }
         }

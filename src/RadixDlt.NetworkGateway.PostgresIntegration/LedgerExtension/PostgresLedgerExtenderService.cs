@@ -82,6 +82,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Array = System.Array;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using JsonConverter = System.Text.Json.Serialization.JsonConverter;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -504,8 +505,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 var feeSummary = commitedTransaction.Receipt.FeeSummary;
 
                 ledgerTransaction.StateVersion = commitedTransaction.StateVersion;
-                ledgerTransaction.Status = commitedTransaction.Receipt.Status.ToModel();
-                ledgerTransaction.ErrorMessage = commitedTransaction.Receipt.ErrorMessage;
                 ledgerTransaction.TransactionAccumulator = commitedTransaction.GetAccumulatorHashBytes();
                 // TODO commented out as incompatible with current Core API version
                 ledgerTransaction.Message = null; // message: transaction.Metadata.Message?.ConvertFromHex(),
@@ -525,7 +524,16 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
                 ledgerTransaction.KindFilterConstraint = kindFilterConstraint;
                 ledgerTransaction.RawPayload = commitedTransaction.LedgerTransaction.GetUnwrappedPayloadBytes();
-                ledgerTransaction.EngineReceipt = commitedTransaction.Receipt.ToJson();
+                ledgerTransaction.EngineReceipt = new TransactionReceipt
+                {
+                    StateUpdates = commitedTransaction.Receipt.StateUpdates.ToJson(),
+                    Status = commitedTransaction.Receipt.Status.ToModel(),
+                    FeeSummary = commitedTransaction.Receipt.FeeSummary.ToJson(),
+                    ErrorMessage = commitedTransaction.Receipt.ErrorMessage,
+                    Items = commitedTransaction.Receipt.Output != null ? JsonConvert.SerializeObject(commitedTransaction.Receipt.Output) : null,
+                    NextEpoch = commitedTransaction.Receipt.NextEpoch?.ToJson(),
+                    Events = commitedTransaction.Receipt.Events != null ? JsonConvert.SerializeObject(commitedTransaction.Receipt.Events) : null,
+                };
 
                 ledgerTransactionsToAdd.Add(ledgerTransaction);
 

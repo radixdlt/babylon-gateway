@@ -3,7 +3,8 @@ _Release Date: Unreleased_
 
 - renamed `mutable_data` property to `data` in `/state/non-fungible/data` endpoint.
 - added `image_tag` with currently deployed image tag to release information.
-
+- opt-in properties added to `/transaction/committed-details`,`/state/entity/details` user can specify additional properties in response.
+- added opt-in royalty vault balance to `/state/entity/details` if queried entity is component or package.
 
 ### 0.3.1
 
@@ -23,6 +24,7 @@ _Release Date: 31.03.2023_
 - `/entity/resources` merged into `/state/entity/details` endpoint
 - new paginable endpoints `/state/entity/page/{x}` for metadata, fungibles, fungible-vaults, non-fungibles, non-fungible-vaults and non-fungible-vault/ids. Cursors returned from `state/entity/details` can be later used to query for next pages in specific endpoints.
 - `/transaction/committed-details` endpoint operates on `intent_hash_hex` only now
+
 
 ## 0.1.1 - Betanet V2
 _Release Date: 14.02.2023_

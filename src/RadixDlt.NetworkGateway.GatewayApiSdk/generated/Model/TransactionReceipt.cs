@@ -90,74 +90,80 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponseComponentDetailsAllOf
+    /// TransactionReceipt
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponseComponentDetails_allOf")]
-    public partial class StateEntityDetailsResponseComponentDetailsAllOf : IEquatable<StateEntityDetailsResponseComponentDetailsAllOf>
+    [DataContract(Name = "TransactionReceipt")]
+    public partial class TransactionReceipt : IEquatable<TransactionReceipt>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected StateEntityDetailsResponseComponentDetailsAllOf() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsAllOf" /> class.
-        /// </summary>
-        /// <param name="packageAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id..</param>
-        /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="state">state.</param>
-        /// <param name="accessRulesChain">accessRulesChain (required).</param>
-        /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
-        public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), Object accessRulesChain = default(Object), string royaltyVaultBalance = default(string))
+        /// <param name="status">The status of the transaction..</param>
+        /// <param name="feeSummary">Fees paid, Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;..</param>
+        /// <param name="stateUpdates">Transaction state updates (only present if status is Succeeded or Failed)..</param>
+        /// <param name="nextEpoch">Information (number and active validator list) about new epoch if occured..</param>
+        /// <param name="items">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)..</param>
+        /// <param name="events">Events emitted by a transaction..</param>
+        /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
+        public TransactionReceipt(Object status = default(Object), Object feeSummary = default(Object), Object stateUpdates = default(Object), Object nextEpoch = default(Object), Object items = default(Object), Object events = default(Object), string errorMessage = default(string))
         {
-            // to ensure "blueprintName" is required (not null)
-            if (blueprintName == null)
-            {
-                throw new ArgumentNullException("blueprintName is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
-            }
-            this.BlueprintName = blueprintName;
-            // to ensure "accessRulesChain" is required (not null)
-            if (accessRulesChain == null)
-            {
-                throw new ArgumentNullException("accessRulesChain is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
-            }
-            this.AccessRulesChain = accessRulesChain;
-            this.PackageAddress = packageAddress;
-            this.State = state;
-            this.RoyaltyVaultBalance = royaltyVaultBalance;
+            this.Status = status;
+            this.FeeSummary = feeSummary;
+            this.StateUpdates = stateUpdates;
+            this.NextEpoch = nextEpoch;
+            this.Items = items;
+            this.Events = events;
+            this.ErrorMessage = errorMessage;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// The status of the transaction.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
-        [DataMember(Name = "package_address", EmitDefaultValue = true)]
-        public string PackageAddress { get; set; }
+        /// <value>The status of the transaction.</value>
+        [DataMember(Name = "status", EmitDefaultValue = true)]
+        public Object Status { get; set; }
 
         /// <summary>
-        /// Gets or Sets BlueprintName
+        /// Fees paid, Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;.
         /// </summary>
-        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
-        public string BlueprintName { get; set; }
+        /// <value>Fees paid, Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;.</value>
+        [DataMember(Name = "fee_summary", EmitDefaultValue = true)]
+        public Object FeeSummary { get; set; }
 
         /// <summary>
-        /// Gets or Sets State
+        /// Transaction state updates (only present if status is Succeeded or Failed).
         /// </summary>
-        [DataMember(Name = "state", EmitDefaultValue = true)]
-        public Object State { get; set; }
+        /// <value>Transaction state updates (only present if status is Succeeded or Failed).</value>
+        [DataMember(Name = "state_updates", EmitDefaultValue = true)]
+        public Object StateUpdates { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccessRulesChain
+        /// Information (number and active validator list) about new epoch if occured.
         /// </summary>
-        [DataMember(Name = "access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
-        public Object AccessRulesChain { get; set; }
+        /// <value>Information (number and active validator list) about new epoch if occured.</value>
+        [DataMember(Name = "next_epoch", EmitDefaultValue = true)]
+        public Object NextEpoch { get; set; }
 
         /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
+        /// The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).
         /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "royalty_vault_balance", EmitDefaultValue = true)]
-        public string RoyaltyVaultBalance { get; set; }
+        /// <value>The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).</value>
+        [DataMember(Name = "items", EmitDefaultValue = true)]
+        public Object Items { get; set; }
+
+        /// <summary>
+        /// Events emitted by a transaction.
+        /// </summary>
+        /// <value>Events emitted by a transaction.</value>
+        [DataMember(Name = "events", EmitDefaultValue = true)]
+        public Object Events { get; set; }
+
+        /// <summary>
+        /// Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)
+        /// </summary>
+        /// <value>Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)</value>
+        [DataMember(Name = "error_message", EmitDefaultValue = true)]
+        public string ErrorMessage { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -166,12 +172,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponseComponentDetailsAllOf {\n");
-            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
-            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
-            sb.Append("  State: ").Append(State).Append("\n");
-            sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
-            sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
+            sb.Append("class TransactionReceipt {\n");
+            sb.Append("  Status: ").Append(Status).Append("\n");
+            sb.Append("  FeeSummary: ").Append(FeeSummary).Append("\n");
+            sb.Append("  StateUpdates: ").Append(StateUpdates).Append("\n");
+            sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("  Events: ").Append(Events).Append("\n");
+            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -192,15 +200,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponseComponentDetailsAllOf);
+            return this.Equals(input as TransactionReceipt);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponseComponentDetailsAllOf instances are equal
+        /// Returns true if TransactionReceipt instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponseComponentDetailsAllOf to be compared</param>
+        /// <param name="input">Instance of TransactionReceipt to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponseComponentDetailsAllOf input)
+        public bool Equals(TransactionReceipt input)
         {
             if (input == null)
             {
@@ -208,29 +216,39 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.PackageAddress == input.PackageAddress ||
-                    (this.PackageAddress != null &&
-                    this.PackageAddress.Equals(input.PackageAddress))
+                    this.Status == input.Status ||
+                    (this.Status != null &&
+                    this.Status.Equals(input.Status))
                 ) && 
                 (
-                    this.BlueprintName == input.BlueprintName ||
-                    (this.BlueprintName != null &&
-                    this.BlueprintName.Equals(input.BlueprintName))
+                    this.FeeSummary == input.FeeSummary ||
+                    (this.FeeSummary != null &&
+                    this.FeeSummary.Equals(input.FeeSummary))
                 ) && 
                 (
-                    this.State == input.State ||
-                    (this.State != null &&
-                    this.State.Equals(input.State))
+                    this.StateUpdates == input.StateUpdates ||
+                    (this.StateUpdates != null &&
+                    this.StateUpdates.Equals(input.StateUpdates))
                 ) && 
                 (
-                    this.AccessRulesChain == input.AccessRulesChain ||
-                    (this.AccessRulesChain != null &&
-                    this.AccessRulesChain.Equals(input.AccessRulesChain))
+                    this.NextEpoch == input.NextEpoch ||
+                    (this.NextEpoch != null &&
+                    this.NextEpoch.Equals(input.NextEpoch))
                 ) && 
                 (
-                    this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
-                    (this.RoyaltyVaultBalance != null &&
-                    this.RoyaltyVaultBalance.Equals(input.RoyaltyVaultBalance))
+                    this.Items == input.Items ||
+                    (this.Items != null &&
+                    this.Items.Equals(input.Items))
+                ) && 
+                (
+                    this.Events == input.Events ||
+                    (this.Events != null &&
+                    this.Events.Equals(input.Events))
+                ) && 
+                (
+                    this.ErrorMessage == input.ErrorMessage ||
+                    (this.ErrorMessage != null &&
+                    this.ErrorMessage.Equals(input.ErrorMessage))
                 );
         }
 
@@ -243,25 +261,33 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.PackageAddress != null)
+                if (this.Status != null)
                 {
-                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Status.GetHashCode();
                 }
-                if (this.BlueprintName != null)
+                if (this.FeeSummary != null)
                 {
-                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FeeSummary.GetHashCode();
                 }
-                if (this.State != null)
+                if (this.StateUpdates != null)
                 {
-                    hashCode = (hashCode * 59) + this.State.GetHashCode();
+                    hashCode = (hashCode * 59) + this.StateUpdates.GetHashCode();
                 }
-                if (this.AccessRulesChain != null)
+                if (this.NextEpoch != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRulesChain.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NextEpoch.GetHashCode();
                 }
-                if (this.RoyaltyVaultBalance != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoyaltyVaultBalance.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                }
+                if (this.Events != null)
+                {
+                    hashCode = (hashCode * 59) + this.Events.GetHashCode();
+                }
+                if (this.ErrorMessage != null)
+                {
+                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
                 }
                 return hashCode;
             }

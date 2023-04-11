@@ -112,12 +112,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetails" /> class.
         /// </summary>
         /// <param name="codeHex">Hex-encoded binary blob..</param>
-        /// <param name="royaltyAggregator">royaltyAggregator.</param>
+        /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Package).</param>
-        public StateEntityDetailsResponsePackageDetails(string codeHex = default(string), FungibleResourcesCollectionItemGloballyAggregated royaltyAggregator = default(FungibleResourcesCollectionItemGloballyAggregated), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Package) : base(type)
+        public StateEntityDetailsResponsePackageDetails(string codeHex = default(string), string royaltyVaultBalance = default(string), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Package) : base(type)
         {
             this.CodeHex = codeHex;
-            this.RoyaltyAggregator = royaltyAggregator;
+            this.RoyaltyVaultBalance = royaltyVaultBalance;
         }
 
         /// <summary>
@@ -128,10 +128,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string CodeHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets RoyaltyAggregator
+        /// String-encoded decimal representing the amount of a related fungible resource.
         /// </summary>
-        [DataMember(Name = "royalty_aggregator", EmitDefaultValue = true)]
-        public FungibleResourcesCollectionItemGloballyAggregated RoyaltyAggregator { get; set; }
+        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
+        [DataMember(Name = "royalty_vault_balance", EmitDefaultValue = true)]
+        public string RoyaltyVaultBalance { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,7 +144,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class StateEntityDetailsResponsePackageDetails {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
-            sb.Append("  RoyaltyAggregator: ").Append(RoyaltyAggregator).Append("\n");
+            sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -185,9 +186,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.CodeHex.Equals(input.CodeHex))
                 ) && base.Equals(input) && 
                 (
-                    this.RoyaltyAggregator == input.RoyaltyAggregator ||
-                    (this.RoyaltyAggregator != null &&
-                    this.RoyaltyAggregator.Equals(input.RoyaltyAggregator))
+                    this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
+                    (this.RoyaltyVaultBalance != null &&
+                    this.RoyaltyVaultBalance.Equals(input.RoyaltyVaultBalance))
                 );
         }
 
@@ -204,9 +205,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
                 }
-                if (this.RoyaltyAggregator != null)
+                if (this.RoyaltyVaultBalance != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoyaltyAggregator.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RoyaltyVaultBalance.GetHashCode();
                 }
                 return hashCode;
             }

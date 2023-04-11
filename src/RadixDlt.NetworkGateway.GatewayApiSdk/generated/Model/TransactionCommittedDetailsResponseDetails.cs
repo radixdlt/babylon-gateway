@@ -103,18 +103,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionCommittedDetailsResponseDetails" /> class.
         /// </summary>
-        /// <param name="rawHex">Hex-encoded binary blob. (required).</param>
+        /// <param name="rawHex">Hex-encoded binary blob..</param>
         /// <param name="receipt">receipt (required).</param>
         /// <param name="referencedGlobalEntities">referencedGlobalEntities (required).</param>
         /// <param name="messageHex">Hex-encoded binary blob..</param>
-        public TransactionCommittedDetailsResponseDetails(string rawHex = default(string), Object receipt = default(Object), List<string> referencedGlobalEntities = default(List<string>), string messageHex = default(string))
+        public TransactionCommittedDetailsResponseDetails(string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), List<string> referencedGlobalEntities = default(List<string>), string messageHex = default(string))
         {
-            // to ensure "rawHex" is required (not null)
-            if (rawHex == null)
-            {
-                throw new ArgumentNullException("rawHex is a required property for TransactionCommittedDetailsResponseDetails and cannot be null");
-            }
-            this.RawHex = rawHex;
             // to ensure "receipt" is required (not null)
             if (receipt == null)
             {
@@ -127,6 +121,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("referencedGlobalEntities is a required property for TransactionCommittedDetailsResponseDetails and cannot be null");
             }
             this.ReferencedGlobalEntities = referencedGlobalEntities;
+            this.RawHex = rawHex;
             this.MessageHex = messageHex;
         }
 
@@ -134,14 +129,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Hex-encoded binary blob.
         /// </summary>
         /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "raw_hex", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "raw_hex", EmitDefaultValue = true)]
         public string RawHex { get; set; }
 
         /// <summary>
         /// Gets or Sets Receipt
         /// </summary>
         [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
-        public Object Receipt { get; set; }
+        public TransactionReceipt Receipt { get; set; }
 
         /// <summary>
         /// Gets or Sets ReferencedGlobalEntities

@@ -1043,6 +1043,32 @@ components:
         - Pending
         - Rejected
 
+    TransactionReceipt:
+      type: object
+      properties:
+        status:
+          description: The status of the transaction.
+          type: object
+        fee_summary:
+          description: Fees paid, Only present if the `status` is not `Rejected`.
+          type: object
+        state_updates:
+          description: Transaction state updates (only present if status is Succeeded or Failed).
+          type: object
+        next_epoch:
+          description: Information (number and active validator list) about new epoch if occured.
+          type: object
+        items:
+          description: The manifest line-by-line engine return data (only present if `status` is `Succeeded`).
+          type: object
+        events:
+          description: Events emitted by a transaction.
+          type: object
+        error_message:
+          description: Error message (only present if status is `Failed` or `Rejected`)
+          type: string
+          nullable: true
+
     # TODO Obsolete - use BigDecimal instead
     TokenAmount:
       description: Represents a decimal amount of a given resource.
@@ -1359,8 +1385,21 @@ components:
           properties:
             intent_hash_hex:
               $ref: "#/components/schemas/HashHexString"
+            opt_ins:
+              $ref: "#/components/schemas/TransactionCommittedDetailsOptIns"
       example:
         intent_hash_hex: "<transaction-intent-hash>"
+    TransactionCommittedDetailsOptIns:
+      type: object
+      properties:
+        raw_hex:
+          type: boolean
+        receipt_state_changes:
+          type: boolean
+        receipt_fee_summary:
+          type: boolean
+        receipt_events:
+          type: boolean
     TransactionCommittedDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1376,14 +1415,13 @@ components:
     TransactionCommittedDetailsResponseDetails:
       type: object
       required:
-        - raw_hex
         - receipt
         - referenced_global_entities
       properties:
         raw_hex:
           $ref: "#/components/schemas/HexString"
         receipt:
-          type: object
+          $ref: "#/components/schemas/TransactionReceipt"
         referenced_global_entities:
           type: array
           items:
@@ -1444,6 +1482,8 @@ components:
           required:
             - addresses
           properties:
+            opt_ins:
+              $ref: "#/components/schemas/StateEntityDetailsOptIns"
             addresses:
               type: array
               items:
@@ -1453,6 +1493,15 @@ components:
       example:
         addresses:
           - "<entity-address>"
+    StateEntityDetailsOptIns:
+      type: object
+      properties:
+        ancestor_identities:
+          type: boolean
+        component_royalty_vault_balance:
+          type: boolean
+        package_royalty_vault_balance:
+          type: boolean
     StateEntityDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1563,8 +1612,8 @@ components:
           properties:
             code_hex:
               $ref: "#/components/schemas/HexString"
-            royalty_aggregator:
-              $ref: "#/components/schemas/FungibleResourcesCollectionItemGloballyAggregated"
+            royalty_vault_balance:
+              $ref: "#/components/schemas/BigDecimal"
     StateEntityDetailsResponseComponentDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
@@ -1581,8 +1630,8 @@ components:
               type: object
             access_rules_chain:
               type: object
-            royalty_aggregator:
-              $ref: "#/components/schemas/FungibleResourcesCollectionItemGloballyAggregated"
+            royalty_vault_balance:
+              $ref: "#/components/schemas/BigDecimal"
 
     StateEntityMetadataPageRequest:
       allOf:

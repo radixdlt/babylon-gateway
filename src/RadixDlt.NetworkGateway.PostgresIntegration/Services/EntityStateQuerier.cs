@@ -78,6 +78,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -93,6 +94,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
     private record ValidatorCurrentStakeViewModel(long ValidatorId, string Balance, string State, long BalanceLastUpdatedAtStateVersion, long StateLastUpdatedAtStateVersion);
 
     private record FungibleViewModel(GlobalAddress ResourceEntityGlobalAddress, string Balance, int ResourcesTotalCount, long LastUpdatedAtStateVersion);
+
+    private record RoyaltyVaultBalanceViewModel(long RoyaltyVaultEntityId, string Balance, long LastUpdatedAtStateVersion);
 
     private record FungibleResourceVaultsViewModel(GlobalAddress ResourceEntityGlobalAddress, string VaultAddress, string Balance, int VaultTotalCount, long LastUpdatedAtStateVersion);
 
@@ -133,10 +136,11 @@ internal class EntityStateQuerier : IEntityStateQuerier
         _eddsaEd25519VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EddsaEd25519VirtualIdentityComponent).AddressBytePrefix;
     }
 
-    public async Task<GatewayModel.StateEntityDetailsResponse> EntityDetailsItem(List<GlobalAddress> addresses, bool aggregatePerVault, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.StateEntityDetailsResponse> EntityDetails(List<GlobalAddress> addresses, bool aggregatePerVault, GatewayModel.StateEntityDetailsOptIns optIns, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entities = await GetEntities(addresses, ledgerState, token);
         var componentEntities = entities.OfType<ComponentEntity>().ToList();
+        var packageEntities = entities.OfType<PackageEntity>().ToList();
         var resourceEntities = entities.OfType<ResourceEntity>().ToList();
 
         // TODO ideally we'd like to run those in parallel
@@ -144,6 +148,17 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var accessRulesChainHistory = await GetAccessRulesChainHistory(resourceEntities, componentEntities, ledgerState, token);
         var stateHistory = await GetStateHistory(componentEntities, ledgerState, token);
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, componentEntities, ledgerState, token);
+
+        var packagesRoyaltyVaultEntityIds = packageEntities.Where(x => x.RoyaltyVaultEntityId != null).Select(x => x.RoyaltyVaultEntityId!.Value).ToArray();
+        var packagesRoayltyVaultBalance = optIns.PackageRoyaltyVaultBalance && packagesRoyaltyVaultEntityIds.Any()
+                ? await RoyaltyVaultBalance(packagesRoyaltyVaultEntityIds, ledgerState, token)
+                : null;
+
+        var componentsRoyaltyVaultEntityIds = componentEntities.Where(x => x.RoyaltyVaultEntityId != null).Select(x => x.RoyaltyVaultEntityId!.Value).ToArray();
+        var componentsRoayltyVaultBalance =
+            optIns.ComponentRoyaltyVaultBalance && componentsRoyaltyVaultEntityIds.Any()
+                ? await RoyaltyVaultBalance(componentsRoyaltyVaultEntityIds, ledgerState, token)
+                : null;
 
         var items = new List<GatewayModel.StateEntityDetailsResponseItem>();
 
@@ -169,7 +184,22 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     break;
 
                 case PackageEntity pe:
-                    details = new GatewayModel.StateEntityDetailsResponsePackageDetails(codeHex: pe.Code?.ToHex());
+                    string? packageRoyaltyVaultBalance = null;
+
+                    if (pe.RoyaltyVaultEntityId.HasValue)
+                    {
+                        var packageRoyaltyVaultBalanceValue = packagesRoayltyVaultBalance
+                            ?.SingleOrDefault(x => x.RoyaltyVaultEntityId == pe.RoyaltyVaultEntityId.Value);
+
+                        packageRoyaltyVaultBalance = packageRoyaltyVaultBalanceValue?.Balance != null
+                            ? TokenAmount.FromSubUnitsString(packageRoyaltyVaultBalanceValue.Balance).ToString()
+                            : null;
+                    }
+
+                    details = new GatewayModel.StateEntityDetailsResponsePackageDetails(
+                        codeHex: pe.Code?.ToHex(),
+                        royaltyVaultBalance: packageRoyaltyVaultBalance
+                        );
                     break;
 
                 case VirtualIdentityEntity:
@@ -193,18 +223,31 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 case ComponentEntity ce:
                     stateHistory.TryGetValue(ce.Id, out var state);
 
+                    string? componentRoyaltyVaultBalance = null;
+
+                    if (ce.RoyaltyVaultEntityId.HasValue)
+                    {
+                        var componentRoyaltyVaultBalanceValue = componentsRoayltyVaultBalance
+                            ?.SingleOrDefault(x => x.RoyaltyVaultEntityId == ce.RoyaltyVaultEntityId.Value);
+
+                        componentRoyaltyVaultBalance = componentRoyaltyVaultBalanceValue?.Balance != null
+                            ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalanceValue.Balance).ToString()
+                            : null;
+                    }
+
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         packageAddress: correlatedAddresses[ce.PackageId],
                         blueprintName: ce.BlueprintName,
                         state: state != null ? new JRaw(state.State) : null,
-                        accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(ce.Id, AccessRulesChainSubtype.None)].AccessRulesChain));
+                        accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(ce.Id, AccessRulesChainSubtype.None)].AccessRulesChain),
+                        royaltyVaultBalance: componentRoyaltyVaultBalance);
                     break;
             }
 
             var fungibles = await EntityFungibleResourcesPageSlice(entity.Id, aggregatePerVault, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
             var nonFungibles = await EntityNonFungibleResourcesPageSlice(entity.Id, aggregatePerVault, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
 
-            var ancestorIdentities = entity.HasParent
+            var ancestorIdentities = optIns.AncestorIdentities && entity.HasParent
                 ? new GatewayModel.StateEntityDetailsResponseItemAncestorIdentities(
                     parentAddress: correlatedAddresses[entity.ParentAncestorId.Value],
                     ownerAddress: correlatedAddresses[entity.OwnerAncestorId.Value],
@@ -494,6 +537,33 @@ INNER JOIN LATERAL (
             : null;
 
         return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(null, null, nextCursor, items));
+    }
+
+    private async Task<List<RoyaltyVaultBalanceViewModel>> RoyaltyVaultBalance(long[] royaltyVaultEntityIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    {
+        var cd = new CommandDefinition(
+            commandText: @"
+WITH royalty_vaults (entity_id) AS (SELECT UNNEST(@royaltyVaultEntityIds))
+SELECT evh.*
+from royalty_vaults
+INNER JOIN LATERAL (
+    SELECT vault_entity_id as royaltyVaultEntityId, CAST(balance AS text) AS Balance, from_state_version AS LastUpdatedAtStateVersion
+    FROM entity_vault_history
+    WHERE vault_entity_id = royalty_vaults.entity_id AND from_state_version <= @stateVersion
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) evh on true
+;",
+            parameters: new
+            {
+                stateVersion = ledgerState.StateVersion,
+                royaltyVaultEntityIds = royaltyVaultEntityIds,
+            },
+            cancellationToken: token);
+
+        var result = await _dbContext.Database.GetDbConnection().QueryAsync<RoyaltyVaultBalanceViewModel>(cd);
+
+        return result.ToList();
     }
 
     private async Task<Dictionary<long, GatewayModel.EntityMetadataCollection>> GetMetadataSlices(long[] entityIds, int offset, int limit, GatewayModel.LedgerState ledgerState,

@@ -105,7 +105,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
     public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(null, token);
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.GetIntentHashBytes(), ledgerState, false, token);
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.GetIntentHashBytes(), GatewayModel.TransactionCommittedDetailsOptIns.Default, ledgerState, false, token);
         var pendingTransactions = await _transactionQuerier.LookupPendingTransactionsByIntentHash(request.GetIntentHashBytes(), token);
         var remainingPendingTransactions = pendingTransactions.Where(pt => pt.PayloadHashHex != committedTransaction?.Info.PayloadHashHex).ToList();
 
@@ -139,7 +139,14 @@ internal class DefaultTransactionHandler : ITransactionHandler
     public async Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.GetIntentHashBytes(), ledgerState, true, token);
+        var withDetails = true;
+
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(
+                request.GetIntentHashBytes(),
+                request.OptIns ?? GatewayModel.TransactionCommittedDetailsOptIns.Default,
+                ledgerState,
+                withDetails,
+                token);
 
         if (committedTransaction != null)
         {
