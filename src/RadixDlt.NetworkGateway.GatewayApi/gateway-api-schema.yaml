@@ -1047,18 +1047,25 @@ components:
       type: object
       properties:
         status:
+          description: The status of the transaction.
           type: object
         fee_summary:
+          description: Fees paid, Only present if the `status` is not `Rejected`.
           type: object
         state_updates:
+          description: Transaction state updates (only present if status is Succeeded or Failed).
           type: object
         next_epoch:
+          description: Information (number and active validator list) about new epoch if occured.
           type: object
         items:
+          description: The manifest line-by-line engine return data (only present if `status` is `Succeeded`).
           type: object
         events:
+          description: Events emitted by a transaction.
           type: object
         error_message:
+          description: Error message (only present if status is `Failed` or `Rejected`)
           type: string
           nullable: true
 
@@ -1383,14 +1390,16 @@ components:
       example:
         intent_hash_hex: "<transaction-intent-hash>"
     TransactionCommittedDetailsOptInProperties:
-      type: array
-      items:
-        type: string
-        enum:
-          - raw_payload
-          - receipt.state_changes
-          - receipt.fee_summary
-          - receipt.events
+      type: object
+      properties:
+        raw_hex:
+          type: boolean
+        receipt_state_changes:
+          type: boolean
+        receipt_fee_summary:
+          type: boolean
+        receipt_events:
+          type: boolean
     TransactionCommittedDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1409,7 +1418,7 @@ components:
         - receipt
         - referenced_global_entities
       properties:
-        raw_payload:
+        raw_hex:
           $ref: "#/components/schemas/HexString"
         receipt:
           $ref: "#/components/schemas/TransactionReceipt"
@@ -1485,13 +1494,14 @@ components:
         addresses:
           - "<entity-address>"
     StateEntityDetailsOptInProperties:
-      type: array
-      items:
-        type: string
-        enum:
-          - ancestor_identities
-          - component.royalty_vault_balance
-          - package.royalty_vault_balance
+      type: object
+      properties:
+        ancestor_identities:
+          type: boolean
+        component_royalty_vault_balance:
+          type: boolean
+        package_royalty_vault_balance:
+          type: boolean
     StateEntityDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"

@@ -76,9 +76,6 @@ internal class TransactionCommittedDetailsRequestValidator : AbstractValidator<G
             .NotNull()
             .Hex(NetworkGatewayConstants.Transaction.IdentifierByteLength);
 
-        RuleForEach(x => x.OptInProperties)
-            .IsInEnum();
-
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
     }

@@ -95,32 +95,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [DataContract(Name = "StateEntityDetailsRequest")]
     public partial class StateEntityDetailsRequest : IEquatable<StateEntityDetailsRequest>
     {
-        /// <summary>
-        /// Defines OptInProperties
-        /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum OptInPropertiesEnum
-        {
-            /// <summary>
-            /// Enum AncestorIdentities for value: ancestor_identities
-            /// </summary>
-            [EnumMember(Value = "ancestor_identities")]
-            AncestorIdentities = 1,
-
-            /// <summary>
-            /// Enum ComponentRoyaltyVaultBalance for value: component.royalty_vault_balance
-            /// </summary>
-            [EnumMember(Value = "component.royalty_vault_balance")]
-            ComponentRoyaltyVaultBalance = 2,
-
-            /// <summary>
-            /// Enum PackageRoyaltyVaultBalance for value: package.royalty_vault_balance
-            /// </summary>
-            [EnumMember(Value = "package.royalty_vault_balance")]
-            PackageRoyaltyVaultBalance = 3
-
-        }
-
 
         /// <summary>
         /// Gets or Sets AggregationLevel
@@ -139,7 +113,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="optInProperties">optInProperties.</param>
         /// <param name="addresses">addresses (required).</param>
         /// <param name="aggregationLevel">aggregationLevel.</param>
-        public StateEntityDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), List<OptInPropertiesEnum> optInProperties = default(List<OptInPropertiesEnum>), List<string> addresses = default(List<string>), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
+        public StateEntityDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), StateEntityDetailsOptInProperties optInProperties = default(StateEntityDetailsOptInProperties), List<string> addresses = default(List<string>), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
         {
             // to ensure "addresses" is required (not null)
             if (addresses == null)
@@ -162,7 +136,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets OptInProperties
         /// </summary>
         [DataMember(Name = "opt_in_properties", EmitDefaultValue = true)]
-        public List<StateEntityDetailsRequest.OptInPropertiesEnum> OptInProperties { get; set; }
+        public StateEntityDetailsOptInProperties OptInProperties { get; set; }
 
         /// <summary>
         /// Gets or Sets Addresses
@@ -224,9 +198,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 ) && 
                 (
                     this.OptInProperties == input.OptInProperties ||
-                    this.OptInProperties != null &&
-                    input.OptInProperties != null &&
-                    this.OptInProperties.SequenceEqual(input.OptInProperties)
+                    (this.OptInProperties != null &&
+                    this.OptInProperties.Equals(input.OptInProperties))
                 ) && 
                 (
                     this.Addresses == input.Addresses ||

@@ -103,11 +103,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionCommittedDetailsResponseDetails" /> class.
         /// </summary>
-        /// <param name="rawPayload">Hex-encoded binary blob..</param>
+        /// <param name="rawHex">Hex-encoded binary blob..</param>
         /// <param name="receipt">receipt (required).</param>
         /// <param name="referencedGlobalEntities">referencedGlobalEntities (required).</param>
         /// <param name="messageHex">Hex-encoded binary blob..</param>
-        public TransactionCommittedDetailsResponseDetails(string rawPayload = default(string), TransactionReceipt receipt = default(TransactionReceipt), List<string> referencedGlobalEntities = default(List<string>), string messageHex = default(string))
+        public TransactionCommittedDetailsResponseDetails(string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), List<string> referencedGlobalEntities = default(List<string>), string messageHex = default(string))
         {
             // to ensure "receipt" is required (not null)
             if (receipt == null)
@@ -121,7 +121,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("referencedGlobalEntities is a required property for TransactionCommittedDetailsResponseDetails and cannot be null");
             }
             this.ReferencedGlobalEntities = referencedGlobalEntities;
-            this.RawPayload = rawPayload;
+            this.RawHex = rawHex;
             this.MessageHex = messageHex;
         }
 
@@ -129,8 +129,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Hex-encoded binary blob.
         /// </summary>
         /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "raw_payload", EmitDefaultValue = true)]
-        public string RawPayload { get; set; }
+        [DataMember(Name = "raw_hex", EmitDefaultValue = true)]
+        public string RawHex { get; set; }
 
         /// <summary>
         /// Gets or Sets Receipt
@@ -159,7 +159,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionCommittedDetailsResponseDetails {\n");
-            sb.Append("  RawPayload: ").Append(RawPayload).Append("\n");
+            sb.Append("  RawHex: ").Append(RawHex).Append("\n");
             sb.Append("  Receipt: ").Append(Receipt).Append("\n");
             sb.Append("  ReferencedGlobalEntities: ").Append(ReferencedGlobalEntities).Append("\n");
             sb.Append("  MessageHex: ").Append(MessageHex).Append("\n");
@@ -199,9 +199,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.RawPayload == input.RawPayload ||
-                    (this.RawPayload != null &&
-                    this.RawPayload.Equals(input.RawPayload))
+                    this.RawHex == input.RawHex ||
+                    (this.RawHex != null &&
+                    this.RawHex.Equals(input.RawHex))
                 ) && 
                 (
                     this.Receipt == input.Receipt ||
@@ -230,9 +230,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.RawPayload != null)
+                if (this.RawHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.RawPayload.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
                 }
                 if (this.Receipt != null)
                 {

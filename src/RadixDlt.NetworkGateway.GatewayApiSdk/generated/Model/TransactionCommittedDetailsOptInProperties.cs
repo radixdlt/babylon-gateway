@@ -90,80 +90,49 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionReceipt
+    /// TransactionCommittedDetailsOptInProperties
     /// </summary>
-    [DataContract(Name = "TransactionReceipt")]
-    public partial class TransactionReceipt : IEquatable<TransactionReceipt>
+    [DataContract(Name = "TransactionCommittedDetailsOptInProperties")]
+    public partial class TransactionCommittedDetailsOptInProperties : IEquatable<TransactionCommittedDetailsOptInProperties>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
+        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsOptInProperties" /> class.
         /// </summary>
-        /// <param name="status">The status of the transaction..</param>
-        /// <param name="feeSummary">Fees paid, Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;..</param>
-        /// <param name="stateUpdates">Transaction state updates (only present if status is Succeeded or Failed)..</param>
-        /// <param name="nextEpoch">Information (number and active validator list) about new epoch if occured..</param>
-        /// <param name="items">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)..</param>
-        /// <param name="events">Events emitted by a transaction..</param>
-        /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
-        public TransactionReceipt(Object status = default(Object), Object feeSummary = default(Object), Object stateUpdates = default(Object), Object nextEpoch = default(Object), Object items = default(Object), Object events = default(Object), string errorMessage = default(string))
+        /// <param name="rawHex">rawHex.</param>
+        /// <param name="receiptStateChanges">receiptStateChanges.</param>
+        /// <param name="receiptFeeSummary">receiptFeeSummary.</param>
+        /// <param name="receiptEvents">receiptEvents.</param>
+        public TransactionCommittedDetailsOptInProperties(bool rawHex = default(bool), bool receiptStateChanges = default(bool), bool receiptFeeSummary = default(bool), bool receiptEvents = default(bool))
         {
-            this.Status = status;
-            this.FeeSummary = feeSummary;
-            this.StateUpdates = stateUpdates;
-            this.NextEpoch = nextEpoch;
-            this.Items = items;
-            this.Events = events;
-            this.ErrorMessage = errorMessage;
+            this.RawHex = rawHex;
+            this.ReceiptStateChanges = receiptStateChanges;
+            this.ReceiptFeeSummary = receiptFeeSummary;
+            this.ReceiptEvents = receiptEvents;
         }
 
         /// <summary>
-        /// The status of the transaction.
+        /// Gets or Sets RawHex
         /// </summary>
-        /// <value>The status of the transaction.</value>
-        [DataMember(Name = "status", EmitDefaultValue = true)]
-        public Object Status { get; set; }
+        [DataMember(Name = "raw_hex", EmitDefaultValue = true)]
+        public bool RawHex { get; set; }
 
         /// <summary>
-        /// Fees paid, Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;.
+        /// Gets or Sets ReceiptStateChanges
         /// </summary>
-        /// <value>Fees paid, Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;.</value>
-        [DataMember(Name = "fee_summary", EmitDefaultValue = true)]
-        public Object FeeSummary { get; set; }
+        [DataMember(Name = "receipt_state_changes", EmitDefaultValue = true)]
+        public bool ReceiptStateChanges { get; set; }
 
         /// <summary>
-        /// Transaction state updates (only present if status is Succeeded or Failed).
+        /// Gets or Sets ReceiptFeeSummary
         /// </summary>
-        /// <value>Transaction state updates (only present if status is Succeeded or Failed).</value>
-        [DataMember(Name = "state_updates", EmitDefaultValue = true)]
-        public Object StateUpdates { get; set; }
+        [DataMember(Name = "receipt_fee_summary", EmitDefaultValue = true)]
+        public bool ReceiptFeeSummary { get; set; }
 
         /// <summary>
-        /// Information (number and active validator list) about new epoch if occured.
+        /// Gets or Sets ReceiptEvents
         /// </summary>
-        /// <value>Information (number and active validator list) about new epoch if occured.</value>
-        [DataMember(Name = "next_epoch", EmitDefaultValue = true)]
-        public Object NextEpoch { get; set; }
-
-        /// <summary>
-        /// The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).
-        /// </summary>
-        /// <value>The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).</value>
-        [DataMember(Name = "items", EmitDefaultValue = true)]
-        public Object Items { get; set; }
-
-        /// <summary>
-        /// Events emitted by a transaction.
-        /// </summary>
-        /// <value>Events emitted by a transaction.</value>
-        [DataMember(Name = "events", EmitDefaultValue = true)]
-        public Object Events { get; set; }
-
-        /// <summary>
-        /// Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)
-        /// </summary>
-        /// <value>Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)</value>
-        [DataMember(Name = "error_message", EmitDefaultValue = true)]
-        public string ErrorMessage { get; set; }
+        [DataMember(Name = "receipt_events", EmitDefaultValue = true)]
+        public bool ReceiptEvents { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -172,14 +141,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionReceipt {\n");
-            sb.Append("  Status: ").Append(Status).Append("\n");
-            sb.Append("  FeeSummary: ").Append(FeeSummary).Append("\n");
-            sb.Append("  StateUpdates: ").Append(StateUpdates).Append("\n");
-            sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
-            sb.Append("  Events: ").Append(Events).Append("\n");
-            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
+            sb.Append("class TransactionCommittedDetailsOptInProperties {\n");
+            sb.Append("  RawHex: ").Append(RawHex).Append("\n");
+            sb.Append("  ReceiptStateChanges: ").Append(ReceiptStateChanges).Append("\n");
+            sb.Append("  ReceiptFeeSummary: ").Append(ReceiptFeeSummary).Append("\n");
+            sb.Append("  ReceiptEvents: ").Append(ReceiptEvents).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -200,15 +166,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionReceipt);
+            return this.Equals(input as TransactionCommittedDetailsOptInProperties);
         }
 
         /// <summary>
-        /// Returns true if TransactionReceipt instances are equal
+        /// Returns true if TransactionCommittedDetailsOptInProperties instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionReceipt to be compared</param>
+        /// <param name="input">Instance of TransactionCommittedDetailsOptInProperties to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionReceipt input)
+        public bool Equals(TransactionCommittedDetailsOptInProperties input)
         {
             if (input == null)
             {
@@ -216,39 +182,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Status == input.Status ||
-                    (this.Status != null &&
-                    this.Status.Equals(input.Status))
+                    this.RawHex == input.RawHex ||
+                    this.RawHex.Equals(input.RawHex)
                 ) && 
                 (
-                    this.FeeSummary == input.FeeSummary ||
-                    (this.FeeSummary != null &&
-                    this.FeeSummary.Equals(input.FeeSummary))
+                    this.ReceiptStateChanges == input.ReceiptStateChanges ||
+                    this.ReceiptStateChanges.Equals(input.ReceiptStateChanges)
                 ) && 
                 (
-                    this.StateUpdates == input.StateUpdates ||
-                    (this.StateUpdates != null &&
-                    this.StateUpdates.Equals(input.StateUpdates))
+                    this.ReceiptFeeSummary == input.ReceiptFeeSummary ||
+                    this.ReceiptFeeSummary.Equals(input.ReceiptFeeSummary)
                 ) && 
                 (
-                    this.NextEpoch == input.NextEpoch ||
-                    (this.NextEpoch != null &&
-                    this.NextEpoch.Equals(input.NextEpoch))
-                ) && 
-                (
-                    this.Items == input.Items ||
-                    (this.Items != null &&
-                    this.Items.Equals(input.Items))
-                ) && 
-                (
-                    this.Events == input.Events ||
-                    (this.Events != null &&
-                    this.Events.Equals(input.Events))
-                ) && 
-                (
-                    this.ErrorMessage == input.ErrorMessage ||
-                    (this.ErrorMessage != null &&
-                    this.ErrorMessage.Equals(input.ErrorMessage))
+                    this.ReceiptEvents == input.ReceiptEvents ||
+                    this.ReceiptEvents.Equals(input.ReceiptEvents)
                 );
         }
 
@@ -261,34 +208,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Status != null)
-                {
-                    hashCode = (hashCode * 59) + this.Status.GetHashCode();
-                }
-                if (this.FeeSummary != null)
-                {
-                    hashCode = (hashCode * 59) + this.FeeSummary.GetHashCode();
-                }
-                if (this.StateUpdates != null)
-                {
-                    hashCode = (hashCode * 59) + this.StateUpdates.GetHashCode();
-                }
-                if (this.NextEpoch != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextEpoch.GetHashCode();
-                }
-                if (this.Items != null)
-                {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
-                }
-                if (this.Events != null)
-                {
-                    hashCode = (hashCode * 59) + this.Events.GetHashCode();
-                }
-                if (this.ErrorMessage != null)
-                {
-                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
+                hashCode = (hashCode * 59) + this.ReceiptStateChanges.GetHashCode();
+                hashCode = (hashCode * 59) + this.ReceiptFeeSummary.GetHashCode();
+                hashCode = (hashCode * 59) + this.ReceiptEvents.GetHashCode();
                 return hashCode;
             }
         }

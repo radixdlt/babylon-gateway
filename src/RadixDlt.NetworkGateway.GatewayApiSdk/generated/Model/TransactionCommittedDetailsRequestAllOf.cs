@@ -96,38 +96,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     public partial class TransactionCommittedDetailsRequestAllOf : IEquatable<TransactionCommittedDetailsRequestAllOf>
     {
         /// <summary>
-        /// Defines OptInProperties
-        /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum OptInPropertiesEnum
-        {
-            /// <summary>
-            /// Enum RawPayload for value: raw_payload
-            /// </summary>
-            [EnumMember(Value = "raw_payload")]
-            RawPayload = 1,
-
-            /// <summary>
-            /// Enum ReceiptStateChanges for value: receipt.state_changes
-            /// </summary>
-            [EnumMember(Value = "receipt.state_changes")]
-            ReceiptStateChanges = 2,
-
-            /// <summary>
-            /// Enum ReceiptFeeSummary for value: receipt.fee_summary
-            /// </summary>
-            [EnumMember(Value = "receipt.fee_summary")]
-            ReceiptFeeSummary = 3,
-
-            /// <summary>
-            /// Enum ReceiptEvents for value: receipt.events
-            /// </summary>
-            [EnumMember(Value = "receipt.events")]
-            ReceiptEvents = 4
-
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="TransactionCommittedDetailsRequestAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
@@ -137,7 +105,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="intentHashHex">Hex-encoded SHA-256 hash. (required).</param>
         /// <param name="optInProperties">optInProperties.</param>
-        public TransactionCommittedDetailsRequestAllOf(string intentHashHex = default(string), List<OptInPropertiesEnum> optInProperties = default(List<OptInPropertiesEnum>))
+        public TransactionCommittedDetailsRequestAllOf(string intentHashHex = default(string), TransactionCommittedDetailsOptInProperties optInProperties = default(TransactionCommittedDetailsOptInProperties))
         {
             // to ensure "intentHashHex" is required (not null)
             if (intentHashHex == null)
@@ -159,7 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets OptInProperties
         /// </summary>
         [DataMember(Name = "opt_in_properties", EmitDefaultValue = true)]
-        public List<TransactionCommittedDetailsRequestAllOf.OptInPropertiesEnum> OptInProperties { get; set; }
+        public TransactionCommittedDetailsOptInProperties OptInProperties { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -213,9 +181,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 ) && 
                 (
                     this.OptInProperties == input.OptInProperties ||
-                    this.OptInProperties != null &&
-                    input.OptInProperties != null &&
-                    this.OptInProperties.SequenceEqual(input.OptInProperties)
+                    (this.OptInProperties != null &&
+                    this.OptInProperties.Equals(input.OptInProperties))
                 );
         }
 

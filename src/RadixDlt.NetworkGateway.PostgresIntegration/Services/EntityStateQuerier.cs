@@ -174,7 +174,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         return nonFungibles;
     }
 
-    public async Task<GatewayModel.StateEntityDetailsResponseItem> EntityDetailsItem(GlobalAddress address, bool aggregatePerVault, List<GatewayModel.StateEntityDetailsRequest.OptInPropertiesEnum>? optInProperties, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.StateEntityDetailsResponseItem> EntityDetailsItem(GlobalAddress address, bool aggregatePerVault, GatewayModel.StateEntityDetailsOptInProperties? optInProperties, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity(address, ledgerState, token);
 
@@ -226,9 +226,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
             }
 
             case PackageEntity pe:
-                var includePackageRoyaltyVaultBalance = optInProperties?.Contains(GatewayModel.StateEntityDetailsRequest.OptInPropertiesEnum.PackageRoyaltyVaultBalance) == true;
-
-                var packageRoyaltyVaultBalance = includePackageRoyaltyVaultBalance && pe.RoyaltyVaultEntityId.HasValue
+                var packageRoyaltyVaultBalance = optInProperties?.PackageRoyaltyVaultBalance == true && pe.RoyaltyVaultEntityId.HasValue
                     ? await RoyaltyVaultBalance(pe.RoyaltyVaultEntityId.Value, ledgerState, token)
                     : null;
 
@@ -270,9 +268,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
-                var includeComponentRoyaltyVaultBalance = optInProperties?.Contains(GatewayModel.StateEntityDetailsRequest.OptInPropertiesEnum.ComponentRoyaltyVaultBalance) == true;
-
-                var componentRoyaltyVaultBalance = includeComponentRoyaltyVaultBalance && ce.RoyaltyVaultEntityId.HasValue
+                var componentRoyaltyVaultBalance = optInProperties?.ComponentRoyaltyVaultBalance == true && ce.RoyaltyVaultEntityId.HasValue
                     ? await RoyaltyVaultBalance(ce.RoyaltyVaultEntityId.Value, ledgerState, token)
                     : null;
 
@@ -287,9 +283,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         var metadata = await GetMetadataSlice(entity.Id, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
 
-        var includeAncestorIdentities = optInProperties?.Contains(GatewayModel.StateEntityDetailsRequest.OptInPropertiesEnum.AncestorIdentities) == true;
-
-        var ancestorIdentities = includeAncestorIdentities && entity.HasParent
+        var ancestorIdentities = optInProperties?.AncestorIdentities == true && entity.HasParent
             ? await GetAncestorIdentities(entity, token)
             : null;
 

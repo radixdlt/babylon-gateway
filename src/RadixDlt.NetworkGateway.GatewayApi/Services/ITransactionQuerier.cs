@@ -74,7 +74,7 @@ public interface ITransactionQuerier
 {
     Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default);
 
-    Task<DetailsLookupResult?> LookupCommittedTransaction(byte[] intentHash, List<GatewayModel.TransactionCommittedDetailsRequest.OptInPropertiesEnum>? optInProperties,  GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default);
+    Task<DetailsLookupResult?> LookupCommittedTransaction(byte[] intentHash, GatewayModel.TransactionCommittedDetailsOptInProperties? optInProperties,  GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default);
 
     Task<ICollection<StatusLookupResult>> LookupPendingTransactionsByIntentHash(byte[] intentHash, CancellationToken token = default);
 }
