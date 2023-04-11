@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -253,8 +253,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: table => new
                 {
                     state_version = table.Column<long>(type: "bigint", nullable: false),
-                    status = table.Column<LedgerTransactionStatus>(type: "ledger_transaction_status", nullable: false),
-                    error_message = table.Column<string>(type: "text", nullable: true),
                     transaction_accumulator = table.Column<byte[]>(type: "bytea", nullable: false),
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
                     epoch = table.Column<long>(type: "bigint", nullable: false),
@@ -270,7 +268,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     normalized_round_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     kind_filter_constraint = table.Column<LedgerTransactionKindFilterConstraint>(type: "ledger_transaction_kind_filter_constraint", nullable: true),
                     raw_payload = table.Column<byte[]>(type: "bytea", nullable: false),
-                    engine_receipt = table.Column<string>(type: "jsonb", nullable: false),
+                    receipt_status = table.Column<LedgerTransactionStatus>(type: "ledger_transaction_status", nullable: false),
+                    receipt_fee_summary = table.Column<string>(type: "jsonb", nullable: false),
+                    receipt_state_updates = table.Column<string>(type: "jsonb", nullable: false),
+                    receipt_next_epoch = table.Column<string>(type: "jsonb", nullable: true),
+                    receipt_items = table.Column<string>(type: "jsonb", nullable: true),
+                    receipt_error_message = table.Column<string>(type: "text", nullable: true),
+                    receipt_events = table.Column<string>(type: "jsonb", nullable: true),
                     discriminator = table.Column<LedgerTransactionType>(type: "ledger_transaction_type", nullable: false),
                     payload_hash = table.Column<byte[]>(type: "bytea", nullable: true),
                     intent_hash = table.Column<byte[]>(type: "bytea", nullable: true),

@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230411095911_InitialCreate")]
+    [Migration("20230411104814_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -613,7 +613,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("NonFungibleResourceEntityId", "FromStateVersion");
 
-                    b.HasIndex("NonFungibleResourceEntityId", "NonFungibleId", "FromStateVersion");
+                    b.HasIndex("NonFungibleResourceEntityId", "NonFungibleId", "FromStateVersion")
+                        .IsUnique();
 
                     b.ToTable("non_fungible_id_data");
                 });
