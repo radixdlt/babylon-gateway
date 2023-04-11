@@ -103,14 +103,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="stateUpdates">stateUpdates.</param>
         /// <param name="nextEpoch">nextEpoch.</param>
         /// <param name="items">items.</param>
+        /// <param name="events">events.</param>
         /// <param name="errorMessage">errorMessage.</param>
-        public TransactionReceipt(Object status = default(Object), Object feeSummary = default(Object), Object stateUpdates = default(Object), Object nextEpoch = default(Object), Object items = default(Object), string errorMessage = default(string))
+        public TransactionReceipt(Object status = default(Object), Object feeSummary = default(Object), Object stateUpdates = default(Object), Object nextEpoch = default(Object), Object items = default(Object), Object events = default(Object), string errorMessage = default(string))
         {
             this.Status = status;
             this.FeeSummary = feeSummary;
             this.StateUpdates = stateUpdates;
             this.NextEpoch = nextEpoch;
             this.Items = items;
+            this.Events = events;
             this.ErrorMessage = errorMessage;
         }
 
@@ -145,6 +147,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public Object Items { get; set; }
 
         /// <summary>
+        /// Gets or Sets Events
+        /// </summary>
+        [DataMember(Name = "events", EmitDefaultValue = true)]
+        public Object Events { get; set; }
+
+        /// <summary>
         /// Gets or Sets ErrorMessage
         /// </summary>
         [DataMember(Name = "error_message", EmitDefaultValue = true)]
@@ -163,6 +171,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  StateUpdates: ").Append(StateUpdates).Append("\n");
             sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("  Events: ").Append(Events).Append("\n");
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -225,6 +234,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Items.Equals(input.Items))
                 ) && 
                 (
+                    this.Events == input.Events ||
+                    (this.Events != null &&
+                    this.Events.Equals(input.Events))
+                ) && 
+                (
                     this.ErrorMessage == input.ErrorMessage ||
                     (this.ErrorMessage != null &&
                     this.ErrorMessage.Equals(input.ErrorMessage))
@@ -259,6 +273,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Items != null)
                 {
                     hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                }
+                if (this.Events != null)
+                {
+                    hashCode = (hashCode * 59) + this.Events.GetHashCode();
                 }
                 if (this.ErrorMessage != null)
                 {

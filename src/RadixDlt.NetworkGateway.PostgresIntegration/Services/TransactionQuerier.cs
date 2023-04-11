@@ -226,6 +226,7 @@ internal class TransactionQuerier : ITransactionQuerier
         var includeFeeSummary = optInProperties?.Contains(GatewayModel.TransactionCommittedDetailsRequest.OptInPropertiesEnum.ReceiptFeeSummary);
         var includeStateChanges = optInProperties?.Contains(GatewayModel.TransactionCommittedDetailsRequest.OptInPropertiesEnum.ReceiptStateChanges);
         var includeRawPayload = optInProperties?.Contains(GatewayModel.TransactionCommittedDetailsRequest.OptInPropertiesEnum.RawPayload);
+        var includeEvents = optInProperties?.Contains(GatewayModel.TransactionCommittedDetailsRequest.OptInPropertiesEnum.ReceiptEvents);
 
         return new DetailsLookupResult(MapToGatewayAccountTransaction(ult), new GatewayModel.TransactionCommittedDetailsResponseDetails(
             rawPayload: includeRawPayload == true ? ult.RawPayload.ToHex() : null,
@@ -237,6 +238,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 FeeSummary = includeFeeSummary == true ? new JRaw(ult.EngineReceipt.FeeSummary) : null,
                 NextEpoch = ult.EngineReceipt.NextEpoch != null ? new JRaw(ult.EngineReceipt.NextEpoch) : null,
                 StateUpdates = includeStateChanges == true ? new JRaw(ult.EngineReceipt.StateUpdates) : null,
+                Events = includeEvents == true ? new JRaw(ult.EngineReceipt.Events) : null,
             },
             referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.GlobalAddress.ToString()).ToList(),
             messageHex: ult.Message?.ToHex()

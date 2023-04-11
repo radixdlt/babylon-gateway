@@ -117,7 +117,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             /// Enum ReceiptFeeSummary for value: receipt.fee_summary
             /// </summary>
             [EnumMember(Value = "receipt.fee_summary")]
-            ReceiptFeeSummary = 3
+            ReceiptFeeSummary = 3,
+
+            /// <summary>
+            /// Enum ReceiptEvents for value: receipt.events
+            /// </summary>
+            [EnumMember(Value = "receipt.events")]
+            ReceiptEvents = 4
 
         }
 

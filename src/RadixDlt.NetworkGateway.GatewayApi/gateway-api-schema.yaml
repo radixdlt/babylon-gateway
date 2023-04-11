@@ -1056,6 +1056,8 @@ components:
           type: object
         items:
           type: object
+        events:
+          type: object
         error_message:
           type: string
           nullable: true
@@ -1388,6 +1390,7 @@ components:
           - raw_payload
           - receipt.state_changes
           - receipt.fee_summary
+          - receipt.events
     TransactionCommittedDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
