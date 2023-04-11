@@ -96,6 +96,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record FungibleViewModel(GlobalAddress ResourceEntityGlobalAddress, string Balance, int ResourcesTotalCount, long LastUpdatedAtStateVersion);
 
+    private record RoyaltyVaultBalanceViewModel(string Balance, long LastUpdatedAtStateVersion);
+
     private record FungibleResourceVaultsViewModel(GlobalAddress ResourceEntityGlobalAddress, string VaultAddress, string Balance, int VaultTotalCount, long LastUpdatedAtStateVersion);
 
     private record FungibleAggregatedPerVaultViewModel(GlobalAddress ResourceEntityGlobalAddress, string VaultAddress, string Balance, int ResourceTotalCount, int VaultTotalCount, long LastUpdatedAtStateVersion);
@@ -150,18 +152,6 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var entity = await GetEntity<ComponentEntity>(pageRequest.Address, ledgerState, token);
         var result = await EntityNonFungibleResourcesPageSlice(entity.Id, aggregatePerVault, pageRequest.Offset, pageRequest.Limit, ledgerState, token);
         return new GatewayModel.StateEntityNonFungiblesPageResponse(ledgerState, result.TotalCount, result.PreviousCursor, result.NextCursor, result.Items, pageRequest.Address);
-    }
-
-    public async Task<GatewayModel.FungibleResourcesCollectionItemGloballyAggregated?> RoayltyAggregatedBalance(long entityId, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
-    {
-        var royaltyAggregatedBalance = await GetFungiblesSliceAggregatedPerResource(entityId, 0, 2, ledgerState, token);
-
-        if (royaltyAggregatedBalance.Items?.Count > 1)
-        {
-            throw new UnreachableException("Roaylty vaults should have only 1 type of fungible resources");
-        }
-
-        return royaltyAggregatedBalance.Items?.FirstOrDefault() as GatewayModel.FungibleResourcesCollectionItemGloballyAggregated;
     }
 
     public async Task<GatewayModel.FungibleResourcesCollection> EntityFungibleResourcesPageSlice(long entityId, bool aggregatePerVault, int offset, int limit, GatewayModel.LedgerState ledgerState,
@@ -236,7 +226,16 @@ internal class EntityStateQuerier : IEntityStateQuerier
             }
 
             case PackageEntity pe:
-                details = new GatewayModel.StateEntityDetailsResponsePackageDetails(codeHex: pe.Code?.ToHex());
+                var includePackageRoyaltyVaultBalance = optInProperties?.Contains(GatewayModel.StateEntityDetailsRequest.OptInPropertiesEnum.PackageRoyaltyVaultBalance) == true;
+
+                var packageRoyaltyVaultBalance = includePackageRoyaltyVaultBalance && pe.RoyaltyVaultEntityId.HasValue
+                    ? await RoyaltyVaultBalance(pe.RoyaltyVaultEntityId.Value, ledgerState, token)
+                    : null;
+
+                details = new GatewayModel.StateEntityDetailsResponsePackageDetails(
+                    codeHex: pe.Code?.ToHex(),
+                    royaltyVaultBalance: packageRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(packageRoyaltyVaultBalance.Balance).ToString() : null);
+
                 break;
 
             case VirtualIdentityEntity:
@@ -271,17 +270,17 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
-                var includeRoyaltyAggregator = optInProperties?.Contains(GatewayModel.StateEntityDetailsRequest.OptInPropertiesEnum.ComponentRoyaltyAggregatorBalance) == true;
+                var includeComponentRoyaltyVaultBalance = optInProperties?.Contains(GatewayModel.StateEntityDetailsRequest.OptInPropertiesEnum.ComponentRoyaltyVaultBalance) == true;
 
-                var royaltyAggregator = includeRoyaltyAggregator && ce.RoyaltyVaultEntityId.HasValue
-                    ? await RoayltyAggregatedBalance(ce.RoyaltyVaultEntityId.Value, ledgerState, token)
+                var componentRoyaltyVaultBalance = includeComponentRoyaltyVaultBalance && ce.RoyaltyVaultEntityId.HasValue
+                    ? await RoyaltyVaultBalance(ce.RoyaltyVaultEntityId.Value, ledgerState, token)
                     : null;
 
                 details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                     packageAddress: package.GlobalAddress,
                     blueprintName: ce.BlueprintName,
                     state: state != null ? new JRaw(state.State) : null,
-                    royaltyAggregator: royaltyAggregator,
+                    royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance.Balance).ToString() : null,
                     accessRulesChain: new JRaw(accessRulesLayers.AccessRulesChain));
                 break;
         }
@@ -542,6 +541,28 @@ INNER JOIN LATERAL (
             : null;
 
         return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(null, null, nextCursor, items));
+    }
+
+    private async Task<RoyaltyVaultBalanceViewModel?> RoyaltyVaultBalance(long royaltyVaultEntityId, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    {
+        var cd = new CommandDefinition(
+            commandText: @"
+SELECT CAST(balance AS text) AS Balance, from_state_version AS LastUpdatedAtStateVersion
+FROM entity_vault_history
+WHERE vault_entity_id = @royaltyVaultEntityId AND from_state_version <= @stateVersion
+ORDER BY from_state_version DESC
+LIMIT 1
+;",
+            parameters: new
+            {
+                stateVersion = ledgerState.StateVersion,
+                royaltyVaultEntityId = royaltyVaultEntityId,
+            },
+            cancellationToken: token);
+
+        var balance = await _dbContext.Database.GetDbConnection().QuerySingleOrDefaultAsync<RoyaltyVaultBalanceViewModel>(cd);
+
+        return balance;
     }
 
     private async Task<GatewayModel.EntityMetadataCollection> GetMetadataSlice(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)

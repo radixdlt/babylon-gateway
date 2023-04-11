@@ -1487,7 +1487,8 @@ components:
         type: string
         enum:
           - ancestor_identities
-          - component.royalty_aggregator_balance
+          - component.royalty_vault_balance
+          - package.royalty_vault_balance
     StateEntityDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1598,8 +1599,8 @@ components:
           properties:
             code_hex:
               $ref: "#/components/schemas/HexString"
-            royalty_aggregator:
-              $ref: "#/components/schemas/FungibleResourcesCollectionItemGloballyAggregated"
+            royalty_vault_balance:
+              $ref: "#/components/schemas/BigDecimal"
     StateEntityDetailsResponseComponentDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
@@ -1616,8 +1617,8 @@ components:
               type: object
             access_rules_chain:
               type: object
-            royalty_aggregator:
-              $ref: "#/components/schemas/FungibleResourcesCollectionItemGloballyAggregated"
+            royalty_vault_balance:
+              $ref: "#/components/schemas/BigDecimal"
 
     StateEntityMetadataPageRequest:
       allOf:

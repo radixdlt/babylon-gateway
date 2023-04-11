@@ -115,9 +115,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="blueprintName">blueprintName (required).</param>
         /// <param name="state">state.</param>
         /// <param name="accessRulesChain">accessRulesChain (required).</param>
-        /// <param name="royaltyAggregator">royaltyAggregator.</param>
+        /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Component).</param>
-        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), Object accessRulesChain = default(Object), FungibleResourcesCollectionItemGloballyAggregated royaltyAggregator = default(FungibleResourcesCollectionItemGloballyAggregated), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
+        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), Object accessRulesChain = default(Object), string royaltyVaultBalance = default(string), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
         {
             // to ensure "blueprintName" is required (not null)
             if (blueprintName == null)
@@ -133,7 +133,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.AccessRulesChain = accessRulesChain;
             this.PackageAddress = packageAddress;
             this.State = state;
-            this.RoyaltyAggregator = royaltyAggregator;
+            this.RoyaltyVaultBalance = royaltyVaultBalance;
         }
 
         /// <summary>
@@ -162,10 +162,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public Object AccessRulesChain { get; set; }
 
         /// <summary>
-        /// Gets or Sets RoyaltyAggregator
+        /// String-encoded decimal representing the amount of a related fungible resource.
         /// </summary>
-        [DataMember(Name = "royalty_aggregator", EmitDefaultValue = true)]
-        public FungibleResourcesCollectionItemGloballyAggregated RoyaltyAggregator { get; set; }
+        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
+        [DataMember(Name = "royalty_vault_balance", EmitDefaultValue = true)]
+        public string RoyaltyVaultBalance { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -180,7 +181,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
             sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
-            sb.Append("  RoyaltyAggregator: ").Append(RoyaltyAggregator).Append("\n");
+            sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -237,9 +238,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.AccessRulesChain.Equals(input.AccessRulesChain))
                 ) && base.Equals(input) && 
                 (
-                    this.RoyaltyAggregator == input.RoyaltyAggregator ||
-                    (this.RoyaltyAggregator != null &&
-                    this.RoyaltyAggregator.Equals(input.RoyaltyAggregator))
+                    this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
+                    (this.RoyaltyVaultBalance != null &&
+                    this.RoyaltyVaultBalance.Equals(input.RoyaltyVaultBalance))
                 );
         }
 
@@ -268,9 +269,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.AccessRulesChain.GetHashCode();
                 }
-                if (this.RoyaltyAggregator != null)
+                if (this.RoyaltyVaultBalance != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoyaltyAggregator.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RoyaltyVaultBalance.GetHashCode();
                 }
                 return hashCode;
             }

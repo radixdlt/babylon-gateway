@@ -108,10 +108,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             AncestorIdentities = 1,
 
             /// <summary>
-            /// Enum ComponentRoyaltyAggregatorBalance for value: component.royalty_aggregator_balance
+            /// Enum ComponentRoyaltyVaultBalance for value: component.royalty_vault_balance
             /// </summary>
-            [EnumMember(Value = "component.royalty_aggregator_balance")]
-            ComponentRoyaltyAggregatorBalance = 2
+            [EnumMember(Value = "component.royalty_vault_balance")]
+            ComponentRoyaltyVaultBalance = 2,
+
+            /// <summary>
+            /// Enum PackageRoyaltyVaultBalance for value: package.royalty_vault_balance
+            /// </summary>
+            [EnumMember(Value = "package.royalty_vault_balance")]
+            PackageRoyaltyVaultBalance = 3
 
         }
 
