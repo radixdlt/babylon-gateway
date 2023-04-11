@@ -4,7 +4,7 @@ _Release Date: Unreleased_
 - renamed `mutable_data` property to `data` in `/state/non-fungible/data` endpoint.
 - added `image_tag` with currently deployed image tag to release information.
 - opt-in properties added to `/transaction/committed-details`,`/state/entity/details` user can specify additional properties in response.
-- added royalty aggregator balance to `/state/entity/details` if queried entity is component.
+- added opt-in royalty vault balance to `/state/entity/details` if queried entity is component or package.
 
 ## 0.3.0 - RCNet-V1
 _Release Date: 31.03.2023_
