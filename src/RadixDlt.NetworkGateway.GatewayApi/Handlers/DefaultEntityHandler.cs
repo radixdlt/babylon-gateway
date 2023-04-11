@@ -93,7 +93,12 @@ internal class DefaultEntityHandler : IEntityHandler
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
         var aggregatePerVault = request.AggregationLevel == GatewayModel.ResourceAggregationLevel.Vault;
 
-        return await _entityStateQuerier.EntityDetails(request.Addresses.Select(a => (GlobalAddress)a).ToList(), aggregatePerVault, request.OptIns ?? new GatewayModel.StateEntityDetailsOptIns(), ledgerState, token);
+        return await _entityStateQuerier.EntityDetails(
+            request.Addresses.Select(a => (GlobalAddress)a).ToList(),
+            aggregatePerVault,
+            request.OptIns ?? GatewayModel.StateEntityDetailsOptIns.Default,
+            ledgerState,
+            token);
     }
 
     public async Task<GatewayModel.StateEntityMetadataPageResponse?> Metadata(GatewayModel.StateEntityMetadataPageRequest request, CancellationToken token = default)
