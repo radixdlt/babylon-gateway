@@ -87,24 +87,59 @@ internal class ReadHelper
         _connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
     }
 
-    public async Task<Dictionary<long, EntityMetadataHistory>> MostRecentEntityMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
+    public async Task<Dictionary<MetadataLookup, EntityMetadataHistory>> MostRecentEntityMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
     {
-        var ids = metadataChanges.Select(x => x.ReferencedEntity.DatabaseId).Distinct().ToList();
+        var entityIds = new List<long>();
+        var keys = new List<string>();
+        var lookupSet = new HashSet<MetadataLookup>();
+
+        foreach (var metadataChange in metadataChanges)
+        {
+            lookupSet.Add(new MetadataLookup(metadataChange.ReferencedEntity.DatabaseId, metadataChange.Key));
+        }
+
+        foreach (var lookup in lookupSet)
+        {
+            entityIds.Add(lookup.EntityId);
+            keys.Add(lookup.Key);
+        }
 
         return await _dbContext.EntityMetadataHistory
             .FromSqlInterpolated(@$"
-WITH variables (entity_id) AS (
-    SELECT UNNEST({ids})
+WITH variables (entity_id, key) AS (
+    SELECT UNNEST({entityIds}), UNNEST({keys})
 )
 SELECT emh.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
     FROM entity_metadata_history
-    WHERE entity_id = variables.entity_id
+    WHERE entity_id = variables.entity_id AND key = variables.key
     ORDER BY from_state_version DESC
     LIMIT 1
 ) emh ON true;")
+            .AsNoTracking()
+            .ToDictionaryAsync(e => new MetadataLookup(e.EntityId, e.Key), token);
+    }
+
+    public async Task<Dictionary<long, EntityMetadataAggregateHistory>> MostRecentEntityAggregateMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
+    {
+        var entityIds = metadataChanges.Select(x => x.ReferencedEntity.DatabaseId).Distinct().ToList();
+
+        return await _dbContext.EntityMetadataAggregateHistory
+            .FromSqlInterpolated(@$"
+WITH variables (entity_id) AS (
+    SELECT UNNEST({entityIds})
+)
+SELECT emah.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_metadata_aggregate_history
+    WHERE entity_id = variables.entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) emah ON true;")
             .AsNoTracking()
             .ToDictionaryAsync(e => e.EntityId, token);
     }
@@ -377,6 +412,7 @@ SELECT
     nextval('entities_id_seq') AS EntitySequence,
     nextval('entity_access_rules_chain_history_id_seq') AS EntityAccessRulesChainHistorySequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
+    nextval('entity_metadata_aggregate_history_id_seq') AS EntityMetadataAggregateHistorySequence,
     nextval('entity_resource_aggregated_vaults_history_id_seq') AS EntityResourceAggregatedVaultsHistorySequence,
     nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
     nextval('entity_resource_vault_aggregate_history_id_seq') AS EntityResourceVaultAggregateHistorySequence,

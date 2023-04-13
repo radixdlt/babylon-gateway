@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -143,6 +143,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "entity_metadata_aggregate_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    metadata = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_entity_metadata_aggregate_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "entity_metadata_history",
                 columns: table => new
                 {
@@ -150,9 +165,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    keys = table.Column<List<string>>(type: "text[]", nullable: false),
-                    values = table.Column<List<byte[]>>(type: "bytea[]", nullable: false),
-                    updated_at_state_versions = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                    key = table.Column<string>(type: "text", nullable: false),
+                    value = table.Column<byte[]>(type: "bytea", nullable: true),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -470,6 +485,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "entity_id", "subtype", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_entity_metadata_aggregate_history_entity_id_from_state_vers~",
+                table: "entity_metadata_aggregate_history",
+                columns: new[] { "entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_entity_metadata_history_entity_id_from_state_version",
                 table: "entity_metadata_history",
                 columns: new[] { "entity_id", "from_state_version" });
@@ -610,6 +630,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "entity_access_rules_chain_history");
+
+            migrationBuilder.DropTable(
+                name: "entity_metadata_aggregate_history");
 
             migrationBuilder.DropTable(
                 name: "entity_metadata_history");

@@ -62,37 +62,23 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using FluentValidation;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+
+internal class StateEntityDetailsOptInsValidator : AbstractValidator<GatewayModel.StateEntityDetailsOptIns>
 {
-    public long EntityStateHistorySequence { get; set; }
-
-    public long EntitySequence { get; set; }
-
-    public long EntityAccessRulesChainHistorySequence { get; set; }
-
-    public long EntityMetadataHistorySequence { get; set; }
-
-    public long EntityMetadataAggregateHistorySequence { get; set; }
-
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
+    public StateEntityDetailsOptInsValidator()
+    {
+        // TODO avoid .Must / hardcoded values
+        RuleFor(x => x.ExplicitMetadata)
+            .Must(x => x == null || x.Count <= 10)
+            .ForEach(emRule =>
+            {
+                emRule
+                    .NotEmpty()
+                    .Length(100);
+            });
+    }
 }

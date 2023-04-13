@@ -101,11 +101,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="ancestorIdentities">ancestorIdentities.</param>
         /// <param name="componentRoyaltyVaultBalance">componentRoyaltyVaultBalance.</param>
         /// <param name="packageRoyaltyVaultBalance">packageRoyaltyVaultBalance.</param>
-        public StateEntityDetailsOptIns(bool ancestorIdentities = default(bool), bool componentRoyaltyVaultBalance = default(bool), bool packageRoyaltyVaultBalance = default(bool))
+        /// <param name="explicitMetadata">explicitMetadata.</param>
+        public StateEntityDetailsOptIns(bool ancestorIdentities = default(bool), bool componentRoyaltyVaultBalance = default(bool), bool packageRoyaltyVaultBalance = default(bool), List<string> explicitMetadata = default(List<string>))
         {
             this.AncestorIdentities = ancestorIdentities;
             this.ComponentRoyaltyVaultBalance = componentRoyaltyVaultBalance;
             this.PackageRoyaltyVaultBalance = packageRoyaltyVaultBalance;
+            this.ExplicitMetadata = explicitMetadata;
         }
 
         /// <summary>
@@ -127,6 +129,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public bool PackageRoyaltyVaultBalance { get; set; }
 
         /// <summary>
+        /// Gets or Sets ExplicitMetadata
+        /// </summary>
+        [DataMember(Name = "explicit_metadata", EmitDefaultValue = true)]
+        public List<string> ExplicitMetadata { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -137,6 +145,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  AncestorIdentities: ").Append(AncestorIdentities).Append("\n");
             sb.Append("  ComponentRoyaltyVaultBalance: ").Append(ComponentRoyaltyVaultBalance).Append("\n");
             sb.Append("  PackageRoyaltyVaultBalance: ").Append(PackageRoyaltyVaultBalance).Append("\n");
+            sb.Append("  ExplicitMetadata: ").Append(ExplicitMetadata).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -183,6 +192,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 (
                     this.PackageRoyaltyVaultBalance == input.PackageRoyaltyVaultBalance ||
                     this.PackageRoyaltyVaultBalance.Equals(input.PackageRoyaltyVaultBalance)
+                ) && 
+                (
+                    this.ExplicitMetadata == input.ExplicitMetadata ||
+                    this.ExplicitMetadata != null &&
+                    input.ExplicitMetadata != null &&
+                    this.ExplicitMetadata.SequenceEqual(input.ExplicitMetadata)
                 );
         }
 
@@ -198,6 +213,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 hashCode = (hashCode * 59) + this.AncestorIdentities.GetHashCode();
                 hashCode = (hashCode * 59) + this.ComponentRoyaltyVaultBalance.GetHashCode();
                 hashCode = (hashCode * 59) + this.PackageRoyaltyVaultBalance.GetHashCode();
+                if (this.ExplicitMetadata != null)
+                {
+                    hashCode = (hashCode * 59) + this.ExplicitMetadata.GetHashCode();
+                }
                 return hashCode;
             }
         }
