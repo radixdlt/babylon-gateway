@@ -495,6 +495,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_entity_metadata_history_entity_id_key_from_state_version",
+                table: "entity_metadata_history",
+                columns: new[] { "entity_id", "key", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_entity_resource_aggregate_history_entity_id_from_state_vers~",
                 table: "entity_resource_aggregate_history",
                 columns: new[] { "entity_id", "from_state_version" });

@@ -78,7 +78,7 @@ internal class StateEntityDetailsOptInsValidator : AbstractValidator<GatewayMode
             {
                 emRule
                     .NotEmpty()
-                    .Length(100);
+                    .MaximumLength(100);
             });
     }
 }

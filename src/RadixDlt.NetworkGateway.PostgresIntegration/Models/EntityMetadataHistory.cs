@@ -64,6 +64,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
@@ -86,6 +87,7 @@ internal class EntityMetadataHistory
     [Column("value")]
     public byte[]? Value { get; set; }
 
+    [MemberNotNullWhen(false, nameof(Value))]
     [Column("is_deleted")]
     public bool IsDeleted { get; set; }
 }

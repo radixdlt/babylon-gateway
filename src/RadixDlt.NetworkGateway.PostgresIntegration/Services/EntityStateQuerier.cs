@@ -159,6 +159,10 @@ internal class EntityStateQuerier : IEntityStateQuerier
             ? await RoyaltyVaultBalance(componentsRoyaltyVaultEntityIds, ledgerState, token)
             : null;
 
+        var explicitMetadata = optIns.ExplicitMetadata?.Any() == true
+            ? await GetExplicitMetadata(entities.ToDictionary(e => e.Id, _ => optIns.ExplicitMetadata), ledgerState, token)
+            : null;
+
         var items = new List<GatewayModel.StateEntityDetailsResponseItem>();
 
         foreach (var entity in entities)
@@ -259,7 +263,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 nonFungibleResources: nonFungibles,
                 ancestorIdentities: ancestorIdentities,
                 metadata: metadata[entity.Id],
-                explicitMetadata: metadata[entity.Id],
+                explicitMetadata: explicitMetadata != null && explicitMetadata.ContainsKey(entity.Id) ? explicitMetadata[entity.Id] : null,
                 details: details));
         }
 
@@ -635,11 +639,57 @@ ORDER BY metadata_join.ordinality ASC;",
         return result;
     }
 
-    private async Task<Dictionary<long, GatewayModel.EntityMetadataCollection>> GetExplicitMetadata(long[] entityIds, List<string> keys, GatewayModel.LedgerState ledgerState,
+    private async Task<Dictionary<long, GatewayModel.EntityMetadataCollection>> GetExplicitMetadata(Dictionary<long, List<string>> entityMetadataKeys, GatewayModel.LedgerState ledgerState,
         CancellationToken token)
     {
-        await Task.Delay(1, token);
+        var entityIds = new List<long>();
+        var metadataKeys = new List<string>();
+
+        foreach (var (entityId, keys) in entityMetadataKeys)
+        {
+            foreach (var key in keys)
+            {
+                entityIds.Add(entityId);
+                metadataKeys.Add(key);
+            }
+        }
+
+        var metadataHistory = await _dbContext.EntityMetadataHistory
+            .FromSqlInterpolated(@$"
+WITH variables (entity_id, metadata_key) AS (
+    SELECT UNNEST({entityIds}), UNNEST({metadataKeys})
+)
+SELECT emh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_metadata_history
+    WHERE entity_id = variables.entity_id AND key = variables.metadata_key AND from_state_version <= {ledgerState.StateVersion}
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) emh ON TRUE;")
+            .AsNoTracking()
+            .ToListAsync(token);
+
         var result = new Dictionary<long, GatewayModel.EntityMetadataCollection>();
+
+        foreach (var mh in metadataHistory)
+        {
+            if (mh.IsDeleted)
+            {
+                continue;
+            }
+
+            if (!result.ContainsKey(mh.EntityId))
+            {
+                result[mh.EntityId] = new GatewayModel.EntityMetadataCollection(items: new List<GatewayModel.EntityMetadataItem>());
+            }
+
+            var value = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(_logger, mh.Value, _networkConfigurationProvider.GetNetworkId());
+
+            result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, value, mh.FromStateVersion));
+        }
+
         return result;
     }
 
