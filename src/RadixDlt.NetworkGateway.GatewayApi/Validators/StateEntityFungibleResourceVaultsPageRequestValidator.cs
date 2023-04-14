@@ -87,6 +87,11 @@ internal class StateEntityFungibleResourceVaultsPageRequestValidator : AbstractV
         RuleFor(x => x.Cursor)
             .Base64();
 
+        RuleFor(x => x.AtLedgerState)
+            .Must(x => x != null && x.HasStateVersion())
+            .When(x => !string.IsNullOrEmpty(x.Cursor))
+            .WithMessage("AtLedgerState.StateVersion is required if cursor is provided");
+
         RuleFor(x => x.LimitPerPage)
             .GreaterThan(0)
             .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
