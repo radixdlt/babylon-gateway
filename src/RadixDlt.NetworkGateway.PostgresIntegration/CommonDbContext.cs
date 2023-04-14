@@ -92,6 +92,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityMetadataHistory> EntityMetadataHistory => Set<EntityMetadataHistory>();
 
+    public DbSet<EntityMetadataAggregateHistory> EntityMetadataAggregateHistory => Set<EntityMetadataAggregateHistory>();
+
     public DbSet<EntityResourceAggregateHistory> EntityResourceAggregateHistory => Set<EntityResourceAggregateHistory>();
 
     public DbSet<EntityResourceVaultAggregateHistory> EntityResourceVaultAggregateHistory => Set<EntityResourceVaultAggregateHistory>();
@@ -242,6 +244,9 @@ internal abstract class CommonDbContext : DbContext
     private static void HookupHistory(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<EntityMetadataHistory>()
+            .HasIndex(e => new { e.EntityId, e.Key, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityMetadataAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityResourceAggregateHistory>()

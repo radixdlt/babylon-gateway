@@ -108,8 +108,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="nonFungibleResources">nonFungibleResources.</param>
         /// <param name="ancestorIdentities">ancestorIdentities.</param>
         /// <param name="metadata">metadata (required).</param>
+        /// <param name="explicitMetadata">explicitMetadata.</param>
         /// <param name="details">details.</param>
-        public StateEntityDetailsResponseItem(string address = default(string), FungibleResourcesCollection fungibleResources = default(FungibleResourcesCollection), NonFungibleResourcesCollection nonFungibleResources = default(NonFungibleResourcesCollection), StateEntityDetailsResponseItemAncestorIdentities ancestorIdentities = default(StateEntityDetailsResponseItemAncestorIdentities), EntityMetadataCollection metadata = default(EntityMetadataCollection), StateEntityDetailsResponseItemDetails details = default(StateEntityDetailsResponseItemDetails))
+        public StateEntityDetailsResponseItem(string address = default(string), FungibleResourcesCollection fungibleResources = default(FungibleResourcesCollection), NonFungibleResourcesCollection nonFungibleResources = default(NonFungibleResourcesCollection), StateEntityDetailsResponseItemAncestorIdentities ancestorIdentities = default(StateEntityDetailsResponseItemAncestorIdentities), EntityMetadataCollection metadata = default(EntityMetadataCollection), EntityMetadataCollection explicitMetadata = default(EntityMetadataCollection), StateEntityDetailsResponseItemDetails details = default(StateEntityDetailsResponseItemDetails))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -126,6 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.FungibleResources = fungibleResources;
             this.NonFungibleResources = nonFungibleResources;
             this.AncestorIdentities = ancestorIdentities;
+            this.ExplicitMetadata = explicitMetadata;
             this.Details = details;
         }
 
@@ -161,6 +163,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public EntityMetadataCollection Metadata { get; set; }
 
         /// <summary>
+        /// Gets or Sets ExplicitMetadata
+        /// </summary>
+        [DataMember(Name = "explicit_metadata", EmitDefaultValue = true)]
+        public EntityMetadataCollection ExplicitMetadata { get; set; }
+
+        /// <summary>
         /// Gets or Sets Details
         /// </summary>
         [DataMember(Name = "details", EmitDefaultValue = true)]
@@ -179,6 +187,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  NonFungibleResources: ").Append(NonFungibleResources).Append("\n");
             sb.Append("  AncestorIdentities: ").Append(AncestorIdentities).Append("\n");
             sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("  ExplicitMetadata: ").Append(ExplicitMetadata).Append("\n");
             sb.Append("  Details: ").Append(Details).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -241,6 +250,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Metadata.Equals(input.Metadata))
                 ) && 
                 (
+                    this.ExplicitMetadata == input.ExplicitMetadata ||
+                    (this.ExplicitMetadata != null &&
+                    this.ExplicitMetadata.Equals(input.ExplicitMetadata))
+                ) && 
+                (
                     this.Details == input.Details ||
                     (this.Details != null &&
                     this.Details.Equals(input.Details))
@@ -275,6 +289,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Metadata != null)
                 {
                     hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
+                }
+                if (this.ExplicitMetadata != null)
+                {
+                    hashCode = (hashCode * 59) + this.ExplicitMetadata.GetHashCode();
                 }
                 if (this.Details != null)
                 {

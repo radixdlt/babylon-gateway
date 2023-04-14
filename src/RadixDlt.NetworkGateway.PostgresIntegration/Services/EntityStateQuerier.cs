@@ -89,7 +89,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class EntityStateQuerier : IEntityStateQuerier
 {
-    private record MetadataViewModel(long EntityId, string[] Keys, byte[][] Values, long[] UpdatedAtStateVersions, int TotalCount);
+    private record MetadataViewModel(long FromStateVersion, long EntityId, string Key, byte[] Value, int TotalCount);
 
     private record ValidatorCurrentStakeViewModel(long ValidatorId, string Balance, string State, long BalanceLastUpdatedAtStateVersion, long StateLastUpdatedAtStateVersion);
 
@@ -150,15 +150,18 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, componentEntities, ledgerState, token);
 
         var packagesRoyaltyVaultEntityIds = packageEntities.Where(x => x.RoyaltyVaultEntityId != null).Select(x => x.RoyaltyVaultEntityId!.Value).ToArray();
-        var packagesRoayltyVaultBalance = optIns.PackageRoyaltyVaultBalance && packagesRoyaltyVaultEntityIds.Any()
-                ? await RoyaltyVaultBalance(packagesRoyaltyVaultEntityIds, ledgerState, token)
-                : null;
+        var packagesRoyaltyVaultBalance = optIns.PackageRoyaltyVaultBalance && packagesRoyaltyVaultEntityIds.Any()
+            ? await RoyaltyVaultBalance(packagesRoyaltyVaultEntityIds, ledgerState, token)
+            : null;
 
         var componentsRoyaltyVaultEntityIds = componentEntities.Where(x => x.RoyaltyVaultEntityId != null).Select(x => x.RoyaltyVaultEntityId!.Value).ToArray();
-        var componentsRoayltyVaultBalance =
-            optIns.ComponentRoyaltyVaultBalance && componentsRoyaltyVaultEntityIds.Any()
-                ? await RoyaltyVaultBalance(componentsRoyaltyVaultEntityIds, ledgerState, token)
-                : null;
+        var componentsRoyaltyVaultBalance = optIns.ComponentRoyaltyVaultBalance && componentsRoyaltyVaultEntityIds.Any()
+            ? await RoyaltyVaultBalance(componentsRoyaltyVaultEntityIds, ledgerState, token)
+            : null;
+
+        var explicitMetadata = optIns.ExplicitMetadata?.Any() == true
+            ? await GetExplicitMetadata(entities.ToDictionary(e => e.Id, _ => optIns.ExplicitMetadata), ledgerState, token)
+            : null;
 
         var items = new List<GatewayModel.StateEntityDetailsResponseItem>();
 
@@ -188,7 +191,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
                     if (pe.RoyaltyVaultEntityId.HasValue)
                     {
-                        var packageRoyaltyVaultBalanceValue = packagesRoayltyVaultBalance
+                        var packageRoyaltyVaultBalanceValue = packagesRoyaltyVaultBalance
                             ?.SingleOrDefault(x => x.RoyaltyVaultEntityId == pe.RoyaltyVaultEntityId.Value);
 
                         packageRoyaltyVaultBalance = packageRoyaltyVaultBalanceValue?.Balance != null
@@ -227,7 +230,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
                     if (ce.RoyaltyVaultEntityId.HasValue)
                     {
-                        var componentRoyaltyVaultBalanceValue = componentsRoayltyVaultBalance
+                        var componentRoyaltyVaultBalanceValue = componentsRoyaltyVaultBalance
                             ?.SingleOrDefault(x => x.RoyaltyVaultEntityId == ce.RoyaltyVaultEntityId.Value);
 
                         componentRoyaltyVaultBalance = componentRoyaltyVaultBalanceValue?.Balance != null
@@ -254,7 +257,14 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     globalAddress: correlatedAddresses[entity.GlobalAncestorId.Value])
                 : null;
 
-            items.Add(new GatewayModel.StateEntityDetailsResponseItem(entity.GlobalAddress ?? entity.Address.ToHex(), fungibles, nonFungibles, ancestorIdentities, metadata[entity.Id], details));
+            items.Add(new GatewayModel.StateEntityDetailsResponseItem(
+                address: entity.GlobalAddress ?? entity.Address.ToHex(),
+                fungibleResources: fungibles,
+                nonFungibleResources: nonFungibles,
+                ancestorIdentities: ancestorIdentities,
+                metadata: metadata[entity.Id],
+                explicitMetadata: explicitMetadata != null && explicitMetadata.ContainsKey(entity.Id) ? explicitMetadata[entity.Id] : null,
+                details: details));
         }
 
         return new GatewayModel.StateEntityDetailsResponse(ledgerState, items);
@@ -573,22 +583,25 @@ INNER JOIN LATERAL (
 
         var cd = new CommandDefinition(
             commandText: @"
-WITH variables (entity_id, ord) AS (
-    SELECT
-        a.val AS entity_id,
-        a.ord AS ord
-     FROM UNNEST(@entityIds) WITH ORDINALITY AS a(val, ord)
+WITH variables (entity_id) AS (
+    SELECT UNNEST(@entityIds)
+),
+metadata_slices AS (
+    SELECT variables.entity_id, emah.metadata_slice, emah.metadata_total_count
+    FROM variables
+    INNER JOIN LATERAL (
+        SELECT metadata[@offset:@limit] AS metadata_slice, cardinality(metadata) AS metadata_total_count
+        FROM entity_metadata_aggregate_history
+        WHERE entity_id = variables.entity_id AND from_state_version <= @stateVersion
+        ORDER BY from_state_version DESC
+        LIMIT 1
+    ) emah ON TRUE
 )
-SELECT emh.*
-FROM variables
-INNER JOIN LATERAL (
-    SELECT entity_id AS EntityId, keys[@offset:@limit] AS Keys, values[@offset:@limit] AS Values, updated_at_state_versions[@offset:@limit] AS UpdatedAtStateVersions, cardinality(keys) AS TotalCount
-    FROM entity_metadata_history
-    WHERE entity_id = variables.entity_id AND from_state_version <= @stateVersion
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) emh ON true
-ORDER BY variables.ord;",
+SELECT emh.from_state_version AS FromStateVersion, emh.entity_id AS EntityId, emh.key AS Key, emh.value AS Value, ms.metadata_total_count AS TotalCount
+FROM metadata_slices AS ms
+INNER JOIN LATERAL UNNEST(metadata_slice) WITH ORDINALITY AS metadata_join(id, ordinality) ON TRUE
+INNER JOIN entity_metadata_history emh ON emh.id = metadata_join.id AND emh.is_deleted = FALSE
+ORDER BY metadata_join.ordinality ASC;",
             parameters: new
             {
                 entityIds = entityIds,
@@ -600,24 +613,81 @@ ORDER BY variables.ord;",
 
         foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<MetadataViewModel>(cd))
         {
-            var items = vm.Keys.Zip(vm.Values, vm.UpdatedAtStateVersions)
-                .Select(t => new GatewayModel.EntityMetadataItem(t.First, ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(_logger, t.Second, _networkConfigurationProvider.GetNetworkId()), t.Third))
-                .ToList();
+            if (!result.ContainsKey(vm.EntityId))
+            {
+                var previousCursor = offset > 0
+                    ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
+                    : null;
 
-            var previousCursor = offset > 0
-                ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
-                : null;
+                var nextCursor = vm.TotalCount > limit
+                    ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
+                    : null;
 
-            var nextCursor = items.Count > limit
-                ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
-                : null;
+                result[vm.EntityId] = new GatewayModel.EntityMetadataCollection(vm.TotalCount, previousCursor, nextCursor, new List<GatewayModel.EntityMetadataItem>());
+            }
 
-            result[vm.EntityId] = new GatewayModel.EntityMetadataCollection(vm.TotalCount, previousCursor, nextCursor, items.Take(limit).ToList());
+            var value = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(_logger, vm.Value, _networkConfigurationProvider.GetNetworkId());
+
+            result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, value, vm.FromStateVersion));
         }
 
         foreach (var missing in entityIds.Except(result.Keys))
         {
             result[missing] = GatewayModel.EntityMetadataCollection.Empty;
+        }
+
+        return result;
+    }
+
+    private async Task<Dictionary<long, GatewayModel.EntityMetadataCollection>> GetExplicitMetadata(Dictionary<long, List<string>> entityMetadataKeys, GatewayModel.LedgerState ledgerState,
+        CancellationToken token)
+    {
+        var entityIds = new List<long>();
+        var metadataKeys = new List<string>();
+
+        foreach (var (entityId, keys) in entityMetadataKeys)
+        {
+            foreach (var key in keys)
+            {
+                entityIds.Add(entityId);
+                metadataKeys.Add(key);
+            }
+        }
+
+        var metadataHistory = await _dbContext.EntityMetadataHistory
+            .FromSqlInterpolated(@$"
+WITH variables (entity_id, metadata_key) AS (
+    SELECT UNNEST({entityIds}), UNNEST({metadataKeys})
+)
+SELECT emh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_metadata_history
+    WHERE entity_id = variables.entity_id AND key = variables.metadata_key AND from_state_version <= {ledgerState.StateVersion}
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) emh ON TRUE;")
+            .AsNoTracking()
+            .ToListAsync(token);
+
+        var result = new Dictionary<long, GatewayModel.EntityMetadataCollection>();
+
+        foreach (var mh in metadataHistory)
+        {
+            if (mh.IsDeleted)
+            {
+                continue;
+            }
+
+            if (!result.ContainsKey(mh.EntityId))
+            {
+                result[mh.EntityId] = new GatewayModel.EntityMetadataCollection(items: new List<GatewayModel.EntityMetadataItem>());
+            }
+
+            var value = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(_logger, mh.Value, _networkConfigurationProvider.GetNetworkId());
+
+            result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, value, mh.FromStateVersion));
         }
 
         return result;

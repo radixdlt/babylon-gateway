@@ -698,12 +698,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (substateData is CoreModel.MetadataEntrySubstate metadata)
                     {
-                        // TODO decompile SBOR or use ValueBytes
-                        var keyHex = metadata.KeyHex;
-                        var valueHex = metadata.DataStruct?.StructData.DataHex;
+                        var key = ScryptoSborUtils.ConvertFromScryptoSborString(metadata.KeyHex, _networkConfigurationProvider.GetNetworkId());
+                        var value = metadata.DataStruct?.StructData.DataHex.ConvertFromHex();
                         var isDeleted = metadata.IsDeleted;
 
-                        metadataChanges.Add(new MetadataChange(referencedEntity, keyHex, valueHex, isDeleted, stateVersion));
+                        metadataChanges.Add(new MetadataChange(referencedEntity, key, value, isDeleted, stateVersion));
                     }
 
                     if (substateData is CoreModel.FungibleResourceManagerSubstate fungibleResourceManager)
@@ -819,6 +818,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var sw = Stopwatch.StartNew();
 
             var mostRecentMetadataHistory = await readHelper.MostRecentEntityMetadataHistoryFor(metadataChanges, token);
+            var mostRecentAggregatedMetadataHistory = await readHelper.MostRecentEntityAggregateMetadataHistoryFor(metadataChanges, token);
             var mostRecentEntityResourceAggregateHistory = await readHelper.MostRecentEntityResourceAggregateHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
             var mostRecentEntityResourceAggregatedVaultsHistory = await readHelper.MostRecentEntityResourceAggregatedVaultsHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
             var mostRecentEntityResourceVaultAggregateHistory = await readHelper.MostRecentEntityResourceVaultAggregateHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
@@ -830,6 +830,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             dbReadDuration += sw.Elapsed;
 
             var entityMetadataHistoryToAdd = new List<EntityMetadataHistory>();
+            var entityMetadataAggregateHistoryToAdd = new List<EntityMetadataAggregateHistory>();
             var entityResourceAggregateHistoryCandidates = new List<EntityResourceAggregateHistory>();
             var entityResourceAggregatedVaultsHistoryToAdd = new List<EntityResourceAggregatedVaultsHistory>();
             var entityResourceVaultAggregateHistoryToAdd = new List<EntityResourceVaultAggregateHistory>();
@@ -839,51 +840,60 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
             foreach (var metadataChange in metadataChanges)
             {
-                EntityMetadataHistory metadataHistory;
-
-                if (!mostRecentMetadataHistory.TryGetValue(metadataChange.ReferencedEntity.DatabaseId, out var previous) || previous.FromStateVersion != metadataChange.StateVersion)
+                var lookup = new MetadataLookup(metadataChange.ReferencedEntity.DatabaseId, metadataChange.Key);
+                var metadataHistory = new EntityMetadataHistory
                 {
-                    metadataHistory = new EntityMetadataHistory
+                    Id = sequences.EntityMetadataHistorySequence++,
+                    FromStateVersion = metadataChange.StateVersion,
+                    EntityId = metadataChange.ReferencedEntity.DatabaseId,
+                    Key = metadataChange.Key,
+                    Value = metadataChange.Value,
+                    IsDeleted = metadataChange.IsDeleted,
+                };
+
+                entityMetadataHistoryToAdd.Add(metadataHistory);
+
+                EntityMetadataAggregateHistory aggregate;
+
+                if (!mostRecentAggregatedMetadataHistory.TryGetValue(metadataChange.ReferencedEntity.DatabaseId, out var previousAggregate) || previousAggregate.FromStateVersion != metadataChange.StateVersion)
+                {
+                    aggregate = new EntityMetadataAggregateHistory
                     {
-                        Id = sequences.EntityMetadataHistorySequence++,
+                        Id = sequences.EntityMetadataAggregateHistorySequence++,
                         FromStateVersion = metadataChange.StateVersion,
                         EntityId = metadataChange.ReferencedEntity.DatabaseId,
-                        Keys = new List<string>(),
-                        Values = new List<byte[]>(),
-                        UpdatedAtStateVersions = new List<long>(),
+                        MetadataIds = new List<long>(),
                     };
 
-                    if (previous != null)
+                    if (previousAggregate != null)
                     {
-                        metadataHistory.Keys.AddRange(previous.Keys);
-                        metadataHistory.Values.AddRange(previous.Values);
-                        metadataHistory.UpdatedAtStateVersions.AddRange(previous.UpdatedAtStateVersions);
+                        aggregate.MetadataIds.AddRange(previousAggregate.MetadataIds);
                     }
 
-                    entityMetadataHistoryToAdd.Add(metadataHistory);
-                    mostRecentMetadataHistory[metadataChange.ReferencedEntity.DatabaseId] = metadataHistory;
+                    entityMetadataAggregateHistoryToAdd.Add(aggregate);
+                    mostRecentAggregatedMetadataHistory[metadataChange.ReferencedEntity.DatabaseId] = aggregate;
                 }
                 else
                 {
-                    metadataHistory = previous;
+                    aggregate = previousAggregate;
                 }
 
-                var key = ScryptoSborUtils.ConvertFromScryptoSborString(metadataChange.KeyHex, _networkConfigurationProvider.GetNetworkId());
-                var currentPosition = metadataHistory.Keys.IndexOf(key);
-
-                if (currentPosition != -1)
+                if (mostRecentMetadataHistory.TryGetValue(lookup, out var previous))
                 {
-                    metadataHistory.Keys.RemoveAt(currentPosition);
-                    metadataHistory.Values.RemoveAt(currentPosition);
-                    metadataHistory.UpdatedAtStateVersions.RemoveAt(currentPosition);
+                    var currentPosition = aggregate.MetadataIds.IndexOf(previous.Id);
+
+                    if (currentPosition != -1)
+                    {
+                        aggregate.MetadataIds.RemoveAt(currentPosition);
+                    }
                 }
 
                 if (!metadataChange.IsDeleted)
                 {
-                    metadataHistory.Keys.Insert(0, key);
-                    metadataHistory.Values.Insert(0, metadataChange.ValueHex?.ConvertFromHex() ?? throw new InvalidOperationException("impossible x3")); // TODO improve
-                    metadataHistory.UpdatedAtStateVersions.Insert(0, metadataChange.StateVersion);
+                    aggregate.MetadataIds.Insert(0, metadataHistory.Id);
                 }
+
+                mostRecentMetadataHistory[lookup] = metadataHistory;
             }
 
             foreach (var e in nonFungibleIdChanges)
@@ -1251,6 +1261,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyEntityStateHistory(entityStateToAdd, token);
             rowsInserted += await writeHelper.CopyEntityAccessRulesChainHistory(entityAccessRulesChainHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityMetadataHistory(entityMetadataHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityMetadataAggregateHistory(entityMetadataAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceAggregatedVaultsHistory(entityResourceAggregatedVaultsHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceAggregateHistory(entityResourceAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceVaultAggregateHistory(entityResourceVaultAggregateHistoryToAdd, token);
