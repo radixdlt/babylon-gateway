@@ -150,7 +150,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    metadata = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                    metadata_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -487,11 +487,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_entity_metadata_aggregate_history_entity_id_from_state_vers~",
                 table: "entity_metadata_aggregate_history",
-                columns: new[] { "entity_id", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_entity_metadata_history_entity_id_from_state_version",
-                table: "entity_metadata_history",
                 columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(

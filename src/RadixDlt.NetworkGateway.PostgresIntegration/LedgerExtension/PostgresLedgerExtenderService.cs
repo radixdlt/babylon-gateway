@@ -862,12 +862,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         Id = sequences.EntityMetadataAggregateHistorySequence++,
                         FromStateVersion = metadataChange.StateVersion,
                         EntityId = metadataChange.ReferencedEntity.DatabaseId,
-                        Metadata = new List<long>(),
+                        MetadataIds = new List<long>(),
                     };
 
                     if (previousAggregate != null)
                     {
-                        aggregate.Metadata.AddRange(previousAggregate.Metadata);
+                        aggregate.MetadataIds.AddRange(previousAggregate.MetadataIds);
                     }
 
                     entityMetadataAggregateHistoryToAdd.Add(aggregate);
@@ -880,17 +880,17 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 if (mostRecentMetadataHistory.TryGetValue(lookup, out var previous))
                 {
-                    var currentPosition = aggregate.Metadata.IndexOf(previous.Id);
+                    var currentPosition = aggregate.MetadataIds.IndexOf(previous.Id);
 
                     if (currentPosition != -1)
                     {
-                        aggregate.Metadata.RemoveAt(currentPosition);
+                        aggregate.MetadataIds.RemoveAt(currentPosition);
                     }
                 }
 
                 if (!metadataChange.IsDeleted)
                 {
-                    aggregate.Metadata.Insert(0, metadataHistory.Id);
+                    aggregate.MetadataIds.Insert(0, metadataHistory.Id);
                 }
 
                 mostRecentMetadataHistory[lookup] = metadataHistory;

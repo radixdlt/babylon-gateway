@@ -81,6 +81,6 @@ internal class EntityMetadataAggregateHistory
     [Column("entity_id")]
     public long EntityId { get; set; }
 
-    [Column("metadata")]
-    public List<long> Metadata { get; set; }
+    [Column("metadata_ids")]
+    public List<long> MetadataIds { get; set; }
 }

@@ -244,9 +244,6 @@ internal abstract class CommonDbContext : DbContext
     private static void HookupHistory(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<EntityMetadataHistory>()
-            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
-
-        modelBuilder.Entity<EntityMetadataHistory>()
             .HasIndex(e => new { e.EntityId, e.Key, e.FromStateVersion });
 
         modelBuilder.Entity<EntityMetadataAggregateHistory>()

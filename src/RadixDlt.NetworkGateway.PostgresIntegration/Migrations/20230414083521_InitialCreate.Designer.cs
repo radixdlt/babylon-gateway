@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230413121108_InitialCreate")]
+    [Migration("20230414083521_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -217,10 +217,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
 
-                    b.Property<List<long>>("Metadata")
+                    b.Property<List<long>>("MetadataIds")
                         .IsRequired()
                         .HasColumnType("bigint[]")
-                        .HasColumnName("metadata");
+                        .HasColumnName("metadata_ids");
 
                     b.HasKey("Id");
 
@@ -260,8 +260,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnName("value");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EntityId", "FromStateVersion");
 
                     b.HasIndex("EntityId", "Key", "FromStateVersion");
 
