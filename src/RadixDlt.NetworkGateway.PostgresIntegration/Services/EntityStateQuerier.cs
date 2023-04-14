@@ -150,12 +150,12 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, componentEntities, ledgerState, token);
 
         var packagesRoyaltyVaultEntityIds = packageEntities.Where(x => x.RoyaltyVaultEntityId != null).Select(x => x.RoyaltyVaultEntityId!.Value).ToArray();
-        var packagesRoayltyVaultBalance = optIns.PackageRoyaltyVaultBalance && packagesRoyaltyVaultEntityIds.Any()
+        var packagesRoyaltyVaultBalance = optIns.PackageRoyaltyVaultBalance && packagesRoyaltyVaultEntityIds.Any()
             ? await RoyaltyVaultBalance(packagesRoyaltyVaultEntityIds, ledgerState, token)
             : null;
 
         var componentsRoyaltyVaultEntityIds = componentEntities.Where(x => x.RoyaltyVaultEntityId != null).Select(x => x.RoyaltyVaultEntityId!.Value).ToArray();
-        var componentsRoayltyVaultBalance = optIns.ComponentRoyaltyVaultBalance && componentsRoyaltyVaultEntityIds.Any()
+        var componentsRoyaltyVaultBalance = optIns.ComponentRoyaltyVaultBalance && componentsRoyaltyVaultEntityIds.Any()
             ? await RoyaltyVaultBalance(componentsRoyaltyVaultEntityIds, ledgerState, token)
             : null;
 
@@ -191,7 +191,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
                     if (pe.RoyaltyVaultEntityId.HasValue)
                     {
-                        var packageRoyaltyVaultBalanceValue = packagesRoayltyVaultBalance
+                        var packageRoyaltyVaultBalanceValue = packagesRoyaltyVaultBalance
                             ?.SingleOrDefault(x => x.RoyaltyVaultEntityId == pe.RoyaltyVaultEntityId.Value);
 
                         packageRoyaltyVaultBalance = packageRoyaltyVaultBalanceValue?.Balance != null
@@ -230,7 +230,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
                     if (ce.RoyaltyVaultEntityId.HasValue)
                     {
-                        var componentRoyaltyVaultBalanceValue = componentsRoayltyVaultBalance
+                        var componentRoyaltyVaultBalanceValue = componentsRoyaltyVaultBalance
                             ?.SingleOrDefault(x => x.RoyaltyVaultEntityId == ce.RoyaltyVaultEntityId.Value);
 
                         componentRoyaltyVaultBalance = componentRoyaltyVaultBalanceValue?.Balance != null
