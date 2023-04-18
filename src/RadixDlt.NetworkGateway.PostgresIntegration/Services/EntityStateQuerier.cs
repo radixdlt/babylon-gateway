@@ -590,7 +590,7 @@ metadata_slices AS (
     SELECT variables.entity_id, emah.metadata_slice, emah.metadata_total_count
     FROM variables
     INNER JOIN LATERAL (
-        SELECT metadata[@offset:@limit] AS metadata_slice, cardinality(metadata) AS metadata_total_count
+        SELECT metadata_ids[@offset:@limit] AS metadata_slice, cardinality(metadata_ids) AS metadata_total_count
         FROM entity_metadata_aggregate_history
         WHERE entity_id = variables.entity_id AND from_state_version <= @stateVersion
         ORDER BY from_state_version DESC
