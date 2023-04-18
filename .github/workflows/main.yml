@@ -161,7 +161,7 @@ jobs:
       - docker-data-aggregator-gcr
       - docker-database-migrations-gcr
       - setup-tags
-    if: github.ref == 'refs/heads/feature/github-actions-benchmark-job'
+    #if: github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - name: Process ci.env
