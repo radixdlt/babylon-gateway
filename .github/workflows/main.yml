@@ -187,6 +187,7 @@ jobs:
               "gatewayBranch": "${{ env.GATEWAY_BRANCH }}",
               "nodeDockerTag": "${{ env.FULLNODE_VERSION }}",
               "postgresVersion": "${{ env.POSTGRES_VERSION }}"
+              "testingHarnessBranch": "gateway-benchmark-script"
             }
           job_timeout: "3600"
 
