@@ -454,32 +454,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .IsConcurrencyToken()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_updated");
-
-                    b.Property<long>("TargetStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("sync_status_target_state_version");
-
-                    b.Property<long>("TopOfLedgerStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("top_of_ledger_state_version");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TopOfLedgerStateVersion");
-
-                    b.ToTable("ledger_status");
-                });
-
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", b =>
                 {
                     b.Property<long>("StateVersion")
@@ -1339,17 +1313,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("ledger_transactions");
 
                     b.HasDiscriminator().HasValue(LedgerTransactionType.Validator);
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerStatus", b =>
-                {
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", "TopOfLedgerTransaction")
-                        .WithMany()
-                        .HasForeignKey("TopOfLedgerStateVersion")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("TopOfLedgerTransaction");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", b =>

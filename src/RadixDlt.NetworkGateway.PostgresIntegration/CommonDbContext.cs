@@ -82,8 +82,6 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<NetworkConfiguration> NetworkConfiguration => Set<NetworkConfiguration>();
 
-    public DbSet<LedgerStatus> LedgerStatus => Set<LedgerStatus>();
-
     public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
 
     public DbSet<PendingTransaction> PendingTransactions => Set<PendingTransaction>();
@@ -137,7 +135,6 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<PublicKeyType>();
         modelBuilder.HasPostgresEnum<ResourceType>();
 
-        HookupSingleEntries(modelBuilder);
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
         HookupEntities(modelBuilder);
@@ -156,15 +153,6 @@ internal abstract class CommonDbContext : DbContext
 
         configurationBuilder.Properties<GlobalAddress>()
             .HaveConversion<GlobalAddressToStringConverter>();
-    }
-
-    private static void HookupSingleEntries(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<LedgerStatus>()
-            .HasOne(ls => ls.TopOfLedgerTransaction)
-            .WithMany()
-            .HasForeignKey(ls => ls.TopOfLedgerStateVersion)
-            .OnDelete(DeleteBehavior.NoAction);
     }
 
     private static void HookupTransactions(ModelBuilder modelBuilder)

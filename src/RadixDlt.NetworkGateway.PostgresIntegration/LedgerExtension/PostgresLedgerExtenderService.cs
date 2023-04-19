@@ -66,14 +66,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.RadixEngineToolkit.Model.Value;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -144,7 +142,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
             var extendLedgerReport = await ProcessTransactions(dbContext, ledgerExtension, token);
 
-            await CreateOrUpdateLedgerStatus(dbContext, extendLedgerReport.FinalTransaction, latestSyncTarget.TargetStateVersion, token);
             await tx.CommitAsync(token);
 
             return new CommitTransactionsReport(
@@ -1295,28 +1292,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         }
     }
 
-    private async Task CreateOrUpdateLedgerStatus(ReadWriteDbContext dbContext, TransactionSummary finalTransaction, long latestSyncTarget, CancellationToken token)
-    {
-        var ledgerStatus = await dbContext.LedgerStatus.SingleOrDefaultAsync(token);
-
-        if (ledgerStatus == null)
-        {
-            ledgerStatus = new LedgerStatus();
-            dbContext.Add(ledgerStatus);
-        }
-
-        ledgerStatus.LastUpdated = _clock.UtcNow;
-        ledgerStatus.TopOfLedgerStateVersion = finalTransaction.StateVersion;
-        ledgerStatus.TargetStateVersion = latestSyncTarget;
-
-        await dbContext.SaveChangesAsync(token);
-    }
-
     private async Task<TransactionSummary> GetTopOfLedger(ReadWriteDbContext dbContext, CancellationToken token)
     {
-        var lastTransaction = await dbContext.LedgerTransactions
-            .AsNoTracking()
-            .OrderByDescending(lt => lt.StateVersion)
+        var lastTransaction = await dbContext.GetTopLedgerTransaction()
             .FirstOrDefaultAsync(token);
 
         var lastOverview = lastTransaction == null
