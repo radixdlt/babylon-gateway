@@ -11,8 +11,8 @@ API_GENERATED_DESTINATION = '../lib/generated'
 
 OPENAPI_GENERATION_FOLDER='.'
 OPENAPI_TEMP_GENERATION_FOLDER='./temp'
-OPENAPI_GENERATOR_FIXED_VERSION_JAR=os.path.join(OPENAPI_GENERATION_FOLDER, 'openapi-generator-cli-6.1.0.jar')
-OPENAPI_GENERATOR_FIXED_VERSION_DOWNLOAD_URL='https://search.maven.org/remotecontent?filepath=org/openapitools/openapi-generator-cli/6.1.0/openapi-generator-cli-6.1.0.jar'
+OPENAPI_GENERATOR_FIXED_VERSION_JAR=os.path.join(OPENAPI_GENERATION_FOLDER, 'openapi-generator-cli-6.2.1.jar')
+OPENAPI_GENERATOR_FIXED_VERSION_DOWNLOAD_URL='https://search.maven.org/remotecontent?filepath=org/openapitools/openapi-generator-cli/6.2.1/openapi-generator-cli-6.2.1.jar'
 
 def safe_os_remove(path, silent = False):
     try:
@@ -153,6 +153,7 @@ def generate_models(prepared_spec_file, tmp_client_folder, out_location):
          '-g', 'typescript-fetch',
          '-i', prepared_spec_file,
          '-o', tmp_client_folder,
+         '-t', os.path.join(OPENAPI_GENERATION_FOLDER, 'template-overrides'),
          '--additional-properties=supportsES6=true,modelPropertyNaming=original,npmVersion=0.1.0'
     ], should_log=False)
 
