@@ -33,16 +33,16 @@ export interface StateEntityDetailsResponseFungibleResourceDetails {
     access_rules_chain: object;
     /**
      * 
-     * @type {number}
-     * @memberof StateEntityDetailsResponseFungibleResourceDetails
-     */
-    divisibility: number;
-    /**
-     * 
      * @type {object}
      * @memberof StateEntityDetailsResponseFungibleResourceDetails
      */
     vault_access_rules_chain: object;
+    /**
+     * 
+     * @type {number}
+     * @memberof StateEntityDetailsResponseFungibleResourceDetails
+     */
+    divisibility: number;
 }
 
 
@@ -62,8 +62,8 @@ export function instanceOfStateEntityDetailsResponseFungibleResourceDetails(valu
     let isInstance = true;
     isInstance = isInstance && "type" in value;
     isInstance = isInstance && "access_rules_chain" in value;
-    isInstance = isInstance && "divisibility" in value;
     isInstance = isInstance && "vault_access_rules_chain" in value;
+    isInstance = isInstance && "divisibility" in value;
 
     return isInstance;
 }
@@ -80,8 +80,8 @@ export function StateEntityDetailsResponseFungibleResourceDetailsFromJSONTyped(j
         
         'type': json['type'],
         'access_rules_chain': json['access_rules_chain'],
-        'divisibility': json['divisibility'],
         'vault_access_rules_chain': json['vault_access_rules_chain'],
+        'divisibility': json['divisibility'],
     };
 }
 
@@ -96,8 +96,8 @@ export function StateEntityDetailsResponseFungibleResourceDetailsToJSON(value?: 
         
         'type': value.type,
         'access_rules_chain': value.access_rules_chain,
-        'divisibility': value.divisibility,
         'vault_access_rules_chain': value.vault_access_rules_chain,
+        'divisibility': value.divisibility,
     };
 }
 

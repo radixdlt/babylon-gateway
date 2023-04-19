@@ -27,17 +27,17 @@ import {
  */
 export interface StateNonFungibleIdsResponseAllOf {
     /**
-     * 
-     * @type {NonFungibleIdsCollection}
-     * @memberof StateNonFungibleIdsResponseAllOf
-     */
-    non_fungible_ids: NonFungibleIdsCollection;
-    /**
      * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
      * @type {string}
      * @memberof StateNonFungibleIdsResponseAllOf
      */
     resource_address: string;
+    /**
+     * 
+     * @type {NonFungibleIdsCollection}
+     * @memberof StateNonFungibleIdsResponseAllOf
+     */
+    non_fungible_ids: NonFungibleIdsCollection;
 }
 
 /**
@@ -45,8 +45,8 @@ export interface StateNonFungibleIdsResponseAllOf {
  */
 export function instanceOfStateNonFungibleIdsResponseAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "non_fungible_ids" in value;
     isInstance = isInstance && "resource_address" in value;
+    isInstance = isInstance && "non_fungible_ids" in value;
 
     return isInstance;
 }
@@ -61,8 +61,8 @@ export function StateNonFungibleIdsResponseAllOfFromJSONTyped(json: any, ignoreD
     }
     return {
         
-        'non_fungible_ids': NonFungibleIdsCollectionFromJSON(json['non_fungible_ids']),
         'resource_address': json['resource_address'],
+        'non_fungible_ids': NonFungibleIdsCollectionFromJSON(json['non_fungible_ids']),
     };
 }
 
@@ -75,8 +75,8 @@ export function StateNonFungibleIdsResponseAllOfToJSON(value?: StateNonFungibleI
     }
     return {
         
-        'non_fungible_ids': NonFungibleIdsCollectionToJSON(value.non_fungible_ids),
         'resource_address': value.resource_address,
+        'non_fungible_ids': NonFungibleIdsCollectionToJSON(value.non_fungible_ids),
     };
 }
 

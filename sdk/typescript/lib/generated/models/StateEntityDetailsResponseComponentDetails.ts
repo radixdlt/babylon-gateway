@@ -33,18 +33,6 @@ export interface StateEntityDetailsResponseComponentDetails {
      */
     type: StateEntityDetailsResponseComponentDetailsTypeEnum;
     /**
-     * 
-     * @type {object}
-     * @memberof StateEntityDetailsResponseComponentDetails
-     */
-    access_rules_chain: object;
-    /**
-     * 
-     * @type {string}
-     * @memberof StateEntityDetailsResponseComponentDetails
-     */
-    blueprint_name: string;
-    /**
      * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
      * @type {string}
      * @memberof StateEntityDetailsResponseComponentDetails
@@ -52,16 +40,28 @@ export interface StateEntityDetailsResponseComponentDetails {
     package_address?: string;
     /**
      * 
-     * @type {FungibleResourcesCollectionItemGloballyAggregated}
+     * @type {string}
      * @memberof StateEntityDetailsResponseComponentDetails
      */
-    royalty_aggregator?: FungibleResourcesCollectionItemGloballyAggregated;
+    blueprint_name: string;
     /**
      * 
      * @type {object}
      * @memberof StateEntityDetailsResponseComponentDetails
      */
     state?: object;
+    /**
+     * 
+     * @type {object}
+     * @memberof StateEntityDetailsResponseComponentDetails
+     */
+    access_rules_chain: object;
+    /**
+     * 
+     * @type {FungibleResourcesCollectionItemGloballyAggregated}
+     * @memberof StateEntityDetailsResponseComponentDetails
+     */
+    royalty_aggregator?: FungibleResourcesCollectionItemGloballyAggregated;
 }
 
 
@@ -80,8 +80,8 @@ export type StateEntityDetailsResponseComponentDetailsTypeEnum = typeof StateEnt
 export function instanceOfStateEntityDetailsResponseComponentDetails(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "type" in value;
-    isInstance = isInstance && "access_rules_chain" in value;
     isInstance = isInstance && "blueprint_name" in value;
+    isInstance = isInstance && "access_rules_chain" in value;
 
     return isInstance;
 }
@@ -97,11 +97,11 @@ export function StateEntityDetailsResponseComponentDetailsFromJSONTyped(json: an
     return {
         
         'type': json['type'],
-        'access_rules_chain': json['access_rules_chain'],
-        'blueprint_name': json['blueprint_name'],
         'package_address': !exists(json, 'package_address') ? undefined : json['package_address'],
-        'royalty_aggregator': !exists(json, 'royalty_aggregator') ? undefined : FungibleResourcesCollectionItemGloballyAggregatedFromJSON(json['royalty_aggregator']),
+        'blueprint_name': json['blueprint_name'],
         'state': !exists(json, 'state') ? undefined : json['state'],
+        'access_rules_chain': json['access_rules_chain'],
+        'royalty_aggregator': !exists(json, 'royalty_aggregator') ? undefined : FungibleResourcesCollectionItemGloballyAggregatedFromJSON(json['royalty_aggregator']),
     };
 }
 
@@ -115,11 +115,11 @@ export function StateEntityDetailsResponseComponentDetailsToJSON(value?: StateEn
     return {
         
         'type': value.type,
-        'access_rules_chain': value.access_rules_chain,
-        'blueprint_name': value.blueprint_name,
         'package_address': value.package_address,
-        'royalty_aggregator': FungibleResourcesCollectionItemGloballyAggregatedToJSON(value.royalty_aggregator),
+        'blueprint_name': value.blueprint_name,
         'state': value.state,
+        'access_rules_chain': value.access_rules_chain,
+        'royalty_aggregator': FungibleResourcesCollectionItemGloballyAggregatedToJSON(value.royalty_aggregator),
     };
 }
 

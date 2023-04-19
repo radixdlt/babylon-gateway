@@ -20,6 +20,12 @@ import { exists, mapValues } from '../runtime';
  */
 export interface FungibleResourcesCollectionItemVaultAggregatedVaultItem {
     /**
+     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
+     * @type {string}
+     * @memberof FungibleResourcesCollectionItemVaultAggregatedVaultItem
+     */
+    vault_address: string;
+    /**
      * String-encoded decimal representing the amount of a related fungible resource.
      * @type {string}
      * @memberof FungibleResourcesCollectionItemVaultAggregatedVaultItem
@@ -31,12 +37,6 @@ export interface FungibleResourcesCollectionItemVaultAggregatedVaultItem {
      * @memberof FungibleResourcesCollectionItemVaultAggregatedVaultItem
      */
     last_updated_at_state_version: number;
-    /**
-     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
-     * @type {string}
-     * @memberof FungibleResourcesCollectionItemVaultAggregatedVaultItem
-     */
-    vault_address: string;
 }
 
 /**
@@ -44,9 +44,9 @@ export interface FungibleResourcesCollectionItemVaultAggregatedVaultItem {
  */
 export function instanceOfFungibleResourcesCollectionItemVaultAggregatedVaultItem(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "vault_address" in value;
     isInstance = isInstance && "amount" in value;
     isInstance = isInstance && "last_updated_at_state_version" in value;
-    isInstance = isInstance && "vault_address" in value;
 
     return isInstance;
 }
@@ -61,9 +61,9 @@ export function FungibleResourcesCollectionItemVaultAggregatedVaultItemFromJSONT
     }
     return {
         
+        'vault_address': json['vault_address'],
         'amount': json['amount'],
         'last_updated_at_state_version': json['last_updated_at_state_version'],
-        'vault_address': json['vault_address'],
     };
 }
 
@@ -76,9 +76,9 @@ export function FungibleResourcesCollectionItemVaultAggregatedVaultItemToJSON(va
     }
     return {
         
+        'vault_address': value.vault_address,
         'amount': value.amount,
         'last_updated_at_state_version': value.last_updated_at_state_version,
-        'vault_address': value.vault_address,
     };
 }
 

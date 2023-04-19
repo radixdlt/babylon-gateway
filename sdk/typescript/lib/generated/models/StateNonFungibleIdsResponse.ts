@@ -39,17 +39,17 @@ export interface StateNonFungibleIdsResponse {
      */
     ledger_state: LedgerState;
     /**
-     * 
-     * @type {NonFungibleIdsCollection}
-     * @memberof StateNonFungibleIdsResponse
-     */
-    non_fungible_ids: NonFungibleIdsCollection;
-    /**
      * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
      * @type {string}
      * @memberof StateNonFungibleIdsResponse
      */
     resource_address: string;
+    /**
+     * 
+     * @type {NonFungibleIdsCollection}
+     * @memberof StateNonFungibleIdsResponse
+     */
+    non_fungible_ids: NonFungibleIdsCollection;
 }
 
 /**
@@ -58,8 +58,8 @@ export interface StateNonFungibleIdsResponse {
 export function instanceOfStateNonFungibleIdsResponse(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "ledger_state" in value;
-    isInstance = isInstance && "non_fungible_ids" in value;
     isInstance = isInstance && "resource_address" in value;
+    isInstance = isInstance && "non_fungible_ids" in value;
 
     return isInstance;
 }
@@ -75,8 +75,8 @@ export function StateNonFungibleIdsResponseFromJSONTyped(json: any, ignoreDiscri
     return {
         
         'ledger_state': LedgerStateFromJSON(json['ledger_state']),
-        'non_fungible_ids': NonFungibleIdsCollectionFromJSON(json['non_fungible_ids']),
         'resource_address': json['resource_address'],
+        'non_fungible_ids': NonFungibleIdsCollectionFromJSON(json['non_fungible_ids']),
     };
 }
 
@@ -90,8 +90,8 @@ export function StateNonFungibleIdsResponseToJSON(value?: StateNonFungibleIdsRes
     return {
         
         'ledger_state': LedgerStateToJSON(value.ledger_state),
-        'non_fungible_ids': NonFungibleIdsCollectionToJSON(value.non_fungible_ids),
         'resource_address': value.resource_address,
+        'non_fungible_ids': NonFungibleIdsCollectionToJSON(value.non_fungible_ids),
     };
 }
 

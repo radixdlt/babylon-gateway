@@ -27,6 +27,12 @@ import {
  */
 export interface ErrorResponse {
     /**
+     * A human-readable error message.
+     * @type {string}
+     * @memberof ErrorResponse
+     */
+    message: string;
+    /**
      * A numeric code corresponding to the given error type.
      * @type {number}
      * @memberof ErrorResponse
@@ -38,12 +44,6 @@ export interface ErrorResponse {
      * @memberof ErrorResponse
      */
     details?: GatewayError;
-    /**
-     * A human-readable error message.
-     * @type {string}
-     * @memberof ErrorResponse
-     */
-    message: string;
     /**
      * A unique request identifier to be used when reporting errors, to allow correlation with the Gateway API's error logs.
      * @type {string}
@@ -72,9 +72,9 @@ export function ErrorResponseFromJSONTyped(json: any, ignoreDiscriminator: boole
     }
     return {
         
+        'message': json['message'],
         'code': !exists(json, 'code') ? undefined : json['code'],
         'details': !exists(json, 'details') ? undefined : GatewayErrorFromJSON(json['details']),
-        'message': json['message'],
         'trace_id': !exists(json, 'trace_id') ? undefined : json['trace_id'],
     };
 }
@@ -88,9 +88,9 @@ export function ErrorResponseToJSON(value?: ErrorResponse | null): any {
     }
     return {
         
+        'message': value.message,
         'code': value.code,
         'details': GatewayErrorToJSON(value.details),
-        'message': value.message,
         'trace_id': value.trace_id,
     };
 }

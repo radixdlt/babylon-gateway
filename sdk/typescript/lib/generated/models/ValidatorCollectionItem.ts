@@ -33,17 +33,17 @@ import {
  */
 export interface ValidatorCollectionItem {
     /**
-     * 
-     * @type {ValidatorCollectionItemActiveInEpoch}
-     * @memberof ValidatorCollectionItem
-     */
-    active_in_epoch?: ValidatorCollectionItemActiveInEpoch;
-    /**
      * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
      * @type {string}
      * @memberof ValidatorCollectionItem
      */
     address: string;
+    /**
+     * 
+     * @type {object}
+     * @memberof ValidatorCollectionItem
+     */
+    state?: object | null;
     /**
      * String-encoded decimal representing the amount of a related fungible resource.
      * @type {string}
@@ -52,16 +52,16 @@ export interface ValidatorCollectionItem {
     current_stake: string;
     /**
      * 
+     * @type {ValidatorCollectionItemActiveInEpoch}
+     * @memberof ValidatorCollectionItem
+     */
+    active_in_epoch?: ValidatorCollectionItemActiveInEpoch;
+    /**
+     * 
      * @type {EntityMetadataCollection}
      * @memberof ValidatorCollectionItem
      */
     metadata: EntityMetadataCollection;
-    /**
-     * 
-     * @type {object}
-     * @memberof ValidatorCollectionItem
-     */
-    state?: object | null;
 }
 
 /**
@@ -86,11 +86,11 @@ export function ValidatorCollectionItemFromJSONTyped(json: any, ignoreDiscrimina
     }
     return {
         
-        'active_in_epoch': !exists(json, 'active_in_epoch') ? undefined : ValidatorCollectionItemActiveInEpochFromJSON(json['active_in_epoch']),
         'address': json['address'],
-        'current_stake': json['current_stake'],
-        'metadata': EntityMetadataCollectionFromJSON(json['metadata']),
         'state': !exists(json, 'state') ? undefined : json['state'],
+        'current_stake': json['current_stake'],
+        'active_in_epoch': !exists(json, 'active_in_epoch') ? undefined : ValidatorCollectionItemActiveInEpochFromJSON(json['active_in_epoch']),
+        'metadata': EntityMetadataCollectionFromJSON(json['metadata']),
     };
 }
 
@@ -103,11 +103,11 @@ export function ValidatorCollectionItemToJSON(value?: ValidatorCollectionItem | 
     }
     return {
         
-        'active_in_epoch': ValidatorCollectionItemActiveInEpochToJSON(value.active_in_epoch),
         'address': value.address,
-        'current_stake': value.current_stake,
-        'metadata': EntityMetadataCollectionToJSON(value.metadata),
         'state': value.state,
+        'current_stake': value.current_stake,
+        'active_in_epoch': ValidatorCollectionItemActiveInEpochToJSON(value.active_in_epoch),
+        'metadata': EntityMetadataCollectionToJSON(value.metadata),
     };
 }
 

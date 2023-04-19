@@ -20,17 +20,17 @@ import { exists, mapValues } from '../runtime';
  */
 export interface GatewayInfoResponseReleaseInfo {
     /**
-     * The Open API Schema version that was used to generate the API models.
-     * @type {string}
-     * @memberof GatewayInfoResponseReleaseInfo
-     */
-    open_api_schema_version: string;
-    /**
      * The release that is currently deployed to the Gateway API.
      * @type {string}
      * @memberof GatewayInfoResponseReleaseInfo
      */
     release_version: string;
+    /**
+     * The Open API Schema version that was used to generate the API models.
+     * @type {string}
+     * @memberof GatewayInfoResponseReleaseInfo
+     */
+    open_api_schema_version: string;
 }
 
 /**
@@ -38,8 +38,8 @@ export interface GatewayInfoResponseReleaseInfo {
  */
 export function instanceOfGatewayInfoResponseReleaseInfo(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "open_api_schema_version" in value;
     isInstance = isInstance && "release_version" in value;
+    isInstance = isInstance && "open_api_schema_version" in value;
 
     return isInstance;
 }
@@ -54,8 +54,8 @@ export function GatewayInfoResponseReleaseInfoFromJSONTyped(json: any, ignoreDis
     }
     return {
         
-        'open_api_schema_version': json['open_api_schema_version'],
         'release_version': json['release_version'],
+        'open_api_schema_version': json['open_api_schema_version'],
     };
 }
 
@@ -68,8 +68,8 @@ export function GatewayInfoResponseReleaseInfoToJSON(value?: GatewayInfoResponse
     }
     return {
         
-        'open_api_schema_version': value.open_api_schema_version,
         'release_version': value.release_version,
+        'open_api_schema_version': value.open_api_schema_version,
     };
 }
 

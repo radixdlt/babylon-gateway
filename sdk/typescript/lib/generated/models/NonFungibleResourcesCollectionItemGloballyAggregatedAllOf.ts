@@ -20,12 +20,6 @@ import { exists, mapValues } from '../runtime';
  */
 export interface NonFungibleResourcesCollectionItemGloballyAggregatedAllOf {
     /**
-     * 
-     * @type {string}
-     * @memberof NonFungibleResourcesCollectionItemGloballyAggregatedAllOf
-     */
-    aggregation_level?: NonFungibleResourcesCollectionItemGloballyAggregatedAllOfAggregationLevelEnum;
-    /**
      * TBA
      * @type {number}
      * @memberof NonFungibleResourcesCollectionItemGloballyAggregatedAllOf
@@ -37,6 +31,12 @@ export interface NonFungibleResourcesCollectionItemGloballyAggregatedAllOf {
      * @memberof NonFungibleResourcesCollectionItemGloballyAggregatedAllOf
      */
     last_updated_at_state_version: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof NonFungibleResourcesCollectionItemGloballyAggregatedAllOf
+     */
+    aggregation_level?: NonFungibleResourcesCollectionItemGloballyAggregatedAllOfAggregationLevelEnum;
 }
 
 
@@ -70,9 +70,9 @@ export function NonFungibleResourcesCollectionItemGloballyAggregatedAllOfFromJSO
     }
     return {
         
-        'aggregation_level': !exists(json, 'aggregation_level') ? undefined : json['aggregation_level'],
         'amount': json['amount'],
         'last_updated_at_state_version': json['last_updated_at_state_version'],
+        'aggregation_level': !exists(json, 'aggregation_level') ? undefined : json['aggregation_level'],
     };
 }
 
@@ -85,9 +85,9 @@ export function NonFungibleResourcesCollectionItemGloballyAggregatedAllOfToJSON(
     }
     return {
         
-        'aggregation_level': value.aggregation_level,
         'amount': value.amount,
         'last_updated_at_state_version': value.last_updated_at_state_version,
+        'aggregation_level': value.aggregation_level,
     };
 }
 

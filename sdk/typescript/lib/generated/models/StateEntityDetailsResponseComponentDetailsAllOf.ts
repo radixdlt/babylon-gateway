@@ -27,18 +27,6 @@ import {
  */
 export interface StateEntityDetailsResponseComponentDetailsAllOf {
     /**
-     * 
-     * @type {object}
-     * @memberof StateEntityDetailsResponseComponentDetailsAllOf
-     */
-    access_rules_chain: object;
-    /**
-     * 
-     * @type {string}
-     * @memberof StateEntityDetailsResponseComponentDetailsAllOf
-     */
-    blueprint_name: string;
-    /**
      * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
      * @type {string}
      * @memberof StateEntityDetailsResponseComponentDetailsAllOf
@@ -46,16 +34,28 @@ export interface StateEntityDetailsResponseComponentDetailsAllOf {
     package_address?: string;
     /**
      * 
-     * @type {FungibleResourcesCollectionItemGloballyAggregated}
+     * @type {string}
      * @memberof StateEntityDetailsResponseComponentDetailsAllOf
      */
-    royalty_aggregator?: FungibleResourcesCollectionItemGloballyAggregated;
+    blueprint_name: string;
     /**
      * 
      * @type {object}
      * @memberof StateEntityDetailsResponseComponentDetailsAllOf
      */
     state?: object;
+    /**
+     * 
+     * @type {object}
+     * @memberof StateEntityDetailsResponseComponentDetailsAllOf
+     */
+    access_rules_chain: object;
+    /**
+     * 
+     * @type {FungibleResourcesCollectionItemGloballyAggregated}
+     * @memberof StateEntityDetailsResponseComponentDetailsAllOf
+     */
+    royalty_aggregator?: FungibleResourcesCollectionItemGloballyAggregated;
     /**
      * 
      * @type {string}
@@ -79,8 +79,8 @@ export type StateEntityDetailsResponseComponentDetailsAllOfTypeEnum = typeof Sta
  */
 export function instanceOfStateEntityDetailsResponseComponentDetailsAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "access_rules_chain" in value;
     isInstance = isInstance && "blueprint_name" in value;
+    isInstance = isInstance && "access_rules_chain" in value;
 
     return isInstance;
 }
@@ -95,11 +95,11 @@ export function StateEntityDetailsResponseComponentDetailsAllOfFromJSONTyped(jso
     }
     return {
         
-        'access_rules_chain': json['access_rules_chain'],
-        'blueprint_name': json['blueprint_name'],
         'package_address': !exists(json, 'package_address') ? undefined : json['package_address'],
-        'royalty_aggregator': !exists(json, 'royalty_aggregator') ? undefined : FungibleResourcesCollectionItemGloballyAggregatedFromJSON(json['royalty_aggregator']),
+        'blueprint_name': json['blueprint_name'],
         'state': !exists(json, 'state') ? undefined : json['state'],
+        'access_rules_chain': json['access_rules_chain'],
+        'royalty_aggregator': !exists(json, 'royalty_aggregator') ? undefined : FungibleResourcesCollectionItemGloballyAggregatedFromJSON(json['royalty_aggregator']),
         'type': !exists(json, 'type') ? undefined : json['type'],
     };
 }
@@ -113,11 +113,11 @@ export function StateEntityDetailsResponseComponentDetailsAllOfToJSON(value?: St
     }
     return {
         
-        'access_rules_chain': value.access_rules_chain,
-        'blueprint_name': value.blueprint_name,
         'package_address': value.package_address,
-        'royalty_aggregator': FungibleResourcesCollectionItemGloballyAggregatedToJSON(value.royalty_aggregator),
+        'blueprint_name': value.blueprint_name,
         'state': value.state,
+        'access_rules_chain': value.access_rules_chain,
+        'royalty_aggregator': FungibleResourcesCollectionItemGloballyAggregatedToJSON(value.royalty_aggregator),
         'type': value.type,
     };
 }

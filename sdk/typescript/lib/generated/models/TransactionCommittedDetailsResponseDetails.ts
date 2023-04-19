@@ -24,12 +24,6 @@ export interface TransactionCommittedDetailsResponseDetails {
      * @type {string}
      * @memberof TransactionCommittedDetailsResponseDetails
      */
-    message_hex?: string;
-    /**
-     * Hex-encoded binary blob.
-     * @type {string}
-     * @memberof TransactionCommittedDetailsResponseDetails
-     */
     raw_hex: string;
     /**
      * 
@@ -43,6 +37,12 @@ export interface TransactionCommittedDetailsResponseDetails {
      * @memberof TransactionCommittedDetailsResponseDetails
      */
     referenced_global_entities: Array<string>;
+    /**
+     * Hex-encoded binary blob.
+     * @type {string}
+     * @memberof TransactionCommittedDetailsResponseDetails
+     */
+    message_hex?: string;
 }
 
 /**
@@ -67,10 +67,10 @@ export function TransactionCommittedDetailsResponseDetailsFromJSONTyped(json: an
     }
     return {
         
-        'message_hex': !exists(json, 'message_hex') ? undefined : json['message_hex'],
         'raw_hex': json['raw_hex'],
         'receipt': json['receipt'],
         'referenced_global_entities': json['referenced_global_entities'],
+        'message_hex': !exists(json, 'message_hex') ? undefined : json['message_hex'],
     };
 }
 
@@ -83,10 +83,10 @@ export function TransactionCommittedDetailsResponseDetailsToJSON(value?: Transac
     }
     return {
         
-        'message_hex': value.message_hex,
         'raw_hex': value.raw_hex,
         'receipt': value.receipt,
         'referenced_global_entities': value.referenced_global_entities,
+        'message_hex': value.message_hex,
     };
 }
 

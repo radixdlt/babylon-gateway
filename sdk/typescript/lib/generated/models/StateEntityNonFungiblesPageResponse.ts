@@ -39,11 +39,11 @@ export interface StateEntityNonFungiblesPageResponse {
      */
     ledger_state: LedgerState;
     /**
-     * If specified, contains a cursor to query next page of the `items` collection.
-     * @type {string}
+     * Total number of items in underlying collection, fragment of which is available in `items` collection.
+     * @type {number}
      * @memberof StateEntityNonFungiblesPageResponse
      */
-    next_cursor?: string | null;
+    total_count?: number | null;
     /**
      * If specified, contains a cursor to query previous page of the `items` collection.
      * @type {string}
@@ -51,11 +51,11 @@ export interface StateEntityNonFungiblesPageResponse {
      */
     previous_cursor?: string | null;
     /**
-     * Total number of items in underlying collection, fragment of which is available in `items` collection.
-     * @type {number}
+     * If specified, contains a cursor to query next page of the `items` collection.
+     * @type {string}
      * @memberof StateEntityNonFungiblesPageResponse
      */
-    total_count?: number | null;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<NonFungibleResourcesCollectionItem>}
@@ -93,9 +93,9 @@ export function StateEntityNonFungiblesPageResponseFromJSONTyped(json: any, igno
     return {
         
         'ledger_state': LedgerStateFromJSON(json['ledger_state']),
-        'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
-        'previous_cursor': !exists(json, 'previous_cursor') ? undefined : json['previous_cursor'],
         'total_count': !exists(json, 'total_count') ? undefined : json['total_count'],
+        'previous_cursor': !exists(json, 'previous_cursor') ? undefined : json['previous_cursor'],
+        'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
         'items': ((json['items'] as Array<any>).map(NonFungibleResourcesCollectionItemFromJSON)),
         'address': json['address'],
     };
@@ -111,9 +111,9 @@ export function StateEntityNonFungiblesPageResponseToJSON(value?: StateEntityNon
     return {
         
         'ledger_state': LedgerStateToJSON(value.ledger_state),
-        'next_cursor': value.next_cursor,
-        'previous_cursor': value.previous_cursor,
         'total_count': value.total_count,
+        'previous_cursor': value.previous_cursor,
+        'next_cursor': value.next_cursor,
         'items': ((value.items as Array<any>).map(NonFungibleResourcesCollectionItemToJSON)),
         'address': value.address,
     };

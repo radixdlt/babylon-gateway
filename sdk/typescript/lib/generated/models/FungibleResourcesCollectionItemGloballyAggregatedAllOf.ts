@@ -20,12 +20,6 @@ import { exists, mapValues } from '../runtime';
  */
 export interface FungibleResourcesCollectionItemGloballyAggregatedAllOf {
     /**
-     * 
-     * @type {string}
-     * @memberof FungibleResourcesCollectionItemGloballyAggregatedAllOf
-     */
-    aggregation_level?: FungibleResourcesCollectionItemGloballyAggregatedAllOfAggregationLevelEnum;
-    /**
      * String-encoded decimal representing the amount of a related fungible resource.
      * @type {string}
      * @memberof FungibleResourcesCollectionItemGloballyAggregatedAllOf
@@ -37,6 +31,12 @@ export interface FungibleResourcesCollectionItemGloballyAggregatedAllOf {
      * @memberof FungibleResourcesCollectionItemGloballyAggregatedAllOf
      */
     last_updated_at_state_version: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof FungibleResourcesCollectionItemGloballyAggregatedAllOf
+     */
+    aggregation_level?: FungibleResourcesCollectionItemGloballyAggregatedAllOfAggregationLevelEnum;
 }
 
 
@@ -70,9 +70,9 @@ export function FungibleResourcesCollectionItemGloballyAggregatedAllOfFromJSONTy
     }
     return {
         
-        'aggregation_level': !exists(json, 'aggregation_level') ? undefined : json['aggregation_level'],
         'amount': json['amount'],
         'last_updated_at_state_version': json['last_updated_at_state_version'],
+        'aggregation_level': !exists(json, 'aggregation_level') ? undefined : json['aggregation_level'],
     };
 }
 
@@ -85,9 +85,9 @@ export function FungibleResourcesCollectionItemGloballyAggregatedAllOfToJSON(val
     }
     return {
         
-        'aggregation_level': value.aggregation_level,
         'amount': value.amount,
         'last_updated_at_state_version': value.last_updated_at_state_version,
+        'aggregation_level': value.aggregation_level,
     };
 }
 

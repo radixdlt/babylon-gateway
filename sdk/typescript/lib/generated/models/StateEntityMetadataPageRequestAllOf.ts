@@ -16,42 +16,42 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TransactionCommittedDetailsRequestAllOf
+ * @interface StateEntityMetadataPageRequestAllOf
  */
-export interface TransactionCommittedDetailsRequestAllOf {
+export interface StateEntityMetadataPageRequestAllOf {
     /**
-     * Hex-encoded SHA-256 hash.
+     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
      * @type {string}
-     * @memberof TransactionCommittedDetailsRequestAllOf
+     * @memberof StateEntityMetadataPageRequestAllOf
      */
-    intent_hash_hex: string;
+    address: string;
 }
 
 /**
- * Check if a given object implements the TransactionCommittedDetailsRequestAllOf interface.
+ * Check if a given object implements the StateEntityMetadataPageRequestAllOf interface.
  */
-export function instanceOfTransactionCommittedDetailsRequestAllOf(value: object): boolean {
+export function instanceOfStateEntityMetadataPageRequestAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "intent_hash_hex" in value;
+    isInstance = isInstance && "address" in value;
 
     return isInstance;
 }
 
-export function TransactionCommittedDetailsRequestAllOfFromJSON(json: any): TransactionCommittedDetailsRequestAllOf {
-    return TransactionCommittedDetailsRequestAllOfFromJSONTyped(json, false);
+export function StateEntityMetadataPageRequestAllOfFromJSON(json: any): StateEntityMetadataPageRequestAllOf {
+    return StateEntityMetadataPageRequestAllOfFromJSONTyped(json, false);
 }
 
-export function TransactionCommittedDetailsRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionCommittedDetailsRequestAllOf {
+export function StateEntityMetadataPageRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateEntityMetadataPageRequestAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'intent_hash_hex': json['intent_hash_hex'],
+        'address': json['address'],
     };
 }
 
-export function TransactionCommittedDetailsRequestAllOfToJSON(value?: TransactionCommittedDetailsRequestAllOf | null): any {
+export function StateEntityMetadataPageRequestAllOfToJSON(value?: StateEntityMetadataPageRequestAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -60,7 +60,7 @@ export function TransactionCommittedDetailsRequestAllOfToJSON(value?: Transactio
     }
     return {
         
-        'intent_hash_hex': value.intent_hash_hex,
+        'address': value.address,
     };
 }
 

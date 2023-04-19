@@ -20,6 +20,12 @@ import { exists, mapValues } from '../runtime';
  */
 export interface NotSyncedUpErrorAllOf {
     /**
+     * The request type that triggered this exception.
+     * @type {string}
+     * @memberof NotSyncedUpErrorAllOf
+     */
+    request_type: string;
+    /**
      * The current delay between the Gateway DB and the network ledger round timestamp.
      * @type {number}
      * @memberof NotSyncedUpErrorAllOf
@@ -31,12 +37,6 @@ export interface NotSyncedUpErrorAllOf {
      * @memberof NotSyncedUpErrorAllOf
      */
     max_allowed_sync_delay_seconds: number;
-    /**
-     * The request type that triggered this exception.
-     * @type {string}
-     * @memberof NotSyncedUpErrorAllOf
-     */
-    request_type: string;
     /**
      * 
      * @type {string}
@@ -60,9 +60,9 @@ export type NotSyncedUpErrorAllOfTypeEnum = typeof NotSyncedUpErrorAllOfTypeEnum
  */
 export function instanceOfNotSyncedUpErrorAllOf(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "request_type" in value;
     isInstance = isInstance && "current_sync_delay_seconds" in value;
     isInstance = isInstance && "max_allowed_sync_delay_seconds" in value;
-    isInstance = isInstance && "request_type" in value;
 
     return isInstance;
 }
@@ -77,9 +77,9 @@ export function NotSyncedUpErrorAllOfFromJSONTyped(json: any, ignoreDiscriminato
     }
     return {
         
+        'request_type': json['request_type'],
         'current_sync_delay_seconds': json['current_sync_delay_seconds'],
         'max_allowed_sync_delay_seconds': json['max_allowed_sync_delay_seconds'],
-        'request_type': json['request_type'],
         'type': !exists(json, 'type') ? undefined : json['type'],
     };
 }
@@ -93,9 +93,9 @@ export function NotSyncedUpErrorAllOfToJSON(value?: NotSyncedUpErrorAllOf | null
     }
     return {
         
+        'request_type': value.request_type,
         'current_sync_delay_seconds': value.current_sync_delay_seconds,
         'max_allowed_sync_delay_seconds': value.max_allowed_sync_delay_seconds,
-        'request_type': value.request_type,
         'type': value.type,
     };
 }

@@ -28,16 +28,16 @@ import {
 export interface NonFungibleResourcesCollectionItemVaultAggregatedAllOf {
     /**
      * 
-     * @type {string}
-     * @memberof NonFungibleResourcesCollectionItemVaultAggregatedAllOf
-     */
-    aggregation_level?: NonFungibleResourcesCollectionItemVaultAggregatedAllOfAggregationLevelEnum;
-    /**
-     * 
      * @type {NonFungibleResourcesCollectionItemVaultAggregatedVault}
      * @memberof NonFungibleResourcesCollectionItemVaultAggregatedAllOf
      */
     vaults: NonFungibleResourcesCollectionItemVaultAggregatedVault;
+    /**
+     * 
+     * @type {string}
+     * @memberof NonFungibleResourcesCollectionItemVaultAggregatedAllOf
+     */
+    aggregation_level?: NonFungibleResourcesCollectionItemVaultAggregatedAllOfAggregationLevelEnum;
 }
 
 
@@ -70,8 +70,8 @@ export function NonFungibleResourcesCollectionItemVaultAggregatedAllOfFromJSONTy
     }
     return {
         
-        'aggregation_level': !exists(json, 'aggregation_level') ? undefined : json['aggregation_level'],
         'vaults': NonFungibleResourcesCollectionItemVaultAggregatedVaultFromJSON(json['vaults']),
+        'aggregation_level': !exists(json, 'aggregation_level') ? undefined : json['aggregation_level'],
     };
 }
 
@@ -84,8 +84,8 @@ export function NonFungibleResourcesCollectionItemVaultAggregatedAllOfToJSON(val
     }
     return {
         
-        'aggregation_level': value.aggregation_level,
         'vaults': NonFungibleResourcesCollectionItemVaultAggregatedVaultToJSON(value.vaults),
+        'aggregation_level': value.aggregation_level,
     };
 }
 

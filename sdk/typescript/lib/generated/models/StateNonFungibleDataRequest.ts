@@ -45,17 +45,17 @@ export interface StateNonFungibleDataRequest {
      */
     limit_per_page?: number | null;
     /**
-     * 
-     * @type {Array<string>}
-     * @memberof StateNonFungibleDataRequest
-     */
-    non_fungible_ids: Array<string>;
-    /**
      * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
      * @type {string}
      * @memberof StateNonFungibleDataRequest
      */
     resource_address: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof StateNonFungibleDataRequest
+     */
+    non_fungible_ids: Array<string>;
 }
 
 /**
@@ -63,8 +63,8 @@ export interface StateNonFungibleDataRequest {
  */
 export function instanceOfStateNonFungibleDataRequest(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "non_fungible_ids" in value;
     isInstance = isInstance && "resource_address" in value;
+    isInstance = isInstance && "non_fungible_ids" in value;
 
     return isInstance;
 }
@@ -82,8 +82,8 @@ export function StateNonFungibleDataRequestFromJSONTyped(json: any, ignoreDiscri
         'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
         'cursor': !exists(json, 'cursor') ? undefined : json['cursor'],
         'limit_per_page': !exists(json, 'limit_per_page') ? undefined : json['limit_per_page'],
-        'non_fungible_ids': json['non_fungible_ids'],
         'resource_address': json['resource_address'],
+        'non_fungible_ids': json['non_fungible_ids'],
     };
 }
 
@@ -99,8 +99,8 @@ export function StateNonFungibleDataRequestToJSON(value?: StateNonFungibleDataRe
         'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
         'cursor': value.cursor,
         'limit_per_page': value.limit_per_page,
-        'non_fungible_ids': value.non_fungible_ids,
         'resource_address': value.resource_address,
+        'non_fungible_ids': value.non_fungible_ids,
     };
 }
 

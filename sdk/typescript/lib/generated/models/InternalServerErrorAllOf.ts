@@ -20,17 +20,17 @@ import { exists, mapValues } from '../runtime';
  */
 export interface InternalServerErrorAllOf {
     /**
-     * Gives a human readable message - likely just a trace ID for reporting the error.
-     * @type {string}
-     * @memberof InternalServerErrorAllOf
-     */
-    cause: string;
-    /**
      * Gives an error type which occurred within the Gateway API when serving the request.
      * @type {string}
      * @memberof InternalServerErrorAllOf
      */
     exception: string;
+    /**
+     * Gives a human readable message - likely just a trace ID for reporting the error.
+     * @type {string}
+     * @memberof InternalServerErrorAllOf
+     */
+    cause: string;
     /**
      * 
      * @type {string}
@@ -54,8 +54,8 @@ export type InternalServerErrorAllOfTypeEnum = typeof InternalServerErrorAllOfTy
  */
 export function instanceOfInternalServerErrorAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "cause" in value;
     isInstance = isInstance && "exception" in value;
+    isInstance = isInstance && "cause" in value;
 
     return isInstance;
 }
@@ -70,8 +70,8 @@ export function InternalServerErrorAllOfFromJSONTyped(json: any, ignoreDiscrimin
     }
     return {
         
-        'cause': json['cause'],
         'exception': json['exception'],
+        'cause': json['cause'],
         'type': !exists(json, 'type') ? undefined : json['type'],
     };
 }
@@ -85,8 +85,8 @@ export function InternalServerErrorAllOfToJSON(value?: InternalServerErrorAllOf 
     }
     return {
         
-        'cause': value.cause,
         'exception': value.exception,
+        'cause': value.cause,
         'type': value.type,
     };
 }

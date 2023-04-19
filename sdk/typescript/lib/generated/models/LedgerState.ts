@@ -21,17 +21,17 @@ import { exists, mapValues } from '../runtime';
  */
 export interface LedgerState {
     /**
-     * The epoch number of the ledger at this state version.
-     * @type {number}
-     * @memberof LedgerState
-     */
-    epoch: number;
-    /**
      * The logical name of the network
      * @type {string}
      * @memberof LedgerState
      */
     network: string;
+    /**
+     * The state version of the ledger. Each transaction increments the state version by 1.
+     * @type {number}
+     * @memberof LedgerState
+     */
+    state_version: number;
     /**
      * The proposer round timestamp of the consensus round when this transaction was committed to ledger.
      * This is not guaranteed to be strictly increasing, as it is computed as an average across the validator set.
@@ -42,17 +42,17 @@ export interface LedgerState {
      */
     proposer_round_timestamp: string;
     /**
+     * The epoch number of the ledger at this state version.
+     * @type {number}
+     * @memberof LedgerState
+     */
+    epoch: number;
+    /**
      * The consensus round in the epoch that this state version was committed in.
      * @type {number}
      * @memberof LedgerState
      */
     round: number;
-    /**
-     * The state version of the ledger. Each transaction increments the state version by 1.
-     * @type {number}
-     * @memberof LedgerState
-     */
-    state_version: number;
 }
 
 /**
@@ -60,11 +60,11 @@ export interface LedgerState {
  */
 export function instanceOfLedgerState(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "epoch" in value;
     isInstance = isInstance && "network" in value;
-    isInstance = isInstance && "proposer_round_timestamp" in value;
-    isInstance = isInstance && "round" in value;
     isInstance = isInstance && "state_version" in value;
+    isInstance = isInstance && "proposer_round_timestamp" in value;
+    isInstance = isInstance && "epoch" in value;
+    isInstance = isInstance && "round" in value;
 
     return isInstance;
 }
@@ -79,11 +79,11 @@ export function LedgerStateFromJSONTyped(json: any, ignoreDiscriminator: boolean
     }
     return {
         
-        'epoch': json['epoch'],
         'network': json['network'],
-        'proposer_round_timestamp': json['proposer_round_timestamp'],
-        'round': json['round'],
         'state_version': json['state_version'],
+        'proposer_round_timestamp': json['proposer_round_timestamp'],
+        'epoch': json['epoch'],
+        'round': json['round'],
     };
 }
 
@@ -96,11 +96,11 @@ export function LedgerStateToJSON(value?: LedgerState | null): any {
     }
     return {
         
-        'epoch': value.epoch,
         'network': value.network,
-        'proposer_round_timestamp': value.proposer_round_timestamp,
-        'round': value.round,
         'state_version': value.state_version,
+        'proposer_round_timestamp': value.proposer_round_timestamp,
+        'epoch': value.epoch,
+        'round': value.round,
     };
 }
 

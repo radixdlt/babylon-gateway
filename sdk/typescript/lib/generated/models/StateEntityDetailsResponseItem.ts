@@ -58,22 +58,22 @@ export interface StateEntityDetailsResponseItem {
     address: string;
     /**
      * 
-     * @type {StateEntityDetailsResponseItemAncestorIdentities}
-     * @memberof StateEntityDetailsResponseItem
-     */
-    ancestor_identities?: StateEntityDetailsResponseItemAncestorIdentities;
-    /**
-     * 
-     * @type {StateEntityDetailsResponseItemDetails}
-     * @memberof StateEntityDetailsResponseItem
-     */
-    details?: StateEntityDetailsResponseItemDetails;
-    /**
-     * 
      * @type {FungibleResourcesCollection}
      * @memberof StateEntityDetailsResponseItem
      */
     fungible_resources?: FungibleResourcesCollection;
+    /**
+     * 
+     * @type {NonFungibleResourcesCollection}
+     * @memberof StateEntityDetailsResponseItem
+     */
+    non_fungible_resources?: NonFungibleResourcesCollection;
+    /**
+     * 
+     * @type {StateEntityDetailsResponseItemAncestorIdentities}
+     * @memberof StateEntityDetailsResponseItem
+     */
+    ancestor_identities?: StateEntityDetailsResponseItemAncestorIdentities;
     /**
      * 
      * @type {EntityMetadataCollection}
@@ -82,10 +82,10 @@ export interface StateEntityDetailsResponseItem {
     metadata: EntityMetadataCollection;
     /**
      * 
-     * @type {NonFungibleResourcesCollection}
+     * @type {StateEntityDetailsResponseItemDetails}
      * @memberof StateEntityDetailsResponseItem
      */
-    non_fungible_resources?: NonFungibleResourcesCollection;
+    details?: StateEntityDetailsResponseItemDetails;
 }
 
 /**
@@ -110,11 +110,11 @@ export function StateEntityDetailsResponseItemFromJSONTyped(json: any, ignoreDis
     return {
         
         'address': json['address'],
-        'ancestor_identities': !exists(json, 'ancestor_identities') ? undefined : StateEntityDetailsResponseItemAncestorIdentitiesFromJSON(json['ancestor_identities']),
-        'details': !exists(json, 'details') ? undefined : StateEntityDetailsResponseItemDetailsFromJSON(json['details']),
         'fungible_resources': !exists(json, 'fungible_resources') ? undefined : FungibleResourcesCollectionFromJSON(json['fungible_resources']),
-        'metadata': EntityMetadataCollectionFromJSON(json['metadata']),
         'non_fungible_resources': !exists(json, 'non_fungible_resources') ? undefined : NonFungibleResourcesCollectionFromJSON(json['non_fungible_resources']),
+        'ancestor_identities': !exists(json, 'ancestor_identities') ? undefined : StateEntityDetailsResponseItemAncestorIdentitiesFromJSON(json['ancestor_identities']),
+        'metadata': EntityMetadataCollectionFromJSON(json['metadata']),
+        'details': !exists(json, 'details') ? undefined : StateEntityDetailsResponseItemDetailsFromJSON(json['details']),
     };
 }
 
@@ -128,11 +128,11 @@ export function StateEntityDetailsResponseItemToJSON(value?: StateEntityDetailsR
     return {
         
         'address': value.address,
-        'ancestor_identities': StateEntityDetailsResponseItemAncestorIdentitiesToJSON(value.ancestor_identities),
-        'details': StateEntityDetailsResponseItemDetailsToJSON(value.details),
         'fungible_resources': FungibleResourcesCollectionToJSON(value.fungible_resources),
-        'metadata': EntityMetadataCollectionToJSON(value.metadata),
         'non_fungible_resources': NonFungibleResourcesCollectionToJSON(value.non_fungible_resources),
+        'ancestor_identities': StateEntityDetailsResponseItemAncestorIdentitiesToJSON(value.ancestor_identities),
+        'metadata': EntityMetadataCollectionToJSON(value.metadata),
+        'details': StateEntityDetailsResponseItemDetailsToJSON(value.details),
     };
 }
 

@@ -33,17 +33,17 @@ export interface EntityMetadataItem {
      */
     key: string;
     /**
-     * TBD
-     * @type {number}
-     * @memberof EntityMetadataItem
-     */
-    last_updated_at_state_version: number;
-    /**
      * 
      * @type {EntityMetadataItemValue}
      * @memberof EntityMetadataItem
      */
     value: EntityMetadataItemValue;
+    /**
+     * TBD
+     * @type {number}
+     * @memberof EntityMetadataItem
+     */
+    last_updated_at_state_version: number;
 }
 
 /**
@@ -52,8 +52,8 @@ export interface EntityMetadataItem {
 export function instanceOfEntityMetadataItem(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "key" in value;
-    isInstance = isInstance && "last_updated_at_state_version" in value;
     isInstance = isInstance && "value" in value;
+    isInstance = isInstance && "last_updated_at_state_version" in value;
 
     return isInstance;
 }
@@ -69,8 +69,8 @@ export function EntityMetadataItemFromJSONTyped(json: any, ignoreDiscriminator: 
     return {
         
         'key': json['key'],
-        'last_updated_at_state_version': json['last_updated_at_state_version'],
         'value': EntityMetadataItemValueFromJSON(json['value']),
+        'last_updated_at_state_version': json['last_updated_at_state_version'],
     };
 }
 
@@ -84,8 +84,8 @@ export function EntityMetadataItemToJSON(value?: EntityMetadataItem | null): any
     return {
         
         'key': value.key,
-        'last_updated_at_state_version': value.last_updated_at_state_version,
         'value': EntityMetadataItemValueToJSON(value.value),
+        'last_updated_at_state_version': value.last_updated_at_state_version,
     };
 }
 

@@ -27,11 +27,11 @@ import {
  */
 export interface StateNonFungibleDetailsResponseItem {
     /**
-     * TBD
-     * @type {number}
+     * String-encoded non-fungible ID.
+     * @type {string}
      * @memberof StateNonFungibleDetailsResponseItem
      */
-    last_updated_at_state_version: number;
+    non_fungible_id: string;
     /**
      * 
      * @type {ScryptoSborValue}
@@ -39,11 +39,11 @@ export interface StateNonFungibleDetailsResponseItem {
      */
     mutable_data: ScryptoSborValue;
     /**
-     * String-encoded non-fungible ID.
-     * @type {string}
+     * TBD
+     * @type {number}
      * @memberof StateNonFungibleDetailsResponseItem
      */
-    non_fungible_id: string;
+    last_updated_at_state_version: number;
 }
 
 /**
@@ -51,9 +51,9 @@ export interface StateNonFungibleDetailsResponseItem {
  */
 export function instanceOfStateNonFungibleDetailsResponseItem(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "last_updated_at_state_version" in value;
-    isInstance = isInstance && "mutable_data" in value;
     isInstance = isInstance && "non_fungible_id" in value;
+    isInstance = isInstance && "mutable_data" in value;
+    isInstance = isInstance && "last_updated_at_state_version" in value;
 
     return isInstance;
 }
@@ -68,9 +68,9 @@ export function StateNonFungibleDetailsResponseItemFromJSONTyped(json: any, igno
     }
     return {
         
-        'last_updated_at_state_version': json['last_updated_at_state_version'],
-        'mutable_data': ScryptoSborValueFromJSON(json['mutable_data']),
         'non_fungible_id': json['non_fungible_id'],
+        'mutable_data': ScryptoSborValueFromJSON(json['mutable_data']),
+        'last_updated_at_state_version': json['last_updated_at_state_version'],
     };
 }
 
@@ -83,9 +83,9 @@ export function StateNonFungibleDetailsResponseItemToJSON(value?: StateNonFungib
     }
     return {
         
-        'last_updated_at_state_version': value.last_updated_at_state_version,
-        'mutable_data': ScryptoSborValueToJSON(value.mutable_data),
         'non_fungible_id': value.non_fungible_id,
+        'mutable_data': ScryptoSborValueToJSON(value.mutable_data),
+        'last_updated_at_state_version': value.last_updated_at_state_version,
     };
 }
 

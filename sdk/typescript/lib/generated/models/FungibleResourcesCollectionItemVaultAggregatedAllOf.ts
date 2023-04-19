@@ -28,16 +28,16 @@ import {
 export interface FungibleResourcesCollectionItemVaultAggregatedAllOf {
     /**
      * 
-     * @type {string}
-     * @memberof FungibleResourcesCollectionItemVaultAggregatedAllOf
-     */
-    aggregation_level?: FungibleResourcesCollectionItemVaultAggregatedAllOfAggregationLevelEnum;
-    /**
-     * 
      * @type {FungibleResourcesCollectionItemVaultAggregatedVault}
      * @memberof FungibleResourcesCollectionItemVaultAggregatedAllOf
      */
     vaults: FungibleResourcesCollectionItemVaultAggregatedVault;
+    /**
+     * 
+     * @type {string}
+     * @memberof FungibleResourcesCollectionItemVaultAggregatedAllOf
+     */
+    aggregation_level?: FungibleResourcesCollectionItemVaultAggregatedAllOfAggregationLevelEnum;
 }
 
 
@@ -70,8 +70,8 @@ export function FungibleResourcesCollectionItemVaultAggregatedAllOfFromJSONTyped
     }
     return {
         
-        'aggregation_level': !exists(json, 'aggregation_level') ? undefined : json['aggregation_level'],
         'vaults': FungibleResourcesCollectionItemVaultAggregatedVaultFromJSON(json['vaults']),
+        'aggregation_level': !exists(json, 'aggregation_level') ? undefined : json['aggregation_level'],
     };
 }
 
@@ -84,8 +84,8 @@ export function FungibleResourcesCollectionItemVaultAggregatedAllOfToJSON(value?
     }
     return {
         
-        'aggregation_level': value.aggregation_level,
         'vaults': FungibleResourcesCollectionItemVaultAggregatedVaultToJSON(value.vaults),
+        'aggregation_level': value.aggregation_level,
     };
 }
 

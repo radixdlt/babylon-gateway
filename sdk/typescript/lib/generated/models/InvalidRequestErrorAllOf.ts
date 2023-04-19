@@ -27,17 +27,17 @@ import {
  */
 export interface InvalidRequestErrorAllOf {
     /**
-     * 
-     * @type {string}
-     * @memberof InvalidRequestErrorAllOf
-     */
-    type?: InvalidRequestErrorAllOfTypeEnum;
-    /**
      * One or more validation errors which occurred when validating the request.
      * @type {Array<ValidationErrorsAtPath>}
      * @memberof InvalidRequestErrorAllOf
      */
     validation_errors: Array<ValidationErrorsAtPath>;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvalidRequestErrorAllOf
+     */
+    type?: InvalidRequestErrorAllOfTypeEnum;
 }
 
 
@@ -70,8 +70,8 @@ export function InvalidRequestErrorAllOfFromJSONTyped(json: any, ignoreDiscrimin
     }
     return {
         
-        'type': !exists(json, 'type') ? undefined : json['type'],
         'validation_errors': ((json['validation_errors'] as Array<any>).map(ValidationErrorsAtPathFromJSON)),
+        'type': !exists(json, 'type') ? undefined : json['type'],
     };
 }
 
@@ -84,8 +84,8 @@ export function InvalidRequestErrorAllOfToJSON(value?: InvalidRequestErrorAllOf 
     }
     return {
         
-        'type': value.type,
         'validation_errors': ((value.validation_errors as Array<any>).map(ValidationErrorsAtPathToJSON)),
+        'type': value.type,
     };
 }
 

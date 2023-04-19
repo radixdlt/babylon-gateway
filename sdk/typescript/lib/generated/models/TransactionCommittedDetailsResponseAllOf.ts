@@ -34,16 +34,16 @@ import {
 export interface TransactionCommittedDetailsResponseAllOf {
     /**
      * 
-     * @type {TransactionCommittedDetailsResponseDetails}
-     * @memberof TransactionCommittedDetailsResponseAllOf
-     */
-    details: TransactionCommittedDetailsResponseDetails;
-    /**
-     * 
      * @type {CommittedTransactionInfo}
      * @memberof TransactionCommittedDetailsResponseAllOf
      */
     transaction: CommittedTransactionInfo;
+    /**
+     * 
+     * @type {TransactionCommittedDetailsResponseDetails}
+     * @memberof TransactionCommittedDetailsResponseAllOf
+     */
+    details: TransactionCommittedDetailsResponseDetails;
 }
 
 /**
@@ -51,8 +51,8 @@ export interface TransactionCommittedDetailsResponseAllOf {
  */
 export function instanceOfTransactionCommittedDetailsResponseAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "details" in value;
     isInstance = isInstance && "transaction" in value;
+    isInstance = isInstance && "details" in value;
 
     return isInstance;
 }
@@ -67,8 +67,8 @@ export function TransactionCommittedDetailsResponseAllOfFromJSONTyped(json: any,
     }
     return {
         
-        'details': TransactionCommittedDetailsResponseDetailsFromJSON(json['details']),
         'transaction': CommittedTransactionInfoFromJSON(json['transaction']),
+        'details': TransactionCommittedDetailsResponseDetailsFromJSON(json['details']),
     };
 }
 
@@ -81,8 +81,8 @@ export function TransactionCommittedDetailsResponseAllOfToJSON(value?: Transacti
     }
     return {
         
-        'details': TransactionCommittedDetailsResponseDetailsToJSON(value.details),
         'transaction': CommittedTransactionInfoToJSON(value.transaction),
+        'details': TransactionCommittedDetailsResponseDetailsToJSON(value.details),
     };
 }
 

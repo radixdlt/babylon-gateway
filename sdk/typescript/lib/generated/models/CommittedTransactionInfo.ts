@@ -34,36 +34,6 @@ import {
 export interface CommittedTransactionInfo {
     /**
      * 
-     * @type {Date}
-     * @memberof CommittedTransactionInfo
-     */
-    confirmed_at?: Date | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof CommittedTransactionInfo
-     */
-    error_message?: string | null;
-    /**
-     * 
-     * @type {TokenAmount}
-     * @memberof CommittedTransactionInfo
-     */
-    fee_paid?: TokenAmount;
-    /**
-     * Hex-encoded SHA-256 hash.
-     * @type {string}
-     * @memberof CommittedTransactionInfo
-     */
-    intent_hash_hex?: string;
-    /**
-     * Hex-encoded SHA-256 hash.
-     * @type {string}
-     * @memberof CommittedTransactionInfo
-     */
-    payload_hash_hex?: string;
-    /**
-     * 
      * @type {number}
      * @memberof CommittedTransactionInfo
      */
@@ -74,6 +44,36 @@ export interface CommittedTransactionInfo {
      * @memberof CommittedTransactionInfo
      */
     transaction_status: TransactionStatus;
+    /**
+     * Hex-encoded SHA-256 hash.
+     * @type {string}
+     * @memberof CommittedTransactionInfo
+     */
+    payload_hash_hex?: string;
+    /**
+     * Hex-encoded SHA-256 hash.
+     * @type {string}
+     * @memberof CommittedTransactionInfo
+     */
+    intent_hash_hex?: string;
+    /**
+     * 
+     * @type {TokenAmount}
+     * @memberof CommittedTransactionInfo
+     */
+    fee_paid?: TokenAmount;
+    /**
+     * 
+     * @type {Date}
+     * @memberof CommittedTransactionInfo
+     */
+    confirmed_at?: Date | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof CommittedTransactionInfo
+     */
+    error_message?: string | null;
 }
 
 /**
@@ -97,13 +97,13 @@ export function CommittedTransactionInfoFromJSONTyped(json: any, ignoreDiscrimin
     }
     return {
         
-        'confirmed_at': !exists(json, 'confirmed_at') ? undefined : (json['confirmed_at'] === null ? null : new Date(json['confirmed_at'])),
-        'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
-        'fee_paid': !exists(json, 'fee_paid') ? undefined : TokenAmountFromJSON(json['fee_paid']),
-        'intent_hash_hex': !exists(json, 'intent_hash_hex') ? undefined : json['intent_hash_hex'],
-        'payload_hash_hex': !exists(json, 'payload_hash_hex') ? undefined : json['payload_hash_hex'],
         'state_version': json['state_version'],
         'transaction_status': TransactionStatusFromJSON(json['transaction_status']),
+        'payload_hash_hex': !exists(json, 'payload_hash_hex') ? undefined : json['payload_hash_hex'],
+        'intent_hash_hex': !exists(json, 'intent_hash_hex') ? undefined : json['intent_hash_hex'],
+        'fee_paid': !exists(json, 'fee_paid') ? undefined : TokenAmountFromJSON(json['fee_paid']),
+        'confirmed_at': !exists(json, 'confirmed_at') ? undefined : (json['confirmed_at'] === null ? null : new Date(json['confirmed_at'])),
+        'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
     };
 }
 
@@ -116,13 +116,13 @@ export function CommittedTransactionInfoToJSON(value?: CommittedTransactionInfo 
     }
     return {
         
-        'confirmed_at': value.confirmed_at === undefined ? undefined : (value.confirmed_at === null ? null : value.confirmed_at.toISOString()),
-        'error_message': value.error_message,
-        'fee_paid': TokenAmountToJSON(value.fee_paid),
-        'intent_hash_hex': value.intent_hash_hex,
-        'payload_hash_hex': value.payload_hash_hex,
         'state_version': value.state_version,
         'transaction_status': TransactionStatusToJSON(value.transaction_status),
+        'payload_hash_hex': value.payload_hash_hex,
+        'intent_hash_hex': value.intent_hash_hex,
+        'fee_paid': TokenAmountToJSON(value.fee_paid),
+        'confirmed_at': value.confirmed_at === undefined ? undefined : (value.confirmed_at === null ? null : value.confirmed_at.toISOString()),
+        'error_message': value.error_message,
     };
 }
 

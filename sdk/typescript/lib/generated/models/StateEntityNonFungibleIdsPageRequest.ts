@@ -51,17 +51,17 @@ export interface StateEntityNonFungibleIdsPageRequest {
      */
     address: string;
     /**
-     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
-     * @type {string}
-     * @memberof StateEntityNonFungibleIdsPageRequest
-     */
-    resource_address: string;
-    /**
      * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
      * @type {string}
      * @memberof StateEntityNonFungibleIdsPageRequest
      */
     vault_address: string;
+    /**
+     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+     * @type {string}
+     * @memberof StateEntityNonFungibleIdsPageRequest
+     */
+    resource_address: string;
 }
 
 /**
@@ -70,8 +70,8 @@ export interface StateEntityNonFungibleIdsPageRequest {
 export function instanceOfStateEntityNonFungibleIdsPageRequest(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "address" in value;
-    isInstance = isInstance && "resource_address" in value;
     isInstance = isInstance && "vault_address" in value;
+    isInstance = isInstance && "resource_address" in value;
 
     return isInstance;
 }
@@ -90,8 +90,8 @@ export function StateEntityNonFungibleIdsPageRequestFromJSONTyped(json: any, ign
         'cursor': !exists(json, 'cursor') ? undefined : json['cursor'],
         'limit_per_page': !exists(json, 'limit_per_page') ? undefined : json['limit_per_page'],
         'address': json['address'],
-        'resource_address': json['resource_address'],
         'vault_address': json['vault_address'],
+        'resource_address': json['resource_address'],
     };
 }
 
@@ -108,8 +108,8 @@ export function StateEntityNonFungibleIdsPageRequestToJSON(value?: StateEntityNo
         'cursor': value.cursor,
         'limit_per_page': value.limit_per_page,
         'address': value.address,
-        'resource_address': value.resource_address,
         'vault_address': value.vault_address,
+        'resource_address': value.resource_address,
     };
 }
 

@@ -45,6 +45,12 @@ export interface StateNonFungibleDataResponse {
      */
     ledger_state: LedgerState;
     /**
+     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+     * @type {string}
+     * @memberof StateNonFungibleDataResponse
+     */
+    resource_address: string;
+    /**
      * 
      * @type {NonFungibleIdType}
      * @memberof StateNonFungibleDataResponse
@@ -56,12 +62,6 @@ export interface StateNonFungibleDataResponse {
      * @memberof StateNonFungibleDataResponse
      */
     non_fungible_ids: Array<StateNonFungibleDetailsResponseItem>;
-    /**
-     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
-     * @type {string}
-     * @memberof StateNonFungibleDataResponse
-     */
-    resource_address: string;
 }
 
 /**
@@ -70,9 +70,9 @@ export interface StateNonFungibleDataResponse {
 export function instanceOfStateNonFungibleDataResponse(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "ledger_state" in value;
+    isInstance = isInstance && "resource_address" in value;
     isInstance = isInstance && "non_fungible_id_type" in value;
     isInstance = isInstance && "non_fungible_ids" in value;
-    isInstance = isInstance && "resource_address" in value;
 
     return isInstance;
 }
@@ -88,9 +88,9 @@ export function StateNonFungibleDataResponseFromJSONTyped(json: any, ignoreDiscr
     return {
         
         'ledger_state': LedgerStateFromJSON(json['ledger_state']),
+        'resource_address': json['resource_address'],
         'non_fungible_id_type': NonFungibleIdTypeFromJSON(json['non_fungible_id_type']),
         'non_fungible_ids': ((json['non_fungible_ids'] as Array<any>).map(StateNonFungibleDetailsResponseItemFromJSON)),
-        'resource_address': json['resource_address'],
     };
 }
 
@@ -104,9 +104,9 @@ export function StateNonFungibleDataResponseToJSON(value?: StateNonFungibleDataR
     return {
         
         'ledger_state': LedgerStateToJSON(value.ledger_state),
+        'resource_address': value.resource_address,
         'non_fungible_id_type': NonFungibleIdTypeToJSON(value.non_fungible_id_type),
         'non_fungible_ids': ((value.non_fungible_ids as Array<any>).map(StateNonFungibleDetailsResponseItemToJSON)),
-        'resource_address': value.resource_address,
     };
 }
 

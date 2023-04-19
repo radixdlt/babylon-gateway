@@ -33,6 +33,12 @@ import {
  */
 export interface StateNonFungibleDataResponseAllOf {
     /**
+     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+     * @type {string}
+     * @memberof StateNonFungibleDataResponseAllOf
+     */
+    resource_address: string;
+    /**
      * 
      * @type {NonFungibleIdType}
      * @memberof StateNonFungibleDataResponseAllOf
@@ -44,12 +50,6 @@ export interface StateNonFungibleDataResponseAllOf {
      * @memberof StateNonFungibleDataResponseAllOf
      */
     non_fungible_ids: Array<StateNonFungibleDetailsResponseItem>;
-    /**
-     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
-     * @type {string}
-     * @memberof StateNonFungibleDataResponseAllOf
-     */
-    resource_address: string;
 }
 
 /**
@@ -57,9 +57,9 @@ export interface StateNonFungibleDataResponseAllOf {
  */
 export function instanceOfStateNonFungibleDataResponseAllOf(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "resource_address" in value;
     isInstance = isInstance && "non_fungible_id_type" in value;
     isInstance = isInstance && "non_fungible_ids" in value;
-    isInstance = isInstance && "resource_address" in value;
 
     return isInstance;
 }
@@ -74,9 +74,9 @@ export function StateNonFungibleDataResponseAllOfFromJSONTyped(json: any, ignore
     }
     return {
         
+        'resource_address': json['resource_address'],
         'non_fungible_id_type': NonFungibleIdTypeFromJSON(json['non_fungible_id_type']),
         'non_fungible_ids': ((json['non_fungible_ids'] as Array<any>).map(StateNonFungibleDetailsResponseItemFromJSON)),
-        'resource_address': json['resource_address'],
     };
 }
 
@@ -89,9 +89,9 @@ export function StateNonFungibleDataResponseAllOfToJSON(value?: StateNonFungible
     }
     return {
         
+        'resource_address': value.resource_address,
         'non_fungible_id_type': NonFungibleIdTypeToJSON(value.non_fungible_id_type),
         'non_fungible_ids': ((value.non_fungible_ids as Array<any>).map(StateNonFungibleDetailsResponseItemToJSON)),
-        'resource_address': value.resource_address,
     };
 }
 

@@ -46,10 +46,10 @@ export interface TransactionStatusResponse {
     ledger_state: LedgerState;
     /**
      * 
-     * @type {string}
+     * @type {TransactionStatus}
      * @memberof TransactionStatusResponse
      */
-    error_message?: string | null;
+    status: TransactionStatus;
     /**
      * 
      * @type {Array<TransactionStatusResponseKnownPayloadItem>}
@@ -58,10 +58,10 @@ export interface TransactionStatusResponse {
     known_payloads: Array<TransactionStatusResponseKnownPayloadItem>;
     /**
      * 
-     * @type {TransactionStatus}
+     * @type {string}
      * @memberof TransactionStatusResponse
      */
-    status: TransactionStatus;
+    error_message?: string | null;
 }
 
 /**
@@ -70,8 +70,8 @@ export interface TransactionStatusResponse {
 export function instanceOfTransactionStatusResponse(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "ledger_state" in value;
-    isInstance = isInstance && "known_payloads" in value;
     isInstance = isInstance && "status" in value;
+    isInstance = isInstance && "known_payloads" in value;
 
     return isInstance;
 }
@@ -87,9 +87,9 @@ export function TransactionStatusResponseFromJSONTyped(json: any, ignoreDiscrimi
     return {
         
         'ledger_state': LedgerStateFromJSON(json['ledger_state']),
-        'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
-        'known_payloads': ((json['known_payloads'] as Array<any>).map(TransactionStatusResponseKnownPayloadItemFromJSON)),
         'status': TransactionStatusFromJSON(json['status']),
+        'known_payloads': ((json['known_payloads'] as Array<any>).map(TransactionStatusResponseKnownPayloadItemFromJSON)),
+        'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
     };
 }
 
@@ -103,9 +103,9 @@ export function TransactionStatusResponseToJSON(value?: TransactionStatusRespons
     return {
         
         'ledger_state': LedgerStateToJSON(value.ledger_state),
-        'error_message': value.error_message,
-        'known_payloads': ((value.known_payloads as Array<any>).map(TransactionStatusResponseKnownPayloadItemToJSON)),
         'status': TransactionStatusToJSON(value.status),
+        'known_payloads': ((value.known_payloads as Array<any>).map(TransactionStatusResponseKnownPayloadItemToJSON)),
+        'error_message': value.error_message,
     };
 }
 

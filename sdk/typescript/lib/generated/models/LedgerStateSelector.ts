@@ -22,18 +22,6 @@ import { exists, mapValues } from '../runtime';
  */
 export interface LedgerStateSelector {
     /**
-     * If provided, the ledger state lower than or equal to the given epoch at round 0 is returned.
-     * @type {number}
-     * @memberof LedgerStateSelector
-     */
-    epoch?: number | null;
-    /**
-     * If provided must be accompanied with `epoch`, the ledger state lower than or equal to the given epoch and round is returned.
-     * @type {number}
-     * @memberof LedgerStateSelector
-     */
-    round?: number | null;
-    /**
      * If provided, the latest ledger state lower than or equal to the given state version is returned.
      * @type {number}
      * @memberof LedgerStateSelector
@@ -45,6 +33,18 @@ export interface LedgerStateSelector {
      * @memberof LedgerStateSelector
      */
     timestamp?: Date | null;
+    /**
+     * If provided, the ledger state lower than or equal to the given epoch at round 0 is returned.
+     * @type {number}
+     * @memberof LedgerStateSelector
+     */
+    epoch?: number | null;
+    /**
+     * If provided must be accompanied with `epoch`, the ledger state lower than or equal to the given epoch and round is returned.
+     * @type {number}
+     * @memberof LedgerStateSelector
+     */
+    round?: number | null;
 }
 
 /**
@@ -66,10 +66,10 @@ export function LedgerStateSelectorFromJSONTyped(json: any, ignoreDiscriminator:
     }
     return {
         
-        'epoch': !exists(json, 'epoch') ? undefined : json['epoch'],
-        'round': !exists(json, 'round') ? undefined : json['round'],
         'state_version': !exists(json, 'state_version') ? undefined : json['state_version'],
         'timestamp': !exists(json, 'timestamp') ? undefined : (json['timestamp'] === null ? null : new Date(json['timestamp'])),
+        'epoch': !exists(json, 'epoch') ? undefined : json['epoch'],
+        'round': !exists(json, 'round') ? undefined : json['round'],
     };
 }
 
@@ -82,10 +82,10 @@ export function LedgerStateSelectorToJSON(value?: LedgerStateSelector | null): a
     }
     return {
         
-        'epoch': value.epoch,
-        'round': value.round,
         'state_version': value.state_version,
         'timestamp': value.timestamp === undefined ? undefined : (value.timestamp === null ? null : value.timestamp.toISOString()),
+        'epoch': value.epoch,
+        'round': value.round,
     };
 }
 

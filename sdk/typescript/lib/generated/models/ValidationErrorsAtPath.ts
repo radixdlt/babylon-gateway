@@ -21,16 +21,16 @@ import { exists, mapValues } from '../runtime';
 export interface ValidationErrorsAtPath {
     /**
      * 
-     * @type {Array<string>}
-     * @memberof ValidationErrorsAtPath
-     */
-    errors: Array<string>;
-    /**
-     * 
      * @type {string}
      * @memberof ValidationErrorsAtPath
      */
     path: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ValidationErrorsAtPath
+     */
+    errors: Array<string>;
 }
 
 /**
@@ -38,8 +38,8 @@ export interface ValidationErrorsAtPath {
  */
 export function instanceOfValidationErrorsAtPath(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "errors" in value;
     isInstance = isInstance && "path" in value;
+    isInstance = isInstance && "errors" in value;
 
     return isInstance;
 }
@@ -54,8 +54,8 @@ export function ValidationErrorsAtPathFromJSONTyped(json: any, ignoreDiscriminat
     }
     return {
         
-        'errors': json['errors'],
         'path': json['path'],
+        'errors': json['errors'],
     };
 }
 
@@ -68,8 +68,8 @@ export function ValidationErrorsAtPathToJSON(value?: ValidationErrorsAtPath | nu
     }
     return {
         
-        'errors': value.errors,
         'path': value.path,
+        'errors': value.errors,
     };
 }
 

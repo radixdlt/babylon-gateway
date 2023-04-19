@@ -24,7 +24,7 @@ export interface StateEntityDetailsResponseItemAncestorIdentities {
      * @type {string}
      * @memberof StateEntityDetailsResponseItemAncestorIdentities
      */
-    global_address?: string;
+    parent_address?: string;
     /**
      * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
      * @type {string}
@@ -36,7 +36,7 @@ export interface StateEntityDetailsResponseItemAncestorIdentities {
      * @type {string}
      * @memberof StateEntityDetailsResponseItemAncestorIdentities
      */
-    parent_address?: string;
+    global_address?: string;
 }
 
 /**
@@ -58,9 +58,9 @@ export function StateEntityDetailsResponseItemAncestorIdentitiesFromJSONTyped(js
     }
     return {
         
-        'global_address': !exists(json, 'global_address') ? undefined : json['global_address'],
-        'owner_address': !exists(json, 'owner_address') ? undefined : json['owner_address'],
         'parent_address': !exists(json, 'parent_address') ? undefined : json['parent_address'],
+        'owner_address': !exists(json, 'owner_address') ? undefined : json['owner_address'],
+        'global_address': !exists(json, 'global_address') ? undefined : json['global_address'],
     };
 }
 
@@ -73,9 +73,9 @@ export function StateEntityDetailsResponseItemAncestorIdentitiesToJSON(value?: S
     }
     return {
         
-        'global_address': value.global_address,
-        'owner_address': value.owner_address,
         'parent_address': value.parent_address,
+        'owner_address': value.owner_address,
+        'global_address': value.global_address,
     };
 }
 

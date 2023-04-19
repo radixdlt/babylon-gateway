@@ -34,6 +34,12 @@ export interface StateEntityDetailsResponseNonFungibleResourceDetailsAllOf {
     access_rules_chain: object;
     /**
      * 
+     * @type {object}
+     * @memberof StateEntityDetailsResponseNonFungibleResourceDetailsAllOf
+     */
+    vault_access_rules_chain: object;
+    /**
+     * 
      * @type {NonFungibleIdType}
      * @memberof StateEntityDetailsResponseNonFungibleResourceDetailsAllOf
      */
@@ -44,12 +50,6 @@ export interface StateEntityDetailsResponseNonFungibleResourceDetailsAllOf {
      * @memberof StateEntityDetailsResponseNonFungibleResourceDetailsAllOf
      */
     type?: StateEntityDetailsResponseNonFungibleResourceDetailsAllOfTypeEnum;
-    /**
-     * 
-     * @type {object}
-     * @memberof StateEntityDetailsResponseNonFungibleResourceDetailsAllOf
-     */
-    vault_access_rules_chain: object;
 }
 
 
@@ -68,8 +68,8 @@ export type StateEntityDetailsResponseNonFungibleResourceDetailsAllOfTypeEnum = 
 export function instanceOfStateEntityDetailsResponseNonFungibleResourceDetailsAllOf(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "access_rules_chain" in value;
-    isInstance = isInstance && "non_fungible_id_type" in value;
     isInstance = isInstance && "vault_access_rules_chain" in value;
+    isInstance = isInstance && "non_fungible_id_type" in value;
 
     return isInstance;
 }
@@ -85,9 +85,9 @@ export function StateEntityDetailsResponseNonFungibleResourceDetailsAllOfFromJSO
     return {
         
         'access_rules_chain': json['access_rules_chain'],
+        'vault_access_rules_chain': json['vault_access_rules_chain'],
         'non_fungible_id_type': NonFungibleIdTypeFromJSON(json['non_fungible_id_type']),
         'type': !exists(json, 'type') ? undefined : json['type'],
-        'vault_access_rules_chain': json['vault_access_rules_chain'],
     };
 }
 
@@ -101,9 +101,9 @@ export function StateEntityDetailsResponseNonFungibleResourceDetailsAllOfToJSON(
     return {
         
         'access_rules_chain': value.access_rules_chain,
+        'vault_access_rules_chain': value.vault_access_rules_chain,
         'non_fungible_id_type': NonFungibleIdTypeToJSON(value.non_fungible_id_type),
         'type': value.type,
-        'vault_access_rules_chain': value.vault_access_rules_chain,
     };
 }
 

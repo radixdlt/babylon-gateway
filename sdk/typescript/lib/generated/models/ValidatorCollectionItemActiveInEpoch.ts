@@ -27,12 +27,6 @@ import {
  */
 export interface ValidatorCollectionItemActiveInEpoch {
     /**
-     * 
-     * @type {PublicKey}
-     * @memberof ValidatorCollectionItemActiveInEpoch
-     */
-    key: PublicKey;
-    /**
      * String-encoded decimal representing the amount of a related fungible resource.
      * @type {string}
      * @memberof ValidatorCollectionItemActiveInEpoch
@@ -44,6 +38,12 @@ export interface ValidatorCollectionItemActiveInEpoch {
      * @memberof ValidatorCollectionItemActiveInEpoch
      */
     stake_percentage: number;
+    /**
+     * 
+     * @type {PublicKey}
+     * @memberof ValidatorCollectionItemActiveInEpoch
+     */
+    key: PublicKey;
 }
 
 /**
@@ -51,9 +51,9 @@ export interface ValidatorCollectionItemActiveInEpoch {
  */
 export function instanceOfValidatorCollectionItemActiveInEpoch(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "key" in value;
     isInstance = isInstance && "stake" in value;
     isInstance = isInstance && "stake_percentage" in value;
+    isInstance = isInstance && "key" in value;
 
     return isInstance;
 }
@@ -68,9 +68,9 @@ export function ValidatorCollectionItemActiveInEpochFromJSONTyped(json: any, ign
     }
     return {
         
-        'key': PublicKeyFromJSON(json['key']),
         'stake': json['stake'],
         'stake_percentage': json['stake_percentage'],
+        'key': PublicKeyFromJSON(json['key']),
     };
 }
 
@@ -83,9 +83,9 @@ export function ValidatorCollectionItemActiveInEpochToJSON(value?: ValidatorColl
     }
     return {
         
-        'key': PublicKeyToJSON(value.key),
         'stake': value.stake,
         'stake_percentage': value.stake_percentage,
+        'key': PublicKeyToJSON(value.key),
     };
 }
 

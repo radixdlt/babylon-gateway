@@ -46,16 +46,16 @@ export interface TransactionCommittedDetailsResponse {
     ledger_state: LedgerState;
     /**
      * 
-     * @type {TransactionCommittedDetailsResponseDetails}
-     * @memberof TransactionCommittedDetailsResponse
-     */
-    details: TransactionCommittedDetailsResponseDetails;
-    /**
-     * 
      * @type {CommittedTransactionInfo}
      * @memberof TransactionCommittedDetailsResponse
      */
     transaction: CommittedTransactionInfo;
+    /**
+     * 
+     * @type {TransactionCommittedDetailsResponseDetails}
+     * @memberof TransactionCommittedDetailsResponse
+     */
+    details: TransactionCommittedDetailsResponseDetails;
 }
 
 /**
@@ -64,8 +64,8 @@ export interface TransactionCommittedDetailsResponse {
 export function instanceOfTransactionCommittedDetailsResponse(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "ledger_state" in value;
-    isInstance = isInstance && "details" in value;
     isInstance = isInstance && "transaction" in value;
+    isInstance = isInstance && "details" in value;
 
     return isInstance;
 }
@@ -81,8 +81,8 @@ export function TransactionCommittedDetailsResponseFromJSONTyped(json: any, igno
     return {
         
         'ledger_state': LedgerStateFromJSON(json['ledger_state']),
-        'details': TransactionCommittedDetailsResponseDetailsFromJSON(json['details']),
         'transaction': CommittedTransactionInfoFromJSON(json['transaction']),
+        'details': TransactionCommittedDetailsResponseDetailsFromJSON(json['details']),
     };
 }
 
@@ -96,8 +96,8 @@ export function TransactionCommittedDetailsResponseToJSON(value?: TransactionCom
     return {
         
         'ledger_state': LedgerStateToJSON(value.ledger_state),
-        'details': TransactionCommittedDetailsResponseDetailsToJSON(value.details),
         'transaction': CommittedTransactionInfoToJSON(value.transaction),
+        'details': TransactionCommittedDetailsResponseDetailsToJSON(value.details),
     };
 }
 

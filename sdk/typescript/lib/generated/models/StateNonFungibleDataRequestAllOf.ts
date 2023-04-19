@@ -20,17 +20,17 @@ import { exists, mapValues } from '../runtime';
  */
 export interface StateNonFungibleDataRequestAllOf {
     /**
-     * 
-     * @type {Array<string>}
-     * @memberof StateNonFungibleDataRequestAllOf
-     */
-    non_fungible_ids: Array<string>;
-    /**
      * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
      * @type {string}
      * @memberof StateNonFungibleDataRequestAllOf
      */
     resource_address: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof StateNonFungibleDataRequestAllOf
+     */
+    non_fungible_ids: Array<string>;
 }
 
 /**
@@ -38,8 +38,8 @@ export interface StateNonFungibleDataRequestAllOf {
  */
 export function instanceOfStateNonFungibleDataRequestAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "non_fungible_ids" in value;
     isInstance = isInstance && "resource_address" in value;
+    isInstance = isInstance && "non_fungible_ids" in value;
 
     return isInstance;
 }
@@ -54,8 +54,8 @@ export function StateNonFungibleDataRequestAllOfFromJSONTyped(json: any, ignoreD
     }
     return {
         
-        'non_fungible_ids': json['non_fungible_ids'],
         'resource_address': json['resource_address'],
+        'non_fungible_ids': json['non_fungible_ids'],
     };
 }
 
@@ -68,8 +68,8 @@ export function StateNonFungibleDataRequestAllOfToJSON(value?: StateNonFungibleD
     }
     return {
         
-        'non_fungible_ids': value.non_fungible_ids,
         'resource_address': value.resource_address,
+        'non_fungible_ids': value.non_fungible_ids,
     };
 }
 

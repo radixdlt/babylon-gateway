@@ -20,11 +20,11 @@ import { exists, mapValues } from '../runtime';
  */
 export interface ResultSetCursorMixin {
     /**
-     * If specified, contains a cursor to query next page of the `items` collection.
-     * @type {string}
+     * Total number of items in underlying collection, fragment of which is available in `items` collection.
+     * @type {number}
      * @memberof ResultSetCursorMixin
      */
-    next_cursor?: string | null;
+    total_count?: number | null;
     /**
      * If specified, contains a cursor to query previous page of the `items` collection.
      * @type {string}
@@ -32,11 +32,11 @@ export interface ResultSetCursorMixin {
      */
     previous_cursor?: string | null;
     /**
-     * Total number of items in underlying collection, fragment of which is available in `items` collection.
-     * @type {number}
+     * If specified, contains a cursor to query next page of the `items` collection.
+     * @type {string}
      * @memberof ResultSetCursorMixin
      */
-    total_count?: number | null;
+    next_cursor?: string | null;
 }
 
 /**
@@ -58,9 +58,9 @@ export function ResultSetCursorMixinFromJSONTyped(json: any, ignoreDiscriminator
     }
     return {
         
-        'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
-        'previous_cursor': !exists(json, 'previous_cursor') ? undefined : json['previous_cursor'],
         'total_count': !exists(json, 'total_count') ? undefined : json['total_count'],
+        'previous_cursor': !exists(json, 'previous_cursor') ? undefined : json['previous_cursor'],
+        'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
     };
 }
 
@@ -73,9 +73,9 @@ export function ResultSetCursorMixinToJSON(value?: ResultSetCursorMixin | null):
     }
     return {
         
-        'next_cursor': value.next_cursor,
-        'previous_cursor': value.previous_cursor,
         'total_count': value.total_count,
+        'previous_cursor': value.previous_cursor,
+        'next_cursor': value.next_cursor,
     };
 }
 

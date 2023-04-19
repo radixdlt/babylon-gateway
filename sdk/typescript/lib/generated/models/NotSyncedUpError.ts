@@ -26,6 +26,12 @@ export interface NotSyncedUpError {
      */
     type: NotSyncedUpErrorTypeEnum;
     /**
+     * The request type that triggered this exception.
+     * @type {string}
+     * @memberof NotSyncedUpError
+     */
+    request_type: string;
+    /**
      * The current delay between the Gateway DB and the network ledger round timestamp.
      * @type {number}
      * @memberof NotSyncedUpError
@@ -37,12 +43,6 @@ export interface NotSyncedUpError {
      * @memberof NotSyncedUpError
      */
     max_allowed_sync_delay_seconds: number;
-    /**
-     * The request type that triggered this exception.
-     * @type {string}
-     * @memberof NotSyncedUpError
-     */
-    request_type: string;
 }
 
 
@@ -61,9 +61,9 @@ export type NotSyncedUpErrorTypeEnum = typeof NotSyncedUpErrorTypeEnum[keyof typ
 export function instanceOfNotSyncedUpError(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "type" in value;
+    isInstance = isInstance && "request_type" in value;
     isInstance = isInstance && "current_sync_delay_seconds" in value;
     isInstance = isInstance && "max_allowed_sync_delay_seconds" in value;
-    isInstance = isInstance && "request_type" in value;
 
     return isInstance;
 }
@@ -79,9 +79,9 @@ export function NotSyncedUpErrorFromJSONTyped(json: any, ignoreDiscriminator: bo
     return {
         
         'type': json['type'],
+        'request_type': json['request_type'],
         'current_sync_delay_seconds': json['current_sync_delay_seconds'],
         'max_allowed_sync_delay_seconds': json['max_allowed_sync_delay_seconds'],
-        'request_type': json['request_type'],
     };
 }
 
@@ -95,9 +95,9 @@ export function NotSyncedUpErrorToJSON(value?: NotSyncedUpError | null): any {
     return {
         
         'type': value.type,
+        'request_type': value.request_type,
         'current_sync_delay_seconds': value.current_sync_delay_seconds,
         'max_allowed_sync_delay_seconds': value.max_allowed_sync_delay_seconds,
-        'request_type': value.request_type,
     };
 }
 

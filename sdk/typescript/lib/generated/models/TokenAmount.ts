@@ -20,17 +20,17 @@ import { exists, mapValues } from '../runtime';
  */
 export interface TokenAmount {
     /**
-     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
-     * @type {string}
-     * @memberof TokenAmount
-     */
-    address?: string;
-    /**
      * String-encoded decimal representing the amount of a related fungible resource.
      * @type {string}
      * @memberof TokenAmount
      */
     value: string;
+    /**
+     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+     * @type {string}
+     * @memberof TokenAmount
+     */
+    address?: string;
 }
 
 /**
@@ -53,8 +53,8 @@ export function TokenAmountFromJSONTyped(json: any, ignoreDiscriminator: boolean
     }
     return {
         
-        'address': !exists(json, 'address') ? undefined : json['address'],
         'value': json['value'],
+        'address': !exists(json, 'address') ? undefined : json['address'],
     };
 }
 
@@ -67,8 +67,8 @@ export function TokenAmountToJSON(value?: TokenAmount | null): any {
     }
     return {
         
-        'address': value.address,
         'value': value.value,
+        'address': value.address,
     };
 }
 

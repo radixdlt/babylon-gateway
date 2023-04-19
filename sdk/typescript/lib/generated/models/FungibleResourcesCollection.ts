@@ -27,11 +27,11 @@ import {
  */
 export interface FungibleResourcesCollection {
     /**
-     * If specified, contains a cursor to query next page of the `items` collection.
-     * @type {string}
+     * Total number of items in underlying collection, fragment of which is available in `items` collection.
+     * @type {number}
      * @memberof FungibleResourcesCollection
      */
-    next_cursor?: string | null;
+    total_count?: number | null;
     /**
      * If specified, contains a cursor to query previous page of the `items` collection.
      * @type {string}
@@ -39,11 +39,11 @@ export interface FungibleResourcesCollection {
      */
     previous_cursor?: string | null;
     /**
-     * Total number of items in underlying collection, fragment of which is available in `items` collection.
-     * @type {number}
+     * If specified, contains a cursor to query next page of the `items` collection.
+     * @type {string}
      * @memberof FungibleResourcesCollection
      */
-    total_count?: number | null;
+    next_cursor?: string | null;
     /**
      * 
      * @type {Array<FungibleResourcesCollectionItem>}
@@ -72,9 +72,9 @@ export function FungibleResourcesCollectionFromJSONTyped(json: any, ignoreDiscri
     }
     return {
         
-        'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
-        'previous_cursor': !exists(json, 'previous_cursor') ? undefined : json['previous_cursor'],
         'total_count': !exists(json, 'total_count') ? undefined : json['total_count'],
+        'previous_cursor': !exists(json, 'previous_cursor') ? undefined : json['previous_cursor'],
+        'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
         'items': ((json['items'] as Array<any>).map(FungibleResourcesCollectionItemFromJSON)),
     };
 }
@@ -88,9 +88,9 @@ export function FungibleResourcesCollectionToJSON(value?: FungibleResourcesColle
     }
     return {
         
-        'next_cursor': value.next_cursor,
-        'previous_cursor': value.previous_cursor,
         'total_count': value.total_count,
+        'previous_cursor': value.previous_cursor,
+        'next_cursor': value.next_cursor,
         'items': ((value.items as Array<any>).map(FungibleResourcesCollectionItemToJSON)),
     };
 }

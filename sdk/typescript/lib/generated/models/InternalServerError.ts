@@ -26,17 +26,17 @@ export interface InternalServerError {
      */
     type: InternalServerErrorTypeEnum;
     /**
-     * Gives a human readable message - likely just a trace ID for reporting the error.
-     * @type {string}
-     * @memberof InternalServerError
-     */
-    cause: string;
-    /**
      * Gives an error type which occurred within the Gateway API when serving the request.
      * @type {string}
      * @memberof InternalServerError
      */
     exception: string;
+    /**
+     * Gives a human readable message - likely just a trace ID for reporting the error.
+     * @type {string}
+     * @memberof InternalServerError
+     */
+    cause: string;
 }
 
 
@@ -55,8 +55,8 @@ export type InternalServerErrorTypeEnum = typeof InternalServerErrorTypeEnum[key
 export function instanceOfInternalServerError(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "type" in value;
-    isInstance = isInstance && "cause" in value;
     isInstance = isInstance && "exception" in value;
+    isInstance = isInstance && "cause" in value;
 
     return isInstance;
 }
@@ -72,8 +72,8 @@ export function InternalServerErrorFromJSONTyped(json: any, ignoreDiscriminator:
     return {
         
         'type': json['type'],
-        'cause': json['cause'],
         'exception': json['exception'],
+        'cause': json['cause'],
     };
 }
 
@@ -87,8 +87,8 @@ export function InternalServerErrorToJSON(value?: InternalServerError | null): a
     return {
         
         'type': value.type,
-        'cause': value.cause,
         'exception': value.exception,
+        'cause': value.cause,
     };
 }
 

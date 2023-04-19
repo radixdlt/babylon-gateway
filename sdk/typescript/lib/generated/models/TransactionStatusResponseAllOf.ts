@@ -34,10 +34,10 @@ import {
 export interface TransactionStatusResponseAllOf {
     /**
      * 
-     * @type {string}
+     * @type {TransactionStatus}
      * @memberof TransactionStatusResponseAllOf
      */
-    error_message?: string | null;
+    status: TransactionStatus;
     /**
      * 
      * @type {Array<TransactionStatusResponseKnownPayloadItem>}
@@ -46,10 +46,10 @@ export interface TransactionStatusResponseAllOf {
     known_payloads: Array<TransactionStatusResponseKnownPayloadItem>;
     /**
      * 
-     * @type {TransactionStatus}
+     * @type {string}
      * @memberof TransactionStatusResponseAllOf
      */
-    status: TransactionStatus;
+    error_message?: string | null;
 }
 
 /**
@@ -57,8 +57,8 @@ export interface TransactionStatusResponseAllOf {
  */
 export function instanceOfTransactionStatusResponseAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "known_payloads" in value;
     isInstance = isInstance && "status" in value;
+    isInstance = isInstance && "known_payloads" in value;
 
     return isInstance;
 }
@@ -73,9 +73,9 @@ export function TransactionStatusResponseAllOfFromJSONTyped(json: any, ignoreDis
     }
     return {
         
-        'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
-        'known_payloads': ((json['known_payloads'] as Array<any>).map(TransactionStatusResponseKnownPayloadItemFromJSON)),
         'status': TransactionStatusFromJSON(json['status']),
+        'known_payloads': ((json['known_payloads'] as Array<any>).map(TransactionStatusResponseKnownPayloadItemFromJSON)),
+        'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
     };
 }
 
@@ -88,9 +88,9 @@ export function TransactionStatusResponseAllOfToJSON(value?: TransactionStatusRe
     }
     return {
         
-        'error_message': value.error_message,
-        'known_payloads': ((value.known_payloads as Array<any>).map(TransactionStatusResponseKnownPayloadItemToJSON)),
         'status': TransactionStatusToJSON(value.status),
+        'known_payloads': ((value.known_payloads as Array<any>).map(TransactionStatusResponseKnownPayloadItemToJSON)),
+        'error_message': value.error_message,
     };
 }
 

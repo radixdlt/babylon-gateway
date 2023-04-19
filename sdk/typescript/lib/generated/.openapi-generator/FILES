@@ -100,8 +100,8 @@ models/StateEntityFungibleResourceVaultsPageResponse.ts
 models/StateEntityFungiblesPageRequest.ts
 models/StateEntityFungiblesPageRequestAllOf.ts
 models/StateEntityFungiblesPageResponse.ts
-models/StateEntityFungiblesPageResponseAllOf.ts
 models/StateEntityMetadataPageRequest.ts
+models/StateEntityMetadataPageRequestAllOf.ts
 models/StateEntityMetadataPageResponse.ts
 models/StateEntityNonFungibleIdsPageRequest.ts
 models/StateEntityNonFungibleIdsPageRequestAllOf.ts
@@ -128,7 +128,6 @@ models/StreamTransactionsRequestAllOf.ts
 models/StreamTransactionsResponse.ts
 models/TokenAmount.ts
 models/TransactionCommittedDetailsRequest.ts
-models/TransactionCommittedDetailsRequestAllOf.ts
 models/TransactionCommittedDetailsResponse.ts
 models/TransactionCommittedDetailsResponseAllOf.ts
 models/TransactionCommittedDetailsResponseDetails.ts
@@ -141,6 +140,7 @@ models/TransactionPreviewResponse.ts
 models/TransactionPreviewResponseLogsInner.ts
 models/TransactionStatus.ts
 models/TransactionStatusRequest.ts
+models/TransactionStatusRequestAllOf.ts
 models/TransactionStatusResponse.ts
 models/TransactionStatusResponseAllOf.ts
 models/TransactionStatusResponseKnownPayloadItem.ts

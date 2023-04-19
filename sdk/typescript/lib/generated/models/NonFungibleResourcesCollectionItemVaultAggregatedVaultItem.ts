@@ -20,11 +20,11 @@ import { exists, mapValues } from '../runtime';
  */
 export interface NonFungibleResourcesCollectionItemVaultAggregatedVaultItem {
     /**
-     * TBD
-     * @type {number}
+     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
+     * @type {string}
      * @memberof NonFungibleResourcesCollectionItemVaultAggregatedVaultItem
      */
-    last_updated_at_state_version: number;
+    vault_address: string;
     /**
      * 
      * @type {number}
@@ -32,11 +32,11 @@ export interface NonFungibleResourcesCollectionItemVaultAggregatedVaultItem {
      */
     total_count: number;
     /**
-     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
-     * @type {string}
+     * TBD
+     * @type {number}
      * @memberof NonFungibleResourcesCollectionItemVaultAggregatedVaultItem
      */
-    vault_address: string;
+    last_updated_at_state_version: number;
 }
 
 /**
@@ -44,9 +44,9 @@ export interface NonFungibleResourcesCollectionItemVaultAggregatedVaultItem {
  */
 export function instanceOfNonFungibleResourcesCollectionItemVaultAggregatedVaultItem(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "last_updated_at_state_version" in value;
-    isInstance = isInstance && "total_count" in value;
     isInstance = isInstance && "vault_address" in value;
+    isInstance = isInstance && "total_count" in value;
+    isInstance = isInstance && "last_updated_at_state_version" in value;
 
     return isInstance;
 }
@@ -61,9 +61,9 @@ export function NonFungibleResourcesCollectionItemVaultAggregatedVaultItemFromJS
     }
     return {
         
-        'last_updated_at_state_version': json['last_updated_at_state_version'],
-        'total_count': json['total_count'],
         'vault_address': json['vault_address'],
+        'total_count': json['total_count'],
+        'last_updated_at_state_version': json['last_updated_at_state_version'],
     };
 }
 
@@ -76,9 +76,9 @@ export function NonFungibleResourcesCollectionItemVaultAggregatedVaultItemToJSON
     }
     return {
         
-        'last_updated_at_state_version': value.last_updated_at_state_version,
-        'total_count': value.total_count,
         'vault_address': value.vault_address,
+        'total_count': value.total_count,
+        'last_updated_at_state_version': value.last_updated_at_state_version,
     };
 }
 

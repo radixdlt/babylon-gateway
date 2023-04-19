@@ -20,6 +20,18 @@ import { exists, mapValues } from '../runtime';
  */
 export interface NetworkConfigurationResponseWellKnownAddresses {
     /**
+     * Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id.
+     * @type {string}
+     * @memberof NetworkConfigurationResponseWellKnownAddresses
+     */
+    faucet: string;
+    /**
+     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
+     * @type {string}
+     * @memberof NetworkConfigurationResponseWellKnownAddresses
+     */
+    epoch_manager: string;
+    /**
      * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
      * @type {string}
      * @memberof NetworkConfigurationResponseWellKnownAddresses
@@ -38,18 +50,6 @@ export interface NetworkConfigurationResponseWellKnownAddresses {
      */
     eddsa_ed25519: string;
     /**
-     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
-     * @type {string}
-     * @memberof NetworkConfigurationResponseWellKnownAddresses
-     */
-    epoch_manager: string;
-    /**
-     * Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id.
-     * @type {string}
-     * @memberof NetworkConfigurationResponseWellKnownAddresses
-     */
-    faucet: string;
-    /**
      * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
      * @type {string}
      * @memberof NetworkConfigurationResponseWellKnownAddresses
@@ -62,11 +62,11 @@ export interface NetworkConfigurationResponseWellKnownAddresses {
  */
 export function instanceOfNetworkConfigurationResponseWellKnownAddresses(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "faucet" in value;
+    isInstance = isInstance && "epoch_manager" in value;
     isInstance = isInstance && "clock" in value;
     isInstance = isInstance && "ecdsa_secp256k1" in value;
     isInstance = isInstance && "eddsa_ed25519" in value;
-    isInstance = isInstance && "epoch_manager" in value;
-    isInstance = isInstance && "faucet" in value;
     isInstance = isInstance && "xrd" in value;
 
     return isInstance;
@@ -82,11 +82,11 @@ export function NetworkConfigurationResponseWellKnownAddressesFromJSONTyped(json
     }
     return {
         
+        'faucet': json['faucet'],
+        'epoch_manager': json['epoch_manager'],
         'clock': json['clock'],
         'ecdsa_secp256k1': json['ecdsa_secp256k1'],
         'eddsa_ed25519': json['eddsa_ed25519'],
-        'epoch_manager': json['epoch_manager'],
-        'faucet': json['faucet'],
         'xrd': json['xrd'],
     };
 }
@@ -100,11 +100,11 @@ export function NetworkConfigurationResponseWellKnownAddressesToJSON(value?: Net
     }
     return {
         
+        'faucet': value.faucet,
+        'epoch_manager': value.epoch_manager,
         'clock': value.clock,
         'ecdsa_secp256k1': value.ecdsa_secp256k1,
         'eddsa_ed25519': value.eddsa_ed25519,
-        'epoch_manager': value.epoch_manager,
-        'faucet': value.faucet,
         'xrd': value.xrd,
     };
 }

@@ -27,6 +27,12 @@ export interface StateEntityDetailsResponseFungibleResourceDetailsAllOf {
     access_rules_chain: object;
     /**
      * 
+     * @type {object}
+     * @memberof StateEntityDetailsResponseFungibleResourceDetailsAllOf
+     */
+    vault_access_rules_chain: object;
+    /**
+     * 
      * @type {number}
      * @memberof StateEntityDetailsResponseFungibleResourceDetailsAllOf
      */
@@ -37,12 +43,6 @@ export interface StateEntityDetailsResponseFungibleResourceDetailsAllOf {
      * @memberof StateEntityDetailsResponseFungibleResourceDetailsAllOf
      */
     type?: StateEntityDetailsResponseFungibleResourceDetailsAllOfTypeEnum;
-    /**
-     * 
-     * @type {object}
-     * @memberof StateEntityDetailsResponseFungibleResourceDetailsAllOf
-     */
-    vault_access_rules_chain: object;
 }
 
 
@@ -61,8 +61,8 @@ export type StateEntityDetailsResponseFungibleResourceDetailsAllOfTypeEnum = typ
 export function instanceOfStateEntityDetailsResponseFungibleResourceDetailsAllOf(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "access_rules_chain" in value;
-    isInstance = isInstance && "divisibility" in value;
     isInstance = isInstance && "vault_access_rules_chain" in value;
+    isInstance = isInstance && "divisibility" in value;
 
     return isInstance;
 }
@@ -78,9 +78,9 @@ export function StateEntityDetailsResponseFungibleResourceDetailsAllOfFromJSONTy
     return {
         
         'access_rules_chain': json['access_rules_chain'],
+        'vault_access_rules_chain': json['vault_access_rules_chain'],
         'divisibility': json['divisibility'],
         'type': !exists(json, 'type') ? undefined : json['type'],
-        'vault_access_rules_chain': json['vault_access_rules_chain'],
     };
 }
 
@@ -94,9 +94,9 @@ export function StateEntityDetailsResponseFungibleResourceDetailsAllOfToJSON(val
     return {
         
         'access_rules_chain': value.access_rules_chain,
+        'vault_access_rules_chain': value.vault_access_rules_chain,
         'divisibility': value.divisibility,
         'type': value.type,
-        'vault_access_rules_chain': value.vault_access_rules_chain,
     };
 }
 

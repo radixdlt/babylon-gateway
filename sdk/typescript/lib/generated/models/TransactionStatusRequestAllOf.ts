@@ -16,42 +16,42 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface StateEntityFungiblesPageResponseAllOf
+ * @interface TransactionStatusRequestAllOf
  */
-export interface StateEntityFungiblesPageResponseAllOf {
+export interface TransactionStatusRequestAllOf {
     /**
-     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
+     * Hex-encoded SHA-256 hash.
      * @type {string}
-     * @memberof StateEntityFungiblesPageResponseAllOf
+     * @memberof TransactionStatusRequestAllOf
      */
-    address: string;
+    intent_hash_hex: string;
 }
 
 /**
- * Check if a given object implements the StateEntityFungiblesPageResponseAllOf interface.
+ * Check if a given object implements the TransactionStatusRequestAllOf interface.
  */
-export function instanceOfStateEntityFungiblesPageResponseAllOf(value: object): boolean {
+export function instanceOfTransactionStatusRequestAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "address" in value;
+    isInstance = isInstance && "intent_hash_hex" in value;
 
     return isInstance;
 }
 
-export function StateEntityFungiblesPageResponseAllOfFromJSON(json: any): StateEntityFungiblesPageResponseAllOf {
-    return StateEntityFungiblesPageResponseAllOfFromJSONTyped(json, false);
+export function TransactionStatusRequestAllOfFromJSON(json: any): TransactionStatusRequestAllOf {
+    return TransactionStatusRequestAllOfFromJSONTyped(json, false);
 }
 
-export function StateEntityFungiblesPageResponseAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateEntityFungiblesPageResponseAllOf {
+export function TransactionStatusRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionStatusRequestAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'address': json['address'],
+        'intent_hash_hex': json['intent_hash_hex'],
     };
 }
 
-export function StateEntityFungiblesPageResponseAllOfToJSON(value?: StateEntityFungiblesPageResponseAllOf | null): any {
+export function TransactionStatusRequestAllOfToJSON(value?: TransactionStatusRequestAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -60,7 +60,7 @@ export function StateEntityFungiblesPageResponseAllOfToJSON(value?: StateEntityF
     }
     return {
         
-        'address': value.address,
+        'intent_hash_hex': value.intent_hash_hex,
     };
 }
 

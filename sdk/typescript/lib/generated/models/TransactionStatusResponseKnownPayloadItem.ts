@@ -27,12 +27,6 @@ import {
  */
 export interface TransactionStatusResponseKnownPayloadItem {
     /**
-     * 
-     * @type {string}
-     * @memberof TransactionStatusResponseKnownPayloadItem
-     */
-    error_message?: string | null;
-    /**
      * Hex-encoded SHA-256 hash.
      * @type {string}
      * @memberof TransactionStatusResponseKnownPayloadItem
@@ -44,6 +38,12 @@ export interface TransactionStatusResponseKnownPayloadItem {
      * @memberof TransactionStatusResponseKnownPayloadItem
      */
     status: TransactionStatus;
+    /**
+     * 
+     * @type {string}
+     * @memberof TransactionStatusResponseKnownPayloadItem
+     */
+    error_message?: string | null;
 }
 
 /**
@@ -67,9 +67,9 @@ export function TransactionStatusResponseKnownPayloadItemFromJSONTyped(json: any
     }
     return {
         
-        'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
         'payload_hash_hex': json['payload_hash_hex'],
         'status': TransactionStatusFromJSON(json['status']),
+        'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
     };
 }
 
@@ -82,9 +82,9 @@ export function TransactionStatusResponseKnownPayloadItemToJSON(value?: Transact
     }
     return {
         
-        'error_message': value.error_message,
         'payload_hash_hex': value.payload_hash_hex,
         'status': TransactionStatusToJSON(value.status),
+        'error_message': value.error_message,
     };
 }
 

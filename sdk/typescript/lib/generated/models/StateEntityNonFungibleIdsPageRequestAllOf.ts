@@ -26,17 +26,17 @@ export interface StateEntityNonFungibleIdsPageRequestAllOf {
      */
     address: string;
     /**
-     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
-     * @type {string}
-     * @memberof StateEntityNonFungibleIdsPageRequestAllOf
-     */
-    resource_address: string;
-    /**
      * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
      * @type {string}
      * @memberof StateEntityNonFungibleIdsPageRequestAllOf
      */
     vault_address: string;
+    /**
+     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+     * @type {string}
+     * @memberof StateEntityNonFungibleIdsPageRequestAllOf
+     */
+    resource_address: string;
 }
 
 /**
@@ -45,8 +45,8 @@ export interface StateEntityNonFungibleIdsPageRequestAllOf {
 export function instanceOfStateEntityNonFungibleIdsPageRequestAllOf(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "address" in value;
-    isInstance = isInstance && "resource_address" in value;
     isInstance = isInstance && "vault_address" in value;
+    isInstance = isInstance && "resource_address" in value;
 
     return isInstance;
 }
@@ -62,8 +62,8 @@ export function StateEntityNonFungibleIdsPageRequestAllOfFromJSONTyped(json: any
     return {
         
         'address': json['address'],
-        'resource_address': json['resource_address'],
         'vault_address': json['vault_address'],
+        'resource_address': json['resource_address'],
     };
 }
 
@@ -77,8 +77,8 @@ export function StateEntityNonFungibleIdsPageRequestAllOfToJSON(value?: StateEnt
     return {
         
         'address': value.address,
-        'resource_address': value.resource_address,
         'vault_address': value.vault_address,
+        'resource_address': value.resource_address,
     };
 }
 
