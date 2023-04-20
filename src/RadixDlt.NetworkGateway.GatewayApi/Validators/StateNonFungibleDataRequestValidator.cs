@@ -69,24 +69,28 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class StateEntityNonFungibleIdsPageRequestValidator : AbstractValidator<GatewayModel.StateEntityNonFungibleIdsPageRequest>
+internal class StateNonFungibleDataRequestValidator : AbstractValidator<GatewayModel.StateNonFungibleDataRequest>
 {
-    public StateEntityNonFungibleIdsPageRequestValidator(
+    public StateNonFungibleDataRequestValidator(
         IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
         LedgerStateSelectorValidator ledgerStateSelectorValidator,
         PaginableRequestValidator paginableRequestValidator)
     {
-        RuleFor(x => x.Address)
-            .NotEmpty()
-            .RadixAddress();
-
         RuleFor(x => x.ResourceAddress)
             .NotEmpty()
             .RadixAddress();
 
-        RuleFor(x => x.VaultAddress)
+        RuleFor(x => x.NonFungibleIds)
             .NotEmpty()
-            .Hex();
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.NonFungibleIds.Count)
+                    .GreaterThan(0)
+                    .LessThan(endpointOptionsSnapshot.Value.MaxPageSize);
+
+                RuleForEach(x => x.NonFungibleIds)
+                    .NotEmpty();
+            });
 
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);

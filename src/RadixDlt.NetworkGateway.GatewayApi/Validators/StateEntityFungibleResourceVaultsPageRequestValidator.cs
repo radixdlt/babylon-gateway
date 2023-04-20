@@ -71,7 +71,10 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class StateEntityFungibleResourceVaultsPageRequestValidator : AbstractValidator<StateEntityFungibleResourceVaultsPageRequest>
 {
-    public StateEntityFungibleResourceVaultsPageRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public StateEntityFungibleResourceVaultsPageRequestValidator(
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        LedgerStateSelectorValidator ledgerStateSelectorValidator,
+        PaginableRequestValidator paginableRequestValidator)
     {
         RuleFor(x => x.Address)
             .NotEmpty()
@@ -87,10 +90,8 @@ internal class StateEntityFungibleResourceVaultsPageRequestValidator : AbstractV
         RuleFor(x => x.Cursor)
             .Base64();
 
-        RuleFor(x => x.AtLedgerState)
-            .Must(x => x != null && x.HasStateVersion())
-            .When(x => !string.IsNullOrEmpty(x.Cursor))
-            .WithMessage("AtLedgerState.StateVersion is required if cursor is provided");
+        RuleFor(x => x)
+            .SetValidator(paginableRequestValidator);
 
         RuleFor(x => x.LimitPerPage)
             .GreaterThan(0)

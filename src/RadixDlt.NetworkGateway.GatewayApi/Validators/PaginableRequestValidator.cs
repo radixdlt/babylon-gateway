@@ -63,42 +63,17 @@
  */
 
 using FluentValidation;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class StateEntityNonFungibleIdsPageRequestValidator : AbstractValidator<GatewayModel.StateEntityNonFungibleIdsPageRequest>
+internal class PaginableRequestValidator : AbstractValidator<IPaginableRequest>
 {
-    public StateEntityNonFungibleIdsPageRequestValidator(
-        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
-        LedgerStateSelectorValidator ledgerStateSelectorValidator,
-        PaginableRequestValidator paginableRequestValidator)
+    public PaginableRequestValidator()
     {
-        RuleFor(x => x.Address)
-            .NotEmpty()
-            .RadixAddress();
-
-        RuleFor(x => x.ResourceAddress)
-            .NotEmpty()
-            .RadixAddress();
-
-        RuleFor(x => x.VaultAddress)
-            .NotEmpty()
-            .Hex();
-
         RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
-
-        RuleFor(x => x.Cursor)
-            .Base64();
-
-        RuleFor(x => x)
-            .SetValidator(paginableRequestValidator);
-
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
+            .Must(x => x?.HasStateVersion() == true)
+            .When(x => x.Cursor != null)
+            .WithMessage("AtLedgerState.StateVersion is required if cursor is provided");
     }
 }

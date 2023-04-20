@@ -69,7 +69,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class StateValidatorsListRequestValidator : AbstractValidator<GatewayModel.StateValidatorsListRequest>
 {
-    public StateValidatorsListRequestValidator(LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public StateValidatorsListRequestValidator(LedgerStateSelectorValidator ledgerStateSelectorValidator, PaginableRequestValidator paginableRequestValidator)
     {
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
@@ -77,9 +77,7 @@ internal class StateValidatorsListRequestValidator : AbstractValidator<GatewayMo
         RuleFor(x => x.Cursor)
             .Base64();
 
-        RuleFor(x => x.AtLedgerState)
-            .Must(x => x != null && x.HasStateVersion())
-            .When(x => !string.IsNullOrEmpty(x.Cursor))
-            .WithMessage("AtLedgerState.StateVersion is required if cursor is provided");
+        RuleFor(x => x)
+            .SetValidator(paginableRequestValidator);
     }
 }
