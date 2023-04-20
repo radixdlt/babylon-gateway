@@ -124,15 +124,15 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
     public async Task<GatewayModel.GatewayStatusResponse> GetGatewayStatus(CancellationToken token)
     {
-        var ledgerStatus = await GetLedgerStatus(token);
+        var topLedgerTransaction = await GetTopLedgerTransaction(token);
 
         return new GatewayModel.GatewayStatusResponse(
             new GatewayModel.LedgerState(
                 _networkConfigurationProvider.GetNetworkName(),
-                ledgerStatus.TopOfLedgerTransaction.StateVersion,
-                ledgerStatus.TopOfLedgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
-                ledgerStatus.TopOfLedgerTransaction.Epoch,
-                ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
+                topLedgerTransaction.StateVersion,
+                topLedgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
+                topLedgerTransaction.Epoch,
+                topLedgerTransaction.RoundInEpoch
             ),
             new GatewayModel.GatewayInfoResponseReleaseInfo(_gatewayVersion, _oasVersion, _deployedImage)
         );
@@ -234,9 +234,9 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
     public async Task<long> GetTopOfLedgerStateVersion(CancellationToken token = default)
     {
-        var ledgerStatus = await GetLedgerStatus(token);
+        var topLedgerTransaction = await GetTopLedgerTransaction(token);
 
-        return ledgerStatus.TopOfLedgerStateVersion;
+        return topLedgerTransaction.StateVersion;
     }
 
     private static (string FullVersion, string DeployedImage) GetGatewayProductVersion()
@@ -263,20 +263,19 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return match.Groups[1].Value;
     }
 
-    private async Task<LedgerStatus> GetLedgerStatus(CancellationToken token)
+    private async Task<LedgerTransaction> GetTopLedgerTransaction(CancellationToken token)
     {
         try
         {
-            var ledgerStatus = await _dbContext.LedgerStatus
-                .Include(ls => ls.TopOfLedgerTransaction)
-                .SingleOrDefaultAsync(token);
+            var topLedgerTransaction = await _dbContext.GetTopLedgerTransaction()
+                .FirstOrDefaultAsync(token);
 
-            if (ledgerStatus == null)
+            if (topLedgerTransaction == null)
             {
                 throw new InvalidStateException("There are no transactions in the database");
             }
 
-            return ledgerStatus;
+            return topLedgerTransaction;
         }
         catch (Exception ex)
         {

@@ -426,25 +426,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ledger_status",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false),
-                    top_of_ledger_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    sync_status_target_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    last_updated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ledger_status", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_ledger_status_ledger_transactions_top_of_ledger_state_versi~",
-                        column: x => x.top_of_ledger_state_version,
-                        principalTable: "ledger_transactions",
-                        principalColumn: "state_version");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "validator_active_set_history",
                 columns: table => new
                 {
@@ -523,11 +504,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_entity_vault_history_owner_entity_id_vault_entity_id_from_s~",
                 table: "entity_vault_history",
                 columns: new[] { "owner_entity_id", "vault_entity_id", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ledger_status_top_of_ledger_state_version",
-                table: "ledger_status",
-                column: "top_of_ledger_state_version");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_epoch_round_in_epoch",
@@ -653,7 +629,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "entity_vault_history");
 
             migrationBuilder.DropTable(
-                name: "ledger_status");
+                name: "ledger_transactions");
 
             migrationBuilder.DropTable(
                 name: "network_configuration");
@@ -675,9 +651,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "validator_active_set_history");
-
-            migrationBuilder.DropTable(
-                name: "ledger_transactions");
 
             migrationBuilder.DropTable(
                 name: "validator_public_key_history");
