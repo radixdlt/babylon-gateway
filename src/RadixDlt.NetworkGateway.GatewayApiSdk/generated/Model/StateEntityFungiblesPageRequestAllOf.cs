@@ -111,7 +111,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
         /// <param name="aggregationLevel">aggregationLevel.</param>
-        public StateEntityFungiblesPageRequestAllOf(string address = default(string), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
+        /// <param name="optIns">optIns.</param>
+        public StateEntityFungiblesPageRequestAllOf(string address = default(string), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?), StateEntityFungiblesPageRequestOptIns optIns = default(StateEntityFungiblesPageRequestOptIns))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -120,6 +121,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.Address = address;
             this.AggregationLevel = aggregationLevel;
+            this.OptIns = optIns;
         }
 
         /// <summary>
@@ -128,6 +130,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
+
+        /// <summary>
+        /// Gets or Sets OptIns
+        /// </summary>
+        [DataMember(Name = "opt_ins", EmitDefaultValue = true)]
+        public StateEntityFungiblesPageRequestOptIns OptIns { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -139,6 +147,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class StateEntityFungiblesPageRequestAllOf {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
+            sb.Append("  OptIns: ").Append(OptIns).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -182,6 +191,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 (
                     this.AggregationLevel == input.AggregationLevel ||
                     this.AggregationLevel.Equals(input.AggregationLevel)
+                ) && 
+                (
+                    this.OptIns == input.OptIns ||
+                    (this.OptIns != null &&
+                    this.OptIns.Equals(input.OptIns))
                 );
         }
 
@@ -199,6 +213,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.AggregationLevel.GetHashCode();
+                if (this.OptIns != null)
+                {
+                    hashCode = (hashCode * 59) + this.OptIns.GetHashCode();
+                }
                 return hashCode;
             }
         }

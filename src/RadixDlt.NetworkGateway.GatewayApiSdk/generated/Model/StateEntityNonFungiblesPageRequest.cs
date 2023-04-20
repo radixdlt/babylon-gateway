@@ -114,7 +114,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="limitPerPage">The page size requested..</param>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
         /// <param name="aggregationLevel">aggregationLevel.</param>
-        public StateEntityNonFungiblesPageRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string address = default(string), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?))
+        /// <param name="optIns">optIns.</param>
+        public StateEntityNonFungiblesPageRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string address = default(string), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?), StateEntityNonFungiblesPageRequestOptIns optIns = default(StateEntityNonFungiblesPageRequestOptIns))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -126,6 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.Cursor = cursor;
             this.LimitPerPage = limitPerPage;
             this.AggregationLevel = aggregationLevel;
+            this.OptIns = optIns;
         }
 
         /// <summary>
@@ -156,6 +158,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Address { get; set; }
 
         /// <summary>
+        /// Gets or Sets OptIns
+        /// </summary>
+        [DataMember(Name = "opt_ins", EmitDefaultValue = true)]
+        public StateEntityNonFungiblesPageRequestOptIns OptIns { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -168,6 +176,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  LimitPerPage: ").Append(LimitPerPage).Append("\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
+            sb.Append("  OptIns: ").Append(OptIns).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -226,6 +235,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 (
                     this.AggregationLevel == input.AggregationLevel ||
                     this.AggregationLevel.Equals(input.AggregationLevel)
+                ) && 
+                (
+                    this.OptIns == input.OptIns ||
+                    (this.OptIns != null &&
+                    this.OptIns.Equals(input.OptIns))
                 );
         }
 
@@ -255,6 +269,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.AggregationLevel.GetHashCode();
+                if (this.OptIns != null)
+                {
+                    hashCode = (hashCode * 59) + this.OptIns.GetHashCode();
+                }
                 return hashCode;
             }
         }

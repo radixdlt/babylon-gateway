@@ -1678,8 +1678,17 @@ components:
               $ref: "#/components/schemas/EntityAddress"
             aggregation_level:
               $ref: "#/components/schemas/ResourceAggregationLevel"
+            opt_ins:
+              $ref: "#/components/schemas/StateEntityFungiblesPageRequestOptIns"
       example:
         address: "<component-entity-address>"
+    StateEntityFungiblesPageRequestOptIns:
+      type: object
+      properties:
+        explicit_metadata:
+          type: array
+          items:
+            type: string
     StateEntityFungiblesPageResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1732,8 +1741,17 @@ components:
               $ref: "#/components/schemas/EntityAddress"
             aggregation_level:
               $ref: "#/components/schemas/ResourceAggregationLevel"
+            opt_ins:
+              $ref: "#/components/schemas/StateEntityNonFungiblesPageRequestOptIns"
       example:
         address: "<component-entity-address>"
+    StateEntityNonFungiblesPageRequestOptIns:
+      type: object
+      properties:
+        explicit_metadata:
+          type: array
+          items:
+            type: string
     StateEntityNonFungiblesPageResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
