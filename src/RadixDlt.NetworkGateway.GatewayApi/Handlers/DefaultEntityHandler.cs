@@ -125,7 +125,7 @@ internal class DefaultEntityHandler : IEntityHandler
             Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
         );
 
-        return await _entityStateQuerier.EntityFungibleResourcesPage(pageRequest, aggregatePerVault, ledgerState, token);
+        return await _entityStateQuerier.EntityFungibleResourcesPage(pageRequest, aggregatePerVault, request.OptIns ?? GatewayModel.StateEntityFungiblesPageRequestOptIns.Default, ledgerState, token);
     }
 
     public async Task<GatewayModel.StateEntityFungibleResourceVaultsPageResponse?> FungibleVaults(GatewayModel.StateEntityFungibleResourceVaultsPageRequest request, CancellationToken token = default)
@@ -153,7 +153,7 @@ internal class DefaultEntityHandler : IEntityHandler
             Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
         );
 
-        return await _entityStateQuerier.EntityNonFungibleResourcesPage(pageRequest, aggregatePerVault, ledgerState, token);
+        return await _entityStateQuerier.EntityNonFungibleResourcesPage(pageRequest, aggregatePerVault, request.OptIns ?? GatewayModel.StateEntityNonFungiblesPageRequestOptIns.Default, ledgerState, token);
     }
 
     public async Task<GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse?> NonFungibleVaults(GatewayModel.StateEntityNonFungibleResourceVaultsPageRequest request, CancellationToken token = default)

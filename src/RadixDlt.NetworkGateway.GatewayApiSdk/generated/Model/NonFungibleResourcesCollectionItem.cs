@@ -117,7 +117,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="aggregationLevel">aggregationLevel (required).</param>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
-        public NonFungibleResourcesCollectionItem(ResourceAggregationLevel aggregationLevel = default(ResourceAggregationLevel), string resourceAddress = default(string))
+        /// <param name="explicitMetadata">explicitMetadata.</param>
+        public NonFungibleResourcesCollectionItem(ResourceAggregationLevel aggregationLevel = default(ResourceAggregationLevel), string resourceAddress = default(string), EntityMetadataCollection explicitMetadata = default(EntityMetadataCollection))
         {
             this.AggregationLevel = aggregationLevel;
             // to ensure "resourceAddress" is required (not null)
@@ -126,6 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("resourceAddress is a required property for NonFungibleResourcesCollectionItem and cannot be null");
             }
             this.ResourceAddress = resourceAddress;
+            this.ExplicitMetadata = explicitMetadata;
         }
 
         /// <summary>
@@ -134,6 +136,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
         [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
         public string ResourceAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ExplicitMetadata
+        /// </summary>
+        [DataMember(Name = "explicit_metadata", EmitDefaultValue = true)]
+        public EntityMetadataCollection ExplicitMetadata { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,6 +153,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class NonFungibleResourcesCollectionItem {\n");
             sb.Append("  AggregationLevel: ").Append(AggregationLevel).Append("\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  ExplicitMetadata: ").Append(ExplicitMetadata).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -188,6 +197,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ResourceAddress == input.ResourceAddress ||
                     (this.ResourceAddress != null &&
                     this.ResourceAddress.Equals(input.ResourceAddress))
+                ) && 
+                (
+                    this.ExplicitMetadata == input.ExplicitMetadata ||
+                    (this.ExplicitMetadata != null &&
+                    this.ExplicitMetadata.Equals(input.ExplicitMetadata))
                 );
         }
 
@@ -204,6 +218,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.ResourceAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
+                if (this.ExplicitMetadata != null)
+                {
+                    hashCode = (hashCode * 59) + this.ExplicitMetadata.GetHashCode();
                 }
                 return hashCode;
             }
