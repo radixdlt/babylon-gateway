@@ -86,7 +86,7 @@ jobs:
     name: (DatabaseMigrations) Docker
     needs:
       - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@DO-1364
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
       image_registry: "docker.io"
@@ -111,7 +111,7 @@ jobs:
     name: (DataAggregator) Docker
     needs:
       - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@DO-1364
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
       image_registry: "docker.io"
@@ -136,7 +136,7 @@ jobs:
     name: (GatewayApi) Docker
     needs:
       - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@DO-1364
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
       image_registry: "docker.io"
