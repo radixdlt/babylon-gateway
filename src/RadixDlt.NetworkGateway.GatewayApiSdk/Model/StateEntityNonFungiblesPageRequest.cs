@@ -62,41 +62,6 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
-
-internal class StateNonFungibleDetailsRequestValidator : AbstractValidator<GatewayModel.StateNonFungibleDataRequest>
-{
-    public StateNonFungibleDetailsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
-    {
-        RuleFor(x => x.ResourceAddress)
-            .NotEmpty()
-            .RadixAddress();
-
-        RuleFor(x => x.NonFungibleIds)
-            .NotEmpty()
-            .DependentRules(() =>
-            {
-                RuleFor(x => x.NonFungibleIds.Count)
-                    .GreaterThan(0)
-                    .LessThan(endpointOptionsSnapshot.Value.MaxPageSize);
-
-                RuleForEach(x => x.NonFungibleIds)
-                    .NotEmpty();
-            });
-
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
-
-        RuleFor(x => x.Cursor)
-            .Base64();
-
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
-    }
-}
+public partial class StateEntityNonFungiblesPageRequest : IPaginableRequest { }
