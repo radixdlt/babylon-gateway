@@ -859,6 +859,8 @@ components:
           $ref: "#/components/schemas/ResourceAggregationLevel"
         resource_address:
           $ref: "#/components/schemas/ResourceAddress"
+        explicit_metadata:
+          $ref: "#/components/schemas/EntityMetadataCollection"
       discriminator:
         propertyName: aggregation_level
         mapping:
@@ -933,6 +935,8 @@ components:
           $ref: "#/components/schemas/ResourceAggregationLevel"
         resource_address:
           $ref: "#/components/schemas/ResourceAddress"
+        explicit_metadata:
+          $ref: "#/components/schemas/EntityMetadataCollection"
       discriminator:
         propertyName: aggregation_level
         mapping:
