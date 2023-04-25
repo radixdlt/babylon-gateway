@@ -73,8 +73,7 @@ internal class StateNonFungibleDataRequestValidator : AbstractValidator<GatewayM
 {
     public StateNonFungibleDataRequestValidator(
         IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
-        LedgerStateSelectorValidator ledgerStateSelectorValidator,
-        PaginableRequestValidator paginableRequestValidator)
+        LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
         RuleFor(x => x.ResourceAddress)
             .NotEmpty()
@@ -94,15 +93,5 @@ internal class StateNonFungibleDataRequestValidator : AbstractValidator<GatewayM
 
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
-
-        RuleFor(x => x.Cursor)
-            .Base64();
-
-        RuleFor(x => x)
-            .SetValidator(paginableRequestValidator);
-
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
     }
 }
