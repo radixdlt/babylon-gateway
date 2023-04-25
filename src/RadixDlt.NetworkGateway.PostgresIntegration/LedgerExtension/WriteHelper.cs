@@ -96,7 +96,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, royalty_vault_entity_id, divisibility, store_of_non_fungible_resource_entity_id, non_fungible_id_type, code, code_type, stake_vault_entity_id, unstake_vault_entity_id, epoch_manager_entity_id, resource_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, divisibility, store_of_non_fungible_resource_entity_id, non_fungible_id_type, code, code_type, stake_vault_entity_id, unstake_vault_entity_id, epoch_manager_entity_id, resource_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -115,15 +115,6 @@ internal class WriteHelper
             await writer.WriteAsync(discriminator, "entity_type", token);
             await writer.WriteNullableAsync(e is ComponentEntity ce1 ? ce1.PackageId : null, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e is ComponentEntity ce2 ? ce2.BlueprintName : null, NpgsqlDbType.Text, token);
-
-            if (e is IRoyaltyVaultHolder rvh && rvh.RoyaltyVaultEntityId.HasValue)
-            {
-                await writer.WriteAsync(rvh.RoyaltyVaultEntityId.Value, token);
-            }
-            else
-            {
-                await writer.WriteNullAsync(token);
-            }
 
             await writer.WriteNullableAsync(e is FungibleResourceEntity frme ? frme.Divisibility : null, NpgsqlDbType.Integer, token);
 
