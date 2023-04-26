@@ -80,7 +80,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Array = System.Array;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
-using JsonConverter = System.Text.Json.Serialization.JsonConverter;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -254,6 +253,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
 
         var ledgerTransactionsToAdd = new List<LedgerTransaction>();
+        var ledgerTransactionSearchIndicesToAdd = new List<LedgerTransactionSearchIndex>();
         var entitiesToAdd = new List<Entity>();
 
         SequencesHolder sequences;
@@ -279,19 +279,17 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         // step: scan for any referenced entities
         {
-            var hrp = _networkConfigurationProvider.GetHrpDefinition();
-
-            foreach (var commitedTransaction in ledgerExtension.CommittedTransactions)
+            foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
             {
-                var stateVersion = commitedTransaction.StateVersion;
-                var stateUpdates = commitedTransaction.Receipt.StateUpdates;
+                var stateVersion = committedTransaction.StateVersion;
+                var stateUpdates = committedTransaction.Receipt.StateUpdates;
 
                 long? nextEpoch = null;
                 long? newRoundInEpoch = null;
                 DateTime? newRoundTimestamp = null;
                 LedgerTransactionKindFilterConstraint? kindFilterConstraint = null;
 
-                if (commitedTransaction.LedgerTransaction is CoreModel.ValidatorLedgerTransaction vlt)
+                if (committedTransaction.LedgerTransaction is CoreModel.ValidatorLedgerTransaction vlt)
                 {
                     switch (vlt.ValidatorTransaction)
                     {
@@ -301,12 +299,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     }
                 }
 
-                if (commitedTransaction.LedgerTransaction is CoreModel.SystemLedgerTransaction)
+                if (committedTransaction.LedgerTransaction is CoreModel.SystemLedgerTransaction)
                 {
                     // no-op so far
                 }
 
-                if (commitedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction)
+                if (committedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction)
                 {
                     kindFilterConstraint = LedgerTransactionKindFilterConstraint.User;
                 }
@@ -460,6 +458,28 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     referencedEntities.GetOrAdd(sid.EntityIdHex, _ => new ReferencedEntity(sid.EntityIdHex, sid.EntityType, stateVersion));
                 }
 
+                if (committedTransaction.Receipt.Events != null)
+                {
+                    foreach (var @event in committedTransaction.Receipt.Events)
+                    {
+                        switch (@event.Type.Emitter)
+                        {
+                            case CoreModel.FunctionEventEmitterIdentifier functionEventEmitterIdentifier:
+                                referencedEntities.GetOrAdd(
+                                    functionEventEmitterIdentifier.Entity.EntityIdHex,
+                                    _ => new ReferencedEntity(functionEventEmitterIdentifier.Entity.EntityIdHex, functionEventEmitterIdentifier.Entity.EntityType, stateVersion));
+                                break;
+                            case CoreModel.MethodEventEmitterIdentifier methodEventEmitterIdentifier:
+                                referencedEntities.GetOrAdd(
+                                    methodEventEmitterIdentifier.Entity.EntityIdHex,
+                                    _ => new ReferencedEntity(methodEventEmitterIdentifier.Entity.EntityIdHex, methodEventEmitterIdentifier.Entity.EntityType, stateVersion));
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@event.Type.Emitter), @event.Type.Emitter, null);
+                        }
+                    }
+                }
+
                 /* NB:
                    The Epoch Transition Transaction sort of fits between epochs, but it seems to fit slightly more naturally
                    as the _first_ transaction of a new epoch, as creates the next EpochData, and the RoundData to 0.
@@ -484,9 +504,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     IndexInEpoch: isStartOfEpoch ? 0 : lastTransactionSummary.IndexInEpoch + 1,
                     IndexInRound: isStartOfRound ? 0 : lastTransactionSummary.IndexInRound + 1,
                     IsEndOfEpoch: nextEpoch != null,
-                    TransactionAccumulator: commitedTransaction.LedgerTransaction.GetPayloadBytes());
+                    TransactionAccumulator: committedTransaction.LedgerTransaction.GetPayloadBytes());
 
-                LedgerTransaction ledgerTransaction = commitedTransaction.LedgerTransaction switch
+                LedgerTransaction ledgerTransaction = committedTransaction.LedgerTransaction switch
                 {
                     CoreModel.UserLedgerTransaction ult => new UserLedgerTransaction
                     {
@@ -499,10 +519,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     _ => throw new UnreachableException(),
                 };
 
-                var feeSummary = commitedTransaction.Receipt.FeeSummary;
+                var feeSummary = committedTransaction.Receipt.FeeSummary;
 
-                ledgerTransaction.StateVersion = commitedTransaction.StateVersion;
-                ledgerTransaction.TransactionAccumulator = commitedTransaction.GetAccumulatorHashBytes();
+                ledgerTransaction.StateVersion = committedTransaction.StateVersion;
+                ledgerTransaction.TransactionAccumulator = committedTransaction.GetAccumulatorHashBytes();
                 // TODO commented out as incompatible with current Core API version
                 ledgerTransaction.Message = null; // message: transaction.Metadata.Message?.ConvertFromHex(),
                 ledgerTransaction.Epoch = summary.Epoch;
@@ -511,25 +531,25 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 ledgerTransaction.IndexInRound = summary.IndexInRound;
                 ledgerTransaction.IsEndOfEpoch = summary.IsEndOfEpoch;
                 ledgerTransaction.FeePaid = feeSummary != null
-                    ? TokenAmount.FromDecimalString(commitedTransaction.Receipt.FeeSummary.XrdTotalExecutionCost)
+                    ? TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdTotalExecutionCost)
                     : null;
                 ledgerTransaction.TipPaid = feeSummary != null
-                    ? TokenAmount.FromDecimalString(commitedTransaction.Receipt.FeeSummary.XrdTotalTipped)
+                    ? TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdTotalTipped)
                     : null;
                 ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
                 ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
                 ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
                 ledgerTransaction.KindFilterConstraint = kindFilterConstraint;
-                ledgerTransaction.RawPayload = commitedTransaction.LedgerTransaction.GetUnwrappedPayloadBytes();
+                ledgerTransaction.RawPayload = committedTransaction.LedgerTransaction.GetUnwrappedPayloadBytes();
                 ledgerTransaction.EngineReceipt = new TransactionReceipt
                 {
-                    StateUpdates = commitedTransaction.Receipt.StateUpdates.ToJson(),
-                    Status = commitedTransaction.Receipt.Status.ToModel(),
-                    FeeSummary = commitedTransaction.Receipt.FeeSummary.ToJson(),
-                    ErrorMessage = commitedTransaction.Receipt.ErrorMessage,
-                    Items = commitedTransaction.Receipt.Output != null ? JsonConvert.SerializeObject(commitedTransaction.Receipt.Output) : null,
-                    NextEpoch = commitedTransaction.Receipt.NextEpoch?.ToJson(),
-                    Events = commitedTransaction.Receipt.Events != null ? JsonConvert.SerializeObject(commitedTransaction.Receipt.Events) : null,
+                    StateUpdates = committedTransaction.Receipt.StateUpdates.ToJson(),
+                    Status = committedTransaction.Receipt.Status.ToModel(),
+                    FeeSummary = committedTransaction.Receipt.FeeSummary.ToJson(),
+                    ErrorMessage = committedTransaction.Receipt.ErrorMessage,
+                    Items = committedTransaction.Receipt.Output != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Output) : null,
+                    NextEpoch = committedTransaction.Receipt.NextEpoch?.ToJson(),
+                    Events = committedTransaction.Receipt.Events != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Events) : null,
                 };
 
                 ledgerTransactionsToAdd.Add(ledgerTransaction);
@@ -660,13 +680,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             }
 
             referencedEntities.InvokePostResolveConfiguration();
-
-            sw = Stopwatch.StartNew();
-
-            rowsInserted += await writeHelper.CopyEntity(entitiesToAdd, token);
-            rowsInserted += await writeHelper.CopyLedgerTransaction(ledgerTransactionsToAdd, referencedEntities, token);
-
-            dbWriteDuration += sw.Elapsed;
         }
 
         var fungibleVaultChanges = new List<FungibleVaultChange>();
@@ -805,6 +818,85 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 v => TokenAmount.FromDecimalString(v.Stake));
 
                         validatorSetChanges.Add(new ValidatorSetChange(validatorSet.Epoch, change, stateVersion));
+                    }
+                }
+
+                // TODO we'd love to see schemed JSON payload here and/or support for SBOR to schemed JSON in RET but this is not available yet; consider this entire section heavy WIP
+                foreach (var @event in committedTransaction.Receipt.Events)
+                {
+                    if (@event.Type.Emitter is not CoreModel.MethodEventEmitterIdentifier methodEventEmitter)
+                    {
+                        continue;
+                    }
+
+                    var eventEmitterEntity = referencedEntities.Get(methodEventEmitter.Entity.EntityIdHex);
+
+                    // TODO "deposit" and "withdrawal" events should be used to alter entity_resource_aggregated_vaults_history table (drop tmp_tmp_remove_me_once_tx_events_become_available column)
+                    // TODO we should most likely ensure that those are LocalTypeIndices we believe they are, as they're of kind=SchemaLocal, i.e. we should check the schema
+                    if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.Vault)
+                    {
+                        // TODO "withdrawal" even
+                        if (@event.Type.LocalTypeIndex.Index == 27)
+                        {
+                            var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
+                            var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<VaultEntity>().ResourceEntityId;
+
+                            ledgerTransactionSearchIndicesToAdd.Add(new LedgerTransactionSearchIndex
+                            {
+                                Id = sequences.LedgerTransactionSearchIndexSequence++,
+                                TransactionStateVersion = stateVersion,
+                                EntityId = globalAncestorId,
+                                OperationType = LedgerTransactionSearchIndexOperationType.Withdrawal,
+                                OperationResourceEntityId = resourceEntityId,
+                            });
+                        }
+
+                        // TODO "deposit" event
+                        if (@event.Type.LocalTypeIndex.Index == 28)
+                        {
+                            var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
+                            var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<VaultEntity>().ResourceEntityId;
+
+                            ledgerTransactionSearchIndicesToAdd.Add(new LedgerTransactionSearchIndex
+                            {
+                                Id = sequences.LedgerTransactionSearchIndexSequence++,
+                                TransactionStateVersion = stateVersion,
+                                EntityId = globalAncestorId,
+                                OperationType = LedgerTransactionSearchIndexOperationType.Deposit,
+                                OperationResourceEntityId = resourceEntityId,
+                            });
+                        }
+                    }
+
+                    // TODO keep track of "total supply"
+                    if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.FungibleResource)
+                    {
+                        // TODO "mint" event
+                        if (@event.Type.LocalTypeIndex.Index == 35)
+                        {
+                            // TODO keep track of "total minted"
+                        }
+
+                        // TODO "burn" event
+                        if (@event.Type.LocalTypeIndex.Index == 36)
+                        {
+                            // TODO keep track of "total burnt"
+                        }
+                    }
+
+                    if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.NonFungibleResource)
+                    {
+                        // TODO "mint" event
+                        if (@event.Type.LocalTypeIndex.Index == 83)
+                        {
+                            // TODO keep track of "total minted" (@event.data.data_json.fields.elements is an array of NFIDs)
+                        }
+
+                        // TODO "burn" event
+                        if (@event.Type.LocalTypeIndex.Index == 85)
+                        {
+                            // TODO keep track of "total burnt" (@event.data.data_json.fields.elements is an array of NFIDs)
+                        }
                     }
                 }
             }
@@ -1253,8 +1345,16 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
             var entityResourceAggregateHistoryToAdd = entityResourceAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()).ToList();
 
+            foreach (var lt in ledgerTransactionsToAdd)
+            {
+                lt.ReferencedEntities = referencedEntities.OfStateVersion(lt.StateVersion).Select(e => e.DatabaseId).ToList();
+            }
+
             sw = Stopwatch.StartNew();
 
+            rowsInserted += await writeHelper.CopyEntity(entitiesToAdd, token);
+            rowsInserted += await writeHelper.CopyLedgerTransaction(ledgerTransactionsToAdd, token);
+            rowsInserted += await writeHelper.CopyLedgerTransactionSearchIndex(ledgerTransactionSearchIndicesToAdd, token);
             rowsInserted += await writeHelper.CopyEntityStateHistory(entityStateToAdd, token);
             rowsInserted += await writeHelper.CopyEntityAccessRulesChainHistory(entityAccessRulesChainHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityMetadataHistory(entityMetadataHistoryToAdd, token);

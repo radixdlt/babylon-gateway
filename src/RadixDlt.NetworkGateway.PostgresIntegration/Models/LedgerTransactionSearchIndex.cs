@@ -62,39 +62,35 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+
+// TODO it is possible we'll create entire class hierarchy with multiple properties per operation but lets start simple
+internal enum LedgerTransactionSearchIndexOperationType
 {
-    public long EntityStateHistorySequence { get; set; }
+    Deposit,
+    Withdrawal,
+}
 
-    public long EntitySequence { get; set; }
+[Table("ledger_transaction_search_index")]
+internal class LedgerTransactionSearchIndex
+{
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public long EntityAccessRulesChainHistorySequence { get; set; }
+    [Column("transaction_state_version")]
+    public long TransactionStateVersion { get; set; }
 
-    public long EntityMetadataHistorySequence { get; set; }
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 
-    public long EntityMetadataAggregateHistorySequence { get; set; }
+    [Column("operation_type")]
+    public LedgerTransactionSearchIndexOperationType? OperationType { get; set; }
 
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionSearchIndexSequence { get; set; }
+    [Column("operation_resource_entity_id")]
+    public long? OperationResourceEntityId { get; set; }
 }

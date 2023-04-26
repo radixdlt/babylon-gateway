@@ -84,6 +84,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
 
+    public DbSet<LedgerTransactionSearchIndex> LedgerTransactionSearchIndex => Set<LedgerTransactionSearchIndex>();
+
     public DbSet<PendingTransaction> PendingTransactions => Set<PendingTransaction>();
 
     public DbSet<Entity> Entities => Set<Entity>();
@@ -130,6 +132,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<LedgerTransactionKindFilterConstraint>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionSearchIndexOperationType>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
         modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();
