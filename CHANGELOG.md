@@ -3,8 +3,12 @@ _Release Date: Unreleased_
 
 Changelog will appear here when changes are merged.
 
+### 0.3.1
+
+- Fix `/state/non-fungible/data` to return data for all NFIDs
+
 ## 0.3.0 - RCNet-V1
-_Release Date: 31.02.2023_
+_Release Date: 31.03.2023_
 
 - `/entity/overview` and `/entity/details` endpoints replaced with single `/state/entity/details`.
 - Fungible and non-fungible resources are now ordered by the most recently updated.

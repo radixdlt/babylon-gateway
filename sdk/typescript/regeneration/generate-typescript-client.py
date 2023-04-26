@@ -1,7 +1,7 @@
-import urllib.request, logging, subprocess, os, shutil, re
+import urllib.request, logging, subprocess, os, shutil, re, yaml
 
 # Inspired by https://github.com/radixdlt/radixdlt-python-clients
-# Requires python 3+ and various packages above
+# Requires python 3+ and `pip install pyyaml`
 
 logger = logging.getLogger()
 logging.basicConfig(format='%(asctime)s [%(levelname)s]: %(message)s', level=logging.INFO)
@@ -11,8 +11,8 @@ API_GENERATED_DESTINATION = '../lib/generated'
 
 OPENAPI_GENERATION_FOLDER='.'
 OPENAPI_TEMP_GENERATION_FOLDER='./temp'
-OPENAPI_GENERATOR_FIXED_VERSION_JAR=os.path.join(OPENAPI_GENERATION_FOLDER, 'openapi-generator-cli-6.1.0.jar')
-OPENAPI_GENERATOR_FIXED_VERSION_DOWNLOAD_URL='https://search.maven.org/remotecontent?filepath=org/openapitools/openapi-generator-cli/6.1.0/openapi-generator-cli-6.1.0.jar'
+OPENAPI_GENERATOR_FIXED_VERSION_JAR=os.path.join(OPENAPI_GENERATION_FOLDER, 'openapi-generator-cli-6.2.1.jar')
+OPENAPI_GENERATOR_FIXED_VERSION_DOWNLOAD_URL='https://search.maven.org/remotecontent?filepath=org/openapitools/openapi-generator-cli/6.2.1/openapi-generator-cli-6.2.1.jar'
 
 def safe_os_remove(path, silent = False):
     try:
@@ -48,13 +48,112 @@ def run(command, cwd = '.', should_log = False):
     if (should_log): logging.debug('Response: %s', stdout)
     return stdout
 
-def generate_models(spec_file, tmp_client_folder, out_location):
+def split_out_inherited_discriminated_types(schema):
+    """
+    Some context:
+    
+    The Open API specificaiton is very unclear how to handle discriminated unions, leaving different languages
+    and code generators to implement it in different ways.
+
+    The "best" way to do it which allows class-based languages with inheritance to work right is to have allOf on the
+    parent class, and have various child classes use anyOd, like this: https://redocly.com/docs/resources/discriminator/#Vehicle.yaml
+
+    BUT many code generators - such as:
+    - The TypeScript "open api generator"
+    - Ovral - a specialized typescript generator
+
+    Do not support it properly - in particular, to avoid recursive type definitions, you need to essentially add in a "Base" type.
+    This method introduces this Base type so that the type generation works correctly.
+    """
+    types = schema["components"]["schemas"]
+    typeRefsChanged = {}
+    originalTypeNames = list(types.keys())
+    
+    # First pass - we need to find all the types that are discriminated unions, and split them
+    for typeName in originalTypeNames:
+        typeData = types[typeName]
+        if "discriminator" in typeData and "type" in typeData and typeData["type"] == "object" and not ("allOf" in typeData or "anyOf" in typeData or "oneOf" in typeData):
+            # Assume it's one of the types we're targetting!
+
+            baseTypeData = {
+                typeDataKey: typeData[typeDataKey] for typeDataKey in typeData if typeDataKey != "discriminator"
+            }
+
+            unionTypeData = {
+                # Technically speaking it should be `anyOf` here because the child type doesn't validate the exact key...
+                # And so multiple child types could be valid at the same time.
+                # But this results in the typescript generator outputting invalid code which doesn't compile (yay).
+                # So we stick with "oneOf".
+                "oneOf": [
+                    { "$ref": childTypeReference } for childTypeReference in typeData["discriminator"]["mapping"].values()
+                ],
+                "discriminator": typeData["discriminator"],
+            }
+
+            baseTypeName = typeName + "Base"
+            while baseTypeName in types: # Very basic collision avoidance
+                baseTypeName = baseTypeName + "Derived"
+
+            typeRef = "#/components/schemas/" + typeName
+            baseTypeRef = "#/components/schemas/" + baseTypeName
+            typeRefsChanged[typeRef] = {
+                "baseTypeRef": baseTypeRef,
+                "discriminator": typeData["discriminator"],
+            }
+
+            types[typeName] = unionTypeData
+            types[baseTypeName] = baseTypeData
+
+    # Second pass - we go through all the other types, and update their references to the new types
+    for typeName in originalTypeNames:
+        typeData = types[typeName]
+        if "allOf" in typeData and isinstance(typeData["allOf"], list):
+            match = None
+            for inheritedType in typeData["allOf"]:
+                if "$ref" in inheritedType and inheritedType["$ref"] in typeRefsChanged:
+                    parentTypeDetails = typeRefsChanged[inheritedType["$ref"]]
+                    inheritedType["$ref"] = parentTypeDetails["baseTypeRef"]
+                    match = parentTypeDetails
+            if match is not None:
+                mapping = match["discriminator"]["mapping"]
+                ownTag = next((tag for tag in mapping if mapping[tag] == "#/components/schemas/" + typeName), None)
+                if ownTag is not None:
+                    # Either find the existing inline inner type to amend - or add one
+                    lastInnerTypeData = next((
+                        innerTypeData for innerTypeData in typeData["allOf"]
+                            if "type" in innerTypeData and innerTypeData["type"] == "object"
+                            and "properties" in innerTypeData and isinstance(innerTypeData["properties"], dict)
+                    ), None)
+                    if lastInnerTypeData is None:
+                        lastInnerTypeData = { "type": "object", "properties": {} }
+                        typeData["allOf"].append(lastInnerTypeData)
+
+                    # Restrict the type of the property name to match the discriminator
+                    lastInnerTypeData["properties"][match["discriminator"]["propertyName"]] = {
+                        "type": "string",
+                        "enum": [ownTag],
+                    }
+
+
+def prepare_schema_for_generation(original_schema_file, api_schema_temp_filename):
+    with open(original_schema_file, 'r') as file:
+        schema = yaml.safe_load(file)
+
+    # Open API generator only works with 3.0.0
+    schema['openapi'] = '3.0.0'
+    split_out_inherited_discriminated_types(schema)
+
+    with open(api_schema_temp_filename, 'w') as file:
+        yaml.dump(schema, file, sort_keys=False)
+
+def generate_models(prepared_spec_file, tmp_client_folder, out_location):
     safe_os_remove(tmp_client_folder, True)
     # See https://openapi-generator.tech/docs/generators/typescript-fetch/
     run(['java', '-jar', OPENAPI_GENERATOR_FIXED_VERSION_JAR, 'generate',
          '-g', 'typescript-fetch',
-         '-i', spec_file,
+         '-i', prepared_spec_file,
          '-o', tmp_client_folder,
+         '-t', os.path.join(OPENAPI_GENERATION_FOLDER, 'template-overrides'),
          '--additional-properties=supportsES6=true,modelPropertyNaming=original,npmVersion=0.1.0'
     ], should_log=False)
 
@@ -91,12 +190,12 @@ if __name__ == "__main__":
     safe_os_remove(OPENAPI_TEMP_GENERATION_FOLDER, silent=True)
     os.makedirs(OPENAPI_TEMP_GENERATION_FOLDER)
 
-    api_schema_temp_filename = os.path.join(OPENAPI_TEMP_GENERATION_FOLDER, 'gateway-api-schema.yaml')
-    copy_file(API_SCHEMA_LOCATION, api_schema_temp_filename)
-    replace_in_file(api_schema_temp_filename, 'openapi: 3.1.0', 'openapi: 3.0.0')
-    logging.info('Loaded API Schema from {}'.format(os.path.abspath(API_SCHEMA_LOCATION)))
+    logging.info('Loading API Schema from {}, and preparing it...'.format(os.path.abspath(API_SCHEMA_LOCATION)))
 
-    logging.info('Generating code from schema...')
+    api_schema_temp_filename = os.path.join(OPENAPI_TEMP_GENERATION_FOLDER, 'gateway-api-schema.yaml')
+    prepare_schema_for_generation(API_SCHEMA_LOCATION, api_schema_temp_filename)
+
+    logging.info('Generating code from prepared schema...')
 
     generate_models(api_schema_temp_filename, os.path.join(OPENAPI_TEMP_GENERATION_FOLDER, "typescript"), API_GENERATED_DESTINATION)
 

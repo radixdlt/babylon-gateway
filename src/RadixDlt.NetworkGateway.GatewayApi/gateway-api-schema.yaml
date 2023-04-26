@@ -1792,7 +1792,7 @@ components:
                 $ref: "#/components/schemas/NonFungibleId"
       example:
         resource_address: "<non-fungible-entity-address>"
-        non_fungible_ids: ["0a0100000000"]
+        non_fungible_ids: ["#1#"]
     StateNonFungibleDataResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
