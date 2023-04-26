@@ -154,6 +154,42 @@ jobs:
                 }
             }'
 
+  ephemeral-deploy-and-benchmark:
+    runs-on: ubuntu-22.04
+    needs:
+      - docker-gateway-api-gcr
+      - docker-data-aggregator-gcr
+      - docker-database-migrations-gcr
+      - setup-tags
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - name: Process ci.env
+        run: |
+          export $(grep -v '^#' ./deployment/ci.env | xargs)
+          echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
+      - name: Check if ci.env changed
+        id: changed-files
+        uses: tj-actions/changed-files@db5dd7c176cf59a19ef6561bf1936f059dee4b74
+        with:
+          files: |
+            deployment/ci.env
+      - name: Deploy and run benchmark on an ephemeral network
+        uses: toptal/jenkins-job-trigger-action@649c04c83c099c759aba134bf78138a303ec095f
+        with:
+          jenkins_url: "${{ secrets.JENKINS_URL }}"
+          jenkins_user: ${{ secrets.JENKINS_USER }}
+          jenkins_token: ${{ secrets.BABYLON_NODE_JENKINS_API_TOKEN }}
+          job_name: "ephemeral-deployments/job/ephemeral-env-gateway-benchmark"
+          job_params: |
+            {
+              "gatewayDockerTag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
+              "gatewayBranch": "${{ env.GATEWAY_BRANCH }}",
+              "nodeDockerTag": "${{ env.FULLNODE_VERSION }}",
+              "postgresVersion": "${{ env.POSTGRES_VERSION }}"
+            }
+          job_timeout: "3600"
+
   deploy-pr:
     runs-on: ubuntu-22.04
     needs:
