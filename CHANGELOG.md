@@ -5,7 +5,9 @@ _Release Date: Unreleased_
 - added `image_tag` with currently deployed image tag to release information.
 - opt-in properties added to `/transaction/committed-details`,`/state/entity/details` user can specify additional properties in response.
 - added opt-in royalty vault balance to `/state/entity/details` if queried entity is component or package.
-
+- added possibility to query for `explicit_metadata` in  `/state/entity/details`, ` /state/entity/page/fungibles`, `/state/entity/page/non-fungibles`. If given metadata keys exist, they will be returned for top level entity and all returned resources.
+- possibility to configure max number of transaction fetched from CoreAPI in single batch by `MaxCoreApiTransactionBatchSize`. By default it's fetching 1000.
+- 
 ### 0.3.1
 
 - Fix `/state/non-fungible/data` to return data for all NFIDs

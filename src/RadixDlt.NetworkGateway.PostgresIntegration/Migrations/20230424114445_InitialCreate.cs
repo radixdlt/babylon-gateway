@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -109,7 +109,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     discriminator = table.Column<EntityType>(type: "entity_type", nullable: false),
                     package_id = table.Column<long>(type: "bigint", nullable: true),
                     blueprint_name = table.Column<string>(type: "text", nullable: true),
-                    royalty_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     divisibility = table.Column<int>(type: "integer", nullable: true),
                     store_of_non_fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     non_fungible_id_type = table.Column<NonFungibleIdType>(type: "non_fungible_id_type", nullable: true),

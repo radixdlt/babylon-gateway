@@ -1859,7 +1859,6 @@ components:
     StateNonFungibleDataRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
-        - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
             - resource_address

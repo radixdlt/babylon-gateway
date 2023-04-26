@@ -370,7 +370,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         referencedEntities.GetOrAdd(rv.EntityIdHex, _ => new ReferencedEntity(rv.EntityIdHex, rv.EntityType, stateVersion)).IsImmediateChildOf(referencedEntity);
                         childToParentEntities[rv.EntityIdHex] = substateId.EntityIdHex;
 
-                        referencedEntity.PostResolveConfigure((IRoyaltyVaultHolder e) => e.RoyaltyVaultEntityId = referencedEntities.Get(rv.EntityIdHex).DatabaseId);
                         referencedEntities.Get(rv.EntityIdHex).PostResolveConfigure((VaultEntity e) => e.RoyaltyVaultOfEntityId = referencedEntity.DatabaseId);
                     }
 

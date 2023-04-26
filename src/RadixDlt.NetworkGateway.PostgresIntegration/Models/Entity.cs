@@ -134,7 +134,7 @@ internal class NonFungibleResourceEntity : ResourceEntity
     public NonFungibleIdType NonFungibleIdType { get; set; }
 }
 
-internal abstract class ComponentEntity : Entity, IRoyaltyVaultHolder
+internal abstract class ComponentEntity : Entity
 {
     [Column("package_id")]
     public long PackageId { get; set; }
@@ -142,21 +142,12 @@ internal abstract class ComponentEntity : Entity, IRoyaltyVaultHolder
     [Column("blueprint_name")]
     public string BlueprintName { get; set; }
 
-    [Column("royalty_vault_entity_id")]
-    public long? RoyaltyVaultEntityId { get; set; }
-
     public override List<long> CorrelatedEntities
     {
         get
         {
             var ce = base.CorrelatedEntities;
-
             ce.Add(PackageId);
-
-            if (RoyaltyVaultEntityId.HasValue)
-            {
-                ce.Add(RoyaltyVaultEntityId.Value);
-            }
 
             return ce;
         }
