@@ -177,7 +177,7 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyLedgerTransaction(ICollection<LedgerTransaction> entities, ReferencedEntityDictionary referencedEntities, CancellationToken token)
+    public async Task<int> CopyLedgerTransaction(ICollection<LedgerTransaction> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
@@ -200,7 +200,7 @@ internal class WriteHelper
             await writer.WriteAsync(lt.IndexInEpoch, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.IndexInRound, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.IsEndOfEpoch, NpgsqlDbType.Boolean, token);
-            await writer.WriteAsync(referencedEntities.OfStateVersion(lt.StateVersion).Select(re => re.DatabaseId).ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(lt.ReferencedEntities.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteNullableAsync(lt.FeePaid?.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
             await writer.WriteNullableAsync(lt.TipPaid?.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
             await writer.WriteAsync(lt.RoundTimestamp, NpgsqlDbType.TimestampTz, token);
@@ -240,6 +240,30 @@ internal class WriteHelper
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lt), lt, null);
             }
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
+    public async Task<int> CopyLedgerTransactionSearchIndex(ICollection<LedgerTransactionSearchIndex> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transaction_search_index (id, transaction_state_version, entity_id, operation_type, operation_resource_entity_id) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var ltsi in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(ltsi.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(ltsi.TransactionStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(ltsi.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteNullableAsync(ltsi.OperationType, "ledger_transaction_search_index_operation_type", token);
+            await writer.WriteNullableAsync(ltsi.OperationResourceEntityId, NpgsqlDbType.Bigint, token);
         }
 
         await writer.CompleteAsync(token);
@@ -636,7 +660,8 @@ SELECT
     setval('non_fungible_id_data_history_id_seq', @nonFungibleIdDataHistorySequence),
     setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence),
     setval('validator_public_key_history_id_seq', @validatorPublicKeyHistorySequence),
-    setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence)",
+    setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence),
+    setval('ledger_transaction_search_index_id_seq', @ledgerTransactionSearchIndexSequence)",
             parameters: new
             {
                 entityStateHistorySequence = sequences.EntityStateHistorySequence,
@@ -654,6 +679,7 @@ SELECT
                 nonFungibleIdStoreHistorySequence = sequences.NonFungibleIdStoreHistorySequence,
                 validatorPublicKeyHistorySequence = sequences.ValidatorPublicKeyHistorySequence,
                 validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,
+                ledgerTransactionSearchIndexSequence = sequences.LedgerTransactionSearchIndexSequence,
             },
             cancellationToken: token);
 

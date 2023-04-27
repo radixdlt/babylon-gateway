@@ -85,6 +85,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:access_rules_chain_subtype", "none,resource_manager_vault_access_rules_chain")
                 .Annotation("Npgsql:Enum:entity_type", "epoch_manager,fungible_resource,non_fungible_resource,normal_component,account_component,package,key_value_store,vault,clock,validator,access_controller,identity")
                 .Annotation("Npgsql:Enum:ledger_transaction_kind_filter_constraint", "user,epoch_change")
+                .Annotation("Npgsql:Enum:ledger_transaction_search_index_operation_type", "deposit,withdrawal")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "user,validator,system")
                 .Annotation("Npgsql:Enum:non_fungible_id_type", "string,integer,bytes,uuid")
@@ -260,6 +261,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_entity_vault_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ledger_transaction_search_index",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    transaction_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    operation_type = table.Column<LedgerTransactionSearchIndexOperationType>(type: "ledger_transaction_search_index_operation_type", nullable: true),
+                    operation_resource_entity_id = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ledger_transaction_search_index", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -626,6 +643,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "entity_vault_history");
+
+            migrationBuilder.DropTable(
+                name: "ledger_transaction_search_index");
 
             migrationBuilder.DropTable(
                 name: "ledger_transactions");
