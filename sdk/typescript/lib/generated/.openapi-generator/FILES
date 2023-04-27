@@ -73,6 +73,7 @@ models/PublicKeyType.ts
 models/ResourceAggregationLevel.ts
 models/ResultSetCursorMixin.ts
 models/ScryptoSborValue.ts
+models/StateEntityDetailsOptIns.ts
 models/StateEntityDetailsRequest.ts
 models/StateEntityDetailsRequestAllOf.ts
 models/StateEntityDetailsResponse.ts
@@ -99,6 +100,7 @@ models/StateEntityFungibleResourceVaultsPageRequestAllOf.ts
 models/StateEntityFungibleResourceVaultsPageResponse.ts
 models/StateEntityFungiblesPageRequest.ts
 models/StateEntityFungiblesPageRequestAllOf.ts
+models/StateEntityFungiblesPageRequestOptIns.ts
 models/StateEntityFungiblesPageResponse.ts
 models/StateEntityMetadataPageRequest.ts
 models/StateEntityMetadataPageRequestAllOf.ts
@@ -109,6 +111,8 @@ models/StateEntityNonFungibleIdsPageResponse.ts
 models/StateEntityNonFungibleResourceVaultsPageRequest.ts
 models/StateEntityNonFungibleResourceVaultsPageResponse.ts
 models/StateEntityNonFungiblesPageRequest.ts
+models/StateEntityNonFungiblesPageRequestAllOf.ts
+models/StateEntityNonFungiblesPageRequestOptIns.ts
 models/StateEntityNonFungiblesPageResponse.ts
 models/StateNonFungibleDataRequest.ts
 models/StateNonFungibleDataRequestAllOf.ts
@@ -127,7 +131,9 @@ models/StreamTransactionsRequest.ts
 models/StreamTransactionsRequestAllOf.ts
 models/StreamTransactionsResponse.ts
 models/TokenAmount.ts
+models/TransactionCommittedDetailsOptIns.ts
 models/TransactionCommittedDetailsRequest.ts
+models/TransactionCommittedDetailsRequestAllOf.ts
 models/TransactionCommittedDetailsResponse.ts
 models/TransactionCommittedDetailsResponseAllOf.ts
 models/TransactionCommittedDetailsResponseDetails.ts
@@ -138,6 +144,7 @@ models/TransactionPreviewRequest.ts
 models/TransactionPreviewRequestFlags.ts
 models/TransactionPreviewResponse.ts
 models/TransactionPreviewResponseLogsInner.ts
+models/TransactionReceipt.ts
 models/TransactionStatus.ts
 models/TransactionStatusRequest.ts
 models/TransactionStatusRequestAllOf.ts
