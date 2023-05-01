@@ -85,7 +85,7 @@ internal class StateEntityDetailsRequestValidator : AbstractValidator<GatewayMod
             {
                 RuleFor(x => x.Addresses.Count)
                     .GreaterThan(0)
-                    .LessThan(endpointOptionsSnapshot.Value.StateEntityDetailsMaxPageSize);
+                    .LessThanOrEqualTo(endpointOptionsSnapshot.Value.StateEntityDetailsMaxPageSize);
 
                 RuleForEach(x => x.Addresses)
                     .NotNull()
