@@ -66,7 +66,6 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.Collections.Generic;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -81,6 +80,10 @@ internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, by
 internal record ResourceSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);
 
 internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
+
+internal record NonFungibleDepositTransactionEvent(long EntityId, long ResourceEntityId, List<string> NonFungibleIds, long StateVersion);
+
+internal record NonFungibleWithdrawalTransactionEvent(long EntityId, long ResourceEntityId, List<string> NonFungibleIds, long StateVersion);
 
 internal record struct MetadataLookup(long EntityId, string Key);
 

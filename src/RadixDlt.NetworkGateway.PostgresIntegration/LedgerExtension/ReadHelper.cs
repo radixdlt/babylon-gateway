@@ -330,7 +330,12 @@ WHERE id IN(
             .ToDictionaryAsync(e => ((byte[])e.Address).ToHex(), token);
     }
 
-    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(
+        List<NonFungibleIdChange> nonFungibleIdStoreChanges,
+        List<NonFungibleVaultChange> nonFungibleVaultChanges,
+        List<NonFungibleWithdrawalTransactionEvent> nonFungibleWithdrawalTransactionEvents,
+        List<NonFungibleDepositTransactionEvent> nonFungibleDepositTransactionEvents,
+        CancellationToken token)
     {
         var nonFungibles = new HashSet<NonFungibleIdLookup>();
         var resourceEntityIds = new List<long>();
@@ -346,6 +351,22 @@ WHERE id IN(
             foreach (var nfid in nonFungibleVaultChange.NonFungibleIds)
             {
                 nonFungibles.Add(new NonFungibleIdLookup(nonFungibleVaultChange.ReferencedResource.DatabaseId, nfid));
+            }
+        }
+
+        foreach (var nonFungibleWithdrawalTransactionEvent in nonFungibleWithdrawalTransactionEvents)
+        {
+            foreach (var nfid in nonFungibleWithdrawalTransactionEvent.NonFungibleIds)
+            {
+                nonFungibles.Add(new NonFungibleIdLookup(nonFungibleWithdrawalTransactionEvent.ResourceEntityId, nfid));
+            }
+        }
+
+        foreach (var nonFungibleDepositTransactionEvent in nonFungibleDepositTransactionEvents)
+        {
+            foreach (var nfid in nonFungibleDepositTransactionEvent.NonFungibleIds)
+            {
+                nonFungibles.Add(new NonFungibleIdLookup(nonFungibleDepositTransactionEvent.ResourceEntityId, nfid));
             }
         }
 
@@ -423,7 +444,7 @@ SELECT
     nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence,
     nextval('validator_public_key_history_id_seq') AS ValidatorPublicKeyHistorySequence,
     nextval('validator_active_set_history_id_seq') AS ValidatorActiveSetHistorySequence,
-    nextval('ledger_transaction_search_index_id_seq') AS LedgerTransactionSearchIndexSequence",
+    nextval('ledger_transaction_events_id_seq') AS LedgerTransactionEventSequence",
             cancellationToken: token);
 
         return await _connection.QueryFirstAsync<SequencesHolder>(cd);

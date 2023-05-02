@@ -84,7 +84,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
 
-    public DbSet<LedgerTransactionSearchIndex> LedgerTransactionSearchIndex => Set<LedgerTransactionSearchIndex>();
+    public DbSet<LedgerTransactionEvent> LedgerTransactionEvents => Set<LedgerTransactionEvent>();
 
     public DbSet<PendingTransaction> PendingTransactions => Set<PendingTransaction>();
 
@@ -132,7 +132,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<LedgerTransactionKindFilterConstraint>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
-        modelBuilder.HasPostgresEnum<LedgerTransactionSearchIndexOperationType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionEventType>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
         modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();
@@ -190,6 +190,15 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<LedgerTransaction>()
             .HasIndex(lt => new { lt.KindFilterConstraint, lt.StateVersion })
             .HasFilter("kind_filter_constraint IS NOT NULL");
+
+        modelBuilder.Entity<LedgerTransactionEvent>()
+            .HasDiscriminator<LedgerTransactionEventType>(DiscriminatorColumnName)
+            .HasValue<DepositFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.DepositFungibleResource)
+            .HasValue<DepositNonFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.DepositNonFungibleResource)
+            .HasValue<WithdrawalFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.WithdrawalFungibleResource)
+            .HasValue<WithdrawalNonFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.WithdrawalNonFungibleResource);
+
+        // TODO add all necessary indices on LedgerTransactionEvent table
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)
