@@ -25,7 +25,7 @@ export class Transaction {
   }
 
   /**
-   * Get details of committed transaction together with ledger state at a time of commit. This will trigger two API requests, first to get transaction details and second to get ledger state at a time of commit.
+   * Get details of committed transaction together with ledger state at a time of commit
    */
   getCommittedDetails(
     transactionIntentHashHex: string
@@ -36,15 +36,5 @@ export class Transaction {
           intent_hash_hex: transactionIntentHashHex,
         },
       })
-      .then((response) =>
-        this.innerClient.transactionCommittedDetails({
-          transactionCommittedDetailsRequest: {
-            intent_hash_hex: transactionIntentHashHex,
-            at_ledger_state: {
-              state_version: response.transaction.state_version,
-            },
-          },
-        })
-      )
   }
 }

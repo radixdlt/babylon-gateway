@@ -37,7 +37,19 @@ export interface CommittedTransactionInfo {
      * @type {number}
      * @memberof CommittedTransactionInfo
      */
-    state_version: number | null;
+    state_version: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CommittedTransactionInfo
+     */
+    epoch: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CommittedTransactionInfo
+     */
+    round: number;
     /**
      * 
      * @type {TransactionStatus}
@@ -82,6 +94,8 @@ export interface CommittedTransactionInfo {
 export function instanceOfCommittedTransactionInfo(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "state_version" in value;
+    isInstance = isInstance && "epoch" in value;
+    isInstance = isInstance && "round" in value;
     isInstance = isInstance && "transaction_status" in value;
 
     return isInstance;
@@ -98,6 +112,8 @@ export function CommittedTransactionInfoFromJSONTyped(json: any, ignoreDiscrimin
     return {
         
         'state_version': json['state_version'],
+        'epoch': json['epoch'],
+        'round': json['round'],
         'transaction_status': TransactionStatusFromJSON(json['transaction_status']),
         'payload_hash_hex': !exists(json, 'payload_hash_hex') ? undefined : json['payload_hash_hex'],
         'intent_hash_hex': !exists(json, 'intent_hash_hex') ? undefined : json['intent_hash_hex'],
@@ -117,6 +133,8 @@ export function CommittedTransactionInfoToJSON(value?: CommittedTransactionInfo 
     return {
         
         'state_version': value.state_version,
+        'epoch': value.epoch,
+        'round': value.round,
         'transaction_status': TransactionStatusToJSON(value.transaction_status),
         'payload_hash_hex': value.payload_hash_hex,
         'intent_hash_hex': value.intent_hash_hex,
