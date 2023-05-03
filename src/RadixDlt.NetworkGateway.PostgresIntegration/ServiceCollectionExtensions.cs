@@ -106,6 +106,7 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
                 dataSourceBuilder.MapEnum<LedgerTransactionType>();
                 dataSourceBuilder.MapEnum<LedgerTransactionEventType>();
+                dataSourceBuilder.MapEnum<LedgerTransactionEventTypeFilter>();
                 dataSourceBuilder.MapEnum<NonFungibleIdType>();
                 dataSourceBuilder.MapEnum<PendingTransactionStatus>();
                 dataSourceBuilder.MapEnum<PublicKeyType>();
