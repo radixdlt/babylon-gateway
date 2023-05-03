@@ -1016,10 +1016,17 @@ components:
       type: object
       required:
         - state_version
+        - epoch
+        - round
         - transaction_status
       properties:
         state_version:
-          nullable: true
+          type: integer
+          format: int64
+        epoch:
+          type: integer
+          format: int64
+        round:
           type: integer
           format: int64
         transaction_status:

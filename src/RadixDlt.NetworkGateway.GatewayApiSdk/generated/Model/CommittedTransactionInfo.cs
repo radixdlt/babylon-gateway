@@ -110,20 +110,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="CommittedTransactionInfo" /> class.
         /// </summary>
         /// <param name="stateVersion">stateVersion (required).</param>
+        /// <param name="epoch">epoch (required).</param>
+        /// <param name="round">round (required).</param>
         /// <param name="transactionStatus">transactionStatus (required).</param>
         /// <param name="payloadHashHex">Hex-encoded SHA-256 hash..</param>
         /// <param name="intentHashHex">Hex-encoded SHA-256 hash..</param>
         /// <param name="feePaid">feePaid.</param>
         /// <param name="confirmedAt">confirmedAt.</param>
         /// <param name="errorMessage">errorMessage.</param>
-        public CommittedTransactionInfo(long? stateVersion = default(long?), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), TokenAmount feePaid = default(TokenAmount), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string))
+        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), TokenAmount feePaid = default(TokenAmount), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string))
         {
-            // to ensure "stateVersion" is required (not null)
-            if (stateVersion == null)
-            {
-                throw new ArgumentNullException("stateVersion is a required property for CommittedTransactionInfo and cannot be null");
-            }
             this.StateVersion = stateVersion;
+            this.Epoch = epoch;
+            this.Round = round;
             this.TransactionStatus = transactionStatus;
             this.PayloadHashHex = payloadHashHex;
             this.IntentHashHex = intentHashHex;
@@ -136,7 +135,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets StateVersion
         /// </summary>
         [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long? StateVersion { get; set; }
+        public long StateVersion { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Epoch
+        /// </summary>
+        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
+        public long Epoch { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Round
+        /// </summary>
+        [DataMember(Name = "round", IsRequired = true, EmitDefaultValue = true)]
+        public long Round { get; set; }
 
         /// <summary>
         /// Hex-encoded SHA-256 hash.
@@ -179,6 +190,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class CommittedTransactionInfo {\n");
             sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
+            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
+            sb.Append("  Round: ").Append(Round).Append("\n");
             sb.Append("  TransactionStatus: ").Append(TransactionStatus).Append("\n");
             sb.Append("  PayloadHashHex: ").Append(PayloadHashHex).Append("\n");
             sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
@@ -222,8 +235,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             return 
                 (
                     this.StateVersion == input.StateVersion ||
-                    (this.StateVersion != null &&
-                    this.StateVersion.Equals(input.StateVersion))
+                    this.StateVersion.Equals(input.StateVersion)
+                ) && 
+                (
+                    this.Epoch == input.Epoch ||
+                    this.Epoch.Equals(input.Epoch)
+                ) && 
+                (
+                    this.Round == input.Round ||
+                    this.Round.Equals(input.Round)
                 ) && 
                 (
                     this.TransactionStatus == input.TransactionStatus ||
@@ -265,10 +285,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.StateVersion != null)
-                {
-                    hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
+                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
+                hashCode = (hashCode * 59) + this.Round.GetHashCode();
                 hashCode = (hashCode * 59) + this.TransactionStatus.GetHashCode();
                 if (this.PayloadHashHex != null)
                 {
