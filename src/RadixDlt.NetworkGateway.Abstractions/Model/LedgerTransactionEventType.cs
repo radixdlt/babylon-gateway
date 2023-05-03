@@ -62,39 +62,12 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-internal class SequencesHolder
+public enum LedgerTransactionEventType
 {
-    public long EntityStateHistorySequence { get; set; }
-
-    public long EntitySequence { get; set; }
-
-    public long EntityAccessRulesChainHistorySequence { get; set; }
-
-    public long EntityMetadataHistorySequence { get; set; }
-
-    public long EntityMetadataAggregateHistorySequence { get; set; }
-
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionEventSequence { get; set; }
+    DepositFungibleResource,
+    DepositNonFungibleResource,
+    WithdrawalFungibleResource,
+    WithdrawalNonFungibleResource,
 }

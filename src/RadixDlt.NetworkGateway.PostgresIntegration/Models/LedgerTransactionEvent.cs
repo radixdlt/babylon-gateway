@@ -62,21 +62,15 @@
  * permissions under this License.
  */
 
-using System;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-// TODO it is possible we'll create entire class hierarchy with multiple properties per operation but lets start simple
-internal enum LedgerTransactionSearchIndexOperationType
-{
-    Deposit,
-    Withdrawal,
-}
-
-[Table("ledger_transaction_search_index")]
-internal class LedgerTransactionSearchIndex
+[Table("ledger_transaction_events")]
+internal abstract class LedgerTransactionEvent
 {
     [Key]
     [Column("id")]
@@ -87,10 +81,40 @@ internal class LedgerTransactionSearchIndex
 
     [Column("entity_id")]
     public long EntityId { get; set; }
+}
 
-    [Column("operation_type")]
-    public LedgerTransactionSearchIndexOperationType? OperationType { get; set; }
+internal class DepositFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
+{
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
 
-    [Column("operation_resource_entity_id")]
-    public long? OperationResourceEntityId { get; set; }
+    [Column("amount")]
+    public TokenAmount Amount { get; set; }
+}
+
+internal class DepositNonFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
+{
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+
+    [Column("non_fungible_id_data_ids")]
+    public List<long> NonFungibleIdDataIds { get; set; }
+}
+
+internal class WithdrawalFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
+{
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+
+    [Column("amount")]
+    public TokenAmount Amount { get; set; }
+}
+
+internal class WithdrawalNonFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
+{
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+
+    [Column("non_fungible_id_data_ids")]
+    public List<long> NonFungibleIdDataIds { get; set; }
 }
