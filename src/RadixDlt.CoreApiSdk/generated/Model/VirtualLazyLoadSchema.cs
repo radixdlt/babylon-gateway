@@ -90,22 +90,103 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines SchemaSubpathType
+    /// VirtualLazyLoadSchema
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum SchemaSubpathType
+    [DataContract(Name = "VirtualLazyLoadSchema")]
+    public partial class VirtualLazyLoadSchema : IEquatable<VirtualLazyLoadSchema>
     {
         /// <summary>
-        /// Enum Index for value: Index
+        /// Initializes a new instance of the <see cref="VirtualLazyLoadSchema" /> class.
         /// </summary>
-        [EnumMember(Value = "Index")]
-        Index = 1,
+        [JsonConstructorAttribute]
+        protected VirtualLazyLoadSchema() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VirtualLazyLoadSchema" /> class.
+        /// </summary>
+        /// <param name="exportName">exportName (required).</param>
+        public VirtualLazyLoadSchema(string exportName = default(string))
+        {
+            // to ensure "exportName" is required (not null)
+            if (exportName == null)
+            {
+                throw new ArgumentNullException("exportName is a required property for VirtualLazyLoadSchema and cannot be null");
+            }
+            this.ExportName = exportName;
+        }
 
         /// <summary>
-        /// Enum Field for value: Field
+        /// Gets or Sets ExportName
         /// </summary>
-        [EnumMember(Value = "Field")]
-        Field = 2
+        [DataMember(Name = "export_name", IsRequired = true, EmitDefaultValue = true)]
+        public string ExportName { get; set; }
+
+        /// <summary>
+        /// Returns the string presentation of the object
+        /// </summary>
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class VirtualLazyLoadSchema {\n");
+            sb.Append("  ExportName: ").Append(ExportName).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns the JSON string presentation of the object
+        /// </summary>
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Returns true if objects are equal
+        /// </summary>
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as VirtualLazyLoadSchema);
+        }
+
+        /// <summary>
+        /// Returns true if VirtualLazyLoadSchema instances are equal
+        /// </summary>
+        /// <param name="input">Instance of VirtualLazyLoadSchema to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(VirtualLazyLoadSchema input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.ExportName == input.ExportName ||
+                    (this.ExportName != null &&
+                    this.ExportName.Equals(input.ExportName))
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                if (this.ExportName != null)
+                {
+                    hashCode = (hashCode * 59) + this.ExportName.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
 
     }
 
