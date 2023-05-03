@@ -212,6 +212,8 @@ internal class TransactionQuerier : ITransactionQuerier
 
         return new GatewayModel.CommittedTransactionInfo(
             stateVersion: lt.StateVersion,
+            epoch: lt.Epoch,
+            round: lt.RoundInEpoch,
             transactionStatus: MapTransactionStatus(lt.EngineReceipt.Status),
             payloadHashHex: payloadHashHex,
             intentHashHex: intentHashHex,
