@@ -687,8 +687,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var metadataChanges = new List<MetadataChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
-        var nonFungibleDepositTransactionEvents = new List<NonFungibleDepositTransactionEvent>();
-        var nonFungibleWithdrawalTransactionEvents = new List<NonFungibleWithdrawalTransactionEvent>();
+        var observedNonFungibleDepositTransactionEvents = new List<ObservedDepositNonFungibleTransactionEvent>();
+        var observedNonFungibleWithdrawalTransactionEvents = new List<ObservedWithdrawalNonFungibleTransactionEvent>();
         var entityAccessRulesChainHistoryToAdd = new List<EntityAccessRulesChainHistory>();
         var entityStateToAdd = new List<EntityStateHistory>();
         var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>();
@@ -859,11 +859,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             }
                             else if (nonFungibleIds?.Any() == true)
                             {
-                                nonFungibleWithdrawalTransactionEvents.Add(new NonFungibleWithdrawalTransactionEvent(globalAncestorId, resourceEntityId, nonFungibleIds, stateVersion));
+                                observedNonFungibleWithdrawalTransactionEvents.Add(new ObservedWithdrawalNonFungibleTransactionEvent(globalAncestorId, resourceEntityId, nonFungibleIds, stateVersion));
                             }
                             else
                             {
-                                throw new InvalidOperationException("Unable to process data_json property");
+                                throw new InvalidOperationException("Unable to process data_json structure, expected either fields[0].value for fungibles or fields[0].elements for non-fungibles");
                             }
                         }
 
@@ -889,11 +889,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             }
                             else if (nonFungibleIds?.Any() == true)
                             {
-                                nonFungibleDepositTransactionEvents.Add(new NonFungibleDepositTransactionEvent(globalAncestorId, resourceEntityId, nonFungibleIds, stateVersion));
+                                observedNonFungibleDepositTransactionEvents.Add(new ObservedDepositNonFungibleTransactionEvent(globalAncestorId, resourceEntityId, nonFungibleIds, stateVersion));
                             }
                             else
                             {
-                                throw new InvalidOperationException("Unable to process data_json property");
+                                throw new InvalidOperationException("Unable to process data_json structure, expected either fields[0].value for fungibles or fields[0].elements for non-fungibles");
                             }
                         }
                     }
@@ -943,7 +943,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var mostRecentEntityResourceVaultAggregateHistory = await readHelper.MostRecentEntityResourceVaultAggregateHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
             var mostRecentNonFungibleIdStoreHistory = await readHelper.MostRecentNonFungibleIdStoreHistoryFor(nonFungibleIdChanges, token);
             var mostRecentResourceEntitySupplyHistory = await readHelper.MostRecentResourceEntitySupplyHistoryFor(resourceSupplyChanges, token);
-            var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, nonFungibleVaultChanges, nonFungibleWithdrawalTransactionEvents, nonFungibleDepositTransactionEvents, token);
+            var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, nonFungibleVaultChanges, observedNonFungibleWithdrawalTransactionEvents, observedNonFungibleDepositTransactionEvents, token);
             var existingValidatorKeys = await readHelper.ExistingValidatorKeysFor(validatorSetChanges, token);
 
             dbReadDuration += sw.Elapsed;
@@ -1380,7 +1380,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 lt.ReferencedEntities = referencedEntities.OfStateVersion(lt.StateVersion).Select(e => e.DatabaseId).ToList();
             }
 
-            foreach (var e in nonFungibleWithdrawalTransactionEvents)
+            foreach (var e in observedNonFungibleWithdrawalTransactionEvents)
             {
                 ledgerTransactionEventsToAdd.Add(new WithdrawalNonFungibleResourceLedgerTransactionEvent
                 {
@@ -1392,7 +1392,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 });
             }
 
-            foreach (var e in nonFungibleDepositTransactionEvents)
+            foreach (var e in observedNonFungibleDepositTransactionEvents)
             {
                 ledgerTransactionEventsToAdd.Add(new DepositNonFungibleResourceLedgerTransactionEvent
                 {

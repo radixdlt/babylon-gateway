@@ -333,8 +333,8 @@ WHERE id IN(
     public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(
         List<NonFungibleIdChange> nonFungibleIdStoreChanges,
         List<NonFungibleVaultChange> nonFungibleVaultChanges,
-        List<NonFungibleWithdrawalTransactionEvent> nonFungibleWithdrawalTransactionEvents,
-        List<NonFungibleDepositTransactionEvent> nonFungibleDepositTransactionEvents,
+        List<ObservedWithdrawalNonFungibleTransactionEvent> nonFungibleWithdrawalTransactionEvents,
+        List<ObservedDepositNonFungibleTransactionEvent> nonFungibleDepositTransactionEvents,
         CancellationToken token)
     {
         var nonFungibles = new HashSet<NonFungibleIdLookup>();

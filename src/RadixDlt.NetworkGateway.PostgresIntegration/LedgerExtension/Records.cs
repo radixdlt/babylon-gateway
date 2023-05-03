@@ -81,9 +81,9 @@ internal record ResourceSupplyChange(ReferencedEntity ResourceEntity, TokenAmoun
 
 internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
 
-internal record NonFungibleDepositTransactionEvent(long EntityId, long ResourceEntityId, List<string> NonFungibleIds, long StateVersion);
+internal record ObservedDepositNonFungibleTransactionEvent(long EntityId, long ResourceEntityId, List<string> NonFungibleIds, long StateVersion);
 
-internal record NonFungibleWithdrawalTransactionEvent(long EntityId, long ResourceEntityId, List<string> NonFungibleIds, long StateVersion);
+internal record ObservedWithdrawalNonFungibleTransactionEvent(long EntityId, long ResourceEntityId, List<string> NonFungibleIds, long StateVersion);
 
 internal record struct MetadataLookup(long EntityId, string Key);
 
