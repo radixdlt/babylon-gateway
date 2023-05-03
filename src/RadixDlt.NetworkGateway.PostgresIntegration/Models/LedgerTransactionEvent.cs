@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -81,6 +82,9 @@ internal abstract class LedgerTransactionEvent
 
     [Column("entity_id")]
     public long EntityId { get; set; }
+
+    [Column("type_filter")]
+    public abstract LedgerTransactionEventTypeFilter? TypeFilter { get; }
 }
 
 internal class DepositFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
@@ -90,6 +94,8 @@ internal class DepositFungibleResourceLedgerTransactionEvent : LedgerTransaction
 
     [Column("amount")]
     public TokenAmount Amount { get; set; }
+
+    public override LedgerTransactionEventTypeFilter? TypeFilter => LedgerTransactionEventTypeFilter.Deposit;
 }
 
 internal class DepositNonFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
@@ -99,6 +105,8 @@ internal class DepositNonFungibleResourceLedgerTransactionEvent : LedgerTransact
 
     [Column("non_fungible_id_data_ids")]
     public List<long> NonFungibleIdDataIds { get; set; }
+
+    public override LedgerTransactionEventTypeFilter? TypeFilter => LedgerTransactionEventTypeFilter.Deposit;
 }
 
 internal class WithdrawalFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
@@ -108,6 +116,8 @@ internal class WithdrawalFungibleResourceLedgerTransactionEvent : LedgerTransact
 
     [Column("amount")]
     public TokenAmount Amount { get; set; }
+
+    public override LedgerTransactionEventTypeFilter? TypeFilter => LedgerTransactionEventTypeFilter.Withdrawal;
 }
 
 internal class WithdrawalNonFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
@@ -117,4 +127,6 @@ internal class WithdrawalNonFungibleResourceLedgerTransactionEvent : LedgerTrans
 
     [Column("non_fungible_id_data_ids")]
     public List<long> NonFungibleIdDataIds { get; set; }
+
+    public override LedgerTransactionEventTypeFilter? TypeFilter => LedgerTransactionEventTypeFilter.Withdrawal;
 }

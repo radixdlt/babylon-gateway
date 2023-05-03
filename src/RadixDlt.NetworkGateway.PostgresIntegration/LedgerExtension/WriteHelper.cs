@@ -251,7 +251,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transaction_events (id, transaction_state_version, entity_id, discriminator, resource_entity_id, amount, non_fungible_id_data_ids) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transaction_events (id, transaction_state_version, entity_id, type_filter, discriminator, resource_entity_id, amount, non_fungible_id_data_ids) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -261,6 +261,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.TransactionStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteNullableAsync(e.TypeFilter, "ledger_transaction_event_type_filter", token);
             await writer.WriteAsync(discriminator, "ledger_transaction_event_type", token);
 
             switch (e)

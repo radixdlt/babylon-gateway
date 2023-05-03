@@ -96,6 +96,7 @@ internal static class CustomTypes
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionEventType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionEventTypeFilter>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PublicKeyType>();

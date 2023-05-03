@@ -85,6 +85,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:access_rules_chain_subtype", "none,resource_manager_vault_access_rules_chain")
                 .Annotation("Npgsql:Enum:entity_type", "epoch_manager,fungible_resource,non_fungible_resource,normal_component,account_component,package,key_value_store,vault,clock,validator,access_controller,identity")
                 .Annotation("Npgsql:Enum:ledger_transaction_event_type", "deposit_fungible_resource,deposit_non_fungible_resource,withdrawal_fungible_resource,withdrawal_non_fungible_resource")
+                .Annotation("Npgsql:Enum:ledger_transaction_event_type_filter", "deposit,withdrawal")
                 .Annotation("Npgsql:Enum:ledger_transaction_kind_filter_constraint", "user,epoch_change")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "user,validator,system")

@@ -62,56 +62,41 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace GatewayApi.Controllers;
+namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-[ApiController]
-[Route("stream")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
-public sealed class StreamController : ControllerBase
+public interface ITransactionSearcher
 {
-    private readonly ITransactionHandler _transactionHandler;
-    private readonly ITransactionSearcher _ts;
+    Task<ICollection<long>> Search(SearchCriteria criteria, CancellationToken token = default);
+}
 
-    public StreamController(ITransactionHandler transactionHandler, ITransactionSearcher ts)
+public class SearchCriteria
+{
+    public long EntityId { get; }
+
+    public long? StateVersionLowerBound { get; set; }
+
+    public long? StateVersionUpperBound { get; set; }
+
+    public LedgerTransactionEventTypeFilter? TypeFilter { get; set; }
+
+    public long? ResourceEntityIdFilter { get; set; }
+
+    public long? StateVersionCursor { get; }
+
+    public int Limit { get; }
+
+    public bool OrderAscending { get; }
+
+    public SearchCriteria(long entityId, long? stateVersionCursor, int limit, bool orderAscending)
     {
-        _transactionHandler = transactionHandler;
-        _ts = ts;
-    }
-
-    [HttpPost("transactions")]
-    public async Task<GatewayModel.StreamTransactionsResponse> Transactions(GatewayModel.StreamTransactionsRequest request, CancellationToken token)
-    {
-        return await _transactionHandler.StreamTransactions(request, token);
-    }
-
-    [HttpPost("transactions-by-entity")]
-    public async Task<ICollection<long>> TransactionsByEntity(
-        [FromQuery] long entityId,
-        [FromQuery] long? stateVersionCursor,
-        [FromQuery] bool? orderAscending,
-        [FromQuery] long? stateVersionLowerBound,
-        [FromQuery] long? stateVersionUpperBound,
-        [FromQuery] LedgerTransactionEventTypeFilter? typeFilter,
-        CancellationToken token)
-    {
-        var criteria = new SearchCriteria(entityId, stateVersionCursor, 5, orderAscending ?? false)
-        {
-            StateVersionLowerBound = stateVersionLowerBound,
-            StateVersionUpperBound = stateVersionUpperBound,
-            TypeFilter = typeFilter,
-        };
-
-        return await _ts.Search(criteria, token);
+        EntityId = entityId;
+        StateVersionCursor = stateVersionCursor;
+        Limit = limit;
+        OrderAscending = orderAscending;
     }
 }

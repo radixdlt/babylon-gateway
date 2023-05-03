@@ -62,56 +62,62 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace GatewayApi.Controllers;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-[ApiController]
-[Route("stream")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
-public sealed class StreamController : ControllerBase
+internal class TransactionSearcher : ITransactionSearcher
 {
-    private readonly ITransactionHandler _transactionHandler;
-    private readonly ITransactionSearcher _ts;
+    private readonly ReadOnlyDbContext _dbContext;
 
-    public StreamController(ITransactionHandler transactionHandler, ITransactionSearcher ts)
+    public TransactionSearcher(ReadOnlyDbContext dbContext)
     {
-        _transactionHandler = transactionHandler;
-        _ts = ts;
+        _dbContext = dbContext;
     }
 
-    [HttpPost("transactions")]
-    public async Task<GatewayModel.StreamTransactionsResponse> Transactions(GatewayModel.StreamTransactionsRequest request, CancellationToken token)
+    public async Task<ICollection<long>> Search(SearchCriteria criteria, CancellationToken token = default)
     {
-        return await _transactionHandler.StreamTransactions(request, token);
-    }
+        var query = _dbContext.LedgerTransactionEvents
+            .AsQueryable()
+            .Where(e => e.EntityId == criteria.EntityId);
 
-    [HttpPost("transactions-by-entity")]
-    public async Task<ICollection<long>> TransactionsByEntity(
-        [FromQuery] long entityId,
-        [FromQuery] long? stateVersionCursor,
-        [FromQuery] bool? orderAscending,
-        [FromQuery] long? stateVersionLowerBound,
-        [FromQuery] long? stateVersionUpperBound,
-        [FromQuery] LedgerTransactionEventTypeFilter? typeFilter,
-        CancellationToken token)
-    {
-        var criteria = new SearchCriteria(entityId, stateVersionCursor, 5, orderAscending ?? false)
+        if (criteria.StateVersionLowerBound.HasValue)
         {
-            StateVersionLowerBound = stateVersionLowerBound,
-            StateVersionUpperBound = stateVersionUpperBound,
-            TypeFilter = typeFilter,
-        };
+            query = query.Where(e => e.TransactionStateVersion >= criteria.StateVersionLowerBound.Value);
+        }
 
-        return await _ts.Search(criteria, token);
+        if (criteria.StateVersionUpperBound.HasValue)
+        {
+            query = query.Where(e => e.TransactionStateVersion <= criteria.StateVersionUpperBound.Value);
+        }
+
+        if (criteria.TypeFilter.HasValue)
+        {
+            query = query.Where(e => e.TypeFilter == criteria.TypeFilter.Value);
+        }
+
+        if (criteria.StateVersionCursor.HasValue)
+        {
+            query = criteria.OrderAscending
+                ? query.Where(e => e.TransactionStateVersion > criteria.StateVersionCursor.Value)
+                : query.Where(e => e.TransactionStateVersion < criteria.StateVersionCursor.Value);
+        }
+
+        var criteriaQuery = criteria.OrderAscending
+            ? query.OrderBy(e => e.TransactionStateVersion)
+            : query.OrderByDescending(e => e.TransactionStateVersion);
+
+        var result = await criteriaQuery
+            .DistinctBy(e => e.TransactionStateVersion)
+            .Select(e => e.TransactionStateVersion)
+            .Take(criteria.Limit)
+            .ToListAsync(token);
+
+        return result;
     }
 }

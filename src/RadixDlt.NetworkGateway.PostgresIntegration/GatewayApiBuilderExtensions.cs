@@ -85,6 +85,7 @@ public static class GatewayApiBuilderExtensions
         builder.Services
             .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
             .AddScoped<ITransactionQuerier, TransactionQuerier>()
+            .AddScoped<ITransactionSearcher, TransactionSearcher>()
             .AddScoped<IEntityStateQuerier, EntityStateQuerier>()
             .AddScoped<ISubmissionTrackingService, SubmissionTrackingService>()
             .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
