@@ -16,15 +16,15 @@ export type ReplaceProperty<
   NewPropertyType
 > = Omit<ObjectType, Property> & { [key in Property]: NewPropertyType }
 
-export type ReplaceItems<T, U> = ReplaceProperty<T, 'items', U>
-
-export type FungibleResourcesVaultCollection = ReplaceItems<
+export type FungibleResourcesVaultCollection = ReplaceProperty<
   FungibleResourcesCollection,
-  FungibleResourcesCollectionItemVaultAggregated
+  'items',
+  FungibleResourcesCollectionItemVaultAggregated[]
 >
-export type NonFungibleResourcesVaultCollection = ReplaceItems<
+export type NonFungibleResourcesVaultCollection = ReplaceProperty<
   NonFungibleResourcesCollection,
-  NonFungibleResourcesCollectionItemVaultAggregated
+  'items',
+  NonFungibleResourcesCollectionItemVaultAggregated[]
 >
 
 export type StateEntityDetailsVaultResponseItem =
