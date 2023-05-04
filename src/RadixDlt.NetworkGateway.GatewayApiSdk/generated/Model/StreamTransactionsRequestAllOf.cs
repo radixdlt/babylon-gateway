@@ -130,6 +130,32 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         [DataMember(Name = "kind_filter", EmitDefaultValue = true)]
         public KindFilterEnum? KindFilter { get; set; }
         /// <summary>
+        /// Defines TypeFilter
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum TypeFilterEnum
+        {
+            /// <summary>
+            /// Enum Deposit for value: Deposit
+            /// </summary>
+            [EnumMember(Value = "Deposit")]
+            Deposit = 1,
+
+            /// <summary>
+            /// Enum Withdrawal for value: Withdrawal
+            /// </summary>
+            [EnumMember(Value = "Withdrawal")]
+            Withdrawal = 2
+
+        }
+
+
+        /// <summary>
+        /// Gets or Sets TypeFilter
+        /// </summary>
+        [DataMember(Name = "type_filter", EmitDefaultValue = true)]
+        public TypeFilterEnum? TypeFilter { get; set; }
+        /// <summary>
         /// Configures the order of returned result set. Defaults to &#x60;desc&#x60;.
         /// </summary>
         /// <value>Configures the order of returned result set. Defaults to &#x60;desc&#x60;.</value>
@@ -162,11 +188,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="fromLedgerState">fromLedgerState.</param>
         /// <param name="kindFilter">Limit returned transactions by their kind. Defaults to &#x60;user&#x60;..</param>
+        /// <param name="entityId">entityId.</param>
+        /// <param name="typeFilter">typeFilter.</param>
         /// <param name="order">Configures the order of returned result set. Defaults to &#x60;desc&#x60;..</param>
-        public StreamTransactionsRequestAllOf(LedgerStateSelector fromLedgerState = default(LedgerStateSelector), KindFilterEnum? kindFilter = default(KindFilterEnum?), OrderEnum? order = default(OrderEnum?))
+        public StreamTransactionsRequestAllOf(LedgerStateSelector fromLedgerState = default(LedgerStateSelector), KindFilterEnum? kindFilter = default(KindFilterEnum?), long? entityId = default(long?), TypeFilterEnum? typeFilter = default(TypeFilterEnum?), OrderEnum? order = default(OrderEnum?))
         {
             this.FromLedgerState = fromLedgerState;
             this.KindFilter = kindFilter;
+            this.EntityId = entityId;
+            this.TypeFilter = typeFilter;
             this.Order = order;
         }
 
@@ -175,6 +205,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "from_ledger_state", EmitDefaultValue = true)]
         public LedgerStateSelector FromLedgerState { get; set; }
+
+        /// <summary>
+        /// Gets or Sets EntityId
+        /// </summary>
+        [DataMember(Name = "entity_id", EmitDefaultValue = true)]
+        public long? EntityId { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -186,6 +222,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class StreamTransactionsRequestAllOf {\n");
             sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
             sb.Append("  KindFilter: ").Append(KindFilter).Append("\n");
+            sb.Append("  EntityId: ").Append(EntityId).Append("\n");
+            sb.Append("  TypeFilter: ").Append(TypeFilter).Append("\n");
             sb.Append("  Order: ").Append(Order).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -232,6 +270,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.KindFilter.Equals(input.KindFilter)
                 ) && 
                 (
+                    this.EntityId == input.EntityId ||
+                    (this.EntityId != null &&
+                    this.EntityId.Equals(input.EntityId))
+                ) && 
+                (
+                    this.TypeFilter == input.TypeFilter ||
+                    this.TypeFilter.Equals(input.TypeFilter)
+                ) && 
+                (
                     this.Order == input.Order ||
                     this.Order.Equals(input.Order)
                 );
@@ -251,6 +298,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.KindFilter.GetHashCode();
+                if (this.EntityId != null)
+                {
+                    hashCode = (hashCode * 59) + this.EntityId.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.TypeFilter.GetHashCode();
                 hashCode = (hashCode * 59) + this.Order.GetHashCode();
                 return hashCode;
             }

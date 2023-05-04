@@ -85,4 +85,28 @@ public sealed record StatusLookupResult(string PayloadHashHex, GatewayModel.Tran
 
 public sealed record TransactionPageWithoutTotal(GatewayModel.LedgerTransactionsCursor? NextPageCursor, List<GatewayModel.CommittedTransactionInfo> Transactions);
 
-public sealed record TransactionStreamPageRequest(long FromStateVersion, GatewayModel.LedgerTransactionsCursor? Cursor, int PageSize, bool AscendingOrder, LedgerTransactionKindFilter KindFilter);
+public sealed record TransactionStreamPageRequest(
+    long FromStateVersion,
+    GatewayModel.LedgerTransactionsCursor? Cursor,
+    int PageSize,
+    bool AscendingOrder,
+    LedgerTransactionKindFilter KindFilter,
+    TransactionStreamPageRequestSearchCriteria? SearchCriteria);
+
+public class TransactionStreamPageRequestSearchCriteria
+{
+    public long EntityId { get; }
+
+    public long? StateVersionLowerBound { get; set; }
+
+    public long? StateVersionUpperBound { get; set; }
+
+    public LedgerTransactionEventTypeFilter? TypeFilter { get; set; }
+
+    public long? ResourceEntityIdFilter { get; set; }
+
+    public TransactionStreamPageRequestSearchCriteria(long entityId)
+    {
+        EntityId = entityId;
+    }
+}

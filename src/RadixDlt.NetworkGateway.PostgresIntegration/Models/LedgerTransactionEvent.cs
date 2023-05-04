@@ -84,7 +84,7 @@ internal abstract class LedgerTransactionEvent
     public long EntityId { get; set; }
 
     [Column("type_filter")]
-    public abstract LedgerTransactionEventTypeFilter? TypeFilter { get; }
+    public abstract LedgerTransactionEventTypeFilter? TypeFilter { get; protected set; }
 }
 
 internal class DepositFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
@@ -95,7 +95,7 @@ internal class DepositFungibleResourceLedgerTransactionEvent : LedgerTransaction
     [Column("amount")]
     public TokenAmount Amount { get; set; }
 
-    public override LedgerTransactionEventTypeFilter? TypeFilter => LedgerTransactionEventTypeFilter.Deposit;
+    public override LedgerTransactionEventTypeFilter? TypeFilter { get; protected set; } = LedgerTransactionEventTypeFilter.Deposit;
 }
 
 internal class DepositNonFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
@@ -106,7 +106,7 @@ internal class DepositNonFungibleResourceLedgerTransactionEvent : LedgerTransact
     [Column("non_fungible_id_data_ids")]
     public List<long> NonFungibleIdDataIds { get; set; }
 
-    public override LedgerTransactionEventTypeFilter? TypeFilter => LedgerTransactionEventTypeFilter.Deposit;
+    public override LedgerTransactionEventTypeFilter? TypeFilter { get; protected set; } = LedgerTransactionEventTypeFilter.Deposit;
 }
 
 internal class WithdrawalFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
@@ -117,7 +117,7 @@ internal class WithdrawalFungibleResourceLedgerTransactionEvent : LedgerTransact
     [Column("amount")]
     public TokenAmount Amount { get; set; }
 
-    public override LedgerTransactionEventTypeFilter? TypeFilter => LedgerTransactionEventTypeFilter.Withdrawal;
+    public override LedgerTransactionEventTypeFilter? TypeFilter { get; protected set; } = LedgerTransactionEventTypeFilter.Withdrawal;
 }
 
 internal class WithdrawalNonFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
@@ -128,5 +128,5 @@ internal class WithdrawalNonFungibleResourceLedgerTransactionEvent : LedgerTrans
     [Column("non_fungible_id_data_ids")]
     public List<long> NonFungibleIdDataIds { get; set; }
 
-    public override LedgerTransactionEventTypeFilter? TypeFilter => LedgerTransactionEventTypeFilter.Withdrawal;
+    public override LedgerTransactionEventTypeFilter? TypeFilter { get; protected set; } = LedgerTransactionEventTypeFilter.Withdrawal;
 }

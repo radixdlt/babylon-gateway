@@ -180,12 +180,28 @@ internal class DefaultTransactionHandler : ITransactionHandler
             _ => throw new UnreachableException($"Didn't expect {request.KindFilter} value"),
         };
 
+        TransactionStreamPageRequestSearchCriteria? searchCriteria = null;
+
+        if (request.EntityId.HasValue)
+        {
+            searchCriteria = new TransactionStreamPageRequestSearchCriteria(request.EntityId.Value);
+
+            searchCriteria.TypeFilter = request.TypeFilter switch
+            {
+                GatewayModel.StreamTransactionsRequest.TypeFilterEnum.Deposit => LedgerTransactionEventTypeFilter.Deposit,
+                GatewayModel.StreamTransactionsRequest.TypeFilterEnum.Withdrawal => LedgerTransactionEventTypeFilter.Withdrawal,
+                null => null,
+                _ => throw new UnreachableException($"Didn't expect {request.TypeFilter} value"),
+            };
+        }
+
         var transactionsPageRequest = new TransactionStreamPageRequest(
             FromStateVersion: fromLedgerState.StateVersion,
             Cursor: GatewayModel.LedgerTransactionsCursor.FromCursorString(request.Cursor),
             PageSize: request.LimitPerPage ?? DefaultPageLimit,
             AscendingOrder: request.Order == GatewayModel.StreamTransactionsRequest.OrderEnum.Asc,
-            KindFilter: kindFilter
+            KindFilter: kindFilter,
+            SearchCriteria: searchCriteria
         );
 
         var results = await _transactionQuerier.GetTransactionStream(transactionsPageRequest, atLedgerState, token);

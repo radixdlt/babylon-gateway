@@ -63,11 +63,8 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -81,37 +78,15 @@ namespace GatewayApi.Controllers;
 public sealed class StreamController : ControllerBase
 {
     private readonly ITransactionHandler _transactionHandler;
-    private readonly ITransactionSearcher _ts;
 
-    public StreamController(ITransactionHandler transactionHandler, ITransactionSearcher ts)
+    public StreamController(ITransactionHandler transactionHandler)
     {
         _transactionHandler = transactionHandler;
-        _ts = ts;
     }
 
     [HttpPost("transactions")]
     public async Task<GatewayModel.StreamTransactionsResponse> Transactions(GatewayModel.StreamTransactionsRequest request, CancellationToken token)
     {
         return await _transactionHandler.StreamTransactions(request, token);
-    }
-
-    [HttpPost("transactions-by-entity")]
-    public async Task<ICollection<long>> TransactionsByEntity(
-        [FromQuery] long entityId,
-        [FromQuery] long? stateVersionCursor,
-        [FromQuery] bool? orderAscending,
-        [FromQuery] long? stateVersionLowerBound,
-        [FromQuery] long? stateVersionUpperBound,
-        [FromQuery] LedgerTransactionEventTypeFilter? typeFilter,
-        CancellationToken token)
-    {
-        var criteria = new SearchCriteria(entityId, stateVersionCursor, 5, orderAscending ?? false)
-        {
-            StateVersionLowerBound = stateVersionLowerBound,
-            StateVersionUpperBound = stateVersionUpperBound,
-            TypeFilter = typeFilter,
-        };
-
-        return await _ts.Search(criteria, token);
     }
 }

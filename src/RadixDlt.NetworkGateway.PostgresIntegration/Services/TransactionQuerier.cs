@@ -67,7 +67,9 @@ using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -133,36 +135,89 @@ internal class TransactionQuerier : ITransactionQuerier
     {
         var stateVersionBoundary = request.Cursor?.StateVersionBoundary ?? request.FromStateVersion;
 
-        var query = _dbContext.LedgerTransactions
-            .Where(lt => lt.StateVersion <= atLedgerState.StateVersion);
+        IQueryable<long> query;
 
-        if (request.AscendingOrder)
+        if (request.SearchCriteria != null)
         {
-            query = query.Where(lt => lt.StateVersion >= stateVersionBoundary)
-                .OrderBy(lt => lt.StateVersion);
+            if (request.KindFilter != LedgerTransactionKindFilter.UserOnly)
+            {
+                throw new NotSupportedException("bla bla bla combination not supported");
+            }
+
+            var criteria = request.SearchCriteria;
+
+            var search = _dbContext.LedgerTransactionEvents
+                .Where(lte => lte.TransactionStateVersion <= atLedgerState.StateVersion)
+                .Where(lte => lte.EntityId == criteria.EntityId);
+
+            if (request.AscendingOrder)
+            {
+                search = search
+                    .Where(lte => lte.TransactionStateVersion >= stateVersionBoundary)
+                    .OrderBy(lte => lte.TransactionStateVersion);
+            }
+            else
+            {
+                search = search
+                    .Where(lte => lte.TransactionStateVersion <= stateVersionBoundary)
+                    .OrderByDescending(lte => lte.TransactionStateVersion);
+            }
+
+            if (criteria.StateVersionLowerBound.HasValue)
+            {
+                search = search.Where(lte => lte.TransactionStateVersion >= criteria.StateVersionLowerBound);
+            }
+
+            if (criteria.StateVersionUpperBound.HasValue)
+            {
+                search = search.Where(lte => lte.TransactionStateVersion <= criteria.StateVersionUpperBound);
+            }
+
+            if (criteria.TypeFilter.HasValue)
+            {
+                search = search.Where(lte => lte.TypeFilter == criteria.TypeFilter.Value);
+            }
+
+            query = search
+                .Select(e => e.TransactionStateVersion)
+                .TagWith(ForceDistinctInterceptor.Apply);
+                // .Distinct();
         }
         else
         {
-            query = query.Where(lt => lt.StateVersion <= stateVersionBoundary)
-                .OrderByDescending(lt => lt.StateVersion);
+            var search = _dbContext.LedgerTransactions
+                .Where(lt => lt.StateVersion <= atLedgerState.StateVersion);
+
+            if (request.AscendingOrder)
+            {
+                search = search
+                    .Where(lt => lt.StateVersion >= stateVersionBoundary)
+                    .OrderBy(lt => lt.StateVersion);
+            }
+            else
+            {
+                search = search
+                    .Where(lt => lt.StateVersion <= stateVersionBoundary)
+                    .OrderByDescending(lt => lt.StateVersion);
+            }
+
+            if (request.KindFilter == LedgerTransactionKindFilter.UserOnly)
+            {
+                search = search.Where(lt => lt.KindFilterConstraint == LedgerTransactionKindFilterConstraint.User);
+            }
+            else if (request.KindFilter == LedgerTransactionKindFilter.EpochChangeOnly)
+            {
+                search = search.Where(lt => lt.KindFilterConstraint == LedgerTransactionKindFilterConstraint.EpochChange);
+            }
+            else
+            {
+                search = search.Where(lt => lt.KindFilterConstraint != null);
+            }
+
+            query = search.Select(lt => lt.StateVersion);
         }
 
-        if (request.KindFilter == LedgerTransactionKindFilter.UserOnly)
-        {
-            query = query.Where(lt => lt.KindFilterConstraint == LedgerTransactionKindFilterConstraint.User);
-        }
-        else if (request.KindFilter == LedgerTransactionKindFilter.EpochChangeOnly)
-        {
-            query = query.Where(lt => lt.KindFilterConstraint == LedgerTransactionKindFilterConstraint.EpochChange);
-        }
-        else
-        {
-            query = query.Where(lt => lt.KindFilterConstraint != null);
-        }
-
-        return await query.Take(request.PageSize + 1)
-            .Select(at => at.StateVersion)
-            .ToListAsync(token);
+        return await query.Take(request.PageSize + 1).ToListAsync(token);
     }
 
     private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(List<long> transactionStateVersions, CancellationToken token)

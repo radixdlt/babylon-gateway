@@ -272,6 +272,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     transaction_state_version = table.Column<long>(type: "bigint", nullable: false),
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    type_filter = table.Column<LedgerTransactionEventTypeFilter>(type: "ledger_transaction_event_type_filter", nullable: true),
                     discriminator = table.Column<LedgerTransactionEventType>(type: "ledger_transaction_event_type", nullable: false),
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),

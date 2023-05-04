@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230503133901_InitialCreate")]
+    [Migration("20230503134614_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -89,7 +89,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.4")
+                .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "access_rules_chain_subtype", new[] { "none", "resource_manager_vault_access_rules_chain" });
@@ -567,6 +567,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<long>("TransactionStateVersion")
                         .HasColumnType("bigint")
                         .HasColumnName("transaction_state_version");
+
+                    b.Property<LedgerTransactionEventTypeFilter?>("TypeFilter")
+                        .HasColumnType("ledger_transaction_event_type_filter")
+                        .HasColumnName("type_filter");
 
                     b.Property<LedgerTransactionEventType>("discriminator")
                         .HasColumnType("ledger_transaction_event_type");

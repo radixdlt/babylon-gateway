@@ -1459,6 +1459,17 @@ components:
                 - User
                 - EpochChange
                 - All
+            # TODO use entity_address, timestamp rather state_versions etc.
+            entity_id:
+              nullable: true
+              type: integer
+              format: int64
+            type_filter:
+              nullable: true
+              type: string
+              enum:
+                - Deposit
+                - Withdrawal
             order:
               description: Configures the order of returned result set. Defaults to `desc`.
               type: string
