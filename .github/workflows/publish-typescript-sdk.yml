@@ -25,7 +25,7 @@ jobs:
           role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "publish-gateway-sdk-npmjs"
-          secret_prefix: "NPM_"
+          secret_prefix: "NPM"
           secret_name: "github-actions/radixdlt/babylon-gateway/npm-publishing-secret"
           parse_json: true
       - name: Use Node.js

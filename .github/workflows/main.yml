@@ -172,7 +172,7 @@ jobs:
           role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "ephemeral-deploy-and-benchmark"
-          secret_prefix: "JENKINS_API_"
+          secret_prefix: "JENKINS"
           secret_name: "github-actions/radixdlt/babylon-gateway/jenkins-api-token"
           parse_json: true
       - name: Process ci.env
@@ -190,7 +190,7 @@ jobs:
         with:
           jenkins_url: "${{ env.JENKINS_URL }}"
           jenkins_user: ${{ env.JENKINS_USER }}
-          jenkins_token: ${{ env.JENKINS_API_TOKEN }}
+          jenkins_token: ${{ env.JENKINS_TOKEN }}
           job_name: "ephemeral-deployments/job/ephemeral-env-gateway-benchmark"
           job_params: |
             {
@@ -250,7 +250,7 @@ jobs:
           role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "ephemeral-deploy-and-test"
-          secret_prefix: "JENKINS_API_"
+          secret_prefix: "JENKINS"
           secret_name: "github-actions/radixdlt/babylon-gateway/jenkins-api-token"
           parse_json: true
       - name: Export branch name in github's environment
@@ -266,7 +266,7 @@ jobs:
         with:
           jenkins_url: "${{ env.JENKINS_URL }}"
           jenkins_user: ${{ env.JENKINS_USER }}
-          jenkins_token: ${{ env.JENKINS_API_TOKEN }}
+          jenkins_token: ${{ env.JENKINS_TOKEN }}
           job_name: "ephemeral-deployments/job/ephemeral-gateway-env-deploy-and-test"
           job_params: |
             {
@@ -291,7 +291,7 @@ jobs:
           role_name: "arn:aws:iam::308190735829:role/gh-common-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "sonarcloud"
-          secret_prefix: "SONAR_"
+          secret_prefix: "SONAR"
           # SonarCloud access token should be generated from https://sonarcloud.io/account/security/
           secret_name: "github-actions/common/sonar-token"
           parse_json: true
