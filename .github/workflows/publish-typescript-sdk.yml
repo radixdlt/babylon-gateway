@@ -15,16 +15,26 @@ jobs:
     defaults:
       run:
         working-directory: ./sdk/typescript
-
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: ./.github/actions/fetch-secrets
+        with: 
+          role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
+          app_name: "babylon-gateway"
+          step_name: "publish-gateway-sdk-npmjs"
+          secret_prefix: "NPM_"
+          secret_name: "github-actions/radixdlt/babylon-gateway/npm-publishing-secret"
+          parse_json: true
       - name: Use Node.js
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516
         with:
           node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
       - run: cat $NPM_CONFIG_USERCONFIG
       - name: Build alphanet-gateway-sdk
         run: |
@@ -49,4 +59,4 @@ jobs:
           npm config set access public
           npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
