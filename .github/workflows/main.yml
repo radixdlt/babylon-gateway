@@ -162,8 +162,19 @@ jobs:
       - docker-database-migrations-gcr
       - setup-tags
     if: github.ref == 'refs/heads/develop'
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: ./.github/actions/fetch-secrets
+        with: 
+          role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
+          app_name: "babylon-gateway"
+          step_name: "ephemeral-deploy-and-benchmark"
+          secret_prefix: "JENKINS"
+          secret_name: "github-actions/radixdlt/babylon-gateway/jenkins-api-token"
+          parse_json: true
       - name: Process ci.env
         run: |
           export $(grep -v '^#' ./deployment/ci.env | xargs)
@@ -177,9 +188,9 @@ jobs:
       - name: Deploy and run benchmark on an ephemeral network
         uses: toptal/jenkins-job-trigger-action@649c04c83c099c759aba134bf78138a303ec095f
         with:
-          jenkins_url: "${{ secrets.JENKINS_URL }}"
-          jenkins_user: ${{ secrets.JENKINS_USER }}
-          jenkins_token: ${{ secrets.BABYLON_NODE_JENKINS_API_TOKEN }}
+          jenkins_url: "${{ env.JENKINS_URL }}"
+          jenkins_user: ${{ env.JENKINS_USER }}
+          jenkins_token: ${{ env.JENKINS_TOKEN }}
           job_name: "ephemeral-deployments/job/ephemeral-env-gateway-benchmark"
           job_params: |
             {
@@ -229,8 +240,19 @@ jobs:
       - docker-database-migrations-gcr
       - setup-tags
     if: github.event_name == 'pull_request'
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: ./.github/actions/fetch-secrets
+        with: 
+          role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
+          app_name: "babylon-gateway"
+          step_name: "ephemeral-deploy-and-test"
+          secret_prefix: "JENKINS"
+          secret_name: "github-actions/radixdlt/babylon-gateway/jenkins-api-token"
+          parse_json: true
       - name: Export branch name in github's environment
         run: |
           echo "GATEWAY_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
@@ -242,9 +264,9 @@ jobs:
       - name: Deploy and test on an ephemeral network
         uses: toptal/jenkins-job-trigger-action@649c04c83c099c759aba134bf78138a303ec095f
         with:
-          jenkins_url: "${{ secrets.JENKINS_URL }}"
-          jenkins_user: ${{ secrets.JENKINS_USER }}
-          jenkins_token: ${{ secrets.BABYLON_NODE_JENKINS_API_TOKEN }}
+          jenkins_url: "${{ env.JENKINS_URL }}"
+          jenkins_user: ${{ env.JENKINS_USER }}
+          jenkins_token: ${{ env.JENKINS_TOKEN }}
           job_name: "ephemeral-deployments/job/ephemeral-gateway-env-deploy-and-test"
           job_params: |
             {
@@ -257,10 +279,22 @@ jobs:
 
   sonarcloud:
     runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - uses: ./.github/actions/fetch-secrets
+        with: 
+          role_name: "arn:aws:iam::308190735829:role/gh-common-secrets-read-access"
+          app_name: "babylon-gateway"
+          step_name: "sonarcloud"
+          secret_prefix: "SONAR"
+          # SonarCloud access token should be generated from https://sonarcloud.io/account/security/
+          secret_name: "github-actions/common/sonar-token"
+          parse_json: true
       - name: SonarScanner for .NET
         uses: highbyte/sonarscan-dotnet@8410b6452e036aff2fb830831e508e723b8af60d
         with:
@@ -271,4 +305,4 @@ jobs:
           sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" -d:sonar.cs.vstest.reportsPaths="**/TestResults/*.trx"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
