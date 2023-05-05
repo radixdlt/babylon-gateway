@@ -29,6 +29,9 @@ jobs:
     name: Sync Postman collection w/ latest specs
     environment: Postman
     runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Set current date
         id: date
@@ -37,6 +40,14 @@ jobs:
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
         with:
           fetch-depth: 0
+      - uses: ./.github/actions/fetch-secrets
+        with: 
+          role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
+          app_name: "babylon-gateway"
+          step_name: "sync_collections"
+          secret_prefix: "POSTMAN_API"
+          secret_name: "github-actions/radixdlt/babylon-gateway/postman-token"
+          parse_json: true
       - name: Set git tags
         id: gittag
         run: echo "gittag=$(git describe --tags --dirty)" >> $GITHUB_OUTPUT
@@ -77,7 +88,7 @@ jobs:
         uses: DamianReeves/write-file-action@a432935930b2e351ec2d2792fc220717b656ec1c
         with:
           path: .env
-          contents: POSTMAN_API_KEY=${{secrets.POSTMAN_API_TOKEN}}
+          contents: POSTMAN_API_KEY=${{env.POSTMAN_API_TOKEN}}
           write-mode: append
 
       # ========== Actually updating the postman collection ==========
@@ -87,7 +98,7 @@ jobs:
             --postmanUid ${{env.gateway_api_collection_id}} --syncPostman true --envFile .env
       - name: Download the collection
         run: |
-          curl -X GET -H "X-API-KEY:${{secrets.POSTMAN_API_TOKEN}}" https://api.getpostman.com/collections/${{env.gateway_api_collection_id}} > tmp.collection.json
+          curl -X GET -H "X-API-KEY:${{env.POSTMAN_API_TOKEN}}" https://api.getpostman.com/collections/${{env.gateway_api_collection_id}} > tmp.collection.json
       - name: Update the collection name w/ timestamp and git tag
         run: |
           sed -i 's/"name":".*","description":"This/"name":"${{env.gateway_api_collection_name}}","description":"This/' tmp.collection.json
@@ -96,5 +107,5 @@ jobs:
           sed -i 's/{{baseUrl}}/{{gatewayBaseUrl}}/g' tmp.collection.json
       - name: Update the collection
         run: |
-          curl -X PUT -H "X-API-KEY:${{secrets.POSTMAN_API_TOKEN}}" -H "Content-Type: application/json" \
+          curl -X PUT -H "X-API-KEY:${{env.POSTMAN_API_TOKEN}}" -H "Content-Type: application/json" \
             https://api.getpostman.com/collections/${{env.gateway_api_collection_id}} --data "@tmp.collection.json"
