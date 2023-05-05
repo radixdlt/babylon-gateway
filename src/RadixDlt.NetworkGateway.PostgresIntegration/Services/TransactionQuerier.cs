@@ -180,8 +180,7 @@ internal class TransactionQuerier : ITransactionQuerier
 
             query = search
                 .Select(e => e.TransactionStateVersion)
-                .TagWith(ForceDistinctInterceptor.Apply);
-                // .Distinct();
+                .TagWith(ForceDistinctInterceptor.Apply); // due to EF Core limitations we rely on interceptor to force SELECT DISTINCT
         }
         else
         {
