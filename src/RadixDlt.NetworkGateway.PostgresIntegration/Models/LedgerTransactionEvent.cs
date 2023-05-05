@@ -62,41 +62,59 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal class StateNonFungibleDetailsRequestValidator : AbstractValidator<GatewayModel.StateNonFungibleDataRequest>
+[Table("ledger_transaction_events")]
+internal abstract class LedgerTransactionEvent
 {
-    public StateNonFungibleDetailsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
-    {
-        RuleFor(x => x.ResourceAddress)
-            .NotEmpty()
-            .RadixAddress();
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-        RuleFor(x => x.NonFungibleIds)
-            .NotEmpty()
-            .DependentRules(() =>
-            {
-                RuleFor(x => x.NonFungibleIds.Count)
-                    .GreaterThan(0)
-                    .LessThan(endpointOptionsSnapshot.Value.MaxPageSize);
+    [Column("transaction_state_version")]
+    public long TransactionStateVersion { get; set; }
 
-                RuleForEach(x => x.NonFungibleIds)
-                    .NotEmpty();
-            });
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+}
 
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
+internal class DepositFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
+{
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
 
-        RuleFor(x => x.Cursor)
-            .Base64();
+    [Column("amount")]
+    public TokenAmount Amount { get; set; }
+}
 
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
-    }
+internal class DepositNonFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
+{
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+
+    [Column("non_fungible_id_data_ids")]
+    public List<long> NonFungibleIdDataIds { get; set; }
+}
+
+internal class WithdrawalFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
+{
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+
+    [Column("amount")]
+    public TokenAmount Amount { get; set; }
+}
+
+internal class WithdrawalNonFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
+{
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+
+    [Column("non_fungible_id_data_ids")]
+    public List<long> NonFungibleIdDataIds { get; set; }
 }

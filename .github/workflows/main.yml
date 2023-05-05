@@ -43,6 +43,12 @@ jobs:
         with:
           github_event_name: ${{ github.event_name }}
           github_action_name: ${{ github.event.action}}
+      - name: Publish Gateway Settings
+        uses: actions/upload-artifact@v3
+        with:
+          path: Directory.Build.props
+          name: build_props
+          retention-days: 1
 
   docker-database-migrations-gcr:
     name: (DatabaseMigrations) Docker
@@ -58,6 +64,9 @@ jobs:
       context: "."
       dockerfile: "./apps/DatabaseMigrations/Dockerfile"
       platforms: "linux/amd64"
+      restore_artifact: "true"
+      artifact_location: "./"
+      artifact_name: build_props
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -76,6 +85,9 @@ jobs:
       context: "."
       dockerfile: "./apps/DataAggregator/Dockerfile"
       platforms: "linux/amd64"
+      restore_artifact: "true"
+      artifact_location: "./"
+      artifact_name: build_props
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -94,6 +106,9 @@ jobs:
       context: "."
       dockerfile: "./apps/GatewayApi/Dockerfile"
       platforms: "linux/amd64"
+      restore_artifact: "true"
+      artifact_location: "./"
+      artifact_name: build_props
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -112,6 +127,12 @@ jobs:
         run: |
           export $(grep -v '^#' ./deployment/ci.env | xargs)
           echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
+      - name: Check if ci.env changed
+        id: changed-files
+        uses: tj-actions/changed-files@db5dd7c176cf59a19ef6561bf1936f059dee4b74
+        with:
+          files: |
+            deployment/ci.env
       - name: Trigger deployment event ${{ github.ref }}
         env:
           NAMESPACE: "ng-mardunet"
@@ -125,6 +146,7 @@ jobs:
                 "event_type": "${{env.EVENT_TYPE}}",
                 "client_payload": {
                   "namespace_postfix": "${{env.NAMESPACE}}",
+                  "ci_env_changed": "${{steps.changed-files.outputs.any_changed}}",
                   "data_aggregator_image_tag": "${{ needs.setup-tags.outputs.data-aggregator-tag }}",
                   "gateway_api_image_tag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
                   "database_migrations_image_tag": "${{ needs.setup-tags.outputs.database-migrations-tag }}",

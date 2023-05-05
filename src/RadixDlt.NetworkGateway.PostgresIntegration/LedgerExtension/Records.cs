@@ -66,7 +66,6 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.Collections.Generic;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -76,11 +75,17 @@ internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, Referen
 
 internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, byte[]? MutableData, long StateVersion);
 
-internal record MetadataChange(ReferencedEntity ReferencedEntity, string KeyHex, string? ValueHex, bool IsDeleted, long StateVersion); // TODO use ScryptoSbor.String/ValueButes Key, ScryptoSbor.Enum/ValueBytes? Value
+internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, long StateVersion); // TODO use ScryptoSbor.String/ValueButes Key, ScryptoSbor.Enum/ValueBytes? Value
 
 internal record ResourceSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);
 
 internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
+
+internal record ObservedDepositNonFungibleTransactionEvent(long EntityId, long ResourceEntityId, List<string> NonFungibleIds, long StateVersion);
+
+internal record ObservedWithdrawalNonFungibleTransactionEvent(long EntityId, long ResourceEntityId, List<string> NonFungibleIds, long StateVersion);
+
+internal record struct MetadataLookup(long EntityId, string Key);
 
 internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
 

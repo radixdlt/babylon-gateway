@@ -62,9 +62,6 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public interface IRoyaltyVaultHolder
-{
-    public long? RoyaltyVaultEntityId { get; set; }
-}
+public partial class StateEntityNonFungiblesPageRequest : IPaginableRequest { }

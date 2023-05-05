@@ -62,29 +62,14 @@
  * permissions under this License.
  */
 
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.CoreApiSdk.Model;
 
-/// <summary>
-/// This is designed to make it super-quick to look up the top of the synced ledger,
-/// and to store any other fields we might want.
-/// </summary>
-[Table("ledger_status")]
-internal class LedgerStatus : SingleEntryBase
+public partial class EpochManagerSubstate : IGlobalAddressPointer
 {
-    [Column("top_of_ledger_state_version")]
-    public long TopOfLedgerStateVersion { get; set; }
-
-    // FK Created in OnModelCreating to create an un-truncated name for the constraint
-    public LedgerTransaction TopOfLedgerTransaction { get; set; }
-
-    [Column("sync_status_target_state_version")]
-    public long TargetStateVersion { get; set; }
-
-    [ConcurrencyCheck]
-    [Column("last_updated")]
-    public DateTime LastUpdated { get; set; }
+    public IEnumerable<string> GetGlobalAddresses()
+    {
+        yield return ValidatorOwnerResource;
+    }
 }

@@ -1,3 +1,5 @@
+import { chunk } from '../chunk'
+import { MAX_ADDRESSES_COUNT } from '../constants'
 import {
   FungibleResourcesCollection,
   FungibleResourcesCollectionItemVaultAggregated,
@@ -8,15 +10,21 @@ import {
   StateEntityDetailsResponseItem,
 } from '../generated'
 
-type ReplaceItems<T, U> = Omit<T, 'items'> & { items: U[] }
+export type ReplaceProperty<
+  ObjectType,
+  Property extends string | number | symbol,
+  NewPropertyType
+> = Omit<ObjectType, Property> & { [key in Property]: NewPropertyType }
 
-export type FungibleResourcesVaultCollection = ReplaceItems<
+export type FungibleResourcesVaultCollection = ReplaceProperty<
   FungibleResourcesCollection,
-  FungibleResourcesCollectionItemVaultAggregated
+  'items',
+  FungibleResourcesCollectionItemVaultAggregated[]
 >
-export type NonFungibleResourcesVaultCollection = ReplaceItems<
+export type NonFungibleResourcesVaultCollection = ReplaceProperty<
   NonFungibleResourcesCollection,
-  NonFungibleResourcesCollectionItemVaultAggregated
+  'items',
+  NonFungibleResourcesCollectionItemVaultAggregated[]
 >
 
 export type StateEntityDetailsVaultResponseItem =
@@ -30,7 +38,9 @@ export class State {
 
   /**
    * Get detailed information about entities together with vault aggregated fungible and non-fungible resources.
-   * Returns array or single item depending on input value
+   * Returns an array or single item depending on input value. If array is passed, it will be split into chunks of 20 addresses
+   * which will be requested separately and returned only if all requests are successful.
+   * If any of the requests fail, the whole operation will fail.
    *
    * @example
    * const entityDetails = await gatewayApi.state.getEntityDetailsVaultAggregated('account_tdx_21_1p823h2sq7nsefkdharvvh5')
@@ -52,6 +62,14 @@ export class State {
     StateEntityDetailsVaultResponseItem[] | StateEntityDetailsVaultResponseItem
   > {
     const isArray = Array.isArray(addresses)
+    if (isArray && addresses.length === 0) return Promise.resolve([])
+    if (isArray && addresses.length > MAX_ADDRESSES_COUNT) {
+      const chunks = chunk(addresses, MAX_ADDRESSES_COUNT)
+      return Promise.all(
+        chunks.map((chunk) => this.getEntityDetailsVaultAggregated(chunk))
+      ).then((results) => results.flat())
+    }
+
     const { items } = await this.innerClient.stateEntityDetails({
       stateEntityDetailsRequest: {
         addresses: isArray ? addresses : [addresses],

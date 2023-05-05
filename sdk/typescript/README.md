@@ -81,7 +81,7 @@ High Level APIs will grow over time as we start encountering repeating patterns 
 ### Transaction
 
 - `getStatus(txID: string)` - transaction status for given transaction id (the intent hash)
-- `getCommittedDetails(txID: string)` - transaction details together with ledger state at a time of commit for given transaction id (the intent hash)
+- `getCommittedDetails(txID: string)` - transaction details for given transaction id (the intent hash)
 
 ## Fetch polyfill
 

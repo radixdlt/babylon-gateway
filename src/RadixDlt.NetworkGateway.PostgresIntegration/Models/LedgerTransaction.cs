@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System;
@@ -88,12 +89,6 @@ internal abstract class LedgerTransaction
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     [Column("state_version")]
     public long StateVersion { get; set; }
-
-    [Column("status")]
-    public LedgerTransactionStatus Status { get; set; }
-
-    [Column("error_message")]
-    public string? ErrorMessage { get; set; }
 
     [Column("transaction_accumulator")]
     public byte[] TransactionAccumulator { get; set; }
@@ -159,8 +154,32 @@ internal abstract class LedgerTransaction
     [Column("raw_payload")]
     public byte[] RawPayload { get; set; }
 
-    [Column("engine_receipt", TypeName = "jsonb")]
-    public string EngineReceipt { get; set; }
+    public TransactionReceipt EngineReceipt { get; set; }
+}
+
+[Owned]
+internal class TransactionReceipt
+{
+    [Column("receipt_status")]
+    public LedgerTransactionStatus Status { get; set; }
+
+    [Column("receipt_fee_summary", TypeName = "jsonb")]
+    public string FeeSummary { get; set; }
+
+    [Column("receipt_state_updates", TypeName = "jsonb")]
+    public string StateUpdates { get; set; }
+
+    [Column("receipt_next_epoch", TypeName = "jsonb")]
+    public string? NextEpoch { get; set; }
+
+    [Column("receipt_items", TypeName = "jsonb")]
+    public string? Items { get; set; }
+
+    [Column("receipt_error_message")]
+    public string? ErrorMessage { get; set; }
+
+    [Column("receipt_events", TypeName = "jsonb")]
+    public string? Events { get; set; }
 }
 
 internal class UserLedgerTransaction : LedgerTransaction
