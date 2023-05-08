@@ -120,8 +120,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="accessRulesChain">accessRulesChain (required).</param>
         /// <param name="vaultAccessRulesChain">vaultAccessRulesChain (required).</param>
         /// <param name="nonFungibleIdType">nonFungibleIdType (required).</param>
+        /// <param name="totalSupply">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
+        /// <param name="totalMinted">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
+        /// <param name="totalBurned">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.NonFungibleResource).</param>
-        public StateEntityDetailsResponseNonFungibleResourceDetails(Object accessRulesChain = default(Object), Object vaultAccessRulesChain = default(Object), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.NonFungibleResource) : base(type)
+        public StateEntityDetailsResponseNonFungibleResourceDetails(Object accessRulesChain = default(Object), Object vaultAccessRulesChain = default(Object), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.NonFungibleResource) : base(type)
         {
             // to ensure "accessRulesChain" is required (not null)
             if (accessRulesChain == null)
@@ -136,6 +139,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.VaultAccessRulesChain = vaultAccessRulesChain;
             this.NonFungibleIdType = nonFungibleIdType;
+            // to ensure "totalSupply" is required (not null)
+            if (totalSupply == null)
+            {
+                throw new ArgumentNullException("totalSupply is a required property for StateEntityDetailsResponseNonFungibleResourceDetails and cannot be null");
+            }
+            this.TotalSupply = totalSupply;
+            // to ensure "totalMinted" is required (not null)
+            if (totalMinted == null)
+            {
+                throw new ArgumentNullException("totalMinted is a required property for StateEntityDetailsResponseNonFungibleResourceDetails and cannot be null");
+            }
+            this.TotalMinted = totalMinted;
+            // to ensure "totalBurned" is required (not null)
+            if (totalBurned == null)
+            {
+                throw new ArgumentNullException("totalBurned is a required property for StateEntityDetailsResponseNonFungibleResourceDetails and cannot be null");
+            }
+            this.TotalBurned = totalBurned;
         }
 
         /// <summary>
@@ -151,6 +172,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public Object VaultAccessRulesChain { get; set; }
 
         /// <summary>
+        /// String-encoded decimal representing the amount of a related fungible resource.
+        /// </summary>
+        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
+        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
+        public string TotalSupply { get; set; }
+
+        /// <summary>
+        /// String-encoded decimal representing the amount of a related fungible resource.
+        /// </summary>
+        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
+        [DataMember(Name = "total_minted", IsRequired = true, EmitDefaultValue = true)]
+        public string TotalMinted { get; set; }
+
+        /// <summary>
+        /// String-encoded decimal representing the amount of a related fungible resource.
+        /// </summary>
+        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
+        [DataMember(Name = "total_burned", IsRequired = true, EmitDefaultValue = true)]
+        public string TotalBurned { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -162,6 +204,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
             sb.Append("  VaultAccessRulesChain: ").Append(VaultAccessRulesChain).Append("\n");
             sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
+            sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
+            sb.Append("  TotalMinted: ").Append(TotalMinted).Append("\n");
+            sb.Append("  TotalBurned: ").Append(TotalBurned).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -210,6 +255,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 (
                     this.NonFungibleIdType == input.NonFungibleIdType ||
                     this.NonFungibleIdType.Equals(input.NonFungibleIdType)
+                ) && base.Equals(input) && 
+                (
+                    this.TotalSupply == input.TotalSupply ||
+                    (this.TotalSupply != null &&
+                    this.TotalSupply.Equals(input.TotalSupply))
+                ) && base.Equals(input) && 
+                (
+                    this.TotalMinted == input.TotalMinted ||
+                    (this.TotalMinted != null &&
+                    this.TotalMinted.Equals(input.TotalMinted))
+                ) && base.Equals(input) && 
+                (
+                    this.TotalBurned == input.TotalBurned ||
+                    (this.TotalBurned != null &&
+                    this.TotalBurned.Equals(input.TotalBurned))
                 );
         }
 
@@ -231,6 +291,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     hashCode = (hashCode * 59) + this.VaultAccessRulesChain.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
+                if (this.TotalSupply != null)
+                {
+                    hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
+                }
+                if (this.TotalMinted != null)
+                {
+                    hashCode = (hashCode * 59) + this.TotalMinted.GetHashCode();
+                }
+                if (this.TotalBurned != null)
+                {
+                    hashCode = (hashCode * 59) + this.TotalBurned.GetHashCode();
+                }
                 return hashCode;
             }
         }

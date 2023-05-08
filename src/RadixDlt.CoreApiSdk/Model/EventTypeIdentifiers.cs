@@ -62,31 +62,25 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+namespace RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
-
-[Table("resource_entity_supply_history")]
-internal class ResourceEntitySupplyHistory
+public static class EventTypeIdentifiers
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    public static class Vault
+    {
+        public const int Withdrawal = 27;
+        public const int Deposit = 28;
+    }
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+    public static class FungibleResource
+    {
+        public const int Minted = 35;
+        public const int Burned = 36;
+    }
 
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-
-    [Column("total_supply")]
-    public TokenAmount TotalSupply { get; set; }
-
-    [Column("total_minted")]
-    public TokenAmount TotalMinted { get; set; }
-
-    [Column("total_burned")]
-    public TokenAmount TotalBurned { get; set; }
+    public static class NonFungibleResource
+    {
+        public const int Minted = 85;
+        public const int Burned = 87;
+    }
 }
