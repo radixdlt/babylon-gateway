@@ -71,7 +71,10 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class StateEntityDetailsRequestValidator : AbstractValidator<GatewayModel.StateEntityDetailsRequest>
 {
-    public StateEntityDetailsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public StateEntityDetailsRequestValidator(
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        LedgerStateSelectorValidator ledgerStateSelectorValidator,
+        StateEntityDetailsOptInsValidator optInsValidator)
     {
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);
@@ -82,11 +85,14 @@ internal class StateEntityDetailsRequestValidator : AbstractValidator<GatewayMod
             {
                 RuleFor(x => x.Addresses.Count)
                     .GreaterThan(0)
-                    .LessThan(endpointOptionsSnapshot.Value.StateEntityDetailsMaxPageSize);
+                    .LessThanOrEqualTo(endpointOptionsSnapshot.Value.StateEntityDetailsMaxPageSize);
 
                 RuleForEach(x => x.Addresses)
                     .NotNull()
                     .RadixAddress();
             });
+
+        RuleFor(x => x.OptIns)
+            .SetValidator(optInsValidator);
     }
 }

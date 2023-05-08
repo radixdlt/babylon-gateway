@@ -70,4 +70,3 @@ public partial class EntityMetadataCollection
 {
     public static readonly EntityMetadataCollection Empty = new(items: new List<EntityMetadataItem>());
 }
-

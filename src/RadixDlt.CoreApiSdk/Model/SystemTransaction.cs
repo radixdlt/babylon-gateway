@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 
 namespace RadixDlt.CoreApiSdk.Model;
 

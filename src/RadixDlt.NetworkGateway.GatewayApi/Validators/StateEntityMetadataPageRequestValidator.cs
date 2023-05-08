@@ -71,7 +71,10 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class StateEntityMetadataPageRequestValidator : AbstractValidator<GatewayModel.StateEntityMetadataPageRequest>
 {
-    public StateEntityMetadataPageRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public StateEntityMetadataPageRequestValidator(
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        LedgerStateSelectorValidator ledgerStateSelectorValidator,
+        PaginableRequestValidator paginableRequestValidator)
     {
         RuleFor(x => x.Address)
             .NotEmpty()
@@ -82,6 +85,9 @@ internal class StateEntityMetadataPageRequestValidator : AbstractValidator<Gatew
 
         RuleFor(x => x.Cursor)
             .Base64();
+
+        RuleFor(x => x)
+            .SetValidator(paginableRequestValidator);
 
         RuleFor(x => x.LimitPerPage)
             .GreaterThan(0)

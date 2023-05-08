@@ -62,27 +62,36 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-[Table("non_fungible_id_mutable_data_history")]
-internal class NonFungibleIdMutableDataHistory
+internal class StateNonFungibleDataRequestValidator : AbstractValidator<GatewayModel.StateNonFungibleDataRequest>
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    public StateNonFungibleDataRequestValidator(
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    {
+        RuleFor(x => x.ResourceAddress)
+            .NotEmpty()
+            .RadixAddress();
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+        RuleFor(x => x.NonFungibleIds)
+            .NotEmpty()
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.NonFungibleIds.Count)
+                    .GreaterThan(0)
+                    .LessThan(endpointOptionsSnapshot.Value.MaxPageSize);
 
-    [Column("non_fungible_id_data_id")]
-    public long NonFungibleIdDataId { get; set; }
+                RuleForEach(x => x.NonFungibleIds)
+                    .NotEmpty();
+            });
 
-    [Column("is_deleted")]
-    public bool IsDeleted { get; set; }
-
-    [Column("mutable_data")]
-    public byte[]? MutableData { get; set; }
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
+    }
 }

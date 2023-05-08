@@ -82,15 +82,17 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<NetworkConfiguration> NetworkConfiguration => Set<NetworkConfiguration>();
 
-    public DbSet<LedgerStatus> LedgerStatus => Set<LedgerStatus>();
-
     public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
+
+    public DbSet<LedgerTransactionEvent> LedgerTransactionEvents => Set<LedgerTransactionEvent>();
 
     public DbSet<PendingTransaction> PendingTransactions => Set<PendingTransaction>();
 
     public DbSet<Entity> Entities => Set<Entity>();
 
     public DbSet<EntityMetadataHistory> EntityMetadataHistory => Set<EntityMetadataHistory>();
+
+    public DbSet<EntityMetadataAggregateHistory> EntityMetadataAggregateHistory => Set<EntityMetadataAggregateHistory>();
 
     public DbSet<EntityResourceAggregateHistory> EntityResourceAggregateHistory => Set<EntityResourceAggregateHistory>();
 
@@ -104,7 +106,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<NonFungibleIdData> NonFungibleIdData => Set<NonFungibleIdData>();
 
-    public DbSet<NonFungibleIdMutableDataHistory> NonFungibleIdMutableDataHistory => Set<NonFungibleIdMutableDataHistory>();
+    public DbSet<NonFungibleIdDataHistory> NonFungibleIdDataHistory => Set<NonFungibleIdDataHistory>();
 
     public DbSet<NonFungibleIdStoreHistory> NonFungibleIdStoreHistory => Set<NonFungibleIdStoreHistory>();
 
@@ -130,12 +132,12 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<LedgerTransactionKindFilterConstraint>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionEventType>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
         modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();
         modelBuilder.HasPostgresEnum<ResourceType>();
 
-        HookupSingleEntries(modelBuilder);
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
         HookupEntities(modelBuilder);
@@ -154,15 +156,6 @@ internal abstract class CommonDbContext : DbContext
 
         configurationBuilder.Properties<GlobalAddress>()
             .HaveConversion<GlobalAddressToStringConverter>();
-    }
-
-    private static void HookupSingleEntries(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<LedgerStatus>()
-            .HasOne(ls => ls.TopOfLedgerTransaction)
-            .WithMany()
-            .HasForeignKey(ls => ls.TopOfLedgerStateVersion)
-            .OnDelete(DeleteBehavior.NoAction);
     }
 
     private static void HookupTransactions(ModelBuilder modelBuilder)
@@ -197,6 +190,15 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<LedgerTransaction>()
             .HasIndex(lt => new { lt.KindFilterConstraint, lt.StateVersion })
             .HasFilter("kind_filter_constraint IS NOT NULL");
+
+        modelBuilder.Entity<LedgerTransactionEvent>()
+            .HasDiscriminator<LedgerTransactionEventType>(DiscriminatorColumnName)
+            .HasValue<DepositFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.DepositFungibleResource)
+            .HasValue<DepositNonFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.DepositNonFungibleResource)
+            .HasValue<WithdrawalFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.WithdrawalFungibleResource)
+            .HasValue<WithdrawalNonFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.WithdrawalNonFungibleResource);
+
+        // TODO add all necessary indices on LedgerTransactionEvent table
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)
@@ -242,6 +244,9 @@ internal abstract class CommonDbContext : DbContext
     private static void HookupHistory(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<EntityMetadataHistory>()
+            .HasIndex(e => new { e.EntityId, e.Key, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityMetadataAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityResourceAggregateHistory>()
@@ -279,7 +284,7 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.NonFungibleResourceEntityId, e.NonFungibleId, e.FromStateVersion })
             .IsUnique();
 
-        modelBuilder.Entity<NonFungibleIdMutableDataHistory>()
+        modelBuilder.Entity<NonFungibleIdDataHistory>()
             .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleIdStoreHistory>()

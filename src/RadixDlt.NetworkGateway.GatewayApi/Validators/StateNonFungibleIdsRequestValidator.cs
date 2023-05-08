@@ -71,7 +71,10 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class StateNonFungibleIdsRequestValidator : AbstractValidator<GatewayModel.StateNonFungibleIdsRequest>
 {
-    public StateNonFungibleIdsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public StateNonFungibleIdsRequestValidator(
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        LedgerStateSelectorValidator ledgerStateSelectorValidator,
+        PaginableRequestValidator paginableRequestValidator)
     {
         RuleFor(x => x.ResourceAddress)
             .NotEmpty()
@@ -82,6 +85,9 @@ internal class StateNonFungibleIdsRequestValidator : AbstractValidator<GatewayMo
 
         RuleFor(x => x.Cursor)
             .Base64();
+
+        RuleFor(x => x)
+            .SetValidator(paginableRequestValidator);
 
         RuleFor(x => x.LimitPerPage)
             .GreaterThan(0)

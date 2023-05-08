@@ -71,7 +71,10 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class StateEntityNonFungiblesPageRequestValidator : AbstractValidator<GatewayModel.StateEntityNonFungiblesPageRequest>
 {
-    public StateEntityNonFungiblesPageRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public StateEntityNonFungiblesPageRequestValidator(
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        LedgerStateSelectorValidator ledgerStateSelectorValidator,
+        PaginableRequestValidator paginableRequestValidator)
     {
         RuleFor(x => x.Address)
             .NotEmpty()
@@ -85,6 +88,9 @@ internal class StateEntityNonFungiblesPageRequestValidator : AbstractValidator<G
 
         RuleFor(x => x.Cursor)
             .Base64();
+
+        RuleFor(x => x)
+            .SetValidator(paginableRequestValidator);
 
         RuleFor(x => x.LimitPerPage)
             .GreaterThan(0)

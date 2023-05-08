@@ -87,24 +87,59 @@ internal class ReadHelper
         _connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
     }
 
-    public async Task<Dictionary<long, EntityMetadataHistory>> MostRecentEntityMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
+    public async Task<Dictionary<MetadataLookup, EntityMetadataHistory>> MostRecentEntityMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
     {
-        var ids = metadataChanges.Select(x => x.ReferencedEntity.DatabaseId).Distinct().ToList();
+        var entityIds = new List<long>();
+        var keys = new List<string>();
+        var lookupSet = new HashSet<MetadataLookup>();
+
+        foreach (var metadataChange in metadataChanges)
+        {
+            lookupSet.Add(new MetadataLookup(metadataChange.ReferencedEntity.DatabaseId, metadataChange.Key));
+        }
+
+        foreach (var lookup in lookupSet)
+        {
+            entityIds.Add(lookup.EntityId);
+            keys.Add(lookup.Key);
+        }
 
         return await _dbContext.EntityMetadataHistory
             .FromSqlInterpolated(@$"
-WITH variables (entity_id) AS (
-    SELECT UNNEST({ids})
+WITH variables (entity_id, key) AS (
+    SELECT UNNEST({entityIds}), UNNEST({keys})
 )
 SELECT emh.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
     FROM entity_metadata_history
-    WHERE entity_id = variables.entity_id
+    WHERE entity_id = variables.entity_id AND key = variables.key
     ORDER BY from_state_version DESC
     LIMIT 1
 ) emh ON true;")
+            .AsNoTracking()
+            .ToDictionaryAsync(e => new MetadataLookup(e.EntityId, e.Key), token);
+    }
+
+    public async Task<Dictionary<long, EntityMetadataAggregateHistory>> MostRecentEntityAggregateMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
+    {
+        var entityIds = metadataChanges.Select(x => x.ReferencedEntity.DatabaseId).Distinct().ToList();
+
+        return await _dbContext.EntityMetadataAggregateHistory
+            .FromSqlInterpolated(@$"
+WITH variables (entity_id) AS (
+    SELECT UNNEST({entityIds})
+)
+SELECT emah.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_metadata_aggregate_history
+    WHERE entity_id = variables.entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) emah ON true;")
             .AsNoTracking()
             .ToDictionaryAsync(e => e.EntityId, token);
     }
@@ -295,7 +330,12 @@ WHERE id IN(
             .ToDictionaryAsync(e => ((byte[])e.Address).ToHex(), token);
     }
 
-    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(
+        List<NonFungibleIdChange> nonFungibleIdStoreChanges,
+        List<NonFungibleVaultChange> nonFungibleVaultChanges,
+        List<ObservedWithdrawalNonFungibleTransactionEvent> nonFungibleWithdrawalTransactionEvents,
+        List<ObservedDepositNonFungibleTransactionEvent> nonFungibleDepositTransactionEvents,
+        CancellationToken token)
     {
         var nonFungibles = new HashSet<NonFungibleIdLookup>();
         var resourceEntityIds = new List<long>();
@@ -311,6 +351,22 @@ WHERE id IN(
             foreach (var nfid in nonFungibleVaultChange.NonFungibleIds)
             {
                 nonFungibles.Add(new NonFungibleIdLookup(nonFungibleVaultChange.ReferencedResource.DatabaseId, nfid));
+            }
+        }
+
+        foreach (var nonFungibleWithdrawalTransactionEvent in nonFungibleWithdrawalTransactionEvents)
+        {
+            foreach (var nfid in nonFungibleWithdrawalTransactionEvent.NonFungibleIds)
+            {
+                nonFungibles.Add(new NonFungibleIdLookup(nonFungibleWithdrawalTransactionEvent.ResourceEntityId, nfid));
+            }
+        }
+
+        foreach (var nonFungibleDepositTransactionEvent in nonFungibleDepositTransactionEvents)
+        {
+            foreach (var nfid in nonFungibleDepositTransactionEvent.NonFungibleIds)
+            {
+                nonFungibles.Add(new NonFungibleIdLookup(nonFungibleDepositTransactionEvent.ResourceEntityId, nfid));
             }
         }
 
@@ -377,16 +433,18 @@ SELECT
     nextval('entities_id_seq') AS EntitySequence,
     nextval('entity_access_rules_chain_history_id_seq') AS EntityAccessRulesChainHistorySequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
+    nextval('entity_metadata_aggregate_history_id_seq') AS EntityMetadataAggregateHistorySequence,
     nextval('entity_resource_aggregated_vaults_history_id_seq') AS EntityResourceAggregatedVaultsHistorySequence,
     nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
     nextval('entity_resource_vault_aggregate_history_id_seq') AS EntityResourceVaultAggregateHistorySequence,
     nextval('entity_vault_history_id_seq') AS EntityVaultHistorySequence,
     nextval('resource_entity_supply_history_id_seq') AS ResourceEntitySupplyHistorySequence,
     nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
-    nextval('non_fungible_id_mutable_data_history_id_seq') AS NonFungibleIdMutableDataHistorySequence,
+    nextval('non_fungible_id_data_history_id_seq') AS NonFungibleIdDataHistorySequence,
     nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence,
     nextval('validator_public_key_history_id_seq') AS ValidatorPublicKeyHistorySequence,
-    nextval('validator_active_set_history_id_seq') AS ValidatorActiveSetHistorySequence",
+    nextval('validator_active_set_history_id_seq') AS ValidatorActiveSetHistorySequence,
+    nextval('ledger_transaction_events_id_seq') AS LedgerTransactionEventSequence",
             cancellationToken: token);
 
         return await _connection.QueryFirstAsync<SequencesHolder>(cd);

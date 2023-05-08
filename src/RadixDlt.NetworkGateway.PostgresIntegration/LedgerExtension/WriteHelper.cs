@@ -96,7 +96,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, royalty_vault_entity_id, divisibility, store_of_non_fungible_resource_entity_id, non_fungible_id_type, code, code_type, stake_vault_entity_id, unstake_vault_entity_id, epoch_manager_entity_id, resource_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, divisibility, store_of_non_fungible_resource_entity_id, non_fungible_id_type, code, code_type, stake_vault_entity_id, unstake_vault_entity_id, epoch_manager_entity_id, resource_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -115,15 +115,6 @@ internal class WriteHelper
             await writer.WriteAsync(discriminator, "entity_type", token);
             await writer.WriteNullableAsync(e is ComponentEntity ce1 ? ce1.PackageId : null, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e is ComponentEntity ce2 ? ce2.BlueprintName : null, NpgsqlDbType.Text, token);
-
-            if (e is IRoyaltyVaultHolder rvh && rvh.RoyaltyVaultEntityId.HasValue)
-            {
-                await writer.WriteAsync(rvh.RoyaltyVaultEntityId.Value, token);
-            }
-            else
-            {
-                await writer.WriteNullAsync(token);
-            }
 
             await writer.WriteNullableAsync(e is FungibleResourceEntity frme ? frme.Divisibility : null, NpgsqlDbType.Integer, token);
 
@@ -186,14 +177,14 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyLedgerTransaction(ICollection<LedgerTransaction> entities, ReferencedEntityDictionary referencedEntities, CancellationToken token)
+    public async Task<int> CopyLedgerTransaction(ICollection<LedgerTransaction> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, error_message, transaction_accumulator, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, kind_filter_constraint, raw_payload, engine_receipt, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, transaction_accumulator, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, kind_filter_constraint, raw_payload, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_error_message, receipt_items, receipt_next_epoch, receipt_events, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var lt in entities)
         {
@@ -201,8 +192,6 @@ internal class WriteHelper
 
             await writer.StartRowAsync(token);
             await writer.WriteAsync(lt.StateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(lt.Status, "ledger_transaction_status", token);
-            await writer.WriteAsync(lt.ErrorMessage, NpgsqlDbType.Text, token);
             await writer.WriteAsync(lt.TransactionAccumulator, NpgsqlDbType.Bytea, token);
             await writer.WriteNullableAsync(lt.Message, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(lt.Epoch, NpgsqlDbType.Bigint, token);
@@ -210,7 +199,7 @@ internal class WriteHelper
             await writer.WriteAsync(lt.IndexInEpoch, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.IndexInRound, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.IsEndOfEpoch, NpgsqlDbType.Boolean, token);
-            await writer.WriteAsync(referencedEntities.OfStateVersion(lt.StateVersion).Select(re => re.DatabaseId).ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(lt.ReferencedEntities.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteNullableAsync(lt.FeePaid?.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
             await writer.WriteNullableAsync(lt.TipPaid?.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
             await writer.WriteAsync(lt.RoundTimestamp, NpgsqlDbType.TimestampTz, token);
@@ -218,30 +207,86 @@ internal class WriteHelper
             await writer.WriteAsync(lt.NormalizedRoundTimestamp, NpgsqlDbType.TimestampTz, token);
             await writer.WriteNullableAsync(lt.KindFilterConstraint, "ledger_transaction_kind_filter_constraint", token);
             await writer.WriteAsync(lt.RawPayload, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(lt.EngineReceipt, NpgsqlDbType.Jsonb, token);
+
+            await writer.WriteAsync(lt.EngineReceipt.StateUpdates, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(lt.EngineReceipt.Status, "ledger_transaction_status", token);
+            await writer.WriteAsync(lt.EngineReceipt.FeeSummary, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(lt.EngineReceipt.ErrorMessage, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(lt.EngineReceipt.Items, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(lt.EngineReceipt.NextEpoch, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(lt.EngineReceipt.Events, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(discriminator, "ledger_transaction_type", token);
 
             switch (lt)
             {
                 case UserLedgerTransaction ult:
-                    await writer.WriteAsync(discriminator, "ledger_transaction_type", token);
                     await writer.WriteAsync(ult.PayloadHash, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(ult.IntentHash, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(ult.SignedIntentHash, NpgsqlDbType.Bytea, token);
                     break;
                 case ValidatorLedgerTransaction:
-                    await writer.WriteAsync(discriminator, "ledger_transaction_type", token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     break;
                 case SystemLedgerTransaction:
-                    await writer.WriteAsync(discriminator, "ledger_transaction_type", token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lt), lt, null);
+            }
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
+    public async Task<int> CopyLedgerTransactionEvents(ICollection<LedgerTransactionEvent> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transaction_events (id, transaction_state_version, entity_id, discriminator, resource_entity_id, amount, non_fungible_id_data_ids) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            var discriminator = GetDiscriminator<Abstractions.Model.LedgerTransactionEventType>(e.GetType());
+
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.TransactionStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(discriminator, "ledger_transaction_event_type", token);
+
+            switch (e)
+            {
+                case DepositFungibleResourceLedgerTransactionEvent dfr:
+                    await writer.WriteAsync(dfr.ResourceEntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(dfr.Amount.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                    await writer.WriteNullAsync(token);
+                    break;
+                case DepositNonFungibleResourceLedgerTransactionEvent dnfr:
+                    await writer.WriteAsync(dnfr.ResourceEntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(dnfr.NonFungibleIdDataIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+                    break;
+                case WithdrawalFungibleResourceLedgerTransactionEvent wfr:
+                    await writer.WriteAsync(wfr.ResourceEntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(wfr.Amount.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                    await writer.WriteNullAsync(token);
+                    break;
+                case WithdrawalNonFungibleResourceLedgerTransactionEvent wnfr:
+                    await writer.WriteAsync(wnfr.ResourceEntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(wnfr.NonFungibleIdDataIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(e), e, null);
             }
         }
 
@@ -257,7 +302,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_metadata_history (id, from_state_version, entity_id, keys, values, updated_at_state_versions) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_metadata_history (id, from_state_version, entity_id, key, value, is_deleted) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -265,9 +310,32 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.Keys.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Text, token);
-            await writer.WriteAsync(e.Values.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.UpdatedAtStateVersions.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.Key, NpgsqlDbType.Text, token);
+            await writer.WriteNullableAsync(e.Value, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
+    public async Task<int> CopyEntityMetadataAggregateHistory(ICollection<EntityMetadataAggregateHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_metadata_aggregate_history (id, from_state_version, entity_id, metadata_ids) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.MetadataIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
         }
 
         await writer.CompleteAsync(token);
@@ -549,14 +617,14 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyNonFungibleIdMutableDataHistory(ICollection<NonFungibleIdMutableDataHistory> entities, CancellationToken token)
+    public async Task<int> CopyNonFungibleIdDataHistory(ICollection<NonFungibleIdDataHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_id_mutable_data_history (id, from_state_version, non_fungible_id_data_id, is_deleted, mutable_data) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_id_data_history (id, from_state_version, non_fungible_id_data_id, is_deleted, data) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -565,7 +633,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.NonFungibleIdDataId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
-            await writer.WriteNullableAsync(e.MutableData, NpgsqlDbType.Bytea, token);
+            await writer.WriteNullableAsync(e.Data, NpgsqlDbType.Bytea, token);
         }
 
         await writer.CompleteAsync(token);
@@ -606,32 +674,36 @@ SELECT
     setval('entities_id_seq', @entitySequence),
     setval('entity_access_rules_chain_history_id_seq', @entityAccessRulesChainHistorySequence),
     setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
+    setval('entity_metadata_aggregate_history_id_seq', @entityMetadataAggregateHistorySequence),
     setval('entity_resource_aggregated_vaults_history_id_seq', @entityResourceAggregatedVaultsHistorySequence),
     setval('entity_resource_aggregate_history_id_seq', @entityResourceAggregateHistorySequence),
     setval('entity_resource_vault_aggregate_history_id_seq', @entityResourceVaultAggregateHistorySequence),
     setval('entity_vault_history_id_seq', @entityVaultHistorySequence),
     setval('resource_entity_supply_history_id_seq', @resourceEntitySupplyHistorySequence),
     setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
-    setval('non_fungible_id_mutable_data_history_id_seq', @nonFungibleIdMutableDataHistorySequence),
+    setval('non_fungible_id_data_history_id_seq', @nonFungibleIdDataHistorySequence),
     setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence),
     setval('validator_public_key_history_id_seq', @validatorPublicKeyHistorySequence),
-    setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence)",
+    setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence),
+    setval('ledger_transaction_events_id_seq', @ledgerTransactionEventSequence)",
             parameters: new
             {
                 entityStateHistorySequence = sequences.EntityStateHistorySequence,
                 entitySequence = sequences.EntitySequence,
                 entityAccessRulesChainHistorySequence = sequences.EntityAccessRulesChainHistorySequence,
                 entityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,
+                entityMetadataAggregateHistorySequence = sequences.EntityMetadataAggregateHistorySequence,
                 entityResourceAggregatedVaultsHistorySequence = sequences.EntityResourceAggregatedVaultsHistorySequence,
                 entityResourceAggregateHistorySequence = sequences.EntityResourceAggregateHistorySequence,
                 entityResourceVaultAggregateHistorySequence = sequences.EntityResourceVaultAggregateHistorySequence,
                 entityVaultHistorySequence = sequences.EntityVaultHistorySequence,
                 resourceEntitySupplyHistorySequence = sequences.ResourceEntitySupplyHistorySequence,
                 nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
-                nonFungibleIdMutableDataHistorySequence = sequences.NonFungibleIdMutableDataHistorySequence,
+                nonFungibleIdDataHistorySequence = sequences.NonFungibleIdDataHistorySequence,
                 nonFungibleIdStoreHistorySequence = sequences.NonFungibleIdStoreHistorySequence,
                 validatorPublicKeyHistorySequence = sequences.ValidatorPublicKeyHistorySequence,
                 validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,
+                ledgerTransactionEventSequence = sequences.LedgerTransactionEventSequence,
             },
             cancellationToken: token);
 
