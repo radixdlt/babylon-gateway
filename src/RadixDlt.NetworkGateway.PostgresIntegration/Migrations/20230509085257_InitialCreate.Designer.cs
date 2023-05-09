@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230504122919_InitialCreate")]
+    [Migration("20230509085257_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -589,6 +589,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("address_type_definitions");
+
+                    b.Property<EventTypeIdentifiers>("EventTypeIdentifiers")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("event_type_identifiers");
 
                     b.Property<HrpDefinition>("HrpDefinition")
                         .IsRequired()

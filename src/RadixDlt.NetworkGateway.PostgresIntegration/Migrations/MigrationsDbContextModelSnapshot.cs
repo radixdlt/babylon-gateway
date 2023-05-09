@@ -587,6 +587,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("address_type_definitions");
 
+                    b.Property<EventTypeIdentifiers>("EventTypeIdentifiers")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("event_type_identifiers");
+
                     b.Property<HrpDefinition>("HrpDefinition")
                         .IsRequired()
                         .HasColumnType("jsonb")

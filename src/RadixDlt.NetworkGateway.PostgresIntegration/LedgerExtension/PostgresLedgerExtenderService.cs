@@ -835,6 +835,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     }
                 }
 
+                var eventTypeIdentifiers = _networkConfigurationProvider.GetEventTypeIdentifiers();
                 // TODO we'd love to see schemed JSON payload here and/or support for SBOR to schemed JSON in RET but this is not available yet; consider this entire section heavy WIP
                 foreach (var @event in committedTransaction.Receipt.Events)
                 {
@@ -849,7 +850,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     // TODO we should most likely ensure that those are LocalTypeIndices we believe they are, as they're of kind=SchemaLocal, i.e. we should check the schema
                     if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.Vault)
                     {
-                        if (@event.Type.LocalTypeIndex.Index == CoreModel.EventTypeIdentifiers.Vault.Withdrawal)
+                        if (@event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.Vault.Withdrawal)
                         {
                             var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
                             var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<VaultEntity>().ResourceEntityId;
@@ -880,7 +881,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             }
                         }
 
-                        if (@event.Type.LocalTypeIndex.Index == CoreModel.EventTypeIdentifiers.Vault.Deposit)
+                        if (@event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.Vault.Deposit)
                         {
                             var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
                             var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<VaultEntity>().ResourceEntityId;
@@ -914,80 +915,64 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.FungibleResource)
                     {
-                        switch (@event.Type.LocalTypeIndex.Index)
+                        if (@event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleResource.Minted)
                         {
-                            case CoreModel.EventTypeIdentifiers.FungibleResource.Minted:
+                            var data = (JObject)@event.Data.DataJson;
+                            var amount = data["fields"]?[0]?["value"]?.ToString();
+
+                            if (string.IsNullOrEmpty(amount))
                             {
-                                var data = (JObject)@event.Data.DataJson;
-                                var amount = data["fields"]?[0]?["value"]?.ToString();
-
-                                if (string.IsNullOrEmpty(amount))
-                                {
-                                    throw new InvalidOperationException("Unable to read resource minted amount from event. Unexpected event structure.");
-                                }
-
-                                resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion, Minted: TokenAmount.FromDecimalString(amount)));
-
-                                break;
+                                throw new InvalidOperationException("Unable to read resource minted amount from event. Unexpected event structure.");
                             }
 
-                            case CoreModel.EventTypeIdentifiers.FungibleResource.Burned:
+                            resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion, Minted: TokenAmount.FromDecimalString(amount)));
+                        }
+                        else if (@event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleResource.Burned)
+                        {
+                            var data = (JObject)@event.Data.DataJson;
+                            var amount = data["fields"]?[0]?["value"]?.ToString();
+
+                            if (string.IsNullOrEmpty(amount))
                             {
-                                var data = (JObject)@event.Data.DataJson;
-                                var amount = data["fields"]?[0]?["value"]?.ToString();
-
-                                if (string.IsNullOrEmpty(amount))
-                                {
-                                    throw new InvalidOperationException("Unable to read resource burned amount from event. Unexpected event structure.");
-                                }
-
-                                resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion, Burned: TokenAmount.FromDecimalString(amount)));
-
-                                break;
+                                throw new InvalidOperationException("Unable to read resource burned amount from event. Unexpected event structure.");
                             }
+
+                            resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion, Burned: TokenAmount.FromDecimalString(amount)));
                         }
                     }
 
                     if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.NonFungibleResource)
                     {
-                        switch (@event.Type.LocalTypeIndex.Index)
+                        if (@event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleResource.Minted)
                         {
-                            case CoreModel.EventTypeIdentifiers.NonFungibleResource.Minted:
+                            var data = (JObject)@event.Data.DataJson;
+                            var mintedCount = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).Count();
+                            if (!mintedCount.HasValue)
                             {
-                                var data = (JObject)@event.Data.DataJson;
-                                var mintedCount = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).Count();
-                                if (!mintedCount.HasValue)
-                                {
-                                    throw new InvalidOperationException("Unable to read non fungible resource burned amount from event. Unexpected event structure.");
-                                }
-
-                                resourceSupplyChanges.Add(
-                                    new ResourceSupplyChange(
-                                        eventEmitterEntity.DatabaseId,
-                                        stateVersion,
-                                        Minted: TokenAmount.FromDecimalString(mintedCount.Value.ToString())));
-
-                                break;
+                                throw new InvalidOperationException("Unable to read non fungible resource burned amount from event. Unexpected event structure.");
                             }
 
-                            case CoreModel.EventTypeIdentifiers.NonFungibleResource.Burned:
+                            resourceSupplyChanges.Add(
+                                new ResourceSupplyChange(
+                                    eventEmitterEntity.DatabaseId,
+                                    stateVersion,
+                                    Minted: TokenAmount.FromDecimalString(mintedCount.Value.ToString())));
+                        }
+                        else if (@event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleResource.Burned)
+                        {
+                            var data = (JObject)@event.Data.DataJson;
+                            var burnedCount = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).Count();
+
+                            if (!burnedCount.HasValue)
                             {
-                                var data = (JObject)@event.Data.DataJson;
-                                var burnedCount = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).Count();
-
-                                if (!burnedCount.HasValue)
-                                {
-                                    throw new InvalidOperationException("Unable to read non fungible resource burned amount from event. Unexpected event structure.");
-                                }
-
-                                resourceSupplyChanges.Add(
-                                    new ResourceSupplyChange(
-                                        eventEmitterEntity.DatabaseId,
-                                        stateVersion,
-                                        Burned: TokenAmount.FromDecimalString(burnedCount.Value.ToString())));
-
-                                break;
+                                throw new InvalidOperationException("Unable to read non fungible resource burned amount from event. Unexpected event structure.");
                             }
+
+                            resourceSupplyChanges.Add(
+                                new ResourceSupplyChange(
+                                    eventEmitterEntity.DatabaseId,
+                                    stateVersion,
+                                    Burned: TokenAmount.FromDecimalString(burnedCount.Value.ToString())));
                         }
                     }
                 }

@@ -158,6 +158,11 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().NetworkName;
     }
 
+    public EventTypeIdentifiers GetEventTypeIdentifiers()
+    {
+        return GetCapturedConfig().EventTypeIdentifiers;
+    }
+
     public HrpDefinition GetHrpDefinition()
     {
         return GetCapturedConfig().HrpDefinition;
@@ -202,6 +207,11 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 Xrd: wka.Xrd
             ),
             AddressTypeDefinitions = at,
+            // TODO: temporal solution, that should be read from gensis.
+            EventTypeIdentifiers = new EventTypeIdentifiers(
+                new Vault(27, 28),
+                new FungibleResource(35, 36),
+                new NonFungibleResource(85, 87)),
         };
     }
 
