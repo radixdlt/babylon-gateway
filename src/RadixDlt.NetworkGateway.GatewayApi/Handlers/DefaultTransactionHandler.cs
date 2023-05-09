@@ -186,13 +186,13 @@ internal class DefaultTransactionHandler : ITransactionHandler
         {
             searchCriteria = new TransactionStreamPageRequestSearchCriteria(request.EntityId.Value);
 
-            searchCriteria.TypeFilter = request.TypeFilter switch
-            {
-                GatewayModel.StreamTransactionsRequest.TypeFilterEnum.Deposit => LedgerTransactionEventTypeFilter.Deposit,
-                GatewayModel.StreamTransactionsRequest.TypeFilterEnum.Withdrawal => LedgerTransactionEventTypeFilter.Withdrawal,
-                null => null,
-                _ => throw new UnreachableException($"Didn't expect {request.TypeFilter} value"),
-            };
+            // searchCriteria.TypeFilter = request.TypeFilter switch
+            // {
+            //     GatewayModel.StreamTransactionsRequest.TypeFilterEnum.Deposit => LedgerTransactionMarkerType.Deposit,
+            //     GatewayModel.StreamTransactionsRequest.TypeFilterEnum.Withdrawal => LedgerTransactionMarkerType.Withdrawal,
+            //     null => null,
+            //     _ => throw new UnreachableException($"Didn't expect {request.TypeFilter} value"),
+            // };
         }
 
         var transactionsPageRequest = new TransactionStreamPageRequest(
@@ -200,7 +200,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
             Cursor: GatewayModel.LedgerTransactionsCursor.FromCursorString(request.Cursor),
             PageSize: request.LimitPerPage ?? DefaultPageLimit,
             AscendingOrder: request.Order == GatewayModel.StreamTransactionsRequest.OrderEnum.Asc,
-            KindFilter: kindFilter,
+            // KindFilter: kindFilter,
             SearchCriteria: searchCriteria
         );
 

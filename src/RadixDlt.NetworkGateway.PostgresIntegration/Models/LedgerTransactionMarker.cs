@@ -62,12 +62,68 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public enum LedgerTransactionEventType
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+
+internal enum AbcOriginType
 {
-    DepositFungibleResource,
-    DepositNonFungibleResource,
-    WithdrawalFungibleResource,
-    WithdrawalNonFungibleResource,
+    User,
+    EpochChange,
+}
+
+internal enum AbcEventType
+{
+    Withdrawal,
+    Deposit,
+}
+
+internal enum AbcOperationType
+{
+    ResourceInUse,
+    AccountDepositedInto,
+    AccountWithdrawnFrom,
+}
+
+[Table("ledger_transaction_markers")]
+internal abstract class LedgerTransactionMarker
+{
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
+
+    [Column("state_version")]
+    public long StateVersion { get; set; }
+}
+
+internal class OriginLedgerTransactionMarker : LedgerTransactionMarker
+{
+    [Column("origin_type")]
+    public AbcOriginType OriginType { get; set; }
+}
+
+internal class EventLedgerTransactionMarker : LedgerTransactionMarker
+{
+    [Column("event_type")]
+    public AbcEventType EventType { get; set; }
+
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+
+    [Column("quantity")]
+    public TokenAmount Quantity { get; set; }
+}
+
+internal class ManifestAddressLedgerTransactionMarker : LedgerTransactionMarker
+{
+    [Column("operation_type")]
+    public AbcOperationType OperationType { get; set; }
+
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 }

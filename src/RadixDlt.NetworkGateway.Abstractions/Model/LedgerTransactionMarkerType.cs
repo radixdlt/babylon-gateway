@@ -64,8 +64,9 @@
 
 namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-public enum LedgerTransactionEventTypeFilter
+public enum LedgerTransactionMarkerType
 {
-    Deposit,
-    Withdrawal,
+    Origin,
+    Event,
+    ManifestAddress,
 }

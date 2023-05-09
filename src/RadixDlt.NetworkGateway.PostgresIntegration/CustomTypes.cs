@@ -92,11 +92,12 @@ internal static class CustomTypes
         // needed to support custom enums in postgres
         NpgsqlConnection.GlobalTypeMapper.MapEnum<AccessRulesChainSubtype>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionKindFilterConstraint>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionEventType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionEventTypeFilter>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<AbcEventType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<AbcOperationType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<AbcOriginType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PublicKeyType>();

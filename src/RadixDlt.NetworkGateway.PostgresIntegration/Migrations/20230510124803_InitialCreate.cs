@@ -82,11 +82,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:Enum:abc_event_type", "withdrawal,deposit")
+                .Annotation("Npgsql:Enum:abc_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from")
+                .Annotation("Npgsql:Enum:abc_origin_type", "user,epoch_change")
                 .Annotation("Npgsql:Enum:access_rules_chain_subtype", "none,resource_manager_vault_access_rules_chain")
                 .Annotation("Npgsql:Enum:entity_type", "epoch_manager,fungible_resource,non_fungible_resource,normal_component,account_component,package,key_value_store,vault,clock,validator,access_controller,identity")
-                .Annotation("Npgsql:Enum:ledger_transaction_event_type", "deposit_fungible_resource,deposit_non_fungible_resource,withdrawal_fungible_resource,withdrawal_non_fungible_resource")
-                .Annotation("Npgsql:Enum:ledger_transaction_event_type_filter", "deposit,withdrawal")
-                .Annotation("Npgsql:Enum:ledger_transaction_kind_filter_constraint", "user,epoch_change")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "user,validator,system")
                 .Annotation("Npgsql:Enum:non_fungible_id_type", "string,integer,bytes,uuid")
@@ -265,22 +266,23 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ledger_transaction_events",
+                name: "ledger_transaction_markers",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    transaction_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    type_filter = table.Column<LedgerTransactionEventTypeFilter>(type: "ledger_transaction_event_type_filter", nullable: true),
-                    discriminator = table.Column<LedgerTransactionEventType>(type: "ledger_transaction_event_type", nullable: false),
+                    state_version = table.Column<long>(type: "bigint", nullable: false),
+                    discriminator = table.Column<LedgerTransactionMarkerType>(type: "ledger_transaction_marker_type", nullable: false),
+                    event_type = table.Column<AbcEventType>(type: "abc_event_type", nullable: true),
+                    entity_id = table.Column<long>(type: "bigint", nullable: true),
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
-                    amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
-                    non_fungible_id_data_ids = table.Column<List<long>>(type: "bigint[]", nullable: true)
+                    quantity = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
+                    operation_type = table.Column<AbcOperationType>(type: "abc_operation_type", nullable: true),
+                    origin_type = table.Column<AbcOriginType>(type: "abc_origin_type", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ledger_transaction_events", x => x.id);
+                    table.PrimaryKey("PK_ledger_transaction_markers", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -301,7 +303,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     round_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     created_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     normalized_round_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    kind_filter_constraint = table.Column<LedgerTransactionKindFilterConstraint>(type: "ledger_transaction_kind_filter_constraint", nullable: true),
                     raw_payload = table.Column<byte[]>(type: "bytea", nullable: false),
                     receipt_status = table.Column<LedgerTransactionStatus>(type: "ledger_transaction_status", nullable: false),
                     receipt_fee_summary = table.Column<string>(type: "jsonb", nullable: false),
@@ -540,12 +541,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:IndexMethod", "hash");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ledger_transactions_kind_filter_constraint_state_version",
-                table: "ledger_transactions",
-                columns: new[] { "kind_filter_constraint", "state_version" },
-                filter: "kind_filter_constraint IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_round_timestamp",
                 table: "ledger_transactions",
                 column: "round_timestamp");
@@ -649,7 +644,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "entity_vault_history");
 
             migrationBuilder.DropTable(
-                name: "ledger_transaction_events");
+                name: "ledger_transaction_markers");
 
             migrationBuilder.DropTable(
                 name: "ledger_transactions");

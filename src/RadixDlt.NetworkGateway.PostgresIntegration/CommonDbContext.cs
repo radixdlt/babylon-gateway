@@ -85,7 +85,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
 
-    public DbSet<LedgerTransactionEvent> LedgerTransactionEvents => Set<LedgerTransactionEvent>();
+    public DbSet<LedgerTransactionMarker> LedgerTransactionMarkers => Set<LedgerTransactionMarker>();
 
     public DbSet<PendingTransaction> PendingTransactions => Set<PendingTransaction>();
 
@@ -130,11 +130,12 @@ internal abstract class CommonDbContext : DbContext
     {
         modelBuilder.HasPostgresEnum<AccessRulesChainSubtype>();
         modelBuilder.HasPostgresEnum<EntityType>();
-        modelBuilder.HasPostgresEnum<LedgerTransactionKindFilterConstraint>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
-        modelBuilder.HasPostgresEnum<LedgerTransactionEventType>();
-        modelBuilder.HasPostgresEnum<LedgerTransactionEventTypeFilter>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerType>();
+        modelBuilder.HasPostgresEnum<AbcEventType>();
+        modelBuilder.HasPostgresEnum<AbcOperationType>();
+        modelBuilder.HasPostgresEnum<AbcOriginType>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
         modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();
@@ -193,19 +194,18 @@ internal abstract class CommonDbContext : DbContext
             .IsUnique()
             .HasFilter("index_in_round = 0");
 
-        // This index lets you quickly filter out transaction stream
-        modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => new { lt.KindFilterConstraint, lt.StateVersion })
-            .HasFilter("kind_filter_constraint IS NOT NULL");
+        // // This index lets you quickly filter out transaction stream
+        // modelBuilder.Entity<LedgerTransaction>()
+        //     .HasIndex(lt => new { lt.KindFilterConstraint, lt.StateVersion })
+        //     .HasFilter("kind_filter_constraint IS NOT NULL");
 
-        modelBuilder.Entity<LedgerTransactionEvent>()
-            .HasDiscriminator<LedgerTransactionEventType>(DiscriminatorColumnName)
-            .HasValue<DepositFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.DepositFungibleResource)
-            .HasValue<DepositNonFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.DepositNonFungibleResource)
-            .HasValue<WithdrawalFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.WithdrawalFungibleResource)
-            .HasValue<WithdrawalNonFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.WithdrawalNonFungibleResource);
+        modelBuilder.Entity<LedgerTransactionMarker>()
+            .HasDiscriminator<LedgerTransactionMarkerType>(DiscriminatorColumnName)
+            .HasValue<EventLedgerTransactionMarker>(LedgerTransactionMarkerType.Event)
+            .HasValue<OriginLedgerTransactionMarker>(LedgerTransactionMarkerType.Origin)
+            .HasValue<ManifestAddressLedgerTransactionMarker>(LedgerTransactionMarkerType.ManifestAddress);
 
-        // TODO add all necessary indices on LedgerTransactionEvent table
+        // TODO add all necessary indices on LedgerTransactionMarker table
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)

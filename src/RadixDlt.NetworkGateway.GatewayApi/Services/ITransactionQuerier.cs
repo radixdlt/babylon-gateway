@@ -90,7 +90,6 @@ public sealed record TransactionStreamPageRequest(
     GatewayModel.LedgerTransactionsCursor? Cursor,
     int PageSize,
     bool AscendingOrder,
-    LedgerTransactionKindFilter KindFilter,
     TransactionStreamPageRequestSearchCriteria? SearchCriteria);
 
 public class TransactionStreamPageRequestSearchCriteria
@@ -101,7 +100,7 @@ public class TransactionStreamPageRequestSearchCriteria
 
     public long? StateVersionUpperBound { get; set; }
 
-    public LedgerTransactionEventTypeFilter? TypeFilter { get; set; }
+    public LedgerTransactionMarkerType? TypeFilter { get; set; }
 
     public long? ResourceEntityIdFilter { get; set; }
 

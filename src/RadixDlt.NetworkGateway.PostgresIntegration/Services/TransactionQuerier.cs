@@ -137,52 +137,52 @@ internal class TransactionQuerier : ITransactionQuerier
 
         IQueryable<long> query;
 
-        if (request.SearchCriteria != null)
-        {
-            if (request.KindFilter != LedgerTransactionKindFilter.UserOnly)
-            {
-                throw new NotSupportedException("bla bla bla combination not supported");
-            }
-
-            var criteria = request.SearchCriteria;
-
-            var search = _dbContext.LedgerTransactionEvents
-                .Where(lte => lte.TransactionStateVersion <= atLedgerState.StateVersion)
-                .Where(lte => lte.EntityId == criteria.EntityId);
-
-            if (request.AscendingOrder)
-            {
-                search = search
-                    .Where(lte => lte.TransactionStateVersion >= stateVersionBoundary)
-                    .OrderBy(lte => lte.TransactionStateVersion);
-            }
-            else
-            {
-                search = search
-                    .Where(lte => lte.TransactionStateVersion <= stateVersionBoundary)
-                    .OrderByDescending(lte => lte.TransactionStateVersion);
-            }
-
-            if (criteria.StateVersionLowerBound.HasValue)
-            {
-                search = search.Where(lte => lte.TransactionStateVersion >= criteria.StateVersionLowerBound);
-            }
-
-            if (criteria.StateVersionUpperBound.HasValue)
-            {
-                search = search.Where(lte => lte.TransactionStateVersion <= criteria.StateVersionUpperBound);
-            }
-
-            if (criteria.TypeFilter.HasValue)
-            {
-                search = search.Where(lte => lte.TypeFilter == criteria.TypeFilter.Value);
-            }
-
-            query = search
-                .Select(e => e.TransactionStateVersion)
-                .TagWith(ForceDistinctInterceptor.Apply); // due to EF Core limitations we rely on interceptor to force SELECT DISTINCT
-        }
-        else
+        // if (request.SearchCriteria != null)
+        // {
+        //     if (request.KindFilter != LedgerTransactionKindFilter.UserOnly)
+        //     {
+        //         throw new NotSupportedException("bla bla bla combination not supported");
+        //     }
+        //
+        //     var criteria = request.SearchCriteria;
+        //
+        //     var search = _dbContext.LedgerTransactionMarkers
+        //         .Where(lte => lte.StateVersion <= atLedgerState.StateVersion)
+        //         .Where(lte => lte.EntityId == criteria.EntityId);
+        //
+        //     if (request.AscendingOrder)
+        //     {
+        //         search = search
+        //             .Where(lte => lte.StateVersion >= stateVersionBoundary)
+        //             .OrderBy(lte => lte.StateVersion);
+        //     }
+        //     else
+        //     {
+        //         search = search
+        //             .Where(lte => lte.StateVersion <= stateVersionBoundary)
+        //             .OrderByDescending(lte => lte.StateVersion);
+        //     }
+        //
+        //     if (criteria.StateVersionLowerBound.HasValue)
+        //     {
+        //         search = search.Where(lte => lte.StateVersion >= criteria.StateVersionLowerBound);
+        //     }
+        //
+        //     if (criteria.StateVersionUpperBound.HasValue)
+        //     {
+        //         search = search.Where(lte => lte.StateVersion <= criteria.StateVersionUpperBound);
+        //     }
+        //
+        //     if (criteria.TypeFilter.HasValue)
+        //     {
+        //         search = search.Where(lte => lte.Type == criteria.TypeFilter.Value);
+        //     }
+        //
+        //     query = search
+        //         .Select(e => e.StateVersion)
+        //         .TagWith(ForceDistinctInterceptor.Apply); // due to EF Core limitations we rely on interceptor to force SELECT DISTINCT
+        // }
+        // else
         {
             var search = _dbContext.LedgerTransactions
                 .Where(lt => lt.StateVersion <= atLedgerState.StateVersion);
@@ -200,18 +200,18 @@ internal class TransactionQuerier : ITransactionQuerier
                     .OrderByDescending(lt => lt.StateVersion);
             }
 
-            if (request.KindFilter == LedgerTransactionKindFilter.UserOnly)
-            {
-                search = search.Where(lt => lt.KindFilterConstraint == LedgerTransactionKindFilterConstraint.User);
-            }
-            else if (request.KindFilter == LedgerTransactionKindFilter.EpochChangeOnly)
-            {
-                search = search.Where(lt => lt.KindFilterConstraint == LedgerTransactionKindFilterConstraint.EpochChange);
-            }
-            else
-            {
-                search = search.Where(lt => lt.KindFilterConstraint != null);
-            }
+            // if (request.KindFilter == LedgerTransactionKindFilter.UserOnly)
+            // {
+            //     search = search.Where(lt => lt.KindFilterConstraint == LedgerTransactionKindFilterConstraint.User);
+            // }
+            // else if (request.KindFilter == LedgerTransactionKindFilter.EpochChangeOnly)
+            // {
+            //     search = search.Where(lt => lt.KindFilterConstraint == LedgerTransactionKindFilterConstraint.EpochChange);
+            // }
+            // else
+            // {
+            //     search = search.Where(lt => lt.KindFilterConstraint != null);
+            // }
 
             query = search.Select(lt => lt.StateVersion);
         }

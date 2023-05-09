@@ -62,71 +62,24 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-[Table("ledger_transaction_events")]
-internal abstract class LedgerTransactionEvent
+internal static class ToolkitModelExtensions
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("transaction_state_version")]
-    public long TransactionStateVersion { get; set; }
-
-    [Column("entity_id")]
-    public long EntityId { get; set; }
-
-    [Column("type_filter")]
-    public abstract LedgerTransactionEventTypeFilter? TypeFilter { get; protected set; }
-}
-
-internal class DepositFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
-{
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-
-    [Column("amount")]
-    public TokenAmount Amount { get; set; }
-
-    public override LedgerTransactionEventTypeFilter? TypeFilter { get; protected set; } = LedgerTransactionEventTypeFilter.Deposit;
-}
-
-internal class DepositNonFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
-{
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-
-    [Column("non_fungible_id_data_ids")]
-    public List<long> NonFungibleIdDataIds { get; set; }
-
-    public override LedgerTransactionEventTypeFilter? TypeFilter { get; protected set; } = LedgerTransactionEventTypeFilter.Deposit;
-}
-
-internal class WithdrawalFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
-{
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-
-    [Column("amount")]
-    public TokenAmount Amount { get; set; }
-
-    public override LedgerTransactionEventTypeFilter? TypeFilter { get; protected set; } = LedgerTransactionEventTypeFilter.Withdrawal;
-}
-
-internal class WithdrawalNonFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
-{
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-
-    [Column("non_fungible_id_data_ids")]
-    public List<long> NonFungibleIdDataIds { get; set; }
-
-    public override LedgerTransactionEventTypeFilter? TypeFilter { get; protected set; } = LedgerTransactionEventTypeFilter.Withdrawal;
+    public static IEnumerable<string> All(this ToolkitModel.Exchange.ExtractAddressesFromManifestResponse response)
+    {
+        return response.PackageAddresses
+            .Concat(response.ComponentAddresses)
+            .Concat(response.AccountAddresses)
+            .Concat(response.AccountsRequiringAuth)
+            .Concat(response.AccountsWithdrawnFrom)
+            .Concat(response.AccountsDepositedInto)
+            .Concat(response.IdentityAddresses)
+            .Concat(response.IdentitiesRequiringAuth)
+            .Select(a => a.Address);
+    }
 }
