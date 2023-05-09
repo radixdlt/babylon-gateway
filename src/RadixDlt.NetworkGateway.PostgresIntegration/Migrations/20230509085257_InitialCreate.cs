@@ -62,11 +62,12 @@
  * permissions under this License.
  */
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -327,7 +328,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     network_name = table.Column<string>(type: "text", nullable: false),
                     hrp_definition = table.Column<HrpDefinition>(type: "jsonb", nullable: false),
                     well_known_addresses = table.Column<WellKnownAddresses>(type: "jsonb", nullable: false),
-                    address_type_definitions = table.Column<AddressTypeDefinition[]>(type: "jsonb", nullable: false)
+                    address_type_definitions = table.Column<AddressTypeDefinition[]>(type: "jsonb", nullable: false),
+                    event_type_identifiers = table.Column<EventTypeIdentifiers>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -420,7 +422,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     total_supply = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
                     total_minted = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    total_burnt = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
+                    total_burned = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
                 },
                 constraints: table =>
                 {

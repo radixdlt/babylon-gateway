@@ -7,7 +7,9 @@ _Release Date: Unreleased_
 - added opt-in royalty vault balance to `/state/entity/details` if queried entity is component or package.
 - added possibility to query for `explicit_metadata` in  `/state/entity/details`, ` /state/entity/page/fungibles`, `/state/entity/page/non-fungibles`. If given metadata keys exist, they will be returned for top level entity and all returned resources.
 - possibility to configure max number of transaction fetched from CoreAPI in single batch by `MaxCoreApiTransactionBatchSize`. By default it's fetching 1000.
-- 
+- added information about `epoch`, `round`, `round_timestamp` to `/transaction/committed-details` and `/stream/transactions` endpoints.
+- added `total_supply`, `total_minted`, `total_burned` to `/state/entity/details` when querying for fungible or non fungible resources.
+
 ### 0.3.1
 
 - Fix `/state/non-fungible/data` to return data for all NFIDs

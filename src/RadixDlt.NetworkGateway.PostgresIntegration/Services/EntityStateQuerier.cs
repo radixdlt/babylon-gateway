@@ -148,6 +148,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var accessRulesChainHistory = await GetAccessRulesChainHistory(resourceEntities, componentEntities, ledgerState, token);
         var stateHistory = await GetStateHistory(componentEntities, ledgerState, token);
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, componentEntities, ledgerState, token);
+        var resourcesSupplyData = await GetResourcesSupplyData(resourceEntities.Select(x => x.Id).ToArray(), ledgerState, token);
 
         var royaltyVaultsBalance = componentEntities.Any() && (optIns.ComponentRoyaltyVaultBalance || optIns.PackageRoyaltyVaultBalance)
             ? await RoyaltyVaultBalance(componentEntities.Select(x => x.Id).ToArray(), ledgerState, token)
@@ -170,7 +171,11 @@ internal class EntityStateQuerier : IEntityStateQuerier
             switch (entity)
             {
                 case FungibleResourceEntity frme:
+                    var fungibleResourceSupplyData = resourcesSupplyData[frme.Id];
                     details = new GatewayModel.StateEntityDetailsResponseFungibleResourceDetails(
+                        totalSupply: fungibleResourceSupplyData.TotalSupply.ToString(),
+                        totalMinted: fungibleResourceSupplyData.TotalMinted.ToString(),
+                        totalBurned: fungibleResourceSupplyData.TotalBurned.ToString(),
                         accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(frme.Id, AccessRulesChainSubtype.None)].AccessRulesChain),
                         vaultAccessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(frme.Id, AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain)].AccessRulesChain),
                         divisibility: frme.Divisibility);
@@ -178,7 +183,16 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     break;
 
                 case NonFungibleResourceEntity nfrme:
+                    var nonFungibleResourceSupplyData = resourcesSupplyData[nfrme.Id];
+                    if (nonFungibleResourceSupplyData == null)
+                    {
+                        throw new ArgumentException($"Resource supply data for fungible resource with database id:{nfrme.Id} not found.");
+                    }
+
                     details = new GatewayModel.StateEntityDetailsResponseNonFungibleResourceDetails(
+                        totalSupply: nonFungibleResourceSupplyData.TotalSupply.ToString(),
+                        totalMinted: nonFungibleResourceSupplyData.TotalMinted.ToString(),
+                        totalBurned: nonFungibleResourceSupplyData.TotalBurned.ToString(),
                         accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(nfrme.Id, AccessRulesChainSubtype.None)].AccessRulesChain),
                         vaultAccessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(nfrme.Id, AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain)].AccessRulesChain),
                         nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel());
@@ -703,7 +717,6 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) emh ON TRUE;")
-            .AsNoTracking()
             .ToListAsync(token);
 
         var result = new Dictionary<long, GatewayModel.EntityMetadataCollection>();
@@ -798,6 +811,29 @@ order by ah.ord
             : null;
 
         return new GatewayModel.FungibleResourcesCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
+    }
+
+    private async Task<Dictionary<long, ResourceEntitySupplyHistory>> GetResourcesSupplyData(long[] entityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    {
+        if (!entityIds.Any())
+        {
+            return new Dictionary<long, ResourceEntitySupplyHistory>();
+        }
+
+        var result = await _dbContext.ResourceEntitySupplyHistory.FromSqlInterpolated($@"
+WITH variables (entity_id) AS (SELECT UNNEST({entityIds}))
+SELECT resh.*
+FROM variables
+INNER JOIN LATERAL(
+    SELECT *
+    FROM resource_entity_supply_history
+    WHERE from_state_version <= {ledgerState.StateVersion} AND resource_entity_id = variables.entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) resh ON true")
+            .ToDictionaryAsync(e => e.ResourceEntityId, token);
+
+        return result;
     }
 
     private async Task<GatewayModel.FungibleResourcesCollection> GetFungiblesSliceAggregatedPerVault(long entityId, int resourceOffset, int resourceLimit, int vaultOffset, int vaultLimit, GatewayModel.LedgerState ledgerState,
@@ -1282,33 +1318,6 @@ order by ord
             : null;
 
         return new GatewayModel.NonFungibleIdsCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
-    }
-
-    private async Task<Dictionary<long, GatewayModel.StateEntityDetailsResponseItemAncestorIdentities?>> GetAncestorIdentities(ICollection<Entity> entities, CancellationToken token)
-    {
-        var lookupIds = new HashSet<long>();
-
-        foreach (var entity in entities)
-        {
-            if (entity.HasParent)
-            {
-                lookupIds.Add(entity.ParentAncestorId.Value);
-                lookupIds.Add(entity.OwnerAncestorId.Value);
-                lookupIds.Add(entity.GlobalAncestorId.Value);
-            }
-        }
-
-        var ids = lookupIds.ToList();
-        var ancestors = await _dbContext.Entities
-            .Where(e => ids.Contains(e.Id))
-            .ToDictionaryAsync(e => e.Id, token);
-
-        return entities.ToDictionary(e => e.Id, e => e.HasParent
-            ? new GatewayModel.StateEntityDetailsResponseItemAncestorIdentities(
-                parentAddress: ancestors[e.ParentAncestorId.Value].GlobalAddress ?? ancestors[e.ParentAncestorId.Value].Address.ToHex(),
-                ownerAddress: ancestors[e.OwnerAncestorId.Value].GlobalAddress ?? ancestors[e.OwnerAncestorId.Value].Address.ToHex(),
-                globalAddress: ancestors[e.GlobalAncestorId.Value].GlobalAddress ?? ancestors[e.GlobalAncestorId.Value].Address.ToHex())
-            : null);
     }
 
     private async Task<long> GetVaultEntityId(string vaultAddress, GatewayModel.LedgerState ledgerState, CancellationToken token)

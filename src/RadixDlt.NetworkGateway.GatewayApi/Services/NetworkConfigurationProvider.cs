@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
@@ -82,7 +83,7 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
     string GetNetworkName();
 }
 
-public sealed record CapturedConfig(byte NetworkId, string NetworkName, HrpDefinition HrpDefinition, WellKnownAddresses WellKnownAddresses, AddressTypeDefinition[] AddressTypeDefinitions);
+public sealed record CapturedConfig(byte NetworkId, string NetworkName, HrpDefinition HrpDefinition, WellKnownAddresses WellKnownAddresses, AddressTypeDefinition[] AddressTypeDefinitions, EventTypeIdentifiers EventTypeIdentifiers);
 
 public interface ICapturedConfigProvider
 {
@@ -132,6 +133,11 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
     public AddressTypeDefinition GetAddressTypeDefinition(AddressSubtype subtype)
     {
         return GetCapturedConfig().AddressTypeDefinitions.First(atd => atd.Subtype == subtype);
+    }
+
+    public EventTypeIdentifiers GetEventTypeIdentifiers()
+    {
+        return GetCapturedConfig().EventTypeIdentifiers;
     }
 
     private CapturedConfig GetCapturedConfig()

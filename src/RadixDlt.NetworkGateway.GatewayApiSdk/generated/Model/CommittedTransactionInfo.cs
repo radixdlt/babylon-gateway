@@ -112,17 +112,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="stateVersion">stateVersion (required).</param>
         /// <param name="epoch">epoch (required).</param>
         /// <param name="round">round (required).</param>
+        /// <param name="roundTimestamp">roundTimestamp (required).</param>
         /// <param name="transactionStatus">transactionStatus (required).</param>
         /// <param name="payloadHashHex">Hex-encoded SHA-256 hash..</param>
         /// <param name="intentHashHex">Hex-encoded SHA-256 hash..</param>
         /// <param name="feePaid">feePaid.</param>
         /// <param name="confirmedAt">confirmedAt.</param>
         /// <param name="errorMessage">errorMessage.</param>
-        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), TokenAmount feePaid = default(TokenAmount), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string))
+        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), TokenAmount feePaid = default(TokenAmount), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string))
         {
             this.StateVersion = stateVersion;
             this.Epoch = epoch;
             this.Round = round;
+            // to ensure "roundTimestamp" is required (not null)
+            if (roundTimestamp == null)
+            {
+                throw new ArgumentNullException("roundTimestamp is a required property for CommittedTransactionInfo and cannot be null");
+            }
+            this.RoundTimestamp = roundTimestamp;
             this.TransactionStatus = transactionStatus;
             this.PayloadHashHex = payloadHashHex;
             this.IntentHashHex = intentHashHex;
@@ -148,6 +155,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "round", IsRequired = true, EmitDefaultValue = true)]
         public long Round { get; set; }
+
+        /// <summary>
+        /// Gets or Sets RoundTimestamp
+        /// </summary>
+        [DataMember(Name = "round_timestamp", IsRequired = true, EmitDefaultValue = true)]
+        public string RoundTimestamp { get; set; }
 
         /// <summary>
         /// Hex-encoded SHA-256 hash.
@@ -192,6 +205,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
             sb.Append("  Epoch: ").Append(Epoch).Append("\n");
             sb.Append("  Round: ").Append(Round).Append("\n");
+            sb.Append("  RoundTimestamp: ").Append(RoundTimestamp).Append("\n");
             sb.Append("  TransactionStatus: ").Append(TransactionStatus).Append("\n");
             sb.Append("  PayloadHashHex: ").Append(PayloadHashHex).Append("\n");
             sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
@@ -246,6 +260,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Round.Equals(input.Round)
                 ) && 
                 (
+                    this.RoundTimestamp == input.RoundTimestamp ||
+                    (this.RoundTimestamp != null &&
+                    this.RoundTimestamp.Equals(input.RoundTimestamp))
+                ) && 
+                (
                     this.TransactionStatus == input.TransactionStatus ||
                     this.TransactionStatus.Equals(input.TransactionStatus)
                 ) && 
@@ -288,6 +307,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
                 hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
                 hashCode = (hashCode * 59) + this.Round.GetHashCode();
+                if (this.RoundTimestamp != null)
+                {
+                    hashCode = (hashCode * 59) + this.RoundTimestamp.GetHashCode();
+                }
                 hashCode = (hashCode * 59) + this.TransactionStatus.GetHashCode();
                 if (this.PayloadHashHex != null)
                 {
