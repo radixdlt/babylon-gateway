@@ -64,6 +64,8 @@
 
 namespace RadixDlt.CoreApiSdk.Model;
 
+/// TODO: temporary solution. hardcoded values for time being.
+/// We should probably read these values from genesis tx, store them in db and cache them.
 public static class EventTypeIdentifiers
 {
     public static class Vault
