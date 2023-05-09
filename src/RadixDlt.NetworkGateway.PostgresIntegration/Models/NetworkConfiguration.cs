@@ -96,7 +96,7 @@ internal class NetworkConfiguration : SingleEntryBase
                && NetworkName == other.NetworkName
                && HrpDefinition == other.HrpDefinition
                && WellKnownAddresses == other.WellKnownAddresses
-               && EventTypeIdentifiers == other.EventTypeIdentifiers
+               && EventTypeIdentifiers.Equals(other.EventTypeIdentifiers)
                && AddressTypeDefinitions.SequenceEqual(other.AddressTypeDefinitions);
     }
 }

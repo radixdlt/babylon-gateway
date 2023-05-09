@@ -148,9 +148,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var accessRulesChainHistory = await GetAccessRulesChainHistory(resourceEntities, componentEntities, ledgerState, token);
         var stateHistory = await GetStateHistory(componentEntities, ledgerState, token);
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, componentEntities, ledgerState, token);
-        var resourcesSupplyData = resourceEntities.Any() ?
-            await GetResourcesSupplyData(resourceEntities.Select(x => x.Id).ToArray(), ledgerState, token) :
-            null;
+        var resourcesSupplyData = await GetResourcesSupplyData(resourceEntities.Select(x => x.Id).ToArray(), ledgerState, token);
 
         var royaltyVaultsBalance = componentEntities.Any() && (optIns.ComponentRoyaltyVaultBalance || optIns.PackageRoyaltyVaultBalance)
             ? await RoyaltyVaultBalance(componentEntities.Select(x => x.Id).ToArray(), ledgerState, token)
@@ -173,12 +171,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
             switch (entity)
             {
                 case FungibleResourceEntity frme:
-                    var fungibleResourceSupplyData = resourcesSupplyData?.SingleOrDefault(x => x.ResourceEntityId == frme.Id);
-                    if (fungibleResourceSupplyData == null)
-                    {
-                        throw new ArgumentException($"Resource supply data for fungible resource with database id:{frme.Id} not found.");
-                    }
-
+                    var fungibleResourceSupplyData = resourcesSupplyData[frme.Id];
                     details = new GatewayModel.StateEntityDetailsResponseFungibleResourceDetails(
                         totalSupply: fungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: fungibleResourceSupplyData.TotalMinted.ToString(),
@@ -190,7 +183,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     break;
 
                 case NonFungibleResourceEntity nfrme:
-                    var nonFungibleResourceSupplyData = resourcesSupplyData?.SingleOrDefault(x => x.ResourceEntityId == nfrme.Id);
+                    var nonFungibleResourceSupplyData = resourcesSupplyData[nfrme.Id];
                     if (nonFungibleResourceSupplyData == null)
                     {
                         throw new ArgumentException($"Resource supply data for fungible resource with database id:{nfrme.Id} not found.");
@@ -724,7 +717,6 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) emh ON TRUE;")
-            .AsNoTracking()
             .ToListAsync(token);
 
         var result = new Dictionary<long, GatewayModel.EntityMetadataCollection>();
@@ -821,8 +813,13 @@ order by ah.ord
         return new GatewayModel.FungibleResourcesCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
     }
 
-    private async Task<List<ResourceEntitySupplyHistory>> GetResourcesSupplyData(long[] entityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<Dictionary<long, ResourceEntitySupplyHistory>> GetResourcesSupplyData(long[] entityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
+        if (!entityIds.Any())
+        {
+            return new Dictionary<long, ResourceEntitySupplyHistory>();
+        }
+
         var result = await _dbContext.ResourceEntitySupplyHistory.FromSqlInterpolated($@"
 WITH variables (entity_id) AS (SELECT UNNEST({entityIds}))
 SELECT resh.*
@@ -833,7 +830,8 @@ INNER JOIN LATERAL(
     WHERE from_state_version <= {ledgerState.StateVersion} AND resource_entity_id = variables.entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
-) resh ON true").AsNoTracking().ToListAsync(token);
+) resh ON true")
+            .ToDictionaryAsync(e => e.ResourceEntityId, token);
 
         return result;
     }

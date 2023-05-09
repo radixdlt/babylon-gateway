@@ -208,11 +208,12 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 Xrd: wka.Xrd
             ),
             AddressTypeDefinitions = at,
-            // TODO: temporal solution, that should be read from gensis.
+            // TODO: temporal solution, that should be read from gensis transaction.
+            // For now we rely on hardcoded values.
             EventTypeIdentifiers = new EventTypeIdentifiers(
-                new Vault(27, 28),
-                new FungibleResource(35, 36),
-                new NonFungibleResource(85, 87)),
+                new EventTypeIdentifiers.VaultEventTypeIdentifiers(27, 28),
+                new EventTypeIdentifiers.FungibleResourceEventTypeIdentifiers(35, 36),
+                new EventTypeIdentifiers.NonFungibleResourceEventTypeIdentifiers(85, 87)),
         };
     }
 
