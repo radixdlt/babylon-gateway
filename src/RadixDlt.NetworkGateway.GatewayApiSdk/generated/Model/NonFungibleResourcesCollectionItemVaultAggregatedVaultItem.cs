@@ -103,20 +103,52 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItemVaultAggregatedVaultItem" /> class.
         /// </summary>
-        /// <param name="vaultAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
         /// <param name="totalCount">totalCount (required).</param>
+        /// <param name="previousCursor">If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection..</param>
+        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
+        /// <param name="items">items.</param>
+        /// <param name="vaultAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
         /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
-        public NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(string vaultAddress = default(string), long totalCount = default(long), long lastUpdatedAtStateVersion = default(long))
+        public NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(long totalCount = default(long), string previousCursor = default(string), string nextCursor = default(string), List<string> items = default(List<string>), string vaultAddress = default(string), long lastUpdatedAtStateVersion = default(long))
         {
+            this.TotalCount = totalCount;
             // to ensure "vaultAddress" is required (not null)
             if (vaultAddress == null)
             {
                 throw new ArgumentNullException("vaultAddress is a required property for NonFungibleResourcesCollectionItemVaultAggregatedVaultItem and cannot be null");
             }
             this.VaultAddress = vaultAddress;
-            this.TotalCount = totalCount;
             this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
+            this.PreviousCursor = previousCursor;
+            this.NextCursor = nextCursor;
+            this.Items = items;
         }
+
+        /// <summary>
+        /// Gets or Sets TotalCount
+        /// </summary>
+        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
+        public long TotalCount { get; set; }
+
+        /// <summary>
+        /// If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.
+        /// </summary>
+        /// <value>If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
+        public string PreviousCursor { get; set; }
+
+        /// <summary>
+        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
+        /// </summary>
+        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Items
+        /// </summary>
+        [DataMember(Name = "items", EmitDefaultValue = true)]
+        public List<string> Items { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
@@ -124,12 +156,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
         [DataMember(Name = "vault_address", IsRequired = true, EmitDefaultValue = true)]
         public string VaultAddress { get; set; }
-
-        /// <summary>
-        /// Gets or Sets TotalCount
-        /// </summary>
-        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
-        public long TotalCount { get; set; }
 
         /// <summary>
         /// TBD
@@ -146,8 +172,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleResourcesCollectionItemVaultAggregatedVaultItem {\n");
-            sb.Append("  VaultAddress: ").Append(VaultAddress).Append("\n");
             sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("  VaultAddress: ").Append(VaultAddress).Append("\n");
             sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -185,13 +214,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.TotalCount == input.TotalCount ||
+                    this.TotalCount.Equals(input.TotalCount)
+                ) && 
+                (
+                    this.PreviousCursor == input.PreviousCursor ||
+                    (this.PreviousCursor != null &&
+                    this.PreviousCursor.Equals(input.PreviousCursor))
+                ) && 
+                (
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
+                ) && 
+                (
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
+                ) && 
+                (
                     this.VaultAddress == input.VaultAddress ||
                     (this.VaultAddress != null &&
                     this.VaultAddress.Equals(input.VaultAddress))
-                ) && 
-                (
-                    this.TotalCount == input.TotalCount ||
-                    this.TotalCount.Equals(input.TotalCount)
                 ) && 
                 (
                     this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
@@ -208,11 +253,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                if (this.PreviousCursor != null)
+                {
+                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
+                }
+                if (this.NextCursor != null)
+                {
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
+                }
+                if (this.Items != null)
+                {
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                }
                 if (this.VaultAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.VaultAddress.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
                 hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }

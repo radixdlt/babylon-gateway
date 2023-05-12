@@ -90,35 +90,53 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleIdsCollectionAllOf
+    /// NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf
     /// </summary>
-    [DataContract(Name = "NonFungibleIdsCollection_allOf")]
-    public partial class NonFungibleIdsCollectionAllOf : IEquatable<NonFungibleIdsCollectionAllOf>
+    [DataContract(Name = "NonFungibleResourcesCollectionItemVaultAggregatedVaultItem_allOf")]
+    public partial class NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf : IEquatable<NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleIdsCollectionAllOf() { }
+        protected NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf" /> class.
         /// </summary>
-        /// <param name="items">items (required).</param>
-        public NonFungibleIdsCollectionAllOf(List<string> items = default(List<string>))
+        /// <param name="vaultAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="totalCount">totalCount (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        public NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf(string vaultAddress = default(string), long totalCount = default(long), long lastUpdatedAtStateVersion = default(long))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "vaultAddress" is required (not null)
+            if (vaultAddress == null)
             {
-                throw new ArgumentNullException("items is a required property for NonFungibleIdsCollectionAllOf and cannot be null");
+                throw new ArgumentNullException("vaultAddress is a required property for NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf and cannot be null");
             }
-            this.Items = items;
+            this.VaultAddress = vaultAddress;
+            this.TotalCount = totalCount;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> Items { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        [DataMember(Name = "vault_address", IsRequired = true, EmitDefaultValue = true)]
+        public string VaultAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets TotalCount
+        /// </summary>
+        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
+        public long TotalCount { get; set; }
+
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <value>TBD</value>
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +145,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleIdsCollectionAllOf {\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf {\n");
+            sb.Append("  VaultAddress: ").Append(VaultAddress).Append("\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +169,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleIdsCollectionAllOf);
+            return this.Equals(input as NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleIdsCollectionAllOf instances are equal
+        /// Returns true if NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleIdsCollectionAllOf to be compared</param>
+        /// <param name="input">Instance of NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleIdsCollectionAllOf input)
+        public bool Equals(NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf input)
         {
             if (input == null)
             {
@@ -165,10 +185,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.VaultAddress == input.VaultAddress ||
+                    (this.VaultAddress != null &&
+                    this.VaultAddress.Equals(input.VaultAddress))
+                ) && 
+                (
+                    this.TotalCount == input.TotalCount ||
+                    this.TotalCount.Equals(input.TotalCount)
+                ) && 
+                (
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
         }
 
@@ -181,10 +208,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Items != null)
+                if (this.VaultAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.VaultAddress.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

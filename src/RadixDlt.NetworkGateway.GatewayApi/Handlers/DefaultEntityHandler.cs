@@ -167,7 +167,7 @@ internal class DefaultEntityHandler : IEntityHandler
             Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
         );
 
-        return await _entityStateQuerier.EntityNonFungibleResourceVaults(pageRequest, ledgerState, token);
+        return await _entityStateQuerier.EntityNonFungibleResourceVaults(pageRequest, request.OptIns ?? GatewayModel.StateEntityNonFungibleResourceVaultsPageOptIns.Default, ledgerState, token);
     }
 
     public async Task<GatewayModel.StateEntityNonFungibleIdsPageResponse?> NonFungibleIds(

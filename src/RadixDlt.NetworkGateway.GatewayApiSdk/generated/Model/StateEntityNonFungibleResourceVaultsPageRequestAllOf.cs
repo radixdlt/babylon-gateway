@@ -90,35 +90,58 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleIdsCollectionAllOf
+    /// StateEntityNonFungibleResourceVaultsPageRequestAllOf
     /// </summary>
-    [DataContract(Name = "NonFungibleIdsCollection_allOf")]
-    public partial class NonFungibleIdsCollectionAllOf : IEquatable<NonFungibleIdsCollectionAllOf>
+    [DataContract(Name = "StateEntityNonFungibleResourceVaultsPageRequest_allOf")]
+    public partial class StateEntityNonFungibleResourceVaultsPageRequestAllOf : IEquatable<StateEntityNonFungibleResourceVaultsPageRequestAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityNonFungibleResourceVaultsPageRequestAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleIdsCollectionAllOf() { }
+        protected StateEntityNonFungibleResourceVaultsPageRequestAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityNonFungibleResourceVaultsPageRequestAllOf" /> class.
         /// </summary>
-        /// <param name="items">items (required).</param>
-        public NonFungibleIdsCollectionAllOf(List<string> items = default(List<string>))
+        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
+        /// <param name="optIns">optIns.</param>
+        public StateEntityNonFungibleResourceVaultsPageRequestAllOf(string address = default(string), string resourceAddress = default(string), StateEntityNonFungibleResourceVaultsPageOptIns optIns = default(StateEntityNonFungibleResourceVaultsPageOptIns))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "address" is required (not null)
+            if (address == null)
             {
-                throw new ArgumentNullException("items is a required property for NonFungibleIdsCollectionAllOf and cannot be null");
+                throw new ArgumentNullException("address is a required property for StateEntityNonFungibleResourceVaultsPageRequestAllOf and cannot be null");
             }
-            this.Items = items;
+            this.Address = address;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
+            {
+                throw new ArgumentNullException("resourceAddress is a required property for StateEntityNonFungibleResourceVaultsPageRequestAllOf and cannot be null");
+            }
+            this.ResourceAddress = resourceAddress;
+            this.OptIns = optIns;
         }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> Items { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets OptIns
+        /// </summary>
+        [DataMember(Name = "opt_ins", EmitDefaultValue = true)]
+        public StateEntityNonFungibleResourceVaultsPageOptIns OptIns { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +150,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleIdsCollectionAllOf {\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class StateEntityNonFungibleResourceVaultsPageRequestAllOf {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  OptIns: ").Append(OptIns).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +174,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleIdsCollectionAllOf);
+            return this.Equals(input as StateEntityNonFungibleResourceVaultsPageRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleIdsCollectionAllOf instances are equal
+        /// Returns true if StateEntityNonFungibleResourceVaultsPageRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleIdsCollectionAllOf to be compared</param>
+        /// <param name="input">Instance of StateEntityNonFungibleResourceVaultsPageRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleIdsCollectionAllOf input)
+        public bool Equals(StateEntityNonFungibleResourceVaultsPageRequestAllOf input)
         {
             if (input == null)
             {
@@ -165,10 +190,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
+                ) && 
+                (
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
+                ) && 
+                (
+                    this.OptIns == input.OptIns ||
+                    (this.OptIns != null &&
+                    this.OptIns.Equals(input.OptIns))
                 );
         }
 
@@ -181,9 +215,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Items != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                }
+                if (this.ResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
+                if (this.OptIns != null)
+                {
+                    hashCode = (hashCode * 59) + this.OptIns.GetHashCode();
                 }
                 return hashCode;
             }

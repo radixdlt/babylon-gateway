@@ -9,6 +9,7 @@ _Release Date: Unreleased_
 - possibility to configure max number of transaction fetched from CoreAPI in single batch by `MaxCoreApiTransactionBatchSize`. By default it's fetching 1000.
 - added information about `epoch`, `round`, `round_timestamp` to `/transaction/committed-details` and `/stream/transactions` endpoints.
 - added `total_supply`, `total_minted`, `total_burned` to `/state/entity/details` when querying for fungible or non fungible resources.
+- new opt-in property in `/state/entity/details`, `/state/entity/page/non-fungibles`, `/state/entity/page/non-fungible-vaults` user can additionally ask for first page of non fungible resource ids when aggregating per vault.
 
 ### 0.3.1
 
