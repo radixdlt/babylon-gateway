@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
@@ -95,11 +94,148 @@ internal class TransactionQuerier : ITransactionQuerier
 
     public async Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
     {
-        var transactionStateVersionsAndOneMore = await GetTransactionStreamPageStateVersions(request, atLedgerState, token);
-        var transactions = await GetTransactions(transactionStateVersionsAndOneMore.Take(request.PageSize).ToList(), token);
+        var stateVersionBoundary = request.Cursor?.StateVersionBoundary ?? request.FromStateVersion;
+        var stateVersionsQuery = _dbContext.LedgerTransactions.Select(lt => lt.StateVersion);
 
-        var nextCursor = transactionStateVersionsAndOneMore.Count == request.PageSize + 1
-            ? new GatewayModel.LedgerTransactionsCursor(transactionStateVersionsAndOneMore.Last())
+        if (request.AscendingOrder)
+        {
+            var lowerBound = Math.Max(stateVersionBoundary, request.SearchCriteria.StateVersionLowerBound ?? stateVersionBoundary);
+            var upperBound = Math.Min(atLedgerState.StateVersion, request.SearchCriteria.StateVersionUpperBound ?? atLedgerState.StateVersion);
+
+            stateVersionsQuery = stateVersionsQuery.Where(sv => sv > lowerBound && sv <= upperBound);
+        }
+        else
+        {
+            if (request.SearchCriteria.StateVersionLowerBound.HasValue)
+            {
+                stateVersionsQuery = stateVersionsQuery.Where(sv => sv > request.SearchCriteria.StateVersionLowerBound.Value);
+            }
+
+            stateVersionsQuery = stateVersionsQuery.Where(sv => sv <= stateVersionBoundary);
+        }
+
+        var userKindFilterImplicitlyApplied = false;
+
+        if (request.SearchCriteria.ManifestAccountsDepositedInto?.Any() == true)
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            foreach (var entityId in request.SearchCriteria.ManifestAccountsDepositedInto)
+            {
+                stateVersionsQuery = stateVersionsQuery
+                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                    .OfType<ManifestAddressLedgerTransactionMarker>()
+                    .Where(maltm => maltm.OperationType == AbcOperationType.AccountDepositedInto && maltm.EntityId == entityId)
+                    .Select(maltm => maltm.StateVersion);
+            }
+        }
+
+        if (request.SearchCriteria.ManifestAccountsWithdrawnFrom?.Any() == true)
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            foreach (var entityId in request.SearchCriteria.ManifestAccountsWithdrawnFrom)
+            {
+                stateVersionsQuery = stateVersionsQuery
+                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                    .OfType<ManifestAddressLedgerTransactionMarker>()
+                    .Where(maltm => maltm.OperationType == AbcOperationType.AccountWithdrawnFrom && maltm.EntityId == entityId)
+                    .Select(maltm => maltm.StateVersion);
+            }
+        }
+
+        if (request.SearchCriteria.ManifestResources?.Any() == true)
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            foreach (var entityId in request.SearchCriteria.ManifestResources)
+            {
+                stateVersionsQuery = stateVersionsQuery
+                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                    .OfType<ManifestAddressLedgerTransactionMarker>()
+                    .Where(maltm => maltm.OperationType == AbcOperationType.ResourceInUse && maltm.EntityId == entityId)
+                    .Select(maltm => maltm.StateVersion);
+            }
+        }
+
+        if (request.SearchCriteria.HasTransactionEventConstraints())
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            AbcEventType? eventType = null;
+            long? eventEntityId = null;
+            long? eventResourceId = null;
+
+            if (request.SearchCriteria.WithdrawalEventsOnly)
+            {
+                eventType = AbcEventType.Withdrawal;
+            }
+            else if (request.SearchCriteria.DepositEventsOnly)
+            {
+                eventType = AbcEventType.Deposit;
+            }
+
+            if (request.SearchCriteria.EventEmitterEntityId.HasValue)
+            {
+                eventEntityId = request.SearchCriteria.EventEmitterEntityId.Value;
+            }
+
+            if (request.SearchCriteria.EventResourceEntityId.HasValue)
+            {
+                eventResourceId = request.SearchCriteria.EventResourceEntityId.Value;
+            }
+
+            stateVersionsQuery = stateVersionsQuery
+                .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                .OfType<EventLedgerTransactionMarker>()
+                .Where(eltm => eltm.EventType == (eventType ?? eltm.EventType) && eltm.EntityId == (eventEntityId ?? eltm.EntityId) && eltm.ResourceEntityId == (eventResourceId ?? eltm.ResourceEntityId))
+                .Select(eltm => eltm.StateVersion);
+        }
+
+        if (request.SearchCriteria.KindFilter == LedgerTransactionKindFilter.UserOnly && userKindFilterImplicitlyApplied)
+        {
+        }
+        else if (request.SearchCriteria.KindFilter == LedgerTransactionKindFilter.AllAnnotated)
+        {
+            stateVersionsQuery = stateVersionsQuery
+                .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                .OfType<OriginLedgerTransactionMarker>()
+                .Select(oltm => oltm.StateVersion);
+        }
+        else
+        {
+            var originType = request.SearchCriteria.KindFilter switch
+            {
+                LedgerTransactionKindFilter.UserOnly => AbcOriginType.User,
+                LedgerTransactionKindFilter.EpochChangeOnly => AbcOriginType.EpochChange,
+                _ => throw new UnreachableException($"Unexpected value of kindFilter: {request.SearchCriteria.KindFilter}"),
+            };
+
+            stateVersionsQuery = stateVersionsQuery
+                .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                .OfType<OriginLedgerTransactionMarker>()
+                .Where(oltm => oltm.OriginType == originType)
+                .Select(oltm => oltm.StateVersion);
+        }
+
+        if (request.AscendingOrder)
+        {
+            stateVersionsQuery = stateVersionsQuery.OrderBy(sv => sv);
+        }
+        else
+        {
+            stateVersionsQuery = stateVersionsQuery.OrderByDescending(sv => sv);
+        }
+
+        var stateVersions = await stateVersionsQuery
+            .TagWith(ForceDistinctInterceptor.Apply)
+            .Take(request.PageSize + 1)
+            .ToListAsync(token);
+
+        var transactions = await GetTransactions(stateVersions.Take(request.PageSize).ToList(), token);
+
+        var nextCursor = stateVersions.Count == request.PageSize + 1
+            ? new GatewayModel.LedgerTransactionsCursor(stateVersions.Last())
             : null;
 
         return new TransactionPageWithoutTotal(nextCursor, transactions);
@@ -130,200 +266,6 @@ internal class TransactionQuerier : ITransactionQuerier
             .ToListAsync(token);
 
         return pendingTransactions.Select(pt => new StatusLookupResult(pt.PayloadHash.ToHex(), pt.Status.ToGatewayModel(), pt.LastFailureReason)).ToArray();
-    }
-
-    private async Task<List<long>> GetTransactionStreamPageStateVersions(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token)
-    {
-        var stateVersionBoundary = request.Cursor?.StateVersionBoundary ?? request.FromStateVersion;
-        var baseQuery = _dbContext.LedgerTransactionMarkers.AsQueryable();
-
-        if (request.AscendingOrder)
-        {
-            var lowerBound = Math.Max(stateVersionBoundary, request.SearchCriteria.StateVersionLowerBound ?? stateVersionBoundary);
-            var upperBound = Math.Min(atLedgerState.StateVersion, request.SearchCriteria.StateVersionUpperBound ?? atLedgerState.StateVersion);
-
-            baseQuery = baseQuery.Where(ltm => ltm.StateVersion > lowerBound && ltm.StateVersion <= upperBound);
-        }
-        else
-        {
-            if (request.SearchCriteria.StateVersionLowerBound.HasValue)
-            {
-                baseQuery = baseQuery.Where(ltm => ltm.StateVersion > request.SearchCriteria.StateVersionLowerBound.Value);
-            }
-
-            baseQuery = baseQuery.Where(ltm => ltm.StateVersion <= stateVersionBoundary);
-        }
-
-        // filter constraints on base query - build root query, try to narrow down the possible scope as much as possible
-        var eventsFilterApplied = false;
-        var kindFilterApplied = false;
-        AbcOperationType? manifestFilterOperationApplied = null;
-
-        IQueryable<long> filterQuery;
-
-        if (request.SearchCriteria.HasTransactionEventConstraints())
-        {
-            eventsFilterApplied = true;
-            kindFilterApplied = request.SearchCriteria.KindFilter == LedgerTransactionKindFilter.UserOnly; // TODO implicitly matched by this filter anyways?
-
-            AbcEventType? eventType = null;
-            long? eventEntityId = null;
-            long? eventResourceId = null;
-
-            if (request.SearchCriteria.WithdrawalEventsOnly)
-            {
-                eventType = AbcEventType.Withdrawal;
-            }
-            else if (request.SearchCriteria.DepositEventsOnly)
-            {
-                eventType = AbcEventType.Deposit;
-            }
-
-            if (request.SearchCriteria.EventEmitterEntityId.HasValue)
-            {
-                eventEntityId = request.SearchCriteria.EventEmitterEntityId.Value;
-            }
-
-            if (request.SearchCriteria.EventResourceEntityId.HasValue)
-            {
-                eventResourceId = request.SearchCriteria.EventResourceEntityId.Value;
-            }
-
-            filterQuery = baseQuery
-                .OfType<EventLedgerTransactionMarker>()
-                .Where(eltm => eltm.EventType == (eventType ?? eltm.EventType) && eltm.EntityId == (eventEntityId ?? eltm.EntityId) && eltm.ResourceEntityId == (eventResourceId ?? eltm.ResourceEntityId))
-                .Select(eltm => eltm.StateVersion);
-        }
-        else if (request.SearchCriteria.HasTransactionManifestConstraints())
-        {
-            kindFilterApplied = request.SearchCriteria.KindFilter == LedgerTransactionKindFilter.UserOnly; // TODO implicitly matched by this filter anyways?
-
-            AbcOperationType operationType;
-            long entityId;
-
-            // one of those three must contain exactly one element, we need to find it out
-            if (request.SearchCriteria.ManifestAccountsDepositedInto?.Length == 1)
-            {
-                operationType = AbcOperationType.AccountDepositedInto;
-                entityId = request.SearchCriteria.ManifestAccountsDepositedInto.First();
-            }
-            else if (request.SearchCriteria.ManifestAccountsWithdrawnFrom?.Length == 1)
-            {
-                operationType = AbcOperationType.AccountWithdrawnFrom;
-                entityId = request.SearchCriteria.ManifestAccountsWithdrawnFrom.First();
-            }
-            else if (request.SearchCriteria.ManifestResources?.Length == 1)
-            {
-                operationType = AbcOperationType.ResourceInUse;
-                entityId = request.SearchCriteria.ManifestResources.First();
-            }
-            else
-            {
-                throw new UnreachableException("bla bla bla");
-            }
-
-            manifestFilterOperationApplied = operationType;
-
-            filterQuery = baseQuery
-                .OfType<ManifestAddressLedgerTransactionMarker>()
-                .Where(maltm => maltm.OperationType == operationType && maltm.EntityId == entityId)
-                .Select(maltm => maltm.StateVersion);
-        }
-        else if (request.SearchCriteria.HasTransactionTypeConstraints())
-        {
-            kindFilterApplied = true;
-
-            var originType = request.SearchCriteria.KindFilter switch
-            {
-                LedgerTransactionKindFilter.UserOnly => AbcOriginType.User,
-                LedgerTransactionKindFilter.EpochChangeOnly => AbcOriginType.EpochChange,
-                _ => throw new UnreachableException($"Unexpected value of kindFilter: {request.SearchCriteria.KindFilter}"),
-            };
-
-            filterQuery = baseQuery
-                .OfType<OriginLedgerTransactionMarker>()
-                .Where(oltm => oltm.OriginType == originType)
-                .Select(oltm => oltm.StateVersion);
-        }
-        else
-        {
-            filterQuery = baseQuery.Select(ltm => ltm.StateVersion);
-        }
-
-        // apply remaining filter constrains as joins
-        if (request.SearchCriteria.KindFilter != LedgerTransactionKindFilter.AllAnnotated && !kindFilterApplied)
-        {
-            var originType = request.SearchCriteria.KindFilter switch
-            {
-                LedgerTransactionKindFilter.UserOnly => AbcOriginType.User,
-                LedgerTransactionKindFilter.EpochChangeOnly => AbcOriginType.EpochChange,
-                _ => throw new UnreachableException($"Unexpected value of kindFilter: {request.SearchCriteria.KindFilter}"),
-            };
-
-            filterQuery = filterQuery
-                .Join(_dbContext.LedgerTransactionMarkers, a => a, b => b.StateVersion, (sv, ult) => ult)
-                .OfType<OriginLedgerTransactionMarker>()
-                .Where(oltm => oltm.OriginType == originType)
-                .Select(oltm => oltm.StateVersion);
-        }
-
-        if (request.SearchCriteria.HasTransactionEventConstraints() && !eventsFilterApplied)
-        {
-            throw new UnreachableException("impossible");
-        }
-
-        if (request.SearchCriteria.HasTransactionManifestConstraints())
-        {
-            if (request.SearchCriteria.ManifestAccountsDepositedInto?.Any() == true && manifestFilterOperationApplied != AbcOperationType.AccountDepositedInto)
-            {
-                foreach (var entityId in request.SearchCriteria.ManifestAccountsDepositedInto)
-                {
-                    filterQuery = filterQuery
-                        .Join(_dbContext.LedgerTransactionMarkers, a => a, b => b.StateVersion, (sv, ult) => ult)
-                        .OfType<ManifestAddressLedgerTransactionMarker>()
-                        .Where(maltm => maltm.OperationType == AbcOperationType.AccountDepositedInto && maltm.EntityId == entityId)
-                        .Select(maltm => maltm.StateVersion);
-                }
-            }
-
-            if (request.SearchCriteria.ManifestAccountsWithdrawnFrom?.Any() == true && manifestFilterOperationApplied != AbcOperationType.AccountWithdrawnFrom)
-            {
-                foreach (var entityId in request.SearchCriteria.ManifestAccountsWithdrawnFrom)
-                {
-                    filterQuery = filterQuery
-                        .Join(_dbContext.LedgerTransactionMarkers, a => a, b => b.StateVersion, (sv, ult) => ult)
-                        .OfType<ManifestAddressLedgerTransactionMarker>()
-                        .Where(maltm => maltm.OperationType == AbcOperationType.AccountWithdrawnFrom && maltm.EntityId == entityId)
-                        .Select(maltm => maltm.StateVersion);
-                }
-            }
-
-            if (request.SearchCriteria.ManifestResources?.Any() == true && manifestFilterOperationApplied != AbcOperationType.ResourceInUse)
-            {
-                foreach (var entityId in request.SearchCriteria.ManifestResources)
-                {
-                    filterQuery = filterQuery
-                        .Join(_dbContext.LedgerTransactionMarkers, a => a, b => b.StateVersion, (sv, ult) => ult)
-                        .OfType<ManifestAddressLedgerTransactionMarker>()
-                        .Where(maltm => maltm.OperationType == AbcOperationType.ResourceInUse && maltm.EntityId == entityId)
-                        .Select(maltm => maltm.StateVersion);
-                }
-            }
-        }
-
-        if (request.AscendingOrder)
-        {
-            filterQuery = filterQuery.OrderBy(sv => sv);
-        }
-        else
-        {
-            filterQuery = filterQuery.OrderByDescending(sv => sv);
-        }
-
-        return await filterQuery
-            .TagWith(ForceDistinctInterceptor.Apply)
-            .Take(request.PageSize + 1)
-            .ToListAsync(token);
     }
 
     private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(List<long> transactionStateVersions, CancellationToken token)
