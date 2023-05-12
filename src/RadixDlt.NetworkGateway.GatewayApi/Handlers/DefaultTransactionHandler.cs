@@ -180,19 +180,31 @@ internal class DefaultTransactionHandler : ITransactionHandler
             _ => throw new UnreachableException($"Didn't expect {request.KindFilter} value"),
         };
 
-        TransactionStreamPageRequestSearchCriteria? searchCriteria = null;
+        var searchCriteria = new TransactionStreamPageRequestSearchCriteria
+        {
+            KindFilter = kindFilter,
+        };
 
         if (request.EntityId.HasValue)
         {
-            searchCriteria = new TransactionStreamPageRequestSearchCriteria(request.EntityId.Value);
+            searchCriteria.EventEmitterEntityId = request.EntityId.Value;
 
-            // searchCriteria.TypeFilter = request.TypeFilter switch
-            // {
-            //     GatewayModel.StreamTransactionsRequest.TypeFilterEnum.Deposit => LedgerTransactionMarkerType.Deposit,
-            //     GatewayModel.StreamTransactionsRequest.TypeFilterEnum.Withdrawal => LedgerTransactionMarkerType.Withdrawal,
-            //     null => null,
-            //     _ => throw new UnreachableException($"Didn't expect {request.TypeFilter} value"),
-            // };
+            if (request.EntityId.Value % 2 == 0)
+            {
+                searchCriteria.WithdrawalEventsOnly = true;
+            }
+
+            if (request.EntityId.Value % 4 == 0)
+            {
+                searchCriteria.EventResourceEntityId = request.EntityId.Value + 10000;
+            }
+        }
+
+        if (request.ResourceEntityId.HasValue)
+        {
+            searchCriteria.ManifestAccountsDepositedInto = new[] { request.ResourceEntityId.Value };
+            searchCriteria.ManifestAccountsWithdrawnFrom = new[] { request.ResourceEntityId.Value + 1, request.ResourceEntityId.Value + 2 };
+            searchCriteria.ManifestResources = new[] { request.ResourceEntityId.Value - 1, request.ResourceEntityId.Value - 2 };
         }
 
         var transactionsPageRequest = new TransactionStreamPageRequest(

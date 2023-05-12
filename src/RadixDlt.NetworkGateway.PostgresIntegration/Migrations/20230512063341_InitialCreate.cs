@@ -527,6 +527,24 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "owner_entity_id", "vault_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_markers_event_type_entity_id_state_versi~",
+                table: "ledger_transaction_markers",
+                columns: new[] { "event_type", "entity_id", "state_version" },
+                filter: "discriminator = 'event'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_markers_operation_type_entity_id_state_v~",
+                table: "ledger_transaction_markers",
+                columns: new[] { "operation_type", "entity_id", "state_version" },
+                filter: "discriminator = 'manifest_address'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_markers_origin_type_state_version",
+                table: "ledger_transaction_markers",
+                columns: new[] { "origin_type", "state_version" },
+                filter: "discriminator = 'origin'");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_epoch_round_in_epoch",
                 table: "ledger_transactions",
                 columns: new[] { "epoch", "round_in_epoch" },

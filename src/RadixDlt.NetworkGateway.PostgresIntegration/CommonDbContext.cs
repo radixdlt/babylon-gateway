@@ -205,7 +205,17 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<OriginLedgerTransactionMarker>(LedgerTransactionMarkerType.Origin)
             .HasValue<ManifestAddressLedgerTransactionMarker>(LedgerTransactionMarkerType.ManifestAddress);
 
-        // TODO add all necessary indices on LedgerTransactionMarker table
+        modelBuilder.Entity<EventLedgerTransactionMarker>()
+            .HasIndex(e => new { e.EventType, e.EntityId, e.StateVersion })
+            .HasFilter("discriminator = 'event'");
+
+        modelBuilder.Entity<OriginLedgerTransactionMarker>()
+            .HasIndex(e => new { e.OriginType, e.StateVersion })
+            .HasFilter("discriminator = 'origin'");
+
+        modelBuilder.Entity<ManifestAddressLedgerTransactionMarker>()
+            .HasIndex(e => new { e.OperationType, e.EntityId, e.StateVersion })
+            .HasFilter("discriminator = 'manifest_address'");
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)

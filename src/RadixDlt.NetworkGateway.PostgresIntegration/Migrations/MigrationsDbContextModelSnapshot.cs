@@ -1303,6 +1303,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("resource_entity_id");
 
+                    b.HasIndex("EventType", "EntityId", "StateVersion")
+                        .HasFilter("discriminator = 'event'");
+
                     b.ToTable("ledger_transaction_markers");
 
                     b.HasDiscriminator().HasValue(LedgerTransactionMarkerType.Event);
@@ -1321,6 +1324,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("abc_operation_type")
                         .HasColumnName("operation_type");
 
+                    b.HasIndex("OperationType", "EntityId", "StateVersion")
+                        .HasFilter("discriminator = 'manifest_address'");
+
                     b.ToTable("ledger_transaction_markers");
 
                     b.HasDiscriminator().HasValue(LedgerTransactionMarkerType.ManifestAddress);
@@ -1333,6 +1339,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<AbcOriginType>("OriginType")
                         .HasColumnType("abc_origin_type")
                         .HasColumnName("origin_type");
+
+                    b.HasIndex("OriginType", "StateVersion")
+                        .HasFilter("discriminator = 'origin'");
 
                     b.ToTable("ledger_transaction_markers");
 

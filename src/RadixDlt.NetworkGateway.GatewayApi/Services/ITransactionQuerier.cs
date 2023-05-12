@@ -64,6 +64,7 @@
 
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -90,22 +91,41 @@ public sealed record TransactionStreamPageRequest(
     GatewayModel.LedgerTransactionsCursor? Cursor,
     int PageSize,
     bool AscendingOrder,
-    TransactionStreamPageRequestSearchCriteria? SearchCriteria);
+    TransactionStreamPageRequestSearchCriteria SearchCriteria);
 
 public class TransactionStreamPageRequestSearchCriteria
 {
-    public long EntityId { get; }
+    // generic constraints
 
     public long? StateVersionLowerBound { get; set; }
 
     public long? StateVersionUpperBound { get; set; }
 
-    public LedgerTransactionMarkerType? TypeFilter { get; set; }
+    // TX type constraints
 
-    public long? ResourceEntityIdFilter { get; set; }
+    public LedgerTransactionKindFilter KindFilter { get; set; }
 
-    public TransactionStreamPageRequestSearchCriteria(long entityId)
-    {
-        EntityId = entityId;
-    }
+    public bool HasTransactionTypeConstraints() => KindFilter != LedgerTransactionKindFilter.AllAnnotated;
+
+    // TX event constraints
+
+    public long? EventEmitterEntityId { get; set; }
+
+    public bool WithdrawalEventsOnly { get; set; }
+
+    public bool DepositEventsOnly { get; set; }
+
+    public long? EventResourceEntityId { get; set; }
+
+    public bool HasTransactionEventConstraints() => EventResourceEntityId.HasValue || WithdrawalEventsOnly || DepositEventsOnly || EventResourceEntityId.HasValue;
+
+    // TX manifest constraints
+
+    public long[]? ManifestAccountsDepositedInto { get; set; }
+
+    public long[]? ManifestAccountsWithdrawnFrom { get; set; }
+
+    public long[]? ManifestResources { get; set; }
+
+    public bool HasTransactionManifestConstraints() => ManifestAccountsDepositedInto?.Any() == true || ManifestAccountsWithdrawnFrom?.Any() == true || ManifestResources?.Any() == true;
 }
