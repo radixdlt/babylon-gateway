@@ -1,6 +1,7 @@
 module.exports = {
   plugins: ['unused-imports'],
   rules: {
+    '@typescript-eslint/explicit-member-accessibility': 'off',
     '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
     'arrow-body-style': ['error', 'as-needed'],
     'no-undef': 'off',
