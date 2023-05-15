@@ -265,7 +265,7 @@ internal class WriteHelper
             switch (e)
             {
                 case EventLedgerTransactionMarker eltm:
-                    await writer.WriteAsync(eltm.EventType, "abc_event_type", token);
+                    await writer.WriteAsync(eltm.EventType, "ledger_transaction_marker_event_type", token);
                     await writer.WriteAsync(eltm.EntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(eltm.ResourceEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(eltm.Quantity.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
@@ -277,7 +277,7 @@ internal class WriteHelper
                     await writer.WriteAsync(maltm.EntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(maltm.OperationType, "abc_operation_type", token);
+                    await writer.WriteAsync(maltm.OperationType, "ledger_transaction_marker_operation_type", token);
                     await writer.WriteNullAsync(token);
                     break;
                 case OriginLedgerTransactionMarker oltm:
@@ -286,7 +286,7 @@ internal class WriteHelper
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(oltm.OriginType, "abc_origin_type", token);
+                    await writer.WriteAsync(oltm.OriginType, "ledger_transaction_marker_origin_type", token);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(e), e, null);

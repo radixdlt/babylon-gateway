@@ -1290,7 +1290,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("entity_id");
 
-                    b.Property<AbcEventType>("EventType")
+                    b.Property<LedgerTransactionMarkerEventType>("EventType")
                         .HasColumnType("abc_event_type")
                         .HasColumnName("event_type");
 
@@ -1320,7 +1320,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("entity_id");
 
-                    b.Property<AbcOperationType>("OperationType")
+                    b.Property<LedgerTransactionMarkerOperationType>("OperationType")
                         .HasColumnType("abc_operation_type")
                         .HasColumnName("operation_type");
 
@@ -1336,7 +1336,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransactionMarker");
 
-                    b.Property<AbcOriginType>("OriginType")
+                    b.Property<LedgerTransactionMarkerOriginType>("OriginType")
                         .HasColumnType("abc_origin_type")
                         .HasColumnName("origin_type");
 

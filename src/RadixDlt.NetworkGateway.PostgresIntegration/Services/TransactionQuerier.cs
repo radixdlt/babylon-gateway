@@ -128,7 +128,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 searchQuery = searchQuery
                     .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                     .OfType<ManifestAddressLedgerTransactionMarker>()
-                    .Where(maltm => maltm.OperationType == AbcOperationType.AccountDepositedInto && maltm.EntityId == entityId)
+                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountDepositedInto && maltm.EntityId == entityId)
                     .Select(maltm => maltm.StateVersion);
             }
         }
@@ -147,7 +147,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 searchQuery = searchQuery
                     .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                     .OfType<ManifestAddressLedgerTransactionMarker>()
-                    .Where(maltm => maltm.OperationType == AbcOperationType.AccountWithdrawnFrom && maltm.EntityId == entityId)
+                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountWithdrawnFrom && maltm.EntityId == entityId)
                     .Select(maltm => maltm.StateVersion);
             }
         }
@@ -166,7 +166,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 searchQuery = searchQuery
                     .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                     .OfType<ManifestAddressLedgerTransactionMarker>()
-                    .Where(maltm => maltm.OperationType == AbcOperationType.ResourceInUse && maltm.EntityId == entityId)
+                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.ResourceInUse && maltm.EntityId == entityId)
                     .Select(maltm => maltm.StateVersion);
             }
         }
@@ -175,17 +175,17 @@ internal class TransactionQuerier : ITransactionQuerier
         {
             userKindFilterImplicitlyApplied = true;
 
-            AbcEventType? eventType = null;
+            LedgerTransactionMarkerEventType? eventType = null;
             long? eventEntityId = null;
             long? eventResourceId = null;
 
             if (request.SearchCriteria.WithdrawalEventsOnly)
             {
-                eventType = AbcEventType.Withdrawal;
+                eventType = LedgerTransactionMarkerEventType.Withdrawal;
             }
             else if (request.SearchCriteria.DepositEventsOnly)
             {
-                eventType = AbcEventType.Deposit;
+                eventType = LedgerTransactionMarkerEventType.Deposit;
             }
 
             if (request.SearchCriteria.EventEmitterEntityId.HasValue)
@@ -217,8 +217,8 @@ internal class TransactionQuerier : ITransactionQuerier
         {
             var originType = request.SearchCriteria.KindFilter switch
             {
-                LedgerTransactionKindFilter.UserOnly => AbcOriginType.User,
-                LedgerTransactionKindFilter.EpochChangeOnly => AbcOriginType.EpochChange,
+                LedgerTransactionKindFilter.UserOnly => LedgerTransactionMarkerOriginType.User,
+                LedgerTransactionKindFilter.EpochChangeOnly => LedgerTransactionMarkerOriginType.EpochChange,
                 _ => throw new UnreachableException($"Unexpected value of kindFilter: {request.SearchCriteria.KindFilter}"),
             };
 

@@ -290,7 +290,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 long? nextEpoch = null;
                 long? newRoundInEpoch = null;
                 DateTime? newRoundTimestamp = null;
-                AbcOriginType? abcOriginType = null;
+                LedgerTransactionMarkerOriginType? abcOriginType = null;
 
                 if (committedTransaction.LedgerTransaction is CoreModel.ValidatorLedgerTransaction vlt)
                 {
@@ -309,7 +309,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 if (committedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction userLedgerTransaction)
                 {
-                    abcOriginType = AbcOriginType.User;
+                    abcOriginType = LedgerTransactionMarkerOriginType.User;
 
                     var coreManifest = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.Manifest;
                     var toolkitManifest = new ToolkitModel.Transaction.TransactionManifest(coreManifest.Instructions, coreManifest.BlobsHex.Values.Select(x => (ToolkitModel.ValueBytes)x.ConvertFromHex()).ToArray());
@@ -362,7 +362,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         if (epochManagerSubstate.Round == 0)
                         {
                             nextEpoch = epochManagerSubstate.Epoch;
-                            abcOriginType = AbcOriginType.EpochChange;
+                            abcOriginType = LedgerTransactionMarkerOriginType.EpochChange;
                         }
                     }
 
@@ -866,8 +866,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             var fungibleAmount = data["fields"]?[0]?["value"]?.ToString();
                             var nonFungibleIds = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).ToList();
                             var eventType = @event.Type.LocalTypeIndex.Index == 27
-                                ? AbcEventType.Withdrawal
-                                : AbcEventType.Deposit;
+                                ? LedgerTransactionMarkerEventType.Withdrawal
+                                : LedgerTransactionMarkerEventType.Deposit;
 
                             TokenAmount quantity;
 
@@ -934,7 +934,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         Id = sequences.LedgerTransactionMarkerSequence++,
                         StateVersion = stateVersion,
-                        OperationType = AbcOperationType.ResourceInUse,
+                        OperationType = LedgerTransactionMarkerOperationType.ResourceInUse,
                         EntityId = referencedEntities.GetByGlobal((GlobalAddress)address.Address).DatabaseId,
                     }));
 
@@ -942,7 +942,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         Id = sequences.LedgerTransactionMarkerSequence++,
                         StateVersion = stateVersion,
-                        OperationType = AbcOperationType.AccountDepositedInto,
+                        OperationType = LedgerTransactionMarkerOperationType.AccountDepositedInto,
                         EntityId = referencedEntities.GetByGlobal((GlobalAddress)address.Address).DatabaseId,
                     }));
 
@@ -950,7 +950,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         Id = sequences.LedgerTransactionMarkerSequence++,
                         StateVersion = stateVersion,
-                        OperationType = AbcOperationType.AccountWithdrawnFrom,
+                        OperationType = LedgerTransactionMarkerOperationType.AccountWithdrawnFrom,
                         EntityId = referencedEntities.GetByGlobal((GlobalAddress)address.Address).DatabaseId,
                     }));
                 }

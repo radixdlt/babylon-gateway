@@ -133,9 +133,9 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerType>();
-        modelBuilder.HasPostgresEnum<AbcEventType>();
-        modelBuilder.HasPostgresEnum<AbcOperationType>();
-        modelBuilder.HasPostgresEnum<AbcOriginType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerEventType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOperationType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOriginType>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
         modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();

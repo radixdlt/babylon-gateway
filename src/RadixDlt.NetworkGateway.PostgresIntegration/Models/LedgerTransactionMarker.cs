@@ -68,19 +68,19 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal enum AbcOriginType
+internal enum LedgerTransactionMarkerOriginType
 {
     User,
     EpochChange,
 }
 
-internal enum AbcEventType
+internal enum LedgerTransactionMarkerEventType
 {
     Withdrawal,
     Deposit,
 }
 
-internal enum AbcOperationType
+internal enum LedgerTransactionMarkerOperationType
 {
     ResourceInUse,
     AccountDepositedInto,
@@ -101,13 +101,13 @@ internal abstract class LedgerTransactionMarker
 internal class OriginLedgerTransactionMarker : LedgerTransactionMarker
 {
     [Column("origin_type")]
-    public AbcOriginType OriginType { get; set; }
+    public LedgerTransactionMarkerOriginType OriginType { get; set; }
 }
 
 internal class EventLedgerTransactionMarker : LedgerTransactionMarker
 {
     [Column("event_type")]
-    public AbcEventType EventType { get; set; }
+    public LedgerTransactionMarkerEventType EventType { get; set; }
 
     [Column("entity_id")]
     public long EntityId { get; set; }
@@ -122,7 +122,7 @@ internal class EventLedgerTransactionMarker : LedgerTransactionMarker
 internal class ManifestAddressLedgerTransactionMarker : LedgerTransactionMarker
 {
     [Column("operation_type")]
-    public AbcOperationType OperationType { get; set; }
+    public LedgerTransactionMarkerOperationType OperationType { get; set; }
 
     [Column("entity_id")]
     public long EntityId { get; set; }

@@ -273,12 +273,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     state_version = table.Column<long>(type: "bigint", nullable: false),
                     discriminator = table.Column<LedgerTransactionMarkerType>(type: "ledger_transaction_marker_type", nullable: false),
-                    event_type = table.Column<AbcEventType>(type: "abc_event_type", nullable: true),
+                    event_type = table.Column<LedgerTransactionMarkerEventType>(type: "abc_event_type", nullable: true),
                     entity_id = table.Column<long>(type: "bigint", nullable: true),
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     quantity = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
-                    operation_type = table.Column<AbcOperationType>(type: "abc_operation_type", nullable: true),
-                    origin_type = table.Column<AbcOriginType>(type: "abc_origin_type", nullable: true)
+                    operation_type = table.Column<LedgerTransactionMarkerOperationType>(type: "abc_operation_type", nullable: true),
+                    origin_type = table.Column<LedgerTransactionMarkerOriginType>(type: "abc_origin_type", nullable: true)
                 },
                 constraints: table =>
                 {
