@@ -108,7 +108,7 @@ internal class TransactionQuerier : ITransactionQuerier
             ? request.Cursor?.StateVersionBoundary ?? request.FromStateVersion
             : request.FromStateVersion;
 
-        var searchQuery = _dbContext.LedgerTransactions
+        var searchQuery = _dbContext.LedgerTransactionMarkers
             .Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion > (lowerStateVersion ?? lt.StateVersion))
             .Select(lt => lt.StateVersion);
 
@@ -211,10 +211,7 @@ internal class TransactionQuerier : ITransactionQuerier
         }
         else if (request.SearchCriteria.KindFilter == LedgerTransactionKindFilter.AllAnnotated)
         {
-            searchQuery = searchQuery
-                .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
-                .OfType<OriginLedgerTransactionMarker>()
-                .Select(oltm => oltm.StateVersion);
+            // already handled as every TX found in LedgerTransactionMarker table is implicitly annotated
         }
         else
         {
