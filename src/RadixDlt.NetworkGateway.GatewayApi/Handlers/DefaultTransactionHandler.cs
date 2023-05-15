@@ -169,7 +169,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
     public async Task<GatewayModel.StreamTransactionsResponse> StreamTransactions(GatewayModel.StreamTransactionsRequest request, CancellationToken token = default)
     {
         var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromLedgerState, token) ?? atLedgerState;
+        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromLedgerState, token);
 
         var kindFilter = request.KindFilter switch
         {
@@ -185,30 +185,12 @@ internal class DefaultTransactionHandler : ITransactionHandler
             KindFilter = kindFilter,
         };
 
-        if (request.EntityId.HasValue)
-        {
-            searchCriteria.EventEmitterEntityId = request.EntityId.Value;
-
-            if (request.EntityId.Value % 2 == 0)
-            {
-                searchCriteria.WithdrawalEventsOnly = true;
-            }
-
-            if (request.EntityId.Value % 4 == 0)
-            {
-                searchCriteria.EventResourceEntityId = request.EntityId.Value + 10000;
-            }
-        }
-
-        if (request.ResourceEntityId.HasValue)
-        {
-            searchCriteria.ManifestAccountsDepositedInto = new[] { request.ResourceEntityId.Value };
-            searchCriteria.ManifestAccountsWithdrawnFrom = new[] { request.ResourceEntityId.Value + 1, request.ResourceEntityId.Value + 2 };
-            searchCriteria.ManifestResources = new[] { request.ResourceEntityId.Value - 1, request.ResourceEntityId.Value - 2 };
-        }
+        request.ManifestAccountsDepositedIntoFilter?.ForEach(a => searchCriteria.ManifestAccountsDepositedInto.Add(a));
+        request.ManifestAccountsWithdrawnFromFilter?.ForEach(a => searchCriteria.ManifestAccountsWithdrawnFrom.Add(a));
+        request.ManifestResourcesFilter?.ForEach(a => searchCriteria.ManifestResources.Add(a));
 
         var transactionsPageRequest = new TransactionStreamPageRequest(
-            FromStateVersion: fromLedgerState.StateVersion,
+            FromStateVersion: fromLedgerState?.StateVersion,
             Cursor: GatewayModel.LedgerTransactionsCursor.FromCursorString(request.Cursor),
             PageSize: request.LimitPerPage ?? DefaultPageLimit,
             AscendingOrder: request.Order == GatewayModel.StreamTransactionsRequest.OrderEnum.Asc,

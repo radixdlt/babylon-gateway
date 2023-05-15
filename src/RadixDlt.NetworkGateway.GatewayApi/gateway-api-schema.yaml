@@ -1459,21 +1459,22 @@ components:
                 - User
                 - EpochChange
                 - All
-            # TODO use entity_address, timestamp rather state_versions etc.
-            entity_id:
-              nullable: true
-              type: integer
-              format: int64
-            resource_entity_id:
-              nullable: true
-              type: integer
-              format: int64
-            type_filter:
-              nullable: true
-              type: string
-              enum:
-                - Deposit
-                - Withdrawal
+            manifest_accounts_withdrawn_from_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/ComponentAddress"
+            manifest_accounts_deposited_into_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/ComponentAddress"
+            manifest_resources_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/ResourceAddress"
+            low_level_events_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/StreamTransactionsRequestLowLevelEventFilter"
             order:
               description: Configures the order of returned result set. Defaults to `desc`.
               type: string
@@ -1482,6 +1483,22 @@ components:
                 - Desc
       example:
         limit_per_page: 5
+    StreamTransactionsRequestLowLevelEventFilter:
+      type: object
+      required:
+        - event
+      properties:
+        event:
+          type: string
+          enum:
+            - Deposit
+            - Withdrawal
+        emitter_address:
+          $ref: "#/components/schemas/ComponentAddress"
+        resource_address:
+          $ref: "#/components/schemas/ResourceAddress"
+        quantity:
+          $ref: "#/components/schemas/BigDecimal"
     StreamTransactionsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"

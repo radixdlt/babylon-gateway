@@ -64,7 +64,6 @@
 
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -84,10 +83,13 @@ public sealed record DetailsLookupResult(GatewayModel.CommittedTransactionInfo I
 
 public sealed record StatusLookupResult(string PayloadHashHex, GatewayModel.TransactionStatus Status, string? ErrorMessage);
 
-public sealed record TransactionPageWithoutTotal(GatewayModel.LedgerTransactionsCursor? NextPageCursor, List<GatewayModel.CommittedTransactionInfo> Transactions);
+public sealed record TransactionPageWithoutTotal(GatewayModel.LedgerTransactionsCursor? NextPageCursor, List<GatewayModel.CommittedTransactionInfo> Transactions)
+{
+    public static readonly TransactionPageWithoutTotal Empty = new(null, new List<GatewayModel.CommittedTransactionInfo>());
+}
 
 public sealed record TransactionStreamPageRequest(
-    long FromStateVersion,
+    long? FromStateVersion,
     GatewayModel.LedgerTransactionsCursor? Cursor,
     int PageSize,
     bool AscendingOrder,
@@ -95,17 +97,9 @@ public sealed record TransactionStreamPageRequest(
 
 public class TransactionStreamPageRequestSearchCriteria
 {
-    // generic constraints
-
-    public long? StateVersionLowerBound { get; set; }
-
-    public long? StateVersionUpperBound { get; set; }
-
     // TX type constraints
 
     public LedgerTransactionKindFilter KindFilter { get; set; }
-
-    public bool HasTransactionTypeConstraints() => KindFilter != LedgerTransactionKindFilter.AllAnnotated;
 
     // TX event constraints
 
@@ -121,11 +115,9 @@ public class TransactionStreamPageRequestSearchCriteria
 
     // TX manifest constraints
 
-    public long[]? ManifestAccountsDepositedInto { get; set; }
+    public List<string> ManifestAccountsDepositedInto { get; set; } = new();
 
-    public long[]? ManifestAccountsWithdrawnFrom { get; set; }
+    public List<string> ManifestAccountsWithdrawnFrom { get; set; } = new();
 
-    public long[]? ManifestResources { get; set; }
-
-    public bool HasTransactionManifestConstraints() => ManifestAccountsDepositedInto?.Any() == true || ManifestAccountsWithdrawnFrom?.Any() == true || ManifestResources?.Any() == true;
+    public List<string> ManifestResources { get; set; } = new();
 }
