@@ -87,6 +87,6 @@ internal class ResourceEntitySupplyHistory
     [Column("total_minted")]
     public TokenAmount TotalMinted { get; set; }
 
-    [Column("total_burnt")]
-    public TokenAmount TotalBurnt { get; set; }
+    [Column("total_burned")]
+    public TokenAmount TotalBurned { get; set; }
 }

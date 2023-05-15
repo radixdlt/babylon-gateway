@@ -64,6 +64,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
@@ -158,6 +159,11 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().NetworkName;
     }
 
+    public EventTypeIdentifiers GetEventTypeIdentifiers()
+    {
+        return GetCapturedConfig().EventTypeIdentifiers;
+    }
+
     public HrpDefinition GetHrpDefinition()
     {
         return GetCapturedConfig().HrpDefinition;
@@ -202,6 +208,12 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 Xrd: wka.Xrd
             ),
             AddressTypeDefinitions = at,
+            // TODO: temporal solution, that should be read from gensis transaction.
+            // For now we rely on hardcoded values.
+            EventTypeIdentifiers = new EventTypeIdentifiers(
+                new EventTypeIdentifiers.VaultEventTypeIdentifiers(27, 28),
+                new EventTypeIdentifiers.FungibleResourceEventTypeIdentifiers(35, 36),
+                new EventTypeIdentifiers.NonFungibleResourceEventTypeIdentifiers(85, 87)),
         };
     }
 

@@ -290,7 +290,7 @@ INNER JOIN LATERAL (
 
     public async Task<Dictionary<long, ResourceEntitySupplyHistory>> MostRecentResourceEntitySupplyHistoryFor(List<ResourceSupplyChange> resourceSupplyChanges, CancellationToken token)
     {
-        var ids = resourceSupplyChanges.Select(c => c.ResourceEntity.DatabaseId).Distinct().ToList();
+        var ids = resourceSupplyChanges.Select(c => c.ResourceEntityId).Distinct().ToList();
 
         return await _dbContext.ResourceEntitySupplyHistory
             .FromSqlInterpolated(@$"

@@ -70,6 +70,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration;
@@ -89,11 +90,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "abc_event_type", new[] { "withdrawal", "deposit" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "abc_operation_type", new[] { "resource_in_use", "account_deposited_into", "account_withdrawn_from" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "abc_origin_type", new[] { "user", "epoch_change" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "access_rules_chain_subtype", new[] { "none", "resource_manager_vault_access_rules_chain" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_type", new[] { "epoch_manager", "fungible_resource", "non_fungible_resource", "normal_component", "account_component", "package", "key_value_store", "vault", "clock", "validator", "access_controller", "identity" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_event_type", new[] { "withdrawal", "deposit" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_operation_type", new[] { "resource_in_use", "account_deposited_into", "account_withdrawn_from" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_origin_type", new[] { "user", "epoch_change" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_type", new[] { "origin", "event", "manifest_address" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_type", new[] { "user", "validator", "system" });
@@ -578,6 +579,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("address_type_definitions");
 
+                    b.Property<EventTypeIdentifiers>("EventTypeIdentifiers")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("event_type_identifiers");
+
                     b.Property<HrpDefinition>("HrpDefinition")
                         .IsRequired()
                         .HasColumnType("jsonb")
@@ -810,10 +816,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("resource_entity_id");
 
-                    b.Property<BigInteger>("TotalBurnt")
+                    b.Property<BigInteger>("TotalBurned")
                         .HasPrecision(1000)
                         .HasColumnType("numeric")
-                        .HasColumnName("total_burnt");
+                        .HasColumnName("total_burned");
 
                     b.Property<BigInteger>("TotalMinted")
                         .HasPrecision(1000)
@@ -1291,7 +1297,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnName("entity_id");
 
                     b.Property<LedgerTransactionMarkerEventType>("EventType")
-                        .HasColumnType("abc_event_type")
+                        .HasColumnType("ledger_transaction_marker_event_type")
                         .HasColumnName("event_type");
 
                     b.Property<BigInteger>("Quantity")
@@ -1321,7 +1327,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnName("entity_id");
 
                     b.Property<LedgerTransactionMarkerOperationType>("OperationType")
-                        .HasColumnType("abc_operation_type")
+                        .HasColumnType("ledger_transaction_marker_operation_type")
                         .HasColumnName("operation_type");
 
                     b.HasIndex("OperationType", "EntityId", "StateVersion")
@@ -1337,7 +1343,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransactionMarker");
 
                     b.Property<LedgerTransactionMarkerOriginType>("OriginType")
-                        .HasColumnType("abc_origin_type")
+                        .HasColumnType("ledger_transaction_marker_origin_type")
                         .HasColumnName("origin_type");
 
                     b.HasIndex("OriginType", "StateVersion")

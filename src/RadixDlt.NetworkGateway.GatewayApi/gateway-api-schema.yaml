@@ -1018,6 +1018,7 @@ components:
         - state_version
         - epoch
         - round
+        - round_timestamp
         - transaction_status
       properties:
         state_version:
@@ -1029,6 +1030,9 @@ components:
         round:
           type: integer
           format: int64
+        round_timestamp:
+          type: string
+          # TODO add format: date-time once OAS generator get fixed support for required value-types
         transaction_status:
           $ref: "#/components/schemas/TransactionStatus"
         payload_hash_hex:
@@ -1623,6 +1627,9 @@ components:
             - access_rules_chain
             - vault_access_rules_chain
             - divisibility
+            - total_supply
+            - total_minted
+            - total_burned
           properties:
             access_rules_chain:
               type: object
@@ -1631,6 +1638,12 @@ components:
             divisibility:
               type: integer
               minimum: 0
+            total_supply:
+              $ref: "#/components/schemas/BigDecimal"
+            total_minted:
+              $ref: "#/components/schemas/BigDecimal"
+            total_burned:
+              $ref: "#/components/schemas/BigDecimal"
     StateEntityDetailsResponseNonFungibleResourceDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
@@ -1639,6 +1652,9 @@ components:
             - access_rules_chain
             - vault_access_rules_chain
             - non_fungible_id_type
+            - total_supply
+            - total_minted
+            - total_burned
           properties:
             access_rules_chain:
               type: object
@@ -1646,6 +1662,12 @@ components:
               type: object
             non_fungible_id_type:
               $ref: "#/components/schemas/NonFungibleIdType"
+            total_supply:
+              $ref: "#/components/schemas/BigDecimal"
+            total_minted:
+              $ref: "#/components/schemas/BigDecimal"
+            total_burned:
+              $ref: "#/components/schemas/BigDecimal"
     StateEntityDetailsResponseFungibleVaultDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"

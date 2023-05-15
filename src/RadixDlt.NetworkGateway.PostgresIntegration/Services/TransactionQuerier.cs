@@ -336,6 +336,7 @@ internal class TransactionQuerier : ITransactionQuerier
             stateVersion: lt.StateVersion,
             epoch: lt.Epoch,
             round: lt.RoundInEpoch,
+            roundTimestamp: lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
             transactionStatus: MapTransactionStatus(lt.EngineReceipt.Status),
             payloadHashHex: payloadHashHex,
             intentHashHex: intentHashHex,

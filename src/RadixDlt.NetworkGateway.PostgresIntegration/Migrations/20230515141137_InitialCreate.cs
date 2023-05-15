@@ -67,6 +67,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -82,11 +83,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:abc_event_type", "withdrawal,deposit")
-                .Annotation("Npgsql:Enum:abc_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from")
-                .Annotation("Npgsql:Enum:abc_origin_type", "user,epoch_change")
                 .Annotation("Npgsql:Enum:access_rules_chain_subtype", "none,resource_manager_vault_access_rules_chain")
                 .Annotation("Npgsql:Enum:entity_type", "epoch_manager,fungible_resource,non_fungible_resource,normal_component,account_component,package,key_value_store,vault,clock,validator,access_controller,identity")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_event_type", "withdrawal,deposit")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_origin_type", "user,epoch_change")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "user,validator,system")
@@ -273,12 +274,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     state_version = table.Column<long>(type: "bigint", nullable: false),
                     discriminator = table.Column<LedgerTransactionMarkerType>(type: "ledger_transaction_marker_type", nullable: false),
-                    event_type = table.Column<LedgerTransactionMarkerEventType>(type: "abc_event_type", nullable: true),
+                    event_type = table.Column<LedgerTransactionMarkerEventType>(type: "ledger_transaction_marker_event_type", nullable: true),
                     entity_id = table.Column<long>(type: "bigint", nullable: true),
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     quantity = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
-                    operation_type = table.Column<LedgerTransactionMarkerOperationType>(type: "abc_operation_type", nullable: true),
-                    origin_type = table.Column<LedgerTransactionMarkerOriginType>(type: "abc_origin_type", nullable: true)
+                    operation_type = table.Column<LedgerTransactionMarkerOperationType>(type: "ledger_transaction_marker_operation_type", nullable: true),
+                    origin_type = table.Column<LedgerTransactionMarkerOriginType>(type: "ledger_transaction_marker_origin_type", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -330,7 +331,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     network_name = table.Column<string>(type: "text", nullable: false),
                     hrp_definition = table.Column<HrpDefinition>(type: "jsonb", nullable: false),
                     well_known_addresses = table.Column<WellKnownAddresses>(type: "jsonb", nullable: false),
-                    address_type_definitions = table.Column<AddressTypeDefinition[]>(type: "jsonb", nullable: false)
+                    address_type_definitions = table.Column<AddressTypeDefinition[]>(type: "jsonb", nullable: false),
+                    event_type_identifiers = table.Column<EventTypeIdentifiers>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -423,7 +425,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     total_supply = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
                     total_minted = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    total_burnt = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
+                    total_burned = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
                 },
                 constraints: table =>
                 {

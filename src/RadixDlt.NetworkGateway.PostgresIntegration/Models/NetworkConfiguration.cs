@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -86,12 +87,16 @@ internal class NetworkConfiguration : SingleEntryBase
     [Column("address_type_definitions", TypeName = "jsonb")]
     public AddressTypeDefinition[] AddressTypeDefinitions { get; set; }
 
+    [Column("event_type_identifiers", TypeName = "jsonb")]
+    public EventTypeIdentifiers EventTypeIdentifiers { get; set; }
+
     public bool HasEqualConfiguration(NetworkConfiguration other)
     {
         return NetworkId == other.NetworkId
                && NetworkName == other.NetworkName
                && HrpDefinition == other.HrpDefinition
                && WellKnownAddresses == other.WellKnownAddresses
+               && EventTypeIdentifiers.Equals(other.EventTypeIdentifiers)
                && AddressTypeDefinitions.SequenceEqual(other.AddressTypeDefinitions);
     }
 }

@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,26 +62,58 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
-using System.Threading;
-using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
+using System;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Services;
+namespace RadixDlt.NetworkGateway.Abstractions;
 
-public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
+public class EventTypeIdentifiers
 {
-    Task SetNetworkConfigurationOrAssertMatching(CoreModel.NetworkConfigurationResponse inputNetworkConfiguration, CancellationToken token);
+    public EventTypeIdentifiers(
+        VaultEventTypeIdentifiers vault,
+        FungibleResourceEventTypeIdentifiers fungibleResource,
+        NonFungibleResourceEventTypeIdentifiers nonFungibleResource)
+    {
+        Vault = vault;
+        FungibleResource = fungibleResource;
+        NonFungibleResource = nonFungibleResource;
+    }
 
-    Task<string?> EnsureNetworkConfigurationLoadedFromDatabaseIfExistsAndReturnNetworkName(CancellationToken token = default);
+    public VaultEventTypeIdentifiers Vault { get; }
 
-    Task<bool> SaveLedgerNetworkConfigurationToDatabaseOnInitIfNotExists(CancellationToken token);
+    public FungibleResourceEventTypeIdentifiers FungibleResource { get; }
 
-    byte GetNetworkId();
+    public NonFungibleResourceEventTypeIdentifiers NonFungibleResource { get; }
 
-    string GetNetworkName();
+    public sealed record VaultEventTypeIdentifiers(int Withdrawal, int Deposit);
 
-    EventTypeIdentifiers GetEventTypeIdentifiers();
+    public sealed record FungibleResourceEventTypeIdentifiers(int Minted, int Burned);
+
+    public sealed record NonFungibleResourceEventTypeIdentifiers(int Minted, int Burned);
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, obj))
+        {
+            return true;
+        }
+
+        return obj.GetType() == GetType() && Equals((EventTypeIdentifiers)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Vault, FungibleResource, NonFungibleResource);
+    }
+
+    private bool Equals(EventTypeIdentifiers other)
+    {
+        return Vault.Equals(other.Vault) &&
+               FungibleResource.Equals(other.FungibleResource) &&
+               NonFungibleResource.Equals(other.NonFungibleResource);
+    }
 }

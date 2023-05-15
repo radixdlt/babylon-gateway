@@ -448,7 +448,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY resource_entity_supply_history (id, from_state_version, resource_entity_id, total_supply, total_minted, total_burnt) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY resource_entity_supply_history (id, from_state_version, resource_entity_id, total_supply, total_minted, total_burned) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -458,7 +458,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.TotalSupply.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
             await writer.WriteAsync(e.TotalMinted.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-            await writer.WriteAsync(e.TotalBurnt.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+            await writer.WriteAsync(e.TotalBurned.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
         }
 
         await writer.CompleteAsync(token);

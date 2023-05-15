@@ -77,7 +77,7 @@ internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, Referenced
 
 internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, long StateVersion); // TODO use ScryptoSbor.String/ValueButes Key, ScryptoSbor.Enum/ValueBytes? Value
 
-internal record ResourceSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);
+internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, TokenAmount? TotalSupply = null, TokenAmount? Minted = null, TokenAmount? Burned = null);
 
 internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
 
