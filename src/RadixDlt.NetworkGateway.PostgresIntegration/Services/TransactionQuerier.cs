@@ -109,7 +109,7 @@ internal class TransactionQuerier : ITransactionQuerier
             : request.FromStateVersion;
 
         var searchQuery = _dbContext.LedgerTransactionMarkers
-            .Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion > (lowerStateVersion ?? lt.StateVersion))
+            .Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion >= (lowerStateVersion ?? lt.StateVersion))
             .Select(lt => lt.StateVersion);
 
         var userKindFilterImplicitlyApplied = false;
@@ -315,6 +315,11 @@ internal class TransactionQuerier : ITransactionQuerier
 
     private async Task<Dictionary<string, long>> GetEntityIds(List<string> addresses, CancellationToken token = default)
     {
+        if (!addresses.Any())
+        {
+            return new Dictionary<string, long>();
+        }
+
         return await _dbContext.Entities
             .Where(e => e.GlobalAddress != null && addresses.Contains(e.GlobalAddress.Value))
             .Select(e => new { e.Id, e.GlobalAddress!.Value })
