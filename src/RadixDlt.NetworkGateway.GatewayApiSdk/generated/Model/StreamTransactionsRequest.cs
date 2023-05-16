@@ -168,9 +168,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="manifestAccountsWithdrawnFromFilter">manifestAccountsWithdrawnFromFilter.</param>
         /// <param name="manifestAccountsDepositedIntoFilter">manifestAccountsDepositedIntoFilter.</param>
         /// <param name="manifestResourcesFilter">manifestResourcesFilter.</param>
-        /// <param name="lowLevelEventsFilter">lowLevelEventsFilter.</param>
+        /// <param name="eventsFilter">eventsFilter.</param>
         /// <param name="order">Configures the order of returned result set. Defaults to &#x60;desc&#x60;..</param>
-        public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<StreamTransactionsRequestLowLevelEventFilter> lowLevelEventsFilter = default(List<StreamTransactionsRequestLowLevelEventFilter>), OrderEnum? order = default(OrderEnum?))
+        public StreamTransactionsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), KindFilterEnum? kindFilter = default(KindFilterEnum?), List<string> manifestAccountsWithdrawnFromFilter = default(List<string>), List<string> manifestAccountsDepositedIntoFilter = default(List<string>), List<string> manifestResourcesFilter = default(List<string>), List<StreamTransactionsRequestEventFilterItem> eventsFilter = default(List<StreamTransactionsRequestEventFilterItem>), OrderEnum? order = default(OrderEnum?))
         {
             this.AtLedgerState = atLedgerState;
             this.Cursor = cursor;
@@ -180,7 +180,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.ManifestAccountsWithdrawnFromFilter = manifestAccountsWithdrawnFromFilter;
             this.ManifestAccountsDepositedIntoFilter = manifestAccountsDepositedIntoFilter;
             this.ManifestResourcesFilter = manifestResourcesFilter;
-            this.LowLevelEventsFilter = lowLevelEventsFilter;
+            this.EventsFilter = eventsFilter;
             this.Order = order;
         }
 
@@ -229,10 +229,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<string> ManifestResourcesFilter { get; set; }
 
         /// <summary>
-        /// Gets or Sets LowLevelEventsFilter
+        /// Gets or Sets EventsFilter
         /// </summary>
-        [DataMember(Name = "low_level_events_filter", EmitDefaultValue = true)]
-        public List<StreamTransactionsRequestLowLevelEventFilter> LowLevelEventsFilter { get; set; }
+        [DataMember(Name = "events_filter", EmitDefaultValue = true)]
+        public List<StreamTransactionsRequestEventFilterItem> EventsFilter { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -250,7 +250,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  ManifestAccountsWithdrawnFromFilter: ").Append(ManifestAccountsWithdrawnFromFilter).Append("\n");
             sb.Append("  ManifestAccountsDepositedIntoFilter: ").Append(ManifestAccountsDepositedIntoFilter).Append("\n");
             sb.Append("  ManifestResourcesFilter: ").Append(ManifestResourcesFilter).Append("\n");
-            sb.Append("  LowLevelEventsFilter: ").Append(LowLevelEventsFilter).Append("\n");
+            sb.Append("  EventsFilter: ").Append(EventsFilter).Append("\n");
             sb.Append("  Order: ").Append(Order).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -330,10 +330,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ManifestResourcesFilter.SequenceEqual(input.ManifestResourcesFilter)
                 ) && 
                 (
-                    this.LowLevelEventsFilter == input.LowLevelEventsFilter ||
-                    this.LowLevelEventsFilter != null &&
-                    input.LowLevelEventsFilter != null &&
-                    this.LowLevelEventsFilter.SequenceEqual(input.LowLevelEventsFilter)
+                    this.EventsFilter == input.EventsFilter ||
+                    this.EventsFilter != null &&
+                    input.EventsFilter != null &&
+                    this.EventsFilter.SequenceEqual(input.EventsFilter)
                 ) && 
                 (
                     this.Order == input.Order ||
@@ -379,9 +379,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ManifestResourcesFilter.GetHashCode();
                 }
-                if (this.LowLevelEventsFilter != null)
+                if (this.EventsFilter != null)
                 {
-                    hashCode = (hashCode * 59) + this.LowLevelEventsFilter.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EventsFilter.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.Order.GetHashCode();
                 return hashCode;

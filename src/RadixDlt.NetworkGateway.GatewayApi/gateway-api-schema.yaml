@@ -1475,10 +1475,10 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/ResourceAddress"
-            low_level_events_filter:
+            events_filter:
               type: array
               items:
-                $ref: "#/components/schemas/StreamTransactionsRequestLowLevelEventFilter"
+                $ref: "#/components/schemas/StreamTransactionsRequestEventFilterItem"
             order:
               description: Configures the order of returned result set. Defaults to `desc`.
               type: string
@@ -1487,7 +1487,7 @@ components:
                 - Desc
       example:
         limit_per_page: 5
-    StreamTransactionsRequestLowLevelEventFilter:
+    StreamTransactionsRequestEventFilterItem:
       type: object
       required:
         - event

@@ -194,11 +194,6 @@ internal abstract class CommonDbContext : DbContext
             .IsUnique()
             .HasFilter("index_in_round = 0");
 
-        // // This index lets you quickly filter out transaction stream
-        // modelBuilder.Entity<LedgerTransaction>()
-        //     .HasIndex(lt => new { lt.KindFilterConstraint, lt.StateVersion })
-        //     .HasFilter("kind_filter_constraint IS NOT NULL");
-
         modelBuilder.Entity<LedgerTransactionMarker>()
             .HasDiscriminator<LedgerTransactionMarkerType>(DiscriminatorColumnName)
             .HasValue<EventLedgerTransactionMarker>(LedgerTransactionMarkerType.Event)

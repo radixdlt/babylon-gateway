@@ -194,7 +194,6 @@ internal class DefaultTransactionHandler : ITransactionHandler
             Cursor: GatewayModel.LedgerTransactionsCursor.FromCursorString(request.Cursor),
             PageSize: request.LimitPerPage ?? DefaultPageLimit,
             AscendingOrder: request.Order == GatewayModel.StreamTransactionsRequest.OrderEnum.Asc,
-            // KindFilter: kindFilter,
             SearchCriteria: searchCriteria
         );
 

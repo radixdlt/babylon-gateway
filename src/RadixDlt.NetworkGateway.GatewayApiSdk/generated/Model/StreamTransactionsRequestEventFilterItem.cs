@@ -90,10 +90,10 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StreamTransactionsRequestLowLevelEventFilter
+    /// StreamTransactionsRequestEventFilterItem
     /// </summary>
-    [DataContract(Name = "StreamTransactionsRequestLowLevelEventFilter")]
-    public partial class StreamTransactionsRequestLowLevelEventFilter : IEquatable<StreamTransactionsRequestLowLevelEventFilter>
+    [DataContract(Name = "StreamTransactionsRequestEventFilterItem")]
+    public partial class StreamTransactionsRequestEventFilterItem : IEquatable<StreamTransactionsRequestEventFilterItem>
     {
         /// <summary>
         /// Defines Event
@@ -122,18 +122,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         [DataMember(Name = "event", IsRequired = true, EmitDefaultValue = true)]
         public EventEnum Event { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StreamTransactionsRequestLowLevelEventFilter" /> class.
+        /// Initializes a new instance of the <see cref="StreamTransactionsRequestEventFilterItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StreamTransactionsRequestLowLevelEventFilter() { }
+        protected StreamTransactionsRequestEventFilterItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StreamTransactionsRequestLowLevelEventFilter" /> class.
+        /// Initializes a new instance of the <see cref="StreamTransactionsRequestEventFilterItem" /> class.
         /// </summary>
         /// <param name="_event">_event (required).</param>
         /// <param name="emitterAddress">Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id..</param>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id..</param>
         /// <param name="quantity">String-encoded decimal representing the amount of a related fungible resource..</param>
-        public StreamTransactionsRequestLowLevelEventFilter(EventEnum _event = default(EventEnum), string emitterAddress = default(string), string resourceAddress = default(string), string quantity = default(string))
+        public StreamTransactionsRequestEventFilterItem(EventEnum _event = default(EventEnum), string emitterAddress = default(string), string resourceAddress = default(string), string quantity = default(string))
         {
             this.Event = _event;
             this.EmitterAddress = emitterAddress;
@@ -169,7 +169,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StreamTransactionsRequestLowLevelEventFilter {\n");
+            sb.Append("class StreamTransactionsRequestEventFilterItem {\n");
             sb.Append("  Event: ").Append(Event).Append("\n");
             sb.Append("  EmitterAddress: ").Append(EmitterAddress).Append("\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
@@ -194,15 +194,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StreamTransactionsRequestLowLevelEventFilter);
+            return this.Equals(input as StreamTransactionsRequestEventFilterItem);
         }
 
         /// <summary>
-        /// Returns true if StreamTransactionsRequestLowLevelEventFilter instances are equal
+        /// Returns true if StreamTransactionsRequestEventFilterItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of StreamTransactionsRequestLowLevelEventFilter to be compared</param>
+        /// <param name="input">Instance of StreamTransactionsRequestEventFilterItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StreamTransactionsRequestLowLevelEventFilter input)
+        public bool Equals(StreamTransactionsRequestEventFilterItem input)
         {
             if (input == null)
             {
