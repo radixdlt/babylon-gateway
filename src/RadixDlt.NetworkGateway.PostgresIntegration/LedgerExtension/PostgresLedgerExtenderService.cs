@@ -870,7 +870,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     // TODO we should most likely ensure that those are LocalTypeIndices we believe they are, as they're of kind=SchemaLocal, i.e. we should check the schema
                     if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.Vault)
                     {
-                        // TODO "withdrawal" or "deposit" event
                         if (@event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.Vault.Withdrawal || @event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.Vault.Deposit)
                         {
                             var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
@@ -878,7 +877,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             var data = (JObject)@event.Data.DataJson;
                             var fungibleAmount = data["fields"]?[0]?["value"]?.ToString();
                             var nonFungibleIds = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).ToList();
-                            var eventType = @event.Type.LocalTypeIndex.Index == 27
+                            var eventType = @event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.Vault.Withdrawal
                                 ? LedgerTransactionMarkerEventType.Withdrawal
                                 : LedgerTransactionMarkerEventType.Deposit;
 
