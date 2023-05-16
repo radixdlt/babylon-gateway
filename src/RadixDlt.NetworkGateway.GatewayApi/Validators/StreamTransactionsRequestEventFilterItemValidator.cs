@@ -69,43 +69,18 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayModel.StreamTransactionsRequest>
+internal class StreamTransactionsRequestEventItemValidator : AbstractValidator<GatewayModel.StreamTransactionsRequestEventFilterItem>
 {
-    public StreamTransactionsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    public StreamTransactionsRequestEventItemValidator()
     {
-        RuleFor(x => x.AtLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
-
-        RuleFor(x => x.Cursor)
-            .Base64();
-
-        RuleFor(x => x.LimitPerPage)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
-
-        RuleFor(x => x.FromLedgerState)
-            .SetValidator(ledgerStateSelectorValidator);
-
-        RuleFor(x => x.KindFilter)
+        RuleFor(x => x.Event)
+            .NotNull()
             .IsInEnum();
 
-        RuleFor(x => x.Order)
-            .IsInEnum();
-
-        RuleForEach(x => x.ManifestAccountsWithdrawnFromFilter)
-            .NotNull()
+        RuleFor(x => x.EmitterAddress)
             .RadixAddress();
 
-        RuleForEach(x => x.ManifestAccountsDepositedIntoFilter)
-            .NotNull()
+        RuleFor(x => x.ResourceAddress)
             .RadixAddress();
-
-        RuleForEach(x => x.ManifestResourcesFilter)
-            .NotNull()
-            .RadixAddress();
-
-        RuleForEach(x => x.EventsFilter)
-            .NotNull()
-            .SetValidator(new StreamTransactionsRequestEventItemValidator());
     }
 }
