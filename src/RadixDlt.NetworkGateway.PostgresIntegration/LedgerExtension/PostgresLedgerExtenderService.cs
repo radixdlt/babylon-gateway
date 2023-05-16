@@ -974,28 +974,28 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 if (manifestExtractedAddresses.TryGetValue(stateVersion, out var extractedAddresses))
                 {
-                    ledgerTransactionMarkersToAdd.AddRange(extractedAddresses.ResourceAddresses.Select(address => new ManifestAddressLedgerTransactionMarker
+                    ledgerTransactionMarkersToAdd.AddRange(extractedAddresses.ResourceAddresses.Select(f => new ManifestAddressLedgerTransactionMarker
                     {
                         Id = sequences.LedgerTransactionMarkerSequence++,
                         StateVersion = stateVersion,
                         OperationType = LedgerTransactionMarkerOperationType.ResourceInUse,
-                        EntityId = referencedEntities.GetByGlobal((GlobalAddress)address.Address).DatabaseId,
+                        EntityId = referencedEntities.GetByGlobal((GlobalAddress)f.Address).DatabaseId,
                     }));
 
-                    ledgerTransactionMarkersToAdd.AddRange(extractedAddresses.AccountsDepositedInto.Select(address => new ManifestAddressLedgerTransactionMarker
+                    ledgerTransactionMarkersToAdd.AddRange(extractedAddresses.AccountsDepositedInto.Select(f => new ManifestAddressLedgerTransactionMarker
                     {
                         Id = sequences.LedgerTransactionMarkerSequence++,
                         StateVersion = stateVersion,
                         OperationType = LedgerTransactionMarkerOperationType.AccountDepositedInto,
-                        EntityId = referencedEntities.GetByGlobal((GlobalAddress)address.Address).DatabaseId,
+                        EntityId = referencedEntities.GetByGlobal((GlobalAddress)f.Address).DatabaseId,
                     }));
 
-                    ledgerTransactionMarkersToAdd.AddRange(extractedAddresses.AccountsWithdrawnFrom.Select(address => new ManifestAddressLedgerTransactionMarker
+                    ledgerTransactionMarkersToAdd.AddRange(extractedAddresses.AccountsWithdrawnFrom.Select(f => new ManifestAddressLedgerTransactionMarker
                     {
                         Id = sequences.LedgerTransactionMarkerSequence++,
                         StateVersion = stateVersion,
                         OperationType = LedgerTransactionMarkerOperationType.AccountWithdrawnFrom,
-                        EntityId = referencedEntities.GetByGlobal((GlobalAddress)address.Address).DatabaseId,
+                        EntityId = referencedEntities.GetByGlobal((GlobalAddress)f.Address).DatabaseId,
                     }));
                 }
             }
