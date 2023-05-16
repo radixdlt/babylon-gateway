@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.Collections.Generic;
 using System.Threading;
@@ -97,27 +98,13 @@ public sealed record TransactionStreamPageRequest(
 
 public class TransactionStreamPageRequestSearchCriteria
 {
-    // TX type constraints
+    public LedgerTransactionKindFilter Kind { get; set; }
 
-    public LedgerTransactionKindFilter KindFilter { get; set; }
+    public List<LedgerTransactionEventFilter> Events { get; set; } = new();
 
-    // TX event constraints
+    public List<GlobalAddress> ManifestAccountsDepositedInto { get; set; } = new();
 
-    public long? EventEmitterEntityId { get; set; }
+    public List<GlobalAddress> ManifestAccountsWithdrawnFrom { get; set; } = new();
 
-    public bool WithdrawalEventsOnly { get; set; }
-
-    public bool DepositEventsOnly { get; set; }
-
-    public long? EventResourceEntityId { get; set; }
-
-    public bool HasTransactionEventConstraints() => EventResourceEntityId.HasValue || WithdrawalEventsOnly || DepositEventsOnly || EventResourceEntityId.HasValue;
-
-    // TX manifest constraints
-
-    public List<string> ManifestAccountsDepositedInto { get; set; } = new();
-
-    public List<string> ManifestAccountsWithdrawnFrom { get; set; } = new();
-
-    public List<string> ManifestResources { get; set; } = new();
+    public List<GlobalAddress> ManifestResources { get; set; } = new();
 }

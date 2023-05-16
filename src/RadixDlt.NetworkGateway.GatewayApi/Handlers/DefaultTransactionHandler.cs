@@ -62,7 +62,9 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Collections.Generic;
@@ -182,12 +184,29 @@ internal class DefaultTransactionHandler : ITransactionHandler
 
         var searchCriteria = new TransactionStreamPageRequestSearchCriteria
         {
-            KindFilter = kindFilter,
+            Kind = kindFilter,
         };
 
-        request.ManifestAccountsDepositedIntoFilter?.ForEach(a => searchCriteria.ManifestAccountsDepositedInto.Add(a));
-        request.ManifestAccountsWithdrawnFromFilter?.ForEach(a => searchCriteria.ManifestAccountsWithdrawnFrom.Add(a));
-        request.ManifestResourcesFilter?.ForEach(a => searchCriteria.ManifestResources.Add(a));
+        request.ManifestAccountsDepositedIntoFilter?.ForEach(a => searchCriteria.ManifestAccountsDepositedInto.Add((GlobalAddress)a));
+        request.ManifestAccountsWithdrawnFromFilter?.ForEach(a => searchCriteria.ManifestAccountsWithdrawnFrom.Add((GlobalAddress)a));
+        request.ManifestResourcesFilter?.ForEach(a => searchCriteria.ManifestResources.Add((GlobalAddress)a));
+        request.EventsFilter?.ForEach(ef =>
+        {
+            var eventType = ef.Event switch
+            {
+                GatewayModel.StreamTransactionsRequestEventFilterItem.EventEnum.Deposit => LedgerTransactionEventFilter.EventType.Deposit,
+                GatewayModel.StreamTransactionsRequestEventFilterItem.EventEnum.Withdrawal => LedgerTransactionEventFilter.EventType.Withdrawal,
+                _ => throw new UnreachableException($"Didn't expect {ef.Event} value"),
+            };
+
+            searchCriteria.Events.Add(new LedgerTransactionEventFilter
+            {
+                Event = eventType,
+                EmitterEntityAddress = ef.EmitterAddress != null ? (GlobalAddress)ef.EmitterAddress : null,
+                ResourceAddress = ef.ResourceAddress != null ? (GlobalAddress)ef.ResourceAddress : null,
+                Qunatity = ef.Quantity != null ? TokenAmount.FromDecimalString(ef.Quantity) : null,
+            });
+        });
 
         var transactionsPageRequest = new TransactionStreamPageRequest(
             FromStateVersion: fromLedgerState?.StateVersion,

@@ -64,6 +64,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -96,6 +97,23 @@ internal class TransactionQuerier : ITransactionQuerier
         var referencedAddresses = request.SearchCriteria.ManifestAccountsDepositedInto
             .Concat(request.SearchCriteria.ManifestAccountsWithdrawnFrom)
             .Concat(request.SearchCriteria.ManifestResources)
+            .Concat(request.SearchCriteria.Events.SelectMany(e =>
+            {
+                var addresses = new List<GlobalAddress>();
+
+                if (e.EmitterEntityAddress.HasValue)
+                {
+                    addresses.Add(e.EmitterEntityAddress.Value);
+                }
+
+                if (e.ResourceAddress.HasValue)
+                {
+                    addresses.Add(e.ResourceAddress.Value);
+                }
+
+                return addresses;
+            }))
+            .Select(a => (string)a)
             .ToList();
 
         var entityAddressToId = await GetEntityIds(referencedAddresses, token);
@@ -171,55 +189,65 @@ internal class TransactionQuerier : ITransactionQuerier
             }
         }
 
-        if (request.SearchCriteria.HasTransactionEventConstraints())
+        if (request.SearchCriteria.Events.Any())
         {
             userKindFilterImplicitlyApplied = true;
 
-            LedgerTransactionMarkerEventType? eventType = null;
-            long? eventEntityId = null;
-            long? eventResourceId = null;
-
-            if (request.SearchCriteria.WithdrawalEventsOnly)
+            foreach (var @event in request.SearchCriteria.Events)
             {
-                eventType = LedgerTransactionMarkerEventType.Withdrawal;
-            }
-            else if (request.SearchCriteria.DepositEventsOnly)
-            {
-                eventType = LedgerTransactionMarkerEventType.Deposit;
-            }
+                var eventType = @event.Event switch
+                {
+                    LedgerTransactionEventFilter.EventType.Withdrawal => LedgerTransactionMarkerEventType.Withdrawal,
+                    LedgerTransactionEventFilter.EventType.Deposit => LedgerTransactionMarkerEventType.Deposit,
+                    _ => throw new UnreachableException($"Didn't expect {@event.Event} value"),
+                };
 
-            if (request.SearchCriteria.EventEmitterEntityId.HasValue)
-            {
-                eventEntityId = request.SearchCriteria.EventEmitterEntityId.Value;
-            }
+                long? eventEmitterEntityId = null;
+                long? eventResourceEntityId = null;
 
-            if (request.SearchCriteria.EventResourceEntityId.HasValue)
-            {
-                eventResourceId = request.SearchCriteria.EventResourceEntityId.Value;
-            }
+                if (@event.EmitterEntityAddress.HasValue)
+                {
+                    if (!entityAddressToId.TryGetValue(@event.EmitterEntityAddress.Value, out var id))
+                    {
+                        return TransactionPageWithoutTotal.Empty;
+                    }
 
-            searchQuery = searchQuery
-                .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
-                .OfType<EventLedgerTransactionMarker>()
-                .Where(eltm => eltm.EventType == (eventType ?? eltm.EventType) && eltm.EntityId == (eventEntityId ?? eltm.EntityId) && eltm.ResourceEntityId == (eventResourceId ?? eltm.ResourceEntityId))
-                .Select(eltm => eltm.StateVersion);
+                    eventEmitterEntityId = id;
+                }
+
+                if (@event.ResourceAddress.HasValue)
+                {
+                    if (!entityAddressToId.TryGetValue(@event.ResourceAddress.Value, out var id))
+                    {
+                        return TransactionPageWithoutTotal.Empty;
+                    }
+
+                    eventResourceEntityId = id;
+                }
+
+                searchQuery = searchQuery
+                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                    .OfType<EventLedgerTransactionMarker>()
+                    .Where(eltm => eltm.EventType == eventType && eltm.EntityId == (eventEmitterEntityId ?? eltm.EntityId) && eltm.ResourceEntityId == (eventResourceEntityId ?? eltm.ResourceEntityId))
+                    .Select(eltm => eltm.StateVersion);
+            }
         }
 
-        if (request.SearchCriteria.KindFilter == LedgerTransactionKindFilter.UserOnly && userKindFilterImplicitlyApplied)
+        if (request.SearchCriteria.Kind == LedgerTransactionKindFilter.UserOnly && userKindFilterImplicitlyApplied)
         {
             // already handled
         }
-        else if (request.SearchCriteria.KindFilter == LedgerTransactionKindFilter.AllAnnotated)
+        else if (request.SearchCriteria.Kind == LedgerTransactionKindFilter.AllAnnotated)
         {
             // already handled as every TX found in LedgerTransactionMarker table is implicitly annotated
         }
         else
         {
-            var originType = request.SearchCriteria.KindFilter switch
+            var originType = request.SearchCriteria.Kind switch
             {
                 LedgerTransactionKindFilter.UserOnly => LedgerTransactionMarkerOriginType.User,
                 LedgerTransactionKindFilter.EpochChangeOnly => LedgerTransactionMarkerOriginType.EpochChange,
-                _ => throw new UnreachableException($"Unexpected value of kindFilter: {request.SearchCriteria.KindFilter}"),
+                _ => throw new UnreachableException($"Unexpected value of kindFilter: {request.SearchCriteria.Kind}"),
             };
 
             searchQuery = searchQuery
