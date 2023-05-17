@@ -97,16 +97,16 @@ namespace RadixDlt.CoreApiSdk.Model
     public enum LtsCommittedTransactionStatus
     {
         /// <summary>
-        /// Enum Succeeded for value: Succeeded
+        /// Enum Success for value: Success
         /// </summary>
-        [EnumMember(Value = "Succeeded")]
-        Succeeded = 1,
+        [EnumMember(Value = "Success")]
+        Success = 1,
 
         /// <summary>
-        /// Enum Failed for value: Failed
+        /// Enum Failure for value: Failure
         /// </summary>
-        [EnumMember(Value = "Failed")]
-        Failed = 2
+        [EnumMember(Value = "Failure")]
+        Failure = 2
 
     }
 

@@ -97,10 +97,10 @@ namespace RadixDlt.CoreApiSdk.Model
     {
 
         /// <summary>
-        /// Gets or Sets ModuleType
+        /// Gets or Sets ObjectModuleId
         /// </summary>
-        [DataMember(Name = "module_type", IsRequired = true, EmitDefaultValue = true)]
-        public ModuleType ModuleType { get; set; }
+        [DataMember(Name = "object_module_id", IsRequired = true, EmitDefaultValue = true)]
+        public ObjectModuleId ObjectModuleId { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="FunctionEventEmitterIdentifierAllOf" /> class.
         /// </summary>
@@ -110,9 +110,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="FunctionEventEmitterIdentifierAllOf" /> class.
         /// </summary>
         /// <param name="entity">entity (required).</param>
-        /// <param name="moduleType">moduleType (required).</param>
+        /// <param name="objectModuleId">objectModuleId (required).</param>
         /// <param name="blueprintName">Blueprint name. (required).</param>
-        public FunctionEventEmitterIdentifierAllOf(EntityReference entity = default(EntityReference), ModuleType moduleType = default(ModuleType), string blueprintName = default(string))
+        public FunctionEventEmitterIdentifierAllOf(EntityReference entity = default(EntityReference), ObjectModuleId objectModuleId = default(ObjectModuleId), string blueprintName = default(string))
         {
             // to ensure "entity" is required (not null)
             if (entity == null)
@@ -120,7 +120,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("entity is a required property for FunctionEventEmitterIdentifierAllOf and cannot be null");
             }
             this.Entity = entity;
-            this.ModuleType = moduleType;
+            this.ObjectModuleId = objectModuleId;
             // to ensure "blueprintName" is required (not null)
             if (blueprintName == null)
             {
@@ -151,7 +151,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class FunctionEventEmitterIdentifierAllOf {\n");
             sb.Append("  Entity: ").Append(Entity).Append("\n");
-            sb.Append("  ModuleType: ").Append(ModuleType).Append("\n");
+            sb.Append("  ObjectModuleId: ").Append(ObjectModuleId).Append("\n");
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -194,8 +194,8 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Entity.Equals(input.Entity))
                 ) && 
                 (
-                    this.ModuleType == input.ModuleType ||
-                    this.ModuleType.Equals(input.ModuleType)
+                    this.ObjectModuleId == input.ObjectModuleId ||
+                    this.ObjectModuleId.Equals(input.ObjectModuleId)
                 ) && 
                 (
                     this.BlueprintName == input.BlueprintName ||
@@ -217,7 +217,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Entity.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.ModuleType.GetHashCode();
+                hashCode = (hashCode * 59) + this.ObjectModuleId.GetHashCode();
                 if (this.BlueprintName != null)
                 {
                     hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();

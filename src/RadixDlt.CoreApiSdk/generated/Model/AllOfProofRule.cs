@@ -112,7 +112,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="list">list (required).</param>
         /// <param name="type">type (required) (default to ProofRuleType.AllOf).</param>
-        public AllOfProofRule(DynamicResourceDescriptorList list = default(DynamicResourceDescriptorList), ProofRuleType type = ProofRuleType.AllOf) : base(type)
+        public AllOfProofRule(List<Requirement> list = default(List<Requirement>), ProofRuleType type = ProofRuleType.AllOf) : base(type)
         {
             // to ensure "list" is required (not null)
             if (list == null)
@@ -126,7 +126,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets List
         /// </summary>
         [DataMember(Name = "list", IsRequired = true, EmitDefaultValue = true)]
-        public DynamicResourceDescriptorList List { get; set; }
+        public List<Requirement> List { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -175,8 +175,9 @@ namespace RadixDlt.CoreApiSdk.Model
             return base.Equals(input) && 
                 (
                     this.List == input.List ||
-                    (this.List != null &&
-                    this.List.Equals(input.List))
+                    this.List != null &&
+                    input.List != null &&
+                    this.List.SequenceEqual(input.List)
                 );
         }
 

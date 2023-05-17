@@ -110,7 +110,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
         /// <param name="type">type (required) (default to LedgerTransactionType.User).</param>
-        /// <param name="payloadHex">The hex-encoded full ledger transaction payload (required).</param>
+        /// <param name="payloadHex">The hex-encoded full ledger transaction payload. Only returned if enabled in TransactionFormatOptions on your request..</param>
         public UserLedgerTransaction(NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), LedgerTransactionType type = LedgerTransactionType.User, string payloadHex = default(string)) : base(type, payloadHex)
         {
             // to ensure "notarizedTransaction" is required (not null)

@@ -101,10 +101,10 @@ namespace RadixDlt.CoreApiSdk.Model
     {
 
         /// <summary>
-        /// Gets or Sets ModuleType
+        /// Gets or Sets ObjectModuleId
         /// </summary>
-        [DataMember(Name = "module_type", IsRequired = true, EmitDefaultValue = true)]
-        public ModuleType ModuleType { get; set; }
+        [DataMember(Name = "object_module_id", IsRequired = true, EmitDefaultValue = true)]
+        public ObjectModuleId ObjectModuleId { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="MethodEventEmitterIdentifier" /> class.
         /// </summary>
@@ -114,9 +114,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="MethodEventEmitterIdentifier" /> class.
         /// </summary>
         /// <param name="entity">entity (required).</param>
-        /// <param name="moduleType">moduleType (required).</param>
+        /// <param name="objectModuleId">objectModuleId (required).</param>
         /// <param name="type">type (required) (default to EventEmitterIdentifierType.Method).</param>
-        public MethodEventEmitterIdentifier(EntityReference entity = default(EntityReference), ModuleType moduleType = default(ModuleType), EventEmitterIdentifierType type = EventEmitterIdentifierType.Method) : base(type)
+        public MethodEventEmitterIdentifier(EntityReference entity = default(EntityReference), ObjectModuleId objectModuleId = default(ObjectModuleId), EventEmitterIdentifierType type = EventEmitterIdentifierType.Method) : base(type)
         {
             // to ensure "entity" is required (not null)
             if (entity == null)
@@ -124,7 +124,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("entity is a required property for MethodEventEmitterIdentifier and cannot be null");
             }
             this.Entity = entity;
-            this.ModuleType = moduleType;
+            this.ObjectModuleId = objectModuleId;
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class MethodEventEmitterIdentifier {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Entity: ").Append(Entity).Append("\n");
-            sb.Append("  ModuleType: ").Append(ModuleType).Append("\n");
+            sb.Append("  ObjectModuleId: ").Append(ObjectModuleId).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -185,8 +185,8 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Entity.Equals(input.Entity))
                 ) && base.Equals(input) && 
                 (
-                    this.ModuleType == input.ModuleType ||
-                    this.ModuleType.Equals(input.ModuleType)
+                    this.ObjectModuleId == input.ObjectModuleId ||
+                    this.ObjectModuleId.Equals(input.ObjectModuleId)
                 );
         }
 
@@ -203,7 +203,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Entity.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.ModuleType.GetHashCode();
+                hashCode = (hashCode * 59) + this.ObjectModuleId.GetHashCode();
                 return hashCode;
             }
         }

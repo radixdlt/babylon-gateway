@@ -111,10 +111,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="stateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the resultant state version after the transaction has been committed (required).</param>
         /// <param name="accumulatorHash">The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger. This hash is &#x60;ACC_{N+1} &#x3D; Blake2b-256(CONCAT(ACC_N, LEDGER_HASH_{N}))&#x60;, starting with &#x60;ACC_0 &#x3D; 000..000&#x60; the pre-genesis accumulator.  (required).</param>
+        /// <param name="userTransactionIdentifiers">userTransactionIdentifiers.</param>
         /// <param name="status">status (required).</param>
-        /// <param name="fungibleEntityBalanceChanges">A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated.  (required).</param>
-        /// <param name="fee">The string-encoded decimal representing the total amount of XRD payed as fee (execution, validator tip and royalties). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
-        public LtsCommittedTransactionOutcome(long stateVersion = default(long), string accumulatorHash = default(string), LtsCommittedTransactionStatus status = default(LtsCommittedTransactionStatus), List<LtsEntityFungibleBalanceChanges> fungibleEntityBalanceChanges = default(List<LtsEntityFungibleBalanceChanges>), string fee = default(string))
+        /// <param name="fungibleEntityBalanceChanges">THE FEE ASSIGNMENT IS NOT CURRENTLY FULLY ACCURATE FOR SOME TRANSACTIONS. THIS WILL BE FIXED AT RCNET-V2. A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated.  (required).</param>
+        /// <param name="resultantAccountFungibleBalances">THIS CURRENTLY RETURNS AN EMPTY LIST. THIS FEATURE WILL BE COMING AT RCNET-V2. A list of the resultant balances of any account balances changed in this transaction. Only balances for accounts are returned, not any other kind of entity.  (required).</param>
+        /// <param name="totalFee">The string-encoded decimal representing the total amount of XRD payed as fee (execution, validator tip and royalties). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        public LtsCommittedTransactionOutcome(long stateVersion = default(long), string accumulatorHash = default(string), TransactionIdentifiers userTransactionIdentifiers = default(TransactionIdentifiers), LtsCommittedTransactionStatus status = default(LtsCommittedTransactionStatus), List<LtsEntityFungibleBalanceChanges> fungibleEntityBalanceChanges = default(List<LtsEntityFungibleBalanceChanges>), List<LtsResultantAccountFungibleBalances> resultantAccountFungibleBalances = default(List<LtsResultantAccountFungibleBalances>), string totalFee = default(string))
         {
             this.StateVersion = stateVersion;
             // to ensure "accumulatorHash" is required (not null)
@@ -130,12 +132,19 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("fungibleEntityBalanceChanges is a required property for LtsCommittedTransactionOutcome and cannot be null");
             }
             this.FungibleEntityBalanceChanges = fungibleEntityBalanceChanges;
-            // to ensure "fee" is required (not null)
-            if (fee == null)
+            // to ensure "resultantAccountFungibleBalances" is required (not null)
+            if (resultantAccountFungibleBalances == null)
             {
-                throw new ArgumentNullException("fee is a required property for LtsCommittedTransactionOutcome and cannot be null");
+                throw new ArgumentNullException("resultantAccountFungibleBalances is a required property for LtsCommittedTransactionOutcome and cannot be null");
             }
-            this.Fee = fee;
+            this.ResultantAccountFungibleBalances = resultantAccountFungibleBalances;
+            // to ensure "totalFee" is required (not null)
+            if (totalFee == null)
+            {
+                throw new ArgumentNullException("totalFee is a required property for LtsCommittedTransactionOutcome and cannot be null");
+            }
+            this.TotalFee = totalFee;
+            this.UserTransactionIdentifiers = userTransactionIdentifiers;
         }
 
         /// <summary>
@@ -153,18 +162,31 @@ namespace RadixDlt.CoreApiSdk.Model
         public string AccumulatorHash { get; set; }
 
         /// <summary>
-        /// A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated. 
+        /// Gets or Sets UserTransactionIdentifiers
         /// </summary>
-        /// <value>A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated. </value>
+        [DataMember(Name = "user_transaction_identifiers", EmitDefaultValue = true)]
+        public TransactionIdentifiers UserTransactionIdentifiers { get; set; }
+
+        /// <summary>
+        /// THE FEE ASSIGNMENT IS NOT CURRENTLY FULLY ACCURATE FOR SOME TRANSACTIONS. THIS WILL BE FIXED AT RCNET-V2. A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated. 
+        /// </summary>
+        /// <value>THE FEE ASSIGNMENT IS NOT CURRENTLY FULLY ACCURATE FOR SOME TRANSACTIONS. THIS WILL BE FIXED AT RCNET-V2. A list of all fungible balance updates which occurred in this transaction, aggregated by the global entity (such as account) which owns the vaults which were updated. </value>
         [DataMember(Name = "fungible_entity_balance_changes", IsRequired = true, EmitDefaultValue = true)]
         public List<LtsEntityFungibleBalanceChanges> FungibleEntityBalanceChanges { get; set; }
+
+        /// <summary>
+        /// THIS CURRENTLY RETURNS AN EMPTY LIST. THIS FEATURE WILL BE COMING AT RCNET-V2. A list of the resultant balances of any account balances changed in this transaction. Only balances for accounts are returned, not any other kind of entity. 
+        /// </summary>
+        /// <value>THIS CURRENTLY RETURNS AN EMPTY LIST. THIS FEATURE WILL BE COMING AT RCNET-V2. A list of the resultant balances of any account balances changed in this transaction. Only balances for accounts are returned, not any other kind of entity. </value>
+        [DataMember(Name = "resultant_account_fungible_balances", IsRequired = true, EmitDefaultValue = true)]
+        public List<LtsResultantAccountFungibleBalances> ResultantAccountFungibleBalances { get; set; }
 
         /// <summary>
         /// The string-encoded decimal representing the total amount of XRD payed as fee (execution, validator tip and royalties). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
         /// </summary>
         /// <value>The string-encoded decimal representing the total amount of XRD payed as fee (execution, validator tip and royalties). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
-        [DataMember(Name = "fee", IsRequired = true, EmitDefaultValue = true)]
-        public string Fee { get; set; }
+        [DataMember(Name = "total_fee", IsRequired = true, EmitDefaultValue = true)]
+        public string TotalFee { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -176,9 +198,11 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class LtsCommittedTransactionOutcome {\n");
             sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
             sb.Append("  AccumulatorHash: ").Append(AccumulatorHash).Append("\n");
+            sb.Append("  UserTransactionIdentifiers: ").Append(UserTransactionIdentifiers).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("  FungibleEntityBalanceChanges: ").Append(FungibleEntityBalanceChanges).Append("\n");
-            sb.Append("  Fee: ").Append(Fee).Append("\n");
+            sb.Append("  ResultantAccountFungibleBalances: ").Append(ResultantAccountFungibleBalances).Append("\n");
+            sb.Append("  TotalFee: ").Append(TotalFee).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -224,6 +248,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.AccumulatorHash.Equals(input.AccumulatorHash))
                 ) && 
                 (
+                    this.UserTransactionIdentifiers == input.UserTransactionIdentifiers ||
+                    (this.UserTransactionIdentifiers != null &&
+                    this.UserTransactionIdentifiers.Equals(input.UserTransactionIdentifiers))
+                ) && 
+                (
                     this.Status == input.Status ||
                     this.Status.Equals(input.Status)
                 ) && 
@@ -234,9 +263,15 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.FungibleEntityBalanceChanges.SequenceEqual(input.FungibleEntityBalanceChanges)
                 ) && 
                 (
-                    this.Fee == input.Fee ||
-                    (this.Fee != null &&
-                    this.Fee.Equals(input.Fee))
+                    this.ResultantAccountFungibleBalances == input.ResultantAccountFungibleBalances ||
+                    this.ResultantAccountFungibleBalances != null &&
+                    input.ResultantAccountFungibleBalances != null &&
+                    this.ResultantAccountFungibleBalances.SequenceEqual(input.ResultantAccountFungibleBalances)
+                ) && 
+                (
+                    this.TotalFee == input.TotalFee ||
+                    (this.TotalFee != null &&
+                    this.TotalFee.Equals(input.TotalFee))
                 );
         }
 
@@ -254,14 +289,22 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.AccumulatorHash.GetHashCode();
                 }
+                if (this.UserTransactionIdentifiers != null)
+                {
+                    hashCode = (hashCode * 59) + this.UserTransactionIdentifiers.GetHashCode();
+                }
                 hashCode = (hashCode * 59) + this.Status.GetHashCode();
                 if (this.FungibleEntityBalanceChanges != null)
                 {
                     hashCode = (hashCode * 59) + this.FungibleEntityBalanceChanges.GetHashCode();
                 }
-                if (this.Fee != null)
+                if (this.ResultantAccountFungibleBalances != null)
                 {
-                    hashCode = (hashCode * 59) + this.Fee.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResultantAccountFungibleBalances.GetHashCode();
+                }
+                if (this.TotalFee != null)
+                {
+                    hashCode = (hashCode * 59) + this.TotalFee.GetHashCode();
                 }
                 return hashCode;
             }

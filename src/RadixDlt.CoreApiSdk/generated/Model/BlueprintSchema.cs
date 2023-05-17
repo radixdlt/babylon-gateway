@@ -103,12 +103,14 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="BlueprintSchema" /> class.
         /// </summary>
+        /// <param name="outerBlueprint">outerBlueprint.</param>
         /// <param name="schema">schema (required).</param>
-        /// <param name="substates">The type index of the substates under the SELF module - in the context of the blueprint&#39;s SBOR schema.  (required).</param>
         /// <param name="functionSchemas">A map from the function name to the FunctionSchema (required).</param>
         /// <param name="virtualLazyLoadFunctionSchemas">A map from the system function ID to the VirtualLazyLoadSchema (required).</param>
         /// <param name="eventSchemas">A map from the event name to the local type index for the event payload under the blueprint schema. (required).</param>
-        public BlueprintSchema(SborData schema = default(SborData), List<LocalTypeIndex> substates = default(List<LocalTypeIndex>), Dictionary<string, FunctionSchema> functionSchemas = default(Dictionary<string, FunctionSchema>), Dictionary<string, VirtualLazyLoadSchema> virtualLazyLoadFunctionSchemas = default(Dictionary<string, VirtualLazyLoadSchema>), Dictionary<string, LocalTypeIndex> eventSchemas = default(Dictionary<string, LocalTypeIndex>))
+        /// <param name="fieldPartition">fieldPartition.</param>
+        /// <param name="collectionPartitions">The collection partitions for this blueprint. (required).</param>
+        public BlueprintSchema(string outerBlueprint = default(string), ScryptoSchema schema = default(ScryptoSchema), Dictionary<string, FunctionSchema> functionSchemas = default(Dictionary<string, FunctionSchema>), Dictionary<string, VirtualLazyLoadSchema> virtualLazyLoadFunctionSchemas = default(Dictionary<string, VirtualLazyLoadSchema>), Dictionary<string, LocalTypeIndex> eventSchemas = default(Dictionary<string, LocalTypeIndex>), BlueprintSchemaFieldPartition fieldPartition = default(BlueprintSchemaFieldPartition), List<BlueprintSchemaCollectionPartition> collectionPartitions = default(List<BlueprintSchemaCollectionPartition>))
         {
             // to ensure "schema" is required (not null)
             if (schema == null)
@@ -116,12 +118,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("schema is a required property for BlueprintSchema and cannot be null");
             }
             this.Schema = schema;
-            // to ensure "substates" is required (not null)
-            if (substates == null)
-            {
-                throw new ArgumentNullException("substates is a required property for BlueprintSchema and cannot be null");
-            }
-            this.Substates = substates;
             // to ensure "functionSchemas" is required (not null)
             if (functionSchemas == null)
             {
@@ -140,20 +136,27 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("eventSchemas is a required property for BlueprintSchema and cannot be null");
             }
             this.EventSchemas = eventSchemas;
+            // to ensure "collectionPartitions" is required (not null)
+            if (collectionPartitions == null)
+            {
+                throw new ArgumentNullException("collectionPartitions is a required property for BlueprintSchema and cannot be null");
+            }
+            this.CollectionPartitions = collectionPartitions;
+            this.OuterBlueprint = outerBlueprint;
+            this.FieldPartition = fieldPartition;
         }
+
+        /// <summary>
+        /// Gets or Sets OuterBlueprint
+        /// </summary>
+        [DataMember(Name = "outer_blueprint", EmitDefaultValue = true)]
+        public string OuterBlueprint { get; set; }
 
         /// <summary>
         /// Gets or Sets Schema
         /// </summary>
         [DataMember(Name = "schema", IsRequired = true, EmitDefaultValue = true)]
-        public SborData Schema { get; set; }
-
-        /// <summary>
-        /// The type index of the substates under the SELF module - in the context of the blueprint&#39;s SBOR schema. 
-        /// </summary>
-        /// <value>The type index of the substates under the SELF module - in the context of the blueprint&#39;s SBOR schema. </value>
-        [DataMember(Name = "substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<LocalTypeIndex> Substates { get; set; }
+        public ScryptoSchema Schema { get; set; }
 
         /// <summary>
         /// A map from the function name to the FunctionSchema
@@ -177,6 +180,19 @@ namespace RadixDlt.CoreApiSdk.Model
         public Dictionary<string, LocalTypeIndex> EventSchemas { get; set; }
 
         /// <summary>
+        /// Gets or Sets FieldPartition
+        /// </summary>
+        [DataMember(Name = "field_partition", EmitDefaultValue = true)]
+        public BlueprintSchemaFieldPartition FieldPartition { get; set; }
+
+        /// <summary>
+        /// The collection partitions for this blueprint.
+        /// </summary>
+        /// <value>The collection partitions for this blueprint.</value>
+        [DataMember(Name = "collection_partitions", IsRequired = true, EmitDefaultValue = true)]
+        public List<BlueprintSchemaCollectionPartition> CollectionPartitions { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -184,11 +200,13 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class BlueprintSchema {\n");
+            sb.Append("  OuterBlueprint: ").Append(OuterBlueprint).Append("\n");
             sb.Append("  Schema: ").Append(Schema).Append("\n");
-            sb.Append("  Substates: ").Append(Substates).Append("\n");
             sb.Append("  FunctionSchemas: ").Append(FunctionSchemas).Append("\n");
             sb.Append("  VirtualLazyLoadFunctionSchemas: ").Append(VirtualLazyLoadFunctionSchemas).Append("\n");
             sb.Append("  EventSchemas: ").Append(EventSchemas).Append("\n");
+            sb.Append("  FieldPartition: ").Append(FieldPartition).Append("\n");
+            sb.Append("  CollectionPartitions: ").Append(CollectionPartitions).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -225,15 +243,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.OuterBlueprint == input.OuterBlueprint ||
+                    (this.OuterBlueprint != null &&
+                    this.OuterBlueprint.Equals(input.OuterBlueprint))
+                ) && 
+                (
                     this.Schema == input.Schema ||
                     (this.Schema != null &&
                     this.Schema.Equals(input.Schema))
-                ) && 
-                (
-                    this.Substates == input.Substates ||
-                    this.Substates != null &&
-                    input.Substates != null &&
-                    this.Substates.SequenceEqual(input.Substates)
                 ) && 
                 (
                     this.FunctionSchemas == input.FunctionSchemas ||
@@ -252,6 +269,17 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.EventSchemas != null &&
                     input.EventSchemas != null &&
                     this.EventSchemas.SequenceEqual(input.EventSchemas)
+                ) && 
+                (
+                    this.FieldPartition == input.FieldPartition ||
+                    (this.FieldPartition != null &&
+                    this.FieldPartition.Equals(input.FieldPartition))
+                ) && 
+                (
+                    this.CollectionPartitions == input.CollectionPartitions ||
+                    this.CollectionPartitions != null &&
+                    input.CollectionPartitions != null &&
+                    this.CollectionPartitions.SequenceEqual(input.CollectionPartitions)
                 );
         }
 
@@ -264,13 +292,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.OuterBlueprint != null)
+                {
+                    hashCode = (hashCode * 59) + this.OuterBlueprint.GetHashCode();
+                }
                 if (this.Schema != null)
                 {
                     hashCode = (hashCode * 59) + this.Schema.GetHashCode();
-                }
-                if (this.Substates != null)
-                {
-                    hashCode = (hashCode * 59) + this.Substates.GetHashCode();
                 }
                 if (this.FunctionSchemas != null)
                 {
@@ -283,6 +311,14 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.EventSchemas != null)
                 {
                     hashCode = (hashCode * 59) + this.EventSchemas.GetHashCode();
+                }
+                if (this.FieldPartition != null)
+                {
+                    hashCode = (hashCode * 59) + this.FieldPartition.GetHashCode();
+                }
+                if (this.CollectionPartitions != null)
+                {
+                    hashCode = (hashCode * 59) + this.CollectionPartitions.GetHashCode();
                 }
                 return hashCode;
             }

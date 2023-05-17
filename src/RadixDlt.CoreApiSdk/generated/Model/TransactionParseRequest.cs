@@ -222,7 +222,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="parseMode">The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Manifest, Ledger. .</param>
         /// <param name="validationMode">The type of validation that should be performed, if the payload correctly decompiles as a Notarized Transaction. This is only relevant for Notarized payloads. If omitted, \&quot;Static\&quot; is used. .</param>
         /// <param name="responseMode">The amount of information to return in the response. \&quot;Basic\&quot; includes the type, validity information, and any relevant identifiers. \&quot;Full\&quot; also includes the fully parsed information. If omitted, \&quot;Full\&quot; is used. .</param>
-        public TransactionParseRequest(string network = default(string), string payloadHex = default(string), ParseModeEnum? parseMode = default(ParseModeEnum?), ValidationModeEnum? validationMode = default(ValidationModeEnum?), ResponseModeEnum? responseMode = default(ResponseModeEnum?))
+        /// <param name="transactionFormatOptions">transactionFormatOptions.</param>
+        public TransactionParseRequest(string network = default(string), string payloadHex = default(string), ParseModeEnum? parseMode = default(ParseModeEnum?), ValidationModeEnum? validationMode = default(ValidationModeEnum?), ResponseModeEnum? responseMode = default(ResponseModeEnum?), TransactionFormatOptions transactionFormatOptions = default(TransactionFormatOptions))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -239,6 +240,7 @@ namespace RadixDlt.CoreApiSdk.Model
             this.ParseMode = parseMode;
             this.ValidationMode = validationMode;
             this.ResponseMode = responseMode;
+            this.TransactionFormatOptions = transactionFormatOptions;
         }
 
         /// <summary>
@@ -256,6 +258,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public string PayloadHex { get; set; }
 
         /// <summary>
+        /// Gets or Sets TransactionFormatOptions
+        /// </summary>
+        [DataMember(Name = "transaction_format_options", EmitDefaultValue = true)]
+        public TransactionFormatOptions TransactionFormatOptions { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -268,6 +276,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  ParseMode: ").Append(ParseMode).Append("\n");
             sb.Append("  ValidationMode: ").Append(ValidationMode).Append("\n");
             sb.Append("  ResponseMode: ").Append(ResponseMode).Append("\n");
+            sb.Append("  TransactionFormatOptions: ").Append(TransactionFormatOptions).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -324,6 +333,11 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.ResponseMode == input.ResponseMode ||
                     this.ResponseMode.Equals(input.ResponseMode)
+                ) && 
+                (
+                    this.TransactionFormatOptions == input.TransactionFormatOptions ||
+                    (this.TransactionFormatOptions != null &&
+                    this.TransactionFormatOptions.Equals(input.TransactionFormatOptions))
                 );
         }
 
@@ -347,6 +361,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 hashCode = (hashCode * 59) + this.ParseMode.GetHashCode();
                 hashCode = (hashCode * 59) + this.ValidationMode.GetHashCode();
                 hashCode = (hashCode * 59) + this.ResponseMode.GetHashCode();
+                if (this.TransactionFormatOptions != null)
+                {
+                    hashCode = (hashCode * 59) + this.TransactionFormatOptions.GetHashCode();
+                }
                 return hashCode;
             }
         }

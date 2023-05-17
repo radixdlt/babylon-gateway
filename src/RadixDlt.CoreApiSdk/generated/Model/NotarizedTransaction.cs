@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="NotarizedTransaction" /> class.
         /// </summary>
         /// <param name="hash">The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;Blake2b-256(compiled_notarized_transaction)&#x60; (required).</param>
-        /// <param name="payloadHex">The hex-encoded full notarized transaction payload (required).</param>
+        /// <param name="payloadHex">The hex-encoded full notarized transaction payload. Returning this can be disabled in TransactionFormatOptions on your request (default true)..</param>
         /// <param name="signedIntent">signedIntent (required).</param>
         /// <param name="notarySignature">notarySignature (required).</param>
         public NotarizedTransaction(string hash = default(string), string payloadHex = default(string), SignedTransactionIntent signedIntent = default(SignedTransactionIntent), Signature notarySignature = default(Signature))
@@ -115,12 +115,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("hash is a required property for NotarizedTransaction and cannot be null");
             }
             this.Hash = hash;
-            // to ensure "payloadHex" is required (not null)
-            if (payloadHex == null)
-            {
-                throw new ArgumentNullException("payloadHex is a required property for NotarizedTransaction and cannot be null");
-            }
-            this.PayloadHex = payloadHex;
             // to ensure "signedIntent" is required (not null)
             if (signedIntent == null)
             {
@@ -133,6 +127,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("notarySignature is a required property for NotarizedTransaction and cannot be null");
             }
             this.NotarySignature = notarySignature;
+            this.PayloadHex = payloadHex;
         }
 
         /// <summary>
@@ -143,10 +138,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public string Hash { get; set; }
 
         /// <summary>
-        /// The hex-encoded full notarized transaction payload
+        /// The hex-encoded full notarized transaction payload. Returning this can be disabled in TransactionFormatOptions on your request (default true).
         /// </summary>
-        /// <value>The hex-encoded full notarized transaction payload</value>
-        [DataMember(Name = "payload_hex", IsRequired = true, EmitDefaultValue = true)]
+        /// <value>The hex-encoded full notarized transaction payload. Returning this can be disabled in TransactionFormatOptions on your request (default true).</value>
+        [DataMember(Name = "payload_hex", EmitDefaultValue = true)]
         public string PayloadHex { get; set; }
 
         /// <summary>

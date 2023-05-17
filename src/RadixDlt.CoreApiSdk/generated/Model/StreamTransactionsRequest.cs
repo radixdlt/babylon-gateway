@@ -106,7 +106,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="network">The logical name of the network (required).</param>
         /// <param name="fromStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version to be returned (required).</param>
         /// <param name="limit">The maximum number of transactions that will be returned. (required).</param>
-        public StreamTransactionsRequest(string network = default(string), long fromStateVersion = default(long), int limit = default(int))
+        /// <param name="sborFormatOptions">sborFormatOptions.</param>
+        /// <param name="transactionFormatOptions">transactionFormatOptions.</param>
+        /// <param name="substateFormatOptions">substateFormatOptions.</param>
+        public StreamTransactionsRequest(string network = default(string), long fromStateVersion = default(long), int limit = default(int), SborFormatOptions sborFormatOptions = default(SborFormatOptions), TransactionFormatOptions transactionFormatOptions = default(TransactionFormatOptions), SubstateFormatOptions substateFormatOptions = default(SubstateFormatOptions))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -116,6 +119,9 @@ namespace RadixDlt.CoreApiSdk.Model
             this.Network = network;
             this.FromStateVersion = fromStateVersion;
             this.Limit = limit;
+            this.SborFormatOptions = sborFormatOptions;
+            this.TransactionFormatOptions = transactionFormatOptions;
+            this.SubstateFormatOptions = substateFormatOptions;
         }
 
         /// <summary>
@@ -140,6 +146,24 @@ namespace RadixDlt.CoreApiSdk.Model
         public int Limit { get; set; }
 
         /// <summary>
+        /// Gets or Sets SborFormatOptions
+        /// </summary>
+        [DataMember(Name = "sbor_format_options", EmitDefaultValue = true)]
+        public SborFormatOptions SborFormatOptions { get; set; }
+
+        /// <summary>
+        /// Gets or Sets TransactionFormatOptions
+        /// </summary>
+        [DataMember(Name = "transaction_format_options", EmitDefaultValue = true)]
+        public TransactionFormatOptions TransactionFormatOptions { get; set; }
+
+        /// <summary>
+        /// Gets or Sets SubstateFormatOptions
+        /// </summary>
+        [DataMember(Name = "substate_format_options", EmitDefaultValue = true)]
+        public SubstateFormatOptions SubstateFormatOptions { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -150,6 +174,9 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  Network: ").Append(Network).Append("\n");
             sb.Append("  FromStateVersion: ").Append(FromStateVersion).Append("\n");
             sb.Append("  Limit: ").Append(Limit).Append("\n");
+            sb.Append("  SborFormatOptions: ").Append(SborFormatOptions).Append("\n");
+            sb.Append("  TransactionFormatOptions: ").Append(TransactionFormatOptions).Append("\n");
+            sb.Append("  SubstateFormatOptions: ").Append(SubstateFormatOptions).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -197,6 +224,21 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.Limit == input.Limit ||
                     this.Limit.Equals(input.Limit)
+                ) && 
+                (
+                    this.SborFormatOptions == input.SborFormatOptions ||
+                    (this.SborFormatOptions != null &&
+                    this.SborFormatOptions.Equals(input.SborFormatOptions))
+                ) && 
+                (
+                    this.TransactionFormatOptions == input.TransactionFormatOptions ||
+                    (this.TransactionFormatOptions != null &&
+                    this.TransactionFormatOptions.Equals(input.TransactionFormatOptions))
+                ) && 
+                (
+                    this.SubstateFormatOptions == input.SubstateFormatOptions ||
+                    (this.SubstateFormatOptions != null &&
+                    this.SubstateFormatOptions.Equals(input.SubstateFormatOptions))
                 );
         }
 
@@ -215,6 +257,18 @@ namespace RadixDlt.CoreApiSdk.Model
                 }
                 hashCode = (hashCode * 59) + this.FromStateVersion.GetHashCode();
                 hashCode = (hashCode * 59) + this.Limit.GetHashCode();
+                if (this.SborFormatOptions != null)
+                {
+                    hashCode = (hashCode * 59) + this.SborFormatOptions.GetHashCode();
+                }
+                if (this.TransactionFormatOptions != null)
+                {
+                    hashCode = (hashCode * 59) + this.TransactionFormatOptions.GetHashCode();
+                }
+                if (this.SubstateFormatOptions != null)
+                {
+                    hashCode = (hashCode * 59) + this.SubstateFormatOptions.GetHashCode();
+                }
                 return hashCode;
             }
         }

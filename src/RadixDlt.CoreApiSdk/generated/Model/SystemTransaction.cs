@@ -98,27 +98,17 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="SystemTransaction" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected SystemTransaction() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SystemTransaction" /> class.
-        /// </summary>
-        /// <param name="payloadHex">The hex-encoded system transaction payload (required).</param>
+        /// <param name="payloadHex">The hex-encoded system transaction payload. Only returned if enabled in TransactionFormatOptions on your request..</param>
         public SystemTransaction(string payloadHex = default(string))
         {
-            // to ensure "payloadHex" is required (not null)
-            if (payloadHex == null)
-            {
-                throw new ArgumentNullException("payloadHex is a required property for SystemTransaction and cannot be null");
-            }
             this.PayloadHex = payloadHex;
         }
 
         /// <summary>
-        /// The hex-encoded system transaction payload
+        /// The hex-encoded system transaction payload. Only returned if enabled in TransactionFormatOptions on your request.
         /// </summary>
-        /// <value>The hex-encoded system transaction payload</value>
-        [DataMember(Name = "payload_hex", IsRequired = true, EmitDefaultValue = true)]
+        /// <value>The hex-encoded system transaction payload. Only returned if enabled in TransactionFormatOptions on your request.</value>
+        [DataMember(Name = "payload_hex", EmitDefaultValue = true)]
         public string PayloadHex { get; set; }
 
         /// <summary>

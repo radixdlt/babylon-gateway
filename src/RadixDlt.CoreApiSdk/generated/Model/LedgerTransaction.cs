@@ -118,23 +118,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="LedgerTransaction" /> class.
         /// </summary>
         /// <param name="type">type (required).</param>
-        /// <param name="payloadHex">The hex-encoded full ledger transaction payload (required).</param>
+        /// <param name="payloadHex">The hex-encoded full ledger transaction payload. Only returned if enabled in TransactionFormatOptions on your request..</param>
         public LedgerTransaction(LedgerTransactionType type = default(LedgerTransactionType), string payloadHex = default(string))
         {
             this.Type = type;
-            // to ensure "payloadHex" is required (not null)
-            if (payloadHex == null)
-            {
-                throw new ArgumentNullException("payloadHex is a required property for LedgerTransaction and cannot be null");
-            }
             this.PayloadHex = payloadHex;
         }
 
         /// <summary>
-        /// The hex-encoded full ledger transaction payload
+        /// The hex-encoded full ledger transaction payload. Only returned if enabled in TransactionFormatOptions on your request.
         /// </summary>
-        /// <value>The hex-encoded full ledger transaction payload</value>
-        [DataMember(Name = "payload_hex", IsRequired = true, EmitDefaultValue = true)]
+        /// <value>The hex-encoded full ledger transaction payload. Only returned if enabled in TransactionFormatOptions on your request.</value>
+        [DataMember(Name = "payload_hex", EmitDefaultValue = true)]
         public string PayloadHex { get; set; }
 
         /// <summary>

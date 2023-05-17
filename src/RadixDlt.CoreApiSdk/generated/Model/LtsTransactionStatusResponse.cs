@@ -114,7 +114,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="committedStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the resultant state version when the transaction was committed. This is only present if the intent was committed (as a Success or Failure). This can be considered to be the auto-incrementing primary key for a committed tranasction, and can be used in (eg) to look up details on the transaction&#39;s outcome from the &#x60;/lts/stream/transaction-outcomes&#x60; endpoint. .</param>
         /// <param name="invalidFromEpoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be permanently rejected. Only present if the intent status is InMempool or Unknown and we know about a payload. .</param>
         /// <param name="knownPayloads">knownPayloads (required).</param>
-        public LtsTransactionStatusResponse(LtsTransactionIntentStatus intentStatus = default(LtsTransactionIntentStatus), string statusDescription = default(string), long committedStateVersion = default(long), long invalidFromEpoch = default(long), List<LtsTransactionPayloadStatus> knownPayloads = default(List<LtsTransactionPayloadStatus>))
+        public LtsTransactionStatusResponse(LtsTransactionIntentStatus intentStatus = default(LtsTransactionIntentStatus), string statusDescription = default(string), long committedStateVersion = default(long), long invalidFromEpoch = default(long), List<LtsTransactionPayloadDetails> knownPayloads = default(List<LtsTransactionPayloadDetails>))
         {
             this.IntentStatus = intentStatus;
             // to ensure "statusDescription" is required (not null)
@@ -158,7 +158,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets KnownPayloads
         /// </summary>
         [DataMember(Name = "known_payloads", IsRequired = true, EmitDefaultValue = true)]
-        public List<LtsTransactionPayloadStatus> KnownPayloads { get; set; }
+        public List<LtsTransactionPayloadDetails> KnownPayloads { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// SborData
+    /// Various representations of an SBOR payload. Some endpoints may allow opting in/out of each representation. 
     /// </summary>
     [DataContract(Name = "SborData")]
     public partial class SborData : IEquatable<SborData>
@@ -98,42 +98,27 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="SborData" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected SborData() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SborData" /> class.
-        /// </summary>
-        /// <param name="dataHex">The hex-encoded, raw SBOR-encoded data (required).</param>
-        /// <param name="dataJson">An untyped JSON body representing the content of the SBOR data (required).</param>
-        public SborData(string dataHex = default(string), Object dataJson = default(Object))
+        /// <param name="hex">The hex-encoded, raw SBOR-encoded data.</param>
+        /// <param name="programmaticJson">The (untyped) unannotated programmatic SBOR JSON.</param>
+        public SborData(string hex = default(string), Object programmaticJson = default(Object))
         {
-            // to ensure "dataHex" is required (not null)
-            if (dataHex == null)
-            {
-                throw new ArgumentNullException("dataHex is a required property for SborData and cannot be null");
-            }
-            this.DataHex = dataHex;
-            // to ensure "dataJson" is required (not null)
-            if (dataJson == null)
-            {
-                throw new ArgumentNullException("dataJson is a required property for SborData and cannot be null");
-            }
-            this.DataJson = dataJson;
+            this.Hex = hex;
+            this.ProgrammaticJson = programmaticJson;
         }
 
         /// <summary>
         /// The hex-encoded, raw SBOR-encoded data
         /// </summary>
         /// <value>The hex-encoded, raw SBOR-encoded data</value>
-        [DataMember(Name = "data_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string DataHex { get; set; }
+        [DataMember(Name = "hex", EmitDefaultValue = true)]
+        public string Hex { get; set; }
 
         /// <summary>
-        /// An untyped JSON body representing the content of the SBOR data
+        /// The (untyped) unannotated programmatic SBOR JSON
         /// </summary>
-        /// <value>An untyped JSON body representing the content of the SBOR data</value>
-        [DataMember(Name = "data_json", IsRequired = true, EmitDefaultValue = true)]
-        public Object DataJson { get; set; }
+        /// <value>The (untyped) unannotated programmatic SBOR JSON</value>
+        [DataMember(Name = "programmatic_json", EmitDefaultValue = true)]
+        public Object ProgrammaticJson { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,8 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class SborData {\n");
-            sb.Append("  DataHex: ").Append(DataHex).Append("\n");
-            sb.Append("  DataJson: ").Append(DataJson).Append("\n");
+            sb.Append("  Hex: ").Append(Hex).Append("\n");
+            sb.Append("  ProgrammaticJson: ").Append(ProgrammaticJson).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -181,14 +166,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.DataHex == input.DataHex ||
-                    (this.DataHex != null &&
-                    this.DataHex.Equals(input.DataHex))
+                    this.Hex == input.Hex ||
+                    (this.Hex != null &&
+                    this.Hex.Equals(input.Hex))
                 ) && 
                 (
-                    this.DataJson == input.DataJson ||
-                    (this.DataJson != null &&
-                    this.DataJson.Equals(input.DataJson))
+                    this.ProgrammaticJson == input.ProgrammaticJson ||
+                    (this.ProgrammaticJson != null &&
+                    this.ProgrammaticJson.Equals(input.ProgrammaticJson))
                 );
         }
 
@@ -201,13 +186,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.DataHex != null)
+                if (this.Hex != null)
                 {
-                    hashCode = (hashCode * 59) + this.DataHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Hex.GetHashCode();
                 }
-                if (this.DataJson != null)
+                if (this.ProgrammaticJson != null)
                 {
-                    hashCode = (hashCode * 59) + this.DataJson.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ProgrammaticJson.GetHashCode();
                 }
                 return hashCode;
             }
