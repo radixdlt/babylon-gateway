@@ -172,7 +172,7 @@ jobs:
       - docker-data-aggregator-gcr
       - docker-database-migrations-gcr
       - setup-tags
-    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.ref == 'refs/heads/develop'
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.ref == 'refs/heads/develop'
     permissions:
       id-token: write
       contents: read
