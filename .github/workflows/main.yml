@@ -127,7 +127,7 @@ jobs:
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - uses: ./.github/actions/fetch-secrets
-        with: 
+        with:
           role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "deploy-on-mardunet"
@@ -172,14 +172,14 @@ jobs:
       - docker-data-aggregator-gcr
       - docker-database-migrations-gcr
       - setup-tags
-    if: github.ref == 'refs/heads/develop'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     permissions:
       id-token: write
       contents: read
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - uses: ./.github/actions/fetch-secrets
-        with: 
+        with:
           role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "ephemeral-deploy-and-benchmark"
@@ -226,7 +226,7 @@ jobs:
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - uses: ./.github/actions/fetch-secrets
-        with: 
+        with:
           role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "deploy-pr"
@@ -269,7 +269,7 @@ jobs:
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - uses: ./.github/actions/fetch-secrets
-        with: 
+        with:
           role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "ephemeral-deploy-and-test"
@@ -310,7 +310,7 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - uses: ./.github/actions/fetch-secrets
-        with: 
+        with:
           role_name: "arn:aws:iam::308190735829:role/gh-common-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "sonarcloud"
