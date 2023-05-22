@@ -67,7 +67,7 @@ using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class MetadataEntrySubstate : IEntityOwner, IGlobalAddressPointer
+public partial class MetadataModuleEntrySubstate : IEntityOwner, IParentAddressPointer
 {
     public IEnumerable<EntityReference> GetOwnedEntities()
     {
@@ -76,10 +76,10 @@ public partial class MetadataEntrySubstate : IEntityOwner, IGlobalAddressPointer
             : Enumerable.Empty<EntityReference>();
     }
 
-    public IEnumerable<string> GetGlobalAddresses()
+    public IEnumerable<string> GetParentAddresses()
     {
         return DataStruct != null
-            ? DataStruct.ReferencedEntities.Select(re => re.GlobalAddress)
+            ? DataStruct.ReferencedEntities.Select(re => re.EntityAddress)
             : Enumerable.Empty<string>();
     }
 }

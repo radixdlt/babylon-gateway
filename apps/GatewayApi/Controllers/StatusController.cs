@@ -102,12 +102,33 @@ public sealed class StatusController : ControllerBase
             _networkConfigurationProvider.GetNetworkId(),
             _networkConfigurationProvider.GetNetworkName(),
             new GatewayModel.NetworkConfigurationResponseWellKnownAddresses(
-                wellKnownAddresses.Faucet,
+                wellKnownAddresses.Xrd,
+                wellKnownAddresses.Secp256k1SignatureVirtualBadge,
+                wellKnownAddresses.Ed25519_signatureVirtualBadge,
+                wellKnownAddresses.PackageOfDirectCallerVirtualBadge,
+                wellKnownAddresses.GlobalCallerVirtualBadge,
+                wellKnownAddresses.SystemTransactionBadge,
+                wellKnownAddresses.PackageOwnerBadge,
+                wellKnownAddresses.ValidatorOwnerBadge,
+                wellKnownAddresses.AccountOwnerBadge,
+                wellKnownAddresses.IdentityOwnerBadge,
+                wellKnownAddresses.PackagePackage,
+                wellKnownAddresses.ResourcePackage,
+                wellKnownAddresses.AccountPackage,
+                wellKnownAddresses.IdentityPackage,
+                wellKnownAddresses.EpochManagerPackage,
+                wellKnownAddresses.ClockPackage,
+                wellKnownAddresses.AccessControllerPackage,
+                wellKnownAddresses.TransactionProcessorPackage,
+                wellKnownAddresses.MetadataModulePackage,
+                wellKnownAddresses.RoyaltyModulePackage,
+                wellKnownAddresses.AccessRulesPackage,
+                wellKnownAddresses.GenesisHelperPackage,
+                wellKnownAddresses.FaucetPackage,
                 wellKnownAddresses.EpochManager,
                 wellKnownAddresses.Clock,
-                wellKnownAddresses.EcdsaSecp256k1,
-                wellKnownAddresses.EddsaEd25519,
-                wellKnownAddresses.Xrd
+                wellKnownAddresses.GenesisHelper,
+                wellKnownAddresses.Faucet
             )
         );
     }

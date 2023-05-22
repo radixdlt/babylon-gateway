@@ -62,18 +62,14 @@
  * permissions under this License.
  */
 
-using Dapper;
-using RadixDlt.NetworkGateway.Abstractions;
-using System.Data;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+namespace RadixDlt.CoreApiSdk.Model;
 
-public sealed class GlobalAddressHandler : SqlMapper.TypeHandler<GlobalAddress>
+public partial class AccessControllerFieldStateSubstate : IEntityOwner, IParentAddressPointer
 {
-    public override void SetValue(IDbDataParameter parameter, GlobalAddress value)
-    {
-        parameter.Value = value;
-    }
+    public IEnumerable<EntityReference> GetOwnedEntities() => DataStruct.OwnedEntities;
 
-    public override GlobalAddress Parse(object value) => (GlobalAddress)(string)value;
+    public IEnumerable<string> GetParentAddresses() => DataStruct.ReferencedEntities.Select(re => re.EntityAddress);
 }

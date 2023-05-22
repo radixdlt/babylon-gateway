@@ -66,7 +66,7 @@ using System;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class PackageCodeSubstate
+public partial class PackageFieldCodeSubstate
 {
     private byte[] _codeBytes;
 

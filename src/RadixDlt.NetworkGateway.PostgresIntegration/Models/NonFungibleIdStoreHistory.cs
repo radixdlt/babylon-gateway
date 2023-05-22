@@ -78,9 +78,6 @@ internal class NonFungibleIdStoreHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("key_value_store_entity_id")]
-    public long KeyValueStoreEntityId { get; set; }
-
     [Column("non_fungible_resource_entity_id")]
     public long NonFungibleResourceEntityId { get; set; }
 

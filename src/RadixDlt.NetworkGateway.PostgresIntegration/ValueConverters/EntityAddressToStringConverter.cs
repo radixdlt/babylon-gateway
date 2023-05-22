@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,14 +62,15 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using RadixDlt.NetworkGateway.Abstractions;
 
-namespace RadixDlt.CoreApiSdk.Model;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
-public partial class NonFungibleResourceManagerSubstate : IEntityOwner
+internal class EntityAddressToStringConverter : ValueConverter<EntityAddress, string>
 {
-    public IEnumerable<EntityReference> GetOwnedEntities()
+    public EntityAddressToStringConverter()
+        : base(ra => ra, @string => (EntityAddress)@string)
     {
-        yield return new EntityReference(NonFungibleDataTable.EntityType, NonFungibleDataTable.EntityIdHex);
     }
 }

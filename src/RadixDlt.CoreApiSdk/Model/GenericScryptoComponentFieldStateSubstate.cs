@@ -62,10 +62,14 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Model;
+using System.Collections.Generic;
+using System.Linq;
 
-public enum AccessRulesChainSubtype
+namespace RadixDlt.CoreApiSdk.Model;
+
+public partial class GenericScryptoComponentFieldStateSubstate : IEntityOwner, IParentAddressPointer
 {
-    None,
-    ResourceManagerVaultAccessRulesChain,
+    public IEnumerable<EntityReference> GetOwnedEntities() => DataStruct.OwnedEntities;
+
+    public IEnumerable<string> GetParentAddresses() => DataStruct.ReferencedEntities.Select(re => re.EntityAddress);
 }

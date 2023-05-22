@@ -130,9 +130,9 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().WellKnownAddresses;
     }
 
-    public AddressTypeDefinition GetAddressTypeDefinition(AddressSubtype subtype)
+    public AddressTypeDefinition GetAddressTypeDefinition(AddressEntityType entityType)
     {
-        return GetCapturedConfig().AddressTypeDefinitions.First(atd => atd.Subtype == subtype);
+        return GetCapturedConfig().AddressTypeDefinitions.First(atd => atd.EntityType == entityType);
     }
 
     public EventTypeIdentifiers GetEventTypeIdentifiers()

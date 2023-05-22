@@ -67,18 +67,22 @@ using System.Diagnostics;
 namespace RadixDlt.NetworkGateway.Abstractions;
 
 [DebuggerDisplay("{ToString()}")]
-public readonly record struct GlobalAddress
+public readonly record struct EntityAddress
 {
     private readonly string _address;
 
-    private GlobalAddress(string address)
+    private EntityAddress(string address)
     {
         _address = address;
     }
 
-    public static implicit operator string(GlobalAddress ra) => ra._address;
+    public bool IsInternal => _address.StartsWith("internal_");
 
-    public static explicit operator GlobalAddress(string text) => new GlobalAddress(text);
+    public bool IsGlobal => !IsInternal;
+
+    public static implicit operator string(EntityAddress ra) => ra._address;
+
+    public static explicit operator EntityAddress(string text) => new(text);
 
     public override string ToString()
     {

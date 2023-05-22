@@ -62,14 +62,21 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
-using System.Linq;
-
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class AccessControllerSubstate : IEntityOwner, IGlobalAddressPointer
+public partial class RoyaltyModuleFieldAccumulatorSubstate : IRoyaltyVaultHolder
 {
-    public IEnumerable<EntityReference> GetOwnedEntities() => DataStruct.OwnedEntities;
+    public bool TryGetRoyaltyVault(out EntityReference royaltyVault)
+    {
+        royaltyVault = default;
 
-    public IEnumerable<string> GetGlobalAddresses() => DataStruct.ReferencedEntities.Select(re => re.GlobalAddress);
+        if (VaultEntity != null)
+        {
+            royaltyVault = VaultEntity;
+
+            return true;
+        }
+
+        return false;
+    }
 }

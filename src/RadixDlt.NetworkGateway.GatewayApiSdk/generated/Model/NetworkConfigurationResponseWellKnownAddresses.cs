@@ -103,20 +103,173 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NetworkConfigurationResponseWellKnownAddresses" /> class.
         /// </summary>
-        /// <param name="faucet">Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id. (required).</param>
-        /// <param name="epochManager">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
-        /// <param name="clock">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
-        /// <param name="ecdsaSecp256k1">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
-        /// <param name="eddsaEd25519">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
-        /// <param name="xrd">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
-        public NetworkConfigurationResponseWellKnownAddresses(string faucet = default(string), string epochManager = default(string), string clock = default(string), string ecdsaSecp256k1 = default(string), string eddsaEd25519 = default(string), string xrd = default(string))
+        /// <param name="xrd">xrd (required).</param>
+        /// <param name="secp256k1SignatureVirtualBadge">secp256k1SignatureVirtualBadge (required).</param>
+        /// <param name="ed25519SignatureVirtualBadge">ed25519SignatureVirtualBadge (required).</param>
+        /// <param name="packageOfDirectCallerVirtualBadge">packageOfDirectCallerVirtualBadge (required).</param>
+        /// <param name="globalCallerVirtualBadge">globalCallerVirtualBadge (required).</param>
+        /// <param name="systemTransactionBadge">systemTransactionBadge (required).</param>
+        /// <param name="packageOwnerBadge">packageOwnerBadge (required).</param>
+        /// <param name="validatorOwnerBadge">validatorOwnerBadge (required).</param>
+        /// <param name="accountOwnerBadge">accountOwnerBadge (required).</param>
+        /// <param name="identityOwnerBadge">identityOwnerBadge (required).</param>
+        /// <param name="packagePackage">packagePackage (required).</param>
+        /// <param name="resourcePackage">resourcePackage (required).</param>
+        /// <param name="accountPackage">accountPackage (required).</param>
+        /// <param name="identityPackage">identityPackage (required).</param>
+        /// <param name="epochManagerPackage">epochManagerPackage (required).</param>
+        /// <param name="clockPackage">clockPackage (required).</param>
+        /// <param name="accessControllerPackage">accessControllerPackage (required).</param>
+        /// <param name="transactionProcessorPackage">transactionProcessorPackage (required).</param>
+        /// <param name="metadataModulePackage">metadataModulePackage (required).</param>
+        /// <param name="royaltyModulePackage">royaltyModulePackage (required).</param>
+        /// <param name="accessRulesPackage">accessRulesPackage (required).</param>
+        /// <param name="genesisHelperPackage">genesisHelperPackage (required).</param>
+        /// <param name="faucetPackage">faucetPackage (required).</param>
+        /// <param name="epochManager">epochManager (required).</param>
+        /// <param name="clock">clock (required).</param>
+        /// <param name="genesisHelper">genesisHelper (required).</param>
+        /// <param name="faucet">faucet (required).</param>
+        public NetworkConfigurationResponseWellKnownAddresses(string xrd = default(string), string secp256k1SignatureVirtualBadge = default(string), string ed25519SignatureVirtualBadge = default(string), string packageOfDirectCallerVirtualBadge = default(string), string globalCallerVirtualBadge = default(string), string systemTransactionBadge = default(string), string packageOwnerBadge = default(string), string validatorOwnerBadge = default(string), string accountOwnerBadge = default(string), string identityOwnerBadge = default(string), string packagePackage = default(string), string resourcePackage = default(string), string accountPackage = default(string), string identityPackage = default(string), string epochManagerPackage = default(string), string clockPackage = default(string), string accessControllerPackage = default(string), string transactionProcessorPackage = default(string), string metadataModulePackage = default(string), string royaltyModulePackage = default(string), string accessRulesPackage = default(string), string genesisHelperPackage = default(string), string faucetPackage = default(string), string epochManager = default(string), string clock = default(string), string genesisHelper = default(string), string faucet = default(string))
         {
-            // to ensure "faucet" is required (not null)
-            if (faucet == null)
+            // to ensure "xrd" is required (not null)
+            if (xrd == null)
             {
-                throw new ArgumentNullException("faucet is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+                throw new ArgumentNullException("xrd is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
-            this.Faucet = faucet;
+            this.Xrd = xrd;
+            // to ensure "secp256k1SignatureVirtualBadge" is required (not null)
+            if (secp256k1SignatureVirtualBadge == null)
+            {
+                throw new ArgumentNullException("secp256k1SignatureVirtualBadge is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.Secp256k1SignatureVirtualBadge = secp256k1SignatureVirtualBadge;
+            // to ensure "ed25519SignatureVirtualBadge" is required (not null)
+            if (ed25519SignatureVirtualBadge == null)
+            {
+                throw new ArgumentNullException("ed25519SignatureVirtualBadge is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.Ed25519SignatureVirtualBadge = ed25519SignatureVirtualBadge;
+            // to ensure "packageOfDirectCallerVirtualBadge" is required (not null)
+            if (packageOfDirectCallerVirtualBadge == null)
+            {
+                throw new ArgumentNullException("packageOfDirectCallerVirtualBadge is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.PackageOfDirectCallerVirtualBadge = packageOfDirectCallerVirtualBadge;
+            // to ensure "globalCallerVirtualBadge" is required (not null)
+            if (globalCallerVirtualBadge == null)
+            {
+                throw new ArgumentNullException("globalCallerVirtualBadge is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.GlobalCallerVirtualBadge = globalCallerVirtualBadge;
+            // to ensure "systemTransactionBadge" is required (not null)
+            if (systemTransactionBadge == null)
+            {
+                throw new ArgumentNullException("systemTransactionBadge is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.SystemTransactionBadge = systemTransactionBadge;
+            // to ensure "packageOwnerBadge" is required (not null)
+            if (packageOwnerBadge == null)
+            {
+                throw new ArgumentNullException("packageOwnerBadge is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.PackageOwnerBadge = packageOwnerBadge;
+            // to ensure "validatorOwnerBadge" is required (not null)
+            if (validatorOwnerBadge == null)
+            {
+                throw new ArgumentNullException("validatorOwnerBadge is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.ValidatorOwnerBadge = validatorOwnerBadge;
+            // to ensure "accountOwnerBadge" is required (not null)
+            if (accountOwnerBadge == null)
+            {
+                throw new ArgumentNullException("accountOwnerBadge is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.AccountOwnerBadge = accountOwnerBadge;
+            // to ensure "identityOwnerBadge" is required (not null)
+            if (identityOwnerBadge == null)
+            {
+                throw new ArgumentNullException("identityOwnerBadge is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.IdentityOwnerBadge = identityOwnerBadge;
+            // to ensure "packagePackage" is required (not null)
+            if (packagePackage == null)
+            {
+                throw new ArgumentNullException("packagePackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.PackagePackage = packagePackage;
+            // to ensure "resourcePackage" is required (not null)
+            if (resourcePackage == null)
+            {
+                throw new ArgumentNullException("resourcePackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.ResourcePackage = resourcePackage;
+            // to ensure "accountPackage" is required (not null)
+            if (accountPackage == null)
+            {
+                throw new ArgumentNullException("accountPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.AccountPackage = accountPackage;
+            // to ensure "identityPackage" is required (not null)
+            if (identityPackage == null)
+            {
+                throw new ArgumentNullException("identityPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.IdentityPackage = identityPackage;
+            // to ensure "epochManagerPackage" is required (not null)
+            if (epochManagerPackage == null)
+            {
+                throw new ArgumentNullException("epochManagerPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.EpochManagerPackage = epochManagerPackage;
+            // to ensure "clockPackage" is required (not null)
+            if (clockPackage == null)
+            {
+                throw new ArgumentNullException("clockPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.ClockPackage = clockPackage;
+            // to ensure "accessControllerPackage" is required (not null)
+            if (accessControllerPackage == null)
+            {
+                throw new ArgumentNullException("accessControllerPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.AccessControllerPackage = accessControllerPackage;
+            // to ensure "transactionProcessorPackage" is required (not null)
+            if (transactionProcessorPackage == null)
+            {
+                throw new ArgumentNullException("transactionProcessorPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.TransactionProcessorPackage = transactionProcessorPackage;
+            // to ensure "metadataModulePackage" is required (not null)
+            if (metadataModulePackage == null)
+            {
+                throw new ArgumentNullException("metadataModulePackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.MetadataModulePackage = metadataModulePackage;
+            // to ensure "royaltyModulePackage" is required (not null)
+            if (royaltyModulePackage == null)
+            {
+                throw new ArgumentNullException("royaltyModulePackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.RoyaltyModulePackage = royaltyModulePackage;
+            // to ensure "accessRulesPackage" is required (not null)
+            if (accessRulesPackage == null)
+            {
+                throw new ArgumentNullException("accessRulesPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.AccessRulesPackage = accessRulesPackage;
+            // to ensure "genesisHelperPackage" is required (not null)
+            if (genesisHelperPackage == null)
+            {
+                throw new ArgumentNullException("genesisHelperPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.GenesisHelperPackage = genesisHelperPackage;
+            // to ensure "faucetPackage" is required (not null)
+            if (faucetPackage == null)
+            {
+                throw new ArgumentNullException("faucetPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.FaucetPackage = faucetPackage;
             // to ensure "epochManager" is required (not null)
             if (epochManager == null)
             {
@@ -129,67 +282,181 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("clock is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
             this.Clock = clock;
-            // to ensure "ecdsaSecp256k1" is required (not null)
-            if (ecdsaSecp256k1 == null)
+            // to ensure "genesisHelper" is required (not null)
+            if (genesisHelper == null)
             {
-                throw new ArgumentNullException("ecdsaSecp256k1 is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+                throw new ArgumentNullException("genesisHelper is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
-            this.EcdsaSecp256k1 = ecdsaSecp256k1;
-            // to ensure "eddsaEd25519" is required (not null)
-            if (eddsaEd25519 == null)
+            this.GenesisHelper = genesisHelper;
+            // to ensure "faucet" is required (not null)
+            if (faucet == null)
             {
-                throw new ArgumentNullException("eddsaEd25519 is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+                throw new ArgumentNullException("faucet is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
-            this.EddsaEd25519 = eddsaEd25519;
-            // to ensure "xrd" is required (not null)
-            if (xrd == null)
-            {
-                throw new ArgumentNullException("xrd is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
-            }
-            this.Xrd = xrd;
+            this.Faucet = faucet;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id.
+        /// Gets or Sets Xrd
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id.</value>
-        [DataMember(Name = "faucet", IsRequired = true, EmitDefaultValue = true)]
-        public string Faucet { get; set; }
+        [DataMember(Name = "xrd", IsRequired = true, EmitDefaultValue = true)]
+        public string Xrd { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// Gets or Sets Secp256k1SignatureVirtualBadge
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        [DataMember(Name = "secp256k1_signature_virtual_badge", IsRequired = true, EmitDefaultValue = true)]
+        public string Secp256k1SignatureVirtualBadge { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Ed25519SignatureVirtualBadge
+        /// </summary>
+        [DataMember(Name = "ed25519_signature_virtual_badge", IsRequired = true, EmitDefaultValue = true)]
+        public string Ed25519SignatureVirtualBadge { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PackageOfDirectCallerVirtualBadge
+        /// </summary>
+        [DataMember(Name = "package_of_direct_caller_virtual_badge", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageOfDirectCallerVirtualBadge { get; set; }
+
+        /// <summary>
+        /// Gets or Sets GlobalCallerVirtualBadge
+        /// </summary>
+        [DataMember(Name = "global_caller_virtual_badge", IsRequired = true, EmitDefaultValue = true)]
+        public string GlobalCallerVirtualBadge { get; set; }
+
+        /// <summary>
+        /// Gets or Sets SystemTransactionBadge
+        /// </summary>
+        [DataMember(Name = "system_transaction_badge", IsRequired = true, EmitDefaultValue = true)]
+        public string SystemTransactionBadge { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PackageOwnerBadge
+        /// </summary>
+        [DataMember(Name = "package_owner_badge", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageOwnerBadge { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ValidatorOwnerBadge
+        /// </summary>
+        [DataMember(Name = "validator_owner_badge", IsRequired = true, EmitDefaultValue = true)]
+        public string ValidatorOwnerBadge { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AccountOwnerBadge
+        /// </summary>
+        [DataMember(Name = "account_owner_badge", IsRequired = true, EmitDefaultValue = true)]
+        public string AccountOwnerBadge { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IdentityOwnerBadge
+        /// </summary>
+        [DataMember(Name = "identity_owner_badge", IsRequired = true, EmitDefaultValue = true)]
+        public string IdentityOwnerBadge { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PackagePackage
+        /// </summary>
+        [DataMember(Name = "package_package", IsRequired = true, EmitDefaultValue = true)]
+        public string PackagePackage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ResourcePackage
+        /// </summary>
+        [DataMember(Name = "resource_package", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourcePackage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AccountPackage
+        /// </summary>
+        [DataMember(Name = "account_package", IsRequired = true, EmitDefaultValue = true)]
+        public string AccountPackage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IdentityPackage
+        /// </summary>
+        [DataMember(Name = "identity_package", IsRequired = true, EmitDefaultValue = true)]
+        public string IdentityPackage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets EpochManagerPackage
+        /// </summary>
+        [DataMember(Name = "epoch_manager_package", IsRequired = true, EmitDefaultValue = true)]
+        public string EpochManagerPackage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ClockPackage
+        /// </summary>
+        [DataMember(Name = "clock_package", IsRequired = true, EmitDefaultValue = true)]
+        public string ClockPackage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AccessControllerPackage
+        /// </summary>
+        [DataMember(Name = "access_controller_package", IsRequired = true, EmitDefaultValue = true)]
+        public string AccessControllerPackage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets TransactionProcessorPackage
+        /// </summary>
+        [DataMember(Name = "transaction_processor_package", IsRequired = true, EmitDefaultValue = true)]
+        public string TransactionProcessorPackage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets MetadataModulePackage
+        /// </summary>
+        [DataMember(Name = "metadata_module_package", IsRequired = true, EmitDefaultValue = true)]
+        public string MetadataModulePackage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets RoyaltyModulePackage
+        /// </summary>
+        [DataMember(Name = "royalty_module_package", IsRequired = true, EmitDefaultValue = true)]
+        public string RoyaltyModulePackage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AccessRulesPackage
+        /// </summary>
+        [DataMember(Name = "access_rules_package", IsRequired = true, EmitDefaultValue = true)]
+        public string AccessRulesPackage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets GenesisHelperPackage
+        /// </summary>
+        [DataMember(Name = "genesis_helper_package", IsRequired = true, EmitDefaultValue = true)]
+        public string GenesisHelperPackage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets FaucetPackage
+        /// </summary>
+        [DataMember(Name = "faucet_package", IsRequired = true, EmitDefaultValue = true)]
+        public string FaucetPackage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets EpochManager
+        /// </summary>
         [DataMember(Name = "epoch_manager", IsRequired = true, EmitDefaultValue = true)]
         public string EpochManager { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// Gets or Sets Clock
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
         [DataMember(Name = "clock", IsRequired = true, EmitDefaultValue = true)]
         public string Clock { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+        /// Gets or Sets GenesisHelper
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
-        [DataMember(Name = "ecdsa_secp256k1", IsRequired = true, EmitDefaultValue = true)]
-        public string EcdsaSecp256k1 { get; set; }
+        [DataMember(Name = "genesis_helper", IsRequired = true, EmitDefaultValue = true)]
+        public string GenesisHelper { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+        /// Gets or Sets Faucet
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
-        [DataMember(Name = "eddsa_ed25519", IsRequired = true, EmitDefaultValue = true)]
-        public string EddsaEd25519 { get; set; }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
-        [DataMember(Name = "xrd", IsRequired = true, EmitDefaultValue = true)]
-        public string Xrd { get; set; }
+        [DataMember(Name = "faucet", IsRequired = true, EmitDefaultValue = true)]
+        public string Faucet { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -199,12 +466,33 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NetworkConfigurationResponseWellKnownAddresses {\n");
-            sb.Append("  Faucet: ").Append(Faucet).Append("\n");
+            sb.Append("  Xrd: ").Append(Xrd).Append("\n");
+            sb.Append("  Secp256k1SignatureVirtualBadge: ").Append(Secp256k1SignatureVirtualBadge).Append("\n");
+            sb.Append("  Ed25519SignatureVirtualBadge: ").Append(Ed25519SignatureVirtualBadge).Append("\n");
+            sb.Append("  PackageOfDirectCallerVirtualBadge: ").Append(PackageOfDirectCallerVirtualBadge).Append("\n");
+            sb.Append("  GlobalCallerVirtualBadge: ").Append(GlobalCallerVirtualBadge).Append("\n");
+            sb.Append("  SystemTransactionBadge: ").Append(SystemTransactionBadge).Append("\n");
+            sb.Append("  PackageOwnerBadge: ").Append(PackageOwnerBadge).Append("\n");
+            sb.Append("  ValidatorOwnerBadge: ").Append(ValidatorOwnerBadge).Append("\n");
+            sb.Append("  AccountOwnerBadge: ").Append(AccountOwnerBadge).Append("\n");
+            sb.Append("  IdentityOwnerBadge: ").Append(IdentityOwnerBadge).Append("\n");
+            sb.Append("  PackagePackage: ").Append(PackagePackage).Append("\n");
+            sb.Append("  ResourcePackage: ").Append(ResourcePackage).Append("\n");
+            sb.Append("  AccountPackage: ").Append(AccountPackage).Append("\n");
+            sb.Append("  IdentityPackage: ").Append(IdentityPackage).Append("\n");
+            sb.Append("  EpochManagerPackage: ").Append(EpochManagerPackage).Append("\n");
+            sb.Append("  ClockPackage: ").Append(ClockPackage).Append("\n");
+            sb.Append("  AccessControllerPackage: ").Append(AccessControllerPackage).Append("\n");
+            sb.Append("  TransactionProcessorPackage: ").Append(TransactionProcessorPackage).Append("\n");
+            sb.Append("  MetadataModulePackage: ").Append(MetadataModulePackage).Append("\n");
+            sb.Append("  RoyaltyModulePackage: ").Append(RoyaltyModulePackage).Append("\n");
+            sb.Append("  AccessRulesPackage: ").Append(AccessRulesPackage).Append("\n");
+            sb.Append("  GenesisHelperPackage: ").Append(GenesisHelperPackage).Append("\n");
+            sb.Append("  FaucetPackage: ").Append(FaucetPackage).Append("\n");
             sb.Append("  EpochManager: ").Append(EpochManager).Append("\n");
             sb.Append("  Clock: ").Append(Clock).Append("\n");
-            sb.Append("  EcdsaSecp256k1: ").Append(EcdsaSecp256k1).Append("\n");
-            sb.Append("  EddsaEd25519: ").Append(EddsaEd25519).Append("\n");
-            sb.Append("  Xrd: ").Append(Xrd).Append("\n");
+            sb.Append("  GenesisHelper: ").Append(GenesisHelper).Append("\n");
+            sb.Append("  Faucet: ").Append(Faucet).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -241,9 +529,119 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Faucet == input.Faucet ||
-                    (this.Faucet != null &&
-                    this.Faucet.Equals(input.Faucet))
+                    this.Xrd == input.Xrd ||
+                    (this.Xrd != null &&
+                    this.Xrd.Equals(input.Xrd))
+                ) && 
+                (
+                    this.Secp256k1SignatureVirtualBadge == input.Secp256k1SignatureVirtualBadge ||
+                    (this.Secp256k1SignatureVirtualBadge != null &&
+                    this.Secp256k1SignatureVirtualBadge.Equals(input.Secp256k1SignatureVirtualBadge))
+                ) && 
+                (
+                    this.Ed25519SignatureVirtualBadge == input.Ed25519SignatureVirtualBadge ||
+                    (this.Ed25519SignatureVirtualBadge != null &&
+                    this.Ed25519SignatureVirtualBadge.Equals(input.Ed25519SignatureVirtualBadge))
+                ) && 
+                (
+                    this.PackageOfDirectCallerVirtualBadge == input.PackageOfDirectCallerVirtualBadge ||
+                    (this.PackageOfDirectCallerVirtualBadge != null &&
+                    this.PackageOfDirectCallerVirtualBadge.Equals(input.PackageOfDirectCallerVirtualBadge))
+                ) && 
+                (
+                    this.GlobalCallerVirtualBadge == input.GlobalCallerVirtualBadge ||
+                    (this.GlobalCallerVirtualBadge != null &&
+                    this.GlobalCallerVirtualBadge.Equals(input.GlobalCallerVirtualBadge))
+                ) && 
+                (
+                    this.SystemTransactionBadge == input.SystemTransactionBadge ||
+                    (this.SystemTransactionBadge != null &&
+                    this.SystemTransactionBadge.Equals(input.SystemTransactionBadge))
+                ) && 
+                (
+                    this.PackageOwnerBadge == input.PackageOwnerBadge ||
+                    (this.PackageOwnerBadge != null &&
+                    this.PackageOwnerBadge.Equals(input.PackageOwnerBadge))
+                ) && 
+                (
+                    this.ValidatorOwnerBadge == input.ValidatorOwnerBadge ||
+                    (this.ValidatorOwnerBadge != null &&
+                    this.ValidatorOwnerBadge.Equals(input.ValidatorOwnerBadge))
+                ) && 
+                (
+                    this.AccountOwnerBadge == input.AccountOwnerBadge ||
+                    (this.AccountOwnerBadge != null &&
+                    this.AccountOwnerBadge.Equals(input.AccountOwnerBadge))
+                ) && 
+                (
+                    this.IdentityOwnerBadge == input.IdentityOwnerBadge ||
+                    (this.IdentityOwnerBadge != null &&
+                    this.IdentityOwnerBadge.Equals(input.IdentityOwnerBadge))
+                ) && 
+                (
+                    this.PackagePackage == input.PackagePackage ||
+                    (this.PackagePackage != null &&
+                    this.PackagePackage.Equals(input.PackagePackage))
+                ) && 
+                (
+                    this.ResourcePackage == input.ResourcePackage ||
+                    (this.ResourcePackage != null &&
+                    this.ResourcePackage.Equals(input.ResourcePackage))
+                ) && 
+                (
+                    this.AccountPackage == input.AccountPackage ||
+                    (this.AccountPackage != null &&
+                    this.AccountPackage.Equals(input.AccountPackage))
+                ) && 
+                (
+                    this.IdentityPackage == input.IdentityPackage ||
+                    (this.IdentityPackage != null &&
+                    this.IdentityPackage.Equals(input.IdentityPackage))
+                ) && 
+                (
+                    this.EpochManagerPackage == input.EpochManagerPackage ||
+                    (this.EpochManagerPackage != null &&
+                    this.EpochManagerPackage.Equals(input.EpochManagerPackage))
+                ) && 
+                (
+                    this.ClockPackage == input.ClockPackage ||
+                    (this.ClockPackage != null &&
+                    this.ClockPackage.Equals(input.ClockPackage))
+                ) && 
+                (
+                    this.AccessControllerPackage == input.AccessControllerPackage ||
+                    (this.AccessControllerPackage != null &&
+                    this.AccessControllerPackage.Equals(input.AccessControllerPackage))
+                ) && 
+                (
+                    this.TransactionProcessorPackage == input.TransactionProcessorPackage ||
+                    (this.TransactionProcessorPackage != null &&
+                    this.TransactionProcessorPackage.Equals(input.TransactionProcessorPackage))
+                ) && 
+                (
+                    this.MetadataModulePackage == input.MetadataModulePackage ||
+                    (this.MetadataModulePackage != null &&
+                    this.MetadataModulePackage.Equals(input.MetadataModulePackage))
+                ) && 
+                (
+                    this.RoyaltyModulePackage == input.RoyaltyModulePackage ||
+                    (this.RoyaltyModulePackage != null &&
+                    this.RoyaltyModulePackage.Equals(input.RoyaltyModulePackage))
+                ) && 
+                (
+                    this.AccessRulesPackage == input.AccessRulesPackage ||
+                    (this.AccessRulesPackage != null &&
+                    this.AccessRulesPackage.Equals(input.AccessRulesPackage))
+                ) && 
+                (
+                    this.GenesisHelperPackage == input.GenesisHelperPackage ||
+                    (this.GenesisHelperPackage != null &&
+                    this.GenesisHelperPackage.Equals(input.GenesisHelperPackage))
+                ) && 
+                (
+                    this.FaucetPackage == input.FaucetPackage ||
+                    (this.FaucetPackage != null &&
+                    this.FaucetPackage.Equals(input.FaucetPackage))
                 ) && 
                 (
                     this.EpochManager == input.EpochManager ||
@@ -256,19 +654,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Clock.Equals(input.Clock))
                 ) && 
                 (
-                    this.EcdsaSecp256k1 == input.EcdsaSecp256k1 ||
-                    (this.EcdsaSecp256k1 != null &&
-                    this.EcdsaSecp256k1.Equals(input.EcdsaSecp256k1))
+                    this.GenesisHelper == input.GenesisHelper ||
+                    (this.GenesisHelper != null &&
+                    this.GenesisHelper.Equals(input.GenesisHelper))
                 ) && 
                 (
-                    this.EddsaEd25519 == input.EddsaEd25519 ||
-                    (this.EddsaEd25519 != null &&
-                    this.EddsaEd25519.Equals(input.EddsaEd25519))
-                ) && 
-                (
-                    this.Xrd == input.Xrd ||
-                    (this.Xrd != null &&
-                    this.Xrd.Equals(input.Xrd))
+                    this.Faucet == input.Faucet ||
+                    (this.Faucet != null &&
+                    this.Faucet.Equals(input.Faucet))
                 );
         }
 
@@ -281,9 +674,97 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Faucet != null)
+                if (this.Xrd != null)
                 {
-                    hashCode = (hashCode * 59) + this.Faucet.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Xrd.GetHashCode();
+                }
+                if (this.Secp256k1SignatureVirtualBadge != null)
+                {
+                    hashCode = (hashCode * 59) + this.Secp256k1SignatureVirtualBadge.GetHashCode();
+                }
+                if (this.Ed25519SignatureVirtualBadge != null)
+                {
+                    hashCode = (hashCode * 59) + this.Ed25519SignatureVirtualBadge.GetHashCode();
+                }
+                if (this.PackageOfDirectCallerVirtualBadge != null)
+                {
+                    hashCode = (hashCode * 59) + this.PackageOfDirectCallerVirtualBadge.GetHashCode();
+                }
+                if (this.GlobalCallerVirtualBadge != null)
+                {
+                    hashCode = (hashCode * 59) + this.GlobalCallerVirtualBadge.GetHashCode();
+                }
+                if (this.SystemTransactionBadge != null)
+                {
+                    hashCode = (hashCode * 59) + this.SystemTransactionBadge.GetHashCode();
+                }
+                if (this.PackageOwnerBadge != null)
+                {
+                    hashCode = (hashCode * 59) + this.PackageOwnerBadge.GetHashCode();
+                }
+                if (this.ValidatorOwnerBadge != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValidatorOwnerBadge.GetHashCode();
+                }
+                if (this.AccountOwnerBadge != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccountOwnerBadge.GetHashCode();
+                }
+                if (this.IdentityOwnerBadge != null)
+                {
+                    hashCode = (hashCode * 59) + this.IdentityOwnerBadge.GetHashCode();
+                }
+                if (this.PackagePackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.PackagePackage.GetHashCode();
+                }
+                if (this.ResourcePackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourcePackage.GetHashCode();
+                }
+                if (this.AccountPackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccountPackage.GetHashCode();
+                }
+                if (this.IdentityPackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.IdentityPackage.GetHashCode();
+                }
+                if (this.EpochManagerPackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.EpochManagerPackage.GetHashCode();
+                }
+                if (this.ClockPackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.ClockPackage.GetHashCode();
+                }
+                if (this.AccessControllerPackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccessControllerPackage.GetHashCode();
+                }
+                if (this.TransactionProcessorPackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.TransactionProcessorPackage.GetHashCode();
+                }
+                if (this.MetadataModulePackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.MetadataModulePackage.GetHashCode();
+                }
+                if (this.RoyaltyModulePackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.RoyaltyModulePackage.GetHashCode();
+                }
+                if (this.AccessRulesPackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccessRulesPackage.GetHashCode();
+                }
+                if (this.GenesisHelperPackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.GenesisHelperPackage.GetHashCode();
+                }
+                if (this.FaucetPackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.FaucetPackage.GetHashCode();
                 }
                 if (this.EpochManager != null)
                 {
@@ -293,17 +774,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Clock.GetHashCode();
                 }
-                if (this.EcdsaSecp256k1 != null)
+                if (this.GenesisHelper != null)
                 {
-                    hashCode = (hashCode * 59) + this.EcdsaSecp256k1.GetHashCode();
+                    hashCode = (hashCode * 59) + this.GenesisHelper.GetHashCode();
                 }
-                if (this.EddsaEd25519 != null)
+                if (this.Faucet != null)
                 {
-                    hashCode = (hashCode * 59) + this.EddsaEd25519.GetHashCode();
-                }
-                if (this.Xrd != null)
-                {
-                    hashCode = (hashCode * 59) + this.Xrd.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Faucet.GetHashCode();
                 }
                 return hashCode;
             }

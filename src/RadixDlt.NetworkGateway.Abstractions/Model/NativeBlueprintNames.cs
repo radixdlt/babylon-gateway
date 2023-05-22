@@ -62,15 +62,10 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-namespace RadixDlt.CoreApiSdk.Model;
-
-public partial class VaultInfoSubstate : IGlobalAddressPointer
+public static class NativeBlueprintNames
 {
-    public IEnumerable<string> GetGlobalAddresses()
-    {
-        yield return ResourceAddress;
-    }
+    public const string FungibleVault = "FungibleVault";
+    public const string NonFungibleVault = "NonFungibleVault";
 }
-

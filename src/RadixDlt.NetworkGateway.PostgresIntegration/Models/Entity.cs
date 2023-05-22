@@ -83,10 +83,10 @@ internal abstract class Entity
     public long FromStateVersion { get; set; }
 
     [Column("address")]
-    public RadixAddress Address { get; set; }
+    public EntityAddress Address { get; set; }
 
-    [Column("global_address")]
-    public GlobalAddress? GlobalAddress { get; set; }
+    [Column("is_global")]
+    public bool IsGlobal { get; set; }
 
     [Column("ancestor_ids")]
     public List<long>? AncestorIds { get; set; }
@@ -122,13 +122,13 @@ internal abstract class ResourceEntity : ComponentEntity
 {
 }
 
-internal class FungibleResourceEntity : ResourceEntity
+internal class GlobalFungibleResourceEntity : ResourceEntity
 {
     [Column("divisibility")]
     public int Divisibility { get; set; }
 }
 
-internal class NonFungibleResourceEntity : ResourceEntity
+internal class GlobalNonFungibleResourceEntity : ResourceEntity
 {
     [Column("non_fungible_id_type")]
     public NonFungibleIdType NonFungibleIdType { get; set; }
@@ -154,7 +154,7 @@ internal abstract class ComponentEntity : Entity
     }
 }
 
-internal class ValidatorEntity : ComponentEntity
+internal class GlobalValidatorEntity : ComponentEntity
 {
     [Column("stake_vault_entity_id")]
     public long StakeVaultEntityId { get; set; }
@@ -162,19 +162,13 @@ internal class ValidatorEntity : ComponentEntity
     [Column("unstake_vault_entity_id")]
     public long UnstakeVaultEntityId { get; set; }
 
-    [Column("epoch_manager_entity_id")]
-    public long EpochManagerEntityId { get; set; }
-
     public override List<long> CorrelatedEntities
     {
         get
         {
             var ce = base.CorrelatedEntities;
-
             ce.Add(StakeVaultEntityId);
             ce.Add(UnstakeVaultEntityId);
-            ce.Add(EpochManagerEntityId);
-
             return ce;
         }
     }
@@ -184,15 +178,28 @@ internal class EpochManagerEntity : ComponentEntity
 {
 }
 
-internal class ClockEntity : ComponentEntity
+internal class GlobalClockEntity : ComponentEntity
 {
 }
 
-internal class VaultEntity : ComponentEntity
+internal abstract class VaultEntity : ComponentEntity
 {
     [Column("resource_entity_id")]
     public long ResourceEntityId { get; set; }
 
+    public override List<long> CorrelatedEntities
+    {
+        get
+        {
+            var ce = base.CorrelatedEntities;
+            ce.Add(ResourceEntityId);
+            return ce;
+        }
+    }
+}
+
+internal class InternalFungibleVaultEntity : VaultEntity
+{
     [Column("royalty_vault_of_entity_id")]
     public long? RoyaltyVaultOfEntityId { get; set; }
 
@@ -204,8 +211,6 @@ internal class VaultEntity : ComponentEntity
         {
             var ce = base.CorrelatedEntities;
 
-            ce.Add(ResourceEntityId);
-
             if (RoyaltyVaultOfEntityId.HasValue)
             {
                 ce.Add(RoyaltyVaultOfEntityId.Value);
@@ -216,19 +221,31 @@ internal class VaultEntity : ComponentEntity
     }
 }
 
-internal class NormalComponentEntity : ComponentEntity
+internal class InternalNonFungibleVaultEntity : VaultEntity
 {
 }
 
-internal class AccountComponentEntity : ComponentEntity
+internal class GlobalGenericComponentEntity : ComponentEntity
 {
 }
 
-internal class IdentityEntity : ComponentEntity
+internal class InternalGenericComponentEntity : ComponentEntity
 {
 }
 
-internal class PackageEntity : ComponentEntity
+internal class GlobalAccountEntity : ComponentEntity
+{
+}
+
+internal class InternalAccountEntity : ComponentEntity
+{
+}
+
+internal class GlobalIdentityEntity : ComponentEntity
+{
+}
+
+internal class GlobalPackageEntity : ComponentEntity
 {
     [Column("code")]
     public byte[] Code { get; set; }
@@ -238,29 +255,29 @@ internal class PackageEntity : ComponentEntity
 }
 
 // This is transient model, not stored in database
-internal class VirtualAccountComponentEntity : AccountComponentEntity
+internal class VirtualAccountComponentEntity : GlobalAccountEntity
 {
-    public VirtualAccountComponentEntity(GlobalAddress globalAddress)
+    public VirtualAccountComponentEntity(EntityAddress address)
     {
-        GlobalAddress = globalAddress;
+        Address = address;
     }
 }
 
 // This is transient model, not stored in database
-internal class VirtualIdentityEntity : IdentityEntity
+internal class VirtualIdentityEntity : GlobalIdentityEntity
 {
-    public VirtualIdentityEntity(GlobalAddress globalAddress)
+    public VirtualIdentityEntity(EntityAddress address)
     {
-        GlobalAddress = globalAddress;
+        Address = address;
     }
 }
 
-internal class KeyValueStoreEntity : Entity
+internal class InternalKeyValueStoreEntity : Entity
 {
     [Column("store_of_non_fungible_resource_entity_id")]
     public long? StoreOfNonFungibleResourceEntityId { get; set; }
 }
 
-internal class AccessControllerEntity : ComponentEntity
+internal class GlobalAccessControllerEntity : ComponentEntity
 {
 }

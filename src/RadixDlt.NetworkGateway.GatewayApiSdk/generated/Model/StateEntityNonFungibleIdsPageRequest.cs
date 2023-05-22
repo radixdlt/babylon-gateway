@@ -106,9 +106,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limitPerPage">The page size requested..</param>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
-        /// <param name="vaultAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
+        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s address. (required).</param>
+        /// <param name="vaultAddress">Bech32m-encoded human readable version of the entity&#39;s address. (required).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) address. (required).</param>
         public StateEntityNonFungibleIdsPageRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string address = default(string), string vaultAddress = default(string), string resourceAddress = default(string))
         {
             // to ensure "address" is required (not null)
@@ -155,23 +155,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public int? LimitPerPage { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// Bech32m-encoded human readable version of the entity&#39;s address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s address.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// Bech32m-encoded human readable version of the entity&#39;s address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s address.</value>
         [DataMember(Name = "vault_address", IsRequired = true, EmitDefaultValue = true)]
         public string VaultAddress { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
+        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) address.</value>
         [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
         public string ResourceAddress { get; set; }
 

@@ -66,10 +66,11 @@ using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class ObjectTypeInfoDetails : IGlobalAddressPointer
+public partial class ObjectTypeInfoDetails : IParentAddressPointer
 {
-    public IEnumerable<string> GetGlobalAddresses()
+    public IEnumerable<string> GetParentAddresses()
     {
+        yield return OuterObject;
         yield return PackageAddress;
     }
 }

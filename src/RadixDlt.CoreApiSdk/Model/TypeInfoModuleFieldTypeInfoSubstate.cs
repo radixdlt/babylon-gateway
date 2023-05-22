@@ -63,13 +63,19 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class EpochManagerSubstate : IGlobalAddressPointer
+public partial class TypeInfoModuleFieldTypeInfoSubstate : IParentAddressPointer
 {
-    public IEnumerable<string> GetGlobalAddresses()
+    public IEnumerable<string> GetParentAddresses()
     {
-        yield return ValidatorOwnerResource;
+        if (Details is ObjectTypeInfoDetails otid)
+        {
+            return otid.GetParentAddresses();
+        }
+
+        return Enumerable.Empty<string>();
     }
 }

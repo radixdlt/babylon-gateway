@@ -584,13 +584,10 @@ components:
       example: "<network-name>"
 
     EntityAddress:
-      description: Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
-      type: string
-    ComponentAddress:
-      description: Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id.
+      description: Bech32m-encoded human readable version of the entity's address.
       type: string
     ResourceAddress:
-      description: Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+      description: Bech32m-encoded human readable version of the resource (fungible, non-fungible) address.
       type: string
 
     BigDecimal:
@@ -1166,25 +1163,88 @@ components:
         well_known_addresses:
           type: object
           required:
-            - faucet
+            - xrd
+            - secp256k1_signature_virtual_badge
+            - ed25519_signature_virtual_badge
+            - package_of_direct_caller_virtual_badge
+            - global_caller_virtual_badge
+            - system_transaction_badge
+            - package_owner_badge
+            - validator_owner_badge
+            - account_owner_badge
+            - identity_owner_badge
+            - package_package
+            - resource_package
+            - account_package
+            - identity_package
+            - epoch_manager_package
+            - clock_package
+            - access_controller_package
+            - transaction_processor_package
+            - metadata_module_package
+            - royalty_module_package
+            - access_rules_package
+            - genesis_helper_package
+            - faucet_package
             - epoch_manager
             - clock
-            - ecdsa_secp256k1
-            - eddsa_ed25519
-            - xrd
+            - genesis_helper
+            - faucet
           properties:
-            faucet:
-              $ref: "#/components/schemas/ComponentAddress"
-            epoch_manager:
-              $ref: "#/components/schemas/EntityAddress"
-            clock:
-              $ref: "#/components/schemas/EntityAddress"
-            ecdsa_secp256k1:
-              $ref: "#/components/schemas/ResourceAddress"
-            eddsa_ed25519:
-              $ref: "#/components/schemas/ResourceAddress"
             xrd:
-              $ref: "#/components/schemas/ResourceAddress"
+              type: string
+            secp256k1_signature_virtual_badge:
+              type: string
+            ed25519_signature_virtual_badge:
+              type: string
+            package_of_direct_caller_virtual_badge:
+              type: string
+            global_caller_virtual_badge:
+              type: string
+            system_transaction_badge:
+              type: string
+            package_owner_badge:
+              type: string
+            validator_owner_badge:
+              type: string
+            account_owner_badge:
+              type: string
+            identity_owner_badge:
+              type: string
+            package_package:
+              type: string
+            resource_package:
+              type: string
+            account_package:
+              type: string
+            identity_package:
+              type: string
+            epoch_manager_package:
+              type: string
+            clock_package:
+              type: string
+            access_controller_package:
+              type: string
+            transaction_processor_package:
+              type: string
+            metadata_module_package:
+              type: string
+            royalty_module_package:
+              type: string
+            access_rules_package:
+              type: string
+            genesis_helper_package:
+              type: string
+            faucet_package:
+              type: string
+            epoch_manager:
+              type: string
+            clock:
+              type: string
+            genesis_helper:
+              type: string
+            faucet:
+              type: string
 
     GatewayStatusResponse:
       allOf:

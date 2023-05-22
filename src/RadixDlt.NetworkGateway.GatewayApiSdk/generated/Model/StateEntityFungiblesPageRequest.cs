@@ -112,7 +112,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limitPerPage">The page size requested..</param>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s address. (required).</param>
         /// <param name="aggregationLevel">aggregationLevel.</param>
         /// <param name="optIns">optIns.</param>
         public StateEntityFungiblesPageRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string address = default(string), ResourceAggregationLevel? aggregationLevel = default(ResourceAggregationLevel?), StateEntityFungiblesPageRequestOptIns optIns = default(StateEntityFungiblesPageRequestOptIns))
@@ -151,9 +151,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public int? LimitPerPage { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// Bech32m-encoded human readable version of the entity&#39;s address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s address.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 

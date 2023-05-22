@@ -110,7 +110,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StateNonFungibleDataResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) address. (required).</param>
         /// <param name="nonFungibleIdType">nonFungibleIdType (required).</param>
         /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
         public StateNonFungibleDataResponse(LedgerState ledgerState = default(LedgerState), string resourceAddress = default(string), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), List<StateNonFungibleDetailsResponseItem> nonFungibleIds = default(List<StateNonFungibleDetailsResponseItem>))
@@ -143,9 +143,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
+        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) address.</value>
         [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
         public string ResourceAddress { get; set; }
 

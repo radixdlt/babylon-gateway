@@ -98,7 +98,26 @@ internal class TransactionStreamReader : ITransactionStreamReader
                 new CoreModel.StreamTransactionsRequest(
                     network: _networkConfigurationProvider.GetNetworkName(),
                     fromStateVersion: fromStateVersion,
-                    limit: count
+                    limit: count,
+                    transactionFormatOptions: new CoreModel.TransactionFormatOptions
+                    {
+                        Blobs = false,
+                        Manifest = false,
+                        RawLedgerTransaction = true,
+                        RawNotarizedTransaction = false,
+                        RawSystemTransaction = true,
+                    },
+                    substateFormatOptions: new CoreModel.SubstateFormatOptions
+                    {
+                        Hash = false,
+                        Raw = false,
+                        Typed = true,
+                    },
+                    sborFormatOptions: new CoreModel.SborFormatOptions
+                    {
+                        Raw = true,
+                        ProgrammaticJson = false,
+                    }
                 ),
                 token
             );

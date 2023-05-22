@@ -83,8 +83,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:access_rules_chain_subtype", "none,resource_manager_vault_access_rules_chain")
-                .Annotation("Npgsql:Enum:entity_type", "epoch_manager,fungible_resource,non_fungible_resource,normal_component,account_component,package,key_value_store,vault,clock,validator,access_controller,identity")
+                .Annotation("Npgsql:Enum:entity_type", "global_epoch_manager,global_fungible_resource,global_non_fungible_resource,global_generic_component,internal_generic_component,global_account_component,internal_account_component,global_package,internal_key_value_store,internal_fungible_vault,internal_non_fungible_vault,global_clock,global_validator,global_access_controller,global_identity")
                 .Annotation("Npgsql:Enum:ledger_transaction_event_type", "deposit_fungible_resource,deposit_non_fungible_resource,withdrawal_fungible_resource,withdrawal_non_fungible_resource")
                 .Annotation("Npgsql:Enum:ledger_transaction_kind_filter_constraint", "user,epoch_change")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
@@ -101,8 +100,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    address = table.Column<byte[]>(type: "bytea", nullable: false),
-                    global_address = table.Column<string>(type: "text", nullable: true),
+                    address = table.Column<string>(type: "text", nullable: false),
+                    is_global = table.Column<bool>(type: "boolean", nullable: false),
                     ancestor_ids = table.Column<List<long>>(type: "bigint[]", nullable: true),
                     parent_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     owner_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
@@ -112,15 +111,14 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     package_id = table.Column<long>(type: "bigint", nullable: true),
                     blueprint_name = table.Column<string>(type: "text", nullable: true),
                     divisibility = table.Column<int>(type: "integer", nullable: true),
-                    store_of_non_fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     non_fungible_id_type = table.Column<NonFungibleIdType>(type: "non_fungible_id_type", nullable: true),
                     code = table.Column<byte[]>(type: "bytea", nullable: true),
                     code_type = table.Column<string>(type: "text", nullable: true),
                     stake_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     unstake_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
-                    epoch_manager_entity_id = table.Column<long>(type: "bigint", nullable: true),
+                    royalty_vault_of_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
-                    royalty_vault_of_entity_id = table.Column<long>(type: "bigint", nullable: true)
+                    store_of_non_fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -135,7 +133,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    subtype = table.Column<AccessRulesChainSubtype>(type: "access_rules_chain_subtype", nullable: false),
+                    child_blueprint_name = table.Column<string>(type: "text", nullable: true),
                     access_rules_chain = table.Column<string>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
@@ -343,7 +341,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    key_value_store_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     non_fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     non_fungible_id = table.Column<string>(type: "text", nullable: false)
                 },
@@ -375,7 +372,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    key_value_store_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     non_fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     non_fungible_id_data_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
                 },
@@ -468,22 +464,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_entities_address",
-                table: "entities",
-                column: "address")
-                .Annotation("Npgsql:IndexMethod", "hash");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_entities_global_address",
-                table: "entities",
-                column: "global_address",
-                filter: "global_address IS NOT NULL")
-                .Annotation("Npgsql:IndexMethod", "hash");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_entity_access_rules_chain_history_entity_id_subtype_from_st~",
+                name: "IX_entity_access_rules_chain_history_entity_id_child_blueprint~",
                 table: "entity_access_rules_chain_history",
-                columns: new[] { "entity_id", "subtype", "from_state_version" });
+                columns: new[] { "entity_id", "child_blueprint_name", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_entity_metadata_aggregate_history_entity_id_from_state_vers~",

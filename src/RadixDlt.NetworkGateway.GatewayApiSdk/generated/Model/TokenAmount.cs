@@ -104,7 +104,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TokenAmount" /> class.
         /// </summary>
         /// <param name="value">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        /// <param name="address">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id..</param>
+        /// <param name="address">Bech32m-encoded human readable version of the resource (fungible, non-fungible) address..</param>
         public TokenAmount(string value = default(string), string address = default(string))
         {
             // to ensure "value" is required (not null)
@@ -124,9 +124,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Value { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
+        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) address.</value>
         [DataMember(Name = "address", EmitDefaultValue = true)]
         public string Address { get; set; }
 

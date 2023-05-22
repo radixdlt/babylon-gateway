@@ -238,7 +238,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 StateUpdates = optIns.ReceiptStateChanges ? new JRaw(ult.EngineReceipt.StateUpdates) : null,
                 Events = optIns.ReceiptEvents ? new JRaw(ult.EngineReceipt.Events) : null,
             },
-            referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.GlobalAddress.ToString()).ToList(),
+            referencedGlobalEntities: referencedEntities.Where(re => re.IsGlobal).Select(re => re.Address.ToString()).ToList(),
             messageHex: ult.Message?.ToHex()
         ));
     }

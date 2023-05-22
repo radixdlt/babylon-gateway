@@ -67,9 +67,9 @@ using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class ValidatorSetSubstate : IGlobalAddressPointer
+public partial class EpochManagerFieldCurrentValidatorSetSubstate : IParentAddressPointer
 {
-    public IEnumerable<string> GetGlobalAddresses()
+    public IEnumerable<string> GetParentAddresses()
     {
         return ValidatorSet.Select(vs => vs.Address);
     }

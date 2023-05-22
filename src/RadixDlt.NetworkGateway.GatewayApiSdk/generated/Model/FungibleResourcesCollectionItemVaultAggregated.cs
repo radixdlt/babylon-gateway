@@ -109,7 +109,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="vaults">vaults (required).</param>
         /// <param name="aggregationLevel">aggregationLevel (required) (default to ResourceAggregationLevel.Vault).</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) address. (required).</param>
         /// <param name="explicitMetadata">explicitMetadata.</param>
         public FungibleResourcesCollectionItemVaultAggregated(FungibleResourcesCollectionItemVaultAggregatedVault vaults = default(FungibleResourcesCollectionItemVaultAggregatedVault), ResourceAggregationLevel aggregationLevel = ResourceAggregationLevel.Vault, string resourceAddress = default(string), EntityMetadataCollection explicitMetadata = default(EntityMetadataCollection)) : base(aggregationLevel, resourceAddress, explicitMetadata)
         {
