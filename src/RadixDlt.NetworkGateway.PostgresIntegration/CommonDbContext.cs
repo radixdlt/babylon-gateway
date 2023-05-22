@@ -66,6 +66,7 @@ using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
@@ -84,7 +85,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
 
-    public DbSet<LedgerTransactionEvent> LedgerTransactionEvents => Set<LedgerTransactionEvent>();
+    public DbSet<LedgerTransactionMarker> LedgerTransactionMarkers => Set<LedgerTransactionMarker>();
 
     public DbSet<PendingTransaction> PendingTransactions => Set<PendingTransaction>();
 
@@ -129,10 +130,12 @@ internal abstract class CommonDbContext : DbContext
     {
         modelBuilder.HasPostgresEnum<AccessRulesChainSubtype>();
         modelBuilder.HasPostgresEnum<EntityType>();
-        modelBuilder.HasPostgresEnum<LedgerTransactionKindFilterConstraint>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
-        modelBuilder.HasPostgresEnum<LedgerTransactionEventType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerEventType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOperationType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOriginType>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
         modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();
@@ -142,6 +145,11 @@ internal abstract class CommonDbContext : DbContext
         HookupPendingTransactions(modelBuilder);
         HookupEntities(modelBuilder);
         HookupHistory(modelBuilder);
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.AddInterceptors(new ForceDistinctInterceptor());
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -186,19 +194,23 @@ internal abstract class CommonDbContext : DbContext
             .IsUnique()
             .HasFilter("index_in_round = 0");
 
-        // This index lets you quickly filter out transaction stream
-        modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => new { lt.KindFilterConstraint, lt.StateVersion })
-            .HasFilter("kind_filter_constraint IS NOT NULL");
+        modelBuilder.Entity<LedgerTransactionMarker>()
+            .HasDiscriminator<LedgerTransactionMarkerType>(DiscriminatorColumnName)
+            .HasValue<EventLedgerTransactionMarker>(LedgerTransactionMarkerType.Event)
+            .HasValue<OriginLedgerTransactionMarker>(LedgerTransactionMarkerType.Origin)
+            .HasValue<ManifestAddressLedgerTransactionMarker>(LedgerTransactionMarkerType.ManifestAddress);
 
-        modelBuilder.Entity<LedgerTransactionEvent>()
-            .HasDiscriminator<LedgerTransactionEventType>(DiscriminatorColumnName)
-            .HasValue<DepositFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.DepositFungibleResource)
-            .HasValue<DepositNonFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.DepositNonFungibleResource)
-            .HasValue<WithdrawalFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.WithdrawalFungibleResource)
-            .HasValue<WithdrawalNonFungibleResourceLedgerTransactionEvent>(LedgerTransactionEventType.WithdrawalNonFungibleResource);
+        modelBuilder.Entity<EventLedgerTransactionMarker>()
+            .HasIndex(e => new { e.EventType, e.EntityId, e.StateVersion })
+            .HasFilter("discriminator = 'event'");
 
-        // TODO add all necessary indices on LedgerTransactionEvent table
+        modelBuilder.Entity<OriginLedgerTransactionMarker>()
+            .HasIndex(e => new { e.OriginType, e.StateVersion })
+            .HasFilter("discriminator = 'origin'");
+
+        modelBuilder.Entity<ManifestAddressLedgerTransactionMarker>()
+            .HasIndex(e => new { e.OperationType, e.EntityId, e.StateVersion })
+            .HasFilter("discriminator = 'manifest_address'");
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)

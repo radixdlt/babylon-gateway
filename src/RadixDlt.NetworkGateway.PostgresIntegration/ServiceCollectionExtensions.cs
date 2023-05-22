@@ -102,10 +102,12 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.UseLoggerFactory(sp.GetService<ILoggerFactory>());
                 dataSourceBuilder.MapEnum<AccessRulesChainSubtype>();
                 dataSourceBuilder.MapEnum<EntityType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionKindFilterConstraint>();
                 dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
                 dataSourceBuilder.MapEnum<LedgerTransactionType>();
-                dataSourceBuilder.MapEnum<LedgerTransactionEventType>();
+                dataSourceBuilder.MapEnum<LedgerTransactionMarkerType>();
+                dataSourceBuilder.MapEnum<LedgerTransactionMarkerEventType>();
+                dataSourceBuilder.MapEnum<LedgerTransactionMarkerOperationType>();
+                dataSourceBuilder.MapEnum<LedgerTransactionMarkerOriginType>();
                 dataSourceBuilder.MapEnum<NonFungibleIdType>();
                 dataSourceBuilder.MapEnum<PendingTransactionStatus>();
                 dataSourceBuilder.MapEnum<PublicKeyType>();

@@ -62,49 +62,68 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public interface ITransactionQuerier
+internal enum LedgerTransactionMarkerOriginType
 {
-    Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default);
-
-    Task<DetailsLookupResult?> LookupCommittedTransaction(byte[] intentHash, GatewayModel.TransactionCommittedDetailsOptIns optIns,  GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default);
-
-    Task<ICollection<StatusLookupResult>> LookupPendingTransactionsByIntentHash(byte[] intentHash, CancellationToken token = default);
+    User,
+    EpochChange,
 }
 
-public sealed record DetailsLookupResult(GatewayModel.CommittedTransactionInfo Info, GatewayModel.TransactionCommittedDetailsResponseDetails? Details);
-
-public sealed record StatusLookupResult(string PayloadHashHex, GatewayModel.TransactionStatus Status, string? ErrorMessage);
-
-public sealed record TransactionPageWithoutTotal(GatewayModel.LedgerTransactionsCursor? NextPageCursor, List<GatewayModel.CommittedTransactionInfo> Transactions)
+internal enum LedgerTransactionMarkerEventType
 {
-    public static readonly TransactionPageWithoutTotal Empty = new(null, new List<GatewayModel.CommittedTransactionInfo>());
+    Withdrawal,
+    Deposit,
 }
 
-public sealed record TransactionStreamPageRequest(
-    long? FromStateVersion,
-    GatewayModel.LedgerTransactionsCursor? Cursor,
-    int PageSize,
-    bool AscendingOrder,
-    TransactionStreamPageRequestSearchCriteria SearchCriteria);
-
-public class TransactionStreamPageRequestSearchCriteria
+internal enum LedgerTransactionMarkerOperationType
 {
-    public LedgerTransactionKindFilter Kind { get; set; }
+    ResourceInUse,
+    AccountDepositedInto,
+    AccountWithdrawnFrom,
+}
 
-    public List<LedgerTransactionEventFilter> Events { get; set; } = new();
+[Table("ledger_transaction_markers")]
+internal abstract class LedgerTransactionMarker
+{
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public List<GlobalAddress> ManifestAccountsDepositedInto { get; set; } = new();
+    [Column("state_version")]
+    public long StateVersion { get; set; }
+}
 
-    public List<GlobalAddress> ManifestAccountsWithdrawnFrom { get; set; } = new();
+internal class OriginLedgerTransactionMarker : LedgerTransactionMarker
+{
+    [Column("origin_type")]
+    public LedgerTransactionMarkerOriginType OriginType { get; set; }
+}
 
-    public List<GlobalAddress> ManifestResources { get; set; } = new();
+internal class EventLedgerTransactionMarker : LedgerTransactionMarker
+{
+    [Column("event_type")]
+    public LedgerTransactionMarkerEventType EventType { get; set; }
+
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+
+    [Column("quantity")]
+    public TokenAmount Quantity { get; set; }
+}
+
+internal class ManifestAddressLedgerTransactionMarker : LedgerTransactionMarker
+{
+    [Column("operation_type")]
+    public LedgerTransactionMarkerOperationType OperationType { get; set; }
+
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 }

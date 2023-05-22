@@ -64,9 +64,11 @@
 
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -92,11 +94,187 @@ internal class TransactionQuerier : ITransactionQuerier
 
     public async Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
     {
-        var transactionStateVersionsAndOneMore = await GetTransactionStreamPageStateVersions(request, atLedgerState, token);
-        var transactions = await GetTransactions(transactionStateVersionsAndOneMore.Take(request.PageSize).ToList(), token);
+        var referencedAddresses = request.SearchCriteria.ManifestAccountsDepositedInto
+            .Concat(request.SearchCriteria.ManifestAccountsWithdrawnFrom)
+            .Concat(request.SearchCriteria.ManifestResources)
+            .Concat(request.SearchCriteria.Events.SelectMany(e =>
+            {
+                var addresses = new List<GlobalAddress>();
 
-        var nextCursor = transactionStateVersionsAndOneMore.Count == request.PageSize + 1
-            ? new GatewayModel.LedgerTransactionsCursor(transactionStateVersionsAndOneMore.Last())
+                if (e.EmitterEntityAddress.HasValue)
+                {
+                    addresses.Add(e.EmitterEntityAddress.Value);
+                }
+
+                if (e.ResourceAddress.HasValue)
+                {
+                    addresses.Add(e.ResourceAddress.Value);
+                }
+
+                return addresses;
+            }))
+            .Select(a => (string)a)
+            .ToList();
+
+        var entityAddressToId = await GetEntityIds(referencedAddresses, token);
+
+        var upperStateVersion = request.AscendingOrder
+            ? atLedgerState.StateVersion
+            : request.Cursor?.StateVersionBoundary ?? atLedgerState.StateVersion;
+
+        var lowerStateVersion = request.AscendingOrder
+            ? request.Cursor?.StateVersionBoundary ?? request.FromStateVersion
+            : request.FromStateVersion;
+
+        var searchQuery = _dbContext.LedgerTransactionMarkers
+            .Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion >= (lowerStateVersion ?? lt.StateVersion))
+            .Select(lt => lt.StateVersion);
+
+        var userKindFilterImplicitlyApplied = false;
+
+        if (request.SearchCriteria.ManifestAccountsDepositedInto.Any())
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            foreach (var entityAddress in request.SearchCriteria.ManifestAccountsDepositedInto)
+            {
+                if (!entityAddressToId.TryGetValue(entityAddress, out var entityId))
+                {
+                    return TransactionPageWithoutTotal.Empty;
+                }
+
+                searchQuery = searchQuery
+                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                    .OfType<ManifestAddressLedgerTransactionMarker>()
+                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountDepositedInto && maltm.EntityId == entityId)
+                    .Select(maltm => maltm.StateVersion);
+            }
+        }
+
+        if (request.SearchCriteria.ManifestAccountsWithdrawnFrom.Any())
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            foreach (var entityAddress in request.SearchCriteria.ManifestAccountsWithdrawnFrom)
+            {
+                if (!entityAddressToId.TryGetValue(entityAddress, out var entityId))
+                {
+                    return TransactionPageWithoutTotal.Empty;
+                }
+
+                searchQuery = searchQuery
+                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                    .OfType<ManifestAddressLedgerTransactionMarker>()
+                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountWithdrawnFrom && maltm.EntityId == entityId)
+                    .Select(maltm => maltm.StateVersion);
+            }
+        }
+
+        if (request.SearchCriteria.ManifestResources.Any())
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            foreach (var entityAddress in request.SearchCriteria.ManifestResources)
+            {
+                if (!entityAddressToId.TryGetValue(entityAddress, out var entityId))
+                {
+                    return TransactionPageWithoutTotal.Empty;
+                }
+
+                searchQuery = searchQuery
+                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                    .OfType<ManifestAddressLedgerTransactionMarker>()
+                    .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.ResourceInUse && maltm.EntityId == entityId)
+                    .Select(maltm => maltm.StateVersion);
+            }
+        }
+
+        if (request.SearchCriteria.Events.Any())
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            foreach (var @event in request.SearchCriteria.Events)
+            {
+                var eventType = @event.Event switch
+                {
+                    LedgerTransactionEventFilter.EventType.Withdrawal => LedgerTransactionMarkerEventType.Withdrawal,
+                    LedgerTransactionEventFilter.EventType.Deposit => LedgerTransactionMarkerEventType.Deposit,
+                    _ => throw new UnreachableException($"Didn't expect {@event.Event} value"),
+                };
+
+                long? eventEmitterEntityId = null;
+                long? eventResourceEntityId = null;
+
+                if (@event.EmitterEntityAddress.HasValue)
+                {
+                    if (!entityAddressToId.TryGetValue(@event.EmitterEntityAddress.Value, out var id))
+                    {
+                        return TransactionPageWithoutTotal.Empty;
+                    }
+
+                    eventEmitterEntityId = id;
+                }
+
+                if (@event.ResourceAddress.HasValue)
+                {
+                    if (!entityAddressToId.TryGetValue(@event.ResourceAddress.Value, out var id))
+                    {
+                        return TransactionPageWithoutTotal.Empty;
+                    }
+
+                    eventResourceEntityId = id;
+                }
+
+                searchQuery = searchQuery
+                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                    .OfType<EventLedgerTransactionMarker>()
+                    .Where(eltm => eltm.EventType == eventType && eltm.EntityId == (eventEmitterEntityId ?? eltm.EntityId) && eltm.ResourceEntityId == (eventResourceEntityId ?? eltm.ResourceEntityId))
+                    .Select(eltm => eltm.StateVersion);
+            }
+        }
+
+        if (request.SearchCriteria.Kind == LedgerTransactionKindFilter.UserOnly && userKindFilterImplicitlyApplied)
+        {
+            // already handled
+        }
+        else if (request.SearchCriteria.Kind == LedgerTransactionKindFilter.AllAnnotated)
+        {
+            // already handled as every TX found in LedgerTransactionMarker table is implicitly annotated
+        }
+        else
+        {
+            var originType = request.SearchCriteria.Kind switch
+            {
+                LedgerTransactionKindFilter.UserOnly => LedgerTransactionMarkerOriginType.User,
+                LedgerTransactionKindFilter.EpochChangeOnly => LedgerTransactionMarkerOriginType.EpochChange,
+                _ => throw new UnreachableException($"Unexpected value of kindFilter: {request.SearchCriteria.Kind}"),
+            };
+
+            searchQuery = searchQuery
+                .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                .OfType<OriginLedgerTransactionMarker>()
+                .Where(oltm => oltm.OriginType == originType)
+                .Select(oltm => oltm.StateVersion);
+        }
+
+        if (request.AscendingOrder)
+        {
+            searchQuery = searchQuery.OrderBy(sv => sv);
+        }
+        else
+        {
+            searchQuery = searchQuery.OrderByDescending(sv => sv);
+        }
+
+        var stateVersions = await searchQuery
+            .TagWith(ForceDistinctInterceptor.Apply)
+            .Take(request.PageSize + 1)
+            .ToListAsync(token);
+
+        var transactions = await GetTransactions(stateVersions.Take(request.PageSize).ToList(), token);
+
+        var nextCursor = stateVersions.Count == request.PageSize + 1
+            ? new GatewayModel.LedgerTransactionsCursor(stateVersions.Last())
             : null;
 
         return new TransactionPageWithoutTotal(nextCursor, transactions);
@@ -127,42 +305,6 @@ internal class TransactionQuerier : ITransactionQuerier
             .ToListAsync(token);
 
         return pendingTransactions.Select(pt => new StatusLookupResult(pt.PayloadHash.ToHex(), pt.Status.ToGatewayModel(), pt.LastFailureReason)).ToArray();
-    }
-
-    private async Task<List<long>> GetTransactionStreamPageStateVersions(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token)
-    {
-        var stateVersionBoundary = request.Cursor?.StateVersionBoundary ?? request.FromStateVersion;
-
-        var query = _dbContext.LedgerTransactions
-            .Where(lt => lt.StateVersion <= atLedgerState.StateVersion);
-
-        if (request.AscendingOrder)
-        {
-            query = query.Where(lt => lt.StateVersion >= stateVersionBoundary)
-                .OrderBy(lt => lt.StateVersion);
-        }
-        else
-        {
-            query = query.Where(lt => lt.StateVersion <= stateVersionBoundary)
-                .OrderByDescending(lt => lt.StateVersion);
-        }
-
-        if (request.KindFilter == LedgerTransactionKindFilter.UserOnly)
-        {
-            query = query.Where(lt => lt.KindFilterConstraint == LedgerTransactionKindFilterConstraint.User);
-        }
-        else if (request.KindFilter == LedgerTransactionKindFilter.EpochChangeOnly)
-        {
-            query = query.Where(lt => lt.KindFilterConstraint == LedgerTransactionKindFilterConstraint.EpochChange);
-        }
-        else
-        {
-            query = query.Where(lt => lt.KindFilterConstraint != null);
-        }
-
-        return await query.Take(request.PageSize + 1)
-            .Select(at => at.StateVersion)
-            .ToListAsync(token);
     }
 
     private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(List<long> transactionStateVersions, CancellationToken token)
@@ -197,6 +339,19 @@ internal class TransactionQuerier : ITransactionQuerier
         }
 
         return MapToGatewayAccountTransactionWithDetails(transaction, referencedEntities, optInProperties);
+    }
+
+    private async Task<Dictionary<string, long>> GetEntityIds(List<string> addresses, CancellationToken token = default)
+    {
+        if (!addresses.Any())
+        {
+            return new Dictionary<string, long>();
+        }
+
+        return await _dbContext.Entities
+            .Where(e => e.GlobalAddress != null && addresses.Contains(e.GlobalAddress.Value))
+            .Select(e => new { e.Id, e.GlobalAddress!.Value })
+            .ToDictionaryAsync(e => e.Value.ToString(), e => e.Id, token);
     }
 
     private GatewayModel.CommittedTransactionInfo MapToGatewayAccountTransaction(LedgerTransaction lt)

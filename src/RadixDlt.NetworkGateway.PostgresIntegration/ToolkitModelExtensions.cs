@@ -62,49 +62,25 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Linq;
+using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public interface ITransactionQuerier
+internal static class ToolkitModelExtensions
 {
-    Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default);
-
-    Task<DetailsLookupResult?> LookupCommittedTransaction(byte[] intentHash, GatewayModel.TransactionCommittedDetailsOptIns optIns,  GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default);
-
-    Task<ICollection<StatusLookupResult>> LookupPendingTransactionsByIntentHash(byte[] intentHash, CancellationToken token = default);
-}
-
-public sealed record DetailsLookupResult(GatewayModel.CommittedTransactionInfo Info, GatewayModel.TransactionCommittedDetailsResponseDetails? Details);
-
-public sealed record StatusLookupResult(string PayloadHashHex, GatewayModel.TransactionStatus Status, string? ErrorMessage);
-
-public sealed record TransactionPageWithoutTotal(GatewayModel.LedgerTransactionsCursor? NextPageCursor, List<GatewayModel.CommittedTransactionInfo> Transactions)
-{
-    public static readonly TransactionPageWithoutTotal Empty = new(null, new List<GatewayModel.CommittedTransactionInfo>());
-}
-
-public sealed record TransactionStreamPageRequest(
-    long? FromStateVersion,
-    GatewayModel.LedgerTransactionsCursor? Cursor,
-    int PageSize,
-    bool AscendingOrder,
-    TransactionStreamPageRequestSearchCriteria SearchCriteria);
-
-public class TransactionStreamPageRequestSearchCriteria
-{
-    public LedgerTransactionKindFilter Kind { get; set; }
-
-    public List<LedgerTransactionEventFilter> Events { get; set; } = new();
-
-    public List<GlobalAddress> ManifestAccountsDepositedInto { get; set; } = new();
-
-    public List<GlobalAddress> ManifestAccountsWithdrawnFrom { get; set; } = new();
-
-    public List<GlobalAddress> ManifestResources { get; set; } = new();
+    public static IEnumerable<string> All(this ToolkitModel.Exchange.ExtractAddressesFromManifestResponse response)
+    {
+        return response.PackageAddresses
+            .Concat(response.ComponentAddresses)
+            .Concat(response.ResourceAddresses)
+            .Concat(response.AccountAddresses)
+            .Concat(response.AccountsRequiringAuth)
+            .Concat(response.AccountsWithdrawnFrom)
+            .Concat(response.AccountsDepositedInto)
+            .Concat(response.IdentityAddresses)
+            .Concat(response.IdentitiesRequiringAuth)
+            .Select(a => a.Address);
+    }
 }
