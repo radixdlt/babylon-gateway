@@ -464,6 +464,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_entities_address",
+                table: "entities",
+                column: "address");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_entity_access_rules_chain_history_entity_id_child_blueprint~",
                 table: "entity_access_rules_chain_history",
                 columns: new[] { "entity_id", "child_blueprint_name", "from_state_version" });

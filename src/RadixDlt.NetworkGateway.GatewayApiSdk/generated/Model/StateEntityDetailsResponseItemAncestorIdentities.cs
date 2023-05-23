@@ -98,9 +98,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseItemAncestorIdentities" /> class.
         /// </summary>
-        /// <param name="parentAddress">Bech32m-encoded human readable version of the entity&#39;s address..</param>
-        /// <param name="ownerAddress">Bech32m-encoded human readable version of the entity&#39;s address..</param>
-        /// <param name="globalAddress">Bech32m-encoded human readable version of the entity&#39;s address..</param>
+        /// <param name="parentAddress">Bech32m-encoded human readable version of the address..</param>
+        /// <param name="ownerAddress">Bech32m-encoded human readable version of the address..</param>
+        /// <param name="globalAddress">Bech32m-encoded human readable version of the address..</param>
         public StateEntityDetailsResponseItemAncestorIdentities(string parentAddress = default(string), string ownerAddress = default(string), string globalAddress = default(string))
         {
             this.ParentAddress = parentAddress;
@@ -109,23 +109,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s address.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s address.</value>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "parent_address", EmitDefaultValue = true)]
         public string ParentAddress { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s address.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s address.</value>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "owner_address", EmitDefaultValue = true)]
         public string OwnerAddress { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s address.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s address.</value>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "global_address", EmitDefaultValue = true)]
         public string GlobalAddress { get; set; }
 

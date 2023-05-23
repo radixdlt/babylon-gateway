@@ -108,7 +108,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="previousCursor">If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection..</param>
         /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
         /// <param name="items">items (required).</param>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s address. (required).</param>
+        /// <param name="address">Bech32m-encoded human readable version of the address. (required).</param>
         public StateEntityNonFungiblesPageResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<NonFungibleResourcesCollectionItem> items = default(List<NonFungibleResourcesCollectionItem>), string address = default(string))
         {
             // to ensure "ledgerState" is required (not null)
@@ -168,9 +168,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<NonFungibleResourcesCollectionItem> Items { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s address.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s address.</value>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 

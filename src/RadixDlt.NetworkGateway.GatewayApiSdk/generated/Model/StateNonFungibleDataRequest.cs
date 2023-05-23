@@ -104,7 +104,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StateNonFungibleDataRequest" /> class.
         /// </summary>
         /// <param name="atLedgerState">atLedgerState.</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) address. (required).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
         public StateNonFungibleDataRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string resourceAddress = default(string), List<string> nonFungibleIds = default(List<string>))
         {
@@ -130,9 +130,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) address.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) address.</value>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
         public string ResourceAddress { get; set; }
 

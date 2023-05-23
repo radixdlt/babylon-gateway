@@ -110,7 +110,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="amount">TBA (required).</param>
         /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
         /// <param name="aggregationLevel">aggregationLevel (required) (default to ResourceAggregationLevel.Global).</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) address. (required).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="explicitMetadata">explicitMetadata.</param>
         public NonFungibleResourcesCollectionItemGloballyAggregated(long amount = default(long), long lastUpdatedAtStateVersion = default(long), ResourceAggregationLevel aggregationLevel = ResourceAggregationLevel.Global, string resourceAddress = default(string), EntityMetadataCollection explicitMetadata = default(EntityMetadataCollection)) : base(aggregationLevel, resourceAddress, explicitMetadata)
         {

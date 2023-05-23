@@ -103,33 +103,33 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NetworkConfigurationResponseWellKnownAddresses" /> class.
         /// </summary>
-        /// <param name="xrd">xrd (required).</param>
-        /// <param name="secp256k1SignatureVirtualBadge">secp256k1SignatureVirtualBadge (required).</param>
-        /// <param name="ed25519SignatureVirtualBadge">ed25519SignatureVirtualBadge (required).</param>
-        /// <param name="packageOfDirectCallerVirtualBadge">packageOfDirectCallerVirtualBadge (required).</param>
-        /// <param name="globalCallerVirtualBadge">globalCallerVirtualBadge (required).</param>
-        /// <param name="systemTransactionBadge">systemTransactionBadge (required).</param>
-        /// <param name="packageOwnerBadge">packageOwnerBadge (required).</param>
-        /// <param name="validatorOwnerBadge">validatorOwnerBadge (required).</param>
-        /// <param name="accountOwnerBadge">accountOwnerBadge (required).</param>
-        /// <param name="identityOwnerBadge">identityOwnerBadge (required).</param>
-        /// <param name="packagePackage">packagePackage (required).</param>
-        /// <param name="resourcePackage">resourcePackage (required).</param>
-        /// <param name="accountPackage">accountPackage (required).</param>
-        /// <param name="identityPackage">identityPackage (required).</param>
-        /// <param name="epochManagerPackage">epochManagerPackage (required).</param>
-        /// <param name="clockPackage">clockPackage (required).</param>
-        /// <param name="accessControllerPackage">accessControllerPackage (required).</param>
-        /// <param name="transactionProcessorPackage">transactionProcessorPackage (required).</param>
-        /// <param name="metadataModulePackage">metadataModulePackage (required).</param>
-        /// <param name="royaltyModulePackage">royaltyModulePackage (required).</param>
-        /// <param name="accessRulesPackage">accessRulesPackage (required).</param>
-        /// <param name="genesisHelperPackage">genesisHelperPackage (required).</param>
-        /// <param name="faucetPackage">faucetPackage (required).</param>
-        /// <param name="epochManager">epochManager (required).</param>
-        /// <param name="clock">clock (required).</param>
-        /// <param name="genesisHelper">genesisHelper (required).</param>
-        /// <param name="faucet">faucet (required).</param>
+        /// <param name="xrd">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="secp256k1SignatureVirtualBadge">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="ed25519SignatureVirtualBadge">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="packageOfDirectCallerVirtualBadge">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="globalCallerVirtualBadge">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="systemTransactionBadge">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="packageOwnerBadge">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="validatorOwnerBadge">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="accountOwnerBadge">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="identityOwnerBadge">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="packagePackage">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="resourcePackage">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="accountPackage">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="identityPackage">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="epochManagerPackage">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="clockPackage">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="accessControllerPackage">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="transactionProcessorPackage">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="metadataModulePackage">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="royaltyModulePackage">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="accessRulesPackage">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="genesisHelperPackage">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="faucetPackage">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="epochManager">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="clock">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="genesisHelper">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="faucet">Bech32m-encoded human readable version of the address. (required).</param>
         public NetworkConfigurationResponseWellKnownAddresses(string xrd = default(string), string secp256k1SignatureVirtualBadge = default(string), string ed25519SignatureVirtualBadge = default(string), string packageOfDirectCallerVirtualBadge = default(string), string globalCallerVirtualBadge = default(string), string systemTransactionBadge = default(string), string packageOwnerBadge = default(string), string validatorOwnerBadge = default(string), string accountOwnerBadge = default(string), string identityOwnerBadge = default(string), string packagePackage = default(string), string resourcePackage = default(string), string accountPackage = default(string), string identityPackage = default(string), string epochManagerPackage = default(string), string clockPackage = default(string), string accessControllerPackage = default(string), string transactionProcessorPackage = default(string), string metadataModulePackage = default(string), string royaltyModulePackage = default(string), string accessRulesPackage = default(string), string genesisHelperPackage = default(string), string faucetPackage = default(string), string epochManager = default(string), string clock = default(string), string genesisHelper = default(string), string faucet = default(string))
         {
             // to ensure "xrd" is required (not null)
@@ -297,164 +297,191 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets Xrd
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "xrd", IsRequired = true, EmitDefaultValue = true)]
         public string Xrd { get; set; }
 
         /// <summary>
-        /// Gets or Sets Secp256k1SignatureVirtualBadge
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "secp256k1_signature_virtual_badge", IsRequired = true, EmitDefaultValue = true)]
         public string Secp256k1SignatureVirtualBadge { get; set; }
 
         /// <summary>
-        /// Gets or Sets Ed25519SignatureVirtualBadge
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "ed25519_signature_virtual_badge", IsRequired = true, EmitDefaultValue = true)]
         public string Ed25519SignatureVirtualBadge { get; set; }
 
         /// <summary>
-        /// Gets or Sets PackageOfDirectCallerVirtualBadge
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "package_of_direct_caller_virtual_badge", IsRequired = true, EmitDefaultValue = true)]
         public string PackageOfDirectCallerVirtualBadge { get; set; }
 
         /// <summary>
-        /// Gets or Sets GlobalCallerVirtualBadge
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "global_caller_virtual_badge", IsRequired = true, EmitDefaultValue = true)]
         public string GlobalCallerVirtualBadge { get; set; }
 
         /// <summary>
-        /// Gets or Sets SystemTransactionBadge
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "system_transaction_badge", IsRequired = true, EmitDefaultValue = true)]
         public string SystemTransactionBadge { get; set; }
 
         /// <summary>
-        /// Gets or Sets PackageOwnerBadge
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "package_owner_badge", IsRequired = true, EmitDefaultValue = true)]
         public string PackageOwnerBadge { get; set; }
 
         /// <summary>
-        /// Gets or Sets ValidatorOwnerBadge
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "validator_owner_badge", IsRequired = true, EmitDefaultValue = true)]
         public string ValidatorOwnerBadge { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccountOwnerBadge
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "account_owner_badge", IsRequired = true, EmitDefaultValue = true)]
         public string AccountOwnerBadge { get; set; }
 
         /// <summary>
-        /// Gets or Sets IdentityOwnerBadge
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "identity_owner_badge", IsRequired = true, EmitDefaultValue = true)]
         public string IdentityOwnerBadge { get; set; }
 
         /// <summary>
-        /// Gets or Sets PackagePackage
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "package_package", IsRequired = true, EmitDefaultValue = true)]
         public string PackagePackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets ResourcePackage
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "resource_package", IsRequired = true, EmitDefaultValue = true)]
         public string ResourcePackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccountPackage
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "account_package", IsRequired = true, EmitDefaultValue = true)]
         public string AccountPackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets IdentityPackage
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "identity_package", IsRequired = true, EmitDefaultValue = true)]
         public string IdentityPackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets EpochManagerPackage
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "epoch_manager_package", IsRequired = true, EmitDefaultValue = true)]
         public string EpochManagerPackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets ClockPackage
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "clock_package", IsRequired = true, EmitDefaultValue = true)]
         public string ClockPackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccessControllerPackage
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "access_controller_package", IsRequired = true, EmitDefaultValue = true)]
         public string AccessControllerPackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets TransactionProcessorPackage
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "transaction_processor_package", IsRequired = true, EmitDefaultValue = true)]
         public string TransactionProcessorPackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets MetadataModulePackage
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "metadata_module_package", IsRequired = true, EmitDefaultValue = true)]
         public string MetadataModulePackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets RoyaltyModulePackage
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "royalty_module_package", IsRequired = true, EmitDefaultValue = true)]
         public string RoyaltyModulePackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccessRulesPackage
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "access_rules_package", IsRequired = true, EmitDefaultValue = true)]
         public string AccessRulesPackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets GenesisHelperPackage
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "genesis_helper_package", IsRequired = true, EmitDefaultValue = true)]
         public string GenesisHelperPackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets FaucetPackage
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "faucet_package", IsRequired = true, EmitDefaultValue = true)]
         public string FaucetPackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets EpochManager
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "epoch_manager", IsRequired = true, EmitDefaultValue = true)]
         public string EpochManager { get; set; }
 
         /// <summary>
-        /// Gets or Sets Clock
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "clock", IsRequired = true, EmitDefaultValue = true)]
         public string Clock { get; set; }
 
         /// <summary>
-        /// Gets or Sets GenesisHelper
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "genesis_helper", IsRequired = true, EmitDefaultValue = true)]
         public string GenesisHelper { get; set; }
 
         /// <summary>
-        /// Gets or Sets Faucet
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "faucet", IsRequired = true, EmitDefaultValue = true)]
         public string Faucet { get; set; }
 

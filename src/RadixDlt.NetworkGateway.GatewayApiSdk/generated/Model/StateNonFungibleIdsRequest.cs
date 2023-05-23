@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limitPerPage">The page size requested..</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) address. (required).</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
         public StateNonFungibleIdsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), int? limitPerPage = default(int?), string resourceAddress = default(string))
         {
             // to ensure "resourceAddress" is required (not null)
@@ -141,9 +141,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public int? LimitPerPage { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) address.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) address.</value>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
         public string ResourceAddress { get; set; }
 

@@ -103,7 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityMetadataPageRequestAllOf" /> class.
         /// </summary>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s address. (required).</param>
+        /// <param name="address">Bech32m-encoded human readable version of the address. (required).</param>
         public StateEntityMetadataPageRequestAllOf(string address = default(string))
         {
             // to ensure "address" is required (not null)
@@ -115,9 +115,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s address.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s address.</value>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 

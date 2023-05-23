@@ -216,6 +216,9 @@ internal abstract class CommonDbContext : DbContext
     private static void HookupEntities(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Entity>()
+            .HasIndex(e => e.Address);
+
+        modelBuilder.Entity<Entity>()
             .HasDiscriminator<EntityType>(DiscriminatorColumnName)
             .HasValue<EpochManagerEntity>(EntityType.GlobalEpochManager)
             .HasValue<GlobalFungibleResourceEntity>(EntityType.GlobalFungibleResource)
