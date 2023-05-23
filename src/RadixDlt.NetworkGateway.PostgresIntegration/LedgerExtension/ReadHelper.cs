@@ -267,6 +267,30 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => new EntityResourceVaultLookup(e.EntityId, e.ResourceEntityId), token);
     }
 
+    public async Task<Dictionary<long, EntityNonFungibleVaultHistory>> MostRecentEntityNonFungibleVaultHistory(List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    {
+        var vaultIds = nonFungibleVaultChanges.Select(x => x.ReferencedVault.DatabaseId).ToList();
+
+        var entityVaultHistory = await _dbContext.EntityVaultHistory
+            .FromSqlInterpolated(@$"
+WITH variables (vault_entity_id) AS (
+    SELECT UNNEST({vaultIds})
+)
+SELECT evh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_vault_history
+    WHERE vault_entity_id = variables.vault_entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) evh ON true;")
+            .AsNoTracking()
+            .ToDictionaryAsync(e => e.VaultEntityId, e => (EntityNonFungibleVaultHistory)e, token);
+
+        return entityVaultHistory;
+    }
+
     public async Task<Dictionary<long, NonFungibleIdStoreHistory>> MostRecentNonFungibleIdStoreHistoryFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, CancellationToken token)
     {
         var ids = nonFungibleIdStoreChanges.Select(x => x.ReferencedResource.DatabaseId).Distinct().ToList();

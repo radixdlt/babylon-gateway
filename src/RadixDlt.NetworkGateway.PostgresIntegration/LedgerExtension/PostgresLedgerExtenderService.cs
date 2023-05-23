@@ -777,7 +777,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         {
                             var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId);
 
-                            nonFungibleVaultChanges.Add(new NonFungibleVaultChange(referencedEntity, resourceEntity, nonFungibleVaultContentsIndexEntrySubstate.NonFungibleLocalId.SimpleRep, stateVersion));
+                            nonFungibleVaultChanges.Add(new NonFungibleVaultChange(
+                                referencedEntity,
+                                resourceEntity,
+                                nonFungibleVaultContentsIndexEntrySubstate.NonFungibleLocalId.SimpleRep,
+                                false,
+                                stateVersion));
                         }
 
                         if (substateData is CoreModel.NonFungibleResourceManagerDataEntrySubstate nonFungibleResourceManagerDataEntrySubstate)
@@ -866,6 +871,31 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                     v => TokenAmount.FromDecimalString(v.Stake));
 
                             validatorSetChanges.Add(new ValidatorSetChange(currentEpoch, change, stateVersion));
+                        }
+                    }
+
+                    foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
+                    {
+                        var substateId = deletedSubstate.SubstateId;
+
+                        var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)substateId.EntityAddress, _ => new ReferencedEntity(
+                            (EntityAddress)substateId.EntityAddress,
+                            substateId.EntityType,
+                            stateVersion));
+
+                        if (substateId.SubstateType == CoreModel.SubstateType.NonFungibleVaultContentsIndexEntry)
+                        {
+                            var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId);
+                            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId(
+                                (substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex,
+                                _networkConfigurationProvider.GetNetworkId());
+
+                            nonFungibleVaultChanges.Add(new NonFungibleVaultChange(
+                                referencedEntity,
+                                resourceEntity,
+                                nonFungibleId,
+                                true,
+                                stateVersion));
                         }
                     }
 
@@ -1047,6 +1077,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var mostRecentResourceEntitySupplyHistory = await readHelper.MostRecentResourceEntitySupplyHistoryFor(resourceSupplyChanges, token);
             var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, nonFungibleVaultChanges, observedNonFungibleWithdrawalTransactionEvents, observedNonFungibleDepositTransactionEvents, token);
             var existingValidatorKeys = await readHelper.ExistingValidatorKeysFor(validatorSetChanges, token);
+            var mostRecentEntityNonFungibleVaultHistory = await readHelper.MostRecentEntityNonFungibleVaultHistory(nonFungibleVaultChanges, token);
 
             dbReadDuration += sw.Elapsed;
 
@@ -1413,6 +1444,20 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 {
                     AggregateEntityResource(e.Key.ReferencedVault, e.Key.ReferencedResource, e.Key.StateVersion, false, null, e.Count());
 
+                    var vaultExists = mostRecentEntityNonFungibleVaultHistory.TryGetValue(e.Key.ReferencedVault.DatabaseId, out var existingVaultHistory);
+
+                    var nfids = vaultExists ? existingVaultHistory!.NonFungibleIds : new List<long>();
+                    var addedItems = e.Where(x => !x.IsWithdrawal)
+                        .Select(x => existingNonFungibleIdData[new NonFungibleIdLookup(e.Key.ReferencedResource.DatabaseId, x.NonFungibleId)].Id)
+                        .ToList();
+
+                    var deletedItems = e.Where(x => x.IsWithdrawal)
+                        .Select(x => existingNonFungibleIdData[new NonFungibleIdLookup(e.Key.ReferencedResource.DatabaseId, x.NonFungibleId)].Id)
+                        .ToList();
+
+                    nfids.AddRange(addedItems);
+                    nfids.RemoveAll(x => deletedItems.Contains(x));
+
                     return new EntityNonFungibleVaultHistory
                     {
                         Id = sequences.EntityVaultHistorySequence++,
@@ -1421,7 +1466,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         GlobalEntityId = e.Key.ReferencedVault.DatabaseGlobalAncestorId,
                         ResourceEntityId = e.Key.ReferencedResource.DatabaseId,
                         VaultEntityId = e.Key.ReferencedVault.DatabaseId,
-                        NonFungibleIds = e.Select(nfid => existingNonFungibleIdData[new NonFungibleIdLookup(e.Key.ReferencedResource.DatabaseId, nfid.NonFungibleId)].Id).ToList(),
+                        NonFungibleIds = nfids.ToList(),
                     };
                 })
                 .ToList();
