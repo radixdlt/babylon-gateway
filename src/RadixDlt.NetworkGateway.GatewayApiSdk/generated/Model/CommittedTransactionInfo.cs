@@ -116,10 +116,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="transactionStatus">transactionStatus (required).</param>
         /// <param name="payloadHashHex">Hex-encoded SHA-256 hash..</param>
         /// <param name="intentHashHex">Hex-encoded SHA-256 hash..</param>
-        /// <param name="feePaid">feePaid.</param>
+        /// <param name="feePaid">String-encoded decimal representing the amount of a related fungible resource..</param>
         /// <param name="confirmedAt">confirmedAt.</param>
         /// <param name="errorMessage">errorMessage.</param>
-        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), TokenAmount feePaid = default(TokenAmount), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string))
+        /// <param name="rawHex">Hex-encoded binary blob..</param>
+        /// <param name="receipt">receipt.</param>
+        /// <param name="referencedGlobalEntities">referencedGlobalEntities.</param>
+        /// <param name="messageHex">Hex-encoded binary blob..</param>
+        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), string feePaid = default(string), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), List<string> referencedGlobalEntities = default(List<string>), string messageHex = default(string))
         {
             this.StateVersion = stateVersion;
             this.Epoch = epoch;
@@ -136,6 +140,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.FeePaid = feePaid;
             this.ConfirmedAt = confirmedAt;
             this.ErrorMessage = errorMessage;
+            this.RawHex = rawHex;
+            this.Receipt = receipt;
+            this.ReferencedGlobalEntities = referencedGlobalEntities;
+            this.MessageHex = messageHex;
         }
 
         /// <summary>
@@ -177,10 +185,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string IntentHashHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets FeePaid
+        /// String-encoded decimal representing the amount of a related fungible resource.
         /// </summary>
+        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
         [DataMember(Name = "fee_paid", EmitDefaultValue = true)]
-        public TokenAmount FeePaid { get; set; }
+        public string FeePaid { get; set; }
 
         /// <summary>
         /// Gets or Sets ConfirmedAt
@@ -193,6 +202,32 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "error_message", EmitDefaultValue = true)]
         public string ErrorMessage { get; set; }
+
+        /// <summary>
+        /// Hex-encoded binary blob.
+        /// </summary>
+        /// <value>Hex-encoded binary blob.</value>
+        [DataMember(Name = "raw_hex", EmitDefaultValue = true)]
+        public string RawHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Receipt
+        /// </summary>
+        [DataMember(Name = "receipt", EmitDefaultValue = true)]
+        public TransactionReceipt Receipt { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ReferencedGlobalEntities
+        /// </summary>
+        [DataMember(Name = "referenced_global_entities", EmitDefaultValue = true)]
+        public List<string> ReferencedGlobalEntities { get; set; }
+
+        /// <summary>
+        /// Hex-encoded binary blob.
+        /// </summary>
+        /// <value>Hex-encoded binary blob.</value>
+        [DataMember(Name = "message_hex", EmitDefaultValue = true)]
+        public string MessageHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -212,6 +247,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  FeePaid: ").Append(FeePaid).Append("\n");
             sb.Append("  ConfirmedAt: ").Append(ConfirmedAt).Append("\n");
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
+            sb.Append("  RawHex: ").Append(RawHex).Append("\n");
+            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
+            sb.Append("  ReferencedGlobalEntities: ").Append(ReferencedGlobalEntities).Append("\n");
+            sb.Append("  MessageHex: ").Append(MessageHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -292,6 +331,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ErrorMessage == input.ErrorMessage ||
                     (this.ErrorMessage != null &&
                     this.ErrorMessage.Equals(input.ErrorMessage))
+                ) && 
+                (
+                    this.RawHex == input.RawHex ||
+                    (this.RawHex != null &&
+                    this.RawHex.Equals(input.RawHex))
+                ) && 
+                (
+                    this.Receipt == input.Receipt ||
+                    (this.Receipt != null &&
+                    this.Receipt.Equals(input.Receipt))
+                ) && 
+                (
+                    this.ReferencedGlobalEntities == input.ReferencedGlobalEntities ||
+                    this.ReferencedGlobalEntities != null &&
+                    input.ReferencedGlobalEntities != null &&
+                    this.ReferencedGlobalEntities.SequenceEqual(input.ReferencedGlobalEntities)
+                ) && 
+                (
+                    this.MessageHex == input.MessageHex ||
+                    (this.MessageHex != null &&
+                    this.MessageHex.Equals(input.MessageHex))
                 );
         }
 
@@ -331,6 +391,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.ErrorMessage != null)
                 {
                     hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
+                }
+                if (this.RawHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
+                }
+                if (this.Receipt != null)
+                {
+                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
+                }
+                if (this.ReferencedGlobalEntities != null)
+                {
+                    hashCode = (hashCode * 59) + this.ReferencedGlobalEntities.GetHashCode();
+                }
+                if (this.MessageHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.MessageHex.GetHashCode();
                 }
                 return hashCode;
             }

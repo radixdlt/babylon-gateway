@@ -90,45 +90,36 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Represents a decimal amount of a given resource.
+    /// StreamTransactionsResponseAllOf
     /// </summary>
-    [DataContract(Name = "TokenAmount")]
-    public partial class TokenAmount : IEquatable<TokenAmount>
+    [DataContract(Name = "StreamTransactionsResponse_allOf")]
+    public partial class StreamTransactionsResponseAllOf : IEquatable<StreamTransactionsResponseAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TokenAmount" /> class.
+        /// Initializes a new instance of the <see cref="StreamTransactionsResponseAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TokenAmount() { }
+        protected StreamTransactionsResponseAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TokenAmount" /> class.
+        /// Initializes a new instance of the <see cref="StreamTransactionsResponseAllOf" /> class.
         /// </summary>
-        /// <param name="value">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
-        /// <param name="address">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id..</param>
-        public TokenAmount(string value = default(string), string address = default(string))
+        /// <param name="items">The page of user transactions. (required).</param>
+        public StreamTransactionsResponseAllOf(List<CommittedTransactionInfo> items = default(List<CommittedTransactionInfo>))
         {
-            // to ensure "value" is required (not null)
-            if (value == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("value is a required property for TokenAmount and cannot be null");
+                throw new ArgumentNullException("items is a required property for StreamTransactionsResponseAllOf and cannot be null");
             }
-            this.Value = value;
-            this.Address = address;
+            this.Items = items;
         }
 
         /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
+        /// The page of user transactions.
         /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public string Value { get; set; }
-
-        /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
-        /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
-        [DataMember(Name = "address", EmitDefaultValue = true)]
-        public string Address { get; set; }
+        /// <value>The page of user transactions.</value>
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<CommittedTransactionInfo> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,9 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TokenAmount {\n");
-            sb.Append("  Value: ").Append(Value).Append("\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("class StreamTransactionsResponseAllOf {\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -160,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TokenAmount);
+            return this.Equals(input as StreamTransactionsResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if TokenAmount instances are equal
+        /// Returns true if StreamTransactionsResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of TokenAmount to be compared</param>
+        /// <param name="input">Instance of StreamTransactionsResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TokenAmount input)
+        public bool Equals(StreamTransactionsResponseAllOf input)
         {
             if (input == null)
             {
@@ -176,14 +166,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Value == input.Value ||
-                    (this.Value != null &&
-                    this.Value.Equals(input.Value))
-                ) && 
-                (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -196,13 +182,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Value != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
-                }
-                if (this.Address != null)
-                {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

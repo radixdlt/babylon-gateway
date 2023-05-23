@@ -160,8 +160,8 @@ internal class TransactionReceipt
     [Column("receipt_next_epoch", TypeName = "jsonb")]
     public string? NextEpoch { get; set; }
 
-    [Column("receipt_items", TypeName = "jsonb")]
-    public string? Items { get; set; }
+    [Column("receipt_output", TypeName = "jsonb")]
+    public string? Output { get; set; }
 
     [Column("receipt_error_message")]
     public string? ErrorMessage { get; set; }
