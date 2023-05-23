@@ -1040,7 +1040,7 @@ components:
         intent_hash_hex:
           $ref: "#/components/schemas/HashHexString"
         fee_paid:
-          $ref: "#/components/schemas/TokenAmount"
+          $ref: "#/components/schemas/BigDecimal"
         confirmed_at:
           nullable: true
           type: string
@@ -1048,6 +1048,16 @@ components:
         error_message:
           type: string
           nullable: true
+        raw_hex:
+          $ref: "#/components/schemas/HexString"
+        receipt:
+          $ref: "#/components/schemas/TransactionReceipt"
+        referenced_global_entities:
+          type: array
+          items:
+            type: string
+        message_hex:
+          $ref: "#/components/schemas/HexString"
 
     TransactionStatus:
       type: string
@@ -1073,7 +1083,7 @@ components:
         next_epoch:
           description: Information (number and active validator list) about new epoch if occured.
           type: object
-        items:
+        output:
           description: The manifest line-by-line engine return data (only present if `status` is `Succeeded`).
           type: object
         events:
@@ -1083,19 +1093,6 @@ components:
           description: Error message (only present if status is `Failed` or `Rejected`)
           type: string
           nullable: true
-
-    # TODO Obsolete - use BigDecimal instead
-    TokenAmount:
-      description: Represents a decimal amount of a given resource.
-      type: object
-      required:
-        - value
-        - token_identifier
-      properties:
-        value:
-          $ref: "#/components/schemas/BigDecimal"
-        address:
-          $ref: "#/components/schemas/ResourceAddress"
 
     NonFungibleIdType:
       type: string
@@ -1421,28 +1418,9 @@ components:
         - type: object
           required:
             - transaction
-            - details
           properties:
             transaction:
               $ref: "#/components/schemas/CommittedTransactionInfo"
-            details:
-              $ref: "#/components/schemas/TransactionCommittedDetailsResponseDetails"
-    TransactionCommittedDetailsResponseDetails:
-      type: object
-      required:
-        - receipt
-        - referenced_global_entities
-      properties:
-        raw_hex:
-          $ref: "#/components/schemas/HexString"
-        receipt:
-          $ref: "#/components/schemas/TransactionReceipt"
-        referenced_global_entities:
-          type: array
-          items:
-            type: string
-        message_hex:
-          $ref: "#/components/schemas/HexString"
 
     #
     # /stream/* Request & Response Types
@@ -1485,6 +1463,8 @@ components:
               enum:
                 - Asc
                 - Desc
+            opt_ins:
+              $ref: "#/components/schemas/TransactionCommittedDetailsOptIns"
       example:
         limit_per_page: 5
     StreamTransactionsRequestEventFilterItem:
@@ -1506,17 +1486,16 @@ components:
     StreamTransactionsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
-        - allOf:
-            - $ref: "#/components/schemas/ResultSetCursorMixin"
-            - type: object
-              required:
-                - items
-              properties:
-                items:
-                  description: The page of user transactions.
-                  type: array
-                  items:
-                    $ref: "#/components/schemas/CommittedTransactionInfo"
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              description: The page of user transactions.
+              type: array
+              items:
+                $ref: "#/components/schemas/CommittedTransactionInfo"
 
     #
     # /state/entity/* Request & Response Types

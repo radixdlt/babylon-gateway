@@ -62,11 +62,14 @@
  * permissions under this License.
  */
 
+using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
@@ -108,6 +111,60 @@ internal static class GatewayModelExtensions
             PublicKeyType.EcdsaSecp256k1 => new GatewayModel.PublicKeyEcdsaSecp256k1(keyHex),
             PublicKeyType.EddsaEd25519 => new GatewayModel.PublicKeyEddsaEd25519(keyHex),
             _ => throw new UnreachableException($"Didn't expect {validatorPublicKey.KeyType} value"),
+        };
+    }
+
+    public static GatewayModel.CommittedTransactionInfo ToGatewayModel(this LedgerTransaction lt, ICollection<Entity> referencedEntities, GatewayModel.TransactionCommittedDetailsOptIns optIns)
+    {
+        string? payloadHashHex = null;
+        string? intentHashHex = null;
+        string? rawHex = null;
+        string? messageHex = null;
+
+        if (lt is UserLedgerTransaction ult)
+        {
+            payloadHashHex = ult.PayloadHash.ToHex();
+            intentHashHex = ult.IntentHash.ToHex();
+            rawHex = optIns.RawHex ? ult.RawPayload.ToHex() : null;
+            messageHex = ult.Message?.ToHex();
+        }
+
+        var receipt = new GatewayModel.TransactionReceipt
+        {
+            ErrorMessage = lt.EngineReceipt.ErrorMessage,
+            Status = ToGatewayModel(lt.EngineReceipt.Status),
+            Output = new JRaw(lt.EngineReceipt.Output),
+            FeeSummary = optIns.ReceiptFeeSummary ? new JRaw(lt.EngineReceipt.FeeSummary) : null,
+            NextEpoch = lt.EngineReceipt.NextEpoch != null ? new JRaw(lt.EngineReceipt.NextEpoch) : null,
+            StateUpdates = optIns.ReceiptStateChanges ? new JRaw(lt.EngineReceipt.StateUpdates) : null,
+            Events = optIns.ReceiptEvents ? new JRaw(lt.EngineReceipt.Events) : null,
+        };
+
+        return new GatewayModel.CommittedTransactionInfo(
+            stateVersion: lt.StateVersion,
+            epoch: lt.Epoch,
+            round: lt.RoundInEpoch,
+            roundTimestamp: lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
+            transactionStatus: lt.EngineReceipt.Status.ToGatewayModel(),
+            payloadHashHex: payloadHashHex,
+            intentHashHex: intentHashHex,
+            feePaid: lt.FeePaid?.ToString(),
+            confirmedAt: lt.RoundTimestamp,
+            errorMessage: lt.EngineReceipt.ErrorMessage,
+            rawHex: rawHex,
+            receipt: receipt,
+            referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.GlobalAddress.ToString()).ToList(),
+            messageHex: messageHex
+        );
+    }
+
+    public static GatewayModel.TransactionStatus ToGatewayModel(this LedgerTransactionStatus status)
+    {
+        return status switch
+        {
+            LedgerTransactionStatus.Succeeded => GatewayModel.TransactionStatus.CommittedSuccess,
+            LedgerTransactionStatus.Failed => GatewayModel.TransactionStatus.CommittedFailure,
+            _ => throw new UnreachableException($"Didn't expect {status} value"),
         };
     }
 }

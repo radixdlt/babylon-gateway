@@ -75,12 +75,10 @@ public interface ITransactionQuerier
 {
     Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default);
 
-    Task<DetailsLookupResult?> LookupCommittedTransaction(byte[] intentHash, GatewayModel.TransactionCommittedDetailsOptIns optIns,  GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default);
+    Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(byte[] intentHash, GatewayModel.TransactionCommittedDetailsOptIns optIns, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default);
 
     Task<ICollection<StatusLookupResult>> LookupPendingTransactionsByIntentHash(byte[] intentHash, CancellationToken token = default);
 }
-
-public sealed record DetailsLookupResult(GatewayModel.CommittedTransactionInfo Info, GatewayModel.TransactionCommittedDetailsResponseDetails? Details);
 
 public sealed record StatusLookupResult(string PayloadHashHex, GatewayModel.TransactionStatus Status, string? ErrorMessage);
 
@@ -94,7 +92,8 @@ public sealed record TransactionStreamPageRequest(
     GatewayModel.LedgerTransactionsCursor? Cursor,
     int PageSize,
     bool AscendingOrder,
-    TransactionStreamPageRequestSearchCriteria SearchCriteria);
+    TransactionStreamPageRequestSearchCriteria SearchCriteria,
+    GatewayModel.TransactionCommittedDetailsOptIns OptIns);
 
 public class TransactionStreamPageRequestSearchCriteria
 {

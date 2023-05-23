@@ -309,7 +309,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     receipt_fee_summary = table.Column<string>(type: "jsonb", nullable: false),
                     receipt_state_updates = table.Column<string>(type: "jsonb", nullable: false),
                     receipt_next_epoch = table.Column<string>(type: "jsonb", nullable: true),
-                    receipt_items = table.Column<string>(type: "jsonb", nullable: true),
+                    receipt_output = table.Column<string>(type: "jsonb", nullable: true),
                     receipt_error_message = table.Column<string>(type: "text", nullable: true),
                     receipt_events = table.Column<string>(type: "jsonb", nullable: true),
                     discriminator = table.Column<LedgerTransactionType>(type: "ledger_transaction_type", nullable: false),

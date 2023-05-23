@@ -105,8 +105,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="transaction">transaction (required).</param>
-        /// <param name="details">details (required).</param>
-        public TransactionCommittedDetailsResponse(LedgerState ledgerState = default(LedgerState), CommittedTransactionInfo transaction = default(CommittedTransactionInfo), TransactionCommittedDetailsResponseDetails details = default(TransactionCommittedDetailsResponseDetails))
+        public TransactionCommittedDetailsResponse(LedgerState ledgerState = default(LedgerState), CommittedTransactionInfo transaction = default(CommittedTransactionInfo))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -120,12 +119,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("transaction is a required property for TransactionCommittedDetailsResponse and cannot be null");
             }
             this.Transaction = transaction;
-            // to ensure "details" is required (not null)
-            if (details == null)
-            {
-                throw new ArgumentNullException("details is a required property for TransactionCommittedDetailsResponse and cannot be null");
-            }
-            this.Details = details;
         }
 
         /// <summary>
@@ -141,12 +134,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public CommittedTransactionInfo Transaction { get; set; }
 
         /// <summary>
-        /// Gets or Sets Details
-        /// </summary>
-        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionCommittedDetailsResponseDetails Details { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -156,7 +143,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class TransactionCommittedDetailsResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
             sb.Append("  Transaction: ").Append(Transaction).Append("\n");
-            sb.Append("  Details: ").Append(Details).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -201,11 +187,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Transaction == input.Transaction ||
                     (this.Transaction != null &&
                     this.Transaction.Equals(input.Transaction))
-                ) && 
-                (
-                    this.Details == input.Details ||
-                    (this.Details != null &&
-                    this.Details.Equals(input.Details))
                 );
         }
 
@@ -225,10 +206,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Transaction != null)
                 {
                     hashCode = (hashCode * 59) + this.Transaction.GetHashCode();
-                }
-                if (this.Details != null)
-                {
-                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
                 }
                 return hashCode;
             }

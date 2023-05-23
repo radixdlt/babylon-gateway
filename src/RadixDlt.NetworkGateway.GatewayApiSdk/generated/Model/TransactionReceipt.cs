@@ -102,16 +102,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="feeSummary">Fees paid, Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;..</param>
         /// <param name="stateUpdates">Transaction state updates (only present if status is Succeeded or Failed)..</param>
         /// <param name="nextEpoch">Information (number and active validator list) about new epoch if occured..</param>
-        /// <param name="items">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)..</param>
+        /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)..</param>
         /// <param name="events">Events emitted by a transaction..</param>
         /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
-        public TransactionReceipt(Object status = default(Object), Object feeSummary = default(Object), Object stateUpdates = default(Object), Object nextEpoch = default(Object), Object items = default(Object), Object events = default(Object), string errorMessage = default(string))
+        public TransactionReceipt(Object status = default(Object), Object feeSummary = default(Object), Object stateUpdates = default(Object), Object nextEpoch = default(Object), Object output = default(Object), Object events = default(Object), string errorMessage = default(string))
         {
             this.Status = status;
             this.FeeSummary = feeSummary;
             this.StateUpdates = stateUpdates;
             this.NextEpoch = nextEpoch;
-            this.Items = items;
+            this.Output = output;
             this.Events = events;
             this.ErrorMessage = errorMessage;
         }
@@ -148,8 +148,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).
         /// </summary>
         /// <value>The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).</value>
-        [DataMember(Name = "items", EmitDefaultValue = true)]
-        public Object Items { get; set; }
+        [DataMember(Name = "output", EmitDefaultValue = true)]
+        public Object Output { get; set; }
 
         /// <summary>
         /// Events emitted by a transaction.
@@ -177,7 +177,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  FeeSummary: ").Append(FeeSummary).Append("\n");
             sb.Append("  StateUpdates: ").Append(StateUpdates).Append("\n");
             sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("  Output: ").Append(Output).Append("\n");
             sb.Append("  Events: ").Append(Events).Append("\n");
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("}\n");
@@ -236,9 +236,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.NextEpoch.Equals(input.NextEpoch))
                 ) && 
                 (
-                    this.Items == input.Items ||
-                    (this.Items != null &&
-                    this.Items.Equals(input.Items))
+                    this.Output == input.Output ||
+                    (this.Output != null &&
+                    this.Output.Equals(input.Output))
                 ) && 
                 (
                     this.Events == input.Events ||
@@ -277,9 +277,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.NextEpoch.GetHashCode();
                 }
-                if (this.Items != null)
+                if (this.Output != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Output.GetHashCode();
                 }
                 if (this.Events != null)
                 {

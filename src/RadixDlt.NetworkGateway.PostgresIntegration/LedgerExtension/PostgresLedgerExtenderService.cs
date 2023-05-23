@@ -561,7 +561,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     Status = committedTransaction.Receipt.Status.ToModel(),
                     FeeSummary = committedTransaction.Receipt.FeeSummary.ToJson(),
                     ErrorMessage = committedTransaction.Receipt.ErrorMessage,
-                    Items = committedTransaction.Receipt.Output != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Output) : null,
+                    Output = committedTransaction.Receipt.Output != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Output) : null,
                     NextEpoch = committedTransaction.Receipt.NextEpoch?.ToJson(),
                     Events = committedTransaction.Receipt.Events != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Events) : null,
                 };

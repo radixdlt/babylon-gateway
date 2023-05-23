@@ -109,7 +109,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(null, token);
         var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.GetIntentHashBytes(), GatewayModel.TransactionCommittedDetailsOptIns.Default, ledgerState, false, token);
         var pendingTransactions = await _transactionQuerier.LookupPendingTransactionsByIntentHash(request.GetIntentHashBytes(), token);
-        var remainingPendingTransactions = pendingTransactions.Where(pt => pt.PayloadHashHex != committedTransaction?.Info.PayloadHashHex).ToList();
+        var remainingPendingTransactions = pendingTransactions.Where(pt => pt.PayloadHashHex != committedTransaction?.PayloadHashHex).ToList();
 
         var status = GatewayModel.TransactionStatus.Unknown;
         var errorMessage = (string?)null;
@@ -117,13 +117,13 @@ internal class DefaultTransactionHandler : ITransactionHandler
 
         if (committedTransaction != null)
         {
-            status = committedTransaction.Info.TransactionStatus;
-            errorMessage = committedTransaction.Info.ErrorMessage;
+            status = committedTransaction.TransactionStatus;
+            errorMessage = committedTransaction.ErrorMessage;
 
             knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
-                payloadHashHex: committedTransaction.Info.PayloadHashHex,
+                payloadHashHex: committedTransaction.PayloadHashHex,
                 status: status,
-                errorMessage: committedTransaction.Info.ErrorMessage));
+                errorMessage: committedTransaction.ErrorMessage));
         }
         else if (remainingPendingTransactions.Any())
         {
@@ -152,7 +152,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
 
         if (committedTransaction != null)
         {
-            return new GatewayModel.TransactionCommittedDetailsResponse(ledgerState, committedTransaction.Info, committedTransaction.Details);
+            return new GatewayModel.TransactionCommittedDetailsResponse(ledgerState, committedTransaction);
         }
 
         throw new TransactionNotFoundException(request.IntentHashHex);
@@ -213,7 +213,8 @@ internal class DefaultTransactionHandler : ITransactionHandler
             Cursor: GatewayModel.LedgerTransactionsCursor.FromCursorString(request.Cursor),
             PageSize: request.LimitPerPage ?? DefaultPageLimit,
             AscendingOrder: request.Order == GatewayModel.StreamTransactionsRequest.OrderEnum.Asc,
-            SearchCriteria: searchCriteria
+            SearchCriteria: searchCriteria,
+            OptIns: request.OptIns ?? GatewayModel.TransactionCommittedDetailsOptIns.Default
         );
 
         var results = await _transactionQuerier.GetTransactionStream(transactionsPageRequest, atLedgerState, token);
