@@ -322,7 +322,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         {
             return nonFungiblesSliceAggregatedPerVault.ToDictionary(
                 x => x.Key,
-                x => EntityStateQuerierMappingExtensions.MapToNonFungibleResourcesCollection(x.Value, null, offset, limit, offset, limit)
+                x => GatewayModelExtensions.MapToNonFungibleResourcesCollection(x.Value, null, offset, limit, offset, limit)
             );
         }
 
@@ -340,7 +340,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         return nonFungiblesSliceAggregatedPerVault.ToDictionary(
             x => x.Key,
-            x => EntityStateQuerierMappingExtensions.MapToNonFungibleResourcesCollection(x.Value, nonFungibleIdsFirstPage[x.Key], offset, limit, offset, limit)
+            x => GatewayModelExtensions.MapToNonFungibleResourcesCollection(x.Value, nonFungibleIdsFirstPage[x.Key], offset, limit, offset, limit)
         );
     }
 
@@ -420,7 +420,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         if (!optIns.NonFungibleIncludeNfids || !vaultEntityIdsToQuery.Any())
         {
-            return EntityStateQuerierMappingExtensions.MapToStateEntityNonFungibleResourceVaultsPageResponse(nonFungibles, null, ledgerState,
+            return GatewayModelExtensions.MapToStateEntityNonFungibleResourceVaultsPageResponse(nonFungibles, null, ledgerState,
                 request.Offset, request.Limit, entity.GlobalAddress, resourceEntity.GlobalAddress);
         }
 
@@ -438,7 +438,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 x => x.Key,
                 x => x.ToList());
 
-        return EntityStateQuerierMappingExtensions.MapToStateEntityNonFungibleResourceVaultsPageResponse(nonFungibles, nonFungibleIdsPerVault, ledgerState,
+        return GatewayModelExtensions.MapToStateEntityNonFungibleResourceVaultsPageResponse(nonFungibles, nonFungibleIdsPerVault, ledgerState,
             request.Offset, request.Limit, entity.GlobalAddress, resourceEntity.GlobalAddress);
     }
 
