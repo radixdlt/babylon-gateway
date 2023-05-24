@@ -583,14 +583,8 @@ components:
       type: string
       example: "<network-name>"
 
-    EntityAddress:
-      description: Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
-      type: string
-    ComponentAddress:
-      description: Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id.
-      type: string
-    ResourceAddress:
-      description: Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+    Address:
+      description: Bech32m-encoded human readable version of the address.
       type: string
 
     BigDecimal:
@@ -858,7 +852,7 @@ components:
         aggregation_level:
           $ref: "#/components/schemas/ResourceAggregationLevel"
         resource_address:
-          $ref: "#/components/schemas/ResourceAddress"
+          $ref: "#/components/schemas/Address"
         explicit_metadata:
           $ref: "#/components/schemas/EntityMetadataCollection"
       discriminator:
@@ -907,7 +901,7 @@ components:
         - last_updated_at_state_version
       properties:
         vault_address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/Address"
         amount:
           $ref: "#/components/schemas/BigDecimal"
         last_updated_at_state_version:
@@ -934,7 +928,7 @@ components:
         aggregation_level:
           $ref: "#/components/schemas/ResourceAggregationLevel"
         resource_address:
-          $ref: "#/components/schemas/ResourceAddress"
+          $ref: "#/components/schemas/Address"
         explicit_metadata:
           $ref: "#/components/schemas/EntityMetadataCollection"
       discriminator:
@@ -985,7 +979,7 @@ components:
         - last_updated_at_state_version
       properties:
         vault_address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/Address"
         total_count:
           type: integer
           format: int64
@@ -1095,7 +1089,7 @@ components:
         value:
           $ref: "#/components/schemas/BigDecimal"
         address:
-          $ref: "#/components/schemas/ResourceAddress"
+          $ref: "#/components/schemas/Address"
 
     NonFungibleIdType:
       type: string
@@ -1124,7 +1118,7 @@ components:
         - current_stake
       properties:
         address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/Address"
         state:
           type: object
           nullable: true
@@ -1166,25 +1160,88 @@ components:
         well_known_addresses:
           type: object
           required:
-            - faucet
+            - xrd
+            - secp256k1_signature_virtual_badge
+            - ed25519_signature_virtual_badge
+            - package_of_direct_caller_virtual_badge
+            - global_caller_virtual_badge
+            - system_transaction_badge
+            - package_owner_badge
+            - validator_owner_badge
+            - account_owner_badge
+            - identity_owner_badge
+            - package_package
+            - resource_package
+            - account_package
+            - identity_package
+            - epoch_manager_package
+            - clock_package
+            - access_controller_package
+            - transaction_processor_package
+            - metadata_module_package
+            - royalty_module_package
+            - access_rules_package
+            - genesis_helper_package
+            - faucet_package
             - epoch_manager
             - clock
-            - ecdsa_secp256k1
-            - eddsa_ed25519
-            - xrd
+            - genesis_helper
+            - faucet
           properties:
-            faucet:
-              $ref: "#/components/schemas/ComponentAddress"
-            epoch_manager:
-              $ref: "#/components/schemas/EntityAddress"
-            clock:
-              $ref: "#/components/schemas/EntityAddress"
-            ecdsa_secp256k1:
-              $ref: "#/components/schemas/ResourceAddress"
-            eddsa_ed25519:
-              $ref: "#/components/schemas/ResourceAddress"
             xrd:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
+            secp256k1_signature_virtual_badge:
+              $ref: "#/components/schemas/Address"
+            ed25519_signature_virtual_badge:
+              $ref: "#/components/schemas/Address"
+            package_of_direct_caller_virtual_badge:
+              $ref: "#/components/schemas/Address"
+            global_caller_virtual_badge:
+              $ref: "#/components/schemas/Address"
+            system_transaction_badge:
+              $ref: "#/components/schemas/Address"
+            package_owner_badge:
+              $ref: "#/components/schemas/Address"
+            validator_owner_badge:
+              $ref: "#/components/schemas/Address"
+            account_owner_badge:
+              $ref: "#/components/schemas/Address"
+            identity_owner_badge:
+              $ref: "#/components/schemas/Address"
+            package_package:
+              $ref: "#/components/schemas/Address"
+            resource_package:
+              $ref: "#/components/schemas/Address"
+            account_package:
+              $ref: "#/components/schemas/Address"
+            identity_package:
+              $ref: "#/components/schemas/Address"
+            epoch_manager_package:
+              $ref: "#/components/schemas/Address"
+            clock_package:
+              $ref: "#/components/schemas/Address"
+            access_controller_package:
+              $ref: "#/components/schemas/Address"
+            transaction_processor_package:
+              $ref: "#/components/schemas/Address"
+            metadata_module_package:
+              $ref: "#/components/schemas/Address"
+            royalty_module_package:
+              $ref: "#/components/schemas/Address"
+            access_rules_package:
+              $ref: "#/components/schemas/Address"
+            genesis_helper_package:
+              $ref: "#/components/schemas/Address"
+            faucet_package:
+              $ref: "#/components/schemas/Address"
+            epoch_manager:
+              $ref: "#/components/schemas/Address"
+            clock:
+              $ref: "#/components/schemas/Address"
+            genesis_helper:
+              $ref: "#/components/schemas/Address"
+            faucet:
+              $ref: "#/components/schemas/Address"
 
     GatewayStatusResponse:
       allOf:
@@ -1502,7 +1559,7 @@ components:
             addresses:
               type: array
               items:
-                $ref: "#/components/schemas/EntityAddress"
+                $ref: "#/components/schemas/Address"
             aggregation_level:
               $ref: "#/components/schemas/ResourceAggregationLevel"
       example:
@@ -1539,7 +1596,7 @@ components:
         - metadata
       properties:
         address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/Address"
         fungible_resources:
           $ref: "#/components/schemas/FungibleResourcesCollection"
         non_fungible_resources:
@@ -1556,11 +1613,11 @@ components:
       type: object
       properties:
         parent_address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/Address"
         owner_address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/Address"
         global_address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/Address"
     StateEntityDetailsResponseItemDetailsType:
       type: string
       enum:
@@ -1662,7 +1719,7 @@ components:
             - access_rules_chain
           properties:
             package_address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             blueprint_name:
               type: string
             state:
@@ -1681,7 +1738,7 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
       example:
         address: "<entity-address>"
     StateEntityMetadataPageResponse:
@@ -1693,7 +1750,7 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
 
     StateEntityFungiblesPageRequest:
       allOf:
@@ -1704,7 +1761,7 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             aggregation_level:
               $ref: "#/components/schemas/ResourceAggregationLevel"
             opt_ins:
@@ -1727,7 +1784,7 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
     StateEntityFungibleResourceVaultsPageRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
@@ -1738,9 +1795,9 @@ components:
             - resource_address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
       example:
         address: "<component-entity-address>"
         resource_address: "<resource_address>"
@@ -1754,9 +1811,9 @@ components:
             - resource_address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
 
     StateEntityNonFungiblesPageRequest:
       allOf:
@@ -1767,7 +1824,7 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             aggregation_level:
               $ref: "#/components/schemas/ResourceAggregationLevel"
             opt_ins:
@@ -1790,7 +1847,7 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
 
     StateEntityNonFungibleResourceVaultsPageRequest:
       allOf:
@@ -1802,9 +1859,9 @@ components:
             - resource_address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
       example:
         address: "<component-entity-address>"
         resource_address: "<resource_address>"
@@ -1818,9 +1875,9 @@ components:
             - resource_address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
 
     StateEntityNonFungibleIdsPageRequest:
       allOf:
@@ -1833,11 +1890,11 @@ components:
             - resource_address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             vault_address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
       example:
         address: "<component-entity-address>"
         resource_address: null
@@ -1852,9 +1909,9 @@ components:
             - resource_address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
 
     #
     # /state/non-fungible/* Request & Response Types
@@ -1869,7 +1926,7 @@ components:
             - resource_address
           properties:
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
       example:
         resource_address: "<non-fungible-entity-address>"
     StateNonFungibleIdsResponse:
@@ -1881,7 +1938,7 @@ components:
             - non_fungible_ids
           properties:
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
             non_fungible_ids:
               $ref: "#/components/schemas/NonFungibleIdsCollection"
 
@@ -1894,7 +1951,7 @@ components:
             - non_fungible_ids
           properties:
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
             non_fungible_ids:
               type: array
               items:
@@ -1912,7 +1969,7 @@ components:
             - non_fungible_ids
           properties:
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
             non_fungible_id_type:
               $ref: "#/components/schemas/NonFungibleIdType"
             non_fungible_ids:
@@ -2006,7 +2063,7 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
     InvalidEntityError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"
@@ -2015,7 +2072,7 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
     NotSyncedUpError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"

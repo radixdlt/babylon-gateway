@@ -84,6 +84,23 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class ScryptoSborUtils
 {
+    public static string GetNonFungibleId(string input, byte networkId)
+    {
+        var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(Convert.FromHexString(input), networkId);
+
+        if (result is not SborDecodeResponse.ScryptoSbor scryptoSbor)
+        {
+            throw new UnreachableException("Expected ScryptoSbor response");
+        }
+
+        if (scryptoSbor.Value is not NonFungibleLocalId nonFungibleLocalId)
+        {
+            throw new UnreachableException("Expected ScryptoSbor.NonFungibleLocalId");
+        }
+
+        return nonFungibleLocalId.Value;
+    }
+
     public static string ConvertFromScryptoSborString(string input, byte networkId)
     {
         var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(Convert.FromHexString(input), networkId);
@@ -118,7 +135,7 @@ internal static class ScryptoSborUtils
         string? asString = null;
         List<string>? asStringCollection = null;
 
-        switch (metadataEntry.Variant)
+        switch (metadataEntry.VariantId)
         {
             case 0 when metadataEntry.Fields is [Enum variantEnum]:
                 asString = GetSimpleStringOfMetadataValue(logger, variantEnum);
@@ -137,7 +154,7 @@ internal static class ScryptoSborUtils
 
         if (asString == null)
         {
-            logger.LogWarning("Unknown MetadataEntry variant: {}", metadataEntry.Variant);
+            logger.LogWarning("Unknown MetadataEntry variant: {}", metadataEntry.VariantId);
             asString = "[UnrecognizedMetadataEntry]";
         }
 
@@ -150,7 +167,7 @@ internal static class ScryptoSborUtils
 
     public static string GetSimpleStringOfMetadataValue(ILogger logger, Enum variantEnum)
     {
-        switch (variantEnum.Variant)
+        switch (variantEnum.VariantId)
         {
             // See https://github.com/radixdlt/radixdlt-scrypto/blob/release/rcnet-v1/transaction/examples/metadata/metadata.rtm
             case 0 when variantEnum.Fields is [String value]:
@@ -172,69 +189,52 @@ internal static class ScryptoSborUtils
             case 8 when variantEnum.Fields is [Address value]:
                 return value.TmpAddress;
             case 9 when variantEnum.Fields is [Enum publicKeyEnum]:
-                var keyName = publicKeyEnum.Variant switch
+                var keyName = publicKeyEnum.VariantId switch
                 {
                     0 => "EcdsaSecp256k1PublicKey",
                     1 => "EddsaEd25519PublicKey",
-                    _ => $"PublicKeyType[{publicKeyEnum.Variant}]", // Fallback
+                    _ => $"PublicKeyType[{publicKeyEnum.VariantId}]", // Fallback
                 };
 
-                if (publicKeyEnum.Fields is [Array keyBytes])
+                if (publicKeyEnum.Fields is [Bytes keyBytes])
                 {
-                    try
-                    {
-                        var bytes = keyBytes.Elements.Cast<U8>().Select(byteValue => byteValue.Value).ToArray();
-                        return $"{keyName}(\"{Convert.ToHexString(bytes).ToLowerInvariant()}\")";
-                    }
-                    catch (InvalidCastException)
-                    {
-                        // Fallthrough to default
-                    }
+                    return $"{keyName}(\"{Convert.ToHexString(keyBytes.Hex).ToLowerInvariant()}\")";
                 }
 
                 break;
             case 10 when variantEnum.Fields is [Tuple nonFungibleGlobalId]:
-                if (nonFungibleGlobalId.Elements is [Address nonFungibleResourceAddress, NonFungibleLocalId nonFungibleLocalId])
+                if (nonFungibleGlobalId.Fields is [Address nonFungibleResourceAddress, NonFungibleLocalId nonFungibleLocalId])
                 {
-                    return $"{nonFungibleResourceAddress.TmpAddress}:{FormatNonFungibleLocalId(nonFungibleLocalId.Value)}";
+                    return $"{nonFungibleResourceAddress.TmpAddress}:{nonFungibleLocalId.Value}";
                 }
 
                 break;
             case 11 when variantEnum.Fields is [NonFungibleLocalId value]:
-                return FormatNonFungibleLocalId(value.Value);
-            case 12 when variantEnum.Fields is [Tuple instant]:
-                if (instant.Elements is [I64 unixTimestampSeconds])
+                return value.Value;
+            case 12 when variantEnum.Fields is [I64 instant]:
+                return DateTimeOffset.FromUnixTimeSeconds(instant.Value).AsUtcIsoDateAtSecondsPrecisionString();
+            case 13 when variantEnum.Fields is [String url]:
+                return url.Value;
+            case 14 when variantEnum.Fields is [String origin]:
+                return origin.Value;
+            case 15 when variantEnum.Fields is [Enum publicKeyHashEnum]:
+                var hashKeyName = publicKeyHashEnum.VariantId switch
                 {
-                    return DateTimeOffset.FromUnixTimeSeconds(unixTimestampSeconds.Value).AsUtcIsoDateAtSecondsPrecisionString();
+                    0 => "EcdsaSecp256k1PublicKeyHash",
+                    1 => "EddsaEd25519PublicKeyHash",
+                    _ => $"PublicKeyHashType[{publicKeyHashEnum.VariantId}]", // Fallback
+                };
+
+                if (publicKeyHashEnum.Fields is [Bytes hashKeyBytes])
+                {
+                    return $"{hashKeyName}(\"{Convert.ToHexString(hashKeyBytes.Hex).ToLowerInvariant()}\")";
                 }
 
                 break;
-            case 13 when variantEnum.Fields is [String url]:
-                return url.Value;
         }
 
-        logger.LogWarning("MetadataValue variant could not be mapped successfully: {}", variantEnum.Variant);
+        logger.LogWarning("MetadataValue variant could not be mapped successfully: {}", variantEnum.VariantId);
         return "[UnrecognizedMetadataValue]";
-    }
-
-    public static string FormatNonFungibleLocalId(ToolkitModel.INonFungibleLocalId nonFungibleLocalId)
-    {
-        switch (nonFungibleLocalId)
-        {
-            case ToolkitModel.INonFungibleLocalId.Bytes bytes:
-                return $"[{Convert.ToHexString(bytes.Value).ToLowerInvariant()}]";
-            case ToolkitModel.INonFungibleLocalId.Integer integer:
-                return $"#{integer.Value}#";
-            case ToolkitModel.INonFungibleLocalId.String s:
-                return $"<{s.Value}>";
-            case ToolkitModel.INonFungibleLocalId.UUID uuid:
-                // Checked that this matches the representation in the Engine.
-                // EG 5c220001220b01c0031c8cb574c04c44b2aa87263a00000000 should be {1c8cb574-c04c-44b2-aa87-263a00000000}
-                // This should probably be lifted into the toolkit wrapper and a Guid be wrapped.
-                return Guid.ParseExact(Convert.ToHexString(BigInteger.Parse(uuid.Value).ToByteArray(isUnsigned: true, isBigEndian: true)), "N").ToString("B");
-            default:
-                throw new ArgumentOutOfRangeException(nameof(nonFungibleLocalId));
-        }
     }
 
     public static GatewayModel.ScryptoSborValue NonFungibleDataToGatewayScryptoSbor(byte[] rawScryptoSbor, byte networkId)

@@ -103,16 +103,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="LtsFungibleResourceBalanceChange" /> class.
         /// </summary>
-        /// <param name="fungibleResourceAddress">The Bech32m-encoded human readable version of the fungible resource&#39;s global address (required).</param>
+        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the fungible resource&#39;s address  (required).</param>
         /// <param name="balanceChange">The string-encoded decimal representing the amount of change for the fungible resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
-        public LtsFungibleResourceBalanceChange(string fungibleResourceAddress = default(string), string balanceChange = default(string))
+        public LtsFungibleResourceBalanceChange(string resourceAddress = default(string), string balanceChange = default(string))
         {
-            // to ensure "fungibleResourceAddress" is required (not null)
-            if (fungibleResourceAddress == null)
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("fungibleResourceAddress is a required property for LtsFungibleResourceBalanceChange and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for LtsFungibleResourceBalanceChange and cannot be null");
             }
-            this.FungibleResourceAddress = fungibleResourceAddress;
+            this.ResourceAddress = resourceAddress;
             // to ensure "balanceChange" is required (not null)
             if (balanceChange == null)
             {
@@ -122,11 +122,11 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the fungible resource&#39;s global address
+        /// The Bech32m-encoded human readable version of the fungible resource&#39;s address 
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the fungible resource&#39;s global address</value>
-        [DataMember(Name = "fungible_resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string FungibleResourceAddress { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the fungible resource&#39;s address </value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// The string-encoded decimal representing the amount of change for the fungible resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
@@ -143,7 +143,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class LtsFungibleResourceBalanceChange {\n");
-            sb.Append("  FungibleResourceAddress: ").Append(FungibleResourceAddress).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("  BalanceChange: ").Append(BalanceChange).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -181,9 +181,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.FungibleResourceAddress == input.FungibleResourceAddress ||
-                    (this.FungibleResourceAddress != null &&
-                    this.FungibleResourceAddress.Equals(input.FungibleResourceAddress))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 ) && 
                 (
                     this.BalanceChange == input.BalanceChange ||
@@ -201,9 +201,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.FungibleResourceAddress != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.FungibleResourceAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
                 if (this.BalanceChange != null)
                 {

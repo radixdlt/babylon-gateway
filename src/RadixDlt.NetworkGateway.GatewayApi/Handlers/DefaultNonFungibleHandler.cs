@@ -89,7 +89,7 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
 
         var cursor = GatewayModel.OffsetCursor.FromCursorString(request.Cursor);
         var pageRequest = new IEntityStateQuerier.PageRequest(
-            Address: (GlobalAddress)request.ResourceAddress,
+            Address: (EntityAddress)request.ResourceAddress,
             Offset: cursor?.Offset ?? 0,
             Limit: request.LimitPerPage ?? DefaultPageLimit
         );
@@ -101,6 +101,6 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
-        return await _entityStateQuerier.NonFungibleIdData((GlobalAddress)request.ResourceAddress, request.NonFungibleIds, ledgerState, token);
+        return await _entityStateQuerier.NonFungibleIdData((EntityAddress)request.ResourceAddress, request.NonFungibleIds, ledgerState, token);
     }
 }

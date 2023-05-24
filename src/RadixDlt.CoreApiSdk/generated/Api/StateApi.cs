@@ -113,6 +113,27 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <returns>ApiResponse of StateAccessControllerResponse</returns>
         ApiResponse<StateAccessControllerResponse> StateAccessControllerPostWithHttpInfo(StateAccessControllerRequest stateAccessControllerRequest);
         /// <summary>
+        /// Get Account Details
+        /// </summary>
+        /// <remarks>
+        /// Reads the account&#39;s substate/s from the top of the current ledger. Also returns all vaults under the account. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountRequest"></param>
+        /// <returns>StateAccountResponse</returns>
+        StateAccountResponse StateAccountPost(StateAccountRequest stateAccountRequest);
+
+        /// <summary>
+        /// Get Account Details
+        /// </summary>
+        /// <remarks>
+        /// Reads the account&#39;s substate/s from the top of the current ledger. Also returns all vaults under the account. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountRequest"></param>
+        /// <returns>ApiResponse of StateAccountResponse</returns>
+        ApiResponse<StateAccountResponse> StateAccountPostWithHttpInfo(StateAccountRequest stateAccountRequest);
+        /// <summary>
         /// Get Clock Details
         /// </summary>
         /// <remarks>
@@ -291,6 +312,29 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (StateAccessControllerResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<StateAccessControllerResponse>> StateAccessControllerPostWithHttpInfoAsync(StateAccessControllerRequest stateAccessControllerRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Account Details
+        /// </summary>
+        /// <remarks>
+        /// Reads the account&#39;s substate/s from the top of the current ledger. Also returns all vaults under the account. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccountResponse</returns>
+        System.Threading.Tasks.Task<StateAccountResponse> StateAccountPostAsync(StateAccountRequest stateAccountRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Account Details
+        /// </summary>
+        /// <remarks>
+        /// Reads the account&#39;s substate/s from the top of the current ledger. Also returns all vaults under the account. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccountResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateAccountResponse>> StateAccountPostWithHttpInfoAsync(StateAccountRequest stateAccountRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Clock Details
         /// </summary>
@@ -776,6 +820,123 @@ namespace RadixDlt.CoreApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("StateAccessControllerPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Account Details Reads the account&#39;s substate/s from the top of the current ledger. Also returns all vaults under the account. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountRequest"></param>
+        /// <returns>StateAccountResponse</returns>
+        public StateAccountResponse StateAccountPost(StateAccountRequest stateAccountRequest)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<StateAccountResponse> localVarResponse = StateAccountPostWithHttpInfo(stateAccountRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Account Details Reads the account&#39;s substate/s from the top of the current ledger. Also returns all vaults under the account. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountRequest"></param>
+        /// <returns>ApiResponse of StateAccountResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<StateAccountResponse> StateAccountPostWithHttpInfo(StateAccountRequest stateAccountRequest)
+        {
+            // verify the required parameter 'stateAccountRequest' is set
+            if (stateAccountRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccountRequest' when calling StateApi->StateAccountPost");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccountRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateAccountResponse>("/state/account", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("StateAccountPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Account Details Reads the account&#39;s substate/s from the top of the current ledger. Also returns all vaults under the account. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateAccountResponse</returns>
+        public async System.Threading.Tasks.Task<StateAccountResponse> StateAccountPostAsync(StateAccountRequest stateAccountRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<StateAccountResponse> localVarResponse = await StateAccountPostWithHttpInfoAsync(stateAccountRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Account Details Reads the account&#39;s substate/s from the top of the current ledger. Also returns all vaults under the account. 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateAccountRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateAccountResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<StateAccountResponse>> StateAccountPostWithHttpInfoAsync(StateAccountRequest stateAccountRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateAccountRequest' is set
+            if (stateAccountRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'stateAccountRequest' when calling StateApi->StateAccountPost");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateAccountRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateAccountResponse>("/state/account", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("StateAccountPost", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

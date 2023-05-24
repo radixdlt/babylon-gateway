@@ -100,7 +100,6 @@ public static class ServiceCollectionExtensions
                 var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
 
                 dataSourceBuilder.UseLoggerFactory(sp.GetService<ILoggerFactory>());
-                dataSourceBuilder.MapEnum<AccessRulesChainSubtype>();
                 dataSourceBuilder.MapEnum<EntityType>();
                 dataSourceBuilder.MapEnum<LedgerTransactionKindFilterConstraint>();
                 dataSourceBuilder.MapEnum<LedgerTransactionStatus>();

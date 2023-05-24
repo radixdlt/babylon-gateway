@@ -105,8 +105,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch (required).</param>
         /// <param name="epochManager">epochManager (required).</param>
-        /// <param name="activeValidatorSet">activeValidatorSet (required).</param>
-        public StateEpochResponse(long epoch = default(long), Substate epochManager = default(Substate), Substate activeValidatorSet = default(Substate))
+        /// <param name="currentValidatorSet">currentValidatorSet (required).</param>
+        public StateEpochResponse(long epoch = default(long), Substate epochManager = default(Substate), Substate currentValidatorSet = default(Substate))
         {
             this.Epoch = epoch;
             // to ensure "epochManager" is required (not null)
@@ -115,12 +115,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("epochManager is a required property for StateEpochResponse and cannot be null");
             }
             this.EpochManager = epochManager;
-            // to ensure "activeValidatorSet" is required (not null)
-            if (activeValidatorSet == null)
+            // to ensure "currentValidatorSet" is required (not null)
+            if (currentValidatorSet == null)
             {
-                throw new ArgumentNullException("activeValidatorSet is a required property for StateEpochResponse and cannot be null");
+                throw new ArgumentNullException("currentValidatorSet is a required property for StateEpochResponse and cannot be null");
             }
-            this.ActiveValidatorSet = activeValidatorSet;
+            this.CurrentValidatorSet = currentValidatorSet;
         }
 
         /// <summary>
@@ -137,10 +137,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public Substate EpochManager { get; set; }
 
         /// <summary>
-        /// Gets or Sets ActiveValidatorSet
+        /// Gets or Sets CurrentValidatorSet
         /// </summary>
-        [DataMember(Name = "active_validator_set", IsRequired = true, EmitDefaultValue = true)]
-        public Substate ActiveValidatorSet { get; set; }
+        [DataMember(Name = "current_validator_set", IsRequired = true, EmitDefaultValue = true)]
+        public Substate CurrentValidatorSet { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -152,7 +152,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class StateEpochResponse {\n");
             sb.Append("  Epoch: ").Append(Epoch).Append("\n");
             sb.Append("  EpochManager: ").Append(EpochManager).Append("\n");
-            sb.Append("  ActiveValidatorSet: ").Append(ActiveValidatorSet).Append("\n");
+            sb.Append("  CurrentValidatorSet: ").Append(CurrentValidatorSet).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -198,9 +198,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.EpochManager.Equals(input.EpochManager))
                 ) && 
                 (
-                    this.ActiveValidatorSet == input.ActiveValidatorSet ||
-                    (this.ActiveValidatorSet != null &&
-                    this.ActiveValidatorSet.Equals(input.ActiveValidatorSet))
+                    this.CurrentValidatorSet == input.CurrentValidatorSet ||
+                    (this.CurrentValidatorSet != null &&
+                    this.CurrentValidatorSet.Equals(input.CurrentValidatorSet))
                 );
         }
 
@@ -218,9 +218,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.EpochManager.GetHashCode();
                 }
-                if (this.ActiveValidatorSet != null)
+                if (this.CurrentValidatorSet != null)
                 {
-                    hashCode = (hashCode * 59) + this.ActiveValidatorSet.GetHashCode();
+                    hashCode = (hashCode * 59) + this.CurrentValidatorSet.GetHashCode();
                 }
                 return hashCode;
             }

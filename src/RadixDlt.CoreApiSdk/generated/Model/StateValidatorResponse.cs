@@ -103,12 +103,19 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateValidatorResponse" /> class.
         /// </summary>
+        /// <param name="address">The Bech32m-encoded human readable version of the component address (required).</param>
         /// <param name="state">state (required).</param>
         /// <param name="accessRules">accessRules (required).</param>
-        /// <param name="stateOwnedVaults">Any vaults owned directly or indirectly by the component (required).</param>
-        /// <param name="descendentIds">Any descendent nodes owned directly or indirectly by the component (required).</param>
-        public StateValidatorResponse(Substate state = default(Substate), Substate accessRules = default(Substate), List<ResourceAmount> stateOwnedVaults = default(List<ResourceAmount>), List<StateComponentDescendentId> descendentIds = default(List<StateComponentDescendentId>))
+        /// <param name="vaults">Any vaults owned directly or indirectly by the component (required).</param>
+        /// <param name="descendentNodes">Any descendent nodes owned directly or indirectly by the component (required).</param>
+        public StateValidatorResponse(string address = default(string), Substate state = default(Substate), Substate accessRules = default(Substate), List<VaultBalance> vaults = default(List<VaultBalance>), List<StateComponentDescendentNode> descendentNodes = default(List<StateComponentDescendentNode>))
         {
+            // to ensure "address" is required (not null)
+            if (address == null)
+            {
+                throw new ArgumentNullException("address is a required property for StateValidatorResponse and cannot be null");
+            }
+            this.Address = address;
             // to ensure "state" is required (not null)
             if (state == null)
             {
@@ -121,19 +128,26 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("accessRules is a required property for StateValidatorResponse and cannot be null");
             }
             this.AccessRules = accessRules;
-            // to ensure "stateOwnedVaults" is required (not null)
-            if (stateOwnedVaults == null)
+            // to ensure "vaults" is required (not null)
+            if (vaults == null)
             {
-                throw new ArgumentNullException("stateOwnedVaults is a required property for StateValidatorResponse and cannot be null");
+                throw new ArgumentNullException("vaults is a required property for StateValidatorResponse and cannot be null");
             }
-            this.StateOwnedVaults = stateOwnedVaults;
-            // to ensure "descendentIds" is required (not null)
-            if (descendentIds == null)
+            this.Vaults = vaults;
+            // to ensure "descendentNodes" is required (not null)
+            if (descendentNodes == null)
             {
-                throw new ArgumentNullException("descendentIds is a required property for StateValidatorResponse and cannot be null");
+                throw new ArgumentNullException("descendentNodes is a required property for StateValidatorResponse and cannot be null");
             }
-            this.DescendentIds = descendentIds;
+            this.DescendentNodes = descendentNodes;
         }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the component address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the component address</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
         /// Gets or Sets State
@@ -151,15 +165,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Any vaults owned directly or indirectly by the component
         /// </summary>
         /// <value>Any vaults owned directly or indirectly by the component</value>
-        [DataMember(Name = "state_owned_vaults", IsRequired = true, EmitDefaultValue = true)]
-        public List<ResourceAmount> StateOwnedVaults { get; set; }
+        [DataMember(Name = "vaults", IsRequired = true, EmitDefaultValue = true)]
+        public List<VaultBalance> Vaults { get; set; }
 
         /// <summary>
         /// Any descendent nodes owned directly or indirectly by the component
         /// </summary>
         /// <value>Any descendent nodes owned directly or indirectly by the component</value>
-        [DataMember(Name = "descendent_ids", IsRequired = true, EmitDefaultValue = true)]
-        public List<StateComponentDescendentId> DescendentIds { get; set; }
+        [DataMember(Name = "descendent_nodes", IsRequired = true, EmitDefaultValue = true)]
+        public List<StateComponentDescendentNode> DescendentNodes { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -169,10 +183,11 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateValidatorResponse {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
             sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
-            sb.Append("  StateOwnedVaults: ").Append(StateOwnedVaults).Append("\n");
-            sb.Append("  DescendentIds: ").Append(DescendentIds).Append("\n");
+            sb.Append("  Vaults: ").Append(Vaults).Append("\n");
+            sb.Append("  DescendentNodes: ").Append(DescendentNodes).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -209,6 +224,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
+                ) && 
+                (
                     this.State == input.State ||
                     (this.State != null &&
                     this.State.Equals(input.State))
@@ -219,16 +239,16 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.AccessRules.Equals(input.AccessRules))
                 ) && 
                 (
-                    this.StateOwnedVaults == input.StateOwnedVaults ||
-                    this.StateOwnedVaults != null &&
-                    input.StateOwnedVaults != null &&
-                    this.StateOwnedVaults.SequenceEqual(input.StateOwnedVaults)
+                    this.Vaults == input.Vaults ||
+                    this.Vaults != null &&
+                    input.Vaults != null &&
+                    this.Vaults.SequenceEqual(input.Vaults)
                 ) && 
                 (
-                    this.DescendentIds == input.DescendentIds ||
-                    this.DescendentIds != null &&
-                    input.DescendentIds != null &&
-                    this.DescendentIds.SequenceEqual(input.DescendentIds)
+                    this.DescendentNodes == input.DescendentNodes ||
+                    this.DescendentNodes != null &&
+                    input.DescendentNodes != null &&
+                    this.DescendentNodes.SequenceEqual(input.DescendentNodes)
                 );
         }
 
@@ -241,6 +261,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.Address != null)
+                {
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                }
                 if (this.State != null)
                 {
                     hashCode = (hashCode * 59) + this.State.GetHashCode();
@@ -249,13 +273,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
                 }
-                if (this.StateOwnedVaults != null)
+                if (this.Vaults != null)
                 {
-                    hashCode = (hashCode * 59) + this.StateOwnedVaults.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Vaults.GetHashCode();
                 }
-                if (this.DescendentIds != null)
+                if (this.DescendentNodes != null)
                 {
-                    hashCode = (hashCode * 59) + this.DescendentIds.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DescendentNodes.GetHashCode();
                 }
                 return hashCode;
             }

@@ -104,14 +104,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="StateComponentResponse" /> class.
         /// </summary>
         /// <param name="info">info (required).</param>
-        /// <param name="state">state.</param>
-        /// <param name="account">account.</param>
-        /// <param name="royaltyConfig">royaltyConfig.</param>
-        /// <param name="royaltyAccumulator">royaltyAccumulator.</param>
+        /// <param name="state">state (required).</param>
+        /// <param name="royaltyConfig">royaltyConfig (required).</param>
+        /// <param name="royaltyAccumulator">royaltyAccumulator (required).</param>
         /// <param name="accessRules">accessRules (required).</param>
-        /// <param name="stateOwnedVaults">Any vaults owned directly or indirectly by the component (required).</param>
-        /// <param name="descendentIds">Any descendent nodes owned directly or indirectly by the component (required).</param>
-        public StateComponentResponse(Substate info = default(Substate), Substate state = default(Substate), Substate account = default(Substate), Substate royaltyConfig = default(Substate), Substate royaltyAccumulator = default(Substate), Substate accessRules = default(Substate), List<ResourceAmount> stateOwnedVaults = default(List<ResourceAmount>), List<StateComponentDescendentId> descendentIds = default(List<StateComponentDescendentId>))
+        /// <param name="vaults">Any vaults owned directly or indirectly by the component (required).</param>
+        /// <param name="descendentNodes">Any descendent nodes owned directly or indirectly by the component (required).</param>
+        public StateComponentResponse(Substate info = default(Substate), Substate state = default(Substate), Substate royaltyConfig = default(Substate), Substate royaltyAccumulator = default(Substate), Substate accessRules = default(Substate), List<VaultBalance> vaults = default(List<VaultBalance>), List<StateComponentDescendentNode> descendentNodes = default(List<StateComponentDescendentNode>))
         {
             // to ensure "info" is required (not null)
             if (info == null)
@@ -119,28 +118,42 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("info is a required property for StateComponentResponse and cannot be null");
             }
             this.Info = info;
+            // to ensure "state" is required (not null)
+            if (state == null)
+            {
+                throw new ArgumentNullException("state is a required property for StateComponentResponse and cannot be null");
+            }
+            this.State = state;
+            // to ensure "royaltyConfig" is required (not null)
+            if (royaltyConfig == null)
+            {
+                throw new ArgumentNullException("royaltyConfig is a required property for StateComponentResponse and cannot be null");
+            }
+            this.RoyaltyConfig = royaltyConfig;
+            // to ensure "royaltyAccumulator" is required (not null)
+            if (royaltyAccumulator == null)
+            {
+                throw new ArgumentNullException("royaltyAccumulator is a required property for StateComponentResponse and cannot be null");
+            }
+            this.RoyaltyAccumulator = royaltyAccumulator;
             // to ensure "accessRules" is required (not null)
             if (accessRules == null)
             {
                 throw new ArgumentNullException("accessRules is a required property for StateComponentResponse and cannot be null");
             }
             this.AccessRules = accessRules;
-            // to ensure "stateOwnedVaults" is required (not null)
-            if (stateOwnedVaults == null)
+            // to ensure "vaults" is required (not null)
+            if (vaults == null)
             {
-                throw new ArgumentNullException("stateOwnedVaults is a required property for StateComponentResponse and cannot be null");
+                throw new ArgumentNullException("vaults is a required property for StateComponentResponse and cannot be null");
             }
-            this.StateOwnedVaults = stateOwnedVaults;
-            // to ensure "descendentIds" is required (not null)
-            if (descendentIds == null)
+            this.Vaults = vaults;
+            // to ensure "descendentNodes" is required (not null)
+            if (descendentNodes == null)
             {
-                throw new ArgumentNullException("descendentIds is a required property for StateComponentResponse and cannot be null");
+                throw new ArgumentNullException("descendentNodes is a required property for StateComponentResponse and cannot be null");
             }
-            this.DescendentIds = descendentIds;
-            this.State = state;
-            this.Account = account;
-            this.RoyaltyConfig = royaltyConfig;
-            this.RoyaltyAccumulator = royaltyAccumulator;
+            this.DescendentNodes = descendentNodes;
         }
 
         /// <summary>
@@ -152,25 +165,19 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Gets or Sets State
         /// </summary>
-        [DataMember(Name = "state", EmitDefaultValue = true)]
+        [DataMember(Name = "state", IsRequired = true, EmitDefaultValue = true)]
         public Substate State { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Account
-        /// </summary>
-        [DataMember(Name = "account", EmitDefaultValue = true)]
-        public Substate Account { get; set; }
 
         /// <summary>
         /// Gets or Sets RoyaltyConfig
         /// </summary>
-        [DataMember(Name = "royalty_config", EmitDefaultValue = true)]
+        [DataMember(Name = "royalty_config", IsRequired = true, EmitDefaultValue = true)]
         public Substate RoyaltyConfig { get; set; }
 
         /// <summary>
         /// Gets or Sets RoyaltyAccumulator
         /// </summary>
-        [DataMember(Name = "royalty_accumulator", EmitDefaultValue = true)]
+        [DataMember(Name = "royalty_accumulator", IsRequired = true, EmitDefaultValue = true)]
         public Substate RoyaltyAccumulator { get; set; }
 
         /// <summary>
@@ -183,15 +190,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Any vaults owned directly or indirectly by the component
         /// </summary>
         /// <value>Any vaults owned directly or indirectly by the component</value>
-        [DataMember(Name = "state_owned_vaults", IsRequired = true, EmitDefaultValue = true)]
-        public List<ResourceAmount> StateOwnedVaults { get; set; }
+        [DataMember(Name = "vaults", IsRequired = true, EmitDefaultValue = true)]
+        public List<VaultBalance> Vaults { get; set; }
 
         /// <summary>
         /// Any descendent nodes owned directly or indirectly by the component
         /// </summary>
         /// <value>Any descendent nodes owned directly or indirectly by the component</value>
-        [DataMember(Name = "descendent_ids", IsRequired = true, EmitDefaultValue = true)]
-        public List<StateComponentDescendentId> DescendentIds { get; set; }
+        [DataMember(Name = "descendent_nodes", IsRequired = true, EmitDefaultValue = true)]
+        public List<StateComponentDescendentNode> DescendentNodes { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -203,12 +210,11 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class StateComponentResponse {\n");
             sb.Append("  Info: ").Append(Info).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
-            sb.Append("  Account: ").Append(Account).Append("\n");
             sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
             sb.Append("  RoyaltyAccumulator: ").Append(RoyaltyAccumulator).Append("\n");
             sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
-            sb.Append("  StateOwnedVaults: ").Append(StateOwnedVaults).Append("\n");
-            sb.Append("  DescendentIds: ").Append(DescendentIds).Append("\n");
+            sb.Append("  Vaults: ").Append(Vaults).Append("\n");
+            sb.Append("  DescendentNodes: ").Append(DescendentNodes).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -255,11 +261,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.State.Equals(input.State))
                 ) && 
                 (
-                    this.Account == input.Account ||
-                    (this.Account != null &&
-                    this.Account.Equals(input.Account))
-                ) && 
-                (
                     this.RoyaltyConfig == input.RoyaltyConfig ||
                     (this.RoyaltyConfig != null &&
                     this.RoyaltyConfig.Equals(input.RoyaltyConfig))
@@ -275,16 +276,16 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.AccessRules.Equals(input.AccessRules))
                 ) && 
                 (
-                    this.StateOwnedVaults == input.StateOwnedVaults ||
-                    this.StateOwnedVaults != null &&
-                    input.StateOwnedVaults != null &&
-                    this.StateOwnedVaults.SequenceEqual(input.StateOwnedVaults)
+                    this.Vaults == input.Vaults ||
+                    this.Vaults != null &&
+                    input.Vaults != null &&
+                    this.Vaults.SequenceEqual(input.Vaults)
                 ) && 
                 (
-                    this.DescendentIds == input.DescendentIds ||
-                    this.DescendentIds != null &&
-                    input.DescendentIds != null &&
-                    this.DescendentIds.SequenceEqual(input.DescendentIds)
+                    this.DescendentNodes == input.DescendentNodes ||
+                    this.DescendentNodes != null &&
+                    input.DescendentNodes != null &&
+                    this.DescendentNodes.SequenceEqual(input.DescendentNodes)
                 );
         }
 
@@ -305,10 +306,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.State.GetHashCode();
                 }
-                if (this.Account != null)
-                {
-                    hashCode = (hashCode * 59) + this.Account.GetHashCode();
-                }
                 if (this.RoyaltyConfig != null)
                 {
                     hashCode = (hashCode * 59) + this.RoyaltyConfig.GetHashCode();
@@ -321,13 +318,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
                 }
-                if (this.StateOwnedVaults != null)
+                if (this.Vaults != null)
                 {
-                    hashCode = (hashCode * 59) + this.StateOwnedVaults.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Vaults.GetHashCode();
                 }
-                if (this.DescendentIds != null)
+                if (this.DescendentNodes != null)
                 {
-                    hashCode = (hashCode * 59) + this.DescendentIds.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DescendentNodes.GetHashCode();
                 }
                 return hashCode;
             }

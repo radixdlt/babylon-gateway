@@ -98,41 +98,26 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionManifest" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected TransactionManifest() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionManifest" /> class.
-        /// </summary>
-        /// <param name="instructions">The decompiled transaction manifest instructions (required).</param>
-        /// <param name="blobsHex">A map of the hex-encoded blob hash, to hex-encoded blob content (required).</param>
+        /// <param name="instructions">The decompiled transaction manifest instructions. Only returned if enabled in TransactionFormatOptions on your request..</param>
+        /// <param name="blobsHex">A map of the hex-encoded blob hash, to hex-encoded blob content. Only returned if enabled in TransactionFormatOptions on your request..</param>
         public TransactionManifest(string instructions = default(string), Dictionary<string, string> blobsHex = default(Dictionary<string, string>))
         {
-            // to ensure "instructions" is required (not null)
-            if (instructions == null)
-            {
-                throw new ArgumentNullException("instructions is a required property for TransactionManifest and cannot be null");
-            }
             this.Instructions = instructions;
-            // to ensure "blobsHex" is required (not null)
-            if (blobsHex == null)
-            {
-                throw new ArgumentNullException("blobsHex is a required property for TransactionManifest and cannot be null");
-            }
             this.BlobsHex = blobsHex;
         }
 
         /// <summary>
-        /// The decompiled transaction manifest instructions
+        /// The decompiled transaction manifest instructions. Only returned if enabled in TransactionFormatOptions on your request.
         /// </summary>
-        /// <value>The decompiled transaction manifest instructions</value>
-        [DataMember(Name = "instructions", IsRequired = true, EmitDefaultValue = true)]
+        /// <value>The decompiled transaction manifest instructions. Only returned if enabled in TransactionFormatOptions on your request.</value>
+        [DataMember(Name = "instructions", EmitDefaultValue = true)]
         public string Instructions { get; set; }
 
         /// <summary>
-        /// A map of the hex-encoded blob hash, to hex-encoded blob content
+        /// A map of the hex-encoded blob hash, to hex-encoded blob content. Only returned if enabled in TransactionFormatOptions on your request.
         /// </summary>
-        /// <value>A map of the hex-encoded blob hash, to hex-encoded blob content</value>
-        [DataMember(Name = "blobs_hex", IsRequired = true, EmitDefaultValue = true)]
+        /// <value>A map of the hex-encoded blob hash, to hex-encoded blob content. Only returned if enabled in TransactionFormatOptions on your request.</value>
+        [DataMember(Name = "blobs_hex", EmitDefaultValue = true)]
         public Dictionary<string, string> BlobsHex { get; set; }
 
         /// <summary>

@@ -111,9 +111,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="AmountOfProofRule" /> class.
         /// </summary>
         /// <param name="amount">amount (required).</param>
-        /// <param name="resource">resource (required).</param>
+        /// <param name="resource">The Bech32m-encoded human readable version of the resource address (required).</param>
         /// <param name="type">type (required) (default to ProofRuleType.AmountOf).</param>
-        public AmountOfProofRule(DynamicAmount amount = default(DynamicAmount), DynamicResourceDescriptor resource = default(DynamicResourceDescriptor), ProofRuleType type = ProofRuleType.AmountOf) : base(type)
+        public AmountOfProofRule(string amount = default(string), string resource = default(string), ProofRuleType type = ProofRuleType.AmountOf) : base(type)
         {
             // to ensure "amount" is required (not null)
             if (amount == null)
@@ -133,13 +133,14 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Amount
         /// </summary>
         [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public DynamicAmount Amount { get; set; }
+        public string Amount { get; set; }
 
         /// <summary>
-        /// Gets or Sets Resource
+        /// The Bech32m-encoded human readable version of the resource address
         /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the resource address</value>
         [DataMember(Name = "resource", IsRequired = true, EmitDefaultValue = true)]
-        public DynamicResourceDescriptor Resource { get; set; }
+        public string Resource { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

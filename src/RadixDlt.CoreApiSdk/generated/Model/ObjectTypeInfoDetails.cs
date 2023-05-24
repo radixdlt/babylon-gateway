@@ -110,8 +110,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
         /// <param name="blueprintName">blueprintName (required).</param>
         /// <param name="global">global (required).</param>
+        /// <param name="outerObject">The Bech32m-encoded human readable version of any global address.</param>
+        /// <param name="instanceSchema">instanceSchema.</param>
         /// <param name="type">type (required) (default to TypeInfoType.Object).</param>
-        public ObjectTypeInfoDetails(string packageAddress = default(string), string blueprintName = default(string), bool global = default(bool), TypeInfoType type = TypeInfoType.Object) : base(type)
+        public ObjectTypeInfoDetails(string packageAddress = default(string), string blueprintName = default(string), bool global = default(bool), string outerObject = default(string), InstanceSchema instanceSchema = default(InstanceSchema), TypeInfoType type = TypeInfoType.Object) : base(type)
         {
             // to ensure "packageAddress" is required (not null)
             if (packageAddress == null)
@@ -126,6 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.BlueprintName = blueprintName;
             this.Global = global;
+            this.OuterObject = outerObject;
+            this.InstanceSchema = instanceSchema;
         }
 
         /// <summary>
@@ -148,6 +152,19 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool Global { get; set; }
 
         /// <summary>
+        /// The Bech32m-encoded human readable version of any global address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of any global address</value>
+        [DataMember(Name = "outer_object", EmitDefaultValue = true)]
+        public string OuterObject { get; set; }
+
+        /// <summary>
+        /// Gets or Sets InstanceSchema
+        /// </summary>
+        [DataMember(Name = "instance_schema", EmitDefaultValue = true)]
+        public InstanceSchema InstanceSchema { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -159,6 +176,8 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
             sb.Append("  Global: ").Append(Global).Append("\n");
+            sb.Append("  OuterObject: ").Append(OuterObject).Append("\n");
+            sb.Append("  InstanceSchema: ").Append(InstanceSchema).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -207,6 +226,16 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.Global == input.Global ||
                     this.Global.Equals(input.Global)
+                ) && base.Equals(input) && 
+                (
+                    this.OuterObject == input.OuterObject ||
+                    (this.OuterObject != null &&
+                    this.OuterObject.Equals(input.OuterObject))
+                ) && base.Equals(input) && 
+                (
+                    this.InstanceSchema == input.InstanceSchema ||
+                    (this.InstanceSchema != null &&
+                    this.InstanceSchema.Equals(input.InstanceSchema))
                 );
         }
 
@@ -228,6 +257,14 @@ namespace RadixDlt.CoreApiSdk.Model
                     hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.Global.GetHashCode();
+                if (this.OuterObject != null)
+                {
+                    hashCode = (hashCode * 59) + this.OuterObject.GetHashCode();
+                }
+                if (this.InstanceSchema != null)
+                {
+                    hashCode = (hashCode * 59) + this.InstanceSchema.GetHashCode();
+                }
                 return hashCode;
             }
         }

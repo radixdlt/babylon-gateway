@@ -103,22 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         public EntityType EntityType { get; set; }
 
         /// <summary>
-        /// Gets or Sets ModuleType
+        /// Gets or Sets EntityModule
         /// </summary>
-        [DataMember(Name = "module_type", IsRequired = true, EmitDefaultValue = true)]
-        public ModuleType ModuleType { get; set; }
+        [DataMember(Name = "entity_module", IsRequired = true, EmitDefaultValue = true)]
+        public EntityModule EntityModule { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PartitionKind
+        /// </summary>
+        [DataMember(Name = "partition_kind", IsRequired = true, EmitDefaultValue = true)]
+        public PartitionKind PartitionKind { get; set; }
 
         /// <summary>
         /// Gets or Sets SubstateType
         /// </summary>
         [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
         public SubstateType SubstateType { get; set; }
-
-        /// <summary>
-        /// Gets or Sets SubstateKeyType
-        /// </summary>
-        [DataMember(Name = "substate_key_type", IsRequired = true, EmitDefaultValue = true)]
-        public SubstateKeyType SubstateKeyType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="SubstateId" /> class.
         /// </summary>
@@ -128,44 +128,51 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="SubstateId" /> class.
         /// </summary>
         /// <param name="entityType">entityType (required).</param>
-        /// <param name="entityIdHex">The hex-encoded bytes of the entity id. (required).</param>
-        /// <param name="moduleType">moduleType (required).</param>
+        /// <param name="entityAddress">Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id) (required).</param>
+        /// <param name="entityModule">entityModule (required).</param>
+        /// <param name="partitionKind">partitionKind (required).</param>
+        /// <param name="partitionNumber">partitionNumber (required).</param>
         /// <param name="substateType">substateType (required).</param>
-        /// <param name="substateKeyType">substateKeyType (required).</param>
-        /// <param name="substateKeyHex">The hex-encoded bytes of the substate key, under the entity (required).</param>
-        public SubstateId(EntityType entityType = default(EntityType), string entityIdHex = default(string), ModuleType moduleType = default(ModuleType), SubstateType substateType = default(SubstateType), SubstateKeyType substateKeyType = default(SubstateKeyType), string substateKeyHex = default(string))
+        /// <param name="substateKey">substateKey (required).</param>
+        public SubstateId(EntityType entityType = default(EntityType), string entityAddress = default(string), EntityModule entityModule = default(EntityModule), PartitionKind partitionKind = default(PartitionKind), int partitionNumber = default(int), SubstateType substateType = default(SubstateType), SubstateKey substateKey = default(SubstateKey))
         {
             this.EntityType = entityType;
-            // to ensure "entityIdHex" is required (not null)
-            if (entityIdHex == null)
+            // to ensure "entityAddress" is required (not null)
+            if (entityAddress == null)
             {
-                throw new ArgumentNullException("entityIdHex is a required property for SubstateId and cannot be null");
+                throw new ArgumentNullException("entityAddress is a required property for SubstateId and cannot be null");
             }
-            this.EntityIdHex = entityIdHex;
-            this.ModuleType = moduleType;
+            this.EntityAddress = entityAddress;
+            this.EntityModule = entityModule;
+            this.PartitionKind = partitionKind;
+            this.PartitionNumber = partitionNumber;
             this.SubstateType = substateType;
-            this.SubstateKeyType = substateKeyType;
-            // to ensure "substateKeyHex" is required (not null)
-            if (substateKeyHex == null)
+            // to ensure "substateKey" is required (not null)
+            if (substateKey == null)
             {
-                throw new ArgumentNullException("substateKeyHex is a required property for SubstateId and cannot be null");
+                throw new ArgumentNullException("substateKey is a required property for SubstateId and cannot be null");
             }
-            this.SubstateKeyHex = substateKeyHex;
+            this.SubstateKey = substateKey;
         }
 
         /// <summary>
-        /// The hex-encoded bytes of the entity id.
+        /// Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)
         /// </summary>
-        /// <value>The hex-encoded bytes of the entity id.</value>
-        [DataMember(Name = "entity_id_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string EntityIdHex { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)</value>
+        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddress { get; set; }
 
         /// <summary>
-        /// The hex-encoded bytes of the substate key, under the entity
+        /// Gets or Sets PartitionNumber
         /// </summary>
-        /// <value>The hex-encoded bytes of the substate key, under the entity</value>
-        [DataMember(Name = "substate_key_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string SubstateKeyHex { get; set; }
+        [DataMember(Name = "partition_number", IsRequired = true, EmitDefaultValue = true)]
+        public int PartitionNumber { get; set; }
+
+        /// <summary>
+        /// Gets or Sets SubstateKey
+        /// </summary>
+        [DataMember(Name = "substate_key", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateKey SubstateKey { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -176,11 +183,12 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class SubstateId {\n");
             sb.Append("  EntityType: ").Append(EntityType).Append("\n");
-            sb.Append("  EntityIdHex: ").Append(EntityIdHex).Append("\n");
-            sb.Append("  ModuleType: ").Append(ModuleType).Append("\n");
+            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
+            sb.Append("  EntityModule: ").Append(EntityModule).Append("\n");
+            sb.Append("  PartitionKind: ").Append(PartitionKind).Append("\n");
+            sb.Append("  PartitionNumber: ").Append(PartitionNumber).Append("\n");
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
-            sb.Append("  SubstateKeyType: ").Append(SubstateKeyType).Append("\n");
-            sb.Append("  SubstateKeyHex: ").Append(SubstateKeyHex).Append("\n");
+            sb.Append("  SubstateKey: ").Append(SubstateKey).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -221,26 +229,30 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.EntityType.Equals(input.EntityType)
                 ) && 
                 (
-                    this.EntityIdHex == input.EntityIdHex ||
-                    (this.EntityIdHex != null &&
-                    this.EntityIdHex.Equals(input.EntityIdHex))
+                    this.EntityAddress == input.EntityAddress ||
+                    (this.EntityAddress != null &&
+                    this.EntityAddress.Equals(input.EntityAddress))
                 ) && 
                 (
-                    this.ModuleType == input.ModuleType ||
-                    this.ModuleType.Equals(input.ModuleType)
+                    this.EntityModule == input.EntityModule ||
+                    this.EntityModule.Equals(input.EntityModule)
+                ) && 
+                (
+                    this.PartitionKind == input.PartitionKind ||
+                    this.PartitionKind.Equals(input.PartitionKind)
+                ) && 
+                (
+                    this.PartitionNumber == input.PartitionNumber ||
+                    this.PartitionNumber.Equals(input.PartitionNumber)
                 ) && 
                 (
                     this.SubstateType == input.SubstateType ||
                     this.SubstateType.Equals(input.SubstateType)
                 ) && 
                 (
-                    this.SubstateKeyType == input.SubstateKeyType ||
-                    this.SubstateKeyType.Equals(input.SubstateKeyType)
-                ) && 
-                (
-                    this.SubstateKeyHex == input.SubstateKeyHex ||
-                    (this.SubstateKeyHex != null &&
-                    this.SubstateKeyHex.Equals(input.SubstateKeyHex))
+                    this.SubstateKey == input.SubstateKey ||
+                    (this.SubstateKey != null &&
+                    this.SubstateKey.Equals(input.SubstateKey))
                 );
         }
 
@@ -254,16 +266,17 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
-                if (this.EntityIdHex != null)
+                if (this.EntityAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.EntityIdHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.ModuleType.GetHashCode();
+                hashCode = (hashCode * 59) + this.EntityModule.GetHashCode();
+                hashCode = (hashCode * 59) + this.PartitionKind.GetHashCode();
+                hashCode = (hashCode * 59) + this.PartitionNumber.GetHashCode();
                 hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
-                hashCode = (hashCode * 59) + this.SubstateKeyType.GetHashCode();
-                if (this.SubstateKeyHex != null)
+                if (this.SubstateKey != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateKeyHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SubstateKey.GetHashCode();
                 }
                 return hashCode;
             }

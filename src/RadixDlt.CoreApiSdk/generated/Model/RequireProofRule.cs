@@ -110,23 +110,23 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="RequireProofRule" /> class.
         /// </summary>
-        /// <param name="resource">resource (required).</param>
+        /// <param name="requirement">requirement (required).</param>
         /// <param name="type">type (required) (default to ProofRuleType.Require).</param>
-        public RequireProofRule(DynamicResourceDescriptor resource = default(DynamicResourceDescriptor), ProofRuleType type = ProofRuleType.Require) : base(type)
+        public RequireProofRule(Requirement requirement = default(Requirement), ProofRuleType type = ProofRuleType.Require) : base(type)
         {
-            // to ensure "resource" is required (not null)
-            if (resource == null)
+            // to ensure "requirement" is required (not null)
+            if (requirement == null)
             {
-                throw new ArgumentNullException("resource is a required property for RequireProofRule and cannot be null");
+                throw new ArgumentNullException("requirement is a required property for RequireProofRule and cannot be null");
             }
-            this.Resource = resource;
+            this.Requirement = requirement;
         }
 
         /// <summary>
-        /// Gets or Sets Resource
+        /// Gets or Sets Requirement
         /// </summary>
-        [DataMember(Name = "resource", IsRequired = true, EmitDefaultValue = true)]
-        public DynamicResourceDescriptor Resource { get; set; }
+        [DataMember(Name = "requirement", IsRequired = true, EmitDefaultValue = true)]
+        public Requirement Requirement { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,7 +137,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class RequireProofRule {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Resource: ").Append(Resource).Append("\n");
+            sb.Append("  Requirement: ").Append(Requirement).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,9 +174,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Resource == input.Resource ||
-                    (this.Resource != null &&
-                    this.Resource.Equals(input.Resource))
+                    this.Requirement == input.Requirement ||
+                    (this.Requirement != null &&
+                    this.Requirement.Equals(input.Requirement))
                 );
         }
 
@@ -189,9 +189,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Resource != null)
+                if (this.Requirement != null)
                 {
-                    hashCode = (hashCode * 59) + this.Resource.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Requirement.GetHashCode();
                 }
                 return hashCode;
             }

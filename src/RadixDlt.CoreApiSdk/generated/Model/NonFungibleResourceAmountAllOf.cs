@@ -103,9 +103,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourceAmountAllOf" /> class.
         /// </summary>
+        /// <param name="amount">The string-encoded decimal representing the amount of this resource (some decimal for fungible resources, a whole integer for non-fungible resources). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
         /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
-        public NonFungibleResourceAmountAllOf(List<NonFungibleId> nonFungibleIds = default(List<NonFungibleId>))
+        public NonFungibleResourceAmountAllOf(string amount = default(string), List<NonFungibleLocalId> nonFungibleIds = default(List<NonFungibleLocalId>))
         {
+            // to ensure "amount" is required (not null)
+            if (amount == null)
+            {
+                throw new ArgumentNullException("amount is a required property for NonFungibleResourceAmountAllOf and cannot be null");
+            }
+            this.Amount = amount;
             // to ensure "nonFungibleIds" is required (not null)
             if (nonFungibleIds == null)
             {
@@ -115,10 +122,17 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
+        /// The string-encoded decimal representing the amount of this resource (some decimal for fungible resources, a whole integer for non-fungible resources). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// </summary>
+        /// <value>The string-encoded decimal representing the amount of this resource (some decimal for fungible resources, a whole integer for non-fungible resources). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public string Amount { get; set; }
+
+        /// <summary>
         /// Gets or Sets NonFungibleIds
         /// </summary>
         [DataMember(Name = "non_fungible_ids", IsRequired = true, EmitDefaultValue = true)]
-        public List<NonFungibleId> NonFungibleIds { get; set; }
+        public List<NonFungibleLocalId> NonFungibleIds { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,6 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleResourceAmountAllOf {\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -165,6 +180,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
+                ) && 
+                (
                     this.NonFungibleIds == input.NonFungibleIds ||
                     this.NonFungibleIds != null &&
                     input.NonFungibleIds != null &&
@@ -181,6 +201,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.Amount != null)
+                {
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                }
                 if (this.NonFungibleIds != null)
                 {
                     hashCode = (hashCode * 59) + this.NonFungibleIds.GetHashCode();

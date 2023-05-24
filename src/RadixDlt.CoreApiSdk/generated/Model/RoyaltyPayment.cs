@@ -105,7 +105,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="royaltyReceiver">royaltyReceiver (required).</param>
         /// <param name="xrdAmount">The string-encoded decimal representing the amount of fee in XRD paid as royalty to this receiver. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
-        public RoyaltyPayment(GlobalEntityReference royaltyReceiver = default(GlobalEntityReference), string xrdAmount = default(string))
+        public RoyaltyPayment(EntityReference royaltyReceiver = default(EntityReference), string xrdAmount = default(string))
         {
             // to ensure "royaltyReceiver" is required (not null)
             if (royaltyReceiver == null)
@@ -125,7 +125,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets RoyaltyReceiver
         /// </summary>
         [DataMember(Name = "royalty_receiver", IsRequired = true, EmitDefaultValue = true)]
-        public GlobalEntityReference RoyaltyReceiver { get; set; }
+        public EntityReference RoyaltyReceiver { get; set; }
 
         /// <summary>
         /// The string-encoded decimal representing the amount of fee in XRD paid as royalty to this receiver. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 

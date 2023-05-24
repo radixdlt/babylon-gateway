@@ -100,7 +100,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Module
         /// </summary>
         [DataMember(Name = "module", IsRequired = true, EmitDefaultValue = true)]
-        public ModuleType Module { get; set; }
+        public ObjectModuleId Module { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalMethodReference" /> class.
         /// </summary>
@@ -111,7 +111,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="module">module (required).</param>
         /// <param name="name">The name of the method (required).</param>
-        public LocalMethodReference(ModuleType module = default(ModuleType), string name = default(string))
+        public LocalMethodReference(ObjectModuleId module = default(ObjectModuleId), string name = default(string))
         {
             this.Module = module;
             // to ensure "name" is required (not null)

@@ -86,7 +86,7 @@ internal class StateEntityNonFungibleIdsPageRequestValidator : AbstractValidator
 
         RuleFor(x => x.VaultAddress)
             .NotEmpty()
-            .Hex();
+            .RadixAddress();
 
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);

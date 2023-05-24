@@ -106,7 +106,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="structData">structData (required).</param>
         /// <param name="ownedEntities">ownedEntities (required).</param>
         /// <param name="referencedEntities">referencedEntities (required).</param>
-        public DataStruct(SborData structData = default(SborData), List<EntityReference> ownedEntities = default(List<EntityReference>), List<GlobalEntityReference> referencedEntities = default(List<GlobalEntityReference>))
+        public DataStruct(SborData structData = default(SborData), List<EntityReference> ownedEntities = default(List<EntityReference>), List<EntityReference> referencedEntities = default(List<EntityReference>))
         {
             // to ensure "structData" is required (not null)
             if (structData == null)
@@ -144,7 +144,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets ReferencedEntities
         /// </summary>
         [DataMember(Name = "referenced_entities", IsRequired = true, EmitDefaultValue = true)]
-        public List<GlobalEntityReference> ReferencedEntities { get; set; }
+        public List<EntityReference> ReferencedEntities { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

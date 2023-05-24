@@ -66,7 +66,7 @@ using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class ValidatorSubstate : IEntityOwner, IGlobalAddressPointer
+public partial class ValidatorFieldStateSubstate : IEntityOwner, IParentAddressPointer
 {
     public IEnumerable<EntityReference> GetOwnedEntities()
     {
@@ -74,10 +74,9 @@ public partial class ValidatorSubstate : IEntityOwner, IGlobalAddressPointer
         yield return UnstakeVault;
     }
 
-    public IEnumerable<string> GetGlobalAddresses()
+    public IEnumerable<string> GetParentAddresses()
     {
         yield return LiquidStakeUnitResourceAddress;
         yield return UnstakeClaimTokenResourceAddress;
-        yield return EpochManagerAddress;
     }
 }

@@ -103,7 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItemVaultAggregatedVaultItem" /> class.
         /// </summary>
-        /// <param name="vaultAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="vaultAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="totalCount">totalCount (required).</param>
         /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
         public NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(string vaultAddress = default(string), long totalCount = default(long), long lastUpdatedAtStateVersion = default(long))
@@ -119,9 +119,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "vault_address", IsRequired = true, EmitDefaultValue = true)]
         public string VaultAddress { get; set; }
 
