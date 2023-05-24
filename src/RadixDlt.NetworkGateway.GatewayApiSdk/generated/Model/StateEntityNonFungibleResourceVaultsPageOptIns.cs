@@ -90,36 +90,25 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleIdsCollectionItem
+    /// StateEntityNonFungibleResourceVaultsPageOptIns
     /// </summary>
-    [DataContract(Name = "NonFungibleIdsCollectionItem")]
-    public partial class NonFungibleIdsCollectionItem : IEquatable<NonFungibleIdsCollectionItem>
+    [DataContract(Name = "StateEntityNonFungibleResourceVaultsPageOptIns")]
+    public partial class StateEntityNonFungibleResourceVaultsPageOptIns : IEquatable<StateEntityNonFungibleResourceVaultsPageOptIns>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsCollectionItem" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityNonFungibleResourceVaultsPageOptIns" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected NonFungibleIdsCollectionItem() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsCollectionItem" /> class.
-        /// </summary>
-        /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
-        public NonFungibleIdsCollectionItem(string nonFungibleId = default(string))
+        /// <param name="nonFungibleIncludeNfids">nonFungibleIncludeNfids.</param>
+        public StateEntityNonFungibleResourceVaultsPageOptIns(bool nonFungibleIncludeNfids = default(bool))
         {
-            // to ensure "nonFungibleId" is required (not null)
-            if (nonFungibleId == null)
-            {
-                throw new ArgumentNullException("nonFungibleId is a required property for NonFungibleIdsCollectionItem and cannot be null");
-            }
-            this.NonFungibleId = nonFungibleId;
+            this.NonFungibleIncludeNfids = nonFungibleIncludeNfids;
         }
 
         /// <summary>
-        /// String-encoded non-fungible ID.
+        /// Gets or Sets NonFungibleIncludeNfids
         /// </summary>
-        /// <value>String-encoded non-fungible ID.</value>
-        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
-        public string NonFungibleId { get; set; }
+        [DataMember(Name = "non_fungible_include_nfids", EmitDefaultValue = true)]
+        public bool NonFungibleIncludeNfids { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +117,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleIdsCollectionItem {\n");
-            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
+            sb.Append("class StateEntityNonFungibleResourceVaultsPageOptIns {\n");
+            sb.Append("  NonFungibleIncludeNfids: ").Append(NonFungibleIncludeNfids).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +139,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleIdsCollectionItem);
+            return this.Equals(input as StateEntityNonFungibleResourceVaultsPageOptIns);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleIdsCollectionItem instances are equal
+        /// Returns true if StateEntityNonFungibleResourceVaultsPageOptIns instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleIdsCollectionItem to be compared</param>
+        /// <param name="input">Instance of StateEntityNonFungibleResourceVaultsPageOptIns to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleIdsCollectionItem input)
+        public bool Equals(StateEntityNonFungibleResourceVaultsPageOptIns input)
         {
             if (input == null)
             {
@@ -166,9 +155,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.NonFungibleId == input.NonFungibleId ||
-                    (this.NonFungibleId != null &&
-                    this.NonFungibleId.Equals(input.NonFungibleId))
+                    this.NonFungibleIncludeNfids == input.NonFungibleIncludeNfids ||
+                    this.NonFungibleIncludeNfids.Equals(input.NonFungibleIncludeNfids)
                 );
         }
 
@@ -181,10 +169,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.NonFungibleId != null)
-                {
-                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.NonFungibleIncludeNfids.GetHashCode();
                 return hashCode;
             }
         }

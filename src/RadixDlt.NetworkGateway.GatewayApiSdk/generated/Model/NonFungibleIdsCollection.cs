@@ -107,7 +107,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="previousCursor">If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection..</param>
         /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
         /// <param name="items">items (required).</param>
-        public NonFungibleIdsCollection(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<NonFungibleIdsCollectionItem> items = default(List<NonFungibleIdsCollectionItem>))
+        public NonFungibleIdsCollection(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<string> items = default(List<string>))
         {
             // to ensure "items" is required (not null)
             if (items == null)
@@ -145,7 +145,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Items
         /// </summary>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<NonFungibleIdsCollectionItem> Items { get; set; }
+        public List<string> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

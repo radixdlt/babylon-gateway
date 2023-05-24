@@ -90,34 +90,24 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleIdsCollectionAllOf
+    /// OptionalNonFungibleIdsCollectionAllOf
     /// </summary>
-    [DataContract(Name = "NonFungibleIdsCollection_allOf")]
-    public partial class NonFungibleIdsCollectionAllOf : IEquatable<NonFungibleIdsCollectionAllOf>
+    [DataContract(Name = "OptionalNonFungibleIdsCollection_allOf")]
+    public partial class OptionalNonFungibleIdsCollectionAllOf : IEquatable<OptionalNonFungibleIdsCollectionAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="OptionalNonFungibleIdsCollectionAllOf" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected NonFungibleIdsCollectionAllOf() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsCollectionAllOf" /> class.
-        /// </summary>
-        /// <param name="items">items (required).</param>
-        public NonFungibleIdsCollectionAllOf(List<string> items = default(List<string>))
+        /// <param name="items">items.</param>
+        public OptionalNonFungibleIdsCollectionAllOf(List<string> items = default(List<string>))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
-            {
-                throw new ArgumentNullException("items is a required property for NonFungibleIdsCollectionAllOf and cannot be null");
-            }
             this.Items = items;
         }
 
         /// <summary>
         /// Gets or Sets Items
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "items", EmitDefaultValue = true)]
         public List<string> Items { get; set; }
 
         /// <summary>
@@ -127,7 +117,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleIdsCollectionAllOf {\n");
+            sb.Append("class OptionalNonFungibleIdsCollectionAllOf {\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -149,15 +139,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleIdsCollectionAllOf);
+            return this.Equals(input as OptionalNonFungibleIdsCollectionAllOf);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleIdsCollectionAllOf instances are equal
+        /// Returns true if OptionalNonFungibleIdsCollectionAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleIdsCollectionAllOf to be compared</param>
+        /// <param name="input">Instance of OptionalNonFungibleIdsCollectionAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleIdsCollectionAllOf input)
+        public bool Equals(OptionalNonFungibleIdsCollectionAllOf input)
         {
             if (input == null)
             {

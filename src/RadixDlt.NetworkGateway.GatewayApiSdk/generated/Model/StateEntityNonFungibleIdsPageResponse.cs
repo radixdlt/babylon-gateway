@@ -110,7 +110,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="items">items (required).</param>
         /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id. (required).</param>
-        public StateEntityNonFungibleIdsPageResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<NonFungibleIdsCollectionItem> items = default(List<NonFungibleIdsCollectionItem>), string address = default(string), string resourceAddress = default(string))
+        public StateEntityNonFungibleIdsPageResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<string> items = default(List<string>), string address = default(string), string resourceAddress = default(string))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -172,7 +172,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Items
         /// </summary>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<NonFungibleIdsCollectionItem> Items { get; set; }
+        public List<string> Items { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.

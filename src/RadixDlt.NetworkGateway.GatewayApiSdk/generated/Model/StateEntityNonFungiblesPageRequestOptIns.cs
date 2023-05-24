@@ -98,11 +98,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityNonFungiblesPageRequestOptIns" /> class.
         /// </summary>
+        /// <param name="nonFungibleIncludeNfids">nonFungibleIncludeNfids.</param>
         /// <param name="explicitMetadata">explicitMetadata.</param>
-        public StateEntityNonFungiblesPageRequestOptIns(List<string> explicitMetadata = default(List<string>))
+        public StateEntityNonFungiblesPageRequestOptIns(bool nonFungibleIncludeNfids = default(bool), List<string> explicitMetadata = default(List<string>))
         {
+            this.NonFungibleIncludeNfids = nonFungibleIncludeNfids;
             this.ExplicitMetadata = explicitMetadata;
         }
+
+        /// <summary>
+        /// Gets or Sets NonFungibleIncludeNfids
+        /// </summary>
+        [DataMember(Name = "non_fungible_include_nfids", EmitDefaultValue = true)]
+        public bool NonFungibleIncludeNfids { get; set; }
 
         /// <summary>
         /// Gets or Sets ExplicitMetadata
@@ -118,6 +126,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityNonFungiblesPageRequestOptIns {\n");
+            sb.Append("  NonFungibleIncludeNfids: ").Append(NonFungibleIncludeNfids).Append("\n");
             sb.Append("  ExplicitMetadata: ").Append(ExplicitMetadata).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -155,6 +164,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.NonFungibleIncludeNfids == input.NonFungibleIncludeNfids ||
+                    this.NonFungibleIncludeNfids.Equals(input.NonFungibleIncludeNfids)
+                ) && 
+                (
                     this.ExplicitMetadata == input.ExplicitMetadata ||
                     this.ExplicitMetadata != null &&
                     input.ExplicitMetadata != null &&
@@ -171,6 +184,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                hashCode = (hashCode * 59) + this.NonFungibleIncludeNfids.GetHashCode();
                 if (this.ExplicitMetadata != null)
                 {
                     hashCode = (hashCode * 59) + this.ExplicitMetadata.GetHashCode();
