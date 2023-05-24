@@ -104,7 +104,7 @@ internal class TransactionStreamReader : ITransactionStreamReader
                         Blobs = false,
                         Manifest = false,
                         RawLedgerTransaction = true,
-                        RawNotarizedTransaction = false,
+                        RawNotarizedTransaction = true,
                         RawSystemTransaction = true,
                     },
                     substateFormatOptions: new CoreModel.SubstateFormatOptions
