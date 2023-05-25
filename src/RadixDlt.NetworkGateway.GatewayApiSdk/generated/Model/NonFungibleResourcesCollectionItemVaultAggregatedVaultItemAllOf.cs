@@ -90,66 +90,53 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionCommittedDetailsResponseDetails
+    /// NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf
     /// </summary>
-    [DataContract(Name = "TransactionCommittedDetailsResponseDetails")]
-    public partial class TransactionCommittedDetailsResponseDetails : IEquatable<TransactionCommittedDetailsResponseDetails>
+    [DataContract(Name = "NonFungibleResourcesCollectionItemVaultAggregatedVaultItem_allOf")]
+    public partial class NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf : IEquatable<NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsResponseDetails" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionCommittedDetailsResponseDetails() { }
+        protected NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsResponseDetails" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf" /> class.
         /// </summary>
-        /// <param name="rawHex">Hex-encoded binary blob..</param>
-        /// <param name="receipt">receipt (required).</param>
-        /// <param name="referencedGlobalEntities">referencedGlobalEntities (required).</param>
-        /// <param name="messageHex">Hex-encoded binary blob..</param>
-        public TransactionCommittedDetailsResponseDetails(string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), List<string> referencedGlobalEntities = default(List<string>), string messageHex = default(string))
+        /// <param name="vaultAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="totalCount">totalCount (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        public NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf(string vaultAddress = default(string), long totalCount = default(long), long lastUpdatedAtStateVersion = default(long))
         {
-            // to ensure "receipt" is required (not null)
-            if (receipt == null)
+            // to ensure "vaultAddress" is required (not null)
+            if (vaultAddress == null)
             {
-                throw new ArgumentNullException("receipt is a required property for TransactionCommittedDetailsResponseDetails and cannot be null");
+                throw new ArgumentNullException("vaultAddress is a required property for NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf and cannot be null");
             }
-            this.Receipt = receipt;
-            // to ensure "referencedGlobalEntities" is required (not null)
-            if (referencedGlobalEntities == null)
-            {
-                throw new ArgumentNullException("referencedGlobalEntities is a required property for TransactionCommittedDetailsResponseDetails and cannot be null");
-            }
-            this.ReferencedGlobalEntities = referencedGlobalEntities;
-            this.RawHex = rawHex;
-            this.MessageHex = messageHex;
+            this.VaultAddress = vaultAddress;
+            this.TotalCount = totalCount;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "raw_hex", EmitDefaultValue = true)]
-        public string RawHex { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        [DataMember(Name = "vault_address", IsRequired = true, EmitDefaultValue = true)]
+        public string VaultAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets Receipt
+        /// Gets or Sets TotalCount
         /// </summary>
-        [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionReceipt Receipt { get; set; }
+        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
+        public long TotalCount { get; set; }
 
         /// <summary>
-        /// Gets or Sets ReferencedGlobalEntities
+        /// TBD
         /// </summary>
-        [DataMember(Name = "referenced_global_entities", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> ReferencedGlobalEntities { get; set; }
-
-        /// <summary>
-        /// Hex-encoded binary blob.
-        /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "message_hex", EmitDefaultValue = true)]
-        public string MessageHex { get; set; }
+        /// <value>TBD</value>
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -158,11 +145,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionCommittedDetailsResponseDetails {\n");
-            sb.Append("  RawHex: ").Append(RawHex).Append("\n");
-            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
-            sb.Append("  ReferencedGlobalEntities: ").Append(ReferencedGlobalEntities).Append("\n");
-            sb.Append("  MessageHex: ").Append(MessageHex).Append("\n");
+            sb.Append("class NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf {\n");
+            sb.Append("  VaultAddress: ").Append(VaultAddress).Append("\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -183,15 +169,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionCommittedDetailsResponseDetails);
+            return this.Equals(input as NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf);
         }
 
         /// <summary>
-        /// Returns true if TransactionCommittedDetailsResponseDetails instances are equal
+        /// Returns true if NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionCommittedDetailsResponseDetails to be compared</param>
+        /// <param name="input">Instance of NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionCommittedDetailsResponseDetails input)
+        public bool Equals(NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf input)
         {
             if (input == null)
             {
@@ -199,25 +185,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.RawHex == input.RawHex ||
-                    (this.RawHex != null &&
-                    this.RawHex.Equals(input.RawHex))
+                    this.VaultAddress == input.VaultAddress ||
+                    (this.VaultAddress != null &&
+                    this.VaultAddress.Equals(input.VaultAddress))
                 ) && 
                 (
-                    this.Receipt == input.Receipt ||
-                    (this.Receipt != null &&
-                    this.Receipt.Equals(input.Receipt))
+                    this.TotalCount == input.TotalCount ||
+                    this.TotalCount.Equals(input.TotalCount)
                 ) && 
                 (
-                    this.ReferencedGlobalEntities == input.ReferencedGlobalEntities ||
-                    this.ReferencedGlobalEntities != null &&
-                    input.ReferencedGlobalEntities != null &&
-                    this.ReferencedGlobalEntities.SequenceEqual(input.ReferencedGlobalEntities)
-                ) && 
-                (
-                    this.MessageHex == input.MessageHex ||
-                    (this.MessageHex != null &&
-                    this.MessageHex.Equals(input.MessageHex))
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
         }
 
@@ -230,22 +208,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.RawHex != null)
+                if (this.VaultAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.VaultAddress.GetHashCode();
                 }
-                if (this.Receipt != null)
-                {
-                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
-                }
-                if (this.ReferencedGlobalEntities != null)
-                {
-                    hashCode = (hashCode * 59) + this.ReferencedGlobalEntities.GetHashCode();
-                }
-                if (this.MessageHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.MessageHex.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

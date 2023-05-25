@@ -102,13 +102,17 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record NonFungibleViewModel(EntityAddress ResourceEntityAddress, long NonFungibleIdsCount, int ResourcesTotalCount, long LastUpdatedAtStateVersion);
 
-    private record NonFungibleResourceVaultsViewModel(EntityAddress ResourceEntityAddress, EntityAddress VaultAddress, long NonFungibleIdsCount, int VaultTotalCount, long LastUpdatedAtStateVersion);
+    private record NonFungibleResourceVaultsViewModel(EntityAddress ResourceEntityAddress, long VaultEntityId, EntityAddress VaultAddress, long NonFungibleIdsCount, int VaultTotalCount, long LastUpdatedAtStateVersion);
 
-    private record NonFungibleAggregatedPerVaultViewModel(EntityAddress ResourceEntityAddress, EntityAddress VaultAddress, long NonFungibleIdsCount, int ResourceTotalCount, int VaultTotalCount, long LastUpdatedAtStateVersion);
+    private record NonFungibleAggregatedPerVaultViewModel(long ResourceEntityId, long VaultEntityId, EntityAddress ResourceEntityAddress, EntityAddress VaultAddress, long NonFungibleIdsCount, int ResourceTotalCount, int VaultTotalCount, long LastUpdatedAtStateVersion);
 
     private record NonFungibleIdViewModel(string NonFungibleId, int NonFungibleIdsTotalCount);
 
+    private record NonFungibleIdWithOwnerDataViewModel(string NonFungibleId, long EntityId, long ResourceEntityId, long VaultEntityId);
+
     private record NonFungibleIdDataViewModel(string NonFungibleId, bool IsDeleted, byte[] Data, long DataLastUpdatedAtStateVersion);
+
+    private record struct NonFungibleIdOwnerLookup(long EntityId, long ResourceEntityId, long VaultEntityId);
 
     private record struct AccessRuleChainLookup(long EntityId, string? ChildBlueprintName);
 
@@ -155,7 +159,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
             : null;
 
         var fungibleResources = await EntityFungibleResourcesPageSlice(componentEntities.Select(e => e.Id).ToArray(), aggregatePerVault, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
-        var nonFungibleResources = await EntityNonFungibleResourcesPageSlice(componentEntities.Select(e => e.Id).ToArray(), aggregatePerVault, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
+        var nonFungibleResources = await EntityNonFungibleResourcesPageSlice(componentEntities.Select(e => e.Id).ToArray(), aggregatePerVault, optIns.NonFungibleIncludeNfids, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
         var resourceAddressToEntityId = await ResolveResourceEntityIds(fungibleResources.Values, nonFungibleResources.Values, token);
 
         var explicitMetadata = optIns.ExplicitMetadata?.Any() == true
@@ -279,17 +283,114 @@ internal class EntityStateQuerier : IEntityStateQuerier
         return result;
     }
 
-    public async Task<Dictionary<long, GatewayModel.NonFungibleResourcesCollection>> EntityNonFungibleResourcesPageSlice(long[] entityIds, bool aggregatePerVault, int offset, int limit, GatewayModel.LedgerState ledgerState,
+    public async Task<Dictionary<long, GatewayModel.NonFungibleResourcesCollection>> EntityNonFungibleResourcesPageSlice(long[] entityIds, bool aggregatePerVault, bool includeNfids, int offset, int limit, GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
+    {
+        return aggregatePerVault
+            ? await NonFungiblesAggregatedPerVaultPage(entityIds, includeNfids, offset, limit, ledgerState, token)
+            : await NonFungiblesAggregatedPerResourcePage(entityIds, offset, ledgerState, token);
+    }
+
+    public async Task<Dictionary<long, GatewayModel.NonFungibleResourcesCollection>> NonFungiblesAggregatedPerResourcePage(long[] entityIds, int offset, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var result = new Dictionary<long, GatewayModel.NonFungibleResourcesCollection>();
 
         foreach (var entityId in entityIds)
         {
-            result[entityId] = await EntityNonFungibleResourcesPageSlice(entityId, aggregatePerVault, offset, limit, ledgerState, token);
+            result[entityId] = await GetNonFungiblesSliceAggregatedPerResource(entityId, offset, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
         }
 
         return result;
+    }
+
+    public async Task<Dictionary<long, GatewayModel.NonFungibleResourcesCollection>> NonFungiblesAggregatedPerVaultPage(
+        long[] entityIds, bool includeNfids, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    {
+        var nonFungiblesSliceAggregatedPerVault = new Dictionary<long, List<NonFungibleAggregatedPerVaultViewModel>>();
+        var nonFungibleIdOwnerLookup = new List<NonFungibleIdOwnerLookup>();
+
+        foreach (var entityId in entityIds)
+        {
+            var entityResult = await GetNonFungiblesSliceAggregatedPerVault(entityId, offset, limit, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
+            nonFungiblesSliceAggregatedPerVault[entityId] = entityResult;
+            nonFungibleIdOwnerLookup.AddRange(
+                entityResult.Select(row => new NonFungibleIdOwnerLookup(entityId, row.ResourceEntityId, row.VaultEntityId)).ToArray()
+                );
+        }
+
+        if (!includeNfids || !nonFungibleIdOwnerLookup.Any())
+        {
+            return nonFungiblesSliceAggregatedPerVault.ToDictionary(
+                x => x.Key,
+                x => MapToNonFungibleResourcesCollection(x.Value, null, offset, limit, offset, limit)
+            );
+        }
+
+        var nonFungibleIds = await GetNonFungibleIdsFirstPage(
+            nonFungibleIdOwnerLookup.Select(x => x.EntityId).ToArray(),
+            nonFungibleIdOwnerLookup.Select(x => x.ResourceEntityId).ToArray(),
+            nonFungibleIdOwnerLookup.Select(x => x.VaultEntityId).ToArray(),
+            _endpointConfiguration.Value.DefaultPageSize,
+            ledgerState,
+            token);
+
+        var nonFungibleIdsFirstPage = nonFungibleIds
+            .GroupBy(x => x.EntityId)
+            .ToDictionary(x => x.Key, x => x.ToList());
+
+        return nonFungiblesSliceAggregatedPerVault.ToDictionary(
+            x => x.Key,
+            x => MapToNonFungibleResourcesCollection(x.Value, nonFungibleIdsFirstPage[x.Key], offset, limit, offset, limit)
+        );
+    }
+
+    public async Task<GatewayModel.StateEntityNonFungiblesPageResponse> EntityNonFungibleResourcesPage(IEntityStateQuerier.PageRequest pageRequest, bool aggregatePerVault, GatewayModel.StateEntityNonFungiblesPageRequestOptIns optIns, GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default)
+    {
+        var entity = await GetEntity<ComponentEntity>(pageRequest.Address, ledgerState, token);
+        var result = (await EntityNonFungibleResourcesPageSlice(
+            new[] { entity.Id }, aggregatePerVault, optIns.NonFungibleIncludeNfids, pageRequest.Offset, pageRequest.Limit, ledgerState, token))[entity.Id];
+
+        if (optIns.ExplicitMetadata?.Any() == true)
+        {
+            var resourceAddressToEntityId = await ResolveResourceEntityIds(null, new[] { result }, token);
+            var explicitMetadata = await GetExplicitMetadata(resourceAddressToEntityId.Values.ToArray(), optIns.ExplicitMetadata.ToArray(), ledgerState, token);
+
+            result.Items.ForEach(nfr => nfr.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)nfr.ResourceAddress]]);
+        }
+
+        return new GatewayModel.StateEntityNonFungiblesPageResponse(ledgerState, result.TotalCount, result.PreviousCursor, result.NextCursor, result.Items, pageRequest.Address);
+    }
+
+    public async Task<GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse> EntityNonFungibleResourceVaults(
+        IEntityStateQuerier.ResourceVaultsPageRequest request, GatewayModel.StateEntityNonFungibleResourceVaultsPageOptIns optIns,
+        GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    {
+        var entity = await GetEntity<ComponentEntity>(request.Address, ledgerState, token);
+        var resourceEntity = await GetEntity<GlobalNonFungibleResourceEntity>(request.ResourceAddress, ledgerState, token);
+        var nonFungibles = await GetNonFungibleResourceVaults(entity.Id, resourceEntity.Id, request.Offset, request.Limit, ledgerState, token);
+        var vaultEntityIdsToQuery = nonFungibles.Select(x => x.VaultEntityId).ToArray();
+
+        if (!optIns.NonFungibleIncludeNfids || !vaultEntityIdsToQuery.Any())
+        {
+            return MapToStateEntityNonFungibleResourceVaultsPageResponse(nonFungibles, null, ledgerState, request.Offset, request.Limit, entity.Address, resourceEntity.Address);
+        }
+
+        var nonFungibleIds = await GetNonFungibleIdsFirstPage(
+            new[] { entity.Id },
+            new[] { resourceEntity.Id },
+            vaultEntityIdsToQuery,
+            _endpointConfiguration.Value.DefaultPageSize,
+            ledgerState,
+            token);
+
+        var nonFungibleIdsPerVault = nonFungibleIds
+            .GroupBy(x => x.VaultEntityId)
+            .ToDictionary(
+                x => x.Key,
+                x => x.ToList());
+
+        return MapToStateEntityNonFungibleResourceVaultsPageResponse(nonFungibles, nonFungibleIdsPerVault, ledgerState, request.Offset, request.Limit, entity.Address, resourceEntity.Address);
     }
 
     public async Task<GatewayModel.StateEntityFungiblesPageResponse> EntityFungibleResourcesPage(IEntityStateQuerier.PageRequest pageRequest, bool aggregatePerVault, GatewayModel.StateEntityFungiblesPageRequestOptIns optIns, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
@@ -308,23 +409,6 @@ internal class EntityStateQuerier : IEntityStateQuerier
         return new GatewayModel.StateEntityFungiblesPageResponse(ledgerState, result.TotalCount, result.PreviousCursor, result.NextCursor, result.Items, pageRequest.Address);
     }
 
-    public async Task<GatewayModel.StateEntityNonFungiblesPageResponse> EntityNonFungibleResourcesPage(IEntityStateQuerier.PageRequest pageRequest, bool aggregatePerVault, GatewayModel.StateEntityNonFungiblesPageRequestOptIns optIns, GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default)
-    {
-        var entity = await GetEntity<ComponentEntity>(pageRequest.Address, ledgerState, token);
-        var result = await EntityNonFungibleResourcesPageSlice(entity.Id, aggregatePerVault, pageRequest.Offset, pageRequest.Limit, ledgerState, token);
-
-        if (optIns.ExplicitMetadata?.Any() == true)
-        {
-            var resourceAddressToEntityId = await ResolveResourceEntityIds(null, new[] { result }, token);
-            var explicitMetadata = await GetExplicitMetadata(resourceAddressToEntityId.Values.ToArray(), optIns.ExplicitMetadata.ToArray(), ledgerState, token);
-
-            result.Items.ForEach(nfr => nfr.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)nfr.ResourceAddress]]);
-        }
-
-        return new GatewayModel.StateEntityNonFungiblesPageResponse(ledgerState, result.TotalCount, result.PreviousCursor, result.NextCursor, result.Items, pageRequest.Address);
-    }
-
     public async Task<GatewayModel.FungibleResourcesCollection> EntityFungibleResourcesPageSlice(long entityId, bool aggregatePerVault, int offset, int limit, GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
@@ -333,16 +417,6 @@ internal class EntityStateQuerier : IEntityStateQuerier
             : await GetFungiblesSliceAggregatedPerResource(entityId, offset, limit, ledgerState, token);
 
         return fungibles;
-    }
-
-    public async Task<GatewayModel.NonFungibleResourcesCollection> EntityNonFungibleResourcesPageSlice(long entityId, bool aggregatePerVault, int offset, int limit, GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default)
-    {
-        var nonFungibles = aggregatePerVault
-            ? await GetNonFungiblesSliceAggregatedPerVault(entityId, offset, limit, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token)
-            : await GetNonFungiblesSliceAggregatedPerResource(entityId, offset, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
-
-        return nonFungibles;
     }
 
     public async Task<GatewayModel.StateEntityMetadataPageResponse> EntityMetadata(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState,
@@ -364,16 +438,6 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         return new GatewayModel.StateEntityFungibleResourceVaultsPageResponse(
             ledgerState, fungibles.TotalCount, fungibles.PreviousCursor, fungibles.NextCursor, fungibles.Items, entity.Address, resourceEntity.Address);
-    }
-
-    public async Task<GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse> EntityNonFungibleResourceVaults(IEntityStateQuerier.ResourceVaultsPageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
-    {
-        var entity = await GetEntity<ComponentEntity>(request.Address, ledgerState, token);
-        var resourceEntity = await GetEntity<GlobalNonFungibleResourceEntity>(request.ResourceAddress, ledgerState, token);
-        var nonFungibles = await GetNonFungibleResourceVaults(entity.Id, resourceEntity.Id, request.Offset, request.Limit, ledgerState, token);
-
-        return new GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse(
-            ledgerState, nonFungibles.TotalCount, nonFungibles.PreviousCursor, nonFungibles.NextCursor, nonFungibles.Items, entity.Address, resourceEntity.Address);
     }
 
     public async Task<GatewayModel.StateEntityNonFungibleIdsPageResponse> EntityNonFungibleIds(IEntityStateQuerier.PageRequest request, EntityAddress resourceAddress,
@@ -424,7 +488,7 @@ ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
             {
                 totalCount = vm.NonFungibleIdsTotalCount;
 
-                return new GatewayModel.NonFungibleIdsCollectionItem(vm.NonFungibleId);
+                return vm.NonFungibleId;
             })
             .ToList();
 
@@ -587,6 +651,91 @@ INNER JOIN LATERAL (
             : null;
 
         return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(null, null, nextCursor, items));
+    }
+
+    private static GatewayModel.NonFungibleResourcesCollection MapToNonFungibleResourcesCollection(
+        List<NonFungibleAggregatedPerVaultViewModel> input,
+        List<NonFungibleIdWithOwnerDataViewModel>? nonFungibleIds,
+        int vaultOffset, int vaultLimit, int resourceOffset, int resourceLimit)
+    {
+        var resourcesTotalCount = 0;
+        var resources = new Dictionary<EntityAddress, GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregated>();
+
+        foreach (var vm in input)
+        {
+            resourcesTotalCount = vm.ResourceTotalCount;
+
+            if (!resources.TryGetValue(vm.ResourceEntityAddress, out var existingRecord))
+            {
+                var vaultNextCursor = vm.VaultTotalCount > vaultLimit
+                    ? new GatewayApiSdk.Model.OffsetCursor(vaultLimit).ToCursorString()
+                    : null;
+
+                existingRecord = new GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregated(
+                    resourceAddress: vm.ResourceEntityAddress,
+                    vaults: new GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregatedVault(
+                        totalCount: vm.VaultTotalCount,
+                        nextCursor: vaultNextCursor,
+                        items: new List<GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem>()));
+
+                resources[vm.ResourceEntityAddress] = existingRecord;
+            }
+
+            var ids = nonFungibleIds?
+                .Where(x => x.ResourceEntityId == vm.ResourceEntityId && x.VaultEntityId == vm.VaultEntityId)
+                .Select(x => x.NonFungibleId).ToList();
+
+            existingRecord.Vaults.Items.Add(new GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
+                totalCount: vm.NonFungibleIdsCount,
+                vaultAddress: vm.VaultAddress,
+                lastUpdatedAtStateVersion: vm.LastUpdatedAtStateVersion,
+                items: ids));
+        }
+
+        var previousCursor = resourceOffset > 0
+            ? new GatewayApiSdk.Model.OffsetCursor(Math.Max(resourceOffset - resourceLimit, 0)).ToCursorString()
+            : null;
+
+        var nextCursor = resourcesTotalCount > resourceLimit + resourceOffset
+            ? new GatewayApiSdk.Model.OffsetCursor(resourceLimit).ToCursorString()
+            : null;
+
+        return new GatewayApiSdk.Model.NonFungibleResourcesCollection(resourcesTotalCount, previousCursor, nextCursor,
+            resources.Values.Cast<GatewayApiSdk.Model.NonFungibleResourcesCollectionItem>().ToList());
+    }
+
+    private static GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse MapToStateEntityNonFungibleResourceVaultsPageResponse(
+        List<NonFungibleResourceVaultsViewModel> input,
+        Dictionary<long, List<NonFungibleIdWithOwnerDataViewModel>>? nonFungibleIds,
+        GatewayModel.LedgerState ledgerState, int offset, int limit,
+        string? entityGlobalAddress, string? resourceGlobalAddress)
+    {
+        var mapped = input.Select(x =>
+            {
+                List<EntityStateQuerier.NonFungibleIdWithOwnerDataViewModel>? items = null;
+
+                var hasItems = nonFungibleIds?.TryGetValue(x.VaultEntityId, out items);
+                return new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
+                    totalCount: x.NonFungibleIdsCount,
+                    vaultAddress: x.VaultAddress,
+                    lastUpdatedAtStateVersion: x.LastUpdatedAtStateVersion,
+                    items: hasItems == true && items != null ? items.Select(y => y.NonFungibleId).ToList() : null
+                );
+            }
+        ).ToList();
+
+        var vaultsTotalCount = input.FirstOrDefault()?.VaultTotalCount ?? 0;
+
+        var previousCursor = offset > 0
+            ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
+            : null;
+
+        var nextCursor = vaultsTotalCount > offset + limit
+            ? new GatewayModel.OffsetCursor(limit).ToCursorString()
+            : null;
+
+        return new GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse(ledgerState, vaultsTotalCount, previousCursor, nextCursor, mapped, entityGlobalAddress,
+            resourceGlobalAddress);
     }
 
     private async Task<List<RoyaltyVaultBalanceViewModel>> RoyaltyVaultBalance(long[] ownerIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
@@ -1082,7 +1231,7 @@ order by ah.ord;
         return new GatewayModel.NonFungibleResourcesCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
     }
 
-    private async Task<GatewayModel.NonFungibleResourcesCollection> GetNonFungiblesSliceAggregatedPerVault(long entityId, int resourceOffset, int resourceLimit, int vaultOffset, int vaultLimit,
+    private async Task<List<NonFungibleAggregatedPerVaultViewModel>> GetNonFungiblesSliceAggregatedPerVault(long entityId, int resourceOffset, int resourceLimit, int vaultOffset, int vaultLimit,
         GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         var cd = new CommandDefinition(
@@ -1122,6 +1271,8 @@ most_recent_entity_resource_vault_aggregate_history AS (
     LEFT JOIN LATERAL UNNEST(vault_entity_ids[@vaultOffset:@vaultLimit]) WITH ORDINALITY a(val,ord) ON true
 )
 SELECT
+    vah.non_fungible_resource_entity_id as ResourceEntityId,
+    vah.vault_entity_id AS VaultEntityId,
     er.address AS ResourceEntityAddress,
     ev.address AS VaultAddress,
     vh.NonFungibleIdsCount,
@@ -1151,49 +1302,10 @@ ORDER BY vah.resource_order, vah.vault_order;
             },
             cancellationToken: token);
 
-        var resourcesTotalCount = 0;
-
-        var resources = new Dictionary<EntityAddress, GatewayModel.NonFungibleResourcesCollectionItemVaultAggregated>();
-
-        foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleAggregatedPerVaultViewModel>(cd))
-        {
-            resourcesTotalCount = vm.ResourceTotalCount;
-
-            if (!resources.TryGetValue(vm.ResourceEntityAddress, out var existingRecord))
-            {
-                var vaultNextCursor = vm.VaultTotalCount > vaultLimit
-                    ? new GatewayModel.OffsetCursor(vaultLimit).ToCursorString()
-                    : null;
-
-                existingRecord = new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregated(
-                    resourceAddress: vm.ResourceEntityAddress,
-                    vaults: new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVault(
-                        totalCount: vm.VaultTotalCount,
-                        nextCursor: vaultNextCursor,
-                        items: new List<GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem>()));
-
-                resources[vm.ResourceEntityAddress] = existingRecord;
-            }
-
-            existingRecord.Vaults.Items.Add(new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
-                totalCount: vm.NonFungibleIdsCount,
-                vaultAddress: vm.VaultAddress,
-                lastUpdatedAtStateVersion: vm.LastUpdatedAtStateVersion));
-        }
-
-        var previousCursor = resourceOffset > 0
-            ? new GatewayModel.OffsetCursor(Math.Max(resourceOffset - resourceLimit, 0)).ToCursorString()
-            : null;
-
-        var nextCursor = resourcesTotalCount > resourceLimit + resourceOffset
-            ? new GatewayModel.OffsetCursor(resourceLimit).ToCursorString()
-            : null;
-
-        return new GatewayModel.NonFungibleResourcesCollection(resourcesTotalCount, previousCursor, nextCursor,
-            resources.Values.Cast<GatewayModel.NonFungibleResourcesCollectionItem>().ToList());
+        return (await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleAggregatedPerVaultViewModel>(cd)).ToList();
     }
 
-    private async Task<GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVault> GetNonFungibleResourceVaults(long entityId, long resourceEntityId, int vaultOffset, int vaultLimit,
+    private async Task<List<NonFungibleResourceVaultsViewModel>> GetNonFungibleResourceVaults(long entityId, long resourceEntityId, int vaultOffset, int vaultLimit,
         GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         var cd = new CommandDefinition(
@@ -1221,7 +1333,13 @@ most_recent_entity_resource_vault_aggregate_history AS (
     FROM most_recent_entity_resource_vault_aggregate_history_nested ahn
     LEFT JOIN LATERAL UNNEST(vault_entity_ids[@vaultOffset:@vaultLimit]) WITH ORDINALITY a(val,ord) ON true
 )
-SELECT er.address AS ResourceEntityAddress, ev.address AS VaultAddress, vh.NonFungibleIdsCount, vah.vault_total_count AS VaultTotalCount, vh.from_state_version AS LastUpdatedAtStateVersion
+SELECT
+    er.address AS ResourceEntityAddress,
+    vah.vault_entity_id AS VaultEntityId,
+    ENCODE(ev.address, 'hex') AS VaultAddress,
+    vh.NonFungibleIdsCount,
+    vah.vault_total_count AS VaultTotalCount,
+    vh.from_state_version AS LastUpdatedAtStateVersion
 FROM most_recent_entity_resource_vault_aggregate_history vah
 INNER JOIN LATERAL (
     SELECT CAST(cardinality(non_fungible_ids) AS bigint) AS NonFungibleIdsCount, from_state_version
@@ -1245,23 +1363,66 @@ ORDER BY vah.ord;
             cancellationToken: token);
 
         var result = (await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleResourceVaultsViewModel>(cd)).ToList();
-        var vaultsTotalCount = result.FirstOrDefault()?.VaultTotalCount ?? 0;
-        var castedResult = result.Select(x =>
-                new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
-                    totalCount: x.NonFungibleIdsCount,
-                    vaultAddress: x.VaultAddress,
-                    lastUpdatedAtStateVersion: x.LastUpdatedAtStateVersion))
-               .ToList();
+        return result;
+    }
 
-        var previousCursor = vaultOffset > 0
-            ? new GatewayModel.OffsetCursor(Math.Max(vaultOffset - vaultLimit, 0)).ToCursorString()
-            : null;
+    private async Task<List<NonFungibleIdWithOwnerDataViewModel>> GetNonFungibleIdsFirstPage(long[] entityIds, long[] resourceEntityIds, long[] vaultEntityIds, int nonFungibleIdsLimit,
+            GatewayModel.LedgerState ledgerState, CancellationToken token)
+    {
+        var cd = new CommandDefinition(
+            commandText: @"
+WITH variables (entity_id, resource_entity_id, vault_entity_id) AS (
+    SELECT
+        UNNEST(@entityIds),
+        UNNEST(@resourceEntityIds),
+        UNNEST(@vaultEntityIds)
+),
+unnested_nfids AS (
+    SELECT
+        v.id,
+        v.global_entity_id,
+        v.resource_entity_id,
+        v.vault_entity_id,
+        UNNEST(v.non_fungible_ids[0:@nfidsLimit]) as unnested_non_fungible_id
+    FROM variables
+    LEFT JOIN LATERAL
+    (
+        SELECT
+            id,
+            non_fungible_ids,
+            global_entity_id,
+            resource_entity_id,
+            vault_entity_id
+        FROM entity_vault_history
+        WHERE from_state_version <= @stateVersion AND
+                global_entity_id = variables.entity_id AND
+                resource_entity_id = variables.resource_entity_id AND
+                vault_entity_id = variables.vault_entity_id
+        ORDER BY from_state_version DESC
+        LIMIT 1
+    ) v ON true
+)
+SELECT
+    nfid.non_fungible_id as NonFungibleId,
+    un.global_entity_id as EntityId,
+    un.resource_entity_id as ResourceEntityId,
+    un.vault_entity_id as VaultEntityId
+FROM unnested_nfids un
+INNER JOIN non_fungible_id_data nfid ON nfid.id = un.unnested_non_fungible_id
+",
+            parameters: new
+            {
+                stateVersion = ledgerState.StateVersion,
+                entityIds = entityIds,
+                vaultEntityIds = vaultEntityIds,
+                resourceEntityIds = resourceEntityIds,
+                nfidsLimit = nonFungibleIdsLimit,
+            },
+            cancellationToken: token);
 
-        var nextCursor = vaultsTotalCount > vaultOffset + vaultLimit
-            ? new GatewayModel.OffsetCursor(vaultLimit).ToCursorString()
-            : null;
+        var result = (await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdWithOwnerDataViewModel>(cd)).ToList();
 
-        return new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVault(vaultsTotalCount, previousCursor, nextCursor, castedResult);
+        return result;
     }
 
     private async Task<GatewayModel.NonFungibleIdsCollection> GetNonFungibleIdsSlice(long entityId, long resourceEntityId, long vaultEntityId, int offset, int limit,
@@ -1303,7 +1464,7 @@ order by ord
             {
                 totalCount = vm.NonFungibleIdsTotalCount;
 
-                return new GatewayModel.NonFungibleIdsCollectionItem(vm.NonFungibleId);
+                return vm.NonFungibleId;
             })
             .ToList();
 

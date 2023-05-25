@@ -81,6 +81,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Array = System.Array;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -247,6 +248,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var outerStopwatch = Stopwatch.StartNew();
         var referencedEntities = new ReferencedEntityDictionary();
         var childToParentEntities = new Dictionary<EntityAddress, EntityAddress>();
+        var manifestExtractedAddresses = new Dictionary<long, ToolkitModel.Exchange.ExtractAddressesFromManifestResponse>();
 
         var readHelper = new ReadHelper(dbContext);
         var writeHelper = new WriteHelper(dbContext);
@@ -254,6 +256,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
 
         var ledgerTransactionsToAdd = new List<LedgerTransaction>();
+        var ledgerTransactionMarkersToAdd = new List<LedgerTransactionMarker>();
         var entitiesToAdd = new List<Entity>();
 
         SequencesHolder sequences;
@@ -289,7 +292,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     long? nextEpoch = null;
                     long? newRoundInEpoch = null;
                     DateTime? newRoundTimestamp = null;
-                    LedgerTransactionKindFilterConstraint? kindFilterConstraint = null;
+                    LedgerTransactionMarkerOriginType? transactionMarkerOriginType = null;
 
                     if (committedTransaction.LedgerTransaction is CoreModel.ValidatorLedgerTransaction vlt)
                     {
@@ -306,9 +309,20 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         // no-op so far
                     }
 
-                    if (committedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction)
+                    if (committedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction userLedgerTransaction)
                     {
-                        kindFilterConstraint = LedgerTransactionKindFilterConstraint.User;
+                        transactionMarkerOriginType = LedgerTransactionMarkerOriginType.User;
+
+                        var coreManifest = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.Manifest;
+                        var toolkitManifest = new ToolkitModel.Transaction.TransactionManifest(coreManifest.Instructions, coreManifest.BlobsHex.Values.Select(x => (ToolkitModel.ValueBytes)x.ConvertFromHex()).ToArray());
+                        var extractedAddresses = RadixEngineToolkit.RadixEngineToolkit.ExtractAddressesFromManifest(toolkitManifest, _networkConfigurationProvider.GetNetworkId());
+
+                        foreach (var address in extractedAddresses.All())
+                        {
+                            referencedEntities.MarkSeenAddress((EntityAddress)address);
+                        }
+
+                        manifestExtractedAddresses[stateVersion] = extractedAddresses;
                     }
 
                     foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
@@ -351,7 +365,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             if (epochManagerFieldStateSubstate.Round == 0)
                             {
                                 nextEpoch = epochManagerFieldStateSubstate.Epoch;
-                                kindFilterConstraint = LedgerTransactionKindFilterConstraint.EpochChange;
+                                transactionMarkerOriginType = LedgerTransactionMarkerOriginType.EpochChange;
                             }
                         }
 
@@ -551,7 +565,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
                     ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
                     ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
-                    ledgerTransaction.KindFilterConstraint = kindFilterConstraint;
                     ledgerTransaction.RawPayload = committedTransaction.LedgerTransaction.GetUnwrappedPayloadBytes();
                     ledgerTransaction.EngineReceipt = new TransactionReceipt
                     {
@@ -559,17 +572,28 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         Status = committedTransaction.Receipt.Status.ToModel(),
                         FeeSummary = committedTransaction.Receipt.FeeSummary.ToJson(),
                         ErrorMessage = committedTransaction.Receipt.ErrorMessage,
-                        Items = committedTransaction.Receipt.Output != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Output) : null,
+                        Output = committedTransaction.Receipt.Output != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Output) : null,
                         NextEpoch = committedTransaction.Receipt.NextEpoch?.ToJson(),
                         Events = committedTransaction.Receipt.Events != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Events) : null,
                     };
 
                     ledgerTransactionsToAdd.Add(ledgerTransaction);
+
+                    if (transactionMarkerOriginType.HasValue)
+                    {
+                        ledgerTransactionMarkersToAdd.Add(new OriginLedgerTransactionMarker
+                        {
+                            Id = sequences.LedgerTransactionMarkerSequence++,
+                            StateVersion = committedTransaction.StateVersion,
+                            OriginType = transactionMarkerOriginType.Value,
+                        });
+                    }
+
                     lastTransactionSummary = summary;
                 }
                 catch
                 {
-                    _logger.LogError("Failed to process transaction with stateVersion: {stateVersion}", committedTransaction.StateVersion);
+                    _logger.LogError("Failed to process transaction with stateVersion: {StateVersion}", committedTransaction.StateVersion);
                     throw;
                 }
             }
@@ -713,12 +737,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var metadataChanges = new List<MetadataChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
-        var observedNonFungibleDepositTransactionEvents = new List<ObservedDepositNonFungibleTransactionEvent>();
-        var observedNonFungibleWithdrawalTransactionEvents = new List<ObservedWithdrawalNonFungibleTransactionEvent>();
         var entityAccessRulesChainHistoryToAdd = new List<EntityAccessRulesChainHistory>();
         var entityStateToAdd = new List<EntityStateHistory>();
         var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>();
-        var ledgerTransactionEventsToAdd = new List<LedgerTransactionEvent>();
 
         // step: scan all substates to figure out changes
         {
@@ -914,81 +935,41 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         // TODO we should most likely ensure that those are LocalTypeIndices we believe they are, as they're of kind=SchemaLocal, i.e. we should check the schema
                         if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalFungibleVault)
                         {
-                            if (@event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.Vault.Withdrawal)
+                            if (@event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.Vault.Withdrawal || @event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.Vault.Deposit)
                             {
                                 var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
                                 var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId;
                                 var data = (JObject)@event.Data.ProgrammaticJson;
                                 var fungibleAmount = data["fields"]?[0]?["value"]?.ToString();
+                                var nonFungibleIds = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).ToList();
+                                var eventType = @event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.Vault.Withdrawal
+                                    ? LedgerTransactionMarkerEventType.Withdrawal
+                                    : LedgerTransactionMarkerEventType.Deposit;
 
-                                if (fungibleAmount == null)
+                                TokenAmount quantity;
+
+                                if (fungibleAmount != null)
                                 {
-                                    throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].value");
+                                    quantity = TokenAmount.FromDecimalString(fungibleAmount);
+                                }
+                                else if (nonFungibleIds?.Any() == true)
+                                {
+                                    quantity = TokenAmount.FromDecimalString(nonFungibleIds.Count.ToString());
+                                }
+                                else
+                                {
+                                    throw new InvalidOperationException("Unable to process data_json structure, expected either fields[0].value for fungibles or fields[0].elements for non-fungibles");
                                 }
 
-                                ledgerTransactionEventsToAdd.Add(new WithdrawalFungibleResourceLedgerTransactionEvent
+                                ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
                                 {
-                                    Id = sequences.LedgerTransactionEventSequence++,
-                                    TransactionStateVersion = stateVersion,
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    EventType = eventType,
                                     EntityId = globalAncestorId,
                                     ResourceEntityId = resourceEntityId,
-                                    Amount = TokenAmount.FromDecimalString(fungibleAmount),
+                                    Quantity = quantity,
                                 });
-                            }
-
-                            if (@event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.Vault.Deposit)
-                            {
-                                var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
-                                var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId;
-                                var data = (JObject)@event.Data.ProgrammaticJson;
-                                var fungibleAmount = data["fields"]?[0]?["value"]?.ToString();
-
-                                if (fungibleAmount == null)
-                                {
-                                    throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].value");
-                                }
-
-                                ledgerTransactionEventsToAdd.Add(new DepositFungibleResourceLedgerTransactionEvent
-                                {
-                                    Id = sequences.LedgerTransactionEventSequence++,
-                                    TransactionStateVersion = stateVersion,
-                                    EntityId = globalAncestorId,
-                                    ResourceEntityId = resourceEntityId,
-                                    Amount = TokenAmount.FromDecimalString(fungibleAmount),
-                                });
-                            }
-                        }
-
-                        if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalNonFungibleVault)
-                        {
-                            if (@event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.Vault.Withdrawal)
-                            {
-                                var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
-                                var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<VaultEntity>().ResourceEntityId;
-                                var data = (JObject)@event.Data.ProgrammaticJson;
-                                var nonFungibleIds = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).ToList();
-
-                                if (nonFungibleIds?.Any() != true)
-                                {
-                                    throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].elements");
-                                }
-
-                                observedNonFungibleWithdrawalTransactionEvents.Add(new ObservedWithdrawalNonFungibleTransactionEvent(globalAncestorId, resourceEntityId, nonFungibleIds, stateVersion));
-                            }
-
-                            if (@event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.Vault.Deposit)
-                            {
-                                var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
-                                var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<VaultEntity>().ResourceEntityId;
-                                var data = (JObject)@event.Data.ProgrammaticJson;
-                                var nonFungibleIds = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).ToList();
-
-                                if (nonFungibleIds?.Any() != true)
-                                {
-                                    throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].elements");
-                                }
-
-                                observedNonFungibleDepositTransactionEvents.Add(new ObservedDepositNonFungibleTransactionEvent(globalAncestorId, resourceEntityId, nonFungibleIds, stateVersion));
                             }
                         }
 
@@ -1055,10 +1036,37 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             }
                         }
                     }
+
+                    if (manifestExtractedAddresses.TryGetValue(stateVersion, out var extractedAddresses))
+                    {
+                        ledgerTransactionMarkersToAdd.AddRange(extractedAddresses.ResourceAddresses.Select(address => new ManifestAddressLedgerTransactionMarker
+                        {
+                            Id = sequences.LedgerTransactionMarkerSequence++,
+                            StateVersion = stateVersion,
+                            OperationType = LedgerTransactionMarkerOperationType.ResourceInUse,
+                            EntityId = referencedEntities.Get((EntityAddress)address).DatabaseId,
+                        }));
+
+                        ledgerTransactionMarkersToAdd.AddRange(extractedAddresses.AccountsDepositedInto.Select(address => new ManifestAddressLedgerTransactionMarker
+                        {
+                            Id = sequences.LedgerTransactionMarkerSequence++,
+                            StateVersion = stateVersion,
+                            OperationType = LedgerTransactionMarkerOperationType.AccountDepositedInto,
+                            EntityId = referencedEntities.Get((EntityAddress)address).DatabaseId,
+                        }));
+
+                        ledgerTransactionMarkersToAdd.AddRange(extractedAddresses.AccountsWithdrawnFrom.Select(address => new ManifestAddressLedgerTransactionMarker
+                        {
+                            Id = sequences.LedgerTransactionMarkerSequence++,
+                            StateVersion = stateVersion,
+                            OperationType = LedgerTransactionMarkerOperationType.AccountWithdrawnFrom,
+                            EntityId = referencedEntities.Get((EntityAddress)address).DatabaseId,
+                        }));
+                    }
                 }
                 catch
                 {
-                    _logger.LogError("Failed to process transaction with stateVersion: {stateVersion}", committedTransaction.StateVersion);
+                    _logger.LogError("Failed to process transaction with stateVersion: {StateVersion}", committedTransaction.StateVersion);
                     throw;
                 }
             }
@@ -1075,7 +1083,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var mostRecentEntityResourceVaultAggregateHistory = await readHelper.MostRecentEntityResourceVaultAggregateHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
             var mostRecentNonFungibleIdStoreHistory = await readHelper.MostRecentNonFungibleIdStoreHistoryFor(nonFungibleIdChanges, token);
             var mostRecentResourceEntitySupplyHistory = await readHelper.MostRecentResourceEntitySupplyHistoryFor(resourceSupplyChanges, token);
-            var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, nonFungibleVaultChanges, observedNonFungibleWithdrawalTransactionEvents, observedNonFungibleDepositTransactionEvents, token);
+            var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, nonFungibleVaultChanges, token);
             var existingValidatorKeys = await readHelper.ExistingValidatorKeysFor(validatorSetChanges, token);
             var mostRecentEntityNonFungibleVaultHistory = await readHelper.MostRecentEntityNonFungibleVaultHistory(nonFungibleVaultChanges, token);
 
@@ -1224,10 +1232,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 {
                     var tmpTotalCount = tmpNonFungibleTotalCount ?? throw new InvalidOperationException("impossible x2"); // TODO improve
 
-                    AggregateEntityNonFungibleResourceVaultInternal(referencedVault.DatabaseOwnerAncestorId, referencedResource.DatabaseId, tmpTotalCount,
-                        referencedVault.DatabaseId);
-                    AggregateEntityNonFungibleResourceVaultInternal(referencedVault.DatabaseGlobalAncestorId, referencedResource.DatabaseId, tmpTotalCount,
-                        referencedVault.DatabaseId);
+                    AggregateEntityNonFungibleResourceVaultInternal(referencedVault.DatabaseOwnerAncestorId, referencedResource.DatabaseId, tmpTotalCount, referencedVault.DatabaseId);
+                    AggregateEntityNonFungibleResourceVaultInternal(referencedVault.DatabaseGlobalAncestorId, referencedResource.DatabaseId, tmpTotalCount, referencedVault.DatabaseId);
                 }
 
                 AggregateEntityResourceInternal(referencedVault.DatabaseOwnerAncestorId, referencedResource.DatabaseId);
@@ -1537,35 +1543,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 lt.ReferencedEntities = referencedEntities.OfStateVersion(lt.StateVersion).Select(e => e.DatabaseId).ToList();
             }
 
-            foreach (var e in observedNonFungibleWithdrawalTransactionEvents)
-            {
-                ledgerTransactionEventsToAdd.Add(new WithdrawalNonFungibleResourceLedgerTransactionEvent
-                {
-                    Id = sequences.LedgerTransactionEventSequence++,
-                    TransactionStateVersion = e.StateVersion,
-                    EntityId = e.EntityId,
-                    ResourceEntityId = e.ResourceEntityId,
-                    NonFungibleIdDataIds = e.NonFungibleIds.Select(nfid => existingNonFungibleIdData[new NonFungibleIdLookup(e.ResourceEntityId, nfid)].Id).ToList(),
-                });
-            }
-
-            foreach (var e in observedNonFungibleDepositTransactionEvents)
-            {
-                ledgerTransactionEventsToAdd.Add(new DepositNonFungibleResourceLedgerTransactionEvent
-                {
-                    Id = sequences.LedgerTransactionEventSequence++,
-                    TransactionStateVersion = e.StateVersion,
-                    EntityId = e.EntityId,
-                    ResourceEntityId = e.ResourceEntityId,
-                    NonFungibleIdDataIds = e.NonFungibleIds.Select(nfid => existingNonFungibleIdData[new NonFungibleIdLookup(e.ResourceEntityId, nfid)].Id).ToList(),
-                });
-            }
-
             sw = Stopwatch.StartNew();
 
             rowsInserted += await writeHelper.CopyEntity(entitiesToAdd, token);
             rowsInserted += await writeHelper.CopyLedgerTransaction(ledgerTransactionsToAdd, token);
-            rowsInserted += await writeHelper.CopyLedgerTransactionEvents(ledgerTransactionEventsToAdd, token);
+            rowsInserted += await writeHelper.CopyLedgerTransactionMarkers(ledgerTransactionMarkersToAdd, token);
             rowsInserted += await writeHelper.CopyEntityStateHistory(entityStateToAdd, token);
             rowsInserted += await writeHelper.CopyEntityAccessRulesChainHistory(entityAccessRulesChainHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityMetadataHistory(entityMetadataHistoryToAdd, token);

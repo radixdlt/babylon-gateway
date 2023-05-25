@@ -62,59 +62,25 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-[Table("ledger_transaction_events")]
-internal abstract class LedgerTransactionEvent
+internal class StreamTransactionsRequestEventItemValidator : AbstractValidator<GatewayModel.StreamTransactionsRequestEventFilterItem>
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    public StreamTransactionsRequestEventItemValidator()
+    {
+        RuleFor(x => x.Event)
+            .NotNull()
+            .IsInEnum();
 
-    [Column("transaction_state_version")]
-    public long TransactionStateVersion { get; set; }
+        RuleFor(x => x.EmitterAddress)
+            .RadixAddress();
 
-    [Column("entity_id")]
-    public long EntityId { get; set; }
-}
-
-internal class DepositFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
-{
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-
-    [Column("amount")]
-    public TokenAmount Amount { get; set; }
-}
-
-internal class DepositNonFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
-{
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-
-    [Column("non_fungible_id_data_ids")]
-    public List<long> NonFungibleIdDataIds { get; set; }
-}
-
-internal class WithdrawalFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
-{
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-
-    [Column("amount")]
-    public TokenAmount Amount { get; set; }
-}
-
-internal class WithdrawalNonFungibleResourceLedgerTransactionEvent : LedgerTransactionEvent
-{
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-
-    [Column("non_fungible_id_data_ids")]
-    public List<long> NonFungibleIdDataIds { get; set; }
+        RuleFor(x => x.ResourceAddress)
+            .RadixAddress();
+    }
 }

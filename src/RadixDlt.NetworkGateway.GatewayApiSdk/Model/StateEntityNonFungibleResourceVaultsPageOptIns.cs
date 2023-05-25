@@ -62,47 +62,9 @@
  * permissions under this License.
  */
 
-using Dapper;
-using Npgsql;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+﻿namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
-
-internal static class CustomTypes
+public partial class StateEntityNonFungibleResourceVaultsPageOptIns
 {
-    private static bool _configured;
-
-    public static void EnsureConfigured()
-    {
-        if (_configured)
-        {
-            return;
-        }
-
-        // needed to read int[], bigint[] and text[] columns using Dapper
-        SqlMapper.AddTypeHandler(new EntityAddressHandler());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<int>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<byte[]>());
-
-#pragma warning disable CS0618
-        // needed to support custom enums in postgres
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerEventType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOperationType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOriginType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PublicKeyType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<ResourceType>();
-#pragma warning restore CS0618
-
-        _configured = true;
-    }
+    public static StateEntityNonFungibleResourceVaultsPageOptIns Default => new ();
 }

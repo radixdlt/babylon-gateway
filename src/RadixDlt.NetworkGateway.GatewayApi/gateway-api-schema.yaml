@@ -972,19 +972,32 @@ components:
               items:
                 $ref: "#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregatedVaultItem"
     NonFungibleResourcesCollectionItemVaultAggregatedVaultItem:
-      type: object
-      required:
-        - vault_address
-        - total_count
-        - last_updated_at_state_version
-      properties:
-        vault_address:
-          $ref: "#/components/schemas/Address"
-        total_count:
-          type: integer
-          format: int64
-        last_updated_at_state_version:
-          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+      allOf:
+        - $ref: "#/components/schemas/OptionalNonFungibleIdsCollection"
+        - type: object
+          required:
+            - vault_address
+            - total_count
+            - last_updated_at_state_version
+          properties:
+            vault_address:
+              $ref: "#/components/schemas/Address"
+            total_count:
+              type: integer
+              format: int64
+            last_updated_at_state_version:
+              $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+
+    OptionalNonFungibleIdsCollection:
+      description: Non-fungible resource IDs collection.
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/NonFungibleId"
 
     NonFungibleIdsCollection:
       description: Non-fungible resource IDs collection.
@@ -997,14 +1010,7 @@ components:
             items:
               type: array
               items:
-                $ref: "#/components/schemas/NonFungibleIdsCollectionItem"
-    NonFungibleIdsCollectionItem:
-      type: object
-      required:
-        - non_fungible_id
-      properties:
-        non_fungible_id:
-          $ref: "#/components/schemas/NonFungibleId"
+                $ref: "#/components/schemas/NonFungibleId"
 
     CommittedTransactionInfo:
       type: object
@@ -1034,7 +1040,7 @@ components:
         intent_hash_hex:
           $ref: "#/components/schemas/HashHexString"
         fee_paid:
-          $ref: "#/components/schemas/TokenAmount"
+          $ref: "#/components/schemas/BigDecimal"
         confirmed_at:
           nullable: true
           type: string
@@ -1042,6 +1048,16 @@ components:
         error_message:
           type: string
           nullable: true
+        raw_hex:
+          $ref: "#/components/schemas/HexString"
+        receipt:
+          $ref: "#/components/schemas/TransactionReceipt"
+        referenced_global_entities:
+          type: array
+          items:
+            type: string
+        message_hex:
+          $ref: "#/components/schemas/HexString"
 
     TransactionStatus:
       type: string
@@ -1067,7 +1083,7 @@ components:
         next_epoch:
           description: Information (number and active validator list) about new epoch if occured.
           type: object
-        items:
+        output:
           description: The manifest line-by-line engine return data (only present if `status` is `Succeeded`).
           type: object
         events:
@@ -1077,19 +1093,6 @@ components:
           description: Error message (only present if status is `Failed` or `Rejected`)
           type: string
           nullable: true
-
-    # TODO Obsolete - use BigDecimal instead
-    TokenAmount:
-      description: Represents a decimal amount of a given resource.
-      type: object
-      required:
-        - value
-        - token_identifier
-      properties:
-        value:
-          $ref: "#/components/schemas/BigDecimal"
-        address:
-          $ref: "#/components/schemas/Address"
 
     NonFungibleIdType:
       type: string
@@ -1478,28 +1481,9 @@ components:
         - type: object
           required:
             - transaction
-            - details
           properties:
             transaction:
               $ref: "#/components/schemas/CommittedTransactionInfo"
-            details:
-              $ref: "#/components/schemas/TransactionCommittedDetailsResponseDetails"
-    TransactionCommittedDetailsResponseDetails:
-      type: object
-      required:
-        - receipt
-        - referenced_global_entities
-      properties:
-        raw_hex:
-          $ref: "#/components/schemas/HexString"
-        receipt:
-          $ref: "#/components/schemas/TransactionReceipt"
-        referenced_global_entities:
-          type: array
-          items:
-            type: string
-        message_hex:
-          $ref: "#/components/schemas/HexString"
 
     #
     # /stream/* Request & Response Types
@@ -1520,28 +1504,61 @@ components:
                 - User
                 - EpochChange
                 - All
+            manifest_accounts_withdrawn_from_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/ComponentAddress"
+            manifest_accounts_deposited_into_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/ComponentAddress"
+            manifest_resources_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/ResourceAddress"
+            events_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/StreamTransactionsRequestEventFilterItem"
             order:
               description: Configures the order of returned result set. Defaults to `desc`.
               type: string
               enum:
                 - Asc
                 - Desc
+            opt_ins:
+              $ref: "#/components/schemas/TransactionCommittedDetailsOptIns"
       example:
         limit_per_page: 5
+    StreamTransactionsRequestEventFilterItem:
+      type: object
+      required:
+        - event
+      properties:
+        event:
+          type: string
+          enum:
+            - Deposit
+            - Withdrawal
+        emitter_address:
+          $ref: "#/components/schemas/ComponentAddress"
+        resource_address:
+          $ref: "#/components/schemas/ResourceAddress"
+        quantity:
+          $ref: "#/components/schemas/BigDecimal"
     StreamTransactionsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
-        - allOf:
-            - $ref: "#/components/schemas/ResultSetCursorMixin"
-            - type: object
-              required:
-                - items
-              properties:
-                items:
-                  description: The page of user transactions.
-                  type: array
-                  items:
-                    $ref: "#/components/schemas/CommittedTransactionInfo"
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              description: The page of user transactions.
+              type: array
+              items:
+                $ref: "#/components/schemas/CommittedTransactionInfo"
 
     #
     # /state/entity/* Request & Response Types
@@ -1573,6 +1590,8 @@ components:
         component_royalty_vault_balance:
           type: boolean
         package_royalty_vault_balance:
+          type: boolean
+        non_fungible_include_nfids:
           type: boolean
         explicit_metadata:
           type: array
@@ -1834,6 +1853,8 @@ components:
     StateEntityNonFungiblesPageRequestOptIns:
       type: object
       properties:
+        non_fungible_include_nfids:
+          type: boolean
         explicit_metadata:
           type: array
           items:
@@ -1862,9 +1883,17 @@ components:
               $ref: "#/components/schemas/Address"
             resource_address:
               $ref: "#/components/schemas/Address"
+            opt_ins:
+              $ref: "#/components/schemas/StateEntityNonFungibleResourceVaultsPageOptIns"
       example:
         address: "<component-entity-address>"
         resource_address: "<resource_address>"
+    StateEntityNonFungibleResourceVaultsPageOptIns:
+      type: object
+      properties:
+        non_fungible_include_nfids:
+          type: boolean
+
     StateEntityNonFungibleResourceVaultsPageResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"

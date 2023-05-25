@@ -68,6 +68,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
@@ -187,7 +188,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, transaction_accumulator, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, kind_filter_constraint, raw_payload, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_error_message, receipt_items, receipt_next_epoch, receipt_events, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, transaction_accumulator, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, raw_payload, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_error_message, receipt_output, receipt_next_epoch, receipt_events, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var lt in entities)
         {
@@ -208,14 +209,13 @@ internal class WriteHelper
             await writer.WriteAsync(lt.RoundTimestamp, NpgsqlDbType.TimestampTz, token);
             await writer.WriteAsync(lt.CreatedTimestamp, NpgsqlDbType.TimestampTz, token);
             await writer.WriteAsync(lt.NormalizedRoundTimestamp, NpgsqlDbType.TimestampTz, token);
-            await writer.WriteNullableAsync(lt.KindFilterConstraint, "ledger_transaction_kind_filter_constraint", token);
             await writer.WriteAsync(lt.RawPayload, NpgsqlDbType.Bytea, token);
 
             await writer.WriteAsync(lt.EngineReceipt.StateUpdates, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(lt.EngineReceipt.Status, "ledger_transaction_status", token);
             await writer.WriteAsync(lt.EngineReceipt.FeeSummary, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(lt.EngineReceipt.ErrorMessage, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(lt.EngineReceipt.Items, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(lt.EngineReceipt.Output, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(lt.EngineReceipt.NextEpoch, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(lt.EngineReceipt.Events, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(discriminator, "ledger_transaction_type", token);
@@ -247,46 +247,49 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyLedgerTransactionEvents(ICollection<LedgerTransactionEvent> entities, CancellationToken token)
+    public async Task<int> CopyLedgerTransactionMarkers(ICollection<LedgerTransactionMarker> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transaction_events (id, transaction_state_version, entity_id, discriminator, resource_entity_id, amount, non_fungible_id_data_ids) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transaction_markers (id, state_version, discriminator, event_type, entity_id, resource_entity_id, quantity, operation_type, origin_type) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
-            var discriminator = GetDiscriminator<Abstractions.Model.LedgerTransactionEventType>(e.GetType());
+            var discriminator = GetDiscriminator<LedgerTransactionMarkerType>(e.GetType());
 
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.TransactionStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(discriminator, "ledger_transaction_event_type", token);
+            await writer.WriteAsync(e.StateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(discriminator, "ledger_transaction_marker_type", token);
 
             switch (e)
             {
-                case DepositFungibleResourceLedgerTransactionEvent dfr:
-                    await writer.WriteAsync(dfr.ResourceEntityId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(dfr.Amount.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                case EventLedgerTransactionMarker eltm:
+                    await writer.WriteAsync(eltm.EventType, "ledger_transaction_marker_event_type", token);
+                    await writer.WriteAsync(eltm.EntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(eltm.ResourceEntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(eltm.Quantity.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                    await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     break;
-                case DepositNonFungibleResourceLedgerTransactionEvent dnfr:
-                    await writer.WriteAsync(dnfr.ResourceEntityId, NpgsqlDbType.Bigint, token);
+                case ManifestAddressLedgerTransactionMarker maltm:
                     await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(dnfr.NonFungibleIdDataIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-                    break;
-                case WithdrawalFungibleResourceLedgerTransactionEvent wfr:
-                    await writer.WriteAsync(wfr.ResourceEntityId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(wfr.Amount.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                    await writer.WriteAsync(maltm.EntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(maltm.OperationType, "ledger_transaction_marker_operation_type", token);
                     await writer.WriteNullAsync(token);
                     break;
-                case WithdrawalNonFungibleResourceLedgerTransactionEvent wnfr:
-                    await writer.WriteAsync(wnfr.ResourceEntityId, NpgsqlDbType.Bigint, token);
+                case OriginLedgerTransactionMarker oltm:
                     await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(wnfr.NonFungibleIdDataIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(oltm.OriginType, "ledger_transaction_marker_origin_type", token);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(e), e, null);
@@ -686,7 +689,7 @@ SELECT
     setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence),
     setval('validator_public_key_history_id_seq', @validatorPublicKeyHistorySequence),
     setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence),
-    setval('ledger_transaction_events_id_seq', @ledgerTransactionEventSequence)",
+    setval('ledger_transaction_markers_id_seq', @ledgerTransactionMarkerSequence)",
             parameters: new
             {
                 entityStateHistorySequence = sequences.EntityStateHistorySequence,
@@ -704,7 +707,7 @@ SELECT
                 nonFungibleIdStoreHistorySequence = sequences.NonFungibleIdStoreHistorySequence,
                 validatorPublicKeyHistorySequence = sequences.ValidatorPublicKeyHistorySequence,
                 validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,
-                ledgerTransactionEventSequence = sequences.LedgerTransactionEventSequence,
+                ledgerTransactionMarkerSequence = sequences.LedgerTransactionMarkerSequence,
             },
             cancellationToken: token);
 

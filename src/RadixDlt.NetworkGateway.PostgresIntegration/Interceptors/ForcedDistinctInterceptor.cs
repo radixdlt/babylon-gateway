@@ -62,47 +62,40 @@
  * permissions under this License.
  */
 
-using Dapper;
-using Npgsql;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using System;
+using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 
-internal static class CustomTypes
+internal class ForceDistinctInterceptor : DbCommandInterceptor
 {
-    private static bool _configured;
+    /// <summary>Query marked used to trigger interceptor.</summary>
+    /// <remarks>Value has no meaning at all, it should be understood as opaque query marker.</remarks>
+    public const string Apply = nameof(ForceDistinctInterceptor) + ":3c49f785-0598-462a-ba88-bcdbed969709-f66acff3-fd40-4fbd-8eb9-151aefcc5711";
 
-    public static void EnsureConfigured()
+    public override InterceptionResult<DbDataReader> ReaderExecuting(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result)
     {
-        if (_configured)
+        ModifyCommand(command);
+
+        return result;
+    }
+
+    public override ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result, CancellationToken cancellationToken = default)
+    {
+        ModifyCommand(command);
+
+        return new ValueTask<InterceptionResult<DbDataReader>>(result);
+    }
+
+    private static void ModifyCommand(DbCommand command)
+    {
+        // TODO something slightly more sophisticated needed as this is going to fail if multiple tags were applied or query with more than one SELECT clause was used
+        if (command.CommandText.StartsWith($"-- {Apply}", StringComparison.Ordinal))
         {
-            return;
+            command.CommandText = command.CommandText.Replace("SELECT ", "SELECT DISTINCT ");
         }
-
-        // needed to read int[], bigint[] and text[] columns using Dapper
-        SqlMapper.AddTypeHandler(new EntityAddressHandler());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<int>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<byte[]>());
-
-#pragma warning disable CS0618
-        // needed to support custom enums in postgres
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerEventType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOperationType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOriginType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PublicKeyType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<ResourceType>();
-#pragma warning restore CS0618
-
-        _configured = true;
     }
 }

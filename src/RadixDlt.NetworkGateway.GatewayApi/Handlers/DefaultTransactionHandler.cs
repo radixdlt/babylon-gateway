@@ -62,7 +62,9 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Collections.Generic;
@@ -107,7 +109,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(null, token);
         var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.GetIntentHashBytes(), GatewayModel.TransactionCommittedDetailsOptIns.Default, ledgerState, false, token);
         var pendingTransactions = await _transactionQuerier.LookupPendingTransactionsByIntentHash(request.GetIntentHashBytes(), token);
-        var remainingPendingTransactions = pendingTransactions.Where(pt => pt.PayloadHashHex != committedTransaction?.Info.PayloadHashHex).ToList();
+        var remainingPendingTransactions = pendingTransactions.Where(pt => pt.PayloadHashHex != committedTransaction?.PayloadHashHex).ToList();
 
         var status = GatewayModel.TransactionStatus.Unknown;
         var errorMessage = (string?)null;
@@ -115,13 +117,13 @@ internal class DefaultTransactionHandler : ITransactionHandler
 
         if (committedTransaction != null)
         {
-            status = committedTransaction.Info.TransactionStatus;
-            errorMessage = committedTransaction.Info.ErrorMessage;
+            status = committedTransaction.TransactionStatus;
+            errorMessage = committedTransaction.ErrorMessage;
 
             knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
-                payloadHashHex: committedTransaction.Info.PayloadHashHex,
+                payloadHashHex: committedTransaction.PayloadHashHex,
                 status: status,
-                errorMessage: committedTransaction.Info.ErrorMessage));
+                errorMessage: committedTransaction.ErrorMessage));
         }
         else if (remainingPendingTransactions.Any())
         {
@@ -150,7 +152,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
 
         if (committedTransaction != null)
         {
-            return new GatewayModel.TransactionCommittedDetailsResponse(ledgerState, committedTransaction.Info, committedTransaction.Details);
+            return new GatewayModel.TransactionCommittedDetailsResponse(ledgerState, committedTransaction);
         }
 
         throw new TransactionNotFoundException(request.IntentHashHex);
@@ -169,7 +171,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
     public async Task<GatewayModel.StreamTransactionsResponse> StreamTransactions(GatewayModel.StreamTransactionsRequest request, CancellationToken token = default)
     {
         var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
-        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromLedgerState, token) ?? atLedgerState;
+        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromLedgerState, token);
 
         var kindFilter = request.KindFilter switch
         {
@@ -180,12 +182,39 @@ internal class DefaultTransactionHandler : ITransactionHandler
             _ => throw new UnreachableException($"Didn't expect {request.KindFilter} value"),
         };
 
+        var searchCriteria = new TransactionStreamPageRequestSearchCriteria
+        {
+            Kind = kindFilter,
+        };
+
+        request.ManifestAccountsDepositedIntoFilter?.ForEach(a => searchCriteria.ManifestAccountsDepositedInto.Add((EntityAddress)a));
+        request.ManifestAccountsWithdrawnFromFilter?.ForEach(a => searchCriteria.ManifestAccountsWithdrawnFrom.Add((EntityAddress)a));
+        request.ManifestResourcesFilter?.ForEach(a => searchCriteria.ManifestResources.Add((EntityAddress)a));
+        request.EventsFilter?.ForEach(ef =>
+        {
+            var eventType = ef.Event switch
+            {
+                GatewayModel.StreamTransactionsRequestEventFilterItem.EventEnum.Deposit => LedgerTransactionEventFilter.EventType.Deposit,
+                GatewayModel.StreamTransactionsRequestEventFilterItem.EventEnum.Withdrawal => LedgerTransactionEventFilter.EventType.Withdrawal,
+                _ => throw new UnreachableException($"Didn't expect {ef.Event} value"),
+            };
+
+            searchCriteria.Events.Add(new LedgerTransactionEventFilter
+            {
+                Event = eventType,
+                EmitterEntityAddress = ef.EmitterAddress != null ? (EntityAddress)ef.EmitterAddress : null,
+                ResourceAddress = ef.ResourceAddress != null ? (EntityAddress)ef.ResourceAddress : null,
+                Qunatity = ef.Quantity != null ? TokenAmount.FromDecimalString(ef.Quantity) : null,
+            });
+        });
+
         var transactionsPageRequest = new TransactionStreamPageRequest(
-            FromStateVersion: fromLedgerState.StateVersion,
+            FromStateVersion: fromLedgerState?.StateVersion,
             Cursor: GatewayModel.LedgerTransactionsCursor.FromCursorString(request.Cursor),
             PageSize: request.LimitPerPage ?? DefaultPageLimit,
             AscendingOrder: request.Order == GatewayModel.StreamTransactionsRequest.OrderEnum.Asc,
-            KindFilter: kindFilter
+            SearchCriteria: searchCriteria,
+            OptIns: request.OptIns ?? GatewayModel.TransactionCommittedDetailsOptIns.Default
         );
 
         var results = await _transactionQuerier.GetTransactionStream(transactionsPageRequest, atLedgerState, token);

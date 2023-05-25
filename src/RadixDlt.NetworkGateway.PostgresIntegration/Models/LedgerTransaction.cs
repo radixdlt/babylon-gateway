@@ -72,12 +72,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal enum LedgerTransactionKindFilterConstraint
-{
-    User,
-    EpochChange,
-}
-
 /// <summary>
 /// A transaction committed onto the radix ledger.
 /// This table forms a shell, to which other properties are connected.
@@ -143,12 +137,6 @@ internal abstract class LedgerTransaction
     public DateTime NormalizedRoundTimestamp { get; set; }
 
     /// <summary>
-    /// Transaction kind filter used as optional filter constraint in transaction stream endpoint.
-    /// </summary>
-    [Column("kind_filter_constraint")]
-    public LedgerTransactionKindFilterConstraint? KindFilterConstraint { get; set; }
-
-    /// <summary>
     /// The raw payload of the transaction.
     /// </summary>
     [Column("raw_payload")]
@@ -172,8 +160,8 @@ internal class TransactionReceipt
     [Column("receipt_next_epoch", TypeName = "jsonb")]
     public string? NextEpoch { get; set; }
 
-    [Column("receipt_items", TypeName = "jsonb")]
-    public string? Items { get; set; }
+    [Column("receipt_output", TypeName = "jsonb")]
+    public string? Output { get; set; }
 
     [Column("receipt_error_message")]
     public string? ErrorMessage { get; set; }

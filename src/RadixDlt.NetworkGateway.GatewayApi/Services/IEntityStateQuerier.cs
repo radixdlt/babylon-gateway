@@ -86,7 +86,7 @@ public interface IEntityStateQuerier
 
     Task<GatewayModel.StateEntityNonFungiblesPageResponse> EntityNonFungibleResourcesPage(PageRequest pageRequest, bool aggregatePerVault, GatewayModel.StateEntityNonFungiblesPageRequestOptIns optIns, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
-    Task<GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse> EntityNonFungibleResourceVaults(ResourceVaultsPageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse> EntityNonFungibleResourceVaults(ResourceVaultsPageRequest request, GatewayModel.StateEntityNonFungibleResourceVaultsPageOptIns optIns, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
     Task<GatewayModel.StateEntityNonFungibleIdsPageResponse> EntityNonFungibleIds(PageRequest request, EntityAddress resourceAddress, EntityAddress vaultAddress, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 

@@ -96,5 +96,5 @@ internal class SequencesHolder
 
     public long ValidatorActiveSetHistorySequence { get; set; }
 
-    public long LedgerTransactionEventSequence { get; set; }
+    public long LedgerTransactionMarkerSequence { get; set; }
 }

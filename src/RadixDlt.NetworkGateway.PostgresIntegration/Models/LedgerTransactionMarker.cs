@@ -62,47 +62,68 @@
  * permissions under this License.
  */
 
-using Dapper;
-using Npgsql;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal static class CustomTypes
+internal enum LedgerTransactionMarkerOriginType
 {
-    private static bool _configured;
+    User,
+    EpochChange,
+}
 
-    public static void EnsureConfigured()
-    {
-        if (_configured)
-        {
-            return;
-        }
+internal enum LedgerTransactionMarkerEventType
+{
+    Withdrawal,
+    Deposit,
+}
 
-        // needed to read int[], bigint[] and text[] columns using Dapper
-        SqlMapper.AddTypeHandler(new EntityAddressHandler());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<int>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
-        SqlMapper.AddTypeHandler(new GenericArrayHandler<byte[]>());
+internal enum LedgerTransactionMarkerOperationType
+{
+    ResourceInUse,
+    AccountDepositedInto,
+    AccountWithdrawnFrom,
+}
 
-#pragma warning disable CS0618
-        // needed to support custom enums in postgres
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerEventType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOperationType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOriginType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<PublicKeyType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<ResourceType>();
-#pragma warning restore CS0618
+[Table("ledger_transaction_markers")]
+internal abstract class LedgerTransactionMarker
+{
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-        _configured = true;
-    }
+    [Column("state_version")]
+    public long StateVersion { get; set; }
+}
+
+internal class OriginLedgerTransactionMarker : LedgerTransactionMarker
+{
+    [Column("origin_type")]
+    public LedgerTransactionMarkerOriginType OriginType { get; set; }
+}
+
+internal class EventLedgerTransactionMarker : LedgerTransactionMarker
+{
+    [Column("event_type")]
+    public LedgerTransactionMarkerEventType EventType { get; set; }
+
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+
+    [Column("quantity")]
+    public TokenAmount Quantity { get; set; }
+}
+
+internal class ManifestAddressLedgerTransactionMarker : LedgerTransactionMarker
+{
+    [Column("operation_type")]
+    public LedgerTransactionMarkerOperationType OperationType { get; set; }
+
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 }

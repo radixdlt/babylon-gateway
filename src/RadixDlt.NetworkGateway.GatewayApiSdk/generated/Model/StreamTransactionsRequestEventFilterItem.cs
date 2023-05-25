@@ -90,80 +90,77 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionReceipt
+    /// StreamTransactionsRequestEventFilterItem
     /// </summary>
-    [DataContract(Name = "TransactionReceipt")]
-    public partial class TransactionReceipt : IEquatable<TransactionReceipt>
+    [DataContract(Name = "StreamTransactionsRequestEventFilterItem")]
+    public partial class StreamTransactionsRequestEventFilterItem : IEquatable<StreamTransactionsRequestEventFilterItem>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
+        /// Defines Event
         /// </summary>
-        /// <param name="status">The status of the transaction..</param>
-        /// <param name="feeSummary">Fees paid, Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;..</param>
-        /// <param name="stateUpdates">Transaction state updates (only present if status is Succeeded or Failed)..</param>
-        /// <param name="nextEpoch">Information (number and active validator list) about new epoch if occured..</param>
-        /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)..</param>
-        /// <param name="events">Events emitted by a transaction..</param>
-        /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
-        public TransactionReceipt(Object status = default(Object), Object feeSummary = default(Object), Object stateUpdates = default(Object), Object nextEpoch = default(Object), Object output = default(Object), Object events = default(Object), string errorMessage = default(string))
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum EventEnum
         {
-            this.Status = status;
-            this.FeeSummary = feeSummary;
-            this.StateUpdates = stateUpdates;
-            this.NextEpoch = nextEpoch;
-            this.Output = output;
-            this.Events = events;
-            this.ErrorMessage = errorMessage;
+            /// <summary>
+            /// Enum Deposit for value: Deposit
+            /// </summary>
+            [EnumMember(Value = "Deposit")]
+            Deposit = 1,
+
+            /// <summary>
+            /// Enum Withdrawal for value: Withdrawal
+            /// </summary>
+            [EnumMember(Value = "Withdrawal")]
+            Withdrawal = 2
+
+        }
+
+
+        /// <summary>
+        /// Gets or Sets Event
+        /// </summary>
+        [DataMember(Name = "event", IsRequired = true, EmitDefaultValue = true)]
+        public EventEnum Event { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamTransactionsRequestEventFilterItem" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected StreamTransactionsRequestEventFilterItem() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamTransactionsRequestEventFilterItem" /> class.
+        /// </summary>
+        /// <param name="_event">_event (required).</param>
+        /// <param name="emitterAddress">Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id..</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id..</param>
+        /// <param name="quantity">String-encoded decimal representing the amount of a related fungible resource..</param>
+        public StreamTransactionsRequestEventFilterItem(EventEnum _event = default(EventEnum), string emitterAddress = default(string), string resourceAddress = default(string), string quantity = default(string))
+        {
+            this.Event = _event;
+            this.EmitterAddress = emitterAddress;
+            this.ResourceAddress = resourceAddress;
+            this.Quantity = quantity;
         }
 
         /// <summary>
-        /// The status of the transaction.
+        /// Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id.
         /// </summary>
-        /// <value>The status of the transaction.</value>
-        [DataMember(Name = "status", EmitDefaultValue = true)]
-        public Object Status { get; set; }
+        /// <value>Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id.</value>
+        [DataMember(Name = "emitter_address", EmitDefaultValue = true)]
+        public string EmitterAddress { get; set; }
 
         /// <summary>
-        /// Fees paid, Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;.
+        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
         /// </summary>
-        /// <value>Fees paid, Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;.</value>
-        [DataMember(Name = "fee_summary", EmitDefaultValue = true)]
-        public Object FeeSummary { get; set; }
+        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
+        [DataMember(Name = "resource_address", EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// Transaction state updates (only present if status is Succeeded or Failed).
+        /// String-encoded decimal representing the amount of a related fungible resource.
         /// </summary>
-        /// <value>Transaction state updates (only present if status is Succeeded or Failed).</value>
-        [DataMember(Name = "state_updates", EmitDefaultValue = true)]
-        public Object StateUpdates { get; set; }
-
-        /// <summary>
-        /// Information (number and active validator list) about new epoch if occured.
-        /// </summary>
-        /// <value>Information (number and active validator list) about new epoch if occured.</value>
-        [DataMember(Name = "next_epoch", EmitDefaultValue = true)]
-        public Object NextEpoch { get; set; }
-
-        /// <summary>
-        /// The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).
-        /// </summary>
-        /// <value>The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).</value>
-        [DataMember(Name = "output", EmitDefaultValue = true)]
-        public Object Output { get; set; }
-
-        /// <summary>
-        /// Events emitted by a transaction.
-        /// </summary>
-        /// <value>Events emitted by a transaction.</value>
-        [DataMember(Name = "events", EmitDefaultValue = true)]
-        public Object Events { get; set; }
-
-        /// <summary>
-        /// Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)
-        /// </summary>
-        /// <value>Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;)</value>
-        [DataMember(Name = "error_message", EmitDefaultValue = true)]
-        public string ErrorMessage { get; set; }
+        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
+        [DataMember(Name = "quantity", EmitDefaultValue = true)]
+        public string Quantity { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -172,14 +169,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionReceipt {\n");
-            sb.Append("  Status: ").Append(Status).Append("\n");
-            sb.Append("  FeeSummary: ").Append(FeeSummary).Append("\n");
-            sb.Append("  StateUpdates: ").Append(StateUpdates).Append("\n");
-            sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
-            sb.Append("  Output: ").Append(Output).Append("\n");
-            sb.Append("  Events: ").Append(Events).Append("\n");
-            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
+            sb.Append("class StreamTransactionsRequestEventFilterItem {\n");
+            sb.Append("  Event: ").Append(Event).Append("\n");
+            sb.Append("  EmitterAddress: ").Append(EmitterAddress).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  Quantity: ").Append(Quantity).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -200,15 +194,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionReceipt);
+            return this.Equals(input as StreamTransactionsRequestEventFilterItem);
         }
 
         /// <summary>
-        /// Returns true if TransactionReceipt instances are equal
+        /// Returns true if StreamTransactionsRequestEventFilterItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionReceipt to be compared</param>
+        /// <param name="input">Instance of StreamTransactionsRequestEventFilterItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionReceipt input)
+        public bool Equals(StreamTransactionsRequestEventFilterItem input)
         {
             if (input == null)
             {
@@ -216,39 +210,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Status == input.Status ||
-                    (this.Status != null &&
-                    this.Status.Equals(input.Status))
+                    this.Event == input.Event ||
+                    this.Event.Equals(input.Event)
                 ) && 
                 (
-                    this.FeeSummary == input.FeeSummary ||
-                    (this.FeeSummary != null &&
-                    this.FeeSummary.Equals(input.FeeSummary))
+                    this.EmitterAddress == input.EmitterAddress ||
+                    (this.EmitterAddress != null &&
+                    this.EmitterAddress.Equals(input.EmitterAddress))
                 ) && 
                 (
-                    this.StateUpdates == input.StateUpdates ||
-                    (this.StateUpdates != null &&
-                    this.StateUpdates.Equals(input.StateUpdates))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 ) && 
                 (
-                    this.NextEpoch == input.NextEpoch ||
-                    (this.NextEpoch != null &&
-                    this.NextEpoch.Equals(input.NextEpoch))
-                ) && 
-                (
-                    this.Output == input.Output ||
-                    (this.Output != null &&
-                    this.Output.Equals(input.Output))
-                ) && 
-                (
-                    this.Events == input.Events ||
-                    (this.Events != null &&
-                    this.Events.Equals(input.Events))
-                ) && 
-                (
-                    this.ErrorMessage == input.ErrorMessage ||
-                    (this.ErrorMessage != null &&
-                    this.ErrorMessage.Equals(input.ErrorMessage))
+                    this.Quantity == input.Quantity ||
+                    (this.Quantity != null &&
+                    this.Quantity.Equals(input.Quantity))
                 );
         }
 
@@ -261,33 +239,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Status != null)
+                hashCode = (hashCode * 59) + this.Event.GetHashCode();
+                if (this.EmitterAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Status.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EmitterAddress.GetHashCode();
                 }
-                if (this.FeeSummary != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.FeeSummary.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
-                if (this.StateUpdates != null)
+                if (this.Quantity != null)
                 {
-                    hashCode = (hashCode * 59) + this.StateUpdates.GetHashCode();
-                }
-                if (this.NextEpoch != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextEpoch.GetHashCode();
-                }
-                if (this.Output != null)
-                {
-                    hashCode = (hashCode * 59) + this.Output.GetHashCode();
-                }
-                if (this.Events != null)
-                {
-                    hashCode = (hashCode * 59) + this.Events.GetHashCode();
-                }
-                if (this.ErrorMessage != null)
-                {
-                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Quantity.GetHashCode();
                 }
                 return hashCode;
             }

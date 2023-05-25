@@ -104,7 +104,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="NonFungibleIdsCollectionAllOf" /> class.
         /// </summary>
         /// <param name="items">items (required).</param>
-        public NonFungibleIdsCollectionAllOf(List<NonFungibleIdsCollectionItem> items = default(List<NonFungibleIdsCollectionItem>))
+        public NonFungibleIdsCollectionAllOf(List<string> items = default(List<string>))
         {
             // to ensure "items" is required (not null)
             if (items == null)
@@ -118,7 +118,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Items
         /// </summary>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<NonFungibleIdsCollectionItem> Items { get; set; }
+        public List<string> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

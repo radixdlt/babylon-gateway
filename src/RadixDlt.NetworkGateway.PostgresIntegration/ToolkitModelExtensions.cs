@@ -62,12 +62,24 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Model;
+using System.Collections.Generic;
+using System.Linq;
+using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
 
-public enum LedgerTransactionEventType
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
+
+internal static class ToolkitModelExtensions
 {
-    DepositFungibleResource,
-    DepositNonFungibleResource,
-    WithdrawalFungibleResource,
-    WithdrawalNonFungibleResource,
+    public static IEnumerable<string> All(this ToolkitModel.Exchange.ExtractAddressesFromManifestResponse response)
+    {
+        return response.PackageAddresses
+            .Concat(response.ComponentAddresses)
+            .Concat(response.ResourceAddresses)
+            .Concat(response.AccountAddresses)
+            .Concat(response.AccountsRequiringAuth)
+            .Concat(response.AccountsWithdrawnFrom)
+            .Concat(response.AccountsDepositedInto)
+            .Concat(response.IdentityAddresses)
+            .Concat(response.IdentitiesRequiringAuth);
+    }
 }
