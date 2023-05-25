@@ -101,8 +101,8 @@ internal class TransactionStreamReader : ITransactionStreamReader
                     limit: count,
                     transactionFormatOptions: new CoreModel.TransactionFormatOptions
                     {
-                        Blobs = false,
-                        Manifest = false,
+                        Blobs = true,
+                        Manifest = true,
                         RawLedgerTransaction = true,
                         RawNotarizedTransaction = true,
                         RawSystemTransaction = true,
