@@ -67,7 +67,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Npgsql;
 using NpgsqlTypes;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
@@ -101,7 +100,7 @@ internal class WriteHelper
 
         foreach (var e in entities)
         {
-            var discriminator = GetDiscriminator<Abstractions.Model.EntityType>(e.GetType());
+            var discriminator = GetDiscriminator<EntityType>(e.GetType());
 
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
@@ -192,7 +191,7 @@ internal class WriteHelper
 
         foreach (var lt in entities)
         {
-            var discriminator = GetDiscriminator<Abstractions.Model.LedgerTransactionType>(lt.GetType());
+            var discriminator = GetDiscriminator<LedgerTransactionType>(lt.GetType());
 
             await writer.StartRowAsync(token);
             await writer.WriteAsync(lt.StateVersion, NpgsqlDbType.Bigint, token);
@@ -486,7 +485,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.TmpTmpRemoveMeOnceTxEventsBecomeAvailable, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(GetDiscriminator<Abstractions.Model.ResourceType>(e.GetType()), "resource_type", token);
+            await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
 
             if (e is EntityFungibleResourceAggregatedVaultsHistory fe)
             {
