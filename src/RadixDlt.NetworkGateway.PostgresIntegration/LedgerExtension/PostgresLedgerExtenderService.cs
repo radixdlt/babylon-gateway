@@ -327,11 +327,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
                     {
-                        var referencedEntity = referencedEntities
-                            .GetOrAdd(
-                                (EntityAddress)newGlobalEntity.EntityAddress,
-                                _ => new ReferencedEntity((EntityAddress)newGlobalEntity.EntityAddress,  newGlobalEntity.EntityType, stateVersion)
-                            );
+                        var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)newGlobalEntity.EntityAddress, ea => new ReferencedEntity(ea,  newGlobalEntity.EntityType, stateVersion));
 
                         referencedEntity.WithTypeHint(newGlobalEntity.EntityType switch
                         {
