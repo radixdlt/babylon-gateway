@@ -1,15 +1,21 @@
 ## 0.4.0 - RCNet-V2
 _Release Date: Unreleased_
 
-- renamed `mutable_data` property to `data` in `/state/non-fungible/data` endpoint.
-- added `image_tag` with currently deployed image tag to release information.
-- opt-in properties added to `/transaction/committed-details`,`/state/entity/details` user can specify additional properties in response.
-- added opt-in royalty vault balance to `/state/entity/details` if queried entity is component or package.
-- added possibility to query for `explicit_metadata` in  `/state/entity/details`, ` /state/entity/page/fungibles`, `/state/entity/page/non-fungibles`. If given metadata keys exist, they will be returned for top level entity and all returned resources.
-- possibility to configure max number of transaction fetched from CoreAPI in single batch by `MaxCoreApiTransactionBatchSize`. By default it's fetching 1000.
-- added information about `epoch`, `round`, `round_timestamp` to `/transaction/committed-details` and `/stream/transactions` endpoints.
-- added `total_supply`, `total_minted`, `total_burned` to `/state/entity/details` when querying for fungible or non fungible resources.
-- new opt-in property `non_fungible_include_nfids`  in `/state/entity/details`, `/state/entity/page/non-fungibles`, `/state/entity/page/non-fungible-vaults`, when enabled and aggregating per vault first page of non fungible resource ids is going be returned.
+- Renamed `mutable_data` property to `data` in `/state/non-fungible/data` endpoint.
+- Opt-in properties added to `/transaction/committed-details`,`/state/entity/details` user can specify additional properties in response.
+- Added opt-in royalty vault balance to `/state/entity/details` if queried entity is component or package.
+- Possibility to configure max number of transaction fetched from CoreAPI in single batch by `MaxCoreApiTransactionBatchSize`. By default it's fetching 1000.
+- New opt-in property `non_fungible_include_nfids` in `/state/entity/details`, `/state/entity/page/non-fungibles`, `/state/entity/page/non-fungible-vaults`, when enabled and aggregating per vault first page of non fungible resource ids is going be returned.
+- Multiple address-related aliases (`ResourceAddress`, `ComponentAddress` etc.) have been combined into single generic `Address`.
+- Added `explicit_metadata` parameter to  `/state/entity/details`, ` /state/entity/page/fungibles` and `/state/entity/page/non-fungibles` - if given metadata keys exist, they will be returned for top level entity and all returned resources.
+- Added information about `epoch`, `round`, `round_timestamp` to `/transaction/committed-details` and `/stream/transactions` endpoints.
+- Flattened `transaction` and `details` properties of `/transaction/committed-details` endpoint.
+- Added all the properties and opt-ins available in `/transaction/committed-details` endpoint to `/stream/transactions` endpoint.
+- Dropped `TokenAmount` type (used to represent transaction fee which was always expressed in XRDs) in favor of `BigDecimal` scalar value.
+- `/status/network-configuration` endpoint returns several new well-known addresses.
+- Added `image_tag` with currently deployed image tag to release information.
+- Added multiple new filter options to `/stream/transactions` endpoint.
+- Added `total_supply`, `total_minted`, `total_burned` to `/state/entity/details` when querying for fungible or non fungible resources.
 
 ### 0.3.1
 
