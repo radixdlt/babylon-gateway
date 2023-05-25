@@ -25,12 +25,6 @@ import {
     LedgerStateFromJSONTyped,
     LedgerStateToJSON,
 } from './LedgerState';
-import type { TransactionCommittedDetailsResponseDetails } from './TransactionCommittedDetailsResponseDetails';
-import {
-    TransactionCommittedDetailsResponseDetailsFromJSON,
-    TransactionCommittedDetailsResponseDetailsFromJSONTyped,
-    TransactionCommittedDetailsResponseDetailsToJSON,
-} from './TransactionCommittedDetailsResponseDetails';
 
 /**
  * 
@@ -50,12 +44,6 @@ export interface TransactionCommittedDetailsResponse {
      * @memberof TransactionCommittedDetailsResponse
      */
     transaction: CommittedTransactionInfo;
-    /**
-     * 
-     * @type {TransactionCommittedDetailsResponseDetails}
-     * @memberof TransactionCommittedDetailsResponse
-     */
-    details: TransactionCommittedDetailsResponseDetails;
 }
 
 /**
@@ -65,7 +53,6 @@ export function instanceOfTransactionCommittedDetailsResponse(value: object): bo
     let isInstance = true;
     isInstance = isInstance && "ledger_state" in value;
     isInstance = isInstance && "transaction" in value;
-    isInstance = isInstance && "details" in value;
 
     return isInstance;
 }
@@ -82,7 +69,6 @@ export function TransactionCommittedDetailsResponseFromJSONTyped(json: any, igno
         
         'ledger_state': LedgerStateFromJSON(json['ledger_state']),
         'transaction': CommittedTransactionInfoFromJSON(json['transaction']),
-        'details': TransactionCommittedDetailsResponseDetailsFromJSON(json['details']),
     };
 }
 
@@ -97,7 +83,6 @@ export function TransactionCommittedDetailsResponseToJSON(value?: TransactionCom
         
         'ledger_state': LedgerStateToJSON(value.ledger_state),
         'transaction': CommittedTransactionInfoToJSON(value.transaction),
-        'details': TransactionCommittedDetailsResponseDetailsToJSON(value.details),
     };
 }
 

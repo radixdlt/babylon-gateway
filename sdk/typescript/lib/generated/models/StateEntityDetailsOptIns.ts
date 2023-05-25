@@ -39,6 +39,12 @@ export interface StateEntityDetailsOptIns {
     package_royalty_vault_balance?: boolean;
     /**
      * 
+     * @type {boolean}
+     * @memberof StateEntityDetailsOptIns
+     */
+    non_fungible_include_nfids?: boolean;
+    /**
+     * 
      * @type {Array<string>}
      * @memberof StateEntityDetailsOptIns
      */
@@ -67,6 +73,7 @@ export function StateEntityDetailsOptInsFromJSONTyped(json: any, ignoreDiscrimin
         'ancestor_identities': !exists(json, 'ancestor_identities') ? undefined : json['ancestor_identities'],
         'component_royalty_vault_balance': !exists(json, 'component_royalty_vault_balance') ? undefined : json['component_royalty_vault_balance'],
         'package_royalty_vault_balance': !exists(json, 'package_royalty_vault_balance') ? undefined : json['package_royalty_vault_balance'],
+        'non_fungible_include_nfids': !exists(json, 'non_fungible_include_nfids') ? undefined : json['non_fungible_include_nfids'],
         'explicit_metadata': !exists(json, 'explicit_metadata') ? undefined : json['explicit_metadata'],
     };
 }
@@ -83,6 +90,7 @@ export function StateEntityDetailsOptInsToJSON(value?: StateEntityDetailsOptIns 
         'ancestor_identities': value.ancestor_identities,
         'component_royalty_vault_balance': value.component_royalty_vault_balance,
         'package_royalty_vault_balance': value.package_royalty_vault_balance,
+        'non_fungible_include_nfids': value.non_fungible_include_nfids,
         'explicit_metadata': value.explicit_metadata,
     };
 }

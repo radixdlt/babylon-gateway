@@ -20,19 +20,19 @@ import { exists, mapValues } from '../runtime';
  */
 export interface StateEntityDetailsResponseItemAncestorIdentities {
     /**
-     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof StateEntityDetailsResponseItemAncestorIdentities
      */
     parent_address?: string;
     /**
-     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof StateEntityDetailsResponseItemAncestorIdentities
      */
     owner_address?: string;
     /**
-     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof StateEntityDetailsResponseItemAncestorIdentities
      */

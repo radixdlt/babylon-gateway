@@ -13,13 +13,6 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { NonFungibleIdsCollectionItem } from './NonFungibleIdsCollectionItem';
-import {
-    NonFungibleIdsCollectionItemFromJSON,
-    NonFungibleIdsCollectionItemFromJSONTyped,
-    NonFungibleIdsCollectionItemToJSON,
-} from './NonFungibleIdsCollectionItem';
-
 /**
  * Non-fungible resource IDs collection.
  * @export
@@ -46,10 +39,10 @@ export interface NonFungibleIdsCollection {
     next_cursor?: string | null;
     /**
      * 
-     * @type {Array<NonFungibleIdsCollectionItem>}
+     * @type {Array<string>}
      * @memberof NonFungibleIdsCollection
      */
-    items: Array<NonFungibleIdsCollectionItem>;
+    items: Array<string>;
 }
 
 /**
@@ -75,7 +68,7 @@ export function NonFungibleIdsCollectionFromJSONTyped(json: any, ignoreDiscrimin
         'total_count': !exists(json, 'total_count') ? undefined : json['total_count'],
         'previous_cursor': !exists(json, 'previous_cursor') ? undefined : json['previous_cursor'],
         'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
-        'items': ((json['items'] as Array<any>).map(NonFungibleIdsCollectionItemFromJSON)),
+        'items': json['items'],
     };
 }
 
@@ -91,7 +84,7 @@ export function NonFungibleIdsCollectionToJSON(value?: NonFungibleIdsCollection 
         'total_count': value.total_count,
         'previous_cursor': value.previous_cursor,
         'next_cursor': value.next_cursor,
-        'items': ((value.items as Array<any>).map(NonFungibleIdsCollectionItemToJSON)),
+        'items': value.items,
     };
 }
 

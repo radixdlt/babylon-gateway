@@ -13,45 +13,52 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { CommittedTransactionInfo } from './CommittedTransactionInfo';
+import {
+    CommittedTransactionInfoFromJSON,
+    CommittedTransactionInfoFromJSONTyped,
+    CommittedTransactionInfoToJSON,
+} from './CommittedTransactionInfo';
+
 /**
  * 
  * @export
- * @interface StateEntityMetadataPageRequestAllOf
+ * @interface StreamTransactionsResponseAllOf
  */
-export interface StateEntityMetadataPageRequestAllOf {
+export interface StreamTransactionsResponseAllOf {
     /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof StateEntityMetadataPageRequestAllOf
+     * The page of user transactions.
+     * @type {Array<CommittedTransactionInfo>}
+     * @memberof StreamTransactionsResponseAllOf
      */
-    address: string;
+    items: Array<CommittedTransactionInfo>;
 }
 
 /**
- * Check if a given object implements the StateEntityMetadataPageRequestAllOf interface.
+ * Check if a given object implements the StreamTransactionsResponseAllOf interface.
  */
-export function instanceOfStateEntityMetadataPageRequestAllOf(value: object): boolean {
+export function instanceOfStreamTransactionsResponseAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "address" in value;
+    isInstance = isInstance && "items" in value;
 
     return isInstance;
 }
 
-export function StateEntityMetadataPageRequestAllOfFromJSON(json: any): StateEntityMetadataPageRequestAllOf {
-    return StateEntityMetadataPageRequestAllOfFromJSONTyped(json, false);
+export function StreamTransactionsResponseAllOfFromJSON(json: any): StreamTransactionsResponseAllOf {
+    return StreamTransactionsResponseAllOfFromJSONTyped(json, false);
 }
 
-export function StateEntityMetadataPageRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateEntityMetadataPageRequestAllOf {
+export function StreamTransactionsResponseAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StreamTransactionsResponseAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'address': json['address'],
+        'items': ((json['items'] as Array<any>).map(CommittedTransactionInfoFromJSON)),
     };
 }
 
-export function StateEntityMetadataPageRequestAllOfToJSON(value?: StateEntityMetadataPageRequestAllOf | null): any {
+export function StreamTransactionsResponseAllOfToJSON(value?: StreamTransactionsResponseAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -60,7 +67,7 @@ export function StateEntityMetadataPageRequestAllOfToJSON(value?: StateEntityMet
     }
     return {
         
-        'address': value.address,
+        'items': ((value.items as Array<any>).map(CommittedTransactionInfoToJSON)),
     };
 }
 

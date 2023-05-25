@@ -14,51 +14,43 @@
 
 import { exists, mapValues } from '../runtime';
 /**
- * Represents a decimal amount of a given resource.
+ * 
  * @export
- * @interface TokenAmount
+ * @interface OptionalNonFungibleIdsCollectionAllOf
  */
-export interface TokenAmount {
+export interface OptionalNonFungibleIdsCollectionAllOf {
     /**
-     * String-encoded decimal representing the amount of a related fungible resource.
-     * @type {string}
-     * @memberof TokenAmount
+     * 
+     * @type {Array<string>}
+     * @memberof OptionalNonFungibleIdsCollectionAllOf
      */
-    value: string;
-    /**
-     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
-     * @type {string}
-     * @memberof TokenAmount
-     */
-    address?: string;
+    items?: Array<string>;
 }
 
 /**
- * Check if a given object implements the TokenAmount interface.
+ * Check if a given object implements the OptionalNonFungibleIdsCollectionAllOf interface.
  */
-export function instanceOfTokenAmount(value: object): boolean {
+export function instanceOfOptionalNonFungibleIdsCollectionAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "value" in value;
 
     return isInstance;
 }
 
-export function TokenAmountFromJSON(json: any): TokenAmount {
-    return TokenAmountFromJSONTyped(json, false);
+export function OptionalNonFungibleIdsCollectionAllOfFromJSON(json: any): OptionalNonFungibleIdsCollectionAllOf {
+    return OptionalNonFungibleIdsCollectionAllOfFromJSONTyped(json, false);
 }
 
-export function TokenAmountFromJSONTyped(json: any, ignoreDiscriminator: boolean): TokenAmount {
+export function OptionalNonFungibleIdsCollectionAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): OptionalNonFungibleIdsCollectionAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'value': json['value'],
-        'address': !exists(json, 'address') ? undefined : json['address'],
+        'items': !exists(json, 'items') ? undefined : json['items'],
     };
 }
 
-export function TokenAmountToJSON(value?: TokenAmount | null): any {
+export function OptionalNonFungibleIdsCollectionAllOfToJSON(value?: OptionalNonFungibleIdsCollectionAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -67,8 +59,7 @@ export function TokenAmountToJSON(value?: TokenAmount | null): any {
     }
     return {
         
-        'value': value.value,
-        'address': value.address,
+        'items': value.items,
     };
 }
 

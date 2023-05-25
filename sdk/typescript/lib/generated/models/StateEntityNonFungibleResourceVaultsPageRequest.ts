@@ -19,6 +19,12 @@ import {
     LedgerStateSelectorFromJSONTyped,
     LedgerStateSelectorToJSON,
 } from './LedgerStateSelector';
+import type { StateEntityNonFungibleResourceVaultsPageOptIns } from './StateEntityNonFungibleResourceVaultsPageOptIns';
+import {
+    StateEntityNonFungibleResourceVaultsPageOptInsFromJSON,
+    StateEntityNonFungibleResourceVaultsPageOptInsFromJSONTyped,
+    StateEntityNonFungibleResourceVaultsPageOptInsToJSON,
+} from './StateEntityNonFungibleResourceVaultsPageOptIns';
 
 /**
  * 
@@ -45,17 +51,23 @@ export interface StateEntityNonFungibleResourceVaultsPageRequest {
      */
     limit_per_page?: number | null;
     /**
-     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof StateEntityNonFungibleResourceVaultsPageRequest
      */
     address: string;
     /**
-     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof StateEntityNonFungibleResourceVaultsPageRequest
      */
     resource_address: string;
+    /**
+     * 
+     * @type {StateEntityNonFungibleResourceVaultsPageOptIns}
+     * @memberof StateEntityNonFungibleResourceVaultsPageRequest
+     */
+    opt_ins?: StateEntityNonFungibleResourceVaultsPageOptIns;
 }
 
 /**
@@ -84,6 +96,7 @@ export function StateEntityNonFungibleResourceVaultsPageRequestFromJSONTyped(jso
         'limit_per_page': !exists(json, 'limit_per_page') ? undefined : json['limit_per_page'],
         'address': json['address'],
         'resource_address': json['resource_address'],
+        'opt_ins': !exists(json, 'opt_ins') ? undefined : StateEntityNonFungibleResourceVaultsPageOptInsFromJSON(json['opt_ins']),
     };
 }
 
@@ -101,6 +114,7 @@ export function StateEntityNonFungibleResourceVaultsPageRequestToJSON(value?: St
         'limit_per_page': value.limit_per_page,
         'address': value.address,
         'resource_address': value.resource_address,
+        'opt_ins': StateEntityNonFungibleResourceVaultsPageOptInsToJSON(value.opt_ins),
     };
 }
 

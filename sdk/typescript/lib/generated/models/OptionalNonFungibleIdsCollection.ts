@@ -13,95 +13,65 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { EntityMetadataItem } from './EntityMetadataItem';
-import {
-    EntityMetadataItemFromJSON,
-    EntityMetadataItemFromJSONTyped,
-    EntityMetadataItemToJSON,
-} from './EntityMetadataItem';
-import type { LedgerState } from './LedgerState';
-import {
-    LedgerStateFromJSON,
-    LedgerStateFromJSONTyped,
-    LedgerStateToJSON,
-} from './LedgerState';
-
 /**
- * 
+ * Non-fungible resource IDs collection.
  * @export
- * @interface StateEntityMetadataPageResponse
+ * @interface OptionalNonFungibleIdsCollection
  */
-export interface StateEntityMetadataPageResponse {
-    /**
-     * 
-     * @type {LedgerState}
-     * @memberof StateEntityMetadataPageResponse
-     */
-    ledger_state: LedgerState;
+export interface OptionalNonFungibleIdsCollection {
     /**
      * Total number of items in underlying collection, fragment of which is available in `items` collection.
      * @type {number}
-     * @memberof StateEntityMetadataPageResponse
+     * @memberof OptionalNonFungibleIdsCollection
      */
     total_count?: number | null;
     /**
      * If specified, contains a cursor to query previous page of the `items` collection.
      * @type {string}
-     * @memberof StateEntityMetadataPageResponse
+     * @memberof OptionalNonFungibleIdsCollection
      */
     previous_cursor?: string | null;
     /**
      * If specified, contains a cursor to query next page of the `items` collection.
      * @type {string}
-     * @memberof StateEntityMetadataPageResponse
+     * @memberof OptionalNonFungibleIdsCollection
      */
     next_cursor?: string | null;
     /**
      * 
-     * @type {Array<EntityMetadataItem>}
-     * @memberof StateEntityMetadataPageResponse
+     * @type {Array<string>}
+     * @memberof OptionalNonFungibleIdsCollection
      */
-    items: Array<EntityMetadataItem>;
-    /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof StateEntityMetadataPageResponse
-     */
-    address: string;
+    items?: Array<string>;
 }
 
 /**
- * Check if a given object implements the StateEntityMetadataPageResponse interface.
+ * Check if a given object implements the OptionalNonFungibleIdsCollection interface.
  */
-export function instanceOfStateEntityMetadataPageResponse(value: object): boolean {
+export function instanceOfOptionalNonFungibleIdsCollection(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "ledger_state" in value;
-    isInstance = isInstance && "items" in value;
-    isInstance = isInstance && "address" in value;
 
     return isInstance;
 }
 
-export function StateEntityMetadataPageResponseFromJSON(json: any): StateEntityMetadataPageResponse {
-    return StateEntityMetadataPageResponseFromJSONTyped(json, false);
+export function OptionalNonFungibleIdsCollectionFromJSON(json: any): OptionalNonFungibleIdsCollection {
+    return OptionalNonFungibleIdsCollectionFromJSONTyped(json, false);
 }
 
-export function StateEntityMetadataPageResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateEntityMetadataPageResponse {
+export function OptionalNonFungibleIdsCollectionFromJSONTyped(json: any, ignoreDiscriminator: boolean): OptionalNonFungibleIdsCollection {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'ledger_state': LedgerStateFromJSON(json['ledger_state']),
         'total_count': !exists(json, 'total_count') ? undefined : json['total_count'],
         'previous_cursor': !exists(json, 'previous_cursor') ? undefined : json['previous_cursor'],
         'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
-        'items': ((json['items'] as Array<any>).map(EntityMetadataItemFromJSON)),
-        'address': json['address'],
+        'items': !exists(json, 'items') ? undefined : json['items'],
     };
 }
 
-export function StateEntityMetadataPageResponseToJSON(value?: StateEntityMetadataPageResponse | null): any {
+export function OptionalNonFungibleIdsCollectionToJSON(value?: OptionalNonFungibleIdsCollection | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -110,12 +80,10 @@ export function StateEntityMetadataPageResponseToJSON(value?: StateEntityMetadat
     }
     return {
         
-        'ledger_state': LedgerStateToJSON(value.ledger_state),
         'total_count': value.total_count,
         'previous_cursor': value.previous_cursor,
         'next_cursor': value.next_cursor,
-        'items': ((value.items as Array<any>).map(EntityMetadataItemToJSON)),
-        'address': value.address,
+        'items': value.items,
     };
 }
 

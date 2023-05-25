@@ -16,58 +16,58 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface StateEntityNonFungibleIdsPageRequestAllOf
+ * @interface NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf
  */
-export interface StateEntityNonFungibleIdsPageRequestAllOf {
+export interface NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf {
     /**
      * Bech32m-encoded human readable version of the address.
      * @type {string}
-     * @memberof StateEntityNonFungibleIdsPageRequestAllOf
-     */
-    address: string;
-    /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof StateEntityNonFungibleIdsPageRequestAllOf
+     * @memberof NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf
      */
     vault_address: string;
     /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof StateEntityNonFungibleIdsPageRequestAllOf
+     * 
+     * @type {number}
+     * @memberof NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf
      */
-    resource_address: string;
+    total_count: number;
+    /**
+     * TBD
+     * @type {number}
+     * @memberof NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf
+     */
+    last_updated_at_state_version: number;
 }
 
 /**
- * Check if a given object implements the StateEntityNonFungibleIdsPageRequestAllOf interface.
+ * Check if a given object implements the NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf interface.
  */
-export function instanceOfStateEntityNonFungibleIdsPageRequestAllOf(value: object): boolean {
+export function instanceOfNonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "address" in value;
     isInstance = isInstance && "vault_address" in value;
-    isInstance = isInstance && "resource_address" in value;
+    isInstance = isInstance && "total_count" in value;
+    isInstance = isInstance && "last_updated_at_state_version" in value;
 
     return isInstance;
 }
 
-export function StateEntityNonFungibleIdsPageRequestAllOfFromJSON(json: any): StateEntityNonFungibleIdsPageRequestAllOf {
-    return StateEntityNonFungibleIdsPageRequestAllOfFromJSONTyped(json, false);
+export function NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOfFromJSON(json: any): NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf {
+    return NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOfFromJSONTyped(json, false);
 }
 
-export function StateEntityNonFungibleIdsPageRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateEntityNonFungibleIdsPageRequestAllOf {
+export function NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'address': json['address'],
         'vault_address': json['vault_address'],
-        'resource_address': json['resource_address'],
+        'total_count': json['total_count'],
+        'last_updated_at_state_version': json['last_updated_at_state_version'],
     };
 }
 
-export function StateEntityNonFungibleIdsPageRequestAllOfToJSON(value?: StateEntityNonFungibleIdsPageRequestAllOf | null): any {
+export function NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOfToJSON(value?: NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -76,9 +76,9 @@ export function StateEntityNonFungibleIdsPageRequestAllOfToJSON(value?: StateEnt
     }
     return {
         
-        'address': value.address,
         'vault_address': value.vault_address,
-        'resource_address': value.resource_address,
+        'total_count': value.total_count,
+        'last_updated_at_state_version': value.last_updated_at_state_version,
     };
 }
 

@@ -33,7 +33,7 @@ import {
  */
 export interface ValidatorCollectionItem {
     /**
-     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof ValidatorCollectionItem
      */
