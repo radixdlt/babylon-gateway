@@ -107,7 +107,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="previousCursor">If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection..</param>
         /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
         /// <param name="items">items.</param>
-        /// <param name="vaultAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="vaultAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
         public NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(long totalCount = default(long), string previousCursor = default(string), string nextCursor = default(string), List<string> items = default(List<string>), string vaultAddress = default(string), long lastUpdatedAtStateVersion = default(long))
         {
@@ -151,9 +151,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<string> Items { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "vault_address", IsRequired = true, EmitDefaultValue = true)]
         public string VaultAddress { get; set; }
 

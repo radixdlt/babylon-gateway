@@ -130,8 +130,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="StreamTransactionsRequestEventFilterItem" /> class.
         /// </summary>
         /// <param name="_event">_event (required).</param>
-        /// <param name="emitterAddress">Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id..</param>
-        /// <param name="resourceAddress">Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id..</param>
+        /// <param name="emitterAddress">Bech32m-encoded human readable version of the address..</param>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address..</param>
         /// <param name="quantity">String-encoded decimal representing the amount of a related fungible resource..</param>
         public StreamTransactionsRequestEventFilterItem(EventEnum _event = default(EventEnum), string emitterAddress = default(string), string resourceAddress = default(string), string quantity = default(string))
         {
@@ -142,16 +142,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id.</value>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "emitter_address", EmitDefaultValue = true)]
         public string EmitterAddress { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.</value>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "resource_address", EmitDefaultValue = true)]
         public string ResourceAddress { get; set; }
 
