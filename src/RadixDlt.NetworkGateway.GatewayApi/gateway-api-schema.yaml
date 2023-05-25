@@ -1507,15 +1507,15 @@ components:
             manifest_accounts_withdrawn_from_filter:
               type: array
               items:
-                $ref: "#/components/schemas/ComponentAddress"
+                $ref: "#/components/schemas/Address"
             manifest_accounts_deposited_into_filter:
               type: array
               items:
-                $ref: "#/components/schemas/ComponentAddress"
+                $ref: "#/components/schemas/Address"
             manifest_resources_filter:
               type: array
               items:
-                $ref: "#/components/schemas/ResourceAddress"
+                $ref: "#/components/schemas/Address"
             events_filter:
               type: array
               items:
@@ -1541,9 +1541,9 @@ components:
             - Deposit
             - Withdrawal
         emitter_address:
-          $ref: "#/components/schemas/ComponentAddress"
+          $ref: "#/components/schemas/Address"
         resource_address:
-          $ref: "#/components/schemas/ResourceAddress"
+          $ref: "#/components/schemas/Address"
         quantity:
           $ref: "#/components/schemas/BigDecimal"
     StreamTransactionsResponse:
