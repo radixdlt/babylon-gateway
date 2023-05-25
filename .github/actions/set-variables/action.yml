@@ -46,9 +46,9 @@ runs:
         DOCKER_TAG=${NORMALIZED_SUFFIX}
         VERSION_SUFFIX=${NORMALIZED_SUFFIX}
 
-        DOCKER_REPO_DATA_AGGREGATOR="eu.gcr.io/dev-container-repo/babylon-ng-data-aggregator"
-        DOCKER_REPO_GATEWAY_API="eu.gcr.io/dev-container-repo/babylon-ng-gateway-api"
-        DOCKER_REPO_DATABASE_MIGRATIONS="eu.gcr.io/dev-container-repo/babylon-ng-database-migrations"
+        DOCKER_REPO_DATA_AGGREGATOR="docker.io/radixdlt/babylon-ng-data-aggregator"
+        DOCKER_REPO_GATEWAY_API="docker.io/radixdlt/babylon-ng-gateway-api"
+        DOCKER_REPO_DATABASE_MIGRATIONS="docker.io/radixdlt/babylon-ng-database-migrations"
 
         case "${GH_EVENT_NAME}" in
             release)
