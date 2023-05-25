@@ -63,13 +63,13 @@ export interface StateEntityFungibleResourceVaultsPageResponse {
      */
     items: Array<FungibleResourcesCollectionItemVaultAggregatedVaultItem>;
     /**
-     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof StateEntityFungibleResourceVaultsPageResponse
      */
     address: string;
     /**
-     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof StateEntityFungibleResourceVaultsPageResponse
      */

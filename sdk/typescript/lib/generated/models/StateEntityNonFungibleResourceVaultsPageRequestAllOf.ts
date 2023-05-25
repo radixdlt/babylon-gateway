@@ -13,61 +13,67 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { StateEntityNonFungibleResourceVaultsPageOptIns } from './StateEntityNonFungibleResourceVaultsPageOptIns';
+import {
+    StateEntityNonFungibleResourceVaultsPageOptInsFromJSON,
+    StateEntityNonFungibleResourceVaultsPageOptInsFromJSONTyped,
+    StateEntityNonFungibleResourceVaultsPageOptInsToJSON,
+} from './StateEntityNonFungibleResourceVaultsPageOptIns';
+
 /**
  * 
  * @export
- * @interface StateEntityNonFungibleIdsPageRequestAllOf
+ * @interface StateEntityNonFungibleResourceVaultsPageRequestAllOf
  */
-export interface StateEntityNonFungibleIdsPageRequestAllOf {
+export interface StateEntityNonFungibleResourceVaultsPageRequestAllOf {
     /**
      * Bech32m-encoded human readable version of the address.
      * @type {string}
-     * @memberof StateEntityNonFungibleIdsPageRequestAllOf
+     * @memberof StateEntityNonFungibleResourceVaultsPageRequestAllOf
      */
     address: string;
     /**
      * Bech32m-encoded human readable version of the address.
      * @type {string}
-     * @memberof StateEntityNonFungibleIdsPageRequestAllOf
-     */
-    vault_address: string;
-    /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof StateEntityNonFungibleIdsPageRequestAllOf
+     * @memberof StateEntityNonFungibleResourceVaultsPageRequestAllOf
      */
     resource_address: string;
+    /**
+     * 
+     * @type {StateEntityNonFungibleResourceVaultsPageOptIns}
+     * @memberof StateEntityNonFungibleResourceVaultsPageRequestAllOf
+     */
+    opt_ins?: StateEntityNonFungibleResourceVaultsPageOptIns;
 }
 
 /**
- * Check if a given object implements the StateEntityNonFungibleIdsPageRequestAllOf interface.
+ * Check if a given object implements the StateEntityNonFungibleResourceVaultsPageRequestAllOf interface.
  */
-export function instanceOfStateEntityNonFungibleIdsPageRequestAllOf(value: object): boolean {
+export function instanceOfStateEntityNonFungibleResourceVaultsPageRequestAllOf(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "address" in value;
-    isInstance = isInstance && "vault_address" in value;
     isInstance = isInstance && "resource_address" in value;
 
     return isInstance;
 }
 
-export function StateEntityNonFungibleIdsPageRequestAllOfFromJSON(json: any): StateEntityNonFungibleIdsPageRequestAllOf {
-    return StateEntityNonFungibleIdsPageRequestAllOfFromJSONTyped(json, false);
+export function StateEntityNonFungibleResourceVaultsPageRequestAllOfFromJSON(json: any): StateEntityNonFungibleResourceVaultsPageRequestAllOf {
+    return StateEntityNonFungibleResourceVaultsPageRequestAllOfFromJSONTyped(json, false);
 }
 
-export function StateEntityNonFungibleIdsPageRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateEntityNonFungibleIdsPageRequestAllOf {
+export function StateEntityNonFungibleResourceVaultsPageRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateEntityNonFungibleResourceVaultsPageRequestAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
         'address': json['address'],
-        'vault_address': json['vault_address'],
         'resource_address': json['resource_address'],
+        'opt_ins': !exists(json, 'opt_ins') ? undefined : StateEntityNonFungibleResourceVaultsPageOptInsFromJSON(json['opt_ins']),
     };
 }
 
-export function StateEntityNonFungibleIdsPageRequestAllOfToJSON(value?: StateEntityNonFungibleIdsPageRequestAllOf | null): any {
+export function StateEntityNonFungibleResourceVaultsPageRequestAllOfToJSON(value?: StateEntityNonFungibleResourceVaultsPageRequestAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -77,8 +83,8 @@ export function StateEntityNonFungibleIdsPageRequestAllOfToJSON(value?: StateEnt
     return {
         
         'address': value.address,
-        'vault_address': value.vault_address,
         'resource_address': value.resource_address,
+        'opt_ins': StateEntityNonFungibleResourceVaultsPageOptInsToJSON(value.opt_ins),
     };
 }
 

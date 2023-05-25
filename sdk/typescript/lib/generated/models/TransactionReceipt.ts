@@ -48,7 +48,7 @@ export interface TransactionReceipt {
      * @type {object}
      * @memberof TransactionReceipt
      */
-    items?: object;
+    output?: object;
     /**
      * Events emitted by a transaction.
      * @type {object}
@@ -86,7 +86,7 @@ export function TransactionReceiptFromJSONTyped(json: any, ignoreDiscriminator: 
         'fee_summary': !exists(json, 'fee_summary') ? undefined : json['fee_summary'],
         'state_updates': !exists(json, 'state_updates') ? undefined : json['state_updates'],
         'next_epoch': !exists(json, 'next_epoch') ? undefined : json['next_epoch'],
-        'items': !exists(json, 'items') ? undefined : json['items'],
+        'output': !exists(json, 'output') ? undefined : json['output'],
         'events': !exists(json, 'events') ? undefined : json['events'],
         'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
     };
@@ -105,7 +105,7 @@ export function TransactionReceiptToJSON(value?: TransactionReceipt | null): any
         'fee_summary': value.fee_summary,
         'state_updates': value.state_updates,
         'next_epoch': value.next_epoch,
-        'items': value.items,
+        'output': value.output,
         'events': value.events,
         'error_message': value.error_message,
     };

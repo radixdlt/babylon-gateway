@@ -45,19 +45,19 @@ export interface StateEntityNonFungibleIdsPageRequest {
      */
     limit_per_page?: number | null;
     /**
-     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof StateEntityNonFungibleIdsPageRequest
      */
     address: string;
     /**
-     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof StateEntityNonFungibleIdsPageRequest
      */
     vault_address: string;
     /**
-     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof StateEntityNonFungibleIdsPageRequest
      */

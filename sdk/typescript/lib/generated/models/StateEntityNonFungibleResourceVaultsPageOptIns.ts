@@ -16,42 +16,41 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface NonFungibleIdsCollectionItem
+ * @interface StateEntityNonFungibleResourceVaultsPageOptIns
  */
-export interface NonFungibleIdsCollectionItem {
+export interface StateEntityNonFungibleResourceVaultsPageOptIns {
     /**
-     * String-encoded non-fungible ID.
-     * @type {string}
-     * @memberof NonFungibleIdsCollectionItem
+     * 
+     * @type {boolean}
+     * @memberof StateEntityNonFungibleResourceVaultsPageOptIns
      */
-    non_fungible_id: string;
+    non_fungible_include_nfids?: boolean;
 }
 
 /**
- * Check if a given object implements the NonFungibleIdsCollectionItem interface.
+ * Check if a given object implements the StateEntityNonFungibleResourceVaultsPageOptIns interface.
  */
-export function instanceOfNonFungibleIdsCollectionItem(value: object): boolean {
+export function instanceOfStateEntityNonFungibleResourceVaultsPageOptIns(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "non_fungible_id" in value;
 
     return isInstance;
 }
 
-export function NonFungibleIdsCollectionItemFromJSON(json: any): NonFungibleIdsCollectionItem {
-    return NonFungibleIdsCollectionItemFromJSONTyped(json, false);
+export function StateEntityNonFungibleResourceVaultsPageOptInsFromJSON(json: any): StateEntityNonFungibleResourceVaultsPageOptIns {
+    return StateEntityNonFungibleResourceVaultsPageOptInsFromJSONTyped(json, false);
 }
 
-export function NonFungibleIdsCollectionItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): NonFungibleIdsCollectionItem {
+export function StateEntityNonFungibleResourceVaultsPageOptInsFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateEntityNonFungibleResourceVaultsPageOptIns {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'non_fungible_id': json['non_fungible_id'],
+        'non_fungible_include_nfids': !exists(json, 'non_fungible_include_nfids') ? undefined : json['non_fungible_include_nfids'],
     };
 }
 
-export function NonFungibleIdsCollectionItemToJSON(value?: NonFungibleIdsCollectionItem | null): any {
+export function StateEntityNonFungibleResourceVaultsPageOptInsToJSON(value?: StateEntityNonFungibleResourceVaultsPageOptIns | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -60,7 +59,7 @@ export function NonFungibleIdsCollectionItemToJSON(value?: NonFungibleIdsCollect
     }
     return {
         
-        'non_fungible_id': value.non_fungible_id,
+        'non_fungible_include_nfids': value.non_fungible_include_nfids,
     };
 }
 

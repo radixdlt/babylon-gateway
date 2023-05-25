@@ -43,6 +43,24 @@ export interface StateEntityDetailsResponseFungibleResourceDetails {
      * @memberof StateEntityDetailsResponseFungibleResourceDetails
      */
     divisibility: number;
+    /**
+     * String-encoded decimal representing the amount of a related fungible resource.
+     * @type {string}
+     * @memberof StateEntityDetailsResponseFungibleResourceDetails
+     */
+    total_supply: string;
+    /**
+     * String-encoded decimal representing the amount of a related fungible resource.
+     * @type {string}
+     * @memberof StateEntityDetailsResponseFungibleResourceDetails
+     */
+    total_minted: string;
+    /**
+     * String-encoded decimal representing the amount of a related fungible resource.
+     * @type {string}
+     * @memberof StateEntityDetailsResponseFungibleResourceDetails
+     */
+    total_burned: string;
 }
 
 
@@ -64,6 +82,9 @@ export function instanceOfStateEntityDetailsResponseFungibleResourceDetails(valu
     isInstance = isInstance && "access_rules_chain" in value;
     isInstance = isInstance && "vault_access_rules_chain" in value;
     isInstance = isInstance && "divisibility" in value;
+    isInstance = isInstance && "total_supply" in value;
+    isInstance = isInstance && "total_minted" in value;
+    isInstance = isInstance && "total_burned" in value;
 
     return isInstance;
 }
@@ -82,6 +103,9 @@ export function StateEntityDetailsResponseFungibleResourceDetailsFromJSONTyped(j
         'access_rules_chain': json['access_rules_chain'],
         'vault_access_rules_chain': json['vault_access_rules_chain'],
         'divisibility': json['divisibility'],
+        'total_supply': json['total_supply'],
+        'total_minted': json['total_minted'],
+        'total_burned': json['total_burned'],
     };
 }
 
@@ -98,6 +122,9 @@ export function StateEntityDetailsResponseFungibleResourceDetailsToJSON(value?: 
         'access_rules_chain': value.access_rules_chain,
         'vault_access_rules_chain': value.vault_access_rules_chain,
         'divisibility': value.divisibility,
+        'total_supply': value.total_supply,
+        'total_minted': value.total_minted,
+        'total_burned': value.total_burned,
     };
 }
 

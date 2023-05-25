@@ -19,12 +19,6 @@ import {
     LedgerStateFromJSONTyped,
     LedgerStateToJSON,
 } from './LedgerState';
-import type { NonFungibleIdsCollectionItem } from './NonFungibleIdsCollectionItem';
-import {
-    NonFungibleIdsCollectionItemFromJSON,
-    NonFungibleIdsCollectionItemFromJSONTyped,
-    NonFungibleIdsCollectionItemToJSON,
-} from './NonFungibleIdsCollectionItem';
 
 /**
  * 
@@ -58,18 +52,18 @@ export interface StateEntityNonFungibleIdsPageResponse {
     next_cursor?: string | null;
     /**
      * 
-     * @type {Array<NonFungibleIdsCollectionItem>}
+     * @type {Array<string>}
      * @memberof StateEntityNonFungibleIdsPageResponse
      */
-    items: Array<NonFungibleIdsCollectionItem>;
+    items: Array<string>;
     /**
-     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof StateEntityNonFungibleIdsPageResponse
      */
     address: string;
     /**
-     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof StateEntityNonFungibleIdsPageResponse
      */
@@ -103,7 +97,7 @@ export function StateEntityNonFungibleIdsPageResponseFromJSONTyped(json: any, ig
         'total_count': !exists(json, 'total_count') ? undefined : json['total_count'],
         'previous_cursor': !exists(json, 'previous_cursor') ? undefined : json['previous_cursor'],
         'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
-        'items': ((json['items'] as Array<any>).map(NonFungibleIdsCollectionItemFromJSON)),
+        'items': json['items'],
         'address': json['address'],
         'resource_address': json['resource_address'],
     };
@@ -122,7 +116,7 @@ export function StateEntityNonFungibleIdsPageResponseToJSON(value?: StateEntityN
         'total_count': value.total_count,
         'previous_cursor': value.previous_cursor,
         'next_cursor': value.next_cursor,
-        'items': ((value.items as Array<any>).map(NonFungibleIdsCollectionItemToJSON)),
+        'items': value.items,
         'address': value.address,
         'resource_address': value.resource_address,
     };

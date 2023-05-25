@@ -19,6 +19,18 @@ import {
     LedgerStateSelectorFromJSONTyped,
     LedgerStateSelectorToJSON,
 } from './LedgerStateSelector';
+import type { StreamTransactionsRequestEventFilterItem } from './StreamTransactionsRequestEventFilterItem';
+import {
+    StreamTransactionsRequestEventFilterItemFromJSON,
+    StreamTransactionsRequestEventFilterItemFromJSONTyped,
+    StreamTransactionsRequestEventFilterItemToJSON,
+} from './StreamTransactionsRequestEventFilterItem';
+import type { TransactionCommittedDetailsOptIns } from './TransactionCommittedDetailsOptIns';
+import {
+    TransactionCommittedDetailsOptInsFromJSON,
+    TransactionCommittedDetailsOptInsFromJSONTyped,
+    TransactionCommittedDetailsOptInsToJSON,
+} from './TransactionCommittedDetailsOptIns';
 
 /**
  * 
@@ -39,11 +51,41 @@ export interface StreamTransactionsRequestAllOf {
      */
     kind_filter?: StreamTransactionsRequestAllOfKindFilterEnum;
     /**
+     * 
+     * @type {Array<string>}
+     * @memberof StreamTransactionsRequestAllOf
+     */
+    manifest_accounts_withdrawn_from_filter?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof StreamTransactionsRequestAllOf
+     */
+    manifest_accounts_deposited_into_filter?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof StreamTransactionsRequestAllOf
+     */
+    manifest_resources_filter?: Array<string>;
+    /**
+     * 
+     * @type {Array<StreamTransactionsRequestEventFilterItem>}
+     * @memberof StreamTransactionsRequestAllOf
+     */
+    events_filter?: Array<StreamTransactionsRequestEventFilterItem>;
+    /**
      * Configures the order of returned result set. Defaults to `desc`.
      * @type {string}
      * @memberof StreamTransactionsRequestAllOf
      */
     order?: StreamTransactionsRequestAllOfOrderEnum;
+    /**
+     * 
+     * @type {TransactionCommittedDetailsOptIns}
+     * @memberof StreamTransactionsRequestAllOf
+     */
+    opt_ins?: TransactionCommittedDetailsOptIns;
 }
 
 
@@ -88,7 +130,12 @@ export function StreamTransactionsRequestAllOfFromJSONTyped(json: any, ignoreDis
         
         'from_ledger_state': !exists(json, 'from_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['from_ledger_state']),
         'kind_filter': !exists(json, 'kind_filter') ? undefined : json['kind_filter'],
+        'manifest_accounts_withdrawn_from_filter': !exists(json, 'manifest_accounts_withdrawn_from_filter') ? undefined : json['manifest_accounts_withdrawn_from_filter'],
+        'manifest_accounts_deposited_into_filter': !exists(json, 'manifest_accounts_deposited_into_filter') ? undefined : json['manifest_accounts_deposited_into_filter'],
+        'manifest_resources_filter': !exists(json, 'manifest_resources_filter') ? undefined : json['manifest_resources_filter'],
+        'events_filter': !exists(json, 'events_filter') ? undefined : ((json['events_filter'] as Array<any>).map(StreamTransactionsRequestEventFilterItemFromJSON)),
         'order': !exists(json, 'order') ? undefined : json['order'],
+        'opt_ins': !exists(json, 'opt_ins') ? undefined : TransactionCommittedDetailsOptInsFromJSON(json['opt_ins']),
     };
 }
 
@@ -103,7 +150,12 @@ export function StreamTransactionsRequestAllOfToJSON(value?: StreamTransactionsR
         
         'from_ledger_state': LedgerStateSelectorToJSON(value.from_ledger_state),
         'kind_filter': value.kind_filter,
+        'manifest_accounts_withdrawn_from_filter': value.manifest_accounts_withdrawn_from_filter,
+        'manifest_accounts_deposited_into_filter': value.manifest_accounts_deposited_into_filter,
+        'manifest_resources_filter': value.manifest_resources_filter,
+        'events_filter': value.events_filter === undefined ? undefined : ((value.events_filter as Array<any>).map(StreamTransactionsRequestEventFilterItemToJSON)),
         'order': value.order,
+        'opt_ins': TransactionCommittedDetailsOptInsToJSON(value.opt_ins),
     };
 }
 

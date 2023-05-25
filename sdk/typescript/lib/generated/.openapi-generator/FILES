@@ -49,7 +49,6 @@ models/NetworkConfigurationResponseWellKnownAddresses.ts
 models/NonFungibleIdType.ts
 models/NonFungibleIdsCollection.ts
 models/NonFungibleIdsCollectionAllOf.ts
-models/NonFungibleIdsCollectionItem.ts
 models/NonFungibleResourcesCollection.ts
 models/NonFungibleResourcesCollectionAllOf.ts
 models/NonFungibleResourcesCollectionItem.ts
@@ -61,8 +60,11 @@ models/NonFungibleResourcesCollectionItemVaultAggregatedAllOf.ts
 models/NonFungibleResourcesCollectionItemVaultAggregatedVault.ts
 models/NonFungibleResourcesCollectionItemVaultAggregatedVaultAllOf.ts
 models/NonFungibleResourcesCollectionItemVaultAggregatedVaultItem.ts
+models/NonFungibleResourcesCollectionItemVaultAggregatedVaultItemAllOf.ts
 models/NotSyncedUpError.ts
 models/NotSyncedUpErrorAllOf.ts
+models/OptionalNonFungibleIdsCollection.ts
+models/OptionalNonFungibleIdsCollectionAllOf.ts
 models/PublicKey.ts
 models/PublicKeyBase.ts
 models/PublicKeyEcdsaSecp256k1.ts
@@ -108,7 +110,9 @@ models/StateEntityMetadataPageResponse.ts
 models/StateEntityNonFungibleIdsPageRequest.ts
 models/StateEntityNonFungibleIdsPageRequestAllOf.ts
 models/StateEntityNonFungibleIdsPageResponse.ts
+models/StateEntityNonFungibleResourceVaultsPageOptIns.ts
 models/StateEntityNonFungibleResourceVaultsPageRequest.ts
+models/StateEntityNonFungibleResourceVaultsPageRequestAllOf.ts
 models/StateEntityNonFungibleResourceVaultsPageResponse.ts
 models/StateEntityNonFungiblesPageRequest.ts
 models/StateEntityNonFungiblesPageRequestAllOf.ts
@@ -129,14 +133,14 @@ models/StateValidatorsListResponse.ts
 models/StateValidatorsListResponseAllOf.ts
 models/StreamTransactionsRequest.ts
 models/StreamTransactionsRequestAllOf.ts
+models/StreamTransactionsRequestEventFilterItem.ts
 models/StreamTransactionsResponse.ts
-models/TokenAmount.ts
+models/StreamTransactionsResponseAllOf.ts
 models/TransactionCommittedDetailsOptIns.ts
 models/TransactionCommittedDetailsRequest.ts
 models/TransactionCommittedDetailsRequestAllOf.ts
 models/TransactionCommittedDetailsResponse.ts
 models/TransactionCommittedDetailsResponseAllOf.ts
-models/TransactionCommittedDetailsResponseDetails.ts
 models/TransactionConstructionResponse.ts
 models/TransactionNotFoundError.ts
 models/TransactionNotFoundErrorAllOf.ts
