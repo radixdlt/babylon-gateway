@@ -1336,7 +1336,7 @@ most_recent_entity_resource_vault_aggregate_history AS (
 SELECT
     er.address AS ResourceEntityAddress,
     vah.vault_entity_id AS VaultEntityId,
-    ENCODE(ev.address, 'hex') AS VaultAddress,
+    ev.address AS VaultAddress,
     vh.NonFungibleIdsCount,
     vah.vault_total_count AS VaultTotalCount,
     vh.from_state_version AS LastUpdatedAtStateVersion
