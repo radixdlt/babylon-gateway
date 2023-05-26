@@ -1588,7 +1588,7 @@ FROM variables v
 INNER JOIN LATERAL (
     SELECT *
     FROM entity_access_rules_chain_history
-    WHERE entity_id = v.entity_id AND (v.child_blueprint_name is NULL OR child_blueprint_name = v.child_blueprint_name) AND from_state_version <= {ledgerState.StateVersion}
+    WHERE entity_id = v.entity_id AND ((v.child_blueprint_name is NULL and child_blueprint_name is NULL) OR child_blueprint_name = v.child_blueprint_name) AND from_state_version <= {ledgerState.StateVersion}
     ORDER BY from_state_version DESC
     LIMIT 1
 ) earch ON TRUE;")
