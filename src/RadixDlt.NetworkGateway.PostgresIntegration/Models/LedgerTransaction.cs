@@ -105,9 +105,6 @@ internal abstract class LedgerTransaction
     [Column("is_end_of_epoch")]
     public bool IsEndOfEpoch { get; set; }
 
-    [Column("referenced_entities")]
-    public List<long> ReferencedEntities { get; set; }
-
     [Column("fee_paid")]
     public TokenAmount? FeePaid { get; set; }
 

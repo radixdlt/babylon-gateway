@@ -296,7 +296,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     index_in_epoch = table.Column<long>(type: "bigint", nullable: false),
                     index_in_round = table.Column<long>(type: "bigint", nullable: false),
                     is_end_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
-                    referenced_entities = table.Column<List<long>>(type: "bigint[]", nullable: false),
                     fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
                     tip_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
                     round_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),

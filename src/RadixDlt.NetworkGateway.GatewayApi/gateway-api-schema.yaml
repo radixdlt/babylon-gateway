@@ -1052,10 +1052,6 @@ components:
           $ref: "#/components/schemas/HexString"
         receipt:
           $ref: "#/components/schemas/TransactionReceipt"
-        referenced_global_entities:
-          type: array
-          items:
-            type: string
         message_hex:
           $ref: "#/components/schemas/HexString"
 

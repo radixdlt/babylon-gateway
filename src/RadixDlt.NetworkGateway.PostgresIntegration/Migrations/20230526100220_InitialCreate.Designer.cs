@@ -82,7 +82,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230525064925_InitialCreate")]
+    [Migration("20230526100220_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -496,11 +496,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("raw_payload");
-
-                    b.Property<List<long>>("ReferencedEntities")
-                        .IsRequired()
-                        .HasColumnType("bigint[]")
-                        .HasColumnName("referenced_entities");
 
                     b.Property<long>("RoundInEpoch")
                         .HasColumnType("bigint")
