@@ -121,9 +121,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="errorMessage">errorMessage.</param>
         /// <param name="rawHex">Hex-encoded binary blob..</param>
         /// <param name="receipt">receipt.</param>
-        /// <param name="referencedGlobalEntities">referencedGlobalEntities.</param>
         /// <param name="messageHex">Hex-encoded binary blob..</param>
-        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), string feePaid = default(string), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), List<string> referencedGlobalEntities = default(List<string>), string messageHex = default(string))
+        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), string feePaid = default(string), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), string messageHex = default(string))
         {
             this.StateVersion = stateVersion;
             this.Epoch = epoch;
@@ -142,7 +141,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.ErrorMessage = errorMessage;
             this.RawHex = rawHex;
             this.Receipt = receipt;
-            this.ReferencedGlobalEntities = referencedGlobalEntities;
             this.MessageHex = messageHex;
         }
 
@@ -217,12 +215,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public TransactionReceipt Receipt { get; set; }
 
         /// <summary>
-        /// Gets or Sets ReferencedGlobalEntities
-        /// </summary>
-        [DataMember(Name = "referenced_global_entities", EmitDefaultValue = true)]
-        public List<string> ReferencedGlobalEntities { get; set; }
-
-        /// <summary>
         /// Hex-encoded binary blob.
         /// </summary>
         /// <value>Hex-encoded binary blob.</value>
@@ -249,7 +241,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("  RawHex: ").Append(RawHex).Append("\n");
             sb.Append("  Receipt: ").Append(Receipt).Append("\n");
-            sb.Append("  ReferencedGlobalEntities: ").Append(ReferencedGlobalEntities).Append("\n");
             sb.Append("  MessageHex: ").Append(MessageHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -343,12 +334,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Receipt.Equals(input.Receipt))
                 ) && 
                 (
-                    this.ReferencedGlobalEntities == input.ReferencedGlobalEntities ||
-                    this.ReferencedGlobalEntities != null &&
-                    input.ReferencedGlobalEntities != null &&
-                    this.ReferencedGlobalEntities.SequenceEqual(input.ReferencedGlobalEntities)
-                ) && 
-                (
                     this.MessageHex == input.MessageHex ||
                     (this.MessageHex != null &&
                     this.MessageHex.Equals(input.MessageHex))
@@ -399,10 +384,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Receipt != null)
                 {
                     hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
-                }
-                if (this.ReferencedGlobalEntities != null)
-                {
-                    hashCode = (hashCode * 59) + this.ReferencedGlobalEntities.GetHashCode();
                 }
                 if (this.MessageHex != null)
                 {

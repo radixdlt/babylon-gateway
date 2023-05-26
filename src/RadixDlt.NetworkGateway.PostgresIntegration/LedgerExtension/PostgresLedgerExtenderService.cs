@@ -320,7 +320,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         foreach (var address in extractedAddresses.All())
                         {
                             referencedEntities.MarkSeenAddress((EntityAddress)address);
-                            referencedEntities.MarkReferenced(stateVersion, (EntityAddress)address);
                         }
 
                         manifestExtractedAddresses[stateVersion] = extractedAddresses;
@@ -330,7 +329,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)newGlobalEntity.EntityAddress, ea => new ReferencedEntity(ea,  newGlobalEntity.EntityType, stateVersion));
 
-                        referencedEntities.MarkReferenced(stateVersion, referencedEntity.Address);
                         referencedEntity.WithTypeHint(newGlobalEntity.EntityType switch
                         {
                             CoreModel.EntityType.GlobalGenericComponent => typeof(GlobalGenericComponentEntity),
@@ -482,7 +480,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                     var entityAddress = (EntityAddress)functionEventEmitterIdentifier.Entity.EntityAddress;
 
                                     referencedEntities.GetOrAdd(entityAddress, ea => new ReferencedEntity(ea, functionEventEmitterIdentifier.Entity.EntityType, stateVersion));
-                                    referencedEntities.MarkReferenced(stateVersion, entityAddress);
                                     break;
                                 }
 
@@ -491,7 +488,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                     var entityAddress = (EntityAddress)methodEventEmitterIdentifier.Entity.EntityAddress;
 
                                     referencedEntities.GetOrAdd(entityAddress, ea => new ReferencedEntity(ea, methodEventEmitterIdentifier.Entity.EntityType, stateVersion));
-                                    referencedEntities.MarkReferenced(stateVersion, entityAddress);
                                     break;
                                 }
 
@@ -1526,11 +1522,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 .ToList();
 
             var entityResourceAggregateHistoryToAdd = entityResourceAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()).ToList();
-
-            foreach (var lt in ledgerTransactionsToAdd)
-            {
-                lt.ReferencedEntities = referencedEntities.ResolveReferenced(lt.StateVersion).Select(ea => referencedEntities.Get(ea).DatabaseId).ToList();
-            }
 
             sw = Stopwatch.StartNew();
 

@@ -69,7 +69,6 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -291,9 +290,9 @@ internal class TransactionQuerier : ITransactionQuerier
             return null;
         }
 
-        return withDetails
-            ? await GetTransactionWithDetails(stateVersion, optIns, token)
-            : (await GetTransactions(new List<long> { stateVersion }, optIns, token)).First();
+        var transactions = await GetTransactions(new List<long> { stateVersion }, optIns, token);
+
+        return transactions.First();
     }
 
     public async Task<ICollection<StatusLookupResult>> LookupPendingTransactionsByIntentHash(byte[] intentHash, CancellationToken token = default)
@@ -313,28 +312,8 @@ internal class TransactionQuerier : ITransactionQuerier
 
         return transactions
             .OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion))
-            .Select(lt => lt.ToGatewayModel(ArraySegment<Entity>.Empty, optIns))
+            .Select(lt => lt.ToGatewayModel(optIns))
             .ToList();
-    }
-
-    private async Task<GatewayModel.CommittedTransactionInfo> GetTransactionWithDetails(long stateVersion, GatewayModel.TransactionCommittedDetailsOptIns optIns, CancellationToken token)
-    {
-        var transaction = await _dbContext.LedgerTransactions
-            .OfType<UserLedgerTransaction>()
-            .Where(ult => ult.StateVersion == stateVersion)
-            .OrderByDescending(lt => lt.StateVersion)
-            .FirstAsync(token);
-
-        List<Entity> referencedEntities = new List<Entity>();
-
-        if (transaction.ReferencedEntities.Any())
-        {
-            referencedEntities = await _dbContext.Entities
-                .Where(e => transaction.ReferencedEntities.Contains(e.Id))
-                .ToListAsync(token);
-        }
-
-        return transaction.ToGatewayModel(referencedEntities, optIns);
     }
 
     private async Task<Dictionary<string, long>> GetEntityIds(List<string> addresses, CancellationToken token = default)

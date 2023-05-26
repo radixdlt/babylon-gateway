@@ -65,7 +65,6 @@
 using RadixDlt.NetworkGateway.Abstractions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -74,7 +73,6 @@ internal class ReferencedEntityDictionary
     private readonly Dictionary<EntityAddress, ReferencedEntity> _storage = new();
     private readonly Dictionary<long, ReferencedEntity> _dbIdCache = new();
     private readonly HashSet<EntityAddress> _knownAddressesToLoad = new();
-    private readonly Dictionary<long, HashSet<EntityAddress>> _transactionEntityReferences = new();
 
     public ICollection<EntityAddress> KnownAddresses => _knownAddressesToLoad;
 
@@ -116,17 +114,5 @@ internal class ReferencedEntityDictionary
     public void MarkSeenAddress(EntityAddress entityAddress)
     {
         _knownAddressesToLoad.Add(entityAddress);
-    }
-
-    public void MarkReferenced(long stateVersion, EntityAddress entityAddress)
-    {
-        _transactionEntityReferences.GetOrAdd(stateVersion, _ => new HashSet<EntityAddress>()).Add(entityAddress);
-    }
-
-    public IEnumerable<EntityAddress> ResolveReferenced(long stateVersion)
-    {
-        return _transactionEntityReferences.TryGetValue(stateVersion, out var referencedEntities)
-            ? referencedEntities
-            : Enumerable.Empty<EntityAddress>();
     }
 }
