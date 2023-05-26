@@ -269,9 +269,9 @@ INNER JOIN LATERAL (
 
     public async Task<Dictionary<long, EntityNonFungibleVaultHistory>> MostRecentEntityNonFungibleVaultHistory(List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
     {
-        var vaultIds = nonFungibleVaultChanges.Select(x => x.ReferencedVault.DatabaseId).ToList();
+        var vaultIds = nonFungibleVaultChanges.Select(x => x.ReferencedVault.DatabaseId).Distinct().ToList();
 
-        var entityVaultHistory = await _dbContext.EntityVaultHistory
+        return await _dbContext.EntityVaultHistory
             .FromSqlInterpolated(@$"
 WITH variables (vault_entity_id) AS (
     SELECT UNNEST({vaultIds})
@@ -287,8 +287,6 @@ INNER JOIN LATERAL (
 ) evh ON true;")
             .AsNoTracking()
             .ToDictionaryAsync(e => e.VaultEntityId, e => (EntityNonFungibleVaultHistory)e, token);
-
-        return entityVaultHistory;
     }
 
     public async Task<Dictionary<long, NonFungibleIdStoreHistory>> MostRecentNonFungibleIdStoreHistoryFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, CancellationToken token)
