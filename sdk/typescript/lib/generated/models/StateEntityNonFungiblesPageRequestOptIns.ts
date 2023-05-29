@@ -21,6 +21,12 @@ import { exists, mapValues } from '../runtime';
 export interface StateEntityNonFungiblesPageRequestOptIns {
     /**
      * 
+     * @type {boolean}
+     * @memberof StateEntityNonFungiblesPageRequestOptIns
+     */
+    non_fungible_include_nfids?: boolean;
+    /**
+     * 
      * @type {Array<string>}
      * @memberof StateEntityNonFungiblesPageRequestOptIns
      */
@@ -46,6 +52,7 @@ export function StateEntityNonFungiblesPageRequestOptInsFromJSONTyped(json: any,
     }
     return {
         
+        'non_fungible_include_nfids': !exists(json, 'non_fungible_include_nfids') ? undefined : json['non_fungible_include_nfids'],
         'explicit_metadata': !exists(json, 'explicit_metadata') ? undefined : json['explicit_metadata'],
     };
 }
@@ -59,6 +66,7 @@ export function StateEntityNonFungiblesPageRequestOptInsToJSON(value?: StateEnti
     }
     return {
         
+        'non_fungible_include_nfids': value.non_fungible_include_nfids,
         'explicit_metadata': value.explicit_metadata,
     };
 }

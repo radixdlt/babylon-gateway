@@ -64,7 +64,7 @@
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class PackageRoyaltySubstate : IRoyaltyVaultHolder
+public partial class PackageFieldRoyaltySubstate : IRoyaltyVaultHolder
 {
     public bool TryGetRoyaltyVault(out EntityReference royaltyVault)
     {

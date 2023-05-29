@@ -50,6 +50,24 @@ export interface StateEntityDetailsResponseNonFungibleResourceDetails {
      * @memberof StateEntityDetailsResponseNonFungibleResourceDetails
      */
     non_fungible_id_type: NonFungibleIdType;
+    /**
+     * String-encoded decimal representing the amount of a related fungible resource.
+     * @type {string}
+     * @memberof StateEntityDetailsResponseNonFungibleResourceDetails
+     */
+    total_supply: string;
+    /**
+     * String-encoded decimal representing the amount of a related fungible resource.
+     * @type {string}
+     * @memberof StateEntityDetailsResponseNonFungibleResourceDetails
+     */
+    total_minted: string;
+    /**
+     * String-encoded decimal representing the amount of a related fungible resource.
+     * @type {string}
+     * @memberof StateEntityDetailsResponseNonFungibleResourceDetails
+     */
+    total_burned: string;
 }
 
 
@@ -71,6 +89,9 @@ export function instanceOfStateEntityDetailsResponseNonFungibleResourceDetails(v
     isInstance = isInstance && "access_rules_chain" in value;
     isInstance = isInstance && "vault_access_rules_chain" in value;
     isInstance = isInstance && "non_fungible_id_type" in value;
+    isInstance = isInstance && "total_supply" in value;
+    isInstance = isInstance && "total_minted" in value;
+    isInstance = isInstance && "total_burned" in value;
 
     return isInstance;
 }
@@ -89,6 +110,9 @@ export function StateEntityDetailsResponseNonFungibleResourceDetailsFromJSONType
         'access_rules_chain': json['access_rules_chain'],
         'vault_access_rules_chain': json['vault_access_rules_chain'],
         'non_fungible_id_type': NonFungibleIdTypeFromJSON(json['non_fungible_id_type']),
+        'total_supply': json['total_supply'],
+        'total_minted': json['total_minted'],
+        'total_burned': json['total_burned'],
     };
 }
 
@@ -105,6 +129,9 @@ export function StateEntityDetailsResponseNonFungibleResourceDetailsToJSON(value
         'access_rules_chain': value.access_rules_chain,
         'vault_access_rules_chain': value.vault_access_rules_chain,
         'non_fungible_id_type': NonFungibleIdTypeToJSON(value.non_fungible_id_type),
+        'total_supply': value.total_supply,
+        'total_minted': value.total_minted,
+        'total_burned': value.total_burned,
     };
 }
 

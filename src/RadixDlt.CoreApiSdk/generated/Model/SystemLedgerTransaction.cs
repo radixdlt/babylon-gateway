@@ -110,7 +110,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="systemTransaction">systemTransaction (required).</param>
         /// <param name="type">type (required) (default to LedgerTransactionType.System).</param>
-        /// <param name="payloadHex">The hex-encoded full ledger transaction payload (required).</param>
+        /// <param name="payloadHex">The hex-encoded full ledger transaction payload. Only returned if enabled in TransactionFormatOptions on your request..</param>
         public SystemLedgerTransaction(SystemTransaction systemTransaction = default(SystemTransaction), LedgerTransactionType type = LedgerTransactionType.System, string payloadHex = default(string)) : base(type, payloadHex)
         {
             // to ensure "systemTransaction" is required (not null)

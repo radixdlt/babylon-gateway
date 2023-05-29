@@ -107,23 +107,23 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyValueStoreTypeInfoDetails" /> class.
         /// </summary>
-        /// <param name="keyValueStoreSchema">keyValueStoreSchema (required).</param>
+        /// <param name="keyValueStoreInfo">keyValueStoreInfo (required).</param>
         /// <param name="type">type (required) (default to TypeInfoType.KeyValueStore).</param>
-        public KeyValueStoreTypeInfoDetails(KeyValueStoreSchema keyValueStoreSchema = default(KeyValueStoreSchema), TypeInfoType type = TypeInfoType.KeyValueStore) : base(type)
+        public KeyValueStoreTypeInfoDetails(KeyValueStoreInfo keyValueStoreInfo = default(KeyValueStoreInfo), TypeInfoType type = TypeInfoType.KeyValueStore) : base(type)
         {
-            // to ensure "keyValueStoreSchema" is required (not null)
-            if (keyValueStoreSchema == null)
+            // to ensure "keyValueStoreInfo" is required (not null)
+            if (keyValueStoreInfo == null)
             {
-                throw new ArgumentNullException("keyValueStoreSchema is a required property for KeyValueStoreTypeInfoDetails and cannot be null");
+                throw new ArgumentNullException("keyValueStoreInfo is a required property for KeyValueStoreTypeInfoDetails and cannot be null");
             }
-            this.KeyValueStoreSchema = keyValueStoreSchema;
+            this.KeyValueStoreInfo = keyValueStoreInfo;
         }
 
         /// <summary>
-        /// Gets or Sets KeyValueStoreSchema
+        /// Gets or Sets KeyValueStoreInfo
         /// </summary>
-        [DataMember(Name = "key_value_store_schema", IsRequired = true, EmitDefaultValue = true)]
-        public KeyValueStoreSchema KeyValueStoreSchema { get; set; }
+        [DataMember(Name = "key_value_store_info", IsRequired = true, EmitDefaultValue = true)]
+        public KeyValueStoreInfo KeyValueStoreInfo { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -134,7 +134,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class KeyValueStoreTypeInfoDetails {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  KeyValueStoreSchema: ").Append(KeyValueStoreSchema).Append("\n");
+            sb.Append("  KeyValueStoreInfo: ").Append(KeyValueStoreInfo).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -171,9 +171,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.KeyValueStoreSchema == input.KeyValueStoreSchema ||
-                    (this.KeyValueStoreSchema != null &&
-                    this.KeyValueStoreSchema.Equals(input.KeyValueStoreSchema))
+                    this.KeyValueStoreInfo == input.KeyValueStoreInfo ||
+                    (this.KeyValueStoreInfo != null &&
+                    this.KeyValueStoreInfo.Equals(input.KeyValueStoreInfo))
                 );
         }
 
@@ -186,9 +186,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.KeyValueStoreSchema != null)
+                if (this.KeyValueStoreInfo != null)
                 {
-                    hashCode = (hashCode * 59) + this.KeyValueStoreSchema.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyValueStoreInfo.GetHashCode();
                 }
                 return hashCode;
             }

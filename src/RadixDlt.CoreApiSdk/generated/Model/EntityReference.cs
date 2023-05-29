@@ -110,24 +110,32 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityReference" /> class.
         /// </summary>
         /// <param name="entityType">entityType (required).</param>
-        /// <param name="entityIdHex">The hex-encoded bytes of the entity id. (required).</param>
-        public EntityReference(EntityType entityType = default(EntityType), string entityIdHex = default(string))
+        /// <param name="isGlobal">isGlobal (required).</param>
+        /// <param name="entityAddress">Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id) (required).</param>
+        public EntityReference(EntityType entityType = default(EntityType), bool isGlobal = default(bool), string entityAddress = default(string))
         {
             this.EntityType = entityType;
-            // to ensure "entityIdHex" is required (not null)
-            if (entityIdHex == null)
+            this.IsGlobal = isGlobal;
+            // to ensure "entityAddress" is required (not null)
+            if (entityAddress == null)
             {
-                throw new ArgumentNullException("entityIdHex is a required property for EntityReference and cannot be null");
+                throw new ArgumentNullException("entityAddress is a required property for EntityReference and cannot be null");
             }
-            this.EntityIdHex = entityIdHex;
+            this.EntityAddress = entityAddress;
         }
 
         /// <summary>
-        /// The hex-encoded bytes of the entity id.
+        /// Gets or Sets IsGlobal
         /// </summary>
-        /// <value>The hex-encoded bytes of the entity id.</value>
-        [DataMember(Name = "entity_id_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string EntityIdHex { get; set; }
+        [DataMember(Name = "is_global", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsGlobal { get; set; }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)</value>
+        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -138,7 +146,8 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityReference {\n");
             sb.Append("  EntityType: ").Append(EntityType).Append("\n");
-            sb.Append("  EntityIdHex: ").Append(EntityIdHex).Append("\n");
+            sb.Append("  IsGlobal: ").Append(IsGlobal).Append("\n");
+            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,9 +188,13 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.EntityType.Equals(input.EntityType)
                 ) && 
                 (
-                    this.EntityIdHex == input.EntityIdHex ||
-                    (this.EntityIdHex != null &&
-                    this.EntityIdHex.Equals(input.EntityIdHex))
+                    this.IsGlobal == input.IsGlobal ||
+                    this.IsGlobal.Equals(input.IsGlobal)
+                ) && 
+                (
+                    this.EntityAddress == input.EntityAddress ||
+                    (this.EntityAddress != null &&
+                    this.EntityAddress.Equals(input.EntityAddress))
                 );
         }
 
@@ -195,9 +208,10 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
-                if (this.EntityIdHex != null)
+                hashCode = (hashCode * 59) + this.IsGlobal.GetHashCode();
+                if (this.EntityAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.EntityIdHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
                 }
                 return hashCode;
             }

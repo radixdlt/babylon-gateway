@@ -63,7 +63,7 @@ export interface StateEntityMetadataPageResponse {
      */
     items: Array<EntityMetadataItem>;
     /**
-     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof StateEntityMetadataPageResponse
      */

@@ -13,12 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { TokenAmount } from './TokenAmount';
+import type { TransactionReceipt } from './TransactionReceipt';
 import {
-    TokenAmountFromJSON,
-    TokenAmountFromJSONTyped,
-    TokenAmountToJSON,
-} from './TokenAmount';
+    TransactionReceiptFromJSON,
+    TransactionReceiptFromJSONTyped,
+    TransactionReceiptToJSON,
+} from './TransactionReceipt';
 import type { TransactionStatus } from './TransactionStatus';
 import {
     TransactionStatusFromJSON,
@@ -52,6 +52,12 @@ export interface CommittedTransactionInfo {
     round: number;
     /**
      * 
+     * @type {string}
+     * @memberof CommittedTransactionInfo
+     */
+    round_timestamp: string;
+    /**
+     * 
      * @type {TransactionStatus}
      * @memberof CommittedTransactionInfo
      */
@@ -69,11 +75,11 @@ export interface CommittedTransactionInfo {
      */
     intent_hash_hex?: string;
     /**
-     * 
-     * @type {TokenAmount}
+     * String-encoded decimal representing the amount of a related fungible resource.
+     * @type {string}
      * @memberof CommittedTransactionInfo
      */
-    fee_paid?: TokenAmount;
+    fee_paid?: string;
     /**
      * 
      * @type {Date}
@@ -86,6 +92,30 @@ export interface CommittedTransactionInfo {
      * @memberof CommittedTransactionInfo
      */
     error_message?: string | null;
+    /**
+     * Hex-encoded binary blob.
+     * @type {string}
+     * @memberof CommittedTransactionInfo
+     */
+    raw_hex?: string;
+    /**
+     * 
+     * @type {TransactionReceipt}
+     * @memberof CommittedTransactionInfo
+     */
+    receipt?: TransactionReceipt;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof CommittedTransactionInfo
+     */
+    referenced_global_entities?: Array<string>;
+    /**
+     * Hex-encoded binary blob.
+     * @type {string}
+     * @memberof CommittedTransactionInfo
+     */
+    message_hex?: string;
 }
 
 /**
@@ -96,6 +126,7 @@ export function instanceOfCommittedTransactionInfo(value: object): boolean {
     isInstance = isInstance && "state_version" in value;
     isInstance = isInstance && "epoch" in value;
     isInstance = isInstance && "round" in value;
+    isInstance = isInstance && "round_timestamp" in value;
     isInstance = isInstance && "transaction_status" in value;
 
     return isInstance;
@@ -114,12 +145,17 @@ export function CommittedTransactionInfoFromJSONTyped(json: any, ignoreDiscrimin
         'state_version': json['state_version'],
         'epoch': json['epoch'],
         'round': json['round'],
+        'round_timestamp': json['round_timestamp'],
         'transaction_status': TransactionStatusFromJSON(json['transaction_status']),
         'payload_hash_hex': !exists(json, 'payload_hash_hex') ? undefined : json['payload_hash_hex'],
         'intent_hash_hex': !exists(json, 'intent_hash_hex') ? undefined : json['intent_hash_hex'],
-        'fee_paid': !exists(json, 'fee_paid') ? undefined : TokenAmountFromJSON(json['fee_paid']),
+        'fee_paid': !exists(json, 'fee_paid') ? undefined : json['fee_paid'],
         'confirmed_at': !exists(json, 'confirmed_at') ? undefined : (json['confirmed_at'] === null ? null : new Date(json['confirmed_at'])),
         'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
+        'raw_hex': !exists(json, 'raw_hex') ? undefined : json['raw_hex'],
+        'receipt': !exists(json, 'receipt') ? undefined : TransactionReceiptFromJSON(json['receipt']),
+        'referenced_global_entities': !exists(json, 'referenced_global_entities') ? undefined : json['referenced_global_entities'],
+        'message_hex': !exists(json, 'message_hex') ? undefined : json['message_hex'],
     };
 }
 
@@ -135,12 +171,17 @@ export function CommittedTransactionInfoToJSON(value?: CommittedTransactionInfo 
         'state_version': value.state_version,
         'epoch': value.epoch,
         'round': value.round,
+        'round_timestamp': value.round_timestamp,
         'transaction_status': TransactionStatusToJSON(value.transaction_status),
         'payload_hash_hex': value.payload_hash_hex,
         'intent_hash_hex': value.intent_hash_hex,
-        'fee_paid': TokenAmountToJSON(value.fee_paid),
+        'fee_paid': value.fee_paid,
         'confirmed_at': value.confirmed_at === undefined ? undefined : (value.confirmed_at === null ? null : value.confirmed_at.toISOString()),
         'error_message': value.error_message,
+        'raw_hex': value.raw_hex,
+        'receipt': TransactionReceiptToJSON(value.receipt),
+        'referenced_global_entities': value.referenced_global_entities,
+        'message_hex': value.message_hex,
     };
 }
 

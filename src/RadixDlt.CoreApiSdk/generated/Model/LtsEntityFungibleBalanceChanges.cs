@@ -104,8 +104,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="LtsEntityFungibleBalanceChanges" /> class.
         /// </summary>
         /// <param name="entityAddress">The Bech32m-encoded human readable version of the entity&#39;s address (required).</param>
-        /// <param name="fungibleResourceBalanceChanges">fungibleResourceBalanceChanges (required).</param>
-        public LtsEntityFungibleBalanceChanges(string entityAddress = default(string), List<LtsFungibleResourceBalanceChange> fungibleResourceBalanceChanges = default(List<LtsFungibleResourceBalanceChange>))
+        /// <param name="feeBalanceChange">feeBalanceChange.</param>
+        /// <param name="nonFeeBalanceChanges">nonFeeBalanceChanges (required).</param>
+        public LtsEntityFungibleBalanceChanges(string entityAddress = default(string), LtsFungibleResourceBalanceChange feeBalanceChange = default(LtsFungibleResourceBalanceChange), List<LtsFungibleResourceBalanceChange> nonFeeBalanceChanges = default(List<LtsFungibleResourceBalanceChange>))
         {
             // to ensure "entityAddress" is required (not null)
             if (entityAddress == null)
@@ -113,12 +114,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("entityAddress is a required property for LtsEntityFungibleBalanceChanges and cannot be null");
             }
             this.EntityAddress = entityAddress;
-            // to ensure "fungibleResourceBalanceChanges" is required (not null)
-            if (fungibleResourceBalanceChanges == null)
+            // to ensure "nonFeeBalanceChanges" is required (not null)
+            if (nonFeeBalanceChanges == null)
             {
-                throw new ArgumentNullException("fungibleResourceBalanceChanges is a required property for LtsEntityFungibleBalanceChanges and cannot be null");
+                throw new ArgumentNullException("nonFeeBalanceChanges is a required property for LtsEntityFungibleBalanceChanges and cannot be null");
             }
-            this.FungibleResourceBalanceChanges = fungibleResourceBalanceChanges;
+            this.NonFeeBalanceChanges = nonFeeBalanceChanges;
+            this.FeeBalanceChange = feeBalanceChange;
         }
 
         /// <summary>
@@ -129,10 +131,16 @@ namespace RadixDlt.CoreApiSdk.Model
         public string EntityAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets FungibleResourceBalanceChanges
+        /// Gets or Sets FeeBalanceChange
         /// </summary>
-        [DataMember(Name = "fungible_resource_balance_changes", IsRequired = true, EmitDefaultValue = true)]
-        public List<LtsFungibleResourceBalanceChange> FungibleResourceBalanceChanges { get; set; }
+        [DataMember(Name = "fee_balance_change", EmitDefaultValue = true)]
+        public LtsFungibleResourceBalanceChange FeeBalanceChange { get; set; }
+
+        /// <summary>
+        /// Gets or Sets NonFeeBalanceChanges
+        /// </summary>
+        [DataMember(Name = "non_fee_balance_changes", IsRequired = true, EmitDefaultValue = true)]
+        public List<LtsFungibleResourceBalanceChange> NonFeeBalanceChanges { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,7 +151,8 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class LtsEntityFungibleBalanceChanges {\n");
             sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
-            sb.Append("  FungibleResourceBalanceChanges: ").Append(FungibleResourceBalanceChanges).Append("\n");
+            sb.Append("  FeeBalanceChange: ").Append(FeeBalanceChange).Append("\n");
+            sb.Append("  NonFeeBalanceChanges: ").Append(NonFeeBalanceChanges).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -185,10 +194,15 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.EntityAddress.Equals(input.EntityAddress))
                 ) && 
                 (
-                    this.FungibleResourceBalanceChanges == input.FungibleResourceBalanceChanges ||
-                    this.FungibleResourceBalanceChanges != null &&
-                    input.FungibleResourceBalanceChanges != null &&
-                    this.FungibleResourceBalanceChanges.SequenceEqual(input.FungibleResourceBalanceChanges)
+                    this.FeeBalanceChange == input.FeeBalanceChange ||
+                    (this.FeeBalanceChange != null &&
+                    this.FeeBalanceChange.Equals(input.FeeBalanceChange))
+                ) && 
+                (
+                    this.NonFeeBalanceChanges == input.NonFeeBalanceChanges ||
+                    this.NonFeeBalanceChanges != null &&
+                    input.NonFeeBalanceChanges != null &&
+                    this.NonFeeBalanceChanges.SequenceEqual(input.NonFeeBalanceChanges)
                 );
         }
 
@@ -205,9 +219,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
                 }
-                if (this.FungibleResourceBalanceChanges != null)
+                if (this.FeeBalanceChange != null)
                 {
-                    hashCode = (hashCode * 59) + this.FungibleResourceBalanceChanges.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FeeBalanceChange.GetHashCode();
+                }
+                if (this.NonFeeBalanceChanges != null)
+                {
+                    hashCode = (hashCode * 59) + this.NonFeeBalanceChanges.GetHashCode();
                 }
                 return hashCode;
             }

@@ -103,7 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsAllOf" /> class.
         /// </summary>
-        /// <param name="packageAddress">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id..</param>
+        /// <param name="packageAddress">Bech32m-encoded human readable version of the address..</param>
         /// <param name="blueprintName">blueprintName (required).</param>
         /// <param name="state">state.</param>
         /// <param name="accessRulesChain">accessRulesChain (required).</param>
@@ -128,9 +128,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "package_address", EmitDefaultValue = true)]
         public string PackageAddress { get; set; }
 

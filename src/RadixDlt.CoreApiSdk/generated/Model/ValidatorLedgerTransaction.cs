@@ -110,7 +110,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="validatorTransaction">validatorTransaction (required).</param>
         /// <param name="type">type (required) (default to LedgerTransactionType.Validator).</param>
-        /// <param name="payloadHex">The hex-encoded full ledger transaction payload (required).</param>
+        /// <param name="payloadHex">The hex-encoded full ledger transaction payload. Only returned if enabled in TransactionFormatOptions on your request..</param>
         public ValidatorLedgerTransaction(ValidatorTransaction validatorTransaction = default(ValidatorTransaction), LedgerTransactionType type = LedgerTransactionType.Validator, string payloadHex = default(string)) : base(type, payloadHex)
         {
             // to ensure "validatorTransaction" is required (not null)

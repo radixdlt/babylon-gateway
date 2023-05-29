@@ -13,13 +13,6 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { NonFungibleIdsCollectionItem } from './NonFungibleIdsCollectionItem';
-import {
-    NonFungibleIdsCollectionItemFromJSON,
-    NonFungibleIdsCollectionItemFromJSONTyped,
-    NonFungibleIdsCollectionItemToJSON,
-} from './NonFungibleIdsCollectionItem';
-
 /**
  * 
  * @export
@@ -28,10 +21,10 @@ import {
 export interface NonFungibleIdsCollectionAllOf {
     /**
      * 
-     * @type {Array<NonFungibleIdsCollectionItem>}
+     * @type {Array<string>}
      * @memberof NonFungibleIdsCollectionAllOf
      */
-    items: Array<NonFungibleIdsCollectionItem>;
+    items: Array<string>;
 }
 
 /**
@@ -54,7 +47,7 @@ export function NonFungibleIdsCollectionAllOfFromJSONTyped(json: any, ignoreDisc
     }
     return {
         
-        'items': ((json['items'] as Array<any>).map(NonFungibleIdsCollectionItemFromJSON)),
+        'items': json['items'],
     };
 }
 
@@ -67,7 +60,7 @@ export function NonFungibleIdsCollectionAllOfToJSON(value?: NonFungibleIdsCollec
     }
     return {
         
-        'items': ((value.items as Array<any>).map(NonFungibleIdsCollectionItemToJSON)),
+        'items': value.items,
     };
 }
 

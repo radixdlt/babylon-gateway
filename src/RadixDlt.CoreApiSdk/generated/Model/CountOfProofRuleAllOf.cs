@@ -105,13 +105,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="count">count (required).</param>
         /// <param name="list">list (required).</param>
-        public CountOfProofRuleAllOf(DynamicCount count = default(DynamicCount), DynamicResourceDescriptorList list = default(DynamicResourceDescriptorList))
+        public CountOfProofRuleAllOf(int count = default(int), List<Requirement> list = default(List<Requirement>))
         {
-            // to ensure "count" is required (not null)
-            if (count == null)
-            {
-                throw new ArgumentNullException("count is a required property for CountOfProofRuleAllOf and cannot be null");
-            }
             this.Count = count;
             // to ensure "list" is required (not null)
             if (list == null)
@@ -125,13 +120,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Count
         /// </summary>
         [DataMember(Name = "count", IsRequired = true, EmitDefaultValue = true)]
-        public DynamicCount Count { get; set; }
+        public int Count { get; set; }
 
         /// <summary>
         /// Gets or Sets List
         /// </summary>
         [DataMember(Name = "list", IsRequired = true, EmitDefaultValue = true)]
-        public DynamicResourceDescriptorList List { get; set; }
+        public List<Requirement> List { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -180,13 +175,13 @@ namespace RadixDlt.CoreApiSdk.Model
             return 
                 (
                     this.Count == input.Count ||
-                    (this.Count != null &&
-                    this.Count.Equals(input.Count))
+                    this.Count.Equals(input.Count)
                 ) && 
                 (
                     this.List == input.List ||
-                    (this.List != null &&
-                    this.List.Equals(input.List))
+                    this.List != null &&
+                    input.List != null &&
+                    this.List.SequenceEqual(input.List)
                 );
         }
 
@@ -199,10 +194,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Count != null)
-                {
-                    hashCode = (hashCode * 59) + this.Count.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Count.GetHashCode();
                 if (this.List != null)
                 {
                     hashCode = (hashCode * 59) + this.List.GetHashCode();

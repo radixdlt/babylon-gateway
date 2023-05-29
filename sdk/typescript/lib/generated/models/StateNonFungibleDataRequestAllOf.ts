@@ -20,7 +20,7 @@ import { exists, mapValues } from '../runtime';
  */
 export interface StateNonFungibleDataRequestAllOf {
     /**
-     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof StateNonFungibleDataRequestAllOf
      */

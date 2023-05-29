@@ -66,9 +66,9 @@ using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class PackageInfoSubstate : IGlobalAddressPointer
+public partial class PackageFieldInfoSubstate : IParentAddressPointer
 {
-    public IEnumerable<string> GetGlobalAddresses()
+    public IEnumerable<string> GetParentAddresses()
     {
         foreach (var dependentResource in DependentResources)
         {

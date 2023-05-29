@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="AmountOfProofRuleAllOf" /> class.
         /// </summary>
         /// <param name="amount">amount (required).</param>
-        /// <param name="resource">resource (required).</param>
-        public AmountOfProofRuleAllOf(DynamicAmount amount = default(DynamicAmount), DynamicResourceDescriptor resource = default(DynamicResourceDescriptor))
+        /// <param name="resource">The Bech32m-encoded human readable version of the resource address (required).</param>
+        public AmountOfProofRuleAllOf(string amount = default(string), string resource = default(string))
         {
             // to ensure "amount" is required (not null)
             if (amount == null)
@@ -125,13 +125,14 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Amount
         /// </summary>
         [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public DynamicAmount Amount { get; set; }
+        public string Amount { get; set; }
 
         /// <summary>
-        /// Gets or Sets Resource
+        /// The Bech32m-encoded human readable version of the resource address
         /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the resource address</value>
         [DataMember(Name = "resource", IsRequired = true, EmitDefaultValue = true)]
-        public DynamicResourceDescriptor Resource { get; set; }
+        public string Resource { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

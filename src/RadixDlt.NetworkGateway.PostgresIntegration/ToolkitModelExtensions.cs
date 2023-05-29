@@ -80,7 +80,6 @@ internal static class ToolkitModelExtensions
             .Concat(response.AccountsWithdrawnFrom)
             .Concat(response.AccountsDepositedInto)
             .Concat(response.IdentityAddresses)
-            .Concat(response.IdentitiesRequiringAuth)
-            .Select(a => a.Address);
+            .Concat(response.IdentitiesRequiringAuth);
     }
 }

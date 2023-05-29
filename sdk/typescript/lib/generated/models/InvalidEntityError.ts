@@ -26,7 +26,7 @@ export interface InvalidEntityError {
      */
     type: InvalidEntityErrorTypeEnum;
     /**
-     * Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof InvalidEntityError
      */

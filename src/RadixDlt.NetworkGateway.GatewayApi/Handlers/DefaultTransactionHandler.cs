@@ -187,9 +187,9 @@ internal class DefaultTransactionHandler : ITransactionHandler
             Kind = kindFilter,
         };
 
-        request.ManifestAccountsDepositedIntoFilter?.ForEach(a => searchCriteria.ManifestAccountsDepositedInto.Add((GlobalAddress)a));
-        request.ManifestAccountsWithdrawnFromFilter?.ForEach(a => searchCriteria.ManifestAccountsWithdrawnFrom.Add((GlobalAddress)a));
-        request.ManifestResourcesFilter?.ForEach(a => searchCriteria.ManifestResources.Add((GlobalAddress)a));
+        request.ManifestAccountsDepositedIntoFilter?.ForEach(a => searchCriteria.ManifestAccountsDepositedInto.Add((EntityAddress)a));
+        request.ManifestAccountsWithdrawnFromFilter?.ForEach(a => searchCriteria.ManifestAccountsWithdrawnFrom.Add((EntityAddress)a));
+        request.ManifestResourcesFilter?.ForEach(a => searchCriteria.ManifestResources.Add((EntityAddress)a));
         request.EventsFilter?.ForEach(ef =>
         {
             var eventType = ef.Event switch
@@ -202,8 +202,8 @@ internal class DefaultTransactionHandler : ITransactionHandler
             searchCriteria.Events.Add(new LedgerTransactionEventFilter
             {
                 Event = eventType,
-                EmitterEntityAddress = ef.EmitterAddress != null ? (GlobalAddress)ef.EmitterAddress : null,
-                ResourceAddress = ef.ResourceAddress != null ? (GlobalAddress)ef.ResourceAddress : null,
+                EmitterEntityAddress = ef.EmitterAddress != null ? (EntityAddress)ef.EmitterAddress : null,
+                ResourceAddress = ef.ResourceAddress != null ? (EntityAddress)ef.ResourceAddress : null,
                 Qunatity = ef.Quantity != null ? TokenAmount.FromDecimalString(ef.Quantity) : null,
             });
         });

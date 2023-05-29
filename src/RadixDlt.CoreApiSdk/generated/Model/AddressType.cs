@@ -95,104 +95,6 @@ namespace RadixDlt.CoreApiSdk.Model
     [DataContract(Name = "AddressType")]
     public partial class AddressType : IEquatable<AddressType>
     {
-        /// <summary>
-        /// Defines Subtype
-        /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum SubtypeEnum
-        {
-            /// <summary>
-            /// Enum Package for value: Package
-            /// </summary>
-            [EnumMember(Value = "Package")]
-            Package = 1,
-
-            /// <summary>
-            /// Enum FungibleResource for value: FungibleResource
-            /// </summary>
-            [EnumMember(Value = "FungibleResource")]
-            FungibleResource = 2,
-
-            /// <summary>
-            /// Enum NonFungibleResource for value: NonFungibleResource
-            /// </summary>
-            [EnumMember(Value = "NonFungibleResource")]
-            NonFungibleResource = 3,
-
-            /// <summary>
-            /// Enum NormalComponent for value: NormalComponent
-            /// </summary>
-            [EnumMember(Value = "NormalComponent")]
-            NormalComponent = 4,
-
-            /// <summary>
-            /// Enum AccountComponent for value: AccountComponent
-            /// </summary>
-            [EnumMember(Value = "AccountComponent")]
-            AccountComponent = 5,
-
-            /// <summary>
-            /// Enum EcdsaSecp256k1VirtualAccountComponent for value: EcdsaSecp256k1VirtualAccountComponent
-            /// </summary>
-            [EnumMember(Value = "EcdsaSecp256k1VirtualAccountComponent")]
-            EcdsaSecp256k1VirtualAccountComponent = 6,
-
-            /// <summary>
-            /// Enum EddsaEd25519VirtualAccountComponent for value: EddsaEd25519VirtualAccountComponent
-            /// </summary>
-            [EnumMember(Value = "EddsaEd25519VirtualAccountComponent")]
-            EddsaEd25519VirtualAccountComponent = 7,
-
-            /// <summary>
-            /// Enum IdentityComponent for value: IdentityComponent
-            /// </summary>
-            [EnumMember(Value = "IdentityComponent")]
-            IdentityComponent = 8,
-
-            /// <summary>
-            /// Enum EcdsaSecp256k1VirtualIdentityComponent for value: EcdsaSecp256k1VirtualIdentityComponent
-            /// </summary>
-            [EnumMember(Value = "EcdsaSecp256k1VirtualIdentityComponent")]
-            EcdsaSecp256k1VirtualIdentityComponent = 9,
-
-            /// <summary>
-            /// Enum EddsaEd25519VirtualIdentityComponent for value: EddsaEd25519VirtualIdentityComponent
-            /// </summary>
-            [EnumMember(Value = "EddsaEd25519VirtualIdentityComponent")]
-            EddsaEd25519VirtualIdentityComponent = 10,
-
-            /// <summary>
-            /// Enum EpochManager for value: EpochManager
-            /// </summary>
-            [EnumMember(Value = "EpochManager")]
-            EpochManager = 11,
-
-            /// <summary>
-            /// Enum Validator for value: Validator
-            /// </summary>
-            [EnumMember(Value = "Validator")]
-            Validator = 12,
-
-            /// <summary>
-            /// Enum Clock for value: Clock
-            /// </summary>
-            [EnumMember(Value = "Clock")]
-            Clock = 13,
-
-            /// <summary>
-            /// Enum AccessController for value: AccessController
-            /// </summary>
-            [EnumMember(Value = "AccessController")]
-            AccessController = 14
-
-        }
-
-
-        /// <summary>
-        /// Gets or Sets Subtype
-        /// </summary>
-        [DataMember(Name = "subtype", IsRequired = true, EmitDefaultValue = true)]
-        public SubtypeEnum Subtype { get; set; }
 
         /// <summary>
         /// Gets or Sets EntityType
@@ -207,14 +109,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AddressType" /> class.
         /// </summary>
-        /// <param name="subtype">subtype (required).</param>
         /// <param name="hrpPrefix">hrpPrefix (required).</param>
         /// <param name="entityType">entityType (required).</param>
         /// <param name="addressBytePrefix">addressBytePrefix (required).</param>
         /// <param name="addressByteLength">addressByteLength (required).</param>
-        public AddressType(SubtypeEnum subtype = default(SubtypeEnum), string hrpPrefix = default(string), EntityType entityType = default(EntityType), int addressBytePrefix = default(int), int addressByteLength = default(int))
+        public AddressType(string hrpPrefix = default(string), EntityType entityType = default(EntityType), int addressBytePrefix = default(int), int addressByteLength = default(int))
         {
-            this.Subtype = subtype;
             // to ensure "hrpPrefix" is required (not null)
             if (hrpPrefix == null)
             {
@@ -252,7 +152,6 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class AddressType {\n");
-            sb.Append("  Subtype: ").Append(Subtype).Append("\n");
             sb.Append("  HrpPrefix: ").Append(HrpPrefix).Append("\n");
             sb.Append("  EntityType: ").Append(EntityType).Append("\n");
             sb.Append("  AddressBytePrefix: ").Append(AddressBytePrefix).Append("\n");
@@ -293,10 +192,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Subtype == input.Subtype ||
-                    this.Subtype.Equals(input.Subtype)
-                ) && 
-                (
                     this.HrpPrefix == input.HrpPrefix ||
                     (this.HrpPrefix != null &&
                     this.HrpPrefix.Equals(input.HrpPrefix))
@@ -324,7 +219,6 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Subtype.GetHashCode();
                 if (this.HrpPrefix != null)
                 {
                     hashCode = (hashCode * 59) + this.HrpPrefix.GetHashCode();

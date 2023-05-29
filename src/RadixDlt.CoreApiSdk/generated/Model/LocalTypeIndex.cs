@@ -133,10 +133,17 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="kind">The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema.  (required).</param>
         /// <param name="index">Either the well known identifier, of the schema-local index, depending on the kind.  (required).</param>
-        public LocalTypeIndex(KindEnum kind = default(KindEnum), int index = default(int))
+        /// <param name="asSbor">asSbor (required).</param>
+        public LocalTypeIndex(KindEnum kind = default(KindEnum), int index = default(int), SborData asSbor = default(SborData))
         {
             this.Kind = kind;
             this.Index = index;
+            // to ensure "asSbor" is required (not null)
+            if (asSbor == null)
+            {
+                throw new ArgumentNullException("asSbor is a required property for LocalTypeIndex and cannot be null");
+            }
+            this.AsSbor = asSbor;
         }
 
         /// <summary>
@@ -145,6 +152,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <value>Either the well known identifier, of the schema-local index, depending on the kind. </value>
         [DataMember(Name = "index", IsRequired = true, EmitDefaultValue = true)]
         public int Index { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AsSbor
+        /// </summary>
+        [DataMember(Name = "as_sbor", IsRequired = true, EmitDefaultValue = true)]
+        public SborData AsSbor { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -156,6 +169,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class LocalTypeIndex {\n");
             sb.Append("  Kind: ").Append(Kind).Append("\n");
             sb.Append("  Index: ").Append(Index).Append("\n");
+            sb.Append("  AsSbor: ").Append(AsSbor).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -198,6 +212,11 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.Index == input.Index ||
                     this.Index.Equals(input.Index)
+                ) && 
+                (
+                    this.AsSbor == input.AsSbor ||
+                    (this.AsSbor != null &&
+                    this.AsSbor.Equals(input.AsSbor))
                 );
         }
 
@@ -212,6 +231,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.Kind.GetHashCode();
                 hashCode = (hashCode * 59) + this.Index.GetHashCode();
+                if (this.AsSbor != null)
+                {
+                    hashCode = (hashCode * 59) + this.AsSbor.GetHashCode();
+                }
                 return hashCode;
             }
         }

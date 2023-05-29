@@ -101,9 +101,9 @@ public class TransactionStreamPageRequestSearchCriteria
 
     public List<LedgerTransactionEventFilter> Events { get; set; } = new();
 
-    public List<GlobalAddress> ManifestAccountsDepositedInto { get; set; } = new();
+    public List<EntityAddress> ManifestAccountsDepositedInto { get; set; } = new();
 
-    public List<GlobalAddress> ManifestAccountsWithdrawnFrom { get; set; } = new();
+    public List<EntityAddress> ManifestAccountsWithdrawnFrom { get; set; } = new();
 
-    public List<GlobalAddress> ManifestResources { get; set; } = new();
+    public List<EntityAddress> ManifestResources { get; set; } = new();
 }

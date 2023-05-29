@@ -94,7 +94,7 @@ internal class DefaultEntityHandler : IEntityHandler
         var aggregatePerVault = request.AggregationLevel == GatewayModel.ResourceAggregationLevel.Vault;
 
         return await _entityStateQuerier.EntityDetails(
-            request.Addresses.Select(a => (GlobalAddress)a).ToList(),
+            request.Addresses.Select(a => (EntityAddress)a).ToList(),
             aggregatePerVault,
             request.OptIns ?? GatewayModel.StateEntityDetailsOptIns.Default,
             ledgerState,
@@ -106,7 +106,7 @@ internal class DefaultEntityHandler : IEntityHandler
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
         var pageRequest = new IEntityStateQuerier.PageRequest(
-            Address: (GlobalAddress)request.Address,
+            Address: (EntityAddress)request.Address,
             Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
             Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
         );
@@ -120,7 +120,7 @@ internal class DefaultEntityHandler : IEntityHandler
         var aggregatePerVault = request.AggregationLevel == GatewayModel.ResourceAggregationLevel.Vault;
 
         var pageRequest = new IEntityStateQuerier.PageRequest(
-            Address: (GlobalAddress)request.Address,
+            Address: (EntityAddress)request.Address,
             Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
             Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
         );
@@ -133,8 +133,8 @@ internal class DefaultEntityHandler : IEntityHandler
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
         var pageRequest = new IEntityStateQuerier.ResourceVaultsPageRequest(
-            Address: (GlobalAddress)request.Address,
-            ResourceAddress: (GlobalAddress)request.ResourceAddress,
+            Address: (EntityAddress)request.Address,
+            ResourceAddress: (EntityAddress)request.ResourceAddress,
             Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
             Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
         );
@@ -148,7 +148,7 @@ internal class DefaultEntityHandler : IEntityHandler
         var aggregatePerVault = request.AggregationLevel == GatewayModel.ResourceAggregationLevel.Vault;
 
         var pageRequest = new IEntityStateQuerier.PageRequest(
-            Address: (GlobalAddress)request.Address,
+            Address: (EntityAddress)request.Address,
             Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
             Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
         );
@@ -161,8 +161,8 @@ internal class DefaultEntityHandler : IEntityHandler
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
         var pageRequest = new IEntityStateQuerier.ResourceVaultsPageRequest(
-            Address: (GlobalAddress)request.Address,
-            ResourceAddress: (GlobalAddress)request.ResourceAddress,
+            Address: (EntityAddress)request.Address,
+            ResourceAddress: (EntityAddress)request.ResourceAddress,
             Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
             Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
         );
@@ -176,11 +176,11 @@ internal class DefaultEntityHandler : IEntityHandler
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
         var pageRequest = new IEntityStateQuerier.PageRequest(
-            Address: (GlobalAddress)request.Address,
+            Address: (EntityAddress)request.Address,
             Offset: GatewayModel.OffsetCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
             Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
         );
 
-        return await _entityStateQuerier.EntityNonFungibleIds(pageRequest, (GlobalAddress)request.ResourceAddress, request.VaultAddress, ledgerState, token);
+        return await _entityStateQuerier.EntityNonFungibleIds(pageRequest, (EntityAddress)request.ResourceAddress, (EntityAddress)request.VaultAddress, ledgerState, token);
     }
 }

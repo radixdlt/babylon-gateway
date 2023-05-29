@@ -70,5 +70,5 @@ public partial class SborData
 {
     private byte[] _dataBytes;
 
-    public byte[] GetDataBytes() => _dataBytes ??= Convert.FromHexString(DataHex);
+    public byte[] GetDataBytes() => _dataBytes ??= Convert.FromHexString(Hex);
 }

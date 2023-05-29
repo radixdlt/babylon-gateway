@@ -128,7 +128,6 @@ internal abstract class CommonDbContext : DbContext
     // So secondary indexes might benefit from the inclusion of columns for faster lookups
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasPostgresEnum<AccessRulesChainSubtype>();
         modelBuilder.HasPostgresEnum<EntityType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
@@ -162,8 +161,8 @@ internal abstract class CommonDbContext : DbContext
         configurationBuilder.Properties<RadixAddress>()
             .HaveConversion<RadixAddressToByteArrayConverter>();
 
-        configurationBuilder.Properties<GlobalAddress>()
-            .HaveConversion<GlobalAddressToStringConverter>();
+        configurationBuilder.Properties<EntityAddress>()
+            .HaveConversion<EntityAddressToStringConverter>();
     }
 
     private static void HookupTransactions(ModelBuilder modelBuilder)
@@ -229,28 +228,25 @@ internal abstract class CommonDbContext : DbContext
     private static void HookupEntities(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Entity>()
+            .HasIndex(e => e.Address);
+
+        modelBuilder.Entity<Entity>()
             .HasDiscriminator<EntityType>(DiscriminatorColumnName)
-            .HasValue<EpochManagerEntity>(EntityType.EpochManager)
-            .HasValue<FungibleResourceEntity>(EntityType.FungibleResource)
-            .HasValue<NonFungibleResourceEntity>(EntityType.NonFungibleResource)
-            .HasValue<NormalComponentEntity>(EntityType.NormalComponent)
-            .HasValue<AccountComponentEntity>(EntityType.AccountComponent)
-            .HasValue<PackageEntity>(EntityType.Package)
-            .HasValue<KeyValueStoreEntity>(EntityType.KeyValueStore)
-            .HasValue<VaultEntity>(EntityType.Vault)
-            .HasValue<ClockEntity>(EntityType.Clock)
-            .HasValue<ValidatorEntity>(EntityType.Validator)
-            .HasValue<AccessControllerEntity>(EntityType.AccessController)
-            .HasValue<IdentityEntity>(EntityType.Identity);
-
-        modelBuilder.Entity<Entity>()
-            .HasIndex(e => e.Address)
-            .HasMethod("hash");
-
-        modelBuilder.Entity<Entity>()
-            .HasIndex(e => e.GlobalAddress)
-            .HasMethod("hash")
-            .HasFilter("global_address IS NOT NULL");
+            .HasValue<EpochManagerEntity>(EntityType.GlobalEpochManager)
+            .HasValue<GlobalFungibleResourceEntity>(EntityType.GlobalFungibleResource)
+            .HasValue<GlobalNonFungibleResourceEntity>(EntityType.GlobalNonFungibleResource)
+            .HasValue<GlobalGenericComponentEntity>(EntityType.GlobalGenericComponent)
+            .HasValue<InternalGenericComponentEntity>(EntityType.InternalGenericComponent)
+            .HasValue<InternalAccountEntity>(EntityType.InternalAccountComponent)
+            .HasValue<GlobalAccountEntity>(EntityType.GlobalAccountComponent)
+            .HasValue<GlobalPackageEntity>(EntityType.GlobalPackage)
+            .HasValue<InternalKeyValueStoreEntity>(EntityType.InternalKeyValueStore)
+            .HasValue<InternalFungibleVaultEntity>(EntityType.InternalFungibleVault)
+            .HasValue<InternalNonFungibleVaultEntity>(EntityType.InternalNonFungibleVault)
+            .HasValue<GlobalClockEntity>(EntityType.GlobalClock)
+            .HasValue<GlobalValidatorEntity>(EntityType.GlobalValidator)
+            .HasValue<GlobalAccessControllerEntity>(EntityType.GlobalAccessController)
+            .HasValue<GlobalIdentityEntity>(EntityType.GlobalIdentity);
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)
@@ -318,6 +314,6 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => e.Epoch);
 
         modelBuilder.Entity<EntityAccessRulesChainHistory>()
-            .HasIndex(e => new { e.EntityId, e.Subtype, e.FromStateVersion });
+            .HasIndex(e => new { e.EntityId, e.ChildBlueprintName, e.FromStateVersion });
     }
 }

@@ -105,8 +105,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="manager">manager (required).</param>
         /// <param name="accessRules">accessRules (required).</param>
-        /// <param name="vaultAccessRules">vaultAccessRules (required).</param>
-        public StateResourceResponse(Substate manager = default(Substate), Substate accessRules = default(Substate), Substate vaultAccessRules = default(Substate))
+        public StateResourceResponse(StateResourceManager manager = default(StateResourceManager), Substate accessRules = default(Substate))
         {
             // to ensure "manager" is required (not null)
             if (manager == null)
@@ -120,31 +119,19 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("accessRules is a required property for StateResourceResponse and cannot be null");
             }
             this.AccessRules = accessRules;
-            // to ensure "vaultAccessRules" is required (not null)
-            if (vaultAccessRules == null)
-            {
-                throw new ArgumentNullException("vaultAccessRules is a required property for StateResourceResponse and cannot be null");
-            }
-            this.VaultAccessRules = vaultAccessRules;
         }
 
         /// <summary>
         /// Gets or Sets Manager
         /// </summary>
         [DataMember(Name = "manager", IsRequired = true, EmitDefaultValue = true)]
-        public Substate Manager { get; set; }
+        public StateResourceManager Manager { get; set; }
 
         /// <summary>
         /// Gets or Sets AccessRules
         /// </summary>
         [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
         public Substate AccessRules { get; set; }
-
-        /// <summary>
-        /// Gets or Sets VaultAccessRules
-        /// </summary>
-        [DataMember(Name = "vault_access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public Substate VaultAccessRules { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -156,7 +143,6 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class StateResourceResponse {\n");
             sb.Append("  Manager: ").Append(Manager).Append("\n");
             sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
-            sb.Append("  VaultAccessRules: ").Append(VaultAccessRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -201,11 +187,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.AccessRules == input.AccessRules ||
                     (this.AccessRules != null &&
                     this.AccessRules.Equals(input.AccessRules))
-                ) && 
-                (
-                    this.VaultAccessRules == input.VaultAccessRules ||
-                    (this.VaultAccessRules != null &&
-                    this.VaultAccessRules.Equals(input.VaultAccessRules))
                 );
         }
 
@@ -225,10 +206,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.AccessRules != null)
                 {
                     hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
-                }
-                if (this.VaultAccessRules != null)
-                {
-                    hashCode = (hashCode * 59) + this.VaultAccessRules.GetHashCode();
                 }
                 return hashCode;
             }

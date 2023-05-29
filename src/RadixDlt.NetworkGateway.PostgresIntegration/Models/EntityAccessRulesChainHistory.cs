@@ -81,8 +81,8 @@ internal class EntityAccessRulesChainHistory
     [Column("entity_id")]
     public long EntityId { get; set; }
 
-    [Column("subtype")]
-    public AccessRulesChainSubtype Subtype { get; set; }
+    [Column("child_blueprint_name")]
+    public string? ChildBlueprintName { get; set; }
 
     [Column("access_rules_chain", TypeName = "jsonb")]
     public string AccessRulesChain { get; set; }

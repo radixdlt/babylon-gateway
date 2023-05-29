@@ -112,7 +112,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="InvalidEntityError" /> class.
         /// </summary>
-        /// <param name="address">Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id. (required).</param>
+        /// <param name="address">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="type">The type of error. Each subtype may have its own additional structured fields. (required) (default to &quot;InvalidEntityError&quot;).</param>
         public InvalidEntityError(string address = default(string), string type = "InvalidEntityError") : base(type)
         {
@@ -125,9 +125,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s global address or hex-encoded id.</value>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 

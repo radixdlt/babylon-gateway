@@ -97,7 +97,7 @@ internal class TransactionQuerier : ITransactionQuerier
             .Concat(request.SearchCriteria.ManifestResources)
             .Concat(request.SearchCriteria.Events.SelectMany(e =>
             {
-                var addresses = new List<GlobalAddress>();
+                var addresses = new List<EntityAddress>();
 
                 if (e.EmitterEntityAddress.HasValue)
                 {
@@ -345,8 +345,8 @@ internal class TransactionQuerier : ITransactionQuerier
         }
 
         return await _dbContext.Entities
-            .Where(e => e.GlobalAddress != null && addresses.Contains(e.GlobalAddress.Value))
-            .Select(e => new { e.Id, e.GlobalAddress!.Value })
-            .ToDictionaryAsync(e => e.Value.ToString(), e => e.Id, token);
+            .Where(e => addresses.Contains(e.Address))
+            .Select(e => new { e.Id, e.Address })
+            .ToDictionaryAsync(e => e.Address.ToString(), e => e.Id, token);
     }
 }

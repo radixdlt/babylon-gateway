@@ -33,7 +33,7 @@ export interface StateNonFungibleDataRequest {
      */
     at_ledger_state?: LedgerStateSelector | null;
     /**
-     * Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
      * @memberof StateNonFungibleDataRequest
      */

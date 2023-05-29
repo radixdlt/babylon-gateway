@@ -88,35 +88,35 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class EntityStateQuerier : IEntityStateQuerier
 {
-    internal record MetadataViewModel(long FromStateVersion, long EntityId, string Key, byte[] Value, int TotalCount);
+    private record MetadataViewModel(long FromStateVersion, long EntityId, string Key, byte[] Value, int TotalCount);
 
-    internal record ValidatorCurrentStakeViewModel(long ValidatorId, string Balance, string State, long BalanceLastUpdatedAtStateVersion, long StateLastUpdatedAtStateVersion);
+    private record ValidatorCurrentStakeViewModel(long ValidatorId, string Balance, string State, long BalanceLastUpdatedAtStateVersion, long StateLastUpdatedAtStateVersion);
 
-    internal record FungibleViewModel(GlobalAddress ResourceEntityGlobalAddress, string Balance, int ResourcesTotalCount, long LastUpdatedAtStateVersion);
+    private record FungibleViewModel(EntityAddress ResourceEntityAddress, string Balance, int ResourcesTotalCount, long LastUpdatedAtStateVersion);
 
-    internal record RoyaltyVaultBalanceViewModel(long RoyaltyVaultEntityId, string Balance, long OwnerEntityId, long LastUpdatedAtStateVersion);
+    private record RoyaltyVaultBalanceViewModel(long RoyaltyVaultEntityId, string Balance, long OwnerEntityId, long LastUpdatedAtStateVersion);
 
-    internal record FungibleResourceVaultsViewModel(GlobalAddress ResourceEntityGlobalAddress, string VaultAddress, string Balance, int VaultTotalCount, long LastUpdatedAtStateVersion);
+    private record FungibleResourceVaultsViewModel(EntityAddress ResourceEntityAddress, EntityAddress VaultAddress, string Balance, int VaultTotalCount, long LastUpdatedAtStateVersion);
 
-    internal record FungibleAggregatedPerVaultViewModel(GlobalAddress ResourceEntityGlobalAddress, string VaultAddress, string Balance, int ResourceTotalCount, int VaultTotalCount, long LastUpdatedAtStateVersion);
+    private record FungibleAggregatedPerVaultViewModel(EntityAddress ResourceEntityAddress, EntityAddress VaultAddress, string Balance, int ResourceTotalCount, int VaultTotalCount, long LastUpdatedAtStateVersion);
 
-    internal record NonFungibleViewModel(GlobalAddress ResourceEntityGlobalAddress, long NonFungibleIdsCount, int ResourcesTotalCount, long LastUpdatedAtStateVersion);
+    private record NonFungibleViewModel(EntityAddress ResourceEntityAddress, long NonFungibleIdsCount, int ResourcesTotalCount, long LastUpdatedAtStateVersion);
 
-    internal record NonFungibleResourceVaultsViewModel(GlobalAddress ResourceEntityGlobalAddress, long VaultEntityId, string VaultAddress, long NonFungibleIdsCount, int VaultTotalCount, long LastUpdatedAtStateVersion);
+    private record NonFungibleResourceVaultsViewModel(EntityAddress ResourceEntityAddress, long VaultEntityId, EntityAddress VaultAddress, long NonFungibleIdsCount, int VaultTotalCount, long LastUpdatedAtStateVersion);
 
-    internal record NonFungibleAggregatedPerVaultViewModel(long ResourceEntityId, long VaultEntityId, GlobalAddress ResourceEntityGlobalAddress, string VaultAddress, long NonFungibleIdsCount, int ResourceTotalCount, int VaultTotalCount, long LastUpdatedAtStateVersion);
+    private record NonFungibleAggregatedPerVaultViewModel(long ResourceEntityId, long VaultEntityId, EntityAddress ResourceEntityAddress, EntityAddress VaultAddress, long NonFungibleIdsCount, int ResourceTotalCount, int VaultTotalCount, long LastUpdatedAtStateVersion);
 
-    internal record NonFungibleIdViewModel(string NonFungibleId, int NonFungibleIdsTotalCount);
+    private record NonFungibleIdViewModel(string NonFungibleId, int NonFungibleIdsTotalCount);
 
-    internal record NonFungibleIdWithOwnerDataViewModel(string NonFungibleId, long EntityId, long ResourceEntityId, long VaultEntityId);
+    private record NonFungibleIdWithOwnerDataViewModel(string NonFungibleId, long EntityId, long ResourceEntityId, long VaultEntityId);
 
-    internal record NonFungibleIdDataViewModel(string NonFungibleId, bool IsDeleted, byte[] Data, long DataLastUpdatedAtStateVersion);
+    private record NonFungibleIdDataViewModel(string NonFungibleId, bool IsDeleted, byte[] Data, long DataLastUpdatedAtStateVersion);
 
-    internal record struct NonFungibleIdOwnerLookup(long EntityId, long ResourceEntityId, long VaultEntityId);
+    private record struct NonFungibleIdOwnerLookup(long EntityId, long ResourceEntityId, long VaultEntityId);
 
-    internal record struct AccessRuleChainLookup(long EntityId, AccessRulesChainSubtype Subtype);
+    private record struct AccessRuleChainLookup(long EntityId, string? ChildBlueprintName);
 
-    internal record struct ExplicitMetadataLookup(long EntityId, string MetadataKey);
+    private record struct ExplicitMetadataLookup(long EntityId, string MetadataKey);
 
     private readonly TokenAmount _tokenAmount100 = TokenAmount.FromDecimalString("100");
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
@@ -135,13 +135,13 @@ internal class EntityStateQuerier : IEntityStateQuerier
         _endpointConfiguration = endpointConfiguration;
         _logger = logger;
 
-        _ecdsaSecp256k1VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EcdsaSecp256k1VirtualAccountComponent).AddressBytePrefix;
-        _eddsaEd25519VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EddsaEd25519VirtualAccountComponent).AddressBytePrefix;
-        _ecdsaSecp256k1VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EcdsaSecp256k1VirtualIdentityComponent).AddressBytePrefix;
-        _eddsaEd25519VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressSubtype.EddsaEd25519VirtualIdentityComponent).AddressBytePrefix;
+        _ecdsaSecp256k1VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Account).AddressBytePrefix;
+        _eddsaEd25519VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Account).AddressBytePrefix;
+        _ecdsaSecp256k1VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Identity).AddressBytePrefix;
+        _eddsaEd25519VirtualIdentityAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Identity).AddressBytePrefix;
     }
 
-    public async Task<GatewayModel.StateEntityDetailsResponse> EntityDetails(List<GlobalAddress> addresses, bool aggregatePerVault, GatewayModel.StateEntityDetailsOptIns optIns, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.StateEntityDetailsResponse> EntityDetails(List<EntityAddress> addresses, bool aggregatePerVault, GatewayModel.StateEntityDetailsOptIns optIns, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entities = await GetEntities(addresses, ledgerState, token);
         var componentEntities = entities.OfType<ComponentEntity>().ToList();
@@ -174,19 +174,19 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
             switch (entity)
             {
-                case FungibleResourceEntity frme:
+                case GlobalFungibleResourceEntity frme:
                     var fungibleResourceSupplyData = resourcesSupplyData[frme.Id];
                     details = new GatewayModel.StateEntityDetailsResponseFungibleResourceDetails(
                         totalSupply: fungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: fungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: fungibleResourceSupplyData.TotalBurned.ToString(),
-                        accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(frme.Id, AccessRulesChainSubtype.None)].AccessRulesChain),
-                        vaultAccessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(frme.Id, AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain)].AccessRulesChain),
+                        accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(frme.Id, null)].AccessRulesChain),
+                        vaultAccessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(frme.Id, NativeBlueprintNames.FungibleVault)].AccessRulesChain),
                         divisibility: frme.Divisibility);
 
                     break;
 
-                case NonFungibleResourceEntity nfrme:
+                case GlobalNonFungibleResourceEntity nfrme:
                     var nonFungibleResourceSupplyData = resourcesSupplyData[nfrme.Id];
                     if (nonFungibleResourceSupplyData == null)
                     {
@@ -197,12 +197,12 @@ internal class EntityStateQuerier : IEntityStateQuerier
                         totalSupply: nonFungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: nonFungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: nonFungibleResourceSupplyData.TotalBurned.ToString(),
-                        accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(nfrme.Id, AccessRulesChainSubtype.None)].AccessRulesChain),
-                        vaultAccessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(nfrme.Id, AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain)].AccessRulesChain),
+                        accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(nfrme.Id, null)].AccessRulesChain),
+                        vaultAccessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(nfrme.Id, NativeBlueprintNames.NonFungibleVault)].AccessRulesChain),
                         nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel());
                     break;
 
-                case PackageEntity pe:
+                case GlobalPackageEntity pe:
                     var packageRoyaltyVaultBalance = royaltyVaultsBalance?.SingleOrDefault(x => x.OwnerEntityId == pe.Id)?.Balance;
 
                     details = new GatewayModel.StateEntityDetailsResponsePackageDetails(
@@ -229,7 +229,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     );
                     break;
 
-                case ComponentEntity ce:
+                case GlobalGenericComponentEntity ce:
                     stateHistory.TryGetValue(ce.Id, out var state);
 
                     var componentRoyaltyVaultBalance = royaltyVaultsBalance?.SingleOrDefault(x => x.OwnerEntityId == ce.Id)?.Balance;
@@ -238,7 +238,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                         packageAddress: correlatedAddresses[ce.PackageId],
                         blueprintName: ce.BlueprintName,
                         state: state != null ? new JRaw(state.State) : null,
-                        accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(ce.Id, AccessRulesChainSubtype.None)].AccessRulesChain),
+                        accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(ce.Id, null)].AccessRulesChain),
                         royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null
                         );
                     break;
@@ -253,12 +253,12 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
             if (explicitMetadata != null)
             {
-                fungibleResources[entity.Id].Items.ForEach(c => c.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[c.ResourceAddress]]);
-                nonFungibleResources[entity.Id].Items.ForEach(c => c.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[c.ResourceAddress]]);
+                fungibleResources[entity.Id].Items.ForEach(c => c.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)c.ResourceAddress]]);
+                nonFungibleResources[entity.Id].Items.ForEach(c => c.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)c.ResourceAddress]]);
             }
 
             items.Add(new GatewayModel.StateEntityDetailsResponseItem(
-                address: entity.GlobalAddress ?? entity.Address.ToHex(),
+                address: entity.Address,
                 fungibleResources: fungibleResources[entity.Id],
                 nonFungibleResources: nonFungibleResources[entity.Id],
                 ancestorIdentities: ancestorIdentities,
@@ -322,7 +322,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         {
             return nonFungiblesSliceAggregatedPerVault.ToDictionary(
                 x => x.Key,
-                x => GatewayModelExtensions.MapToNonFungibleResourcesCollection(x.Value, null, offset, limit, offset, limit)
+                x => MapToNonFungibleResourcesCollection(x.Value, null, offset, limit, offset, limit)
             );
         }
 
@@ -340,7 +340,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         return nonFungiblesSliceAggregatedPerVault.ToDictionary(
             x => x.Key,
-            x => GatewayModelExtensions.MapToNonFungibleResourcesCollection(x.Value, nonFungibleIdsFirstPage[x.Key], offset, limit, offset, limit)
+            x => MapToNonFungibleResourcesCollection(x.Value, nonFungibleIdsFirstPage[x.Key], offset, limit, offset, limit)
         );
     }
 
@@ -356,10 +356,41 @@ internal class EntityStateQuerier : IEntityStateQuerier
             var resourceAddressToEntityId = await ResolveResourceEntityIds(null, new[] { result }, token);
             var explicitMetadata = await GetExplicitMetadata(resourceAddressToEntityId.Values.ToArray(), optIns.ExplicitMetadata.ToArray(), ledgerState, token);
 
-            result.Items.ForEach(nfr => nfr.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[nfr.ResourceAddress]]);
+            result.Items.ForEach(nfr => nfr.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)nfr.ResourceAddress]]);
         }
 
         return new GatewayModel.StateEntityNonFungiblesPageResponse(ledgerState, result.TotalCount, result.PreviousCursor, result.NextCursor, result.Items, pageRequest.Address);
+    }
+
+    public async Task<GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse> EntityNonFungibleResourceVaults(
+        IEntityStateQuerier.ResourceVaultsPageRequest request, GatewayModel.StateEntityNonFungibleResourceVaultsPageOptIns optIns,
+        GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    {
+        var entity = await GetEntity<ComponentEntity>(request.Address, ledgerState, token);
+        var resourceEntity = await GetEntity<GlobalNonFungibleResourceEntity>(request.ResourceAddress, ledgerState, token);
+        var nonFungibles = await GetNonFungibleResourceVaults(entity.Id, resourceEntity.Id, request.Offset, request.Limit, ledgerState, token);
+        var vaultEntityIdsToQuery = nonFungibles.Select(x => x.VaultEntityId).ToArray();
+
+        if (!optIns.NonFungibleIncludeNfids || !vaultEntityIdsToQuery.Any())
+        {
+            return MapToStateEntityNonFungibleResourceVaultsPageResponse(nonFungibles, null, ledgerState, request.Offset, request.Limit, entity.Address, resourceEntity.Address);
+        }
+
+        var nonFungibleIds = await GetNonFungibleIdsFirstPage(
+            new[] { entity.Id },
+            new[] { resourceEntity.Id },
+            vaultEntityIdsToQuery,
+            _endpointConfiguration.Value.DefaultPageSize,
+            ledgerState,
+            token);
+
+        var nonFungibleIdsPerVault = nonFungibleIds
+            .GroupBy(x => x.VaultEntityId)
+            .ToDictionary(
+                x => x.Key,
+                x => x.ToList());
+
+        return MapToStateEntityNonFungibleResourceVaultsPageResponse(nonFungibles, nonFungibleIdsPerVault, ledgerState, request.Offset, request.Limit, entity.Address, resourceEntity.Address);
     }
 
     public async Task<GatewayModel.StateEntityFungiblesPageResponse> EntityFungibleResourcesPage(IEntityStateQuerier.PageRequest pageRequest, bool aggregatePerVault, GatewayModel.StateEntityFungiblesPageRequestOptIns optIns, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
@@ -372,7 +403,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
             var resourceAddressToEntityId = await ResolveResourceEntityIds(new[] { result }, null, token);
             var explicitMetadata = await GetExplicitMetadata(resourceAddressToEntityId.Values.ToArray(), optIns.ExplicitMetadata.ToArray(), ledgerState, token);
 
-            result.Items.ForEach(fr => fr.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[fr.ResourceAddress]]);
+            result.Items.ForEach(fr => fr.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)fr.ResourceAddress]]);
         }
 
         return new GatewayModel.StateEntityFungiblesPageResponse(ledgerState, result.TotalCount, result.PreviousCursor, result.NextCursor, result.Items, pageRequest.Address);
@@ -396,69 +427,36 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         return new GatewayModel.StateEntityMetadataPageResponse(
             ledgerState, metadata.TotalCount, metadata.PreviousCursor,
-            metadata.NextCursor, metadata.Items, entity.GlobalAddress);
+            metadata.NextCursor, metadata.Items, entity.Address);
     }
 
     public async Task<GatewayModel.StateEntityFungibleResourceVaultsPageResponse> EntityFungibleResourceVaults(IEntityStateQuerier.ResourceVaultsPageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity<ComponentEntity>(request.Address, ledgerState, token);
-        var resourceEntity = await GetEntity<FungibleResourceEntity>(request.ResourceAddress, ledgerState, token);
+        var resourceEntity = await GetEntity<GlobalFungibleResourceEntity>(request.ResourceAddress, ledgerState, token);
         var fungibles = await GetFungibleResourceVaults(entity.Id, resourceEntity.Id, request.Offset, request.Limit, ledgerState, token);
 
         return new GatewayModel.StateEntityFungibleResourceVaultsPageResponse(
-            ledgerState, fungibles.TotalCount, fungibles.PreviousCursor, fungibles.NextCursor, fungibles.Items, entity.GlobalAddress, resourceEntity.GlobalAddress);
+            ledgerState, fungibles.TotalCount, fungibles.PreviousCursor, fungibles.NextCursor, fungibles.Items, entity.Address, resourceEntity.Address);
     }
 
-    public async Task<GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse> EntityNonFungibleResourceVaults(
-        IEntityStateQuerier.ResourceVaultsPageRequest request, GatewayModel.StateEntityNonFungibleResourceVaultsPageOptIns optIns,
-        GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.StateEntityNonFungibleIdsPageResponse> EntityNonFungibleIds(IEntityStateQuerier.PageRequest request, EntityAddress resourceAddress,
+        EntityAddress vaultAddress, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await GetEntity<ComponentEntity>(request.Address, ledgerState, token);
-        var resourceEntity = await GetEntity<NonFungibleResourceEntity>(request.ResourceAddress, ledgerState, token);
-        var nonFungibles = await GetNonFungibleResourceVaults(entity.Id, resourceEntity.Id, request.Offset, request.Limit, ledgerState, token);
-        var vaultEntityIdsToQuery = nonFungibles.Select(x => x.VaultEntityId).ToArray();
-
-        if (!optIns.NonFungibleIncludeNfids || !vaultEntityIdsToQuery.Any())
-        {
-            return GatewayModelExtensions.MapToStateEntityNonFungibleResourceVaultsPageResponse(nonFungibles, null, ledgerState,
-                request.Offset, request.Limit, entity.GlobalAddress, resourceEntity.GlobalAddress);
-        }
-
-        var nonFungibleIds = await GetNonFungibleIdsFirstPage(
-                new[] { entity.Id },
-                new[] { resourceEntity.Id },
-                vaultEntityIdsToQuery,
-                _endpointConfiguration.Value.DefaultPageSize,
-                ledgerState,
-                token);
-
-        var nonFungibleIdsPerVault = nonFungibleIds
-            .GroupBy(x => x.VaultEntityId)
-            .ToDictionary(
-                x => x.Key,
-                x => x.ToList());
-
-        return GatewayModelExtensions.MapToStateEntityNonFungibleResourceVaultsPageResponse(nonFungibles, nonFungibleIdsPerVault, ledgerState,
-            request.Offset, request.Limit, entity.GlobalAddress, resourceEntity.GlobalAddress);
-    }
-
-    public async Task<GatewayModel.StateEntityNonFungibleIdsPageResponse> EntityNonFungibleIds(IEntityStateQuerier.PageRequest request, GlobalAddress resourceAddress,
-        string vaultAddress, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
-    {
-        var entity = await GetEntity<ComponentEntity>(request.Address, ledgerState, token);
-        var resourceEntity = await GetEntity<NonFungibleResourceEntity>(resourceAddress, ledgerState, token);
-        var vaultEntityId = await GetVaultEntityId(vaultAddress, ledgerState, token);
-        var nonFungibleIds = await GetNonFungibleIdsSlice(entity.Id, resourceEntity.Id, vaultEntityId, request.Offset, request.Limit, ledgerState, token);
+        var resourceEntity = await GetEntity<GlobalNonFungibleResourceEntity>(resourceAddress, ledgerState, token);
+        var vaultEntity = await GetEntity<VaultEntity>(vaultAddress, ledgerState, token);
+        var nonFungibleIds = await GetNonFungibleIdsSlice(entity.Id, resourceEntity.Id, vaultEntity.Id, request.Offset, request.Limit, ledgerState, token);
 
         return new GatewayModel.StateEntityNonFungibleIdsPageResponse(
             ledgerState, nonFungibleIds.TotalCount, nonFungibleIds.PreviousCursor, nonFungibleIds.NextCursor,
-            nonFungibleIds.Items, entity.GlobalAddress, resourceEntity.GlobalAddress);
+            nonFungibleIds.Items, entity.Address, resourceEntity.Address);
     }
 
     public async Task<GatewayModel.StateNonFungibleIdsResponse> NonFungibleIds(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState,
         CancellationToken token = default)
     {
-        var entity = await GetEntity<NonFungibleResourceEntity>(request.Address, ledgerState, token);
+        var entity = await GetEntity<GlobalNonFungibleResourceEntity>(request.Address, ledgerState, token);
 
         var cd = new CommandDefinition(
             commandText: @"
@@ -512,9 +510,9 @@ ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
                 items: items.Take(request.Limit).ToList()));
     }
 
-    public async Task<GatewayModel.StateNonFungibleDataResponse> NonFungibleIdData(GlobalAddress resourceAddress, IList<string> nonFungibleIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.StateNonFungibleDataResponse> NonFungibleIdData(EntityAddress resourceAddress, IList<string> nonFungibleIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
-        var entity = await GetEntity<NonFungibleResourceEntity>(resourceAddress, ledgerState, token);
+        var entity = await GetEntity<GlobalNonFungibleResourceEntity>(resourceAddress, ledgerState, token);
 
         var cd = new CommandDefinition(
             commandText: @"
@@ -567,7 +565,7 @@ ORDER BY nfid.from_state_version DESC
         var fromStateVersion = cursor?.StateVersionBoundary ?? 0;
 
         var validatorsAndOneMore = await _dbContext.Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.GetType() == typeof(ValidatorEntity))
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.GetType() == typeof(GlobalValidatorEntity))
             .Where(e => e.FromStateVersion > fromStateVersion)
             .OrderBy(e => e.FromStateVersion)
             .ThenBy(e => e.Id)
@@ -640,7 +638,7 @@ INNER JOIN LATERAL (
                 var details = validatorsDetails.Single(x => x.ValidatorId == v.Id);
 
                 return new GatewayModel.ValidatorCollectionItem(
-                    v.GlobalAddress,
+                    v.Address,
                     new JRaw(details.State),
                     TokenAmount.FromSubUnitsString(details.Balance).ToString(),
                     activeInEpoch,
@@ -653,6 +651,91 @@ INNER JOIN LATERAL (
             : null;
 
         return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(null, null, nextCursor, items));
+    }
+
+    private static GatewayModel.NonFungibleResourcesCollection MapToNonFungibleResourcesCollection(
+        List<NonFungibleAggregatedPerVaultViewModel> input,
+        List<NonFungibleIdWithOwnerDataViewModel>? nonFungibleIds,
+        int vaultOffset, int vaultLimit, int resourceOffset, int resourceLimit)
+    {
+        var resourcesTotalCount = 0;
+        var resources = new Dictionary<EntityAddress, GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregated>();
+
+        foreach (var vm in input)
+        {
+            resourcesTotalCount = vm.ResourceTotalCount;
+
+            if (!resources.TryGetValue(vm.ResourceEntityAddress, out var existingRecord))
+            {
+                var vaultNextCursor = vm.VaultTotalCount > vaultLimit
+                    ? new GatewayApiSdk.Model.OffsetCursor(vaultLimit).ToCursorString()
+                    : null;
+
+                existingRecord = new GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregated(
+                    resourceAddress: vm.ResourceEntityAddress,
+                    vaults: new GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregatedVault(
+                        totalCount: vm.VaultTotalCount,
+                        nextCursor: vaultNextCursor,
+                        items: new List<GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem>()));
+
+                resources[vm.ResourceEntityAddress] = existingRecord;
+            }
+
+            var ids = nonFungibleIds?
+                .Where(x => x.ResourceEntityId == vm.ResourceEntityId && x.VaultEntityId == vm.VaultEntityId)
+                .Select(x => x.NonFungibleId).ToList();
+
+            existingRecord.Vaults.Items.Add(new GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
+                totalCount: vm.NonFungibleIdsCount,
+                vaultAddress: vm.VaultAddress,
+                lastUpdatedAtStateVersion: vm.LastUpdatedAtStateVersion,
+                items: ids));
+        }
+
+        var previousCursor = resourceOffset > 0
+            ? new GatewayApiSdk.Model.OffsetCursor(Math.Max(resourceOffset - resourceLimit, 0)).ToCursorString()
+            : null;
+
+        var nextCursor = resourcesTotalCount > resourceLimit + resourceOffset
+            ? new GatewayApiSdk.Model.OffsetCursor(resourceLimit).ToCursorString()
+            : null;
+
+        return new GatewayApiSdk.Model.NonFungibleResourcesCollection(resourcesTotalCount, previousCursor, nextCursor,
+            resources.Values.Cast<GatewayApiSdk.Model.NonFungibleResourcesCollectionItem>().ToList());
+    }
+
+    private static GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse MapToStateEntityNonFungibleResourceVaultsPageResponse(
+        List<NonFungibleResourceVaultsViewModel> input,
+        Dictionary<long, List<NonFungibleIdWithOwnerDataViewModel>>? nonFungibleIds,
+        GatewayModel.LedgerState ledgerState, int offset, int limit,
+        string? entityGlobalAddress, string? resourceGlobalAddress)
+    {
+        var mapped = input.Select(x =>
+            {
+                List<EntityStateQuerier.NonFungibleIdWithOwnerDataViewModel>? items = null;
+
+                var hasItems = nonFungibleIds?.TryGetValue(x.VaultEntityId, out items);
+                return new GatewayModel.NonFungibleResourcesCollectionItemVaultAggregatedVaultItem(
+                    totalCount: x.NonFungibleIdsCount,
+                    vaultAddress: x.VaultAddress,
+                    lastUpdatedAtStateVersion: x.LastUpdatedAtStateVersion,
+                    items: hasItems == true && items != null ? items.Select(y => y.NonFungibleId).ToList() : null
+                );
+            }
+        ).ToList();
+
+        var vaultsTotalCount = input.FirstOrDefault()?.VaultTotalCount ?? 0;
+
+        var previousCursor = offset > 0
+            ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
+            : null;
+
+        var nextCursor = vaultsTotalCount > offset + limit
+            ? new GatewayModel.OffsetCursor(limit).ToCursorString()
+            : null;
+
+        return new GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse(ledgerState, vaultsTotalCount, previousCursor, nextCursor, mapped, entityGlobalAddress,
+            resourceGlobalAddress);
     }
 
     private async Task<List<RoyaltyVaultBalanceViewModel>> RoyaltyVaultBalance(long[] ownerIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
@@ -737,7 +820,6 @@ ORDER BY metadata_join.ordinality ASC;",
             }
 
             var value = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(_logger, vm.Value, _networkConfigurationProvider.GetNetworkId());
-
             result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, value, vm.FromStateVersion));
         }
 
@@ -800,7 +882,6 @@ INNER JOIN LATERAL (
             }
 
             var value = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(_logger, mh.Value, _networkConfigurationProvider.GetNetworkId());
-
             result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, value, mh.FromStateVersion));
         }
 
@@ -830,7 +911,7 @@ most_recent_entity_resource_aggregate_history AS (
     LEFT JOIN LATERAL UNNEST(fungible_resource_entity_ids[@offset:@limit]) WITH ORDINALITY AS a(val,ord) ON true
 )
 SELECT
-    e.global_address AS ResourceEntityGlobalAddress,
+    e.address AS ResourceEntityAddress,
     CAST(eravh.balance AS text) AS Balance,
     ah.resources_total_count AS ResourcesTotalCount,
     eravh.from_state_version AS LastUpdatedAtStateVersion
@@ -863,7 +944,7 @@ order by ah.ord
             totalCount = vm.ResourcesTotalCount;
 
             items.Add(new GatewayModel.FungibleResourcesCollectionItemGloballyAggregated(
-                resourceAddress: vm.ResourceEntityGlobalAddress,
+                resourceAddress: vm.ResourceEntityAddress,
                 amount: TokenAmount.FromSubUnitsString(vm.Balance).ToString(),
                 lastUpdatedAtStateVersion: vm.LastUpdatedAtStateVersion));
         }
@@ -942,8 +1023,8 @@ most_recent_entity_resource_vault_aggregate_history AS (
     LEFT JOIN LATERAL UNNEST(vault_entity_ids[@vaultOffset:@vaultLimit]) WITH ORDINALITY AS a(val,ord) ON true
 )
 SELECT
-    er.global_address AS ResourceEntityGlobalAddress,
-    ENCODE(ev.address, 'hex') AS VaultAddress,
+    er.address AS ResourceEntityAddress,
+    ev.address AS VaultAddress,
     CAST(vh.balance AS text) AS Balance,
     vah.resource_total_count AS ResourceTotalCount,
     vah.vault_total_count AS VaultTotalCount,
@@ -973,26 +1054,26 @@ ORDER BY vah.resource_order, vah.vault_order;
 
         var resourcesTotalCount = 0;
 
-        var resources = new Dictionary<GlobalAddress, GatewayModel.FungibleResourcesCollectionItemVaultAggregated>();
+        var resources = new Dictionary<EntityAddress, GatewayModel.FungibleResourcesCollectionItemVaultAggregated>();
 
         foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<FungibleAggregatedPerVaultViewModel>(cd))
         {
             resourcesTotalCount = vm.ResourceTotalCount;
 
-            if (!resources.TryGetValue(vm.ResourceEntityGlobalAddress, out var existingRecord))
+            if (!resources.TryGetValue(vm.ResourceEntityAddress, out var existingRecord))
             {
                 var vaultNextCursor = vm.VaultTotalCount > vaultLimit
                     ? new GatewayModel.OffsetCursor(vaultLimit).ToCursorString()
                     : null;
 
                 existingRecord = new GatewayModel.FungibleResourcesCollectionItemVaultAggregated(
-                    resourceAddress: vm.ResourceEntityGlobalAddress,
+                    resourceAddress: vm.ResourceEntityAddress,
                     vaults: new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault(
                         totalCount: vm.VaultTotalCount,
                         nextCursor: vaultNextCursor,
                         items: new List<GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem>()));
 
-                resources[vm.ResourceEntityGlobalAddress] = existingRecord;
+                resources[vm.ResourceEntityAddress] = existingRecord;
             }
 
             existingRecord.Vaults.Items.Add(new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVaultItem(
@@ -1040,7 +1121,7 @@ most_recent_entity_resource_vault_aggregate_history AS (
     FROM most_recent_entity_resource_vault_aggregate_history_nested ahn
     LEFT JOIN LATERAL UNNEST(vault_entity_ids[@vaultOffset:@vaultLimit]) WITH ORDINALITY a(val,ord) ON true
 )
-SELECT er.global_address AS ResourceEntityGlobalAddress, ENCODE(ev.address, 'hex') AS VaultAddress, CAST(vh.balance AS text) AS Balance, vah.vault_total_count AS VaultTotalCount, vh.from_state_version AS LastUpdatedAtStateVersion
+SELECT er.address AS ResourceEntityAddress, ev.address AS VaultAddress, CAST(vh.balance AS text) AS Balance, vah.vault_total_count AS VaultTotalCount, vh.from_state_version AS LastUpdatedAtStateVersion
 FROM most_recent_entity_resource_vault_aggregate_history vah
 INNER JOIN LATERAL (
     SELECT balance, from_state_version
@@ -1101,7 +1182,7 @@ most_recent_entity_resource_aggregate_history AS (
     LEFT JOIN LATERAL UNNEST(non_fungible_resource_entity_ids[@offset:@limit]) WITH ORDINALITY a(val,ord)  ON true
 )
 SELECT
-    e.global_address AS ResourceEntityGlobalAddress,
+    e.address AS ResourceEntityAddress,
     eravh.total_count AS NonFungibleIdsCount,
     ah.resources_total_count AS ResourcesTotalCount,
     eravh.from_state_version AS LastUpdatedAtStateVersion
@@ -1134,7 +1215,7 @@ order by ah.ord;
             totalCount = vm.ResourcesTotalCount;
 
             items.Add(new GatewayModel.NonFungibleResourcesCollectionItemGloballyAggregated(
-                resourceAddress: vm.ResourceEntityGlobalAddress,
+                resourceAddress: vm.ResourceEntityAddress,
                 amount: vm.NonFungibleIdsCount,
                 lastUpdatedAtStateVersion: vm.LastUpdatedAtStateVersion));
         }
@@ -1192,8 +1273,8 @@ most_recent_entity_resource_vault_aggregate_history AS (
 SELECT
     vah.non_fungible_resource_entity_id as ResourceEntityId,
     vah.vault_entity_id AS VaultEntityId,
-    er.global_address AS ResourceEntityGlobalAddress,
-    ENCODE(ev.address, 'hex') AS VaultAddress,
+    er.address AS ResourceEntityAddress,
+    ev.address AS VaultAddress,
     vh.NonFungibleIdsCount,
     vah.resource_total_count AS ResourceTotalCount,
     vah.vault_total_count AS VaultTotalCount,
@@ -1253,9 +1334,9 @@ most_recent_entity_resource_vault_aggregate_history AS (
     LEFT JOIN LATERAL UNNEST(vault_entity_ids[@vaultOffset:@vaultLimit]) WITH ORDINALITY a(val,ord) ON true
 )
 SELECT
-    er.global_address AS ResourceEntityGlobalAddress,
+    er.address AS ResourceEntityAddress,
     vah.vault_entity_id AS VaultEntityId,
-    ENCODE(ev.address, 'hex') AS VaultAddress,
+    ev.address AS VaultAddress,
     vh.NonFungibleIdsCount,
     vah.vault_total_count AS VaultTotalCount,
     vh.from_state_version AS LastUpdatedAtStateVersion
@@ -1398,32 +1479,12 @@ order by ord
         return new GatewayModel.NonFungibleIdsCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
     }
 
-    private async Task<long> GetVaultEntityId(string vaultAddress, GatewayModel.LedgerState ledgerState, CancellationToken token)
-    {
-        var cd = new CommandDefinition(
-            commandText: @"SELECT id from entities where ENCODE(address, 'hex') = @vaultAddress and from_state_version <= @stateVersion",
-            parameters: new
-            {
-                stateVersion = ledgerState.StateVersion, vaultAddress = vaultAddress,
-            },
-            cancellationToken: token);
-
-        var result = (await _dbContext.Database.GetDbConnection().QueryAsync<long?>(cd)).FirstOrDefault();
-
-        if (result == null)
-        {
-            throw new EntityNotFoundException(vaultAddress);
-        }
-
-        return result.Value;
-    }
-
-    private async Task<TEntity> GetEntity<TEntity>(GlobalAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<TEntity> GetEntity<TEntity>(EntityAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
         where TEntity : Entity
     {
         var entity = await _dbContext.Entities
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
+            .FirstOrDefaultAsync(e => e.Address == address, token);
 
         if (entity == null)
         {
@@ -1442,7 +1503,7 @@ order by ord
         return typedEntity;
     }
 
-    private bool TryGetVirtualEntity(GlobalAddress address, [NotNullWhen(true)] out Entity? entity)
+    private bool TryGetVirtualEntity(EntityAddress address, [NotNullWhen(true)] out Entity? entity)
     {
         var firstAddressByte = RadixAddressCodec.Decode(address).Data[0];
 
@@ -1465,15 +1526,15 @@ order by ord
         return false;
     }
 
-    private async Task<ICollection<Entity>> GetEntities(List<GlobalAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<ICollection<Entity>> GetEntities(List<EntityAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         var entities = await _dbContext.Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.GlobalAddress.HasValue && addresses.Contains(e.GlobalAddress.Value))
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && addresses.Contains(e.Address))
             .ToListAsync(token);
 
         foreach (var address in addresses)
         {
-            if (entities.All(e => e.GlobalAddress != address) && TryGetVirtualEntity(address, out var virtualEntity))
+            if (entities.All(e => e.Address != address) && TryGetVirtualEntity(address, out var virtualEntity))
             {
                 entities.Add(virtualEntity);
             }
@@ -1488,13 +1549,21 @@ order by ord
 
         foreach (var resourceEntity in resourceEntities)
         {
-            lookup.Add(new AccessRuleChainLookup(resourceEntity.Id, AccessRulesChainSubtype.None));
-            lookup.Add(new AccessRuleChainLookup(resourceEntity.Id, AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain));
+            lookup.Add(new AccessRuleChainLookup(resourceEntity.Id, null));
+
+            if (resourceEntity is GlobalFungibleResourceEntity)
+            {
+                lookup.Add(new AccessRuleChainLookup(resourceEntity.Id, NativeBlueprintNames.FungibleVault));
+            }
+            else if (resourceEntity is GlobalNonFungibleResourceEntity)
+            {
+                lookup.Add(new AccessRuleChainLookup(resourceEntity.Id, NativeBlueprintNames.NonFungibleVault));
+            }
         }
 
         foreach (var componentEntity in componentEntities)
         {
-            lookup.Add(new AccessRuleChainLookup(componentEntity.Id, AccessRulesChainSubtype.None));
+            lookup.Add(new AccessRuleChainLookup(componentEntity.Id, null));
         }
 
         if (!lookup.Any())
@@ -1503,27 +1572,27 @@ order by ord
         }
 
         var entityIds = new List<long>();
-        var subtypes = new List<AccessRulesChainSubtype>();
+        var childBlueprintNames = new List<string?>();
 
         foreach (var l in lookup)
         {
             entityIds.Add(l.EntityId);
-            subtypes.Add(l.Subtype);
+            childBlueprintNames.Add(l.ChildBlueprintName);
         }
 
         return await _dbContext.EntityAccessRulesChainHistory
             .FromSqlInterpolated($@"
-WITH variables (entity_id, subtype) AS (SELECT UNNEST({entityIds}), UNNEST({subtypes}))
+WITH variables (entity_id, child_blueprint_name) AS (SELECT UNNEST({entityIds}), UNNEST({childBlueprintNames}))
 SELECT earch.*
 FROM variables v
 INNER JOIN LATERAL (
     SELECT *
     FROM entity_access_rules_chain_history
-    WHERE entity_id = v.entity_id AND subtype = v.subtype AND from_state_version <= {ledgerState.StateVersion}
+    WHERE entity_id = v.entity_id AND ((v.child_blueprint_name is NULL and child_blueprint_name is NULL) OR child_blueprint_name = v.child_blueprint_name) AND from_state_version <= {ledgerState.StateVersion}
     ORDER BY from_state_version DESC
     LIMIT 1
 ) earch ON TRUE;")
-            .ToDictionaryAsync(e => new AccessRuleChainLookup(e.EntityId, e.Subtype), token);
+            .ToDictionaryAsync(e => new AccessRuleChainLookup(e.EntityId, e.ChildBlueprintName), token);
     }
 
     private async Task<Dictionary<long, EntityStateHistory>> GetStateHistory(ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
@@ -1557,7 +1626,7 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
-    private async Task<Dictionary<long, string>> GetCorrelatedEntityAddresses(ICollection<Entity> entities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    private async Task<Dictionary<long, EntityAddress>> GetCorrelatedEntityAddresses(ICollection<Entity> entities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var lookup = new HashSet<long>();
 
@@ -1580,15 +1649,15 @@ INNER JOIN LATERAL (
 
         return await _dbContext.Entities
             .Where(e => ids.Contains(e.Id))
-            .Select(e => new { e.Id, e.Address, e.GlobalAddress })
-            .ToDictionaryAsync(e => e.Id, e => e.GlobalAddress ?? e.Address.ToHex(), token);
+            .Select(e => new { e.Id, GlobalAddress = e.Address })
+            .ToDictionaryAsync(e => e.Id, e => e.GlobalAddress, token);
     }
 
-    private async Task<Dictionary<string, long>> ResolveResourceEntityIds(ICollection<GatewayModel.FungibleResourcesCollection>? fungibleResources, ICollection<GatewayModel.NonFungibleResourcesCollection>? nonFungibleResources, CancellationToken token)
+    private async Task<Dictionary<EntityAddress, long>> ResolveResourceEntityIds(ICollection<GatewayModel.FungibleResourcesCollection>? fungibleResources, ICollection<GatewayModel.NonFungibleResourcesCollection>? nonFungibleResources, CancellationToken token)
     {
         if (fungibleResources?.Any() != true && nonFungibleResources?.Any() != true)
         {
-            return new Dictionary<string, long>();
+            return new Dictionary<EntityAddress, long>();
         }
 
         var lookupAddresses = new HashSet<string>();
@@ -1599,8 +1668,8 @@ INNER JOIN LATERAL (
         var addresses = lookupAddresses.ToList();
 
         return await _dbContext.Entities
-            .Where(e => e.GlobalAddress != null && addresses.Contains(e.GlobalAddress.Value))
-            .Select(e => new { e.Id, e.GlobalAddress!.Value })
-            .ToDictionaryAsync(e => e.Value.ToString(), e => e.Id, token);
+            .Where(e => addresses.Contains(e.Address))
+            .Select(e => new { e.Id, e.Address })
+            .ToDictionaryAsync(e => e.Address, e => e.Id, token);
     }
 }
