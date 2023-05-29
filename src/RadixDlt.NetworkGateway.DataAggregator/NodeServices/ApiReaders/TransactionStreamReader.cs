@@ -116,7 +116,7 @@ internal class TransactionStreamReader : ITransactionStreamReader
                     sborFormatOptions: new CoreModel.SborFormatOptions
                     {
                         Raw = true,
-                        ProgrammaticJson = false,
+                        ProgrammaticJson = true,
                     }
                 ),
                 token

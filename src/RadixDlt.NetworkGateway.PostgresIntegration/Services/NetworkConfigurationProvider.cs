@@ -242,9 +242,9 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
             // TODO: temporal solution, that should be read from gensis transaction.
             // For now we rely on hardcoded values.
             EventTypeIdentifiers = new EventTypeIdentifiers(
-                new EventTypeIdentifiers.VaultEventTypeIdentifiers(27, 28),
-                new EventTypeIdentifiers.FungibleResourceEventTypeIdentifiers(35, 36),
-                new EventTypeIdentifiers.NonFungibleResourceEventTypeIdentifiers(85, 87)),
+                new EventTypeIdentifiers.VaultEventTypeIdentifiers(17, 18),
+                new EventTypeIdentifiers.FungibleResourceEventTypeIdentifiers(27, 28),
+                new EventTypeIdentifiers.NonFungibleResourceEventTypeIdentifiers(80, 82)),
         };
     }
 
