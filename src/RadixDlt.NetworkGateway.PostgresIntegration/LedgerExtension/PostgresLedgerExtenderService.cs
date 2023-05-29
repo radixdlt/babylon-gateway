@@ -1448,8 +1448,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 .GroupBy(x => new { x.StateVersion, x.ReferencedVault, x.ReferencedResource })
                 .Select(e =>
                 {
-                    AggregateEntityResource(e.Key.ReferencedVault, e.Key.ReferencedResource, e.Key.StateVersion, false, null, e.Count());
-
                     var vaultExists = mostRecentEntityNonFungibleVaultHistory.TryGetValue(e.Key.ReferencedVault.DatabaseId, out var existingVaultHistory);
 
                     var nfids = vaultExists ? existingVaultHistory!.NonFungibleIds : new List<long>();
@@ -1463,6 +1461,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     nfids.AddRange(addedItems);
                     nfids.RemoveAll(x => deletedItems.Contains(x));
+
+                    AggregateEntityResource(e.Key.ReferencedVault, e.Key.ReferencedResource, e.Key.StateVersion, false, null, nfids.Count);
 
                     return new EntityNonFungibleVaultHistory
                     {
