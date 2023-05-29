@@ -67,7 +67,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Npgsql;
 using NpgsqlTypes;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
@@ -101,7 +100,7 @@ internal class WriteHelper
 
         foreach (var e in entities)
         {
-            var discriminator = GetDiscriminator<Abstractions.Model.EntityType>(e.GetType());
+            var discriminator = GetDiscriminator<EntityType>(e.GetType());
 
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
@@ -188,11 +187,11 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, transaction_accumulator, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, raw_payload, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_error_message, receipt_output, receipt_next_epoch, receipt_events, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, transaction_accumulator, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, raw_payload, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_error_message, receipt_output, receipt_next_epoch, receipt_events, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var lt in entities)
         {
-            var discriminator = GetDiscriminator<Abstractions.Model.LedgerTransactionType>(lt.GetType());
+            var discriminator = GetDiscriminator<LedgerTransactionType>(lt.GetType());
 
             await writer.StartRowAsync(token);
             await writer.WriteAsync(lt.StateVersion, NpgsqlDbType.Bigint, token);
@@ -203,7 +202,6 @@ internal class WriteHelper
             await writer.WriteAsync(lt.IndexInEpoch, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.IndexInRound, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.IsEndOfEpoch, NpgsqlDbType.Boolean, token);
-            await writer.WriteAsync(lt.ReferencedEntities.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteNullableAsync(lt.FeePaid?.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
             await writer.WriteNullableAsync(lt.TipPaid?.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
             await writer.WriteAsync(lt.RoundTimestamp, NpgsqlDbType.TimestampTz, token);
@@ -486,7 +484,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.TmpTmpRemoveMeOnceTxEventsBecomeAvailable, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(GetDiscriminator<Abstractions.Model.ResourceType>(e.GetType()), "resource_type", token);
+            await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
 
             if (e is EntityFungibleResourceAggregatedVaultsHistory fe)
             {

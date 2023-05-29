@@ -63,15 +63,11 @@
  */
 
 using Newtonsoft.Json.Linq;
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
@@ -116,7 +112,7 @@ internal static class GatewayModelExtensions
         };
     }
 
-    public static GatewayModel.CommittedTransactionInfo ToGatewayModel(this LedgerTransaction lt, ICollection<Entity> referencedEntities, GatewayModel.TransactionCommittedDetailsOptIns optIns)
+    public static GatewayModel.CommittedTransactionInfo ToGatewayModel(this LedgerTransaction lt, GatewayModel.TransactionCommittedDetailsOptIns optIns)
     {
         string? payloadHashHex = null;
         string? intentHashHex = null;
@@ -155,7 +151,6 @@ internal static class GatewayModelExtensions
             errorMessage: lt.EngineReceipt.ErrorMessage,
             rawHex: rawHex,
             receipt: receipt,
-            referencedGlobalEntities: referencedEntities.Where(re => re.IsGlobal).Select(re => re.Address.ToString()).ToList(),
             messageHex: messageHex
         );
     }

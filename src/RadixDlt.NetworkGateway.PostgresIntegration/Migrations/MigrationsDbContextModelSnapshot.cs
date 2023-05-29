@@ -494,11 +494,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("raw_payload");
 
-                    b.Property<List<long>>("ReferencedEntities")
-                        .IsRequired()
-                        .HasColumnType("bigint[]")
-                        .HasColumnName("referenced_entities");
-
                     b.Property<long>("RoundInEpoch")
                         .HasColumnType("bigint")
                         .HasColumnName("round_in_epoch");

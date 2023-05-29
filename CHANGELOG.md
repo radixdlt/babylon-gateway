@@ -16,7 +16,8 @@ _Release Date: Unreleased_
 - Added `image_tag` with currently deployed image tag to release information.
 - Added multiple new filter options to `/stream/transactions` endpoint.
 - Added `total_supply`, `total_minted`, `total_burned` to `/state/entity/details` when querying for fungible or non fungible resources.
-- unwrapped non fungible ids in `/state/non-fungible/ids`, `/state/entity/page/non-fungible-vault/ids` endpoints. They are no longer wrapped in `non_fungible_id` object.
+- Unwrapped non fungible ids in `/state/non-fungible/ids`, `/state/entity/page/non-fungible-vault/ids` endpoints. They are no longer wrapped in `non_fungible_id` object.
+- Dropped `transaction.referenced_entities` from `/transaction/committed-details` endpoint.
 
 ### 0.3.1
 
