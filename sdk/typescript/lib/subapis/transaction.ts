@@ -25,16 +25,33 @@ export class Transaction {
   }
 
   /**
-   * Get details of committed transaction together with ledger state at a time of commit
+   * Get details of committed transaction including all opt-ins by default.
+   * Particular opt-ins can be skipped by passing `false` to corresponding keys
+   * inside `options` configuration object
+   *
+   * @example <caption>Get committed transaction details without raw hex transaction</caption>
+   * const details = await gatewayApi.transaction.getCommittedDetails('266cdfe0a28a761909d04761cdbfe33555ee5fdcf1db37fcf71c9a644b53e60b', { rawHex: false })
+   * console.log(details.transaction)
    */
   getCommittedDetails(
-    transactionIntentHashHex: string
+    transactionIntentHashHex: string,
+    options?: {
+      rawHex: false
+      receiptEvents: false
+      receiptFeeSummary: false
+      receiptStateChanges: false
+    }
   ): Promise<TransactionCommittedDetailsResponse> {
-    return this.innerClient
-      .transactionCommittedDetails({
-        transactionCommittedDetailsRequest: {
-          intent_hash_hex: transactionIntentHashHex,
+    return this.innerClient.transactionCommittedDetails({
+      transactionCommittedDetailsRequest: {
+        intent_hash_hex: transactionIntentHashHex,
+        opt_ins: {
+          raw_hex: options?.rawHex ?? true,
+          receipt_events: options?.receiptEvents ?? true,
+          receipt_fee_summary: options?.receiptFeeSummary ?? true,
+          receipt_state_changes: options?.receiptStateChanges ?? true,
         },
-      })
+      },
+    })
   }
 }
