@@ -203,9 +203,9 @@ internal static class ScryptoSborUtils
 
                 break;
             case 10 when variantEnum.Fields is [Tuple nonFungibleGlobalId]:
-                if (nonFungibleGlobalId.Fields is [Address nonFungibleResourceAddress, NonFungibleLocalId nonFungibleLocalId])
+                if (nonFungibleGlobalId.Fields is [Reference nonFungibleResourceAddress, NonFungibleLocalId nonFungibleLocalId])
                 {
-                    return $"{nonFungibleResourceAddress.TmpAddress}:{nonFungibleLocalId.Value}";
+                    return $"{nonFungibleResourceAddress.Value}:{nonFungibleLocalId.Value}";
                 }
 
                 break;
