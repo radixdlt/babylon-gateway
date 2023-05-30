@@ -211,7 +211,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         foreach (var pendingTransaction in toUpdate)
         {
-            if (pendingTransaction.Status is PendingTransactionStatus.RejectedPermanently or PendingTransactionStatus.RejectedTemporarily)
+            if (pendingTransaction.Status is PendingTransactionStatus.RejectedPermanently)
             {
                 await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedWhichWasFailed());
 
