@@ -186,8 +186,8 @@ internal static class ScryptoSborUtils
                 return value.Value.ToString();
             case 7 when variantEnum.Fields is [Decimal value]:
                 return value.Value;
-            case 8 when variantEnum.Fields is [Address value]:
-                return value.TmpAddress;
+            case 8 when variantEnum.Fields is [Reference reference]:
+                return reference.Value;
             case 9 when variantEnum.Fields is [Enum publicKeyEnum]:
                 var keyName = publicKeyEnum.VariantId switch
                 {
