@@ -186,8 +186,8 @@ internal static class ScryptoSborUtils
                 return value.Value.ToString();
             case 7 when variantEnum.Fields is [Decimal value]:
                 return value.Value;
-            case 8 when variantEnum.Fields is [Address value]:
-                return value.TmpAddress;
+            case 8 when variantEnum.Fields is [Reference reference]:
+                return reference.Value;
             case 9 when variantEnum.Fields is [Enum publicKeyEnum]:
                 var keyName = publicKeyEnum.VariantId switch
                 {
@@ -203,9 +203,9 @@ internal static class ScryptoSborUtils
 
                 break;
             case 10 when variantEnum.Fields is [Tuple nonFungibleGlobalId]:
-                if (nonFungibleGlobalId.Fields is [Address nonFungibleResourceAddress, NonFungibleLocalId nonFungibleLocalId])
+                if (nonFungibleGlobalId.Fields is [Reference nonFungibleResourceAddress, NonFungibleLocalId nonFungibleLocalId])
                 {
-                    return $"{nonFungibleResourceAddress.TmpAddress}:{nonFungibleLocalId.Value}";
+                    return $"{nonFungibleResourceAddress.Value}:{nonFungibleLocalId.Value}";
                 }
 
                 break;
