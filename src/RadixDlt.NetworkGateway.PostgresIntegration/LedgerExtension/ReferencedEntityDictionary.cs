@@ -71,7 +71,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 internal class ReferencedEntityDictionary
 {
     private readonly Dictionary<EntityAddress, ReferencedEntity> _storage = new();
-    private readonly Dictionary<long, List<ReferencedEntity>> _entitiesAtStateVersion = new();
     private readonly Dictionary<long, ReferencedEntity> _dbIdCache = new();
     private readonly HashSet<EntityAddress> _knownAddressesToLoad = new();
 
@@ -83,22 +82,7 @@ internal class ReferencedEntityDictionary
 
     public ReferencedEntity GetOrAdd(EntityAddress address, Func<EntityAddress, ReferencedEntity> factory)
     {
-        if (_storage.TryGetValue(address, out var existing))
-        {
-            return existing;
-        }
-
-        var value = factory(address);
-
-        if (!_entitiesAtStateVersion.ContainsKey(value.StateVersion))
-        {
-            _entitiesAtStateVersion[value.StateVersion] = new List<ReferencedEntity>();
-        }
-
-        _storage[address] = value;
-        _entitiesAtStateVersion[value.StateVersion].Add(value);
-
-        return value;
+        return _storage.GetOrAdd(address, factory);
     }
 
     public ReferencedEntity Get(EntityAddress address)
@@ -109,16 +93,6 @@ internal class ReferencedEntityDictionary
     public ReferencedEntity GetByDatabaseId(long id)
     {
         return _dbIdCache[id];
-    }
-
-    public IEnumerable<ReferencedEntity> OfStateVersion(long stateVersion)
-    {
-        if (_entitiesAtStateVersion.TryGetValue(stateVersion, out var existing))
-        {
-            return existing;
-        }
-
-        return Array.Empty<ReferencedEntity>();
     }
 
     public void OnAllEntitiesResolved()

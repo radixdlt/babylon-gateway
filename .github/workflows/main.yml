@@ -50,16 +50,16 @@ jobs:
           name: build_props
           retention-days: 1
 
-  docker-database-migrations-gcr:
+  docker-database-migrations-private:
     name: (DatabaseMigrations) Docker
     needs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
-      image_registry: "eu.gcr.io"
-      image_organization: "dev-container-repo"
-      image_name: "babylon-ng-database-migrations"
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "private-babylon-ng-database-migrations"
       tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}
       context: "."
       dockerfile: "./apps/DatabaseMigrations/Dockerfile"
@@ -71,16 +71,16 @@ jobs:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-  docker-data-aggregator-gcr:
+  docker-data-aggregator-private:
     name: (DataAggregator) Docker
     needs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
-      image_registry: "eu.gcr.io"
-      image_organization: "dev-container-repo"
-      image_name: "babylon-ng-data-aggregator"
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "private-babylon-ng-data-aggregator"
       tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}
       context: "."
       dockerfile: "./apps/DataAggregator/Dockerfile"
@@ -92,16 +92,16 @@ jobs:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-  docker-gateway-api-gcr:
+  docker-gateway-api-private:
     name: (GatewayApi) Docker
     needs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
-      image_registry: "eu.gcr.io"
-      image_organization: "dev-container-repo"
-      image_name: "babylon-ng-gateway-api"
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "private-babylon-ng-gateway-api"
       tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}
       context: "."
       dockerfile: "./apps/GatewayApi/Dockerfile"
@@ -116,9 +116,9 @@ jobs:
   deploy-on-mardunet:
     runs-on: ubuntu-22.04
     needs:
-      - docker-gateway-api-gcr
-      - docker-data-aggregator-gcr
-      - docker-database-migrations-gcr
+      - docker-gateway-api-private
+      - docker-data-aggregator-private
+      - docker-database-migrations-private
       - setup-tags
     if: github.ref == 'refs/heads/develop'
     permissions:
@@ -168,9 +168,9 @@ jobs:
   ephemeral-deploy-and-benchmark:
     runs-on: ubuntu-22.04
     needs:
-      - docker-gateway-api-gcr
-      - docker-data-aggregator-gcr
-      - docker-database-migrations-gcr
+      - docker-gateway-api-private
+      - docker-data-aggregator-private
+      - docker-database-migrations-private
       - setup-tags
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     permissions:
@@ -215,9 +215,9 @@ jobs:
   deploy-pr:
     runs-on: ubuntu-22.04
     needs:
-      - docker-gateway-api-gcr
-      - docker-data-aggregator-gcr
-      - docker-database-migrations-gcr
+      - docker-gateway-api-private
+      - docker-data-aggregator-private
+      - docker-database-migrations-private
       - setup-tags
     if: github.event_name == 'pull_request'
     permissions:
@@ -258,9 +258,9 @@ jobs:
   ephemeral-deploy-and-test:
     runs-on: ubuntu-22.04
     needs:
-      - docker-gateway-api-gcr
-      - docker-data-aggregator-gcr
-      - docker-database-migrations-gcr
+      - docker-gateway-api-private
+      - docker-data-aggregator-private
+      - docker-database-migrations-private
       - setup-tags
     if: github.event_name == 'pull_request'
     permissions:

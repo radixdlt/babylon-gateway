@@ -333,11 +333,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
                     {
-                        var referencedEntity = referencedEntities
-                            .GetOrAdd(
-                                (EntityAddress)newGlobalEntity.EntityAddress,
-                                _ => new ReferencedEntity((EntityAddress)newGlobalEntity.EntityAddress,  newGlobalEntity.EntityType, stateVersion)
-                            );
+                        var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)newGlobalEntity.EntityAddress, ea => new ReferencedEntity(ea,  newGlobalEntity.EntityType, stateVersion));
 
                         referencedEntity.WithTypeHint(newGlobalEntity.EntityType switch
                         {
@@ -363,10 +359,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         var substateId = substate.SubstateId;
                         var substateData = substate.SubstateData;
-
-                        var referencedEntity = referencedEntities.GetOrAdd(
-                            (EntityAddress)substateId.EntityAddress,
-                            _ => new ReferencedEntity((EntityAddress)substateId.EntityAddress, substateId.EntityType, stateVersion));
+                        var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)substateId.EntityAddress, ea => new ReferencedEntity(ea, substateId.EntityType, stateVersion));
 
                         if (substateData is CoreModel.IEntityOwner entityOwner)
                         {
@@ -467,10 +460,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
                     {
                         var sid = deletedSubstate.SubstateId;
-                        referencedEntities.GetOrAdd((EntityAddress)sid.EntityAddress, _ => new ReferencedEntity(
-                            (EntityAddress)sid.EntityAddress,
-                            sid.EntityType,
-                            stateVersion));
+
+                        referencedEntities.GetOrAdd((EntityAddress)sid.EntityAddress, ea => new ReferencedEntity(ea, sid.EntityType, stateVersion));
                     }
 
                     if (committedTransaction.Receipt.Events != null)
@@ -480,21 +471,21 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             switch (@event.Type.Emitter)
                             {
                                 case CoreModel.FunctionEventEmitterIdentifier functionEventEmitterIdentifier:
-                                    referencedEntities.GetOrAdd(
-                                        (EntityAddress)functionEventEmitterIdentifier.Entity.EntityAddress,
-                                        _ => new ReferencedEntity(
-                                            (EntityAddress)functionEventEmitterIdentifier.Entity.EntityAddress,
-                                            functionEventEmitterIdentifier.Entity.EntityType,
-                                            stateVersion));
+                                {
+                                    var entityAddress = (EntityAddress)functionEventEmitterIdentifier.Entity.EntityAddress;
+
+                                    referencedEntities.GetOrAdd(entityAddress, ea => new ReferencedEntity(ea, functionEventEmitterIdentifier.Entity.EntityType, stateVersion));
                                     break;
+                                }
+
                                 case CoreModel.MethodEventEmitterIdentifier methodEventEmitterIdentifier:
-                                    referencedEntities.GetOrAdd(
-                                        (EntityAddress)methodEventEmitterIdentifier.Entity.EntityAddress,
-                                        _ => new ReferencedEntity(
-                                            (EntityAddress)methodEventEmitterIdentifier.Entity.EntityAddress,
-                                            methodEventEmitterIdentifier.Entity.EntityType,
-                                            stateVersion));
+                                {
+                                    var entityAddress = (EntityAddress)methodEventEmitterIdentifier.Entity.EntityAddress;
+
+                                    referencedEntities.GetOrAdd(entityAddress, ea => new ReferencedEntity(ea, methodEventEmitterIdentifier.Entity.EntityType, stateVersion));
                                     break;
+                                }
+
                                 default:
                                     throw new ArgumentOutOfRangeException(nameof(@event.Type.Emitter), @event.Type.Emitter, null);
                             }
@@ -742,8 +733,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             {
                 try
                 {
-                    long currentEpoch = ledgerExtension.LatestTransactionSummary.Epoch;
-
+                    var currentEpoch = ledgerExtension.LatestTransactionSummary.Epoch;
                     var stateVersion = committedTransaction.StateVersion;
                     var stateUpdates = committedTransaction.Receipt.StateUpdates;
 
@@ -751,7 +741,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         var substateId = substate.SubstateId;
                         var substateData = substate.SubstateData;
-
                         var referencedEntity = referencedEntities.Get((EntityAddress)substateId.EntityAddress);
 
                         if (substateData is CoreModel.MetadataModuleEntrySubstate metadata)
@@ -893,11 +882,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
                     {
                         var substateId = deletedSubstate.SubstateId;
-
-                        var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)substateId.EntityAddress, _ => new ReferencedEntity(
-                            (EntityAddress)substateId.EntityAddress,
-                            substateId.EntityType,
-                            stateVersion));
+                        var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)substateId.EntityAddress, ea => new ReferencedEntity(ea, substateId.EntityType, stateVersion));
 
                         if (substateId.SubstateType == CoreModel.SubstateType.NonFungibleVaultContentsIndexEntry)
                         {
@@ -1532,11 +1517,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 .ToList();
 
             var entityResourceAggregateHistoryToAdd = entityResourceAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()).ToList();
-
-            foreach (var lt in ledgerTransactionsToAdd)
-            {
-                lt.ReferencedEntities = referencedEntities.OfStateVersion(lt.StateVersion).Select(e => e.DatabaseId).ToList();
-            }
 
             sw = Stopwatch.StartNew();
 
