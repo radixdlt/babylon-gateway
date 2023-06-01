@@ -95,7 +95,7 @@ public class InvalidTransactionException : ValidationException
 
     public static Exception FromUnsupportedPayloadType()
     {
-        return new InvalidTransactionException("Expected notarized transaction");
+        return new InvalidTransactionException("Invalid notarized transaction");
     }
 
     public static Exception FromStaticallyInvalid(string validityError)
