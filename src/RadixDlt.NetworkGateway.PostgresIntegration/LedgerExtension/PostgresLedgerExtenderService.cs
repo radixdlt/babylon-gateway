@@ -289,17 +289,18 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     var stateVersion = committedTransaction.StateVersion;
                     var stateUpdates = committedTransaction.Receipt.StateUpdates;
 
-                    long? nextEpoch = null;
-                    long? newRoundInEpoch = null;
-                    DateTime? newRoundTimestamp = null;
-                    LedgerTransactionMarkerOriginType? transactionMarkerOriginType = null;
+                    long? epochUpdate = null;
+                    long? roundInEpochUpdate = null;
+                    DateTime? roundTimestampUpdate = null;
 
                     if (committedTransaction.LedgerTransaction is CoreModel.ValidatorLedgerTransaction vlt)
                     {
                         switch (vlt.ValidatorTransaction)
                         {
                             case CoreModel.RoundUpdateValidatorTransaction roundUpdate:
-                                newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(roundUpdate.ProposerTimestamp.UnixTimestampMs).UtcDateTime;
+                                epochUpdate = roundUpdate.ConsensusEpoch;
+                                roundInEpochUpdate = roundUpdate.RoundInEpoch;
+                                roundTimestampUpdate = DateTimeOffset.FromUnixTimeMilliseconds(roundUpdate.ProposerTimestamp.UnixTimestampMs).UtcDateTime;
                                 break;
                         }
                     }
@@ -311,7 +312,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (committedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction userLedgerTransaction)
                     {
-                        transactionMarkerOriginType = LedgerTransactionMarkerOriginType.User;
+                        ledgerTransactionMarkersToAdd.Add(new OriginLedgerTransactionMarker
+                        {
+                            Id = sequences.LedgerTransactionMarkerSequence++,
+                            StateVersion = committedTransaction.StateVersion,
+                            OriginType = LedgerTransactionMarkerOriginType.User,
+                        });
 
                         var coreManifest = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.Manifest;
                         var toolkitManifest = new ToolkitModel.Transaction.TransactionManifest(coreManifest.Instructions, coreManifest.BlobsHex.Values.Select(x => (ToolkitModel.ValueBytes)x.ConvertFromHex()).ToArray());
@@ -354,17 +360,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         var substateId = substate.SubstateId;
                         var substateData = substate.SubstateData;
                         var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)substateId.EntityAddress, ea => new ReferencedEntity(ea, substateId.EntityType, stateVersion));
-
-                        if (substateData is CoreModel.EpochManagerFieldStateSubstate epochManagerFieldStateSubstate)
-                        {
-                            newRoundInEpoch = epochManagerFieldStateSubstate.Round;
-
-                            if (epochManagerFieldStateSubstate.Round == 0)
-                            {
-                                nextEpoch = epochManagerFieldStateSubstate.Epoch;
-                                transactionMarkerOriginType = LedgerTransactionMarkerOriginType.EpochChange;
-                            }
-                        }
 
                         if (substateData is CoreModel.IEntityOwner entityOwner)
                         {
@@ -502,9 +497,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                        as the _first_ transaction of a new epoch, as creates the next EpochData, and the RoundData to 0.
                     */
 
-                    var isStartOfEpoch = lastTransactionSummary.IsEndOfEpoch;
-                    var isStartOfRound = newRoundInEpoch != null;
-                    var roundTimestamp = newRoundTimestamp ?? lastTransactionSummary.RoundTimestamp;
+                    var isStartOfEpoch = epochUpdate.HasValue && epochUpdate.Value != lastTransactionSummary.Epoch;
+                    var isStartOfRound = roundInEpochUpdate.HasValue;
+                    var roundTimestamp = roundTimestampUpdate ?? lastTransactionSummary.RoundTimestamp;
                     var createdTimestamp = _clock.UtcNow;
                     var normalizedRoundTimestamp = // Clamp between lastTransaction.NormalizedTimestamp and createdTimestamp
                         roundTimestamp < lastTransactionSummary.NormalizedRoundTimestamp ? lastTransactionSummary.NormalizedRoundTimestamp
@@ -516,11 +511,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         RoundTimestamp: roundTimestamp,
                         NormalizedRoundTimestamp: normalizedRoundTimestamp,
                         CreatedTimestamp: createdTimestamp,
-                        Epoch: isStartOfEpoch ? lastTransactionSummary.Epoch + 1 : lastTransactionSummary.Epoch,
-                        RoundInEpoch: newRoundInEpoch ?? lastTransactionSummary.RoundInEpoch,
+                        Epoch: epochUpdate ?? lastTransactionSummary.Epoch,
+                        RoundInEpoch: roundInEpochUpdate ?? lastTransactionSummary.RoundInEpoch,
                         IndexInEpoch: isStartOfEpoch ? 0 : lastTransactionSummary.IndexInEpoch + 1,
                         IndexInRound: isStartOfRound ? 0 : lastTransactionSummary.IndexInRound + 1,
-                        IsEndOfEpoch: nextEpoch != null,
+                        IsEndOfEpoch: epochUpdate != null,
                         TransactionAccumulator: committedTransaction.LedgerTransaction.GetPayloadBytes());
 
                     LedgerTransaction ledgerTransaction = committedTransaction.LedgerTransaction switch
@@ -570,13 +565,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     ledgerTransactionsToAdd.Add(ledgerTransaction);
 
-                    if (transactionMarkerOriginType.HasValue)
+                    if (committedTransaction.Receipt.NextEpoch != null)
                     {
                         ledgerTransactionMarkersToAdd.Add(new OriginLedgerTransactionMarker
                         {
                             Id = sequences.LedgerTransactionMarkerSequence++,
                             StateVersion = committedTransaction.StateVersion,
-                            OriginType = transactionMarkerOriginType.Value,
+                            OriginType = LedgerTransactionMarkerOriginType.EpochChange,
                         });
                     }
 
