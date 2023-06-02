@@ -274,8 +274,6 @@ internal class VirtualIdentityEntity : GlobalIdentityEntity
 
 internal class InternalKeyValueStoreEntity : Entity
 {
-    [Column("store_of_non_fungible_resource_entity_id")]
-    public long? StoreOfNonFungibleResourceEntityId { get; set; }
 }
 
 internal class GlobalAccessControllerEntity : ComponentEntity
