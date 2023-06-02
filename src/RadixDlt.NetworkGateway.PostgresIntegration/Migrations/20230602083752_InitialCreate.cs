@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -119,8 +119,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     stake_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     unstake_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     royalty_vault_of_entity_id = table.Column<long>(type: "bigint", nullable: true),
-                    resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
-                    store_of_non_fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: true)
+                    resource_entity_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {

@@ -251,16 +251,26 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     globalAddress: correlatedAddresses[entity.GlobalAncestorId.Value])
                 : null;
 
+            var haveFungibles = fungibleResources.TryGetValue(entity.Id, out var fungibles);
+            var haveNonFungibles = nonFungibleResources.TryGetValue(entity.Id, out var nonFungibles);
+
             if (explicitMetadata != null)
             {
-                fungibleResources[entity.Id].Items.ForEach(c => c.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)c.ResourceAddress]]);
-                nonFungibleResources[entity.Id].Items.ForEach(c => c.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)c.ResourceAddress]]);
+                if (haveFungibles && fungibles != null)
+                {
+                    fungibles.Items.ForEach(c => c.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)c.ResourceAddress]]);
+                }
+
+                if (haveNonFungibles && nonFungibles != null)
+                {
+                    nonFungibles.Items.ForEach(c => c.ExplicitMetadata = explicitMetadata[resourceAddressToEntityId[(EntityAddress)c.ResourceAddress]]);
+                }
             }
 
             items.Add(new GatewayModel.StateEntityDetailsResponseItem(
                 address: entity.Address,
-                fungibleResources: fungibleResources[entity.Id],
-                nonFungibleResources: nonFungibleResources[entity.Id],
+                fungibleResources: haveFungibles ? fungibles : null,
+                nonFungibleResources: haveNonFungibles ? nonFungibles : null,
                 ancestorIdentities: ancestorIdentities,
                 metadata: metadata[entity.Id],
                 explicitMetadata: explicitMetadata?[entity.Id],
