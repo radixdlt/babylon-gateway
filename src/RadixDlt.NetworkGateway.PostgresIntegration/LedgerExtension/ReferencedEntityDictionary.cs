@@ -65,6 +65,7 @@
 using RadixDlt.NetworkGateway.Abstractions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -88,6 +89,13 @@ internal class ReferencedEntityDictionary
     public ReferencedEntity Get(EntityAddress address)
     {
         return _storage[address];
+    }
+
+    public bool TryGet(EntityAddress address, [MaybeNullWhen(false)] out ReferencedEntity entity)
+    {
+        entity = null;
+
+        return _storage.TryGetValue(address, out entity);
     }
 
     public ReferencedEntity GetByDatabaseId(long id)

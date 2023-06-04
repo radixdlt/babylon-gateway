@@ -1019,29 +1019,47 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     if (manifestExtractedAddresses.TryGetValue(stateVersion, out var extractedAddresses))
                     {
-                        ledgerTransactionMarkersToAdd.AddRange(extractedAddresses.ResourceAddresses.Select(address => new ManifestAddressLedgerTransactionMarker
+                        foreach (var address in extractedAddresses.ResourceAddresses)
                         {
-                            Id = sequences.LedgerTransactionMarkerSequence++,
-                            StateVersion = stateVersion,
-                            OperationType = LedgerTransactionMarkerOperationType.ResourceInUse,
-                            EntityId = referencedEntities.Get((EntityAddress)address).DatabaseId,
-                        }));
+                            if (referencedEntities.TryGet((EntityAddress)address, out var re))
+                            {
+                                ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    OperationType = LedgerTransactionMarkerOperationType.ResourceInUse,
+                                    EntityId = re.DatabaseId,
+                                });
+                            }
+                        }
 
-                        ledgerTransactionMarkersToAdd.AddRange(extractedAddresses.AccountsDepositedInto.Select(address => new ManifestAddressLedgerTransactionMarker
+                        foreach (var address in extractedAddresses.AccountsDepositedInto)
                         {
-                            Id = sequences.LedgerTransactionMarkerSequence++,
-                            StateVersion = stateVersion,
-                            OperationType = LedgerTransactionMarkerOperationType.AccountDepositedInto,
-                            EntityId = referencedEntities.Get((EntityAddress)address).DatabaseId,
-                        }));
+                            if (referencedEntities.TryGet((EntityAddress)address, out var re))
+                            {
+                                ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    OperationType = LedgerTransactionMarkerOperationType.AccountDepositedInto,
+                                    EntityId = re.DatabaseId,
+                                });
+                            }
+                        }
 
-                        ledgerTransactionMarkersToAdd.AddRange(extractedAddresses.AccountsWithdrawnFrom.Select(address => new ManifestAddressLedgerTransactionMarker
+                        foreach (var address in extractedAddresses.AccountsWithdrawnFrom)
                         {
-                            Id = sequences.LedgerTransactionMarkerSequence++,
-                            StateVersion = stateVersion,
-                            OperationType = LedgerTransactionMarkerOperationType.AccountWithdrawnFrom,
-                            EntityId = referencedEntities.Get((EntityAddress)address).DatabaseId,
-                        }));
+                            if (referencedEntities.TryGet((EntityAddress)address, out var re))
+                            {
+                                ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    OperationType = LedgerTransactionMarkerOperationType.AccountWithdrawnFrom,
+                                    EntityId = re.DatabaseId,
+                                });
+                            }
+                        }
                     }
                 }
                 catch
