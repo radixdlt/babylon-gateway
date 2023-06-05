@@ -229,8 +229,9 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     );
                     break;
 
-                case GlobalGenericComponentEntity ce:
+                case ComponentEntity ce:
                     stateHistory.TryGetValue(ce.Id, out var state);
+                    accessRulesChainHistory.TryGetValue(new AccessRuleChainLookup(ce.Id, null), out var accessRulesChain);
 
                     var componentRoyaltyVaultBalance = royaltyVaultsBalance?.SingleOrDefault(x => x.OwnerEntityId == ce.Id)?.Balance;
 
@@ -238,9 +239,9 @@ internal class EntityStateQuerier : IEntityStateQuerier
                         packageAddress: correlatedAddresses[ce.PackageId],
                         blueprintName: ce.BlueprintName,
                         state: state != null ? new JRaw(state.State) : null,
-                        accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(ce.Id, null)].AccessRulesChain),
+                        accessRulesChain: accessRulesChain != null ? new JRaw(accessRulesChain.AccessRulesChain) : null,
                         royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null
-                        );
+                    );
                     break;
             }
 
