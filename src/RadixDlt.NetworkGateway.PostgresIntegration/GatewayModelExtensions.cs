@@ -135,11 +135,11 @@ internal static class GatewayModelExtensions
         {
             ErrorMessage = lt.EngineReceipt.ErrorMessage,
             Status = ToGatewayModel(lt.EngineReceipt.Status),
-            Output = new JRaw(lt.EngineReceipt.Output),
+            Output = lt.EngineReceipt.Output != null ? new JRaw(lt.EngineReceipt.Output) : null,
             FeeSummary = optIns.ReceiptFeeSummary ? new JRaw(lt.EngineReceipt.FeeSummary) : null,
             NextEpoch = lt.EngineReceipt.NextEpoch != null ? new JRaw(lt.EngineReceipt.NextEpoch) : null,
             StateUpdates = optIns.ReceiptStateChanges ? new JRaw(lt.EngineReceipt.StateUpdates) : null,
-            Events = optIns.ReceiptEvents ? new JRaw(lt.EngineReceipt.Events) : null,
+            Events = optIns.ReceiptEvents && lt.EngineReceipt.Events != null ? new JRaw(lt.EngineReceipt.Events) : null,
         };
 
         return new GatewayModel.CommittedTransactionInfo(
