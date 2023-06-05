@@ -1582,6 +1582,15 @@ components:
       example:
         addresses:
           - "<entity-address>"
+        aggregation_level: "Vault"
+        opt_ins:
+          ancestor_identities: true
+          component_royalty_vault_balance: true
+          package_royalty_vault_balance: true
+          non_fungible_include_nfids: true
+          explicit_metadata:
+            - name
+            - description
     StateEntityDetailsOptIns:
       type: object
       properties:
