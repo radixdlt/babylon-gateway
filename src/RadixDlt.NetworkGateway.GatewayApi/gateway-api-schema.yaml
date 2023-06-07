@@ -1041,6 +1041,10 @@ components:
           $ref: "#/components/schemas/HashHexString"
         fee_paid:
           $ref: "#/components/schemas/BigDecimal"
+        affected_global_entities:
+          type: array
+          items:
+            $ref: "#/components/schemas/Address"
         confirmed_at:
           nullable: true
           type: string
@@ -1471,6 +1475,8 @@ components:
           type: boolean
         receipt_events:
           type: boolean
+        affected_global_entities:
+          type: boolean
     TransactionCommittedDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1509,6 +1515,10 @@ components:
               items:
                 $ref: "#/components/schemas/Address"
             manifest_resources_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+            affected_global_entities_filter:
               type: array
               items:
                 $ref: "#/components/schemas/Address"

@@ -94,6 +94,7 @@ internal class TransactionQuerier : ITransactionQuerier
         var referencedAddresses = request.SearchCriteria.ManifestAccountsDepositedInto
             .Concat(request.SearchCriteria.ManifestAccountsWithdrawnFrom)
             .Concat(request.SearchCriteria.ManifestResources)
+            .Concat(request.SearchCriteria.AffectedGlobalEntities)
             .Concat(request.SearchCriteria.Events.SelectMany(e =>
             {
                 var addresses = new List<EntityAddress>();
@@ -183,6 +184,25 @@ internal class TransactionQuerier : ITransactionQuerier
                     .OfType<ManifestAddressLedgerTransactionMarker>()
                     .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.ResourceInUse && maltm.EntityId == entityId)
                     .Select(maltm => maltm.StateVersion);
+            }
+        }
+
+        if (request.SearchCriteria.AffectedGlobalEntities.Any())
+        {
+            userKindFilterImplicitlyApplied = true;
+
+            foreach (var entityAddress in request.SearchCriteria.AffectedGlobalEntities)
+            {
+                if (!entityAddressToId.TryGetValue(entityAddress, out var entityId))
+                {
+                    return TransactionPageWithoutTotal.Empty;
+                }
+
+                searchQuery = searchQuery
+                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                    .OfType<AffectedGlobalEntityTransactionMarker>()
+                    .Where(agetm => agetm.EntityId == entityId)
+                    .Select(agetm => agetm.StateVersion);
             }
         }
 
@@ -310,9 +330,11 @@ internal class TransactionQuerier : ITransactionQuerier
             .Where(ult => transactionStateVersions.Contains(ult.StateVersion))
             .ToListAsync(token);
 
+        var entityIdToAddressMap = await GetEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToList(), token);
+
         return transactions
             .OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion))
-            .Select(lt => lt.ToGatewayModel(optIns))
+            .Select(lt => lt.ToGatewayModel(optIns, entityIdToAddressMap))
             .ToList();
     }
 
@@ -327,5 +349,18 @@ internal class TransactionQuerier : ITransactionQuerier
             .Where(e => addresses.Contains(e.Address))
             .Select(e => new { e.Id, e.Address })
             .ToDictionaryAsync(e => e.Address.ToString(), e => e.Id, token);
+    }
+
+    private async Task<Dictionary<long, string>> GetEntityAddresses(List<long> entityIds, CancellationToken token = default)
+    {
+        if (!entityIds.Any())
+        {
+            return new Dictionary<long, string>();
+        }
+
+        return await _dbContext.Entities
+            .Where(e => entityIds.Contains(e.Id))
+            .Select(e => new { e.Id, e.Address })
+            .ToDictionaryAsync(e => e.Id, e => e.Address.ToString(), token);
     }
 }

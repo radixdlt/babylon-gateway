@@ -127,3 +127,9 @@ internal class ManifestAddressLedgerTransactionMarker : LedgerTransactionMarker
     [Column("entity_id")]
     public long EntityId { get; set; }
 }
+
+internal class AffectedGlobalEntityTransactionMarker : LedgerTransactionMarker
+{
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+}

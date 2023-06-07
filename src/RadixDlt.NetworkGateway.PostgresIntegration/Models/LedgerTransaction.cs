@@ -111,6 +111,9 @@ internal abstract class LedgerTransaction
     [Column("tip_paid")]
     public TokenAmount? TipPaid { get; set; }
 
+    [Column("affected_global_entities")]
+    public long[] AffectedGlobalEntities { get; set; }
+
     /// <summary>
     /// The round timestamp of a round where vertex V was voted on is derived as the median of the timestamp of the
     /// votes on the vertex's QC to its parent vertex. These votes come from a subset of validators performing

@@ -18,6 +18,8 @@ _Release Date: Unreleased_
 - Added `total_supply`, `total_minted`, `total_burned` to `/state/entity/details` when querying for fungible or non fungible resources.
 - Unwrapped non fungible ids in `/state/non-fungible/ids`, `/state/entity/page/non-fungible-vault/ids` endpoints. They are no longer wrapped in `non_fungible_id` object.
 - Dropped `transaction.referenced_entities` from `/transaction/committed-details` endpoint.
+- Added `affected_global_entities` to `/transaction/committed-details` and `/stream/transactions` endpoints. To include them in response make sure to include `affected_global_entities` optin.
+- New `affected_global_entities_filter` filter in `/stream/transactions`.
 
 ### 0.3.1
 

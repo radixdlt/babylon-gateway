@@ -67,7 +67,9 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
@@ -112,7 +114,7 @@ internal static class GatewayModelExtensions
         };
     }
 
-    public static GatewayModel.CommittedTransactionInfo ToGatewayModel(this LedgerTransaction lt, GatewayModel.TransactionCommittedDetailsOptIns optIns)
+    public static GatewayModel.CommittedTransactionInfo ToGatewayModel(this LedgerTransaction lt, GatewayModel.TransactionCommittedDetailsOptIns optIns, Dictionary<long, string> entityIdToAddressMap)
     {
         string? payloadHashHex = null;
         string? intentHashHex = null;
@@ -144,6 +146,7 @@ internal static class GatewayModelExtensions
             round: lt.RoundInEpoch,
             roundTimestamp: lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
             transactionStatus: lt.EngineReceipt.Status.ToGatewayModel(),
+            affectedGlobalEntities: optIns.AffectedGlobalEntities ? lt.AffectedGlobalEntities.Select(x => entityIdToAddressMap[x]).ToList() : null,
             payloadHashHex: payloadHashHex,
             intentHashHex: intentHashHex,
             feePaid: lt.FeePaid?.ToString(),

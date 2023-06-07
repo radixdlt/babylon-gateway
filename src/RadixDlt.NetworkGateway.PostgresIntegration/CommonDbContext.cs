@@ -197,7 +197,8 @@ internal abstract class CommonDbContext : DbContext
             .HasDiscriminator<LedgerTransactionMarkerType>(DiscriminatorColumnName)
             .HasValue<EventLedgerTransactionMarker>(LedgerTransactionMarkerType.Event)
             .HasValue<OriginLedgerTransactionMarker>(LedgerTransactionMarkerType.Origin)
-            .HasValue<ManifestAddressLedgerTransactionMarker>(LedgerTransactionMarkerType.ManifestAddress);
+            .HasValue<ManifestAddressLedgerTransactionMarker>(LedgerTransactionMarkerType.ManifestAddress)
+            .HasValue<AffectedGlobalEntityTransactionMarker>(LedgerTransactionMarkerType.AffectedGlobalEntity);
 
         modelBuilder.Entity<EventLedgerTransactionMarker>()
             .HasIndex(e => new { e.EventType, e.EntityId, e.StateVersion })
@@ -210,6 +211,10 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<ManifestAddressLedgerTransactionMarker>()
             .HasIndex(e => new { e.OperationType, e.EntityId, e.StateVersion })
             .HasFilter("discriminator = 'manifest_address'");
+
+        modelBuilder.Entity<AffectedGlobalEntityTransactionMarker>()
+            .HasIndex(e => new { e.EntityId, e.StateVersion })
+            .HasFilter("discriminator = 'affected_global_entity'");
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)
