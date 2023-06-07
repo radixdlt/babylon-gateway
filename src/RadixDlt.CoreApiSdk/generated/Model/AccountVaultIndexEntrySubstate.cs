@@ -139,9 +139,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="AccountVaultIndexEntrySubstate" /> class.
         /// </summary>
         /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
-        /// <param name="vault">Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id).</param>
+        /// <param name="vault">vault.</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.AccountVaultIndexEntry).</param>
-        public AccountVaultIndexEntrySubstate(string resourceAddress = default(string), string vault = default(string), SubstateType substateType = SubstateType.AccountVaultIndexEntry) : base(substateType)
+        public AccountVaultIndexEntrySubstate(string resourceAddress = default(string), EntityReference vault = default(EntityReference), SubstateType substateType = SubstateType.AccountVaultIndexEntry) : base(substateType)
         {
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
@@ -160,11 +160,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)
+        /// Gets or Sets Vault
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)</value>
         [DataMember(Name = "vault", EmitDefaultValue = true)]
-        public string Vault { get; set; }
+        public EntityReference Vault { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

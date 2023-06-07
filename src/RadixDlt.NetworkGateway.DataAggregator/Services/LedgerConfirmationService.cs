@@ -207,7 +207,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
 
         foreach (var transaction in transactions)
         {
-            transactionStoreForNode[transaction.StateVersion] = transaction;
+            transactionStoreForNode[transaction.ResultantStateIdentifiers.StateVersion] = transaction;
         }
     }
 
@@ -409,8 +409,8 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
         {
             _quorumAccumulatorCacheByStateVersion.Set(
-                committedTransaction.StateVersion,
-                committedTransaction.GetAccumulatorHashBytes()
+                committedTransaction.ResultantStateIdentifiers.StateVersion,
+                committedTransaction.ResultantStateIdentifiers.GetAccumulatorHashBytes()
             );
         }
     }
@@ -462,7 +462,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         }
 
         var groupedTransactions = transactionsWithTrust
-            .GroupBy(t => t.Transaction!.StateVersion)
+            .GroupBy(t => t.Transaction!.ResultantStateIdentifiers.StateVersion)
             .Select(grouping => new TransactionClaim(
                 grouping.First().Transaction!,
                 grouping.Select(g => g.NodeName).ToList(),
@@ -494,8 +494,8 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
                 TransactionConsistency.AssertChildTransactionConsistent(
                     previousStateVersion: previousStateVersion,
                     previousAccumulator: previousAccumulator,
-                    stateVersion: transaction.StateVersion,
-                    accumulator: transaction.GetAccumulatorHashBytes(),
+                    stateVersion: transaction.ResultantStateIdentifiers.StateVersion,
+                    accumulator: transaction.ResultantStateIdentifiers.GetAccumulatorHashBytes(),
                     payload: transaction.LedgerTransaction.GetPayloadBytes());
 
                 if (transaction.LedgerTransaction is CoreModel.UserLedgerTransaction ult)
@@ -503,8 +503,8 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
                     TransactionConsistency.AssertTransactionHashCorrect(ult.NotarizedTransaction.GetPayloadBytes(), ult.NotarizedTransaction.GetHashBytes());
                 }
 
-                previousStateVersion = transaction.StateVersion;
-                previousAccumulator = transaction.GetAccumulatorHashBytes();
+                previousStateVersion = transaction.ResultantStateIdentifiers.StateVersion;
+                previousAccumulator = transaction.ResultantStateIdentifiers.GetAccumulatorHashBytes();
             }
 
             _observers.ForEach(x => x.QuorumExtensionConsistentGained());

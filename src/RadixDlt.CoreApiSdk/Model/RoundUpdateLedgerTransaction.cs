@@ -62,15 +62,13 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
-using System.Linq;
+using System;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class EpochManagerFieldCurrentValidatorSetSubstate : IParentAddressPointer
+public partial class RoundUpdateLedgerTransaction
 {
-    public IEnumerable<string> GetParentAddresses()
-    {
-        return ValidatorSet.Select(vs => vs.Address);
-    }
+    private byte[] _payloadBytes;
+
+    public byte[] GetPayloadBytes() => _payloadBytes ??= Convert.FromHexString(PayloadHex);
 }

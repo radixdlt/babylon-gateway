@@ -67,9 +67,9 @@ using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class GenericScryptoComponentFieldStateSubstate : IEntityOwner, IParentAddressPointer
+public partial class GenericScryptoComponentFieldStateSubstate : IEntityOwner, IEntityAddressPointer
 {
     public IEnumerable<EntityReference> GetOwnedEntities() => DataStruct.OwnedEntities;
 
-    public IEnumerable<string> GetParentAddresses() => DataStruct.ReferencedEntities.Select(re => re.EntityAddress);
+    public IEnumerable<string> GetEntityAddresses() => DataStruct.ReferencedEntities.Select(re => re.EntityAddress);
 }

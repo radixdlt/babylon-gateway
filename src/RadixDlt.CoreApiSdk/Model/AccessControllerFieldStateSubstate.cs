@@ -67,9 +67,9 @@ using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class AccessControllerFieldStateSubstate : IEntityOwner, IParentAddressPointer
+public partial class AccessControllerFieldStateSubstate : IEntityOwner, IEntityAddressPointer
 {
     public IEnumerable<EntityReference> GetOwnedEntities() => DataStruct.OwnedEntities;
 
-    public IEnumerable<string> GetParentAddresses() => DataStruct.ReferencedEntities.Select(re => re.EntityAddress);
+    public IEnumerable<string> GetEntityAddresses() => DataStruct.ReferencedEntities.Select(re => re.EntityAddress);
 }

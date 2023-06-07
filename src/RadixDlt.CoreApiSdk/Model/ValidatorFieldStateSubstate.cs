@@ -62,13 +62,23 @@
  * permissions under this License.
  */
 
-using System;
+using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class SystemLedgerTransaction
+public partial class ValidatorFieldStateSubstate : IEntityOwner, IEntityAddressPointer
 {
-    private byte[] _payloadBytes;
+    public IEnumerable<EntityReference> GetOwnedEntities()
+    {
+        yield return StakeXrdVault;
+        yield return PendingXrdWithdrawVault;
+        yield return LockedOwnerStakeUnitVault;
+        yield return PendingOwnerStakeUnitUnlockVault;
+    }
 
-    public byte[] GetPayloadBytes() => _payloadBytes ??= Convert.FromHexString(PayloadHex);
+    public IEnumerable<string> GetEntityAddresses()
+    {
+        yield return StakeUnitResourceAddress;
+        yield return UnstakeClaimTokenResourceAddress;
+    }
 }

@@ -66,7 +66,7 @@ namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
 public enum LedgerTransactionType
 {
+    Genesis,
     User,
-    Validator,
-    System,
+    RoundUpdate,
 }

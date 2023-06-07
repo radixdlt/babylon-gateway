@@ -66,7 +66,7 @@ using System;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class ValidatorLedgerTransaction
+public partial class GenesisLedgerTransaction
 {
     private byte[] _payloadBytes;
 

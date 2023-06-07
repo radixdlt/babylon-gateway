@@ -82,7 +82,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230607083356_InitialCreate")]
+    [Migration("20230608080915_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -93,13 +93,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_type", new[] { "global_epoch_manager", "global_fungible_resource", "global_non_fungible_resource", "global_generic_component", "internal_generic_component", "global_account_component", "internal_account_component", "global_package", "internal_key_value_store", "internal_fungible_vault", "internal_non_fungible_vault", "global_clock", "global_validator", "global_access_controller", "global_identity" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_type", new[] { "global_consensus_manager", "global_fungible_resource", "global_non_fungible_resource", "global_generic_component", "internal_generic_component", "global_account_component", "internal_account_component", "global_package", "internal_key_value_store", "internal_fungible_vault", "internal_non_fungible_vault", "global_validator", "global_access_controller", "global_identity" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_event_type", new[] { "withdrawal", "deposit" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_operation_type", new[] { "resource_in_use", "account_deposited_into", "account_withdrawn_from" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_origin_type", new[] { "user", "epoch_change" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_marker_type", new[] { "origin", "event", "manifest_address", "affected_global_entity" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_type", new[] { "user", "validator", "system" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_type", new[] { "genesis", "user", "round_update" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "non_fungible_id_type", new[] { "string", "integer", "bytes", "uuid" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_status", new[] { "submitted_or_known_in_node_mempool", "missing", "rejected_temporarily", "rejected_permanently", "committed_success", "committed_failure" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public_key_type", new[] { "ecdsa_secp256k1", "eddsa_ed25519" });
@@ -897,26 +897,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("validator_public_key_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EpochManagerEntity", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
-
-                    b.Property<string>("BlueprintName")
-                        .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("text")
-                        .HasColumnName("blueprint_name");
-
-                    b.Property<long>("PackageId")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("bigint")
-                        .HasColumnName("package_id");
-
-                    b.ToTable("entities");
-
-                    b.HasDiscriminator().HasValue(EntityType.GlobalEpochManager);
-                });
-
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalAccessControllerEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
@@ -957,7 +937,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue(EntityType.GlobalAccountComponent);
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalClockEntity", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalConsensusManager", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
@@ -974,7 +954,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("entities");
 
-                    b.HasDiscriminator().HasValue(EntityType.GlobalClock);
+                    b.HasDiscriminator().HasValue(EntityType.GlobalConsensusManager);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalFungibleResourceEntity", b =>
@@ -1285,13 +1265,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue(ResourceType.NonFungible);
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.SystemLedgerTransaction", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GenesisLedgerTransaction", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
 
                     b.ToTable("ledger_transactions");
 
-                    b.HasDiscriminator().HasValue(LedgerTransactionType.System);
+                    b.HasDiscriminator().HasValue(LedgerTransactionType.Genesis);
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.RoundUpdateLedgerTransaction", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
+
+                    b.ToTable("ledger_transactions");
+
+                    b.HasDiscriminator().HasValue(LedgerTransactionType.RoundUpdate);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.UserLedgerTransaction", b =>
@@ -1321,15 +1310,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("ledger_transactions");
 
                     b.HasDiscriminator().HasValue(LedgerTransactionType.User);
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorLedgerTransaction", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
-
-                    b.ToTable("ledger_transactions");
-
-                    b.HasDiscriminator().HasValue(LedgerTransactionType.Validator);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AffectedGlobalEntityTransactionMarker", b =>

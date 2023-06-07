@@ -116,8 +116,7 @@ public sealed class StatusController : ControllerBase
                 wellKnownAddresses.ResourcePackage,
                 wellKnownAddresses.AccountPackage,
                 wellKnownAddresses.IdentityPackage,
-                wellKnownAddresses.EpochManagerPackage,
-                wellKnownAddresses.ClockPackage,
+                wellKnownAddresses.ConsensusManagerPackage,
                 wellKnownAddresses.AccessControllerPackage,
                 wellKnownAddresses.TransactionProcessorPackage,
                 wellKnownAddresses.MetadataModulePackage,
@@ -125,8 +124,7 @@ public sealed class StatusController : ControllerBase
                 wellKnownAddresses.AccessRulesPackage,
                 wellKnownAddresses.GenesisHelperPackage,
                 wellKnownAddresses.FaucetPackage,
-                wellKnownAddresses.EpochManager,
-                wellKnownAddresses.Clock,
+                wellKnownAddresses.ConsensusManager,
                 wellKnownAddresses.GenesisHelper,
                 wellKnownAddresses.Faucet
             )

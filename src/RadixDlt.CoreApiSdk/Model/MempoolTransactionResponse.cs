@@ -66,9 +66,9 @@ using System;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class CommittedTransaction
+public partial class MempoolTransactionResponse
 {
-    private byte[] _accumulatorHashBytes;
+    private byte[] _payloadBytes;
 
-    public byte[] GetAccumulatorHashBytes() => _accumulatorHashBytes ??= Convert.FromHexString(AccumulatorHash);
+    public byte[] GetPayloadBytes() => _payloadBytes ??= Convert.FromHexString(PayloadHex);
 }

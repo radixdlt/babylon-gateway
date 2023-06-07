@@ -66,7 +66,7 @@ namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
 public enum EntityType
 {
-    GlobalEpochManager,
+    GlobalConsensusManager,
     GlobalFungibleResource,
     GlobalNonFungibleResource,
     GlobalGenericComponent,
@@ -77,7 +77,6 @@ public enum EntityType
     InternalKeyValueStore,
     InternalFungibleVault,
     InternalNonFungibleVault,
-    GlobalClock,
     GlobalValidator,
     GlobalAccessController,
     GlobalIdentity,

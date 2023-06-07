@@ -63,14 +63,19 @@
  */
 
 using System.Collections.Generic;
-using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class AccountVaultIndexEntrySubstate : IEntityOwner, IParentAddressPointer
+public partial class AccountVaultIndexEntrySubstate : IEntityAddressPointer, IEntityOwner
 {
-    public IEnumerable<EntityReference> GetOwnedEntities() => DataStruct.OwnedEntities;
+    public IEnumerable<string> GetEntityAddresses()
+    {
+        yield return ResourceAddress;
+    }
 
-    public IEnumerable<string> GetParentAddresses() => DataStruct.ReferencedEntities.Select(re => re.EntityAddress);
+    public IEnumerable<EntityReference> GetOwnedEntities()
+    {
+        yield return Vault;
+    }
 }
 

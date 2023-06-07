@@ -67,13 +67,13 @@ using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class TypeInfoModuleFieldTypeInfoSubstate : IParentAddressPointer
+public partial class TypeInfoModuleFieldTypeInfoSubstate : IEntityAddressPointer
 {
-    public IEnumerable<string> GetParentAddresses()
+    public IEnumerable<string> GetEntityAddresses()
     {
         if (Details is ObjectTypeInfoDetails otid)
         {
-            return otid.GetParentAddresses();
+            return otid.GetEntityAddresses();
         }
 
         return Enumerable.Empty<string>();

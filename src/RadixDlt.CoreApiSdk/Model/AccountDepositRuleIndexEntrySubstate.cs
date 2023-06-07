@@ -66,17 +66,10 @@ using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class ValidatorFieldStateSubstate : IEntityOwner, IParentAddressPointer
+public partial class AccountDepositRuleIndexEntrySubstate : IEntityAddressPointer
 {
-    public IEnumerable<EntityReference> GetOwnedEntities()
+    public IEnumerable<string> GetEntityAddresses()
     {
-        yield return StakeVault;
-        yield return UnstakeVault;
-    }
-
-    public IEnumerable<string> GetParentAddresses()
-    {
-        yield return LiquidStakeUnitResourceAddress;
-        yield return UnstakeClaimTokenResourceAddress;
+        yield return ResourceAddress;
     }
 }

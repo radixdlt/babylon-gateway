@@ -245,7 +245,7 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
 
         if (result.Succeeded)
         {
-            return new PendingTransactionData(hashes, _clock.UtcNow, result.SuccessResponse.NotarizedTransaction.GetPayloadBytes());
+            return new PendingTransactionData(hashes, _clock.UtcNow, result.SuccessResponse.GetPayloadBytes());
         }
 
         if (result.FailureResponse.OriginalApiException.ErrorCode == (int)HttpStatusCode.NotFound)
