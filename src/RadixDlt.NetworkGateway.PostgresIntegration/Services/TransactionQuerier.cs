@@ -189,8 +189,6 @@ internal class TransactionQuerier : ITransactionQuerier
 
         if (request.SearchCriteria.AffectedGlobalEntities.Any())
         {
-            userKindFilterImplicitlyApplied = true;
-
             foreach (var entityAddress in request.SearchCriteria.AffectedGlobalEntities)
             {
                 if (!entityAddressToId.TryGetValue(entityAddress, out var entityId))

@@ -194,7 +194,7 @@ internal class WriteHelper
             await writer.WriteAsync(lt.IsEndOfEpoch, NpgsqlDbType.Boolean, token);
             await writer.WriteNullableAsync(lt.FeePaid?.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
             await writer.WriteNullableAsync(lt.TipPaid?.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-            await writer.WriteNullableAsync(lt.AffectedGlobalEntities, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(lt.AffectedGlobalEntities, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.RoundTimestamp, NpgsqlDbType.TimestampTz, token);
             await writer.WriteAsync(lt.CreatedTimestamp, NpgsqlDbType.TimestampTz, token);
             await writer.WriteAsync(lt.NormalizedRoundTimestamp, NpgsqlDbType.TimestampTz, token);
