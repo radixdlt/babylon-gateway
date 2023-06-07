@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="AccessRulesModuleFieldAccessRulesSubstateAllOf" /> class.
         /// </summary>
         /// <param name="accessRules">accessRules (required).</param>
-        /// <param name="childBlueprintRules">childBlueprintRules (required).</param>
-        public AccessRulesModuleFieldAccessRulesSubstateAllOf(AccessRules accessRules = default(AccessRules), List<BlueprintAccessRules> childBlueprintRules = default(List<BlueprintAccessRules>))
+        /// <param name="innerBlueprintAccessRules">innerBlueprintAccessRules (required).</param>
+        public AccessRulesModuleFieldAccessRulesSubstateAllOf(NodeAuthorityRules accessRules = default(NodeAuthorityRules), List<BlueprintAccessRules> innerBlueprintAccessRules = default(List<BlueprintAccessRules>))
         {
             // to ensure "accessRules" is required (not null)
             if (accessRules == null)
@@ -113,25 +113,25 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("accessRules is a required property for AccessRulesModuleFieldAccessRulesSubstateAllOf and cannot be null");
             }
             this.AccessRules = accessRules;
-            // to ensure "childBlueprintRules" is required (not null)
-            if (childBlueprintRules == null)
+            // to ensure "innerBlueprintAccessRules" is required (not null)
+            if (innerBlueprintAccessRules == null)
             {
-                throw new ArgumentNullException("childBlueprintRules is a required property for AccessRulesModuleFieldAccessRulesSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("innerBlueprintAccessRules is a required property for AccessRulesModuleFieldAccessRulesSubstateAllOf and cannot be null");
             }
-            this.ChildBlueprintRules = childBlueprintRules;
+            this.InnerBlueprintAccessRules = innerBlueprintAccessRules;
         }
 
         /// <summary>
         /// Gets or Sets AccessRules
         /// </summary>
         [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public AccessRules AccessRules { get; set; }
+        public NodeAuthorityRules AccessRules { get; set; }
 
         /// <summary>
-        /// Gets or Sets ChildBlueprintRules
+        /// Gets or Sets InnerBlueprintAccessRules
         /// </summary>
-        [DataMember(Name = "child_blueprint_rules", IsRequired = true, EmitDefaultValue = true)]
-        public List<BlueprintAccessRules> ChildBlueprintRules { get; set; }
+        [DataMember(Name = "inner_blueprint_access_rules", IsRequired = true, EmitDefaultValue = true)]
+        public List<BlueprintAccessRules> InnerBlueprintAccessRules { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,7 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccessRulesModuleFieldAccessRulesSubstateAllOf {\n");
             sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
-            sb.Append("  ChildBlueprintRules: ").Append(ChildBlueprintRules).Append("\n");
+            sb.Append("  InnerBlueprintAccessRules: ").Append(InnerBlueprintAccessRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -184,10 +184,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.AccessRules.Equals(input.AccessRules))
                 ) && 
                 (
-                    this.ChildBlueprintRules == input.ChildBlueprintRules ||
-                    this.ChildBlueprintRules != null &&
-                    input.ChildBlueprintRules != null &&
-                    this.ChildBlueprintRules.SequenceEqual(input.ChildBlueprintRules)
+                    this.InnerBlueprintAccessRules == input.InnerBlueprintAccessRules ||
+                    this.InnerBlueprintAccessRules != null &&
+                    input.InnerBlueprintAccessRules != null &&
+                    this.InnerBlueprintAccessRules.SequenceEqual(input.InnerBlueprintAccessRules)
                 );
         }
 
@@ -204,9 +204,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
                 }
-                if (this.ChildBlueprintRules != null)
+                if (this.InnerBlueprintAccessRules != null)
                 {
-                    hashCode = (hashCode * 59) + this.ChildBlueprintRules.GetHashCode();
+                    hashCode = (hashCode * 59) + this.InnerBlueprintAccessRules.GetHashCode();
                 }
                 return hashCode;
             }

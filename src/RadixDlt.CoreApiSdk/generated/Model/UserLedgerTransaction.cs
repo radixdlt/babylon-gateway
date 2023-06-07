@@ -95,9 +95,9 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [DataContract(Name = "UserLedgerTransaction")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(SystemLedgerTransaction), "System")]
+    [JsonSubtypes.KnownSubType(typeof(GenesisLedgerTransaction), "Genesis")]
+    [JsonSubtypes.KnownSubType(typeof(RoundUpdateLedgerTransaction), "RoundUpdate")]
     [JsonSubtypes.KnownSubType(typeof(UserLedgerTransaction), "User")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorLedgerTransaction), "Validator")]
     public partial class UserLedgerTransaction : LedgerTransaction, IEquatable<UserLedgerTransaction>
     {
         /// <summary>

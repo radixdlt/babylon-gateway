@@ -99,7 +99,6 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ParsedNotarizedTransaction), "NotarizedTransaction")]
     [JsonSubtypes.KnownSubType(typeof(ParsedSignedTransactionIntent), "SignedTransactionIntent")]
     [JsonSubtypes.KnownSubType(typeof(ParsedTransactionIntent), "TransactionIntent")]
-    [JsonSubtypes.KnownSubType(typeof(ParsedTransactionManifest), "TransactionManifest")]
     public partial class ParsedTransactionIntent : ParsedTransaction, IEquatable<ParsedTransactionIntent>
     {
         /// <summary>

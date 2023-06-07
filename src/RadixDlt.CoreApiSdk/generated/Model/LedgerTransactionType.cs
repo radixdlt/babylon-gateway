@@ -97,22 +97,22 @@ namespace RadixDlt.CoreApiSdk.Model
     public enum LedgerTransactionType
     {
         /// <summary>
+        /// Enum Genesis for value: Genesis
+        /// </summary>
+        [EnumMember(Value = "Genesis")]
+        Genesis = 1,
+
+        /// <summary>
         /// Enum User for value: User
         /// </summary>
         [EnumMember(Value = "User")]
-        User = 1,
+        User = 2,
 
         /// <summary>
-        /// Enum Validator for value: Validator
+        /// Enum RoundUpdate for value: RoundUpdate
         /// </summary>
-        [EnumMember(Value = "Validator")]
-        Validator = 2,
-
-        /// <summary>
-        /// Enum System for value: System
-        /// </summary>
-        [EnumMember(Value = "System")]
-        System = 3
+        [EnumMember(Value = "RoundUpdate")]
+        RoundUpdate = 3
 
     }
 

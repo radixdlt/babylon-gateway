@@ -102,10 +102,10 @@ namespace RadixDlt.CoreApiSdk.Model
         GlobalPackage = 1,
 
         /// <summary>
-        /// Enum GlobalEpochManager for value: GlobalEpochManager
+        /// Enum GlobalConsensusManager for value: GlobalConsensusManager
         /// </summary>
-        [EnumMember(Value = "GlobalEpochManager")]
-        GlobalEpochManager = 2,
+        [EnumMember(Value = "GlobalConsensusManager")]
+        GlobalConsensusManager = 2,
 
         /// <summary>
         /// Enum GlobalValidator for value: GlobalValidator
@@ -114,100 +114,94 @@ namespace RadixDlt.CoreApiSdk.Model
         GlobalValidator = 3,
 
         /// <summary>
-        /// Enum GlobalClock for value: GlobalClock
-        /// </summary>
-        [EnumMember(Value = "GlobalClock")]
-        GlobalClock = 4,
-
-        /// <summary>
         /// Enum GlobalGenericComponent for value: GlobalGenericComponent
         /// </summary>
         [EnumMember(Value = "GlobalGenericComponent")]
-        GlobalGenericComponent = 5,
+        GlobalGenericComponent = 4,
 
         /// <summary>
         /// Enum GlobalAccount for value: GlobalAccount
         /// </summary>
         [EnumMember(Value = "GlobalAccount")]
-        GlobalAccount = 6,
+        GlobalAccount = 5,
 
         /// <summary>
         /// Enum GlobalIdentity for value: GlobalIdentity
         /// </summary>
         [EnumMember(Value = "GlobalIdentity")]
-        GlobalIdentity = 7,
+        GlobalIdentity = 6,
 
         /// <summary>
         /// Enum GlobalAccessController for value: GlobalAccessController
         /// </summary>
         [EnumMember(Value = "GlobalAccessController")]
-        GlobalAccessController = 8,
+        GlobalAccessController = 7,
 
         /// <summary>
         /// Enum GlobalVirtualSecp256k1Account for value: GlobalVirtualSecp256k1Account
         /// </summary>
         [EnumMember(Value = "GlobalVirtualSecp256k1Account")]
-        GlobalVirtualSecp256k1Account = 9,
+        GlobalVirtualSecp256k1Account = 8,
 
         /// <summary>
         /// Enum GlobalVirtualSecp256k1Identity for value: GlobalVirtualSecp256k1Identity
         /// </summary>
         [EnumMember(Value = "GlobalVirtualSecp256k1Identity")]
-        GlobalVirtualSecp256k1Identity = 10,
+        GlobalVirtualSecp256k1Identity = 9,
 
         /// <summary>
         /// Enum GlobalVirtualEd25519Account for value: GlobalVirtualEd25519Account
         /// </summary>
         [EnumMember(Value = "GlobalVirtualEd25519Account")]
-        GlobalVirtualEd25519Account = 11,
+        GlobalVirtualEd25519Account = 10,
 
         /// <summary>
         /// Enum GlobalVirtualEd25519Identity for value: GlobalVirtualEd25519Identity
         /// </summary>
         [EnumMember(Value = "GlobalVirtualEd25519Identity")]
-        GlobalVirtualEd25519Identity = 12,
+        GlobalVirtualEd25519Identity = 11,
 
         /// <summary>
         /// Enum GlobalFungibleResource for value: GlobalFungibleResource
         /// </summary>
         [EnumMember(Value = "GlobalFungibleResource")]
-        GlobalFungibleResource = 13,
+        GlobalFungibleResource = 12,
 
         /// <summary>
         /// Enum InternalFungibleVault for value: InternalFungibleVault
         /// </summary>
         [EnumMember(Value = "InternalFungibleVault")]
-        InternalFungibleVault = 14,
+        InternalFungibleVault = 13,
 
         /// <summary>
         /// Enum GlobalNonFungibleResource for value: GlobalNonFungibleResource
         /// </summary>
         [EnumMember(Value = "GlobalNonFungibleResource")]
-        GlobalNonFungibleResource = 15,
+        GlobalNonFungibleResource = 14,
 
         /// <summary>
         /// Enum InternalNonFungibleVault for value: InternalNonFungibleVault
         /// </summary>
         [EnumMember(Value = "InternalNonFungibleVault")]
-        InternalNonFungibleVault = 16,
+        InternalNonFungibleVault = 15,
 
         /// <summary>
         /// Enum InternalGenericComponent for value: InternalGenericComponent
         /// </summary>
         [EnumMember(Value = "InternalGenericComponent")]
-        InternalGenericComponent = 17,
+        InternalGenericComponent = 16,
 
         /// <summary>
         /// Enum InternalAccount for value: InternalAccount
         /// </summary>
         [EnumMember(Value = "InternalAccount")]
-        InternalAccount = 18,
+        InternalAccount = 17,
 
         /// <summary>
         /// Enum InternalKeyValueStore for value: InternalKeyValueStore
         /// </summary>
         [EnumMember(Value = "InternalKeyValueStore")]
-        InternalKeyValueStore = 19
+        InternalKeyValueStore = 18
 
     }
 

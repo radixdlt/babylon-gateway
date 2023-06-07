@@ -105,7 +105,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="network">The logical name of the network (required).</param>
         /// <param name="notarizedTransactionHex">A hex-encoded, compiled notarized transaction. (required).</param>
-        public TransactionSubmitRequest(string network = default(string), string notarizedTransactionHex = default(string))
+        /// <param name="forceRecalculate">If true, the transaction validity is freshly recalculated without using any caches (defaults false).</param>
+        public TransactionSubmitRequest(string network = default(string), string notarizedTransactionHex = default(string), bool forceRecalculate = default(bool))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -119,6 +120,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("notarizedTransactionHex is a required property for TransactionSubmitRequest and cannot be null");
             }
             this.NotarizedTransactionHex = notarizedTransactionHex;
+            this.ForceRecalculate = forceRecalculate;
         }
 
         /// <summary>
@@ -136,6 +138,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public string NotarizedTransactionHex { get; set; }
 
         /// <summary>
+        /// If true, the transaction validity is freshly recalculated without using any caches (defaults false)
+        /// </summary>
+        /// <value>If true, the transaction validity is freshly recalculated without using any caches (defaults false)</value>
+        [DataMember(Name = "force_recalculate", EmitDefaultValue = true)]
+        public bool ForceRecalculate { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -145,6 +154,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class TransactionSubmitRequest {\n");
             sb.Append("  Network: ").Append(Network).Append("\n");
             sb.Append("  NotarizedTransactionHex: ").Append(NotarizedTransactionHex).Append("\n");
+            sb.Append("  ForceRecalculate: ").Append(ForceRecalculate).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -189,6 +199,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.NotarizedTransactionHex == input.NotarizedTransactionHex ||
                     (this.NotarizedTransactionHex != null &&
                     this.NotarizedTransactionHex.Equals(input.NotarizedTransactionHex))
+                ) && 
+                (
+                    this.ForceRecalculate == input.ForceRecalculate ||
+                    this.ForceRecalculate.Equals(input.ForceRecalculate)
                 );
         }
 
@@ -209,6 +223,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.NotarizedTransactionHex.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.ForceRecalculate.GetHashCode();
                 return hashCode;
             }
         }

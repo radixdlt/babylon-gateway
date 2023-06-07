@@ -103,22 +103,23 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="MempoolTransactionResponse" /> class.
         /// </summary>
-        /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
-        public MempoolTransactionResponse(NotarizedTransaction notarizedTransaction = default(NotarizedTransaction))
+        /// <param name="payloadHex">The hex-encoded full notarized transaction payload. (required).</param>
+        public MempoolTransactionResponse(string payloadHex = default(string))
         {
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
+            // to ensure "payloadHex" is required (not null)
+            if (payloadHex == null)
             {
-                throw new ArgumentNullException("notarizedTransaction is a required property for MempoolTransactionResponse and cannot be null");
+                throw new ArgumentNullException("payloadHex is a required property for MempoolTransactionResponse and cannot be null");
             }
-            this.NotarizedTransaction = notarizedTransaction;
+            this.PayloadHex = payloadHex;
         }
 
         /// <summary>
-        /// Gets or Sets NotarizedTransaction
+        /// The hex-encoded full notarized transaction payload.
         /// </summary>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public NotarizedTransaction NotarizedTransaction { get; set; }
+        /// <value>The hex-encoded full notarized transaction payload.</value>
+        [DataMember(Name = "payload_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string PayloadHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +129,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class MempoolTransactionResponse {\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
+            sb.Append("  PayloadHex: ").Append(PayloadHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,9 +166,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.PayloadHex == input.PayloadHex ||
+                    (this.PayloadHex != null &&
+                    this.PayloadHex.Equals(input.PayloadHex))
                 );
         }
 
@@ -180,9 +181,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.NotarizedTransaction != null)
+                if (this.PayloadHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PayloadHex.GetHashCode();
                 }
                 return hashCode;
             }

@@ -96,38 +96,6 @@ namespace RadixDlt.CoreApiSdk.Model
     public partial class FunctionSchema : IEquatable<FunctionSchema>
     {
         /// <summary>
-        /// Defines Receiver
-        /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum ReceiverEnum
-        {
-            /// <summary>
-            /// Enum Function for value: Function
-            /// </summary>
-            [EnumMember(Value = "Function")]
-            Function = 1,
-
-            /// <summary>
-            /// Enum ComponentReadOnly for value: ComponentReadOnly
-            /// </summary>
-            [EnumMember(Value = "ComponentReadOnly")]
-            ComponentReadOnly = 2,
-
-            /// <summary>
-            /// Enum ComponentMutable for value: ComponentMutable
-            /// </summary>
-            [EnumMember(Value = "ComponentMutable")]
-            ComponentMutable = 3
-
-        }
-
-
-        /// <summary>
-        /// Gets or Sets Receiver
-        /// </summary>
-        [DataMember(Name = "receiver", IsRequired = true, EmitDefaultValue = true)]
-        public ReceiverEnum Receiver { get; set; }
-        /// <summary>
         /// Initializes a new instance of the <see cref="FunctionSchema" /> class.
         /// </summary>
         [JsonConstructorAttribute]
@@ -135,13 +103,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="FunctionSchema" /> class.
         /// </summary>
-        /// <param name="receiver">receiver (required).</param>
+        /// <param name="receiverInfo">receiverInfo.</param>
         /// <param name="input">input (required).</param>
         /// <param name="output">output (required).</param>
         /// <param name="exportName">exportName (required).</param>
-        public FunctionSchema(ReceiverEnum receiver = default(ReceiverEnum), LocalTypeIndex input = default(LocalTypeIndex), LocalTypeIndex output = default(LocalTypeIndex), string exportName = default(string))
+        public FunctionSchema(ReceiverInfo receiverInfo = default(ReceiverInfo), LocalTypeIndex input = default(LocalTypeIndex), LocalTypeIndex output = default(LocalTypeIndex), string exportName = default(string))
         {
-            this.Receiver = receiver;
             // to ensure "input" is required (not null)
             if (input == null)
             {
@@ -160,7 +127,14 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("exportName is a required property for FunctionSchema and cannot be null");
             }
             this.ExportName = exportName;
+            this.ReceiverInfo = receiverInfo;
         }
+
+        /// <summary>
+        /// Gets or Sets ReceiverInfo
+        /// </summary>
+        [DataMember(Name = "receiver_info", EmitDefaultValue = true)]
+        public ReceiverInfo ReceiverInfo { get; set; }
 
         /// <summary>
         /// Gets or Sets Input
@@ -188,7 +162,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class FunctionSchema {\n");
-            sb.Append("  Receiver: ").Append(Receiver).Append("\n");
+            sb.Append("  ReceiverInfo: ").Append(ReceiverInfo).Append("\n");
             sb.Append("  Input: ").Append(Input).Append("\n");
             sb.Append("  Output: ").Append(Output).Append("\n");
             sb.Append("  ExportName: ").Append(ExportName).Append("\n");
@@ -228,8 +202,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Receiver == input.Receiver ||
-                    this.Receiver.Equals(input.Receiver)
+                    this.ReceiverInfo == input.ReceiverInfo ||
+                    (this.ReceiverInfo != null &&
+                    this.ReceiverInfo.Equals(input.ReceiverInfo))
                 ) && 
                 (
                     this.Input == input.Input ||
@@ -257,7 +232,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Receiver.GetHashCode();
+                if (this.ReceiverInfo != null)
+                {
+                    hashCode = (hashCode * 59) + this.ReceiverInfo.GetHashCode();
+                }
                 if (this.Input != null)
                 {
                     hashCode = (hashCode * 59) + this.Input.GetHashCode();

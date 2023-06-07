@@ -115,16 +115,10 @@ namespace RadixDlt.CoreApiSdk.Model
         TransactionIntent = 3,
 
         /// <summary>
-        /// Enum TransactionManifest for value: TransactionManifest
-        /// </summary>
-        [EnumMember(Value = "TransactionManifest")]
-        TransactionManifest = 4,
-
-        /// <summary>
         /// Enum LedgerTransaction for value: LedgerTransaction
         /// </summary>
         [EnumMember(Value = "LedgerTransaction")]
-        LedgerTransaction = 5
+        LedgerTransaction = 4
 
     }
 

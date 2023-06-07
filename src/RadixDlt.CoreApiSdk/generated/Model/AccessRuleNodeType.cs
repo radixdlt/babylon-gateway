@@ -111,7 +111,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum AllOf for value: AllOf
         /// </summary>
         [EnumMember(Value = "AllOf")]
-        AllOf = 3
+        AllOf = 3,
+
+        /// <summary>
+        /// Enum Authority for value: Authority
+        /// </summary>
+        [EnumMember(Value = "Authority")]
+        Authority = 4
 
     }
 
