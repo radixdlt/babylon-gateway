@@ -91,6 +91,8 @@ internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Typ
 
     public long DatabaseGlobalAncestorId => GetDatabaseEntityInternal().GlobalAncestorId ?? throw new InvalidOperationException("GlobalAncestorId not set, probably global entity or incorrectly configured one.");
 
+    public long AffectedGlobalEntityId => IsGlobal ? DatabaseId : DatabaseGlobalAncestorId;
+
     public bool CanBeOwnerAncestor => Type is not CoreModel.EntityType.InternalKeyValueStore;
 
     [MemberNotNullWhen(true, nameof(ImmediateParentReference))]

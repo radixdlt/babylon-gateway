@@ -69,4 +69,5 @@ public enum LedgerTransactionMarkerType
     Origin,
     Event,
     ManifestAddress,
+    AffectedGlobalEntity,
 }

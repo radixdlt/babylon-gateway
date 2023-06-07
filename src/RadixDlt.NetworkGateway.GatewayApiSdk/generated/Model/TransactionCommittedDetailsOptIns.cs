@@ -102,12 +102,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="receiptStateChanges">receiptStateChanges.</param>
         /// <param name="receiptFeeSummary">receiptFeeSummary.</param>
         /// <param name="receiptEvents">receiptEvents.</param>
-        public TransactionCommittedDetailsOptIns(bool rawHex = default(bool), bool receiptStateChanges = default(bool), bool receiptFeeSummary = default(bool), bool receiptEvents = default(bool))
+        /// <param name="affectedGlobalEntities">affectedGlobalEntities.</param>
+        public TransactionCommittedDetailsOptIns(bool rawHex = default(bool), bool receiptStateChanges = default(bool), bool receiptFeeSummary = default(bool), bool receiptEvents = default(bool), bool affectedGlobalEntities = default(bool))
         {
             this.RawHex = rawHex;
             this.ReceiptStateChanges = receiptStateChanges;
             this.ReceiptFeeSummary = receiptFeeSummary;
             this.ReceiptEvents = receiptEvents;
+            this.AffectedGlobalEntities = affectedGlobalEntities;
         }
 
         /// <summary>
@@ -135,6 +137,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public bool ReceiptEvents { get; set; }
 
         /// <summary>
+        /// Gets or Sets AffectedGlobalEntities
+        /// </summary>
+        [DataMember(Name = "affected_global_entities", EmitDefaultValue = true)]
+        public bool AffectedGlobalEntities { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -146,6 +154,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  ReceiptStateChanges: ").Append(ReceiptStateChanges).Append("\n");
             sb.Append("  ReceiptFeeSummary: ").Append(ReceiptFeeSummary).Append("\n");
             sb.Append("  ReceiptEvents: ").Append(ReceiptEvents).Append("\n");
+            sb.Append("  AffectedGlobalEntities: ").Append(AffectedGlobalEntities).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -196,6 +205,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 (
                     this.ReceiptEvents == input.ReceiptEvents ||
                     this.ReceiptEvents.Equals(input.ReceiptEvents)
+                ) && 
+                (
+                    this.AffectedGlobalEntities == input.AffectedGlobalEntities ||
+                    this.AffectedGlobalEntities.Equals(input.AffectedGlobalEntities)
                 );
         }
 
@@ -212,6 +225,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 hashCode = (hashCode * 59) + this.ReceiptStateChanges.GetHashCode();
                 hashCode = (hashCode * 59) + this.ReceiptFeeSummary.GetHashCode();
                 hashCode = (hashCode * 59) + this.ReceiptEvents.GetHashCode();
+                hashCode = (hashCode * 59) + this.AffectedGlobalEntities.GetHashCode();
                 return hashCode;
             }
         }

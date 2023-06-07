@@ -87,7 +87,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_event_type", "withdrawal,deposit")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_operation_type", "resource_in_use,account_deposited_into,account_withdrawn_from")
                 .Annotation("Npgsql:Enum:ledger_transaction_marker_origin_type", "user,epoch_change")
-                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address")
+                .Annotation("Npgsql:Enum:ledger_transaction_marker_type", "origin,event,manifest_address,affected_global_entity")
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "user,validator,system")
                 .Annotation("Npgsql:Enum:non_fungible_id_type", "string,integer,bytes,uuid")
@@ -271,8 +271,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     state_version = table.Column<long>(type: "bigint", nullable: false),
                     discriminator = table.Column<LedgerTransactionMarkerType>(type: "ledger_transaction_marker_type", nullable: false),
-                    event_type = table.Column<LedgerTransactionMarkerEventType>(type: "ledger_transaction_marker_event_type", nullable: true),
                     entity_id = table.Column<long>(type: "bigint", nullable: true),
+                    event_type = table.Column<LedgerTransactionMarkerEventType>(type: "ledger_transaction_marker_event_type", nullable: true),
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     quantity = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
                     operation_type = table.Column<LedgerTransactionMarkerOperationType>(type: "ledger_transaction_marker_operation_type", nullable: true),
@@ -297,6 +297,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     is_end_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
                     fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
                     tip_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
+                    affected_global_entities = table.Column<long[]>(type: "bigint[]", nullable: false),
                     round_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     created_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     normalized_round_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -513,6 +514,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_entity_vault_history_owner_entity_id_vault_entity_id_from_s~",
                 table: "entity_vault_history",
                 columns: new[] { "owner_entity_id", "vault_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_markers_entity_id_state_version",
+                table: "ledger_transaction_markers",
+                columns: new[] { "entity_id", "state_version" },
+                filter: "discriminator = 'affected_global_entity'");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transaction_markers_event_type_entity_id_state_versi~",

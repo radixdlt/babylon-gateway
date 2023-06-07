@@ -460,7 +460,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
                     {
                         var sid = deletedSubstate.SubstateId;
-
                         referencedEntities.GetOrAdd((EntityAddress)sid.EntityAddress, ea => new ReferencedEntity(ea, sid.EntityType, stateVersion));
                     }
 
@@ -736,12 +735,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     var currentEpoch = ledgerExtension.LatestTransactionSummary.Epoch;
                     var stateVersion = committedTransaction.StateVersion;
                     var stateUpdates = committedTransaction.Receipt.StateUpdates;
+                    var affectedGlobalEntities = new HashSet<long>();
 
                     foreach (var substate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
                     {
                         var substateId = substate.SubstateId;
                         var substateData = substate.SubstateData;
                         var referencedEntity = referencedEntities.Get((EntityAddress)substateId.EntityAddress);
+                        affectedGlobalEntities.Add(referencedEntity.AffectedGlobalEntityId);
 
                         if (substateData is CoreModel.MetadataModuleEntrySubstate metadata)
                         {
@@ -883,6 +884,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         var substateId = deletedSubstate.SubstateId;
                         var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)substateId.EntityAddress, ea => new ReferencedEntity(ea, substateId.EntityType, stateVersion));
+                        affectedGlobalEntities.Add(referencedEntity.AffectedGlobalEntityId);
 
                         if (substateId.SubstateType == CoreModel.SubstateType.NonFungibleVaultContentsIndexEntry)
                         {
@@ -899,6 +901,16 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 stateVersion));
                         }
                     }
+
+                    var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == committedTransaction.StateVersion);
+                    transaction.AffectedGlobalEntities = affectedGlobalEntities.ToArray();
+
+                    ledgerTransactionMarkersToAdd.AddRange(affectedGlobalEntities.Select(affectedEntity => new AffectedGlobalEntityTransactionMarker
+                    {
+                        Id = sequences.LedgerTransactionMarkerSequence++,
+                        EntityId = affectedEntity,
+                        StateVersion = committedTransaction.StateVersion,
+                    }));
 
                     var eventTypeIdentifiers = _networkConfigurationProvider.GetEventTypeIdentifiers();
                     // TODO we'd love to see schemed JSON payload here and/or support for SBOR to schemed JSON in RET but this is not available yet; consider this entire section heavy WIP

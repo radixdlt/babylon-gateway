@@ -187,6 +187,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
             Kind = kindFilter,
         };
 
+        request.AffectedGlobalEntitiesFilter?.ForEach(a => searchCriteria.AffectedGlobalEntities.Add((EntityAddress)a));
         request.ManifestAccountsDepositedIntoFilter?.ForEach(a => searchCriteria.ManifestAccountsDepositedInto.Add((EntityAddress)a));
         request.ManifestAccountsWithdrawnFromFilter?.ForEach(a => searchCriteria.ManifestAccountsWithdrawnFrom.Add((EntityAddress)a));
         request.ManifestResourcesFilter?.ForEach(a => searchCriteria.ManifestResources.Add((EntityAddress)a));
