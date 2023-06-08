@@ -86,14 +86,12 @@ internal class TransactionPreviewRequestValidator : AbstractValidator<GatewayMod
         RuleFor(x => x.NotaryPublicKey)
             .SetInheritanceValidator(PublicKeyValidator.Configure);
 
-        RuleFor(x => x.CostUnitLimit)
-            .InclusiveBetween(0, 4294967295);
-
         RuleFor(x => x.TipPercentage)
             .InclusiveBetween(0, 255);
 
         RuleFor(x => x.Nonce)
-            .NotEmpty();
+            .NotEmpty()
+            .GreaterThanOrEqualTo(0);
 
         RuleFor(x => x.SignerPublicKeys)
             .NotNull();

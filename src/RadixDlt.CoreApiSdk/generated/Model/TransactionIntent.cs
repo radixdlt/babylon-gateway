@@ -103,10 +103,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionIntent" /> class.
         /// </summary>
-        /// <param name="hash">The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;Blake2b-256(compiled_intent)&#x60; (required).</param>
+        /// <param name="hash">The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent.  (required).</param>
         /// <param name="header">header (required).</param>
-        /// <param name="manifest">manifest (required).</param>
-        public TransactionIntent(string hash = default(string), TransactionHeader header = default(TransactionHeader), TransactionManifest manifest = default(TransactionManifest))
+        /// <param name="instructions">The decompiled transaction manifest instructions. Only returned if enabled in TransactionFormatOptions on your request..</param>
+        /// <param name="blobsHex">A map of the hex-encoded blob hash, to hex-encoded blob content. Only returned if enabled in TransactionFormatOptions on your request..</param>
+        public TransactionIntent(string hash = default(string), TransactionHeader header = default(TransactionHeader), string instructions = default(string), Dictionary<string, string> blobsHex = default(Dictionary<string, string>))
         {
             // to ensure "hash" is required (not null)
             if (hash == null)
@@ -120,18 +121,14 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("header is a required property for TransactionIntent and cannot be null");
             }
             this.Header = header;
-            // to ensure "manifest" is required (not null)
-            if (manifest == null)
-            {
-                throw new ArgumentNullException("manifest is a required property for TransactionIntent and cannot be null");
-            }
-            this.Manifest = manifest;
+            this.Instructions = instructions;
+            this.BlobsHex = blobsHex;
         }
 
         /// <summary>
-        /// The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;Blake2b-256(compiled_intent)&#x60;
+        /// The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. 
         /// </summary>
-        /// <value>The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;Blake2b-256(compiled_intent)&#x60;</value>
+        /// <value>The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. </value>
         [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
         public string Hash { get; set; }
 
@@ -142,10 +139,18 @@ namespace RadixDlt.CoreApiSdk.Model
         public TransactionHeader Header { get; set; }
 
         /// <summary>
-        /// Gets or Sets Manifest
+        /// The decompiled transaction manifest instructions. Only returned if enabled in TransactionFormatOptions on your request.
         /// </summary>
-        [DataMember(Name = "manifest", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionManifest Manifest { get; set; }
+        /// <value>The decompiled transaction manifest instructions. Only returned if enabled in TransactionFormatOptions on your request.</value>
+        [DataMember(Name = "instructions", EmitDefaultValue = true)]
+        public string Instructions { get; set; }
+
+        /// <summary>
+        /// A map of the hex-encoded blob hash, to hex-encoded blob content. Only returned if enabled in TransactionFormatOptions on your request.
+        /// </summary>
+        /// <value>A map of the hex-encoded blob hash, to hex-encoded blob content. Only returned if enabled in TransactionFormatOptions on your request.</value>
+        [DataMember(Name = "blobs_hex", EmitDefaultValue = true)]
+        public Dictionary<string, string> BlobsHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,7 +162,8 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class TransactionIntent {\n");
             sb.Append("  Hash: ").Append(Hash).Append("\n");
             sb.Append("  Header: ").Append(Header).Append("\n");
-            sb.Append("  Manifest: ").Append(Manifest).Append("\n");
+            sb.Append("  Instructions: ").Append(Instructions).Append("\n");
+            sb.Append("  BlobsHex: ").Append(BlobsHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -204,9 +210,15 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Header.Equals(input.Header))
                 ) && 
                 (
-                    this.Manifest == input.Manifest ||
-                    (this.Manifest != null &&
-                    this.Manifest.Equals(input.Manifest))
+                    this.Instructions == input.Instructions ||
+                    (this.Instructions != null &&
+                    this.Instructions.Equals(input.Instructions))
+                ) && 
+                (
+                    this.BlobsHex == input.BlobsHex ||
+                    this.BlobsHex != null &&
+                    input.BlobsHex != null &&
+                    this.BlobsHex.SequenceEqual(input.BlobsHex)
                 );
         }
 
@@ -227,9 +239,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Header.GetHashCode();
                 }
-                if (this.Manifest != null)
+                if (this.Instructions != null)
                 {
-                    hashCode = (hashCode * 59) + this.Manifest.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Instructions.GetHashCode();
+                }
+                if (this.BlobsHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlobsHex.GetHashCode();
                 }
                 return hashCode;
             }

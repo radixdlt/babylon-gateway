@@ -103,14 +103,20 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorFieldStateSubstateAllOf" /> class.
         /// </summary>
+        /// <param name="sortedKey">sortedKey.</param>
         /// <param name="publicKey">publicKey (required).</param>
         /// <param name="isRegistered">isRegistered (required).</param>
-        /// <param name="stakeVault">stakeVault (required).</param>
-        /// <param name="unstakeVault">unstakeVault (required).</param>
-        /// <param name="liquidStakeUnitResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        /// <param name="validatorFeeFactor">A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        /// <param name="validatorFeeChangeRequest">validatorFeeChangeRequest.</param>
+        /// <param name="stakeUnitResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        /// <param name="stakeXrdVault">stakeXrdVault (required).</param>
         /// <param name="unstakeClaimTokenResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
-        /// <param name="sortedKey">sortedKey.</param>
-        public ValidatorFieldStateSubstateAllOf(EcdsaSecp256k1PublicKey publicKey = default(EcdsaSecp256k1PublicKey), bool isRegistered = default(bool), EntityReference stakeVault = default(EntityReference), EntityReference unstakeVault = default(EntityReference), string liquidStakeUnitResourceAddress = default(string), string unstakeClaimTokenResourceAddress = default(string), SubstateKey sortedKey = default(SubstateKey))
+        /// <param name="pendingXrdWithdrawVault">pendingXrdWithdrawVault (required).</param>
+        /// <param name="lockedOwnerStakeUnitVault">lockedOwnerStakeUnitVault (required).</param>
+        /// <param name="pendingOwnerStakeUnitUnlockVault">pendingOwnerStakeUnitUnlockVault (required).</param>
+        /// <param name="pendingOwnerStakeUnitWithdrawals">pendingOwnerStakeUnitWithdrawals (required).</param>
+        /// <param name="alreadyUnlockedOwnerStakeUnitAmount">A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        public ValidatorFieldStateSubstateAllOf(SubstateKey sortedKey = default(SubstateKey), EcdsaSecp256k1PublicKey publicKey = default(EcdsaSecp256k1PublicKey), bool isRegistered = default(bool), string validatorFeeFactor = default(string), ValidatorFeeChangeRequest validatorFeeChangeRequest = default(ValidatorFeeChangeRequest), string stakeUnitResourceAddress = default(string), EntityReference stakeXrdVault = default(EntityReference), string unstakeClaimTokenResourceAddress = default(string), EntityReference pendingXrdWithdrawVault = default(EntityReference), EntityReference lockedOwnerStakeUnitVault = default(EntityReference), EntityReference pendingOwnerStakeUnitUnlockVault = default(EntityReference), List<PendingOwnerStakeWithdrawal> pendingOwnerStakeUnitWithdrawals = default(List<PendingOwnerStakeWithdrawal>), string alreadyUnlockedOwnerStakeUnitAmount = default(string))
         {
             // to ensure "publicKey" is required (not null)
             if (publicKey == null)
@@ -119,32 +125,69 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.PublicKey = publicKey;
             this.IsRegistered = isRegistered;
-            // to ensure "stakeVault" is required (not null)
-            if (stakeVault == null)
+            // to ensure "validatorFeeFactor" is required (not null)
+            if (validatorFeeFactor == null)
             {
-                throw new ArgumentNullException("stakeVault is a required property for ValidatorFieldStateSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("validatorFeeFactor is a required property for ValidatorFieldStateSubstateAllOf and cannot be null");
             }
-            this.StakeVault = stakeVault;
-            // to ensure "unstakeVault" is required (not null)
-            if (unstakeVault == null)
+            this.ValidatorFeeFactor = validatorFeeFactor;
+            // to ensure "stakeUnitResourceAddress" is required (not null)
+            if (stakeUnitResourceAddress == null)
             {
-                throw new ArgumentNullException("unstakeVault is a required property for ValidatorFieldStateSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("stakeUnitResourceAddress is a required property for ValidatorFieldStateSubstateAllOf and cannot be null");
             }
-            this.UnstakeVault = unstakeVault;
-            // to ensure "liquidStakeUnitResourceAddress" is required (not null)
-            if (liquidStakeUnitResourceAddress == null)
+            this.StakeUnitResourceAddress = stakeUnitResourceAddress;
+            // to ensure "stakeXrdVault" is required (not null)
+            if (stakeXrdVault == null)
             {
-                throw new ArgumentNullException("liquidStakeUnitResourceAddress is a required property for ValidatorFieldStateSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("stakeXrdVault is a required property for ValidatorFieldStateSubstateAllOf and cannot be null");
             }
-            this.LiquidStakeUnitResourceAddress = liquidStakeUnitResourceAddress;
+            this.StakeXrdVault = stakeXrdVault;
             // to ensure "unstakeClaimTokenResourceAddress" is required (not null)
             if (unstakeClaimTokenResourceAddress == null)
             {
                 throw new ArgumentNullException("unstakeClaimTokenResourceAddress is a required property for ValidatorFieldStateSubstateAllOf and cannot be null");
             }
             this.UnstakeClaimTokenResourceAddress = unstakeClaimTokenResourceAddress;
+            // to ensure "pendingXrdWithdrawVault" is required (not null)
+            if (pendingXrdWithdrawVault == null)
+            {
+                throw new ArgumentNullException("pendingXrdWithdrawVault is a required property for ValidatorFieldStateSubstateAllOf and cannot be null");
+            }
+            this.PendingXrdWithdrawVault = pendingXrdWithdrawVault;
+            // to ensure "lockedOwnerStakeUnitVault" is required (not null)
+            if (lockedOwnerStakeUnitVault == null)
+            {
+                throw new ArgumentNullException("lockedOwnerStakeUnitVault is a required property for ValidatorFieldStateSubstateAllOf and cannot be null");
+            }
+            this.LockedOwnerStakeUnitVault = lockedOwnerStakeUnitVault;
+            // to ensure "pendingOwnerStakeUnitUnlockVault" is required (not null)
+            if (pendingOwnerStakeUnitUnlockVault == null)
+            {
+                throw new ArgumentNullException("pendingOwnerStakeUnitUnlockVault is a required property for ValidatorFieldStateSubstateAllOf and cannot be null");
+            }
+            this.PendingOwnerStakeUnitUnlockVault = pendingOwnerStakeUnitUnlockVault;
+            // to ensure "pendingOwnerStakeUnitWithdrawals" is required (not null)
+            if (pendingOwnerStakeUnitWithdrawals == null)
+            {
+                throw new ArgumentNullException("pendingOwnerStakeUnitWithdrawals is a required property for ValidatorFieldStateSubstateAllOf and cannot be null");
+            }
+            this.PendingOwnerStakeUnitWithdrawals = pendingOwnerStakeUnitWithdrawals;
+            // to ensure "alreadyUnlockedOwnerStakeUnitAmount" is required (not null)
+            if (alreadyUnlockedOwnerStakeUnitAmount == null)
+            {
+                throw new ArgumentNullException("alreadyUnlockedOwnerStakeUnitAmount is a required property for ValidatorFieldStateSubstateAllOf and cannot be null");
+            }
+            this.AlreadyUnlockedOwnerStakeUnitAmount = alreadyUnlockedOwnerStakeUnitAmount;
             this.SortedKey = sortedKey;
+            this.ValidatorFeeChangeRequest = validatorFeeChangeRequest;
         }
+
+        /// <summary>
+        /// Gets or Sets SortedKey
+        /// </summary>
+        [DataMember(Name = "sorted_key", EmitDefaultValue = true)]
+        public SubstateKey SortedKey { get; set; }
 
         /// <summary>
         /// Gets or Sets PublicKey
@@ -159,23 +202,30 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool IsRegistered { get; set; }
 
         /// <summary>
-        /// Gets or Sets StakeVault
+        /// A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
         /// </summary>
-        [DataMember(Name = "stake_vault", IsRequired = true, EmitDefaultValue = true)]
-        public EntityReference StakeVault { get; set; }
+        /// <value>A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        [DataMember(Name = "validator_fee_factor", IsRequired = true, EmitDefaultValue = true)]
+        public string ValidatorFeeFactor { get; set; }
 
         /// <summary>
-        /// Gets or Sets UnstakeVault
+        /// Gets or Sets ValidatorFeeChangeRequest
         /// </summary>
-        [DataMember(Name = "unstake_vault", IsRequired = true, EmitDefaultValue = true)]
-        public EntityReference UnstakeVault { get; set; }
+        [DataMember(Name = "validator_fee_change_request", EmitDefaultValue = true)]
+        public ValidatorFeeChangeRequest ValidatorFeeChangeRequest { get; set; }
 
         /// <summary>
         /// The Bech32m-encoded human readable version of the resource address
         /// </summary>
         /// <value>The Bech32m-encoded human readable version of the resource address</value>
-        [DataMember(Name = "liquid_stake_unit_resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string LiquidStakeUnitResourceAddress { get; set; }
+        [DataMember(Name = "stake_unit_resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string StakeUnitResourceAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets StakeXrdVault
+        /// </summary>
+        [DataMember(Name = "stake_xrd_vault", IsRequired = true, EmitDefaultValue = true)]
+        public EntityReference StakeXrdVault { get; set; }
 
         /// <summary>
         /// The Bech32m-encoded human readable version of the resource address
@@ -185,10 +235,35 @@ namespace RadixDlt.CoreApiSdk.Model
         public string UnstakeClaimTokenResourceAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets SortedKey
+        /// Gets or Sets PendingXrdWithdrawVault
         /// </summary>
-        [DataMember(Name = "sorted_key", EmitDefaultValue = true)]
-        public SubstateKey SortedKey { get; set; }
+        [DataMember(Name = "pending_xrd_withdraw_vault", IsRequired = true, EmitDefaultValue = true)]
+        public EntityReference PendingXrdWithdrawVault { get; set; }
+
+        /// <summary>
+        /// Gets or Sets LockedOwnerStakeUnitVault
+        /// </summary>
+        [DataMember(Name = "locked_owner_stake_unit_vault", IsRequired = true, EmitDefaultValue = true)]
+        public EntityReference LockedOwnerStakeUnitVault { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PendingOwnerStakeUnitUnlockVault
+        /// </summary>
+        [DataMember(Name = "pending_owner_stake_unit_unlock_vault", IsRequired = true, EmitDefaultValue = true)]
+        public EntityReference PendingOwnerStakeUnitUnlockVault { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PendingOwnerStakeUnitWithdrawals
+        /// </summary>
+        [DataMember(Name = "pending_owner_stake_unit_withdrawals", IsRequired = true, EmitDefaultValue = true)]
+        public List<PendingOwnerStakeWithdrawal> PendingOwnerStakeUnitWithdrawals { get; set; }
+
+        /// <summary>
+        /// A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// </summary>
+        /// <value>A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        [DataMember(Name = "already_unlocked_owner_stake_unit_amount", IsRequired = true, EmitDefaultValue = true)]
+        public string AlreadyUnlockedOwnerStakeUnitAmount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -198,13 +273,19 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ValidatorFieldStateSubstateAllOf {\n");
+            sb.Append("  SortedKey: ").Append(SortedKey).Append("\n");
             sb.Append("  PublicKey: ").Append(PublicKey).Append("\n");
             sb.Append("  IsRegistered: ").Append(IsRegistered).Append("\n");
-            sb.Append("  StakeVault: ").Append(StakeVault).Append("\n");
-            sb.Append("  UnstakeVault: ").Append(UnstakeVault).Append("\n");
-            sb.Append("  LiquidStakeUnitResourceAddress: ").Append(LiquidStakeUnitResourceAddress).Append("\n");
+            sb.Append("  ValidatorFeeFactor: ").Append(ValidatorFeeFactor).Append("\n");
+            sb.Append("  ValidatorFeeChangeRequest: ").Append(ValidatorFeeChangeRequest).Append("\n");
+            sb.Append("  StakeUnitResourceAddress: ").Append(StakeUnitResourceAddress).Append("\n");
+            sb.Append("  StakeXrdVault: ").Append(StakeXrdVault).Append("\n");
             sb.Append("  UnstakeClaimTokenResourceAddress: ").Append(UnstakeClaimTokenResourceAddress).Append("\n");
-            sb.Append("  SortedKey: ").Append(SortedKey).Append("\n");
+            sb.Append("  PendingXrdWithdrawVault: ").Append(PendingXrdWithdrawVault).Append("\n");
+            sb.Append("  LockedOwnerStakeUnitVault: ").Append(LockedOwnerStakeUnitVault).Append("\n");
+            sb.Append("  PendingOwnerStakeUnitUnlockVault: ").Append(PendingOwnerStakeUnitUnlockVault).Append("\n");
+            sb.Append("  PendingOwnerStakeUnitWithdrawals: ").Append(PendingOwnerStakeUnitWithdrawals).Append("\n");
+            sb.Append("  AlreadyUnlockedOwnerStakeUnitAmount: ").Append(AlreadyUnlockedOwnerStakeUnitAmount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -241,6 +322,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.SortedKey == input.SortedKey ||
+                    (this.SortedKey != null &&
+                    this.SortedKey.Equals(input.SortedKey))
+                ) && 
+                (
                     this.PublicKey == input.PublicKey ||
                     (this.PublicKey != null &&
                     this.PublicKey.Equals(input.PublicKey))
@@ -250,19 +336,24 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.IsRegistered.Equals(input.IsRegistered)
                 ) && 
                 (
-                    this.StakeVault == input.StakeVault ||
-                    (this.StakeVault != null &&
-                    this.StakeVault.Equals(input.StakeVault))
+                    this.ValidatorFeeFactor == input.ValidatorFeeFactor ||
+                    (this.ValidatorFeeFactor != null &&
+                    this.ValidatorFeeFactor.Equals(input.ValidatorFeeFactor))
                 ) && 
                 (
-                    this.UnstakeVault == input.UnstakeVault ||
-                    (this.UnstakeVault != null &&
-                    this.UnstakeVault.Equals(input.UnstakeVault))
+                    this.ValidatorFeeChangeRequest == input.ValidatorFeeChangeRequest ||
+                    (this.ValidatorFeeChangeRequest != null &&
+                    this.ValidatorFeeChangeRequest.Equals(input.ValidatorFeeChangeRequest))
                 ) && 
                 (
-                    this.LiquidStakeUnitResourceAddress == input.LiquidStakeUnitResourceAddress ||
-                    (this.LiquidStakeUnitResourceAddress != null &&
-                    this.LiquidStakeUnitResourceAddress.Equals(input.LiquidStakeUnitResourceAddress))
+                    this.StakeUnitResourceAddress == input.StakeUnitResourceAddress ||
+                    (this.StakeUnitResourceAddress != null &&
+                    this.StakeUnitResourceAddress.Equals(input.StakeUnitResourceAddress))
+                ) && 
+                (
+                    this.StakeXrdVault == input.StakeXrdVault ||
+                    (this.StakeXrdVault != null &&
+                    this.StakeXrdVault.Equals(input.StakeXrdVault))
                 ) && 
                 (
                     this.UnstakeClaimTokenResourceAddress == input.UnstakeClaimTokenResourceAddress ||
@@ -270,9 +361,30 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.UnstakeClaimTokenResourceAddress.Equals(input.UnstakeClaimTokenResourceAddress))
                 ) && 
                 (
-                    this.SortedKey == input.SortedKey ||
-                    (this.SortedKey != null &&
-                    this.SortedKey.Equals(input.SortedKey))
+                    this.PendingXrdWithdrawVault == input.PendingXrdWithdrawVault ||
+                    (this.PendingXrdWithdrawVault != null &&
+                    this.PendingXrdWithdrawVault.Equals(input.PendingXrdWithdrawVault))
+                ) && 
+                (
+                    this.LockedOwnerStakeUnitVault == input.LockedOwnerStakeUnitVault ||
+                    (this.LockedOwnerStakeUnitVault != null &&
+                    this.LockedOwnerStakeUnitVault.Equals(input.LockedOwnerStakeUnitVault))
+                ) && 
+                (
+                    this.PendingOwnerStakeUnitUnlockVault == input.PendingOwnerStakeUnitUnlockVault ||
+                    (this.PendingOwnerStakeUnitUnlockVault != null &&
+                    this.PendingOwnerStakeUnitUnlockVault.Equals(input.PendingOwnerStakeUnitUnlockVault))
+                ) && 
+                (
+                    this.PendingOwnerStakeUnitWithdrawals == input.PendingOwnerStakeUnitWithdrawals ||
+                    this.PendingOwnerStakeUnitWithdrawals != null &&
+                    input.PendingOwnerStakeUnitWithdrawals != null &&
+                    this.PendingOwnerStakeUnitWithdrawals.SequenceEqual(input.PendingOwnerStakeUnitWithdrawals)
+                ) && 
+                (
+                    this.AlreadyUnlockedOwnerStakeUnitAmount == input.AlreadyUnlockedOwnerStakeUnitAmount ||
+                    (this.AlreadyUnlockedOwnerStakeUnitAmount != null &&
+                    this.AlreadyUnlockedOwnerStakeUnitAmount.Equals(input.AlreadyUnlockedOwnerStakeUnitAmount))
                 );
         }
 
@@ -285,30 +397,54 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.SortedKey != null)
+                {
+                    hashCode = (hashCode * 59) + this.SortedKey.GetHashCode();
+                }
                 if (this.PublicKey != null)
                 {
                     hashCode = (hashCode * 59) + this.PublicKey.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.IsRegistered.GetHashCode();
-                if (this.StakeVault != null)
+                if (this.ValidatorFeeFactor != null)
                 {
-                    hashCode = (hashCode * 59) + this.StakeVault.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ValidatorFeeFactor.GetHashCode();
                 }
-                if (this.UnstakeVault != null)
+                if (this.ValidatorFeeChangeRequest != null)
                 {
-                    hashCode = (hashCode * 59) + this.UnstakeVault.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ValidatorFeeChangeRequest.GetHashCode();
                 }
-                if (this.LiquidStakeUnitResourceAddress != null)
+                if (this.StakeUnitResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.LiquidStakeUnitResourceAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.StakeUnitResourceAddress.GetHashCode();
+                }
+                if (this.StakeXrdVault != null)
+                {
+                    hashCode = (hashCode * 59) + this.StakeXrdVault.GetHashCode();
                 }
                 if (this.UnstakeClaimTokenResourceAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.UnstakeClaimTokenResourceAddress.GetHashCode();
                 }
-                if (this.SortedKey != null)
+                if (this.PendingXrdWithdrawVault != null)
                 {
-                    hashCode = (hashCode * 59) + this.SortedKey.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PendingXrdWithdrawVault.GetHashCode();
+                }
+                if (this.LockedOwnerStakeUnitVault != null)
+                {
+                    hashCode = (hashCode * 59) + this.LockedOwnerStakeUnitVault.GetHashCode();
+                }
+                if (this.PendingOwnerStakeUnitUnlockVault != null)
+                {
+                    hashCode = (hashCode * 59) + this.PendingOwnerStakeUnitUnlockVault.GetHashCode();
+                }
+                if (this.PendingOwnerStakeUnitWithdrawals != null)
+                {
+                    hashCode = (hashCode * 59) + this.PendingOwnerStakeUnitWithdrawals.GetHashCode();
+                }
+                if (this.AlreadyUnlockedOwnerStakeUnitAmount != null)
+                {
+                    hashCode = (hashCode * 59) + this.AlreadyUnlockedOwnerStakeUnitAmount.GetHashCode();
                 }
                 return hashCode;
             }

@@ -97,12 +97,16 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerFieldStateSubstate), "AccessControllerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesModuleFieldAccessRulesSubstate), "AccessRulesModuleFieldAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(AccountDepositRuleIndexEntrySubstate), "AccountDepositRuleIndexEntry")]
+    [JsonSubtypes.KnownSubType(typeof(AccountFieldStateSubstate), "AccountFieldState")]
     [JsonSubtypes.KnownSubType(typeof(AccountVaultIndexEntrySubstate), "AccountVaultIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(ClockFieldStateSubstate), "ClockFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerFieldConfigSubstate), "EpochManagerFieldConfig")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerFieldCurrentValidatorSetSubstate), "EpochManagerFieldCurrentValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerFieldStateSubstate), "EpochManagerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerRegisteredValidatorsByStakeIndexEntrySubstate), "EpochManagerRegisteredValidatorsByStakeIndexEntry")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldConfigSubstate), "ConsensusManagerFieldConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentProposalStatisticSubstate), "ConsensusManagerFieldCurrentProposalStatistic")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentValidatorSetSubstate), "ConsensusManagerFieldCurrentValidatorSet")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldStateSubstate), "ConsensusManagerFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate), "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
     [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldDivisibilitySubstate), "FungibleResourceManagerFieldDivisibility")]
     [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldTotalSupplySubstate), "FungibleResourceManagerFieldTotalSupply")]
     [JsonSubtypes.KnownSubType(typeof(FungibleVaultFieldBalanceSubstate), "FungibleVaultFieldBalance")]
@@ -134,23 +138,32 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountVaultIndexEntrySubstate" /> class.
         /// </summary>
-        /// <param name="dataStruct">dataStruct (required).</param>
+        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        /// <param name="vault">vault.</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.AccountVaultIndexEntry).</param>
-        public AccountVaultIndexEntrySubstate(DataStruct dataStruct = default(DataStruct), SubstateType substateType = SubstateType.AccountVaultIndexEntry) : base(substateType)
+        public AccountVaultIndexEntrySubstate(string resourceAddress = default(string), EntityReference vault = default(EntityReference), SubstateType substateType = SubstateType.AccountVaultIndexEntry) : base(substateType)
         {
-            // to ensure "dataStruct" is required (not null)
-            if (dataStruct == null)
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("dataStruct is a required property for AccountVaultIndexEntrySubstate and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for AccountVaultIndexEntrySubstate and cannot be null");
             }
-            this.DataStruct = dataStruct;
+            this.ResourceAddress = resourceAddress;
+            this.Vault = vault;
         }
 
         /// <summary>
-        /// Gets or Sets DataStruct
+        /// The Bech32m-encoded human readable version of the resource address
         /// </summary>
-        [DataMember(Name = "data_struct", IsRequired = true, EmitDefaultValue = true)]
-        public DataStruct DataStruct { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource address</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Vault
+        /// </summary>
+        [DataMember(Name = "vault", EmitDefaultValue = true)]
+        public EntityReference Vault { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -161,7 +174,8 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccountVaultIndexEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  Vault: ").Append(Vault).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -198,9 +212,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.DataStruct == input.DataStruct ||
-                    (this.DataStruct != null &&
-                    this.DataStruct.Equals(input.DataStruct))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
+                ) && base.Equals(input) && 
+                (
+                    this.Vault == input.Vault ||
+                    (this.Vault != null &&
+                    this.Vault.Equals(input.Vault))
                 );
         }
 
@@ -213,9 +232,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.DataStruct != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
+                if (this.Vault != null)
+                {
+                    hashCode = (hashCode * 59) + this.Vault.GetHashCode();
                 }
                 return hashCode;
             }

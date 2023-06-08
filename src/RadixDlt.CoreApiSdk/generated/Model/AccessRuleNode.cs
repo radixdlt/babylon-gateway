@@ -99,6 +99,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(AllOfAccessRuleNode), "AllOfAccessRuleNode")]
     [JsonSubtypes.KnownSubType(typeof(AnyOfAccessRuleNode), "AnyOf")]
     [JsonSubtypes.KnownSubType(typeof(AnyOfAccessRuleNode), "AnyOfAccessRuleNode")]
+    [JsonSubtypes.KnownSubType(typeof(AuthorityRuleNode), "Authority")]
+    [JsonSubtypes.KnownSubType(typeof(AuthorityRuleNode), "AuthorityRuleNode")]
     [JsonSubtypes.KnownSubType(typeof(ProofAccessRuleNode), "ProofAccessRuleNode")]
     [JsonSubtypes.KnownSubType(typeof(ProofAccessRuleNode), "ProofRule")]
     public partial class AccessRuleNode : IEquatable<AccessRuleNode>

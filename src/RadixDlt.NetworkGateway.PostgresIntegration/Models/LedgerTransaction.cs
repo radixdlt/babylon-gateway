@@ -170,6 +170,10 @@ internal class TransactionReceipt
     public string? Events { get; set; }
 }
 
+internal class GenesisLedgerTransaction : LedgerTransaction
+{
+}
+
 internal class UserLedgerTransaction : LedgerTransaction
 {
     /// <summary>
@@ -193,10 +197,6 @@ internal class UserLedgerTransaction : LedgerTransaction
     public byte[] SignedIntentHash { get; set; }
 }
 
-internal class ValidatorLedgerTransaction : LedgerTransaction
-{
-}
-
-internal class SystemLedgerTransaction : LedgerTransaction
+internal class RoundUpdateLedgerTransaction : LedgerTransaction
 {
 }

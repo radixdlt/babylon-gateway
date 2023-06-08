@@ -105,7 +105,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="blueprintName">blueprintName (required).</param>
         /// <param name="accessRules">accessRules (required).</param>
-        public BlueprintAccessRules(string blueprintName = default(string), AccessRules accessRules = default(AccessRules))
+        public BlueprintAccessRules(string blueprintName = default(string), NodeAuthorityRules accessRules = default(NodeAuthorityRules))
         {
             // to ensure "blueprintName" is required (not null)
             if (blueprintName == null)
@@ -131,7 +131,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets AccessRules
         /// </summary>
         [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public AccessRules AccessRules { get; set; }
+        public NodeAuthorityRules AccessRules { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

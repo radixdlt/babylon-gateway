@@ -95,12 +95,12 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [DataContract(Name = "LedgerTransaction")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(SystemLedgerTransaction), "System")]
-    [JsonSubtypes.KnownSubType(typeof(SystemLedgerTransaction), "SystemLedgerTransaction")]
+    [JsonSubtypes.KnownSubType(typeof(GenesisLedgerTransaction), "Genesis")]
+    [JsonSubtypes.KnownSubType(typeof(GenesisLedgerTransaction), "GenesisLedgerTransaction")]
+    [JsonSubtypes.KnownSubType(typeof(RoundUpdateLedgerTransaction), "RoundUpdate")]
+    [JsonSubtypes.KnownSubType(typeof(RoundUpdateLedgerTransaction), "RoundUpdateLedgerTransaction")]
     [JsonSubtypes.KnownSubType(typeof(UserLedgerTransaction), "User")]
     [JsonSubtypes.KnownSubType(typeof(UserLedgerTransaction), "UserLedgerTransaction")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorLedgerTransaction), "Validator")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorLedgerTransaction), "ValidatorLedgerTransaction")]
     public partial class LedgerTransaction : IEquatable<LedgerTransaction>
     {
 

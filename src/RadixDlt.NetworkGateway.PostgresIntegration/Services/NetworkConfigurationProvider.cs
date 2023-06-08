@@ -200,8 +200,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 GlobalIdentity: GetHrpPrefix(at, AddressEntityType.GlobalIdentity),
                 GlobalVirtualEd25519Identity: GetHrpPrefix(at, AddressEntityType.GlobalVirtualEd25519Identity),
                 GlobalVirtualSecp256k1Identity: GetHrpPrefix(at, AddressEntityType.GlobalVirtualSecp256k1Identity),
-                GlobalEpochManager: GetHrpPrefix(at, AddressEntityType.GlobalEpochManager),
-                GlobalClock: GetHrpPrefix(at, AddressEntityType.GlobalClock),
+                GlobalConsensusManager: GetHrpPrefix(at, AddressEntityType.GlobalConsensusManager),
                 GlobalFungibleResource: GetHrpPrefix(at, AddressEntityType.GlobalFungibleResource),
                 GlobalNonFungibleResource: GetHrpPrefix(at, AddressEntityType.GlobalNonFungibleResource),
                 InternalFungibleVault: GetHrpPrefix(at, AddressEntityType.InternalFungibleVault),
@@ -224,8 +223,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 ResourcePackage : wka.ResourcePackage,
                 AccountPackage: wka.AccountPackage,
                 IdentityPackage: wka.IdentityPackage,
-                EpochManagerPackage: wka.EpochManagerPackage,
-                ClockPackage: wka.ClockPackage,
+                ConsensusManagerPackage: wka.ConsensusManagerPackage,
                 AccessControllerPackage: wka.AccessControllerPackage,
                 TransactionProcessorPackage: wka.TransactionProcessorPackage,
                 MetadataModulePackage: wka.MetadataModulePackage,
@@ -233,13 +231,12 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 AccessRulesPackage: wka.AccessRulesPackage,
                 GenesisHelperPackage: wka.GenesisHelperPackage,
                 FaucetPackage: wka.FaucetPackage,
-                EpochManager: wka.EpochManager,
-                Clock: wka.Clock,
+                ConsensusManager: wka.ConsensusManager,
                 GenesisHelper: wka.GenesisHelper,
                 Faucet: wka.Faucet
                 ),
             AddressTypeDefinitions = at,
-            // TODO: temporal solution, that should be read from gensis transaction.
+            // TODO: temporal solution, that should be read from genesis transaction.
             // For now we rely on hardcoded values.
             EventTypeIdentifiers = new EventTypeIdentifiers(
                 new EventTypeIdentifiers.VaultEventTypeIdentifiers(17, 18),

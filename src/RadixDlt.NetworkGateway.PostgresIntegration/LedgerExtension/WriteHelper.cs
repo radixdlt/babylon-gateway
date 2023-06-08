@@ -211,17 +211,17 @@ internal class WriteHelper
 
             switch (lt)
             {
+                case GenesisLedgerTransaction:
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    break;
                 case UserLedgerTransaction ult:
                     await writer.WriteAsync(ult.PayloadHash, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(ult.IntentHash, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(ult.SignedIntentHash, NpgsqlDbType.Bytea, token);
                     break;
-                case ValidatorLedgerTransaction:
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    await writer.WriteNullAsync(token);
-                    break;
-                case SystemLedgerTransaction:
+                case RoundUpdateLedgerTransaction:
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);

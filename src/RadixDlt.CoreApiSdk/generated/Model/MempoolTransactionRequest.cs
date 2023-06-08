@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="MempoolTransactionRequest" /> class.
         /// </summary>
         /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="payloadHash">The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;Blake2b-256(compiled_notarized_transaction)&#x60; (required).</param>
+        /// <param name="payloadHash">The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature.  (required).</param>
         public MempoolTransactionRequest(string network = default(string), string payloadHash = default(string))
         {
             // to ensure "network" is required (not null)
@@ -129,9 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public string Network { get; set; }
 
         /// <summary>
-        /// The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;Blake2b-256(compiled_notarized_transaction)&#x60;
+        /// The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. 
         /// </summary>
-        /// <value>The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;Blake2b-256(compiled_notarized_transaction)&#x60;</value>
+        /// <value>The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. </value>
         [DataMember(Name = "payload_hash", IsRequired = true, EmitDefaultValue = true)]
         public string PayloadHash { get; set; }
 

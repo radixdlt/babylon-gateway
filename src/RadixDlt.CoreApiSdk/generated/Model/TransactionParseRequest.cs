@@ -96,9 +96,9 @@ namespace RadixDlt.CoreApiSdk.Model
     public partial class TransactionParseRequest : IEquatable<TransactionParseRequest>
     {
         /// <summary>
-        /// The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Manifest, Ledger. 
+        /// The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Ledger. 
         /// </summary>
-        /// <value>The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Manifest, Ledger. </value>
+        /// <value>The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Ledger. </value>
         [JsonConverter(typeof(StringEnumConverter))]
         public enum ParseModeEnum
         {
@@ -127,24 +127,18 @@ namespace RadixDlt.CoreApiSdk.Model
             Unsigned = 4,
 
             /// <summary>
-            /// Enum Manifest for value: Manifest
-            /// </summary>
-            [EnumMember(Value = "Manifest")]
-            Manifest = 5,
-
-            /// <summary>
             /// Enum Ledger for value: Ledger
             /// </summary>
             [EnumMember(Value = "Ledger")]
-            Ledger = 6
+            Ledger = 5
 
         }
 
 
         /// <summary>
-        /// The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Manifest, Ledger. 
+        /// The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Ledger. 
         /// </summary>
-        /// <value>The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Manifest, Ledger. </value>
+        /// <value>The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Ledger. </value>
         [DataMember(Name = "parse_mode", EmitDefaultValue = true)]
         public ParseModeEnum? ParseMode { get; set; }
         /// <summary>
@@ -218,8 +212,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionParseRequest" /> class.
         /// </summary>
         /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="payloadHex">A hex-encoded payload of a full transaction or a partial transaction - either a notarized transaction, a signed transaction intent an unsigned transaction intent, or a transaction manifest.  (required).</param>
-        /// <param name="parseMode">The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Manifest, Ledger. .</param>
+        /// <param name="payloadHex">A hex-encoded payload of a full transaction or a partial transaction - either a notarized transaction, a signed transaction intent an unsigned transaction intent, or a ledger payload.  (required).</param>
+        /// <param name="parseMode">The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Ledger. .</param>
         /// <param name="validationMode">The type of validation that should be performed, if the payload correctly decompiles as a Notarized Transaction. This is only relevant for Notarized payloads. If omitted, \&quot;Static\&quot; is used. .</param>
         /// <param name="responseMode">The amount of information to return in the response. \&quot;Basic\&quot; includes the type, validity information, and any relevant identifiers. \&quot;Full\&quot; also includes the fully parsed information. If omitted, \&quot;Full\&quot; is used. .</param>
         /// <param name="transactionFormatOptions">transactionFormatOptions.</param>
@@ -251,9 +245,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public string Network { get; set; }
 
         /// <summary>
-        /// A hex-encoded payload of a full transaction or a partial transaction - either a notarized transaction, a signed transaction intent an unsigned transaction intent, or a transaction manifest. 
+        /// A hex-encoded payload of a full transaction or a partial transaction - either a notarized transaction, a signed transaction intent an unsigned transaction intent, or a ledger payload. 
         /// </summary>
-        /// <value>A hex-encoded payload of a full transaction or a partial transaction - either a notarized transaction, a signed transaction intent an unsigned transaction intent, or a transaction manifest. </value>
+        /// <value>A hex-encoded payload of a full transaction or a partial transaction - either a notarized transaction, a signed transaction intent an unsigned transaction intent, or a ledger payload. </value>
         [DataMember(Name = "payload_hex", IsRequired = true, EmitDefaultValue = true)]
         public string PayloadHex { get; set; }
 

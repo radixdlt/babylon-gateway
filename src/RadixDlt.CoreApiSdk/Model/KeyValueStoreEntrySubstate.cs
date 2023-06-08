@@ -67,7 +67,7 @@ using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class GenericKeyValueStoreEntrySubstate : IEntityOwner, IParentAddressPointer
+public partial class GenericKeyValueStoreEntrySubstate : IEntityOwner, IEntityAddressPointer
 {
     public IEnumerable<EntityReference> GetOwnedEntities()
     {
@@ -76,7 +76,7 @@ public partial class GenericKeyValueStoreEntrySubstate : IEntityOwner, IParentAd
             : Enumerable.Empty<EntityReference>();
     }
 
-    public IEnumerable<string> GetParentAddresses()
+    public IEnumerable<string> GetEntityAddresses()
     {
         return DataStruct != null
             ? DataStruct.ReferencedEntities.Select(re => re.EntityAddress)
