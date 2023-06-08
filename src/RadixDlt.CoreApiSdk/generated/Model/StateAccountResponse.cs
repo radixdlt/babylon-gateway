@@ -105,8 +105,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="info">info (required).</param>
         /// <param name="accessRules">accessRules (required).</param>
+        /// <param name="state">state (required).</param>
         /// <param name="vaults">All of the account&#39;s vaults (required).</param>
-        public StateAccountResponse(Substate info = default(Substate), Substate accessRules = default(Substate), List<VaultBalance> vaults = default(List<VaultBalance>))
+        public StateAccountResponse(Substate info = default(Substate), Substate accessRules = default(Substate), Substate state = default(Substate), List<VaultBalance> vaults = default(List<VaultBalance>))
         {
             // to ensure "info" is required (not null)
             if (info == null)
@@ -120,6 +121,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("accessRules is a required property for StateAccountResponse and cannot be null");
             }
             this.AccessRules = accessRules;
+            // to ensure "state" is required (not null)
+            if (state == null)
+            {
+                throw new ArgumentNullException("state is a required property for StateAccountResponse and cannot be null");
+            }
+            this.State = state;
             // to ensure "vaults" is required (not null)
             if (vaults == null)
             {
@@ -141,6 +148,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public Substate AccessRules { get; set; }
 
         /// <summary>
+        /// Gets or Sets State
+        /// </summary>
+        [DataMember(Name = "state", IsRequired = true, EmitDefaultValue = true)]
+        public Substate State { get; set; }
+
+        /// <summary>
         /// All of the account&#39;s vaults
         /// </summary>
         /// <value>All of the account&#39;s vaults</value>
@@ -157,6 +170,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class StateAccountResponse {\n");
             sb.Append("  Info: ").Append(Info).Append("\n");
             sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
+            sb.Append("  State: ").Append(State).Append("\n");
             sb.Append("  Vaults: ").Append(Vaults).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -204,6 +218,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.AccessRules.Equals(input.AccessRules))
                 ) && 
                 (
+                    this.State == input.State ||
+                    (this.State != null &&
+                    this.State.Equals(input.State))
+                ) && 
+                (
                     this.Vaults == input.Vaults ||
                     this.Vaults != null &&
                     input.Vaults != null &&
@@ -227,6 +246,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.AccessRules != null)
                 {
                     hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
+                }
+                if (this.State != null)
+                {
+                    hashCode = (hashCode * 59) + this.State.GetHashCode();
                 }
                 if (this.Vaults != null)
                 {

@@ -103,22 +103,31 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountVaultIndexEntrySubstateAllOf" /> class.
         /// </summary>
-        /// <param name="dataStruct">dataStruct (required).</param>
-        public AccountVaultIndexEntrySubstateAllOf(DataStruct dataStruct = default(DataStruct))
+        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        /// <param name="vault">vault.</param>
+        public AccountVaultIndexEntrySubstateAllOf(string resourceAddress = default(string), EntityReference vault = default(EntityReference))
         {
-            // to ensure "dataStruct" is required (not null)
-            if (dataStruct == null)
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("dataStruct is a required property for AccountVaultIndexEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for AccountVaultIndexEntrySubstateAllOf and cannot be null");
             }
-            this.DataStruct = dataStruct;
+            this.ResourceAddress = resourceAddress;
+            this.Vault = vault;
         }
 
         /// <summary>
-        /// Gets or Sets DataStruct
+        /// The Bech32m-encoded human readable version of the resource address
         /// </summary>
-        [DataMember(Name = "data_struct", IsRequired = true, EmitDefaultValue = true)]
-        public DataStruct DataStruct { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource address</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Vault
+        /// </summary>
+        [DataMember(Name = "vault", EmitDefaultValue = true)]
+        public EntityReference Vault { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +137,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccountVaultIndexEntrySubstateAllOf {\n");
-            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  Vault: ").Append(Vault).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,9 +175,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.DataStruct == input.DataStruct ||
-                    (this.DataStruct != null &&
-                    this.DataStruct.Equals(input.DataStruct))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
+                ) && 
+                (
+                    this.Vault == input.Vault ||
+                    (this.Vault != null &&
+                    this.Vault.Equals(input.Vault))
                 );
         }
 
@@ -180,9 +195,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.DataStruct != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
+                if (this.Vault != null)
+                {
+                    hashCode = (hashCode * 59) + this.Vault.GetHashCode();
                 }
                 return hashCode;
             }

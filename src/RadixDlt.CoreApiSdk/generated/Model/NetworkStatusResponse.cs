@@ -104,9 +104,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="NetworkStatusResponse" /> class.
         /// </summary>
         /// <param name="preGenesisStateIdentifier">preGenesisStateIdentifier (required).</param>
+        /// <param name="genesisEpochRound">genesisEpochRound.</param>
         /// <param name="postGenesisStateIdentifier">postGenesisStateIdentifier.</param>
-        /// <param name="currentStateIdentifier">currentStateIdentifier (required).</param>
-        public NetworkStatusResponse(CommittedStateIdentifier preGenesisStateIdentifier = default(CommittedStateIdentifier), CommittedStateIdentifier postGenesisStateIdentifier = default(CommittedStateIdentifier), CommittedStateIdentifier currentStateIdentifier = default(CommittedStateIdentifier))
+        /// <param name="currentStateIdentifier">currentStateIdentifier.</param>
+        /// <param name="currentEpochRound">currentEpochRound.</param>
+        /// <param name="currentProtocolVersion">A descriptor for the current protocol version that the node is running.  (required).</param>
+        public NetworkStatusResponse(CommittedStateIdentifier preGenesisStateIdentifier = default(CommittedStateIdentifier), EpochRound genesisEpochRound = default(EpochRound), CommittedStateIdentifier postGenesisStateIdentifier = default(CommittedStateIdentifier), CommittedStateIdentifier currentStateIdentifier = default(CommittedStateIdentifier), EpochRound currentEpochRound = default(EpochRound), string currentProtocolVersion = default(string))
         {
             // to ensure "preGenesisStateIdentifier" is required (not null)
             if (preGenesisStateIdentifier == null)
@@ -114,13 +117,16 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("preGenesisStateIdentifier is a required property for NetworkStatusResponse and cannot be null");
             }
             this.PreGenesisStateIdentifier = preGenesisStateIdentifier;
-            // to ensure "currentStateIdentifier" is required (not null)
-            if (currentStateIdentifier == null)
+            // to ensure "currentProtocolVersion" is required (not null)
+            if (currentProtocolVersion == null)
             {
-                throw new ArgumentNullException("currentStateIdentifier is a required property for NetworkStatusResponse and cannot be null");
+                throw new ArgumentNullException("currentProtocolVersion is a required property for NetworkStatusResponse and cannot be null");
             }
-            this.CurrentStateIdentifier = currentStateIdentifier;
+            this.CurrentProtocolVersion = currentProtocolVersion;
+            this.GenesisEpochRound = genesisEpochRound;
             this.PostGenesisStateIdentifier = postGenesisStateIdentifier;
+            this.CurrentStateIdentifier = currentStateIdentifier;
+            this.CurrentEpochRound = currentEpochRound;
         }
 
         /// <summary>
@@ -128,6 +134,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "pre_genesis_state_identifier", IsRequired = true, EmitDefaultValue = true)]
         public CommittedStateIdentifier PreGenesisStateIdentifier { get; set; }
+
+        /// <summary>
+        /// Gets or Sets GenesisEpochRound
+        /// </summary>
+        [DataMember(Name = "genesis_epoch_round", EmitDefaultValue = true)]
+        public EpochRound GenesisEpochRound { get; set; }
 
         /// <summary>
         /// Gets or Sets PostGenesisStateIdentifier
@@ -138,8 +150,21 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Gets or Sets CurrentStateIdentifier
         /// </summary>
-        [DataMember(Name = "current_state_identifier", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "current_state_identifier", EmitDefaultValue = true)]
         public CommittedStateIdentifier CurrentStateIdentifier { get; set; }
+
+        /// <summary>
+        /// Gets or Sets CurrentEpochRound
+        /// </summary>
+        [DataMember(Name = "current_epoch_round", EmitDefaultValue = true)]
+        public EpochRound CurrentEpochRound { get; set; }
+
+        /// <summary>
+        /// A descriptor for the current protocol version that the node is running. 
+        /// </summary>
+        /// <value>A descriptor for the current protocol version that the node is running. </value>
+        [DataMember(Name = "current_protocol_version", IsRequired = true, EmitDefaultValue = true)]
+        public string CurrentProtocolVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,8 +175,11 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NetworkStatusResponse {\n");
             sb.Append("  PreGenesisStateIdentifier: ").Append(PreGenesisStateIdentifier).Append("\n");
+            sb.Append("  GenesisEpochRound: ").Append(GenesisEpochRound).Append("\n");
             sb.Append("  PostGenesisStateIdentifier: ").Append(PostGenesisStateIdentifier).Append("\n");
             sb.Append("  CurrentStateIdentifier: ").Append(CurrentStateIdentifier).Append("\n");
+            sb.Append("  CurrentEpochRound: ").Append(CurrentEpochRound).Append("\n");
+            sb.Append("  CurrentProtocolVersion: ").Append(CurrentProtocolVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -193,6 +221,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.PreGenesisStateIdentifier.Equals(input.PreGenesisStateIdentifier))
                 ) && 
                 (
+                    this.GenesisEpochRound == input.GenesisEpochRound ||
+                    (this.GenesisEpochRound != null &&
+                    this.GenesisEpochRound.Equals(input.GenesisEpochRound))
+                ) && 
+                (
                     this.PostGenesisStateIdentifier == input.PostGenesisStateIdentifier ||
                     (this.PostGenesisStateIdentifier != null &&
                     this.PostGenesisStateIdentifier.Equals(input.PostGenesisStateIdentifier))
@@ -201,6 +234,16 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.CurrentStateIdentifier == input.CurrentStateIdentifier ||
                     (this.CurrentStateIdentifier != null &&
                     this.CurrentStateIdentifier.Equals(input.CurrentStateIdentifier))
+                ) && 
+                (
+                    this.CurrentEpochRound == input.CurrentEpochRound ||
+                    (this.CurrentEpochRound != null &&
+                    this.CurrentEpochRound.Equals(input.CurrentEpochRound))
+                ) && 
+                (
+                    this.CurrentProtocolVersion == input.CurrentProtocolVersion ||
+                    (this.CurrentProtocolVersion != null &&
+                    this.CurrentProtocolVersion.Equals(input.CurrentProtocolVersion))
                 );
         }
 
@@ -217,6 +260,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.PreGenesisStateIdentifier.GetHashCode();
                 }
+                if (this.GenesisEpochRound != null)
+                {
+                    hashCode = (hashCode * 59) + this.GenesisEpochRound.GetHashCode();
+                }
                 if (this.PostGenesisStateIdentifier != null)
                 {
                     hashCode = (hashCode * 59) + this.PostGenesisStateIdentifier.GetHashCode();
@@ -224,6 +271,14 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.CurrentStateIdentifier != null)
                 {
                     hashCode = (hashCode * 59) + this.CurrentStateIdentifier.GetHashCode();
+                }
+                if (this.CurrentEpochRound != null)
+                {
+                    hashCode = (hashCode * 59) + this.CurrentEpochRound.GetHashCode();
+                }
+                if (this.CurrentProtocolVersion != null)
+                {
+                    hashCode = (hashCode * 59) + this.CurrentProtocolVersion.GetHashCode();
                 }
                 return hashCode;
             }

@@ -103,11 +103,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ParsedLedgerTransactionAllOfIdentifiers" /> class.
         /// </summary>
-        /// <param name="intentHash">The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;Blake2b-256(compiled_intent)&#x60;.</param>
-        /// <param name="signaturesHash">The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is &#x60;Blake2b-256(compiled_signed_transaction)&#x60;.</param>
-        /// <param name="payloadHash">The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;Blake2b-256(compiled_notarized_transaction)&#x60;.</param>
-        /// <param name="ledgerHash">The hex-encoded ledger-wrapped transaction hash. This is known as the Ledger Hash. This hash is &#x60;Blake2b-256(ledger_transaction_bytes)&#x60; (required).</param>
-        public ParsedLedgerTransactionAllOfIdentifiers(string intentHash = default(string), string signaturesHash = default(string), string payloadHash = default(string), string ledgerHash = default(string))
+        /// <param name="intentHash">The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. .</param>
+        /// <param name="signedIntentHash">The hex-encoded signed intent hash for a user transaction. This hash identifies the transaction intent, plus additional signatures. This hash is signed by the notary, to create the submittable NotarizedTransaction. .</param>
+        /// <param name="payloadHash">The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. .</param>
+        /// <param name="ledgerHash">The hex-encoded ledger payload transaction hash. This is a wrapper for both user transactions, and system transactions such as genesis and round changes.  (required).</param>
+        public ParsedLedgerTransactionAllOfIdentifiers(string intentHash = default(string), string signedIntentHash = default(string), string payloadHash = default(string), string ledgerHash = default(string))
         {
             // to ensure "ledgerHash" is required (not null)
             if (ledgerHash == null)
@@ -116,35 +116,35 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.LedgerHash = ledgerHash;
             this.IntentHash = intentHash;
-            this.SignaturesHash = signaturesHash;
+            this.SignedIntentHash = signedIntentHash;
             this.PayloadHash = payloadHash;
         }
 
         /// <summary>
-        /// The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;Blake2b-256(compiled_intent)&#x60;
+        /// The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. 
         /// </summary>
-        /// <value>The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;Blake2b-256(compiled_intent)&#x60;</value>
+        /// <value>The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. </value>
         [DataMember(Name = "intent_hash", EmitDefaultValue = true)]
         public string IntentHash { get; set; }
 
         /// <summary>
-        /// The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is &#x60;Blake2b-256(compiled_signed_transaction)&#x60;
+        /// The hex-encoded signed intent hash for a user transaction. This hash identifies the transaction intent, plus additional signatures. This hash is signed by the notary, to create the submittable NotarizedTransaction. 
         /// </summary>
-        /// <value>The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is &#x60;Blake2b-256(compiled_signed_transaction)&#x60;</value>
-        [DataMember(Name = "signatures_hash", EmitDefaultValue = true)]
-        public string SignaturesHash { get; set; }
+        /// <value>The hex-encoded signed intent hash for a user transaction. This hash identifies the transaction intent, plus additional signatures. This hash is signed by the notary, to create the submittable NotarizedTransaction. </value>
+        [DataMember(Name = "signed_intent_hash", EmitDefaultValue = true)]
+        public string SignedIntentHash { get; set; }
 
         /// <summary>
-        /// The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;Blake2b-256(compiled_notarized_transaction)&#x60;
+        /// The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. 
         /// </summary>
-        /// <value>The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;Blake2b-256(compiled_notarized_transaction)&#x60;</value>
+        /// <value>The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. </value>
         [DataMember(Name = "payload_hash", EmitDefaultValue = true)]
         public string PayloadHash { get; set; }
 
         /// <summary>
-        /// The hex-encoded ledger-wrapped transaction hash. This is known as the Ledger Hash. This hash is &#x60;Blake2b-256(ledger_transaction_bytes)&#x60;
+        /// The hex-encoded ledger payload transaction hash. This is a wrapper for both user transactions, and system transactions such as genesis and round changes. 
         /// </summary>
-        /// <value>The hex-encoded ledger-wrapped transaction hash. This is known as the Ledger Hash. This hash is &#x60;Blake2b-256(ledger_transaction_bytes)&#x60;</value>
+        /// <value>The hex-encoded ledger payload transaction hash. This is a wrapper for both user transactions, and system transactions such as genesis and round changes. </value>
         [DataMember(Name = "ledger_hash", IsRequired = true, EmitDefaultValue = true)]
         public string LedgerHash { get; set; }
 
@@ -157,7 +157,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ParsedLedgerTransactionAllOfIdentifiers {\n");
             sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
-            sb.Append("  SignaturesHash: ").Append(SignaturesHash).Append("\n");
+            sb.Append("  SignedIntentHash: ").Append(SignedIntentHash).Append("\n");
             sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
             sb.Append("  LedgerHash: ").Append(LedgerHash).Append("\n");
             sb.Append("}\n");
@@ -201,9 +201,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.IntentHash.Equals(input.IntentHash))
                 ) && 
                 (
-                    this.SignaturesHash == input.SignaturesHash ||
-                    (this.SignaturesHash != null &&
-                    this.SignaturesHash.Equals(input.SignaturesHash))
+                    this.SignedIntentHash == input.SignedIntentHash ||
+                    (this.SignedIntentHash != null &&
+                    this.SignedIntentHash.Equals(input.SignedIntentHash))
                 ) && 
                 (
                     this.PayloadHash == input.PayloadHash ||
@@ -230,9 +230,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
                 }
-                if (this.SignaturesHash != null)
+                if (this.SignedIntentHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.SignaturesHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SignedIntentHash.GetHashCode();
                 }
                 if (this.PayloadHash != null)
                 {

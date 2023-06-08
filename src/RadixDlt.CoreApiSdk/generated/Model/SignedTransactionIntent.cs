@@ -103,7 +103,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="SignedTransactionIntent" /> class.
         /// </summary>
-        /// <param name="hash">The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is &#x60;Blake2b-256(compiled_signed_transaction)&#x60; (required).</param>
+        /// <param name="hash">The hex-encoded signed intent hash for a user transaction. This hash identifies the transaction intent, plus additional signatures. This hash is signed by the notary, to create the submittable NotarizedTransaction.  (required).</param>
         /// <param name="intent">intent (required).</param>
         /// <param name="intentSignatures">intentSignatures (required).</param>
         public SignedTransactionIntent(string hash = default(string), TransactionIntent intent = default(TransactionIntent), List<SignatureWithPublicKey> intentSignatures = default(List<SignatureWithPublicKey>))
@@ -129,9 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is &#x60;Blake2b-256(compiled_signed_transaction)&#x60;
+        /// The hex-encoded signed intent hash for a user transaction. This hash identifies the transaction intent, plus additional signatures. This hash is signed by the notary, to create the submittable NotarizedTransaction. 
         /// </summary>
-        /// <value>The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is &#x60;Blake2b-256(compiled_signed_transaction)&#x60;</value>
+        /// <value>The hex-encoded signed intent hash for a user transaction. This hash identifies the transaction intent, plus additional signatures. This hash is signed by the notary, to create the submittable NotarizedTransaction. </value>
         [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
         public string Hash { get; set; }
 

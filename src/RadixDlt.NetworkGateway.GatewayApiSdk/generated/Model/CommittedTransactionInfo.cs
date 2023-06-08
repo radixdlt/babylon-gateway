@@ -117,12 +117,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="payloadHashHex">Hex-encoded SHA-256 hash..</param>
         /// <param name="intentHashHex">Hex-encoded SHA-256 hash..</param>
         /// <param name="feePaid">String-encoded decimal representing the amount of a related fungible resource..</param>
+        /// <param name="affectedGlobalEntities">affectedGlobalEntities.</param>
         /// <param name="confirmedAt">confirmedAt.</param>
         /// <param name="errorMessage">errorMessage.</param>
         /// <param name="rawHex">Hex-encoded binary blob..</param>
         /// <param name="receipt">receipt.</param>
         /// <param name="messageHex">Hex-encoded binary blob..</param>
-        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), string feePaid = default(string), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), string messageHex = default(string))
+        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), string feePaid = default(string), List<string> affectedGlobalEntities = default(List<string>), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), string messageHex = default(string))
         {
             this.StateVersion = stateVersion;
             this.Epoch = epoch;
@@ -137,6 +138,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.PayloadHashHex = payloadHashHex;
             this.IntentHashHex = intentHashHex;
             this.FeePaid = feePaid;
+            this.AffectedGlobalEntities = affectedGlobalEntities;
             this.ConfirmedAt = confirmedAt;
             this.ErrorMessage = errorMessage;
             this.RawHex = rawHex;
@@ -190,6 +192,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string FeePaid { get; set; }
 
         /// <summary>
+        /// Gets or Sets AffectedGlobalEntities
+        /// </summary>
+        [DataMember(Name = "affected_global_entities", EmitDefaultValue = true)]
+        public List<string> AffectedGlobalEntities { get; set; }
+
+        /// <summary>
         /// Gets or Sets ConfirmedAt
         /// </summary>
         [DataMember(Name = "confirmed_at", EmitDefaultValue = true)]
@@ -237,6 +245,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  PayloadHashHex: ").Append(PayloadHashHex).Append("\n");
             sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
             sb.Append("  FeePaid: ").Append(FeePaid).Append("\n");
+            sb.Append("  AffectedGlobalEntities: ").Append(AffectedGlobalEntities).Append("\n");
             sb.Append("  ConfirmedAt: ").Append(ConfirmedAt).Append("\n");
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("  RawHex: ").Append(RawHex).Append("\n");
@@ -314,6 +323,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.FeePaid.Equals(input.FeePaid))
                 ) && 
                 (
+                    this.AffectedGlobalEntities == input.AffectedGlobalEntities ||
+                    this.AffectedGlobalEntities != null &&
+                    input.AffectedGlobalEntities != null &&
+                    this.AffectedGlobalEntities.SequenceEqual(input.AffectedGlobalEntities)
+                ) && 
+                (
                     this.ConfirmedAt == input.ConfirmedAt ||
                     (this.ConfirmedAt != null &&
                     this.ConfirmedAt.Equals(input.ConfirmedAt))
@@ -368,6 +383,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.FeePaid != null)
                 {
                     hashCode = (hashCode * 59) + this.FeePaid.GetHashCode();
+                }
+                if (this.AffectedGlobalEntities != null)
+                {
+                    hashCode = (hashCode * 59) + this.AffectedGlobalEntities.GetHashCode();
                 }
                 if (this.ConfirmedAt != null)
                 {

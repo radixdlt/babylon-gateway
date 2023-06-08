@@ -134,27 +134,6 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <returns>ApiResponse of StateAccountResponse</returns>
         ApiResponse<StateAccountResponse> StateAccountPostWithHttpInfo(StateAccountRequest stateAccountRequest);
         /// <summary>
-        /// Get Clock Details
-        /// </summary>
-        /// <remarks>
-        /// Reads the clock&#39;s substate/s from the top of the current ledger. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateClockRequest"></param>
-        /// <returns>StateClockResponse</returns>
-        StateClockResponse StateClockPost(StateClockRequest stateClockRequest);
-
-        /// <summary>
-        /// Get Clock Details
-        /// </summary>
-        /// <remarks>
-        /// Reads the clock&#39;s substate/s from the top of the current ledger. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateClockRequest"></param>
-        /// <returns>ApiResponse of StateClockResponse</returns>
-        ApiResponse<StateClockResponse> StateClockPostWithHttpInfo(StateClockRequest stateClockRequest);
-        /// <summary>
         /// Get Component Details
         /// </summary>
         /// <remarks>
@@ -176,26 +155,26 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <returns>ApiResponse of StateComponentResponse</returns>
         ApiResponse<StateComponentResponse> StateComponentPostWithHttpInfo(StateComponentRequest stateComponentRequest);
         /// <summary>
-        /// Get Epoch Details
+        /// Get Consensus Manager Details
         /// </summary>
         /// <remarks>
-        /// Reads the epoch manager&#39;s substate/s from the top of the current ledger. 
+        /// Reads the consensus manager&#39;s substate/s from the top of the current ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateEpochRequest"></param>
-        /// <returns>StateEpochResponse</returns>
-        StateEpochResponse StateEpochPost(StateEpochRequest stateEpochRequest);
+        /// <param name="stateConsensusManagerRequest"></param>
+        /// <returns>StateConsensusManagerResponse</returns>
+        StateConsensusManagerResponse StateConsensusManagerPost(StateConsensusManagerRequest stateConsensusManagerRequest);
 
         /// <summary>
-        /// Get Epoch Details
+        /// Get Consensus Manager Details
         /// </summary>
         /// <remarks>
-        /// Reads the epoch manager&#39;s substate/s from the top of the current ledger. 
+        /// Reads the consensus manager&#39;s substate/s from the top of the current ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateEpochRequest"></param>
-        /// <returns>ApiResponse of StateEpochResponse</returns>
-        ApiResponse<StateEpochResponse> StateEpochPostWithHttpInfo(StateEpochRequest stateEpochRequest);
+        /// <param name="stateConsensusManagerRequest"></param>
+        /// <returns>ApiResponse of StateConsensusManagerResponse</returns>
+        ApiResponse<StateConsensusManagerResponse> StateConsensusManagerPostWithHttpInfo(StateConsensusManagerRequest stateConsensusManagerRequest);
         /// <summary>
         /// Get Non-Fungible Details
         /// </summary>
@@ -336,29 +315,6 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <returns>Task of ApiResponse (StateAccountResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<StateAccountResponse>> StateAccountPostWithHttpInfoAsync(StateAccountRequest stateAccountRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
-        /// Get Clock Details
-        /// </summary>
-        /// <remarks>
-        /// Reads the clock&#39;s substate/s from the top of the current ledger. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateClockRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of StateClockResponse</returns>
-        System.Threading.Tasks.Task<StateClockResponse> StateClockPostAsync(StateClockRequest stateClockRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-        /// <summary>
-        /// Get Clock Details
-        /// </summary>
-        /// <remarks>
-        /// Reads the clock&#39;s substate/s from the top of the current ledger. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateClockRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (StateClockResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<StateClockResponse>> StateClockPostWithHttpInfoAsync(StateClockRequest stateClockRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-        /// <summary>
         /// Get Component Details
         /// </summary>
         /// <remarks>
@@ -382,28 +338,28 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <returns>Task of ApiResponse (StateComponentResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<StateComponentResponse>> StateComponentPostWithHttpInfoAsync(StateComponentRequest stateComponentRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
-        /// Get Epoch Details
+        /// Get Consensus Manager Details
         /// </summary>
         /// <remarks>
-        /// Reads the epoch manager&#39;s substate/s from the top of the current ledger. 
+        /// Reads the consensus manager&#39;s substate/s from the top of the current ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateEpochRequest"></param>
+        /// <param name="stateConsensusManagerRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of StateEpochResponse</returns>
-        System.Threading.Tasks.Task<StateEpochResponse> StateEpochPostAsync(StateEpochRequest stateEpochRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of StateConsensusManagerResponse</returns>
+        System.Threading.Tasks.Task<StateConsensusManagerResponse> StateConsensusManagerPostAsync(StateConsensusManagerRequest stateConsensusManagerRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Get Epoch Details
+        /// Get Consensus Manager Details
         /// </summary>
         /// <remarks>
-        /// Reads the epoch manager&#39;s substate/s from the top of the current ledger. 
+        /// Reads the consensus manager&#39;s substate/s from the top of the current ledger. 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateEpochRequest"></param>
+        /// <param name="stateConsensusManagerRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (StateEpochResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<StateEpochResponse>> StateEpochPostWithHttpInfoAsync(StateEpochRequest stateEpochRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (StateConsensusManagerResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateConsensusManagerResponse>> StateConsensusManagerPostWithHttpInfoAsync(StateConsensusManagerRequest stateConsensusManagerRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Non-Fungible Details
         /// </summary>
@@ -944,123 +900,6 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Get Clock Details Reads the clock&#39;s substate/s from the top of the current ledger. 
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateClockRequest"></param>
-        /// <returns>StateClockResponse</returns>
-        public StateClockResponse StateClockPost(StateClockRequest stateClockRequest)
-        {
-            RadixDlt.CoreApiSdk.Client.ApiResponse<StateClockResponse> localVarResponse = StateClockPostWithHttpInfo(stateClockRequest);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get Clock Details Reads the clock&#39;s substate/s from the top of the current ledger. 
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateClockRequest"></param>
-        /// <returns>ApiResponse of StateClockResponse</returns>
-        public RadixDlt.CoreApiSdk.Client.ApiResponse<StateClockResponse> StateClockPostWithHttpInfo(StateClockRequest stateClockRequest)
-        {
-            // verify the required parameter 'stateClockRequest' is set
-            if (stateClockRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'stateClockRequest' when calling StateApi->StateClockPost");
-
-            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = stateClockRequest;
-
-
-            // make the HTTP request
-            var localVarResponse = this.Client.Post<StateClockResponse>("/state/clock", localVarRequestOptions, this.Configuration);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("StateClockPost", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Get Clock Details Reads the clock&#39;s substate/s from the top of the current ledger. 
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateClockRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of StateClockResponse</returns>
-        public async System.Threading.Tasks.Task<StateClockResponse> StateClockPostAsync(StateClockRequest stateClockRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            RadixDlt.CoreApiSdk.Client.ApiResponse<StateClockResponse> localVarResponse = await StateClockPostWithHttpInfoAsync(stateClockRequest, cancellationToken).ConfigureAwait(false);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get Clock Details Reads the clock&#39;s substate/s from the top of the current ledger. 
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateClockRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (StateClockResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<StateClockResponse>> StateClockPostWithHttpInfoAsync(StateClockRequest stateClockRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            // verify the required parameter 'stateClockRequest' is set
-            if (stateClockRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'stateClockRequest' when calling StateApi->StateClockPost");
-
-
-            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-
-            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = stateClockRequest;
-
-
-            // make the HTTP request
-
-            var localVarResponse = await this.AsynchronousClient.PostAsync<StateClockResponse>("/state/clock", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("StateClockPost", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
         /// Get Component Details Reads the component&#39;s substate/s from the top of the current ledger. Also recursively extracts vault balance totals from the component&#39;s entity subtree. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
@@ -1178,28 +1017,28 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Get Epoch Details Reads the epoch manager&#39;s substate/s from the top of the current ledger. 
+        /// Get Consensus Manager Details Reads the consensus manager&#39;s substate/s from the top of the current ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateEpochRequest"></param>
-        /// <returns>StateEpochResponse</returns>
-        public StateEpochResponse StateEpochPost(StateEpochRequest stateEpochRequest)
+        /// <param name="stateConsensusManagerRequest"></param>
+        /// <returns>StateConsensusManagerResponse</returns>
+        public StateConsensusManagerResponse StateConsensusManagerPost(StateConsensusManagerRequest stateConsensusManagerRequest)
         {
-            RadixDlt.CoreApiSdk.Client.ApiResponse<StateEpochResponse> localVarResponse = StateEpochPostWithHttpInfo(stateEpochRequest);
+            RadixDlt.CoreApiSdk.Client.ApiResponse<StateConsensusManagerResponse> localVarResponse = StateConsensusManagerPostWithHttpInfo(stateConsensusManagerRequest);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Epoch Details Reads the epoch manager&#39;s substate/s from the top of the current ledger. 
+        /// Get Consensus Manager Details Reads the consensus manager&#39;s substate/s from the top of the current ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateEpochRequest"></param>
-        /// <returns>ApiResponse of StateEpochResponse</returns>
-        public RadixDlt.CoreApiSdk.Client.ApiResponse<StateEpochResponse> StateEpochPostWithHttpInfo(StateEpochRequest stateEpochRequest)
+        /// <param name="stateConsensusManagerRequest"></param>
+        /// <returns>ApiResponse of StateConsensusManagerResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<StateConsensusManagerResponse> StateConsensusManagerPostWithHttpInfo(StateConsensusManagerRequest stateConsensusManagerRequest)
         {
-            // verify the required parameter 'stateEpochRequest' is set
-            if (stateEpochRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'stateEpochRequest' when calling StateApi->StateEpochPost");
+            // verify the required parameter 'stateConsensusManagerRequest' is set
+            if (stateConsensusManagerRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'stateConsensusManagerRequest' when calling StateApi->StateConsensusManagerPost");
 
             RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
 
@@ -1218,15 +1057,15 @@ namespace RadixDlt.CoreApiSdk.Api
             var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = stateEpochRequest;
+            localVarRequestOptions.Data = stateConsensusManagerRequest;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<StateEpochResponse>("/state/epoch", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<StateConsensusManagerResponse>("/state/consensus-manager", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("StateEpochPost", localVarResponse);
+                Exception _exception = this.ExceptionFactory("StateConsensusManagerPost", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -1234,30 +1073,30 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Get Epoch Details Reads the epoch manager&#39;s substate/s from the top of the current ledger. 
+        /// Get Consensus Manager Details Reads the consensus manager&#39;s substate/s from the top of the current ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateEpochRequest"></param>
+        /// <param name="stateConsensusManagerRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of StateEpochResponse</returns>
-        public async System.Threading.Tasks.Task<StateEpochResponse> StateEpochPostAsync(StateEpochRequest stateEpochRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of StateConsensusManagerResponse</returns>
+        public async System.Threading.Tasks.Task<StateConsensusManagerResponse> StateConsensusManagerPostAsync(StateConsensusManagerRequest stateConsensusManagerRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.CoreApiSdk.Client.ApiResponse<StateEpochResponse> localVarResponse = await StateEpochPostWithHttpInfoAsync(stateEpochRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.CoreApiSdk.Client.ApiResponse<StateConsensusManagerResponse> localVarResponse = await StateConsensusManagerPostWithHttpInfoAsync(stateConsensusManagerRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Get Epoch Details Reads the epoch manager&#39;s substate/s from the top of the current ledger. 
+        /// Get Consensus Manager Details Reads the consensus manager&#39;s substate/s from the top of the current ledger. 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateEpochRequest"></param>
+        /// <param name="stateConsensusManagerRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (StateEpochResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<StateEpochResponse>> StateEpochPostWithHttpInfoAsync(StateEpochRequest stateEpochRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (StateConsensusManagerResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<StateConsensusManagerResponse>> StateConsensusManagerPostWithHttpInfoAsync(StateConsensusManagerRequest stateConsensusManagerRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'stateEpochRequest' is set
-            if (stateEpochRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'stateEpochRequest' when calling StateApi->StateEpochPost");
+            // verify the required parameter 'stateConsensusManagerRequest' is set
+            if (stateConsensusManagerRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'stateConsensusManagerRequest' when calling StateApi->StateConsensusManagerPost");
 
 
             RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
@@ -1278,16 +1117,16 @@ namespace RadixDlt.CoreApiSdk.Api
             var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = stateEpochRequest;
+            localVarRequestOptions.Data = stateConsensusManagerRequest;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<StateEpochResponse>("/state/epoch", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateConsensusManagerResponse>("/state/consensus-manager", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("StateEpochPost", localVarResponse);
+                Exception _exception = this.ExceptionFactory("StateConsensusManagerPost", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

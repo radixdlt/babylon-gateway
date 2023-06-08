@@ -103,7 +103,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NotarizedTransaction" /> class.
         /// </summary>
-        /// <param name="hash">The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;Blake2b-256(compiled_notarized_transaction)&#x60; (required).</param>
+        /// <param name="hash">The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature.  (required).</param>
         /// <param name="payloadHex">The hex-encoded full notarized transaction payload. Returning this can be disabled in TransactionFormatOptions on your request (default true)..</param>
         /// <param name="signedIntent">signedIntent (required).</param>
         /// <param name="notarySignature">notarySignature (required).</param>
@@ -131,9 +131,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;Blake2b-256(compiled_notarized_transaction)&#x60;
+        /// The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. 
         /// </summary>
-        /// <value>The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;Blake2b-256(compiled_notarized_transaction)&#x60;</value>
+        /// <value>The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. </value>
         [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
         public string Hash { get; set; }
 

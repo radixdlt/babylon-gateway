@@ -97,12 +97,16 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerFieldStateSubstate), "AccessControllerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesModuleFieldAccessRulesSubstate), "AccessRulesModuleFieldAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(AccountDepositRuleIndexEntrySubstate), "AccountDepositRuleIndexEntry")]
+    [JsonSubtypes.KnownSubType(typeof(AccountFieldStateSubstate), "AccountFieldState")]
     [JsonSubtypes.KnownSubType(typeof(AccountVaultIndexEntrySubstate), "AccountVaultIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(ClockFieldStateSubstate), "ClockFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerFieldConfigSubstate), "EpochManagerFieldConfig")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerFieldCurrentValidatorSetSubstate), "EpochManagerFieldCurrentValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerFieldStateSubstate), "EpochManagerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(EpochManagerRegisteredValidatorsByStakeIndexEntrySubstate), "EpochManagerRegisteredValidatorsByStakeIndexEntry")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldConfigSubstate), "ConsensusManagerFieldConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentProposalStatisticSubstate), "ConsensusManagerFieldCurrentProposalStatistic")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentValidatorSetSubstate), "ConsensusManagerFieldCurrentValidatorSet")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldStateSubstate), "ConsensusManagerFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate), "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
     [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldDivisibilitySubstate), "FungibleResourceManagerFieldDivisibility")]
     [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldTotalSupplySubstate), "FungibleResourceManagerFieldTotalSupply")]
     [JsonSubtypes.KnownSubType(typeof(FungibleVaultFieldBalanceSubstate), "FungibleVaultFieldBalance")]
@@ -135,9 +139,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="AccessRulesModuleFieldAccessRulesSubstate" /> class.
         /// </summary>
         /// <param name="accessRules">accessRules (required).</param>
-        /// <param name="childBlueprintRules">childBlueprintRules (required).</param>
+        /// <param name="innerBlueprintAccessRules">innerBlueprintAccessRules (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.AccessRulesModuleFieldAccessRules).</param>
-        public AccessRulesModuleFieldAccessRulesSubstate(AccessRules accessRules = default(AccessRules), List<BlueprintAccessRules> childBlueprintRules = default(List<BlueprintAccessRules>), SubstateType substateType = SubstateType.AccessRulesModuleFieldAccessRules) : base(substateType)
+        public AccessRulesModuleFieldAccessRulesSubstate(NodeAuthorityRules accessRules = default(NodeAuthorityRules), List<BlueprintAccessRules> innerBlueprintAccessRules = default(List<BlueprintAccessRules>), SubstateType substateType = SubstateType.AccessRulesModuleFieldAccessRules) : base(substateType)
         {
             // to ensure "accessRules" is required (not null)
             if (accessRules == null)
@@ -145,25 +149,25 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("accessRules is a required property for AccessRulesModuleFieldAccessRulesSubstate and cannot be null");
             }
             this.AccessRules = accessRules;
-            // to ensure "childBlueprintRules" is required (not null)
-            if (childBlueprintRules == null)
+            // to ensure "innerBlueprintAccessRules" is required (not null)
+            if (innerBlueprintAccessRules == null)
             {
-                throw new ArgumentNullException("childBlueprintRules is a required property for AccessRulesModuleFieldAccessRulesSubstate and cannot be null");
+                throw new ArgumentNullException("innerBlueprintAccessRules is a required property for AccessRulesModuleFieldAccessRulesSubstate and cannot be null");
             }
-            this.ChildBlueprintRules = childBlueprintRules;
+            this.InnerBlueprintAccessRules = innerBlueprintAccessRules;
         }
 
         /// <summary>
         /// Gets or Sets AccessRules
         /// </summary>
         [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public AccessRules AccessRules { get; set; }
+        public NodeAuthorityRules AccessRules { get; set; }
 
         /// <summary>
-        /// Gets or Sets ChildBlueprintRules
+        /// Gets or Sets InnerBlueprintAccessRules
         /// </summary>
-        [DataMember(Name = "child_blueprint_rules", IsRequired = true, EmitDefaultValue = true)]
-        public List<BlueprintAccessRules> ChildBlueprintRules { get; set; }
+        [DataMember(Name = "inner_blueprint_access_rules", IsRequired = true, EmitDefaultValue = true)]
+        public List<BlueprintAccessRules> InnerBlueprintAccessRules { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -175,7 +179,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class AccessRulesModuleFieldAccessRulesSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
-            sb.Append("  ChildBlueprintRules: ").Append(ChildBlueprintRules).Append("\n");
+            sb.Append("  InnerBlueprintAccessRules: ").Append(InnerBlueprintAccessRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -217,10 +221,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.AccessRules.Equals(input.AccessRules))
                 ) && base.Equals(input) && 
                 (
-                    this.ChildBlueprintRules == input.ChildBlueprintRules ||
-                    this.ChildBlueprintRules != null &&
-                    input.ChildBlueprintRules != null &&
-                    this.ChildBlueprintRules.SequenceEqual(input.ChildBlueprintRules)
+                    this.InnerBlueprintAccessRules == input.InnerBlueprintAccessRules ||
+                    this.InnerBlueprintAccessRules != null &&
+                    input.InnerBlueprintAccessRules != null &&
+                    this.InnerBlueprintAccessRules.SequenceEqual(input.InnerBlueprintAccessRules)
                 );
         }
 
@@ -237,9 +241,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
                 }
-                if (this.ChildBlueprintRules != null)
+                if (this.InnerBlueprintAccessRules != null)
                 {
-                    hashCode = (hashCode * 59) + this.ChildBlueprintRules.GetHashCode();
+                    hashCode = (hashCode * 59) + this.InnerBlueprintAccessRules.GetHashCode();
                 }
                 return hashCode;
             }

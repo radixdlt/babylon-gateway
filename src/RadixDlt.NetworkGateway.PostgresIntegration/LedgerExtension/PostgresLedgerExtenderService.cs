@@ -284,28 +284,16 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         {
             foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
             {
+                var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
+                var stateUpdates = committedTransaction.Receipt.StateUpdates;
+
                 try
                 {
-                    var stateVersion = committedTransaction.StateVersion;
-                    var stateUpdates = committedTransaction.Receipt.StateUpdates;
-
                     long? epochUpdate = null;
                     long? roundInEpochUpdate = null;
                     DateTime? roundTimestampUpdate = null;
 
-                    if (committedTransaction.LedgerTransaction is CoreModel.ValidatorLedgerTransaction vlt)
-                    {
-                        switch (vlt.ValidatorTransaction)
-                        {
-                            case CoreModel.RoundUpdateValidatorTransaction roundUpdate:
-                                epochUpdate = roundUpdate.ConsensusEpoch;
-                                roundInEpochUpdate = roundUpdate.RoundInEpoch;
-                                roundTimestampUpdate = DateTimeOffset.FromUnixTimeMilliseconds(roundUpdate.ProposerTimestamp.UnixTimestampMs).UtcDateTime;
-                                break;
-                        }
-                    }
-
-                    if (committedTransaction.LedgerTransaction is CoreModel.SystemLedgerTransaction)
+                    if (committedTransaction.LedgerTransaction is CoreModel.GenesisLedgerTransaction)
                     {
                         // no-op so far
                     }
@@ -315,12 +303,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         ledgerTransactionMarkersToAdd.Add(new OriginLedgerTransactionMarker
                         {
                             Id = sequences.LedgerTransactionMarkerSequence++,
-                            StateVersion = committedTransaction.StateVersion,
+                            StateVersion = stateVersion,
                             OriginType = LedgerTransactionMarkerOriginType.User,
                         });
 
-                        var coreManifest = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.Manifest;
-                        var toolkitManifest = new ToolkitModel.Transaction.TransactionManifest(coreManifest.Instructions, coreManifest.BlobsHex.Values.Select(x => (ToolkitModel.ValueBytes)x.ConvertFromHex()).ToArray());
+                        var coreInstructions = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.Instructions;
+                        var coreBlobs = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.BlobsHex;
+                        var toolkitManifest = new ToolkitModel.Transaction.TransactionManifest(coreInstructions, coreBlobs.Values.Select(x => (ToolkitModel.ValueBytes)x.ConvertFromHex()).ToArray());
                         var extractedAddresses = RadixEngineToolkit.RadixEngineToolkit.ExtractAddressesFromManifest(toolkitManifest, _networkConfigurationProvider.GetNetworkId());
 
                         foreach (var address in extractedAddresses.All())
@@ -331,6 +320,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         manifestExtractedAddresses[stateVersion] = extractedAddresses;
                     }
 
+                    if (committedTransaction.LedgerTransaction is CoreModel.RoundUpdateLedgerTransaction rult)
+                    {
+                        epochUpdate = rult.RoundUpdateTransaction.Epoch;
+                        roundInEpochUpdate = rult.RoundUpdateTransaction.RoundInEpoch;
+                        roundTimestampUpdate = DateTimeOffset.FromUnixTimeMilliseconds(rult.RoundUpdateTransaction.ProposerTimestamp.UnixTimestampMs).UtcDateTime;
+                    }
+
                     foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
                     {
                         var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)newGlobalEntity.EntityAddress, ea => new ReferencedEntity(ea,  newGlobalEntity.EntityType, stateVersion));
@@ -339,8 +335,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         {
                             CoreModel.EntityType.GlobalGenericComponent => typeof(GlobalGenericComponentEntity),
                             CoreModel.EntityType.GlobalPackage => typeof(GlobalPackageEntity),
-                            CoreModel.EntityType.GlobalEpochManager => typeof(EpochManagerEntity),
-                            CoreModel.EntityType.GlobalClock => typeof(GlobalClockEntity),
+                            CoreModel.EntityType.GlobalConsensusManager => typeof(GlobalConsensusManager),
                             CoreModel.EntityType.GlobalValidator => typeof(GlobalValidatorEntity),
                             CoreModel.EntityType.GlobalAccessController => typeof(GlobalAccessControllerEntity),
                             CoreModel.EntityType.GlobalVirtualEd25519Account => typeof(GlobalAccountEntity),
@@ -365,9 +360,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         {
                             foreach (var oe in entityOwner.GetOwnedEntities())
                             {
-                                referencedEntities.GetOrAdd((EntityAddress)oe.EntityAddress, _ =>
-                                        new ReferencedEntity(
-                                            (EntityAddress)oe.EntityAddress,  oe.EntityType, stateVersion))
+                                referencedEntities
+                                    .GetOrAdd((EntityAddress)oe.EntityAddress, ea => new ReferencedEntity(ea, oe.EntityType, stateVersion))
                                     .IsImmediateChildOf(referencedEntity);
                                 childToParentEntities[(EntityAddress)oe.EntityAddress] = (EntityAddress)substateId.EntityAddress;
                             }
@@ -384,9 +378,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 .PostResolveConfigure((InternalFungibleVaultEntity e) => e.RoyaltyVaultOfEntityId = referencedEntity.DatabaseId);
                         }
 
-                        if (substateData is CoreModel.IParentAddressPointer parentAddressPointer)
+                        if (substateData is CoreModel.IEntityAddressPointer parentAddressPointer)
                         {
-                            foreach (var entityAddress in parentAddressPointer.GetParentAddresses())
+                            foreach (var entityAddress in parentAddressPointer.GetEntityAddresses())
                             {
                                 referencedEntities.MarkSeenAddress((EntityAddress)entityAddress);
                             }
@@ -451,8 +445,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         {
                             referencedEntity.PostResolveConfigure((GlobalValidatorEntity e) =>
                             {
-                                e.StakeVaultEntityId = referencedEntities.Get((EntityAddress)validator.StakeVault.EntityAddress).DatabaseId;
-                                e.UnstakeVaultEntityId = referencedEntities.Get((EntityAddress)validator.UnstakeVault.EntityAddress).DatabaseId;
+                                // TODO this is complete garbage
+                                e.StakeVaultEntityId = referencedEntities.Get((EntityAddress)validator.StakeXrdVault.EntityAddress).DatabaseId;
+                                e.UnstakeVaultEntityId = referencedEntities.Get((EntityAddress)validator.StakeXrdVault.EntityAddress).DatabaseId;
                             });
                         }
                     }
@@ -460,7 +455,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
                     {
                         var sid = deletedSubstate.SubstateId;
-
                         referencedEntities.GetOrAdd((EntityAddress)sid.EntityAddress, ea => new ReferencedEntity(ea, sid.EntityType, stateVersion));
                     }
 
@@ -520,21 +514,21 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     LedgerTransaction ledgerTransaction = committedTransaction.LedgerTransaction switch
                     {
+                        CoreModel.GenesisLedgerTransaction => new GenesisLedgerTransaction(),
                         CoreModel.UserLedgerTransaction ult => new UserLedgerTransaction
                         {
                             PayloadHash = ult.NotarizedTransaction.GetHashBytes(),
                             IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.GetHashBytes(),
                             SignedIntentHash = ult.NotarizedTransaction.SignedIntent.GetHashBytes(),
                         },
-                        CoreModel.ValidatorLedgerTransaction => new ValidatorLedgerTransaction(),
-                        CoreModel.SystemLedgerTransaction => new SystemLedgerTransaction(),
+                        CoreModel.RoundUpdateLedgerTransaction => new RoundUpdateLedgerTransaction(),
                         _ => throw new UnreachableException(),
                     };
 
                     var feeSummary = committedTransaction.Receipt.FeeSummary;
 
-                    ledgerTransaction.StateVersion = committedTransaction.StateVersion;
-                    ledgerTransaction.TransactionAccumulator = committedTransaction.GetAccumulatorHashBytes();
+                    ledgerTransaction.StateVersion = stateVersion;
+                    ledgerTransaction.TransactionAccumulator = committedTransaction.ResultantStateIdentifiers.GetAccumulatorHashBytes();
                     // TODO commented out as incompatible with current Core API version
                     ledgerTransaction.Message = null; // message: transaction.Metadata.Message?.ConvertFromHex(),
                     ledgerTransaction.Epoch = summary.Epoch;
@@ -570,16 +564,16 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         ledgerTransactionMarkersToAdd.Add(new OriginLedgerTransactionMarker
                         {
                             Id = sequences.LedgerTransactionMarkerSequence++,
-                            StateVersion = committedTransaction.StateVersion,
+                            StateVersion = stateVersion,
                             OriginType = LedgerTransactionMarkerOriginType.EpochChange,
                         });
                     }
 
                     lastTransactionSummary = summary;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    _logger.LogError("Failed to process transaction with stateVersion: {StateVersion}", committedTransaction.StateVersion);
+                    _logger.LogError(ex, "Failed to process transaction {StateVersion} at referenced entities scan stage", stateVersion);
                     throw;
                 }
             }
@@ -597,12 +591,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             {
                 var entityType = knownDbEntity switch
                 {
-                    EpochManagerEntity => CoreModel.EntityType.GlobalEpochManager,
+                    GlobalConsensusManager => CoreModel.EntityType.GlobalConsensusManager,
                     GlobalAccountEntity => CoreModel.EntityType.GlobalAccount,
                     InternalAccountEntity => CoreModel.EntityType.InternalAccount,
                     GlobalFungibleResourceEntity => CoreModel.EntityType.GlobalFungibleResource,
                     GlobalNonFungibleResourceEntity => CoreModel.EntityType.GlobalNonFungibleResource,
-                    GlobalClockEntity => CoreModel.EntityType.GlobalClock,
                     GlobalValidatorEntity => CoreModel.EntityType.GlobalValidator,
                     InternalFungibleVaultEntity => CoreModel.EntityType.InternalFungibleVault,
                     InternalNonFungibleVaultEntity => CoreModel.EntityType.InternalNonFungibleVault,
@@ -629,7 +622,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 Entity dbEntity = referencedEntity.Type switch
                 {
-                    CoreModel.EntityType.GlobalEpochManager => new EpochManagerEntity(),
+                    CoreModel.EntityType.GlobalConsensusManager => new GlobalConsensusManager(),
                     CoreModel.EntityType.GlobalFungibleResource => new GlobalFungibleResourceEntity(),
                     CoreModel.EntityType.GlobalNonFungibleResource => new GlobalNonFungibleResourceEntity(),
                     CoreModel.EntityType.GlobalGenericComponent => new GlobalGenericComponentEntity(),
@@ -638,13 +631,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     CoreModel.EntityType.InternalFungibleVault => new InternalFungibleVaultEntity(),
                     CoreModel.EntityType.InternalNonFungibleVault => new InternalNonFungibleVaultEntity(),
                     CoreModel.EntityType.InternalKeyValueStore => new InternalKeyValueStoreEntity(),
-                    CoreModel.EntityType.GlobalClock => new GlobalClockEntity(),
                     CoreModel.EntityType.GlobalAccessController => new GlobalAccessControllerEntity(),
                     CoreModel.EntityType.GlobalValidator => new GlobalValidatorEntity(),
                     CoreModel.EntityType.GlobalIdentity => new GlobalIdentityEntity(),
                     CoreModel.EntityType.GlobalAccount => new GlobalAccountEntity(),
                     CoreModel.EntityType.InternalAccount => new InternalAccountEntity(),
-                    CoreModel.EntityType.GlobalVirtualEd25519Identity =>new GlobalIdentityEntity(),
+                    CoreModel.EntityType.GlobalVirtualEd25519Identity => new GlobalIdentityEntity(),
                     CoreModel.EntityType.GlobalVirtualSecp256k1Identity => new GlobalIdentityEntity(),
                     CoreModel.EntityType.GlobalVirtualEd25519Account => new GlobalAccountEntity(),
                     CoreModel.EntityType.GlobalVirtualSecp256k1Account => new GlobalAccountEntity(),
@@ -731,17 +723,19 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         {
             foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
             {
+                var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
+                var stateUpdates = committedTransaction.Receipt.StateUpdates;
+                var currentEpoch = ledgerExtension.LatestTransactionSummary.Epoch;
+                var affectedGlobalEntities = new HashSet<long>();
+
                 try
                 {
-                    var currentEpoch = ledgerExtension.LatestTransactionSummary.Epoch;
-                    var stateVersion = committedTransaction.StateVersion;
-                    var stateUpdates = committedTransaction.Receipt.StateUpdates;
-
                     foreach (var substate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
                     {
                         var substateId = substate.SubstateId;
                         var substateData = substate.SubstateData;
                         var referencedEntity = referencedEntities.Get((EntityAddress)substateId.EntityAddress);
+                        affectedGlobalEntities.Add(referencedEntity.AffectedGlobalEntityId);
 
                         if (substateData is CoreModel.MetadataModuleEntrySubstate metadata)
                         {
@@ -813,7 +807,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 AccessRulesChain = JsonConvert.SerializeObject(accessRulesModuleFieldAccessRulesSubstate.AccessRules),
                             });
 
-                            entityAccessRulesChainHistoryToAdd.AddRange(accessRulesModuleFieldAccessRulesSubstate.ChildBlueprintRules
+                            entityAccessRulesChainHistoryToAdd.AddRange(accessRulesModuleFieldAccessRulesSubstate.InnerBlueprintAccessRules
                                 .Select(x => new EntityAccessRulesChainHistory
                                 {
                                     Id = sequences.EntityAccessRulesChainHistorySequence++,
@@ -858,12 +852,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             });
                         }
 
-                        if (substateData is CoreModel.EpochManagerFieldStateSubstate epochManagerFieldStateSubstate)
+                        if (substateData is CoreModel.ConsensusManagerFieldStateSubstate consensusManagerFieldStateSubstate)
                         {
-                            currentEpoch = epochManagerFieldStateSubstate.Epoch;
+                            currentEpoch = consensusManagerFieldStateSubstate.Epoch;
                         }
 
-                        if (substateData is CoreModel.EpochManagerFieldCurrentValidatorSetSubstate validatorSet)
+                        if (substateData is CoreModel.ConsensusManagerFieldCurrentValidatorSetSubstate validatorSet)
                         {
                             var change = validatorSet.ValidatorSet
                                 .ToDictionary(
@@ -883,6 +877,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         var substateId = deletedSubstate.SubstateId;
                         var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)substateId.EntityAddress, ea => new ReferencedEntity(ea, substateId.EntityType, stateVersion));
+                        affectedGlobalEntities.Add(referencedEntity.AffectedGlobalEntityId);
 
                         if (substateId.SubstateType == CoreModel.SubstateType.NonFungibleVaultContentsIndexEntry)
                         {
@@ -899,6 +894,16 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 stateVersion));
                         }
                     }
+
+                    var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);
+                    transaction.AffectedGlobalEntities = affectedGlobalEntities.ToArray();
+
+                    ledgerTransactionMarkersToAdd.AddRange(affectedGlobalEntities.Select(affectedEntity => new AffectedGlobalEntityTransactionMarker
+                    {
+                        Id = sequences.LedgerTransactionMarkerSequence++,
+                        EntityId = affectedEntity,
+                        StateVersion = stateVersion,
+                    }));
 
                     var eventTypeIdentifiers = _networkConfigurationProvider.GetEventTypeIdentifiers();
                     // TODO we'd love to see schemed JSON payload here and/or support for SBOR to schemed JSON in RET but this is not available yet; consider this entire section heavy WIP
@@ -1062,9 +1067,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    _logger.LogError("Failed to process transaction with stateVersion: {StateVersion}", committedTransaction.StateVersion);
+                    _logger.LogError(ex, "Failed to process transaction {StateVersion} at substate processing stage", stateVersion);
                     throw;
                 }
             }

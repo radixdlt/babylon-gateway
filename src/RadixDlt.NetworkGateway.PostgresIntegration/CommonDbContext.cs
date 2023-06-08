@@ -170,8 +170,8 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<LedgerTransaction>()
             .HasDiscriminator<LedgerTransactionType>(DiscriminatorColumnName)
             .HasValue<UserLedgerTransaction>(LedgerTransactionType.User)
-            .HasValue<ValidatorLedgerTransaction>(LedgerTransactionType.Validator)
-            .HasValue<SystemLedgerTransaction>(LedgerTransactionType.System);
+            .HasValue<RoundUpdateLedgerTransaction>(LedgerTransactionType.RoundUpdate)
+            .HasValue<GenesisLedgerTransaction>(LedgerTransactionType.Genesis);
 
         modelBuilder.Entity<UserLedgerTransaction>()
             .HasIndex(lt => lt.IntentHash)
@@ -197,7 +197,8 @@ internal abstract class CommonDbContext : DbContext
             .HasDiscriminator<LedgerTransactionMarkerType>(DiscriminatorColumnName)
             .HasValue<EventLedgerTransactionMarker>(LedgerTransactionMarkerType.Event)
             .HasValue<OriginLedgerTransactionMarker>(LedgerTransactionMarkerType.Origin)
-            .HasValue<ManifestAddressLedgerTransactionMarker>(LedgerTransactionMarkerType.ManifestAddress);
+            .HasValue<ManifestAddressLedgerTransactionMarker>(LedgerTransactionMarkerType.ManifestAddress)
+            .HasValue<AffectedGlobalEntityTransactionMarker>(LedgerTransactionMarkerType.AffectedGlobalEntity);
 
         modelBuilder.Entity<EventLedgerTransactionMarker>()
             .HasIndex(e => new { e.EventType, e.EntityId, e.StateVersion })
@@ -210,6 +211,10 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<ManifestAddressLedgerTransactionMarker>()
             .HasIndex(e => new { e.OperationType, e.EntityId, e.StateVersion })
             .HasFilter("discriminator = 'manifest_address'");
+
+        modelBuilder.Entity<AffectedGlobalEntityTransactionMarker>()
+            .HasIndex(e => new { e.EntityId, e.StateVersion })
+            .HasFilter("discriminator = 'affected_global_entity'");
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)
@@ -232,7 +237,7 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<Entity>()
             .HasDiscriminator<EntityType>(DiscriminatorColumnName)
-            .HasValue<EpochManagerEntity>(EntityType.GlobalEpochManager)
+            .HasValue<GlobalConsensusManager>(EntityType.GlobalConsensusManager)
             .HasValue<GlobalFungibleResourceEntity>(EntityType.GlobalFungibleResource)
             .HasValue<GlobalNonFungibleResourceEntity>(EntityType.GlobalNonFungibleResource)
             .HasValue<GlobalGenericComponentEntity>(EntityType.GlobalGenericComponent)
@@ -243,7 +248,6 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<InternalKeyValueStoreEntity>(EntityType.InternalKeyValueStore)
             .HasValue<InternalFungibleVaultEntity>(EntityType.InternalFungibleVault)
             .HasValue<InternalNonFungibleVaultEntity>(EntityType.InternalNonFungibleVault)
-            .HasValue<GlobalClockEntity>(EntityType.GlobalClock)
             .HasValue<GlobalValidatorEntity>(EntityType.GlobalValidator)
             .HasValue<GlobalAccessControllerEntity>(EntityType.GlobalAccessController)
             .HasValue<GlobalIdentityEntity>(EntityType.GlobalIdentity);

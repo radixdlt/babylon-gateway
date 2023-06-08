@@ -117,8 +117,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="resourcePackage">resourcePackage (required).</param>
         /// <param name="accountPackage">accountPackage (required).</param>
         /// <param name="identityPackage">identityPackage (required).</param>
-        /// <param name="epochManagerPackage">epochManagerPackage (required).</param>
-        /// <param name="clockPackage">clockPackage (required).</param>
+        /// <param name="consensusManagerPackage">consensusManagerPackage (required).</param>
         /// <param name="accessControllerPackage">accessControllerPackage (required).</param>
         /// <param name="transactionProcessorPackage">transactionProcessorPackage (required).</param>
         /// <param name="metadataModulePackage">metadataModulePackage (required).</param>
@@ -126,11 +125,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="accessRulesPackage">accessRulesPackage (required).</param>
         /// <param name="genesisHelperPackage">genesisHelperPackage (required).</param>
         /// <param name="faucetPackage">faucetPackage (required).</param>
-        /// <param name="epochManager">epochManager (required).</param>
-        /// <param name="clock">clock (required).</param>
+        /// <param name="consensusManager">consensusManager (required).</param>
         /// <param name="genesisHelper">genesisHelper (required).</param>
         /// <param name="faucet">faucet (required).</param>
-        public NetworkConfigurationResponseWellKnownAddresses(string xrd = default(string), string secp256k1SignatureVirtualBadge = default(string), string ed25519SignatureVirtualBadge = default(string), string packageOfDirectCallerVirtualBadge = default(string), string globalCallerVirtualBadge = default(string), string systemTransactionBadge = default(string), string packageOwnerBadge = default(string), string validatorOwnerBadge = default(string), string accountOwnerBadge = default(string), string identityOwnerBadge = default(string), string packagePackage = default(string), string resourcePackage = default(string), string accountPackage = default(string), string identityPackage = default(string), string epochManagerPackage = default(string), string clockPackage = default(string), string accessControllerPackage = default(string), string transactionProcessorPackage = default(string), string metadataModulePackage = default(string), string royaltyModulePackage = default(string), string accessRulesPackage = default(string), string genesisHelperPackage = default(string), string faucetPackage = default(string), string epochManager = default(string), string clock = default(string), string genesisHelper = default(string), string faucet = default(string))
+        public NetworkConfigurationResponseWellKnownAddresses(string xrd = default(string), string secp256k1SignatureVirtualBadge = default(string), string ed25519SignatureVirtualBadge = default(string), string packageOfDirectCallerVirtualBadge = default(string), string globalCallerVirtualBadge = default(string), string systemTransactionBadge = default(string), string packageOwnerBadge = default(string), string validatorOwnerBadge = default(string), string accountOwnerBadge = default(string), string identityOwnerBadge = default(string), string packagePackage = default(string), string resourcePackage = default(string), string accountPackage = default(string), string identityPackage = default(string), string consensusManagerPackage = default(string), string accessControllerPackage = default(string), string transactionProcessorPackage = default(string), string metadataModulePackage = default(string), string royaltyModulePackage = default(string), string accessRulesPackage = default(string), string genesisHelperPackage = default(string), string faucetPackage = default(string), string consensusManager = default(string), string genesisHelper = default(string), string faucet = default(string))
         {
             // to ensure "xrd" is required (not null)
             if (xrd == null)
@@ -216,18 +214,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("identityPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
             this.IdentityPackage = identityPackage;
-            // to ensure "epochManagerPackage" is required (not null)
-            if (epochManagerPackage == null)
+            // to ensure "consensusManagerPackage" is required (not null)
+            if (consensusManagerPackage == null)
             {
-                throw new ArgumentNullException("epochManagerPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+                throw new ArgumentNullException("consensusManagerPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
-            this.EpochManagerPackage = epochManagerPackage;
-            // to ensure "clockPackage" is required (not null)
-            if (clockPackage == null)
-            {
-                throw new ArgumentNullException("clockPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
-            }
-            this.ClockPackage = clockPackage;
+            this.ConsensusManagerPackage = consensusManagerPackage;
             // to ensure "accessControllerPackage" is required (not null)
             if (accessControllerPackage == null)
             {
@@ -270,18 +262,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("faucetPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
             this.FaucetPackage = faucetPackage;
-            // to ensure "epochManager" is required (not null)
-            if (epochManager == null)
+            // to ensure "consensusManager" is required (not null)
+            if (consensusManager == null)
             {
-                throw new ArgumentNullException("epochManager is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+                throw new ArgumentNullException("consensusManager is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
-            this.EpochManager = epochManager;
-            // to ensure "clock" is required (not null)
-            if (clock == null)
-            {
-                throw new ArgumentNullException("clock is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
-            }
-            this.Clock = clock;
+            this.ConsensusManager = consensusManager;
             // to ensure "genesisHelper" is required (not null)
             if (genesisHelper == null)
             {
@@ -381,16 +367,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public string IdentityPackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets EpochManagerPackage
+        /// Gets or Sets ConsensusManagerPackage
         /// </summary>
-        [DataMember(Name = "epoch_manager_package", IsRequired = true, EmitDefaultValue = true)]
-        public string EpochManagerPackage { get; set; }
-
-        /// <summary>
-        /// Gets or Sets ClockPackage
-        /// </summary>
-        [DataMember(Name = "clock_package", IsRequired = true, EmitDefaultValue = true)]
-        public string ClockPackage { get; set; }
+        [DataMember(Name = "consensus_manager_package", IsRequired = true, EmitDefaultValue = true)]
+        public string ConsensusManagerPackage { get; set; }
 
         /// <summary>
         /// Gets or Sets AccessControllerPackage
@@ -435,16 +415,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public string FaucetPackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets EpochManager
+        /// Gets or Sets ConsensusManager
         /// </summary>
-        [DataMember(Name = "epoch_manager", IsRequired = true, EmitDefaultValue = true)]
-        public string EpochManager { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Clock
-        /// </summary>
-        [DataMember(Name = "clock", IsRequired = true, EmitDefaultValue = true)]
-        public string Clock { get; set; }
+        [DataMember(Name = "consensus_manager", IsRequired = true, EmitDefaultValue = true)]
+        public string ConsensusManager { get; set; }
 
         /// <summary>
         /// Gets or Sets GenesisHelper
@@ -480,8 +454,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  ResourcePackage: ").Append(ResourcePackage).Append("\n");
             sb.Append("  AccountPackage: ").Append(AccountPackage).Append("\n");
             sb.Append("  IdentityPackage: ").Append(IdentityPackage).Append("\n");
-            sb.Append("  EpochManagerPackage: ").Append(EpochManagerPackage).Append("\n");
-            sb.Append("  ClockPackage: ").Append(ClockPackage).Append("\n");
+            sb.Append("  ConsensusManagerPackage: ").Append(ConsensusManagerPackage).Append("\n");
             sb.Append("  AccessControllerPackage: ").Append(AccessControllerPackage).Append("\n");
             sb.Append("  TransactionProcessorPackage: ").Append(TransactionProcessorPackage).Append("\n");
             sb.Append("  MetadataModulePackage: ").Append(MetadataModulePackage).Append("\n");
@@ -489,8 +462,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  AccessRulesPackage: ").Append(AccessRulesPackage).Append("\n");
             sb.Append("  GenesisHelperPackage: ").Append(GenesisHelperPackage).Append("\n");
             sb.Append("  FaucetPackage: ").Append(FaucetPackage).Append("\n");
-            sb.Append("  EpochManager: ").Append(EpochManager).Append("\n");
-            sb.Append("  Clock: ").Append(Clock).Append("\n");
+            sb.Append("  ConsensusManager: ").Append(ConsensusManager).Append("\n");
             sb.Append("  GenesisHelper: ").Append(GenesisHelper).Append("\n");
             sb.Append("  Faucet: ").Append(Faucet).Append("\n");
             sb.Append("}\n");
@@ -599,14 +571,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.IdentityPackage.Equals(input.IdentityPackage))
                 ) && 
                 (
-                    this.EpochManagerPackage == input.EpochManagerPackage ||
-                    (this.EpochManagerPackage != null &&
-                    this.EpochManagerPackage.Equals(input.EpochManagerPackage))
-                ) && 
-                (
-                    this.ClockPackage == input.ClockPackage ||
-                    (this.ClockPackage != null &&
-                    this.ClockPackage.Equals(input.ClockPackage))
+                    this.ConsensusManagerPackage == input.ConsensusManagerPackage ||
+                    (this.ConsensusManagerPackage != null &&
+                    this.ConsensusManagerPackage.Equals(input.ConsensusManagerPackage))
                 ) && 
                 (
                     this.AccessControllerPackage == input.AccessControllerPackage ||
@@ -644,14 +611,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.FaucetPackage.Equals(input.FaucetPackage))
                 ) && 
                 (
-                    this.EpochManager == input.EpochManager ||
-                    (this.EpochManager != null &&
-                    this.EpochManager.Equals(input.EpochManager))
-                ) && 
-                (
-                    this.Clock == input.Clock ||
-                    (this.Clock != null &&
-                    this.Clock.Equals(input.Clock))
+                    this.ConsensusManager == input.ConsensusManager ||
+                    (this.ConsensusManager != null &&
+                    this.ConsensusManager.Equals(input.ConsensusManager))
                 ) && 
                 (
                     this.GenesisHelper == input.GenesisHelper ||
@@ -730,13 +692,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.IdentityPackage.GetHashCode();
                 }
-                if (this.EpochManagerPackage != null)
+                if (this.ConsensusManagerPackage != null)
                 {
-                    hashCode = (hashCode * 59) + this.EpochManagerPackage.GetHashCode();
-                }
-                if (this.ClockPackage != null)
-                {
-                    hashCode = (hashCode * 59) + this.ClockPackage.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ConsensusManagerPackage.GetHashCode();
                 }
                 if (this.AccessControllerPackage != null)
                 {
@@ -766,13 +724,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.FaucetPackage.GetHashCode();
                 }
-                if (this.EpochManager != null)
+                if (this.ConsensusManager != null)
                 {
-                    hashCode = (hashCode * 59) + this.EpochManager.GetHashCode();
-                }
-                if (this.Clock != null)
-                {
-                    hashCode = (hashCode * 59) + this.Clock.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ConsensusManager.GetHashCode();
                 }
                 if (this.GenesisHelper != null)
                 {

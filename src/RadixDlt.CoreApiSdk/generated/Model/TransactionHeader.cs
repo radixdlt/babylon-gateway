@@ -103,26 +103,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionHeader" /> class.
         /// </summary>
-        /// <param name="version">version (required).</param>
         /// <param name="networkId">The logical id of the network (required).</param>
         /// <param name="startEpochInclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction can be submitted. In the case of uncommitted transactions, a value of &#x60;10^10&#x60; indicates that the epoch was &gt;&#x3D; &#x60;10^10&#x60;.  (required).</param>
         /// <param name="endEpochExclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be rejected. In the case of uncommitted transactions, a value of &#x60;10^10&#x60; indicates that the epoch was &gt;&#x3D; &#x60;10^10&#x60;.  (required).</param>
-        /// <param name="nonce">A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, chosen to be unique to allow replay of transaction intents (required).</param>
+        /// <param name="nonce">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, chosen to allow a unique intent to be created (to enable submitting an otherwise identical/duplicate intent).  (required).</param>
         /// <param name="notaryPublicKey">notaryPublicKey (required).</param>
-        /// <param name="notaryAsSignatory">Specifies whether the notary&#39;s signature should be included in transaction signers list (required).</param>
-        /// <param name="costUnitLimit">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the maximum number of cost units available for transaction execution. (required).</param>
+        /// <param name="notaryIsSignatory">Specifies whether the notary public key should be included in the transaction signers list (required).</param>
         /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;255&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
-        public TransactionHeader(int version = default(int), int networkId = default(int), long startEpochInclusive = default(long), long endEpochExclusive = default(long), string nonce = default(string), PublicKey notaryPublicKey = default(PublicKey), bool notaryAsSignatory = default(bool), long costUnitLimit = default(long), int tipPercentage = default(int))
+        public TransactionHeader(int networkId = default(int), long startEpochInclusive = default(long), long endEpochExclusive = default(long), long nonce = default(long), PublicKey notaryPublicKey = default(PublicKey), bool notaryIsSignatory = default(bool), int tipPercentage = default(int))
         {
-            this._Version = version;
             this.NetworkId = networkId;
             this.StartEpochInclusive = startEpochInclusive;
             this.EndEpochExclusive = endEpochExclusive;
-            // to ensure "nonce" is required (not null)
-            if (nonce == null)
-            {
-                throw new ArgumentNullException("nonce is a required property for TransactionHeader and cannot be null");
-            }
             this.Nonce = nonce;
             // to ensure "notaryPublicKey" is required (not null)
             if (notaryPublicKey == null)
@@ -130,16 +122,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("notaryPublicKey is a required property for TransactionHeader and cannot be null");
             }
             this.NotaryPublicKey = notaryPublicKey;
-            this.NotaryAsSignatory = notaryAsSignatory;
-            this.CostUnitLimit = costUnitLimit;
+            this.NotaryIsSignatory = notaryIsSignatory;
             this.TipPercentage = tipPercentage;
         }
-
-        /// <summary>
-        /// Gets or Sets _Version
-        /// </summary>
-        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public int _Version { get; set; }
 
         /// <summary>
         /// The logical id of the network
@@ -163,11 +148,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public long EndEpochExclusive { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, chosen to be unique to allow replay of transaction intents
+        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, chosen to allow a unique intent to be created (to enable submitting an otherwise identical/duplicate intent). 
         /// </summary>
-        /// <value>A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, chosen to be unique to allow replay of transaction intents</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, chosen to allow a unique intent to be created (to enable submitting an otherwise identical/duplicate intent). </value>
         [DataMember(Name = "nonce", IsRequired = true, EmitDefaultValue = true)]
-        public string Nonce { get; set; }
+        public long Nonce { get; set; }
 
         /// <summary>
         /// Gets or Sets NotaryPublicKey
@@ -176,18 +161,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public PublicKey NotaryPublicKey { get; set; }
 
         /// <summary>
-        /// Specifies whether the notary&#39;s signature should be included in transaction signers list
+        /// Specifies whether the notary public key should be included in the transaction signers list
         /// </summary>
-        /// <value>Specifies whether the notary&#39;s signature should be included in transaction signers list</value>
-        [DataMember(Name = "notary_as_signatory", IsRequired = true, EmitDefaultValue = true)]
-        public bool NotaryAsSignatory { get; set; }
-
-        /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the maximum number of cost units available for transaction execution.
-        /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the maximum number of cost units available for transaction execution.</value>
-        [DataMember(Name = "cost_unit_limit", IsRequired = true, EmitDefaultValue = true)]
-        public long CostUnitLimit { get; set; }
+        /// <value>Specifies whether the notary public key should be included in the transaction signers list</value>
+        [DataMember(Name = "notary_is_signatory", IsRequired = true, EmitDefaultValue = true)]
+        public bool NotaryIsSignatory { get; set; }
 
         /// <summary>
         /// An integer between &#x60;0&#x60; and &#x60;255&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.
@@ -204,14 +182,12 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionHeader {\n");
-            sb.Append("  _Version: ").Append(_Version).Append("\n");
             sb.Append("  NetworkId: ").Append(NetworkId).Append("\n");
             sb.Append("  StartEpochInclusive: ").Append(StartEpochInclusive).Append("\n");
             sb.Append("  EndEpochExclusive: ").Append(EndEpochExclusive).Append("\n");
             sb.Append("  Nonce: ").Append(Nonce).Append("\n");
             sb.Append("  NotaryPublicKey: ").Append(NotaryPublicKey).Append("\n");
-            sb.Append("  NotaryAsSignatory: ").Append(NotaryAsSignatory).Append("\n");
-            sb.Append("  CostUnitLimit: ").Append(CostUnitLimit).Append("\n");
+            sb.Append("  NotaryIsSignatory: ").Append(NotaryIsSignatory).Append("\n");
             sb.Append("  TipPercentage: ").Append(TipPercentage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -249,10 +225,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this._Version == input._Version ||
-                    this._Version.Equals(input._Version)
-                ) && 
-                (
                     this.NetworkId == input.NetworkId ||
                     this.NetworkId.Equals(input.NetworkId)
                 ) && 
@@ -266,8 +238,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.Nonce == input.Nonce ||
-                    (this.Nonce != null &&
-                    this.Nonce.Equals(input.Nonce))
+                    this.Nonce.Equals(input.Nonce)
                 ) && 
                 (
                     this.NotaryPublicKey == input.NotaryPublicKey ||
@@ -275,12 +246,8 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.NotaryPublicKey.Equals(input.NotaryPublicKey))
                 ) && 
                 (
-                    this.NotaryAsSignatory == input.NotaryAsSignatory ||
-                    this.NotaryAsSignatory.Equals(input.NotaryAsSignatory)
-                ) && 
-                (
-                    this.CostUnitLimit == input.CostUnitLimit ||
-                    this.CostUnitLimit.Equals(input.CostUnitLimit)
+                    this.NotaryIsSignatory == input.NotaryIsSignatory ||
+                    this.NotaryIsSignatory.Equals(input.NotaryIsSignatory)
                 ) && 
                 (
                     this.TipPercentage == input.TipPercentage ||
@@ -297,20 +264,15 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this._Version.GetHashCode();
                 hashCode = (hashCode * 59) + this.NetworkId.GetHashCode();
                 hashCode = (hashCode * 59) + this.StartEpochInclusive.GetHashCode();
                 hashCode = (hashCode * 59) + this.EndEpochExclusive.GetHashCode();
-                if (this.Nonce != null)
-                {
-                    hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
                 if (this.NotaryPublicKey != null)
                 {
                     hashCode = (hashCode * 59) + this.NotaryPublicKey.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.NotaryAsSignatory.GetHashCode();
-                hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
+                hashCode = (hashCode * 59) + this.NotaryIsSignatory.GetHashCode();
                 hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
                 return hashCode;
             }

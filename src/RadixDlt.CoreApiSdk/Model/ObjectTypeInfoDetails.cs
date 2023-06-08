@@ -66,9 +66,9 @@ using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class ObjectTypeInfoDetails : IParentAddressPointer
+public partial class ObjectTypeInfoDetails : IEntityAddressPointer
 {
-    public IEnumerable<string> GetParentAddresses()
+    public IEnumerable<string> GetEntityAddresses()
     {
         yield return OuterObject;
         yield return PackageAddress;

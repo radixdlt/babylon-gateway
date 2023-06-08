@@ -210,64 +210,88 @@ namespace RadixDlt.CoreApiSdk.Model
         NonFungibleVaultContentsIndexEntry = 19,
 
         /// <summary>
-        /// Enum EpochManagerFieldConfig for value: EpochManagerFieldConfig
+        /// Enum ConsensusManagerFieldConfig for value: ConsensusManagerFieldConfig
         /// </summary>
-        [EnumMember(Value = "EpochManagerFieldConfig")]
-        EpochManagerFieldConfig = 20,
+        [EnumMember(Value = "ConsensusManagerFieldConfig")]
+        ConsensusManagerFieldConfig = 20,
 
         /// <summary>
-        /// Enum EpochManagerFieldState for value: EpochManagerFieldState
+        /// Enum ConsensusManagerFieldState for value: ConsensusManagerFieldState
         /// </summary>
-        [EnumMember(Value = "EpochManagerFieldState")]
-        EpochManagerFieldState = 21,
+        [EnumMember(Value = "ConsensusManagerFieldState")]
+        ConsensusManagerFieldState = 21,
 
         /// <summary>
-        /// Enum EpochManagerFieldCurrentValidatorSet for value: EpochManagerFieldCurrentValidatorSet
+        /// Enum ConsensusManagerFieldCurrentValidatorSet for value: ConsensusManagerFieldCurrentValidatorSet
         /// </summary>
-        [EnumMember(Value = "EpochManagerFieldCurrentValidatorSet")]
-        EpochManagerFieldCurrentValidatorSet = 22,
+        [EnumMember(Value = "ConsensusManagerFieldCurrentValidatorSet")]
+        ConsensusManagerFieldCurrentValidatorSet = 22,
 
         /// <summary>
-        /// Enum EpochManagerRegisteredValidatorsByStakeIndexEntry for value: EpochManagerRegisteredValidatorsByStakeIndexEntry
+        /// Enum ConsensusManagerFieldCurrentProposalStatistic for value: ConsensusManagerFieldCurrentProposalStatistic
         /// </summary>
-        [EnumMember(Value = "EpochManagerRegisteredValidatorsByStakeIndexEntry")]
-        EpochManagerRegisteredValidatorsByStakeIndexEntry = 23,
+        [EnumMember(Value = "ConsensusManagerFieldCurrentProposalStatistic")]
+        ConsensusManagerFieldCurrentProposalStatistic = 23,
 
         /// <summary>
-        /// Enum ClockFieldState for value: ClockFieldState
+        /// Enum ConsensusManagerFieldCurrentTimeRoundedToMinutes for value: ConsensusManagerFieldCurrentTimeRoundedToMinutes
         /// </summary>
-        [EnumMember(Value = "ClockFieldState")]
-        ClockFieldState = 24,
+        [EnumMember(Value = "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
+        ConsensusManagerFieldCurrentTimeRoundedToMinutes = 24,
+
+        /// <summary>
+        /// Enum ConsensusManagerFieldCurrentTime for value: ConsensusManagerFieldCurrentTime
+        /// </summary>
+        [EnumMember(Value = "ConsensusManagerFieldCurrentTime")]
+        ConsensusManagerFieldCurrentTime = 25,
+
+        /// <summary>
+        /// Enum ConsensusManagerRegisteredValidatorsByStakeIndexEntry for value: ConsensusManagerRegisteredValidatorsByStakeIndexEntry
+        /// </summary>
+        [EnumMember(Value = "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
+        ConsensusManagerRegisteredValidatorsByStakeIndexEntry = 26,
 
         /// <summary>
         /// Enum ValidatorFieldState for value: ValidatorFieldState
         /// </summary>
         [EnumMember(Value = "ValidatorFieldState")]
-        ValidatorFieldState = 25,
+        ValidatorFieldState = 27,
+
+        /// <summary>
+        /// Enum AccountFieldState for value: AccountFieldState
+        /// </summary>
+        [EnumMember(Value = "AccountFieldState")]
+        AccountFieldState = 28,
 
         /// <summary>
         /// Enum AccountVaultIndexEntry for value: AccountVaultIndexEntry
         /// </summary>
         [EnumMember(Value = "AccountVaultIndexEntry")]
-        AccountVaultIndexEntry = 26,
+        AccountVaultIndexEntry = 29,
+
+        /// <summary>
+        /// Enum AccountDepositRuleIndexEntry for value: AccountDepositRuleIndexEntry
+        /// </summary>
+        [EnumMember(Value = "AccountDepositRuleIndexEntry")]
+        AccountDepositRuleIndexEntry = 30,
 
         /// <summary>
         /// Enum AccessControllerFieldState for value: AccessControllerFieldState
         /// </summary>
         [EnumMember(Value = "AccessControllerFieldState")]
-        AccessControllerFieldState = 27,
+        AccessControllerFieldState = 31,
 
         /// <summary>
         /// Enum GenericScryptoComponentFieldState for value: GenericScryptoComponentFieldState
         /// </summary>
         [EnumMember(Value = "GenericScryptoComponentFieldState")]
-        GenericScryptoComponentFieldState = 28,
+        GenericScryptoComponentFieldState = 32,
 
         /// <summary>
         /// Enum GenericKeyValueStoreEntry for value: GenericKeyValueStoreEntry
         /// </summary>
         [EnumMember(Value = "GenericKeyValueStoreEntry")]
-        GenericKeyValueStoreEntry = 29
+        GenericKeyValueStoreEntry = 33
 
     }
 

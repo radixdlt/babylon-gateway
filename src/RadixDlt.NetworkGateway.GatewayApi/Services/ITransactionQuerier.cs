@@ -106,4 +106,6 @@ public class TransactionStreamPageRequestSearchCriteria
     public List<EntityAddress> ManifestAccountsWithdrawnFrom { get; set; } = new();
 
     public List<EntityAddress> ManifestResources { get; set; } = new();
+
+    public List<EntityAddress> AffectedGlobalEntities { get; set; } = new();
 }

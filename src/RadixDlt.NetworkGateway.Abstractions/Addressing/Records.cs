@@ -76,8 +76,7 @@ public sealed record HrpDefinition(
     string GlobalIdentity,
     string GlobalVirtualSecp256k1Identity,
     string GlobalVirtualEd25519Identity,
-    string GlobalEpochManager,
-    string GlobalClock,
+    string GlobalConsensusManager,
     string GlobalFungibleResource,
     string GlobalNonFungibleResource,
     string InternalFungibleVault,
@@ -101,8 +100,7 @@ public sealed record WellKnownAddresses(
     string ResourcePackage,
     string AccountPackage,
     string IdentityPackage,
-    string EpochManagerPackage,
-    string ClockPackage,
+    string ConsensusManagerPackage,
     string AccessControllerPackage,
     string TransactionProcessorPackage,
     string MetadataModulePackage,
@@ -110,8 +108,7 @@ public sealed record WellKnownAddresses(
     string AccessRulesPackage,
     string GenesisHelperPackage,
     string FaucetPackage,
-    string EpochManager,
-    string Clock,
+    string ConsensusManager,
     string GenesisHelper,
     string Faucet
 );
@@ -119,9 +116,8 @@ public sealed record WellKnownAddresses(
 public enum AddressEntityType
 {
     GlobalPackage,
-    GlobalEpochManager,
+    GlobalConsensusManager,
     GlobalValidator,
-    GlobalClock,
     GlobalGenericComponent,
     InternalGenericComponent,
     GlobalAccount,

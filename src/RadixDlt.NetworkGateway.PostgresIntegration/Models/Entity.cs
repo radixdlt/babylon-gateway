@@ -174,11 +174,7 @@ internal class GlobalValidatorEntity : ComponentEntity
     }
 }
 
-internal class EpochManagerEntity : ComponentEntity
-{
-}
-
-internal class GlobalClockEntity : ComponentEntity
+internal class GlobalConsensusManager : ComponentEntity
 {
 }
 
