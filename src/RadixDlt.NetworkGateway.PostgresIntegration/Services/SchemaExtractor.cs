@@ -62,81 +62,77 @@
  * permissions under this License.
  */
 
+using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using RadixDlt.NetworkGateway.Abstractions.Configuration;
-using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
+public static class EventNames
 {
-    Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token);
+    public static class FungibleResourceManager
+    {
+        public const string Burn = "BurnFungibleResourceEvent";
+        public const string Mint = "MintFungibleResourceEvent";
+    }
 
-    byte GetNetworkId();
+    public static class NonFungibleResourceManager
+    {
+        public const string Burn = "BurnNonFungibleResourceEvent";
+        public const string Mint = "MintNonFungibleResourceEvent";
+    }
 
-    string GetNetworkName();
+    public static class FungibleVault
+    {
+        public const string Withdraw = "WithdrawResourceEvent";
+        public const string Deposit = "DepositResourceEvent";
+    }
+
+    public static class NonFungibleVault
+    {
+        public const string Withdraw = "WithdrawResourceEvent";
+        public const string Deposit = "DepositResourceEvent";
+    }
 }
 
-public sealed record CapturedConfig(byte NetworkId, string NetworkName, HrpDefinition HrpDefinition, WellKnownAddresses WellKnownAddresses, AddressTypeDefinition[] AddressTypeDefinitions);
-
-public interface ICapturedConfigProvider
+public static class SchemaNames
 {
-    Task<CapturedConfig> CaptureConfiguration();
+    public const string FungibleVault = "FungibleVault";
+    public const string NonFungibleVault = "NonFungibleVault";
+    public const string FungibleResourceManager = "FungibleResourceManager";
+    public const string NonFungibleResourceManager = "NonFungibleResourceManager";
 }
 
-internal class NetworkConfigurationProvider : INetworkConfigurationProvider
+public static class SchemaExtractor
 {
-    private readonly object _writeLock = new();
-    private CapturedConfig? _capturedConfig;
-
-    public async Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token)
+    public static EventTypeIdentifiers ExtractEventTypeIdentifiers(TransactionReceipt genesisLedgerTransactionReceipt)
     {
-        var capturedConfig = await capturedConfigProvider.CaptureConfiguration();
+        var schemas = genesisLedgerTransactionReceipt.StateUpdates.CreatedSubstates
+            .Where(x => x.SubstateData is PackageFieldInfoSubstate)
+            .SelectMany(x => (x.SubstateData as PackageFieldInfoSubstate)!.PackageSchema.BlueprintSchemas)
+            .ToList();
 
-        lock (_writeLock)
-        {
-            if (_capturedConfig != null)
-            {
-                return;
-            }
+        var fungibleVaultSchema = schemas.First(x => x.Key == SchemaNames.FungibleVault).Value;
+        var fungibleVaultWithdrawEventId = fungibleVaultSchema.EventSchemas.First(x => x.Key == EventNames.FungibleVault.Withdraw).Value.Index;
+        var fungibleVaultDepositEventId = fungibleVaultSchema.EventSchemas.First(x => x.Key == EventNames.FungibleVault.Deposit).Value.Index;
 
-            _capturedConfig = capturedConfig;
-        }
-    }
+        var nonFungibleVaultSchema = schemas.First(x => x.Key == SchemaNames.NonFungibleVault).Value;
+        var nonFungibleVaultWithdrawEventId = nonFungibleVaultSchema.EventSchemas.First(x => x.Key == EventNames.NonFungibleVault.Withdraw).Value.Index;
+        var nonFungibleVaultDepositEventId = nonFungibleVaultSchema.EventSchemas.First(x => x.Key == EventNames.NonFungibleVault.Deposit).Value.Index;
 
-    public byte GetNetworkId()
-    {
-        return GetCapturedConfig().NetworkId;
-    }
+        var fungibleResourceManagerSchema = schemas.First(x => x.Key == SchemaNames.FungibleResourceManager).Value;
+        var mintFungibleResourceEventId = fungibleResourceManagerSchema.EventSchemas.First(x => x.Key == EventNames.FungibleResourceManager.Mint).Value.Index;
+        var burnFungibleResourceEventId = fungibleResourceManagerSchema.EventSchemas.First(x => x.Key == EventNames.FungibleResourceManager.Burn).Value.Index;
 
-    public string GetNetworkName()
-    {
-        return GetCapturedConfig().NetworkName;
-    }
+        var nonFungibleResourceManagerSchema = schemas.First(x => x.Key == SchemaNames.NonFungibleResourceManager).Value;
+        var mintNonFungibleResourceEventId = nonFungibleResourceManagerSchema.EventSchemas.First(x => x.Key == EventNames.NonFungibleResourceManager.Mint).Value.Index;
+        var burnNonFungibleResourceEventId = nonFungibleResourceManagerSchema.EventSchemas.First(x => x.Key == EventNames.NonFungibleResourceManager.Burn).Value.Index;
 
-    public HrpDefinition GetHrpDefinition()
-    {
-        return GetCapturedConfig().HrpDefinition;
-    }
-
-    public WellKnownAddresses GetWellKnownAddresses()
-    {
-        return GetCapturedConfig().WellKnownAddresses;
-    }
-
-    public AddressTypeDefinition GetAddressTypeDefinition(AddressEntityType entityType)
-    {
-        return GetCapturedConfig().AddressTypeDefinitions.First(atd => atd.EntityType == entityType);
-    }
-
-    private CapturedConfig GetCapturedConfig()
-    {
-        return _capturedConfig ?? throw new ConfigurationException("Config hasn't been captured from a Node or from the Database yet.");
+        return new EventTypeIdentifiers(
+            new EventTypeIdentifiers.FungibleVaultEventTypeIdentifiers(fungibleVaultWithdrawEventId, fungibleVaultDepositEventId),
+            new EventTypeIdentifiers.NonFungibleVaultEventTypeIdentifiers(nonFungibleVaultWithdrawEventId, nonFungibleVaultDepositEventId),
+            new EventTypeIdentifiers.FungibleResourceEventTypeIdentifiers(mintFungibleResourceEventId, burnFungibleResourceEventId),
+            new EventTypeIdentifiers.NonFungibleResourceEventTypeIdentifiers(mintNonFungibleResourceEventId, burnNonFungibleResourceEventId)
+        );
     }
 }

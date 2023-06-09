@@ -96,6 +96,18 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:resource_type", "fungible,non_fungible");
 
             migrationBuilder.CreateTable(
+                name: "component_schema",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false),
+                    event_type_identifiers = table.Column<EventTypeIdentifiers>(type: "jsonb", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_component_schema", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "entities",
                 columns: table => new
                 {
@@ -328,8 +340,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     network_name = table.Column<string>(type: "text", nullable: false),
                     hrp_definition = table.Column<HrpDefinition>(type: "jsonb", nullable: false),
                     well_known_addresses = table.Column<WellKnownAddresses>(type: "jsonb", nullable: false),
-                    address_type_definitions = table.Column<AddressTypeDefinition[]>(type: "jsonb", nullable: false),
-                    event_type_identifiers = table.Column<EventTypeIdentifiers>(type: "jsonb", nullable: false)
+                    address_type_definitions = table.Column<AddressTypeDefinition[]>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -629,6 +640,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "component_schema");
+
             migrationBuilder.DropTable(
                 name: "entities");
 

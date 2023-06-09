@@ -119,6 +119,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityAccessRulesChainHistory> EntityAccessRulesChainHistory => Set<EntityAccessRulesChainHistory>();
 
+    public DbSet<ComponentSchema> ComponentSchema => Set<ComponentSchema>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {

@@ -82,7 +82,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230608080915_InitialCreate")]
+    [Migration("20230609114326_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -105,6 +105,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public_key_type", new[] { "ecdsa_secp256k1", "eddsa_ed25519" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "resource_type", new[] { "fungible", "non_fungible" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentSchema", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<EventTypeIdentifiers>("EventTypeIdentifiers")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("event_type_identifiers");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("component_schema");
+                });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity", b =>
                 {
@@ -573,11 +589,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("address_type_definitions");
-
-                    b.Property<EventTypeIdentifiers>("EventTypeIdentifiers")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("event_type_identifiers");
 
                     b.Property<HrpDefinition>("HrpDefinition")
                         .IsRequired()
