@@ -122,18 +122,21 @@ internal class EntityStateQuerier : IEntityStateQuerier
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
     private readonly ReadOnlyDbContext _dbContext;
+    private readonly IVirtualEntityMetadataProvider _virtualEntityMetadataProvider;
     private readonly ILogger<EntityStateQuerier> _logger;
     private readonly byte _ecdsaSecp256k1VirtualAccountAddressPrefix;
     private readonly byte _eddsaEd25519VirtualAccountAddressPrefix;
     private readonly byte _ecdsaSecp256k1VirtualIdentityAddressPrefix;
     private readonly byte _eddsaEd25519VirtualIdentityAddressPrefix;
 
-    public EntityStateQuerier(INetworkConfigurationProvider networkConfigurationProvider, ReadOnlyDbContext dbContext, IOptionsSnapshot<EndpointOptions> endpointConfiguration, ILogger<EntityStateQuerier> logger)
+    public EntityStateQuerier(INetworkConfigurationProvider networkConfigurationProvider, ReadOnlyDbContext dbContext,
+        IOptionsSnapshot<EndpointOptions> endpointConfiguration, ILogger<EntityStateQuerier> logger, IVirtualEntityMetadataProvider virtualEntityMetadataProvider)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _dbContext = dbContext;
         _endpointConfiguration = endpointConfiguration;
         _logger = logger;
+        _virtualEntityMetadataProvider = virtualEntityMetadataProvider;
 
         _ecdsaSecp256k1VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Account).AddressBytePrefix;
         _eddsaEd25519VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Account).AddressBytePrefix;
@@ -212,6 +215,9 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     break;
 
                 case VirtualIdentityEntity:
+                    var virtualIdentityMetadata = _virtualEntityMetadataProvider.GetVirtualEntityMetadata(entity.Address);
+                    metadata[entity.Id] = virtualIdentityMetadata;
+
                     // TODO - we should better fake the data - eg accessRulesChain when this is possible
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         blueprintName: "Account",
@@ -221,6 +227,9 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     break;
 
                 case VirtualAccountComponentEntity:
+                    var virtualAccountMetadata = _virtualEntityMetadataProvider.GetVirtualEntityMetadata(entity.Address);
+                    metadata[entity.Id] = virtualAccountMetadata;
+
                     // TODO - we should better fake the data - eg accessRulesChain when this is possible
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         blueprintName: "Account",
