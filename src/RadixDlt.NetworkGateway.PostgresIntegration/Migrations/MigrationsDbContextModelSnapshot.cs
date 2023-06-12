@@ -103,6 +103,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "resource_type", new[] { "fungible", "non_fungible" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentSchema", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<EventTypeIdentifiers>("EventTypeIdentifiers")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("event_type_identifiers");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("component_schema");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity", b =>
                 {
                     b.Property<long>("Id")
@@ -570,11 +586,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("address_type_definitions");
-
-                    b.Property<EventTypeIdentifiers>("EventTypeIdentifiers")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("event_type_identifiers");
 
                     b.Property<HrpDefinition>("HrpDefinition")
                         .IsRequired()

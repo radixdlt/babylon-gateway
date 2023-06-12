@@ -1,4 +1,4 @@
-﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,37 +62,64 @@
  * permissions under this License.
  */
 
-using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.Abstractions;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-public class EventTypeIdentifiers
+internal interface IComponentSchemaProvider
 {
-    public EventTypeIdentifiers(
-        FungibleVaultEventTypeIdentifiers fungibleVault,
-        NonFungibleVaultEventTypeIdentifiers nonFungibleVault,
-        FungibleResourceEventTypeIdentifiers fungibleResource,
-        NonFungibleResourceEventTypeIdentifiers nonFungibleResource)
+    EventTypeIdentifiers GetEventTypeIdentifiers();
+
+    Task SaveComponentSchema(ComponentSchema componentSchema, CancellationToken token);
+}
+
+internal class ComponentSchemaProvider : IComponentSchemaProvider
+{
+    private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
+
+    private readonly object _writeLock = new();
+    private ComponentSchema? _capturedComponentSchema;
+
+    public ComponentSchemaProvider(IDbContextFactory<ReadWriteDbContext> dbContextFactory)
     {
-        FungibleVault = fungibleVault;
-        NonFungibleVault = nonFungibleVault;
-        FungibleResource = fungibleResource;
-        NonFungibleResource = nonFungibleResource;
+        _dbContextFactory = dbContextFactory;
     }
 
-    public FungibleVaultEventTypeIdentifiers FungibleVault { get; }
+    public EventTypeIdentifiers GetEventTypeIdentifiers()
+    {
+        return GetCapturedComponentSchema().EventTypeIdentifiers;
+    }
 
-    public NonFungibleVaultEventTypeIdentifiers NonFungibleVault { get; }
+    public async Task SaveComponentSchema(ComponentSchema componentSchema, CancellationToken token)
+    {
+        EnsureComponentSchemaCaptured(componentSchema);
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
+        dbContext.ComponentSchema.Add(GetCapturedComponentSchema());
+        await dbContext.SaveChangesAsync(token);
+    }
 
-    public FungibleResourceEventTypeIdentifiers FungibleResource { get; }
+    private ComponentSchema GetCapturedComponentSchema()
+    {
+        return _capturedComponentSchema ?? throw new ConfigurationException("Config hasn't been captured from genesis transaction yet.");
+    }
 
-    public NonFungibleResourceEventTypeIdentifiers NonFungibleResource { get; }
+    private void EnsureComponentSchemaCaptured(ComponentSchema componentSchema)
+    {
+        lock (_writeLock)
+        {
+            if (_capturedComponentSchema != null)
+            {
+                return;
+            }
 
-    public sealed record FungibleVaultEventTypeIdentifiers(int Withdrawal, int Deposit);
-
-    public sealed record NonFungibleVaultEventTypeIdentifiers(int Withdrawal, int Deposit);
-
-    public sealed record FungibleResourceEventTypeIdentifiers(int Minted, int Burned);
-
-    public sealed record NonFungibleResourceEventTypeIdentifiers(int Minted, int Burned);
+            _capturedComponentSchema = componentSchema;
+        }
+    }
 }
