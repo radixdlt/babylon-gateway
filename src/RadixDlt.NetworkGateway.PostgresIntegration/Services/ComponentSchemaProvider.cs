@@ -63,9 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Threading;
@@ -75,7 +73,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal interface IComponentSchemaProvider
 {
-    EventTypeIdentifiers GetEventTypeIdentifiers();
+    ValueTask<EventTypeIdentifiers> GetEventTypeIdentifiers();
 
     Task SaveComponentSchema(ComponentSchema componentSchema, CancellationToken token);
 }
@@ -92,22 +90,38 @@ internal class ComponentSchemaProvider : IComponentSchemaProvider
         _dbContextFactory = dbContextFactory;
     }
 
-    public EventTypeIdentifiers GetEventTypeIdentifiers()
+    public async ValueTask<EventTypeIdentifiers> GetEventTypeIdentifiers()
     {
-        return GetCapturedComponentSchema().EventTypeIdentifiers;
+        return (await GetCapturedComponentSchema()).EventTypeIdentifiers;
     }
 
     public async Task SaveComponentSchema(ComponentSchema componentSchema, CancellationToken token)
     {
         EnsureComponentSchemaCaptured(componentSchema);
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
-        dbContext.ComponentSchema.Add(GetCapturedComponentSchema());
+        dbContext.ComponentSchema.Add(await GetCapturedComponentSchema());
         await dbContext.SaveChangesAsync(token);
     }
 
-    private ComponentSchema GetCapturedComponentSchema()
+    private async ValueTask<ComponentSchema> GetCapturedComponentSchema()
     {
-        return _capturedComponentSchema ?? throw new ConfigurationException("Config hasn't been captured from genesis transaction yet.");
+        if (_capturedComponentSchema != null)
+        {
+            return _capturedComponentSchema;
+        }
+
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var componentSchema = await dbContext.ComponentSchema.FirstOrDefaultAsync();
+
+        if (componentSchema == null)
+        {
+            throw new ConfigurationException("Config hasn't been captured from genesis transaction yet and/or is not stored in our database.");
+        }
+
+        EnsureComponentSchemaCaptured(componentSchema);
+
+        return componentSchema;
     }
 
     private void EnsureComponentSchemaCaptured(ComponentSchema componentSchema)
