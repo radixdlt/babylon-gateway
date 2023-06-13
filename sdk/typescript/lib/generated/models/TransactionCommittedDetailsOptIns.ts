@@ -43,6 +43,12 @@ export interface TransactionCommittedDetailsOptIns {
      * @memberof TransactionCommittedDetailsOptIns
      */
     receipt_events?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof TransactionCommittedDetailsOptIns
+     */
+    affected_global_entities?: boolean;
 }
 
 /**
@@ -68,6 +74,7 @@ export function TransactionCommittedDetailsOptInsFromJSONTyped(json: any, ignore
         'receipt_state_changes': !exists(json, 'receipt_state_changes') ? undefined : json['receipt_state_changes'],
         'receipt_fee_summary': !exists(json, 'receipt_fee_summary') ? undefined : json['receipt_fee_summary'],
         'receipt_events': !exists(json, 'receipt_events') ? undefined : json['receipt_events'],
+        'affected_global_entities': !exists(json, 'affected_global_entities') ? undefined : json['affected_global_entities'],
     };
 }
 
@@ -84,6 +91,7 @@ export function TransactionCommittedDetailsOptInsToJSON(value?: TransactionCommi
         'receipt_state_changes': value.receipt_state_changes,
         'receipt_fee_summary': value.receipt_fee_summary,
         'receipt_events': value.receipt_events,
+        'affected_global_entities': value.affected_global_entities,
     };
 }
 

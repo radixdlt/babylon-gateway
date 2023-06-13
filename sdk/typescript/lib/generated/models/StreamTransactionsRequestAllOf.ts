@@ -70,6 +70,12 @@ export interface StreamTransactionsRequestAllOf {
     manifest_resources_filter?: Array<string>;
     /**
      * 
+     * @type {Array<string>}
+     * @memberof StreamTransactionsRequestAllOf
+     */
+    affected_global_entities_filter?: Array<string>;
+    /**
+     * 
      * @type {Array<StreamTransactionsRequestEventFilterItem>}
      * @memberof StreamTransactionsRequestAllOf
      */
@@ -133,6 +139,7 @@ export function StreamTransactionsRequestAllOfFromJSONTyped(json: any, ignoreDis
         'manifest_accounts_withdrawn_from_filter': !exists(json, 'manifest_accounts_withdrawn_from_filter') ? undefined : json['manifest_accounts_withdrawn_from_filter'],
         'manifest_accounts_deposited_into_filter': !exists(json, 'manifest_accounts_deposited_into_filter') ? undefined : json['manifest_accounts_deposited_into_filter'],
         'manifest_resources_filter': !exists(json, 'manifest_resources_filter') ? undefined : json['manifest_resources_filter'],
+        'affected_global_entities_filter': !exists(json, 'affected_global_entities_filter') ? undefined : json['affected_global_entities_filter'],
         'events_filter': !exists(json, 'events_filter') ? undefined : ((json['events_filter'] as Array<any>).map(StreamTransactionsRequestEventFilterItemFromJSON)),
         'order': !exists(json, 'order') ? undefined : json['order'],
         'opt_ins': !exists(json, 'opt_ins') ? undefined : TransactionCommittedDetailsOptInsFromJSON(json['opt_ins']),
@@ -153,6 +160,7 @@ export function StreamTransactionsRequestAllOfToJSON(value?: StreamTransactionsR
         'manifest_accounts_withdrawn_from_filter': value.manifest_accounts_withdrawn_from_filter,
         'manifest_accounts_deposited_into_filter': value.manifest_accounts_deposited_into_filter,
         'manifest_resources_filter': value.manifest_resources_filter,
+        'affected_global_entities_filter': value.affected_global_entities_filter,
         'events_filter': value.events_filter === undefined ? undefined : ((value.events_filter as Array<any>).map(StreamTransactionsRequestEventFilterItemToJSON)),
         'order': value.order,
         'opt_ins': TransactionCommittedDetailsOptInsToJSON(value.opt_ins),
