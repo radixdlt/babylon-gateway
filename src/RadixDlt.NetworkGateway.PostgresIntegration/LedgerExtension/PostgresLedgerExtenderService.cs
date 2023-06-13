@@ -292,10 +292,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 try
                 {
-                    long? epochUpdate = null;
-                    long? roundInEpochUpdate = null;
-                    DateTime? roundTimestampUpdate = null;
-
                     if (committedTransaction.LedgerTransaction is CoreModel.GenesisLedgerTransaction)
                     {
                         if (stateVersion == 1)
@@ -304,6 +300,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             await _componentSchemaProvider.SaveComponentSchema(new ComponentSchema { EventTypeIdentifiers = eventSchema }, token);
                         }
                     }
+
+                    long? epochUpdate = null;
+                    long? roundInEpochUpdate = null;
+                    DateTime? roundTimestampUpdate = null;
 
                     if (committedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction userLedgerTransaction)
                     {
@@ -912,7 +912,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         StateVersion = stateVersion,
                     }));
 
-                    var eventTypeIdentifiers = _componentSchemaProvider.GetEventTypeIdentifiers();
+                    var eventTypeIdentifiers = await _componentSchemaProvider.GetEventTypeIdentifiers();
                     // TODO we'd love to see schemed JSON payload here and/or support for SBOR to schemed JSON in RET but this is not available yet; consider this entire section heavy WIP
                     foreach (var @event in committedTransaction.Receipt.Events)
                     {
