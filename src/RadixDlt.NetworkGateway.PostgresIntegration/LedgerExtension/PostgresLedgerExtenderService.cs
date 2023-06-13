@@ -725,6 +725,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var entityAccessRulesChainHistoryToAdd = new List<EntityAccessRulesChainHistory>();
         var entityStateToAdd = new List<EntityStateHistory>();
         var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>();
+        var accountDefaultDepositRuleHistoryToAdd = new List<AccountDefaultDepositRuleHistory>();
+        var accountResourceDepositRuleHistoryToAdd = new List<AccountResourceDepositRuleHistory>();
 
         // step: scan all substates to figure out changes
         {
@@ -877,6 +879,29 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                     v => TokenAmount.FromDecimalString(v.Stake));
 
                             validatorSetChanges.Add(new ValidatorSetChange(currentEpoch, change, stateVersion));
+                        }
+
+                        if (substateData is CoreModel.AccountFieldStateSubstate accountFieldState)
+                        {
+                            accountDefaultDepositRuleHistoryToAdd.Add(new AccountDefaultDepositRuleHistory
+                            {
+                                Id = sequences.AccountDefaultDepositRuleHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                AccountEntityId = referencedEntity.DatabaseId,
+                                DefaultDepositRule = accountFieldState.DefaultDepositRule.ToModel(),
+                            });
+                        }
+
+                        if (substateData is CoreModel.AccountDepositRuleIndexEntrySubstate accountDepositRule)
+                        {
+                            accountResourceDepositRuleHistoryToAdd.Add(new AccountResourceDepositRuleHistory
+                            {
+                                Id = sequences.AccountResourceDepositRuleHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                AccountEntityId = referencedEntity.DatabaseId,
+                                ResourceEntityId = referencedEntities.Get((EntityAddress)accountDepositRule.ResourceAddress).DatabaseId,
+                                ResourceDepositRule = accountDepositRule.DepositRule?.ToModel() ?? throw new InvalidOperationException("todo drop this needless exception"), // TODO drop once CoreApi improves its OAS
+                            });
                         }
                     }
 
