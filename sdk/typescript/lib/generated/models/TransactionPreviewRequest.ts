@@ -67,13 +67,7 @@ export interface TransactionPreviewRequest {
      * @type {boolean}
      * @memberof TransactionPreviewRequest
      */
-    notary_as_signatory?: boolean;
-    /**
-     * An integer between `0` and `2^32 - 1`, giving the maximum number of cost units available for transaction execution
-     * @type {number}
-     * @memberof TransactionPreviewRequest
-     */
-    cost_unit_limit: number;
+    notary_is_signatory?: boolean;
     /**
      * An integer between `0` and `255`, giving the validator tip as a percentage amount. A value of `1` corresponds to 1% of the fee.
      * @type {number}
@@ -82,10 +76,10 @@ export interface TransactionPreviewRequest {
     tip_percentage: number;
     /**
      * A decimal-string-encoded integer between `0` and `2^64 - 1`, used to ensure the transaction intent is unique.
-     * @type {string}
+     * @type {number}
      * @memberof TransactionPreviewRequest
      */
-    nonce: string;
+    nonce: number;
     /**
      * A list of public keys to be used as transaction signers
      * @type {Array<PublicKey>}
@@ -108,7 +102,6 @@ export function instanceOfTransactionPreviewRequest(value: object): boolean {
     isInstance = isInstance && "manifest" in value;
     isInstance = isInstance && "start_epoch_inclusive" in value;
     isInstance = isInstance && "end_epoch_exclusive" in value;
-    isInstance = isInstance && "cost_unit_limit" in value;
     isInstance = isInstance && "tip_percentage" in value;
     isInstance = isInstance && "nonce" in value;
     isInstance = isInstance && "signer_public_keys" in value;
@@ -132,8 +125,7 @@ export function TransactionPreviewRequestFromJSONTyped(json: any, ignoreDiscrimi
         'start_epoch_inclusive': json['start_epoch_inclusive'],
         'end_epoch_exclusive': json['end_epoch_exclusive'],
         'notary_public_key': !exists(json, 'notary_public_key') ? undefined : PublicKeyFromJSON(json['notary_public_key']),
-        'notary_as_signatory': !exists(json, 'notary_as_signatory') ? undefined : json['notary_as_signatory'],
-        'cost_unit_limit': json['cost_unit_limit'],
+        'notary_is_signatory': !exists(json, 'notary_is_signatory') ? undefined : json['notary_is_signatory'],
         'tip_percentage': json['tip_percentage'],
         'nonce': json['nonce'],
         'signer_public_keys': ((json['signer_public_keys'] as Array<any>).map(PublicKeyFromJSON)),
@@ -155,8 +147,7 @@ export function TransactionPreviewRequestToJSON(value?: TransactionPreviewReques
         'start_epoch_inclusive': value.start_epoch_inclusive,
         'end_epoch_exclusive': value.end_epoch_exclusive,
         'notary_public_key': PublicKeyToJSON(value.notary_public_key),
-        'notary_as_signatory': value.notary_as_signatory,
-        'cost_unit_limit': value.cost_unit_limit,
+        'notary_is_signatory': value.notary_is_signatory,
         'tip_percentage': value.tip_percentage,
         'nonce': value.nonce,
         'signer_public_keys': ((value.signer_public_keys as Array<any>).map(PublicKeyToJSON)),
