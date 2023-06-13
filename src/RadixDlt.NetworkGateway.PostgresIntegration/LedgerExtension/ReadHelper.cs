@@ -430,6 +430,8 @@ INNER JOIN LATERAL (
         var cd = new CommandDefinition(
             commandText: @"
 SELECT
+    nextval('account_default_deposit_rule_history_id_seq') AS AccountDefaultDepositRuleHistorySequence,
+    nextval('account_resource_deposit_rule_history_id_seq') AS AccountResourceDepositRuleHistorySequence,
     nextval('entity_state_history_id_seq') AS EntityStateHistorySequence,
     nextval('entities_id_seq') AS EntitySequence,
     nextval('entity_access_rules_chain_history_id_seq') AS EntityAccessRulesChainHistorySequence,

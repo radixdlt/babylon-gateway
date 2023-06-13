@@ -66,6 +66,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal class SequencesHolder
 {
+    public long AccountDefaultDepositRuleHistorySequence { get; set; }
+
+    public long AccountResourceDepositRuleHistorySequence { get; set; }
+
     public long EntityStateHistorySequence { get; set; }
 
     public long EntitySequence { get; set; }

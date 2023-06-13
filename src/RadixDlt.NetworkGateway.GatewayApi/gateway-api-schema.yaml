@@ -1177,8 +1177,7 @@ components:
             - resource_package
             - account_package
             - identity_package
-            - epoch_manager_package
-            - clock_package
+            - consensus_manager_package
             - access_controller_package
             - transaction_processor_package
             - metadata_module_package
@@ -1186,8 +1185,7 @@ components:
             - access_rules_package
             - genesis_helper_package
             - faucet_package
-            - epoch_manager
-            - clock
+            - consensus_manager
             - genesis_helper
             - faucet
           properties:
@@ -1219,9 +1217,7 @@ components:
               $ref: "#/components/schemas/Address"
             identity_package:
               $ref: "#/components/schemas/Address"
-            epoch_manager_package:
-              $ref: "#/components/schemas/Address"
-            clock_package:
+            consensus_manager_package:
               $ref: "#/components/schemas/Address"
             access_controller_package:
               $ref: "#/components/schemas/Address"
@@ -1237,9 +1233,7 @@ components:
               $ref: "#/components/schemas/Address"
             faucet_package:
               $ref: "#/components/schemas/Address"
-            epoch_manager:
-              $ref: "#/components/schemas/Address"
-            clock:
+            consensus_manager:
               $ref: "#/components/schemas/Address"
             genesis_helper:
               $ref: "#/components/schemas/Address"

@@ -206,7 +206,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
             WellKnownAddresses = new WellKnownAddresses(
                 Xrd : wka.Xrd,
                 Secp256k1SignatureVirtualBadge: wka.Secp256k1SignatureVirtualBadge,
-                Ed25519_signatureVirtualBadge : wka.Ed25519SignatureVirtualBadge,
+                Ed25519SignatureVirtualBadge : wka.Ed25519SignatureVirtualBadge,
                 PackageOfDirectCallerVirtualBadge : wka.PackageOfDirectCallerVirtualBadge,
                 GlobalCallerVirtualBadge : wka.GlobalCallerVirtualBadge,
                 SystemTransactionBadge : wka.SystemTransactionBadge,
