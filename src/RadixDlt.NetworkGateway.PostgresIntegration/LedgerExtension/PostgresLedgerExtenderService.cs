@@ -892,7 +892,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             });
                         }
 
-                        if (substateData is CoreModel.AccountDepositRuleIndexEntrySubstate accountDepositRule)
+                        if (substateData is CoreModel.AccountDepositRuleIndexEntrySubstate accountDepositRule && accountDepositRule.DepositRule.HasValue)
                         {
                             accountResourceDepositRuleHistoryToAdd.Add(new AccountResourceDepositRuleHistory
                             {
@@ -900,7 +900,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 FromStateVersion = stateVersion,
                                 AccountEntityId = referencedEntity.DatabaseId,
                                 ResourceEntityId = referencedEntities.Get((EntityAddress)accountDepositRule.ResourceAddress).DatabaseId,
-                                ResourceDepositRule = accountDepositRule.DepositRule?.ToModel() ?? throw new InvalidOperationException("todo drop this needless exception"), // TODO drop once CoreApi improves its OAS
+                                ResourceDepositRule = accountDepositRule.DepositRule.Value.ToModel(),
                             });
                         }
                     }
