@@ -88,7 +88,7 @@ public sealed record HrpDefinition(
 public sealed record WellKnownAddresses(
     string Xrd,
     string Secp256k1SignatureVirtualBadge,
-    string Ed25519_signatureVirtualBadge,
+    string Ed25519SignatureVirtualBadge,
     string PackageOfDirectCallerVirtualBadge,
     string GlobalCallerVirtualBadge,
     string SystemTransactionBadge,

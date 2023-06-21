@@ -82,6 +82,4 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
     byte GetNetworkId();
 
     string GetNetworkName();
-
-    EventTypeIdentifiers GetEventTypeIdentifiers();
 }

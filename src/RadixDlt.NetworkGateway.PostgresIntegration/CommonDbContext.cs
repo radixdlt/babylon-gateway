@@ -101,6 +101,10 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityResourceAggregatedVaultsHistory> EntityResourceAggregatedVaultsHistory => Set<EntityResourceAggregatedVaultsHistory>();
 
+    public DbSet<AccountDefaultDepositRuleHistory> AccountDefaultDepositRuleHistory => Set<AccountDefaultDepositRuleHistory>();
+
+    public DbSet<AccountResourceDepositRuleHistory> AccountDepositRuleHistory => Set<AccountResourceDepositRuleHistory>();
+
     public DbSet<EntityVaultHistory> EntityVaultHistory => Set<EntityVaultHistory>();
 
     public DbSet<ResourceEntitySupplyHistory> ResourceEntitySupplyHistory => Set<ResourceEntitySupplyHistory>();
@@ -119,6 +123,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityAccessRulesChainHistory> EntityAccessRulesChainHistory => Set<EntityAccessRulesChainHistory>();
 
+    public DbSet<ComponentSchema> ComponentSchema => Set<ComponentSchema>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -128,6 +134,8 @@ internal abstract class CommonDbContext : DbContext
     // So secondary indexes might benefit from the inclusion of columns for faster lookups
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresEnum<AccountDefaultDepositRule>();
+        modelBuilder.HasPostgresEnum<AccountResourceDepositRule>();
         modelBuilder.HasPostgresEnum<EntityType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
@@ -255,6 +263,12 @@ internal abstract class CommonDbContext : DbContext
 
     private static void HookupHistory(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AccountDefaultDepositRuleHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<AccountResourceDepositRuleHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion });
+
         modelBuilder.Entity<EntityMetadataHistory>()
             .HasIndex(e => new { e.EntityId, e.Key, e.FromStateVersion });
 

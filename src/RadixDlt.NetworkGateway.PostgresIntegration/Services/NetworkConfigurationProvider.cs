@@ -64,12 +64,12 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -159,11 +159,6 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().NetworkName;
     }
 
-    public EventTypeIdentifiers GetEventTypeIdentifiers()
-    {
-        return GetCapturedConfig().EventTypeIdentifiers;
-    }
-
     public HrpDefinition GetHrpDefinition()
     {
         return GetCapturedConfig().HrpDefinition;
@@ -211,7 +206,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
             WellKnownAddresses = new WellKnownAddresses(
                 Xrd : wka.Xrd,
                 Secp256k1SignatureVirtualBadge: wka.Secp256k1SignatureVirtualBadge,
-                Ed25519_signatureVirtualBadge : wka.Ed25519SignatureVirtualBadge,
+                Ed25519SignatureVirtualBadge : wka.Ed25519SignatureVirtualBadge,
                 PackageOfDirectCallerVirtualBadge : wka.PackageOfDirectCallerVirtualBadge,
                 GlobalCallerVirtualBadge : wka.GlobalCallerVirtualBadge,
                 SystemTransactionBadge : wka.SystemTransactionBadge,
@@ -236,12 +231,6 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 Faucet: wka.Faucet
                 ),
             AddressTypeDefinitions = at,
-            // TODO: temporal solution, that should be read from genesis transaction.
-            // For now we rely on hardcoded values.
-            EventTypeIdentifiers = new EventTypeIdentifiers(
-                new EventTypeIdentifiers.VaultEventTypeIdentifiers(17, 18),
-                new EventTypeIdentifiers.FungibleResourceEventTypeIdentifiers(27, 28),
-                new EventTypeIdentifiers.NonFungibleResourceEventTypeIdentifiers(80, 82)),
         };
     }
 

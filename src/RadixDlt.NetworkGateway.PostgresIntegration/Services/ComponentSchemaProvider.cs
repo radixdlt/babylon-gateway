@@ -1,4 +1,4 @@
-﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,37 +62,78 @@
  * permissions under this License.
  */
 
-using System;
+using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.Abstractions;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-public class EventTypeIdentifiers
+internal interface IComponentSchemaProvider
 {
-    public EventTypeIdentifiers(
-        FungibleVaultEventTypeIdentifiers fungibleVault,
-        NonFungibleVaultEventTypeIdentifiers nonFungibleVault,
-        FungibleResourceEventTypeIdentifiers fungibleResource,
-        NonFungibleResourceEventTypeIdentifiers nonFungibleResource)
+    ValueTask<EventTypeIdentifiers> GetEventTypeIdentifiers();
+
+    Task SaveComponentSchema(ComponentSchema componentSchema, CancellationToken token);
+}
+
+internal class ComponentSchemaProvider : IComponentSchemaProvider
+{
+    private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
+
+    private readonly object _writeLock = new();
+    private ComponentSchema? _capturedComponentSchema;
+
+    public ComponentSchemaProvider(IDbContextFactory<ReadWriteDbContext> dbContextFactory)
     {
-        FungibleVault = fungibleVault;
-        NonFungibleVault = nonFungibleVault;
-        FungibleResource = fungibleResource;
-        NonFungibleResource = nonFungibleResource;
+        _dbContextFactory = dbContextFactory;
     }
 
-    public FungibleVaultEventTypeIdentifiers FungibleVault { get; }
+    public async ValueTask<EventTypeIdentifiers> GetEventTypeIdentifiers()
+    {
+        return (await GetCapturedComponentSchema()).EventTypeIdentifiers;
+    }
 
-    public NonFungibleVaultEventTypeIdentifiers NonFungibleVault { get; }
+    public async Task SaveComponentSchema(ComponentSchema componentSchema, CancellationToken token)
+    {
+        EnsureComponentSchemaCaptured(componentSchema);
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
+        dbContext.ComponentSchema.Add(await GetCapturedComponentSchema());
+        await dbContext.SaveChangesAsync(token);
+    }
 
-    public FungibleResourceEventTypeIdentifiers FungibleResource { get; }
+    private async ValueTask<ComponentSchema> GetCapturedComponentSchema()
+    {
+        if (_capturedComponentSchema != null)
+        {
+            return _capturedComponentSchema;
+        }
 
-    public NonFungibleResourceEventTypeIdentifiers NonFungibleResource { get; }
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
-    public sealed record FungibleVaultEventTypeIdentifiers(int Withdrawal, int Deposit);
+        var componentSchema = await dbContext.ComponentSchema.FirstOrDefaultAsync();
 
-    public sealed record NonFungibleVaultEventTypeIdentifiers(int Withdrawal, int Deposit);
+        if (componentSchema == null)
+        {
+            throw new ConfigurationException("Config hasn't been captured from genesis transaction yet and/or is not stored in our database.");
+        }
 
-    public sealed record FungibleResourceEventTypeIdentifiers(int Minted, int Burned);
+        EnsureComponentSchemaCaptured(componentSchema);
 
-    public sealed record NonFungibleResourceEventTypeIdentifiers(int Minted, int Burned);
+        return componentSchema;
+    }
+
+    private void EnsureComponentSchemaCaptured(ComponentSchema componentSchema)
+    {
+        lock (_writeLock)
+        {
+            if (_capturedComponentSchema != null)
+            {
+                return;
+            }
+
+            _capturedComponentSchema = componentSchema;
+        }
+    }
 }

@@ -1,4 +1,4 @@
-﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,37 +62,28 @@
  * permissions under this License.
  */
 
-using System;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.Abstractions;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public class EventTypeIdentifiers
+[Table("account_resource_deposit_rule_history")]
+public class AccountResourceDepositRuleHistory
 {
-    public EventTypeIdentifiers(
-        FungibleVaultEventTypeIdentifiers fungibleVault,
-        NonFungibleVaultEventTypeIdentifiers nonFungibleVault,
-        FungibleResourceEventTypeIdentifiers fungibleResource,
-        NonFungibleResourceEventTypeIdentifiers nonFungibleResource)
-    {
-        FungibleVault = fungibleVault;
-        NonFungibleVault = nonFungibleVault;
-        FungibleResource = fungibleResource;
-        NonFungibleResource = nonFungibleResource;
-    }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public FungibleVaultEventTypeIdentifiers FungibleVault { get; }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-    public NonFungibleVaultEventTypeIdentifiers NonFungibleVault { get; }
+    [Column("account_entity_id")]
+    public long AccountEntityId { get; set; }
 
-    public FungibleResourceEventTypeIdentifiers FungibleResource { get; }
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
 
-    public NonFungibleResourceEventTypeIdentifiers NonFungibleResource { get; }
-
-    public sealed record FungibleVaultEventTypeIdentifiers(int Withdrawal, int Deposit);
-
-    public sealed record NonFungibleVaultEventTypeIdentifiers(int Withdrawal, int Deposit);
-
-    public sealed record FungibleResourceEventTypeIdentifiers(int Minted, int Burned);
-
-    public sealed record NonFungibleResourceEventTypeIdentifiers(int Minted, int Burned);
+    [Column("deposit_rule")]
+    public AccountResourceDepositRule ResourceDepositRule { get; set; }
 }

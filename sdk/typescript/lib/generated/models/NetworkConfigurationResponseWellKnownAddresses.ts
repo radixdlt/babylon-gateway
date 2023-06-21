@@ -108,13 +108,7 @@ export interface NetworkConfigurationResponseWellKnownAddresses {
      * @type {string}
      * @memberof NetworkConfigurationResponseWellKnownAddresses
      */
-    epoch_manager_package: string;
-    /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof NetworkConfigurationResponseWellKnownAddresses
-     */
-    clock_package: string;
+    consensus_manager_package: string;
     /**
      * Bech32m-encoded human readable version of the address.
      * @type {string}
@@ -162,13 +156,7 @@ export interface NetworkConfigurationResponseWellKnownAddresses {
      * @type {string}
      * @memberof NetworkConfigurationResponseWellKnownAddresses
      */
-    epoch_manager: string;
-    /**
-     * Bech32m-encoded human readable version of the address.
-     * @type {string}
-     * @memberof NetworkConfigurationResponseWellKnownAddresses
-     */
-    clock: string;
+    consensus_manager: string;
     /**
      * Bech32m-encoded human readable version of the address.
      * @type {string}
@@ -202,8 +190,7 @@ export function instanceOfNetworkConfigurationResponseWellKnownAddresses(value: 
     isInstance = isInstance && "resource_package" in value;
     isInstance = isInstance && "account_package" in value;
     isInstance = isInstance && "identity_package" in value;
-    isInstance = isInstance && "epoch_manager_package" in value;
-    isInstance = isInstance && "clock_package" in value;
+    isInstance = isInstance && "consensus_manager_package" in value;
     isInstance = isInstance && "access_controller_package" in value;
     isInstance = isInstance && "transaction_processor_package" in value;
     isInstance = isInstance && "metadata_module_package" in value;
@@ -211,8 +198,7 @@ export function instanceOfNetworkConfigurationResponseWellKnownAddresses(value: 
     isInstance = isInstance && "access_rules_package" in value;
     isInstance = isInstance && "genesis_helper_package" in value;
     isInstance = isInstance && "faucet_package" in value;
-    isInstance = isInstance && "epoch_manager" in value;
-    isInstance = isInstance && "clock" in value;
+    isInstance = isInstance && "consensus_manager" in value;
     isInstance = isInstance && "genesis_helper" in value;
     isInstance = isInstance && "faucet" in value;
 
@@ -243,8 +229,7 @@ export function NetworkConfigurationResponseWellKnownAddressesFromJSONTyped(json
         'resource_package': json['resource_package'],
         'account_package': json['account_package'],
         'identity_package': json['identity_package'],
-        'epoch_manager_package': json['epoch_manager_package'],
-        'clock_package': json['clock_package'],
+        'consensus_manager_package': json['consensus_manager_package'],
         'access_controller_package': json['access_controller_package'],
         'transaction_processor_package': json['transaction_processor_package'],
         'metadata_module_package': json['metadata_module_package'],
@@ -252,8 +237,7 @@ export function NetworkConfigurationResponseWellKnownAddressesFromJSONTyped(json
         'access_rules_package': json['access_rules_package'],
         'genesis_helper_package': json['genesis_helper_package'],
         'faucet_package': json['faucet_package'],
-        'epoch_manager': json['epoch_manager'],
-        'clock': json['clock'],
+        'consensus_manager': json['consensus_manager'],
         'genesis_helper': json['genesis_helper'],
         'faucet': json['faucet'],
     };
@@ -282,8 +266,7 @@ export function NetworkConfigurationResponseWellKnownAddressesToJSON(value?: Net
         'resource_package': value.resource_package,
         'account_package': value.account_package,
         'identity_package': value.identity_package,
-        'epoch_manager_package': value.epoch_manager_package,
-        'clock_package': value.clock_package,
+        'consensus_manager_package': value.consensus_manager_package,
         'access_controller_package': value.access_controller_package,
         'transaction_processor_package': value.transaction_processor_package,
         'metadata_module_package': value.metadata_module_package,
@@ -291,8 +274,7 @@ export function NetworkConfigurationResponseWellKnownAddressesToJSON(value?: Net
         'access_rules_package': value.access_rules_package,
         'genesis_helper_package': value.genesis_helper_package,
         'faucet_package': value.faucet_package,
-        'epoch_manager': value.epoch_manager,
-        'clock': value.clock,
+        'consensus_manager': value.consensus_manager,
         'genesis_helper': value.genesis_helper,
         'faucet': value.faucet,
     };

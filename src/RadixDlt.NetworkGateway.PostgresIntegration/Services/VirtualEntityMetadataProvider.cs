@@ -1,4 +1,4 @@
-﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,37 +62,87 @@
  * permissions under this License.
  */
 
+using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Array = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Array;
+using Enum = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Enum;
 
-namespace RadixDlt.NetworkGateway.Abstractions;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-public class EventTypeIdentifiers
+public interface IVirtualEntityMetadataProvider
 {
-    public EventTypeIdentifiers(
-        FungibleVaultEventTypeIdentifiers fungibleVault,
-        NonFungibleVaultEventTypeIdentifiers nonFungibleVault,
-        FungibleResourceEventTypeIdentifiers fungibleResource,
-        NonFungibleResourceEventTypeIdentifiers nonFungibleResource)
+    GatewayApiSdk.Model.EntityMetadataCollection GetVirtualEntityMetadata(EntityAddress virtualEntityAddress);
+}
+
+public class VirtualEntityMetadataProvider : IVirtualEntityMetadataProvider
+{
+    private readonly ILogger<VirtualEntityMetadataProvider> _logger;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+
+    public VirtualEntityMetadataProvider(ILogger<VirtualEntityMetadataProvider> logger, INetworkConfigurationProvider networkConfigurationProvider)
     {
-        FungibleVault = fungibleVault;
-        NonFungibleVault = nonFungibleVault;
-        FungibleResource = fungibleResource;
-        NonFungibleResource = nonFungibleResource;
+        _logger = logger;
+        _networkConfigurationProvider = networkConfigurationProvider;
     }
 
-    public FungibleVaultEventTypeIdentifiers FungibleVault { get; }
+    public GatewayApiSdk.Model.EntityMetadataCollection GetVirtualEntityMetadata(EntityAddress virtualEntityAddress)
+    {
+        var sbor = GetSbor(virtualEntityAddress);
+        var encodedSbor = RadixEngineToolkit.RadixEngineToolkit.ScryptoSborEncode(sbor);
+        var metadataItem = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(_logger, encodedSbor, _networkConfigurationProvider.GetNetworkId());
 
-    public NonFungibleVaultEventTypeIdentifiers NonFungibleVault { get; }
+        return new GatewayApiSdk.Model.EntityMetadataCollection(1, null, null, new List<GatewayApiSdk.Model.EntityMetadataItem> { new("owner_keys", metadataItem) });
+    }
 
-    public FungibleResourceEventTypeIdentifiers FungibleResource { get; }
+    private static IValue GetSbor(EntityAddress virtualEntityAddress)
+    {
+        var decodedAddress = RadixAddressCodec.Decode(virtualEntityAddress);
 
-    public NonFungibleResourceEventTypeIdentifiers NonFungibleResource { get; }
+        if (decodedAddress.Data.Length != 30)
+        {
+            throw new NotSupportedException("Expected address to be 30 bytes length.");
+        }
 
-    public sealed record FungibleVaultEventTypeIdentifiers(int Withdrawal, int Deposit);
+        var virtualSecp256k1 = new[] { 210, 209 };
+        var virtualEd25519 = new[] { 81, 82 };
 
-    public sealed record NonFungibleVaultEventTypeIdentifiers(int Withdrawal, int Deposit);
+        var isVirtualSecp256k1 = virtualSecp256k1.Contains(decodedAddress.Data.First());
+        var isVirtualEd25519 = virtualEd25519.Contains(decodedAddress.Data.First());
 
-    public sealed record FungibleResourceEventTypeIdentifiers(int Minted, int Burned);
+        if (!isVirtualSecp256k1 && !isVirtualEd25519)
+        {
+            throw new NotSupportedException("Failed to detect if it's virtualEd25519 or virtualSecp256k1");
+        }
 
-    public sealed record NonFungibleResourceEventTypeIdentifiers(int Minted, int Burned);
+        var last29BytesOfAddress = decodedAddress.Data.Skip(1).Take(29).ToArray();
+        var hexAddress = Convert.ToHexString(last29BytesOfAddress);
+
+        IValue scryptoSbor = new Enum(
+            1,
+            new IValue[]
+            {
+                new Array(
+                    ValueKind.Enum,
+                    new IValue[]
+                    {
+                        new Enum(
+                            15,
+                            new IValue[]
+                            {
+                                new Enum(
+                                    isVirtualSecp256k1 ? (byte)0 : (byte)1,
+                                    new IValue[] { new Bytes(ValueKind.U8, hexAddress), }),
+                            }),
+                    }),
+            }
+        );
+
+        return scryptoSbor;
+    }
 }

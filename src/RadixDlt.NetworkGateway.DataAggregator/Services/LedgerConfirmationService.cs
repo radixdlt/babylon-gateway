@@ -498,11 +498,6 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
                     accumulator: transaction.ResultantStateIdentifiers.GetAccumulatorHashBytes(),
                     payload: transaction.LedgerTransaction.GetPayloadBytes());
 
-                if (transaction.LedgerTransaction is CoreModel.UserLedgerTransaction ult)
-                {
-                    TransactionConsistency.AssertTransactionHashCorrect(ult.NotarizedTransaction.GetPayloadBytes(), ult.NotarizedTransaction.GetHashBytes());
-                }
-
                 previousStateVersion = transaction.ResultantStateIdentifiers.StateVersion;
                 previousAccumulator = transaction.ResultantStateIdentifiers.GetAccumulatorHashBytes();
             }

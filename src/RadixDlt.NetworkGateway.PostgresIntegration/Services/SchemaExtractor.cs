@@ -62,44 +62,77 @@
  * permissions under this License.
  */
 
-using System;
+using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Abstractions;
+using System.Linq;
 
-namespace RadixDlt.NetworkGateway.Abstractions.StaticHelpers;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-public static class RadixHashing
+public static class EventNames
 {
-    public static bool IsValidAccumulator(ReadOnlySpan<byte> parentAccumulator, ReadOnlySpan<byte> childHash, ReadOnlySpan<byte> newAccumulator)
+    public static class FungibleResourceManager
     {
-        return HashingHelper.ComputeAndVerifyCombinedHash(parentAccumulator, childHash, newAccumulator);
+        public const string Burn = "BurnFungibleResourceEvent";
+        public const string Mint = "MintFungibleResourceEvent";
     }
 
-    // NB - There is some repetition with the above for performance gains regarding stackalloc.
-    // By using dynamic sizes we can ensure this always returns a value
-    public static byte[] CreateNewAccumulator(byte[] parentAccumulator, byte[] childHash)
+    public static class NonFungibleResourceManager
     {
-        if (parentAccumulator.Length != 32)
-        {
-            throw new ArgumentException("Parent accumulator must to be 32 bytes long", nameof(parentAccumulator));
-        }
-
-        if (childHash.Length != 32)
-        {
-            throw new ArgumentException("Child hash must to be 32 bytes long", nameof(childHash));
-        }
-
-        return HashingHelper.ComputeCombinedHash(parentAccumulator, childHash);
+        public const string Burn = "BurnNonFungibleResourceEvent";
+        public const string Mint = "MintNonFungibleResourceEvent";
     }
 
-    /// <summary>
-    ///  Creates the 32-byte TransactionHash of a signed transaction payload.
-    /// </summary>
-    public static byte[] CreateTransactionPayloadHash(ReadOnlySpan<byte> payload)
+    public static class FungibleVault
     {
-        return HashingHelper.Hash(payload);
+        public const string Withdraw = "WithdrawResourceEvent";
+        public const string Deposit = "DepositResourceEvent";
     }
 
-    public static bool IsValidTransactionPayloadHash(ReadOnlySpan<byte> payload, ReadOnlySpan<byte> payloadHash)
+    public static class NonFungibleVault
     {
-        return HashingHelper.VerifyHash(payload, payloadHash);
+        public const string Withdraw = "WithdrawResourceEvent";
+        public const string Deposit = "DepositResourceEvent";
+    }
+}
+
+public static class SchemaNames
+{
+    public const string FungibleVault = "FungibleVault";
+    public const string NonFungibleVault = "NonFungibleVault";
+    public const string FungibleResourceManager = "FungibleResourceManager";
+    public const string NonFungibleResourceManager = "NonFungibleResourceManager";
+}
+
+public static class SchemaExtractor
+{
+    public static EventTypeIdentifiers ExtractEventTypeIdentifiers(TransactionReceipt genesisLedgerTransactionReceipt)
+    {
+        var schemas = genesisLedgerTransactionReceipt.StateUpdates.CreatedSubstates
+            .Where(x => x.SubstateData is PackageFieldInfoSubstate)
+            .SelectMany(x => (x.SubstateData as PackageFieldInfoSubstate)!.PackageSchema.BlueprintSchemas)
+            .ToList();
+
+        var fungibleVaultSchema = schemas.First(x => x.Key == SchemaNames.FungibleVault).Value;
+        var fungibleVaultWithdrawEventId = fungibleVaultSchema.EventSchemas.First(x => x.Key == EventNames.FungibleVault.Withdraw).Value.Index;
+        var fungibleVaultDepositEventId = fungibleVaultSchema.EventSchemas.First(x => x.Key == EventNames.FungibleVault.Deposit).Value.Index;
+
+        var nonFungibleVaultSchema = schemas.First(x => x.Key == SchemaNames.NonFungibleVault).Value;
+        var nonFungibleVaultWithdrawEventId = nonFungibleVaultSchema.EventSchemas.First(x => x.Key == EventNames.NonFungibleVault.Withdraw).Value.Index;
+        var nonFungibleVaultDepositEventId = nonFungibleVaultSchema.EventSchemas.First(x => x.Key == EventNames.NonFungibleVault.Deposit).Value.Index;
+
+        var fungibleResourceManagerSchema = schemas.First(x => x.Key == SchemaNames.FungibleResourceManager).Value;
+        var mintFungibleResourceEventId = fungibleResourceManagerSchema.EventSchemas.First(x => x.Key == EventNames.FungibleResourceManager.Mint).Value.Index;
+        var burnFungibleResourceEventId = fungibleResourceManagerSchema.EventSchemas.First(x => x.Key == EventNames.FungibleResourceManager.Burn).Value.Index;
+
+        var nonFungibleResourceManagerSchema = schemas.First(x => x.Key == SchemaNames.NonFungibleResourceManager).Value;
+        var mintNonFungibleResourceEventId = nonFungibleResourceManagerSchema.EventSchemas.First(x => x.Key == EventNames.NonFungibleResourceManager.Mint).Value.Index;
+        var burnNonFungibleResourceEventId = nonFungibleResourceManagerSchema.EventSchemas.First(x => x.Key == EventNames.NonFungibleResourceManager.Burn).Value.Index;
+
+        return new EventTypeIdentifiers(
+            new EventTypeIdentifiers.FungibleVaultEventTypeIdentifiers(fungibleVaultWithdrawEventId, fungibleVaultDepositEventId),
+            new EventTypeIdentifiers.NonFungibleVaultEventTypeIdentifiers(nonFungibleVaultWithdrawEventId, nonFungibleVaultDepositEventId),
+            new EventTypeIdentifiers.FungibleResourceEventTypeIdentifiers(mintFungibleResourceEventId, burnFungibleResourceEventId),
+            new EventTypeIdentifiers.NonFungibleResourceEventTypeIdentifiers(mintNonFungibleResourceEventId, burnNonFungibleResourceEventId)
+        );
     }
 }

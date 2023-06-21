@@ -90,6 +90,8 @@ internal static class CustomTypes
 
 #pragma warning disable CS0618
         // needed to support custom enums in postgres
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccountDefaultDepositRule>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccountResourceDepositRule>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionType>();

@@ -70,6 +70,7 @@ using RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using Array = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Array;
@@ -101,142 +102,6 @@ internal static class ScryptoSborUtils
         return nonFungibleLocalId.Value;
     }
 
-    public static string ConvertFromScryptoSborString(string input, byte networkId)
-    {
-        var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(Convert.FromHexString(input), networkId);
-
-        if (result is not SborDecodeResponse.ScryptoSbor scryptoSbor)
-        {
-            throw new UnreachableException("Expected ScryptoSbor response");
-        }
-
-        if (scryptoSbor.Value is not String value)
-        {
-            throw new UnreachableException("Expected ScryptoSbor.String");
-        }
-
-        return value;
-    }
-
-    public static GatewayModel.EntityMetadataItemValue MetadataValueToGatewayMetadataItemValue(ILogger logger, byte[] rawScryptoSbor, byte networkId)
-    {
-        var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(rawScryptoSbor, networkId);
-
-        if (result is not SborDecodeResponse.ScryptoSbor scryptoSbor)
-        {
-            throw new UnreachableException("Expected ScryptoSbor response");
-        }
-
-        if (scryptoSbor.Value is not Enum metadataEntry)
-        {
-            throw new UnreachableException("Expected ScryptoSbor.Enum");
-        }
-
-        string? asString = null;
-        List<string>? asStringCollection = null;
-
-        switch (metadataEntry.VariantId)
-        {
-            case 0 when metadataEntry.Fields is [Enum variantEnum]:
-                asString = GetSimpleStringOfMetadataValue(logger, variantEnum);
-                break;
-            case 1 when metadataEntry.Fields is [Array innerArray]:
-                if (innerArray.ElementKind == ValueKind.Enum)
-                {
-                    // For RCNet, Dashboard would rather have asString also populated for arrays
-                    // For Mainnet, we may wish to give more structured metadata values from the Gateway API
-                    asStringCollection = innerArray.Elements.OfType<Enum>().Select(variantEnum => GetSimpleStringOfMetadataValue(logger, variantEnum)).ToList();
-                    asString = string.Join(", ", asStringCollection);
-                }
-
-                break;
-        }
-
-        if (asString == null)
-        {
-            logger.LogWarning("Unknown MetadataEntry variant: {}", metadataEntry.VariantId);
-            asString = "[UnrecognizedMetadataEntry]";
-        }
-
-        return new GatewayModel.EntityMetadataItemValue(
-            rawHex: rawScryptoSbor.ToHex(),
-            rawJson: new JRaw(RadixEngineToolkit.RadixEngineToolkit.ScryptoSborEncodeJson(metadataEntry)),
-            asString: asString,
-            asStringCollection: asStringCollection);
-    }
-
-    public static string GetSimpleStringOfMetadataValue(ILogger logger, Enum variantEnum)
-    {
-        switch (variantEnum.VariantId)
-        {
-            // See https://github.com/radixdlt/radixdlt-scrypto/blob/release/rcnet-v1/transaction/examples/metadata/metadata.rtm
-            case 0 when variantEnum.Fields is [String value]:
-                return value.Value;
-            case 1 when variantEnum.Fields is [Bool value]:
-                return value.Value.ToString();
-            case 2 when variantEnum.Fields is [U8 value]:
-                return value.Value.ToString();
-            case 3 when variantEnum.Fields is [U32 value]:
-                return value.Value.ToString();
-            case 4 when variantEnum.Fields is [U64 value]:
-                return value.Value.ToString();
-            case 5 when variantEnum.Fields is [I32 value]:
-                return value.Value.ToString();
-            case 6 when variantEnum.Fields is [I64 value]:
-                return value.Value.ToString();
-            case 7 when variantEnum.Fields is [Decimal value]:
-                return value.Value;
-            case 8 when variantEnum.Fields is [Reference reference]:
-                return reference.Value;
-            case 9 when variantEnum.Fields is [Enum publicKeyEnum]:
-                var keyName = publicKeyEnum.VariantId switch
-                {
-                    0 => "EcdsaSecp256k1PublicKey",
-                    1 => "EddsaEd25519PublicKey",
-                    _ => $"PublicKeyType[{publicKeyEnum.VariantId}]", // Fallback
-                };
-
-                if (publicKeyEnum.Fields is [Bytes keyBytes])
-                {
-                    return $"{keyName}(\"{Convert.ToHexString(keyBytes.Hex).ToLowerInvariant()}\")";
-                }
-
-                break;
-            case 10 when variantEnum.Fields is [Tuple nonFungibleGlobalId]:
-                if (nonFungibleGlobalId.Fields is [Reference nonFungibleResourceAddress, NonFungibleLocalId nonFungibleLocalId])
-                {
-                    return $"{nonFungibleResourceAddress.Value}:{nonFungibleLocalId.Value}";
-                }
-
-                break;
-            case 11 when variantEnum.Fields is [NonFungibleLocalId value]:
-                return value.Value;
-            case 12 when variantEnum.Fields is [I64 instant]:
-                return DateTimeOffset.FromUnixTimeSeconds(instant.Value).AsUtcIsoDateAtSecondsPrecisionString();
-            case 13 when variantEnum.Fields is [String url]:
-                return url.Value;
-            case 14 when variantEnum.Fields is [String origin]:
-                return origin.Value;
-            case 15 when variantEnum.Fields is [Enum publicKeyHashEnum]:
-                var hashKeyName = publicKeyHashEnum.VariantId switch
-                {
-                    0 => "EcdsaSecp256k1PublicKeyHash",
-                    1 => "EddsaEd25519PublicKeyHash",
-                    _ => $"PublicKeyHashType[{publicKeyHashEnum.VariantId}]", // Fallback
-                };
-
-                if (publicKeyHashEnum.Fields is [Bytes hashKeyBytes])
-                {
-                    return $"{hashKeyName}(\"{Convert.ToHexString(hashKeyBytes.Hex).ToLowerInvariant()}\")";
-                }
-
-                break;
-        }
-
-        logger.LogWarning("MetadataValue variant could not be mapped successfully: {}", variantEnum.VariantId);
-        return "[UnrecognizedMetadataValue]";
-    }
-
     public static GatewayModel.ScryptoSborValue NonFungibleDataToGatewayScryptoSbor(byte[] rawScryptoSbor, byte networkId)
     {
         var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(rawScryptoSbor, networkId);
@@ -249,5 +114,145 @@ internal static class ScryptoSborUtils
         return new GatewayModel.ScryptoSborValue(
             rawHex: rawScryptoSbor.ToHex(),
             rawJson: new JRaw(RadixEngineToolkit.RadixEngineToolkit.ScryptoSborEncodeJson(scryptoSbor.Value)));
+    }
+
+    // See: https://github.com/radixdlt/radixdlt-scrypto/blob/release/birch/radix-engine-interface/src/api/node_modules/metadata/invocations.rs
+    public static GatewayModel.EntityMetadataItemValue MetadataValueToGatewayMetadataItemValue(ILogger logger, byte[] rawScryptoSbor, byte networkId)
+    {
+        var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(rawScryptoSbor, networkId);
+
+        if (result is not SborDecodeResponse.ScryptoSbor scryptoSbor)
+        {
+            throw new UnreachableException("Expected ScryptoSbor response");
+        }
+
+        if (scryptoSbor.Value is not Enum outerEnum)
+        {
+            throw new UnreachableException("Expected ScryptoSbor.Enum");
+        }
+
+        string? asString = null;
+        List<string>? asStringCollection = null;
+
+        // if we're dealing with array value...
+        if ((outerEnum.VariantId & 0x80) != 0 && outerEnum.Fields is [Array value])
+        {
+            // ...we can reuse scalar-specific logic by wrapping actual values in their respective enum counterparts
+
+            var enumVariant = (byte)(outerEnum.VariantId & (~0x80));
+
+            foreach (var arrayElement in value.Elements)
+            {
+                if (TryGetSimpleStringOfMetadataValue(new Enum(enumVariant, new[] { arrayElement }), out var stringValue))
+                {
+                    asStringCollection ??= new List<string>();
+                    asStringCollection.Add(stringValue);
+                }
+                else
+                {
+                    logger.LogWarning("Unknown MetadataEntry variantId={VariantId}, rawBytes={RawBytes}", outerEnum.VariantId, rawScryptoSbor.ToHex());
+                }
+            }
+        }
+        else if (TryGetSimpleStringOfMetadataValue(outerEnum, out var stringValue))
+        {
+            asString = stringValue;
+        }
+
+        if (asString == null && asStringCollection == null)
+        {
+            logger.LogWarning("Unknown MetadataEntry variantId={VariantId}, rawBytes={RawBytes}", outerEnum.VariantId, rawScryptoSbor.ToHex());
+        }
+
+        return new GatewayModel.EntityMetadataItemValue(
+            rawHex: rawScryptoSbor.ToHex(),
+            rawJson: new JRaw(RadixEngineToolkit.RadixEngineToolkit.ScryptoSborEncodeJson(outerEnum)),
+            asString: asString,
+            asStringCollection: asStringCollection);
+    }
+
+    private static bool TryGetSimpleStringOfMetadataValue(Enum @enum, [NotNullWhen(true)] out string? result)
+    {
+        result = null;
+
+        switch (@enum.VariantId)
+        {
+            case 0 when @enum.Fields is [String value]:
+                result = value.Value;
+                break;
+            case 1 when @enum.Fields is [Bool value]:
+                result = value.Value.ToString();
+                break;
+            case 2 when @enum.Fields is [U8 value]:
+                result = value.Value.ToString();
+                break;
+            case 3 when @enum.Fields is [U32 value]:
+                result = value.Value.ToString();
+                break;
+            case 4 when @enum.Fields is [U64 value]:
+                result = value.Value.ToString();
+                break;
+            case 5 when @enum.Fields is [I32 value]:
+                result = value.Value.ToString();
+                break;
+            case 6 when @enum.Fields is [I64 value]:
+                result = value.Value.ToString();
+                break;
+            case 7 when @enum.Fields is [Decimal value]:
+                result = value.Value;
+                break;
+            case 8 when @enum.Fields is [Reference reference]:
+                result = reference.Value;
+                break;
+            case 9 when @enum.Fields is [Enum publicKeyEnum]:
+                var keyName = publicKeyEnum.VariantId switch
+                {
+                    0 => "EcdsaSecp256k1PublicKey",
+                    1 => "EddsaEd25519PublicKey",
+                    _ => $"PublicKeyType[{publicKeyEnum.VariantId}]", // Fallback
+                };
+
+                if (publicKeyEnum.Fields is [Bytes keyBytes])
+                {
+                    result = $"{keyName}(\"{Convert.ToHexString(keyBytes.Hex).ToLowerInvariant()}\")";
+                }
+
+                break;
+            case 10 when @enum.Fields is [Tuple nonFungibleGlobalId]:
+                if (nonFungibleGlobalId.Fields is [Reference nonFungibleResourceAddress, NonFungibleLocalId nonFungibleLocalId])
+                {
+                    result = $"{nonFungibleResourceAddress.Value}:{nonFungibleLocalId.Value}";
+                }
+
+                break;
+            case 11 when @enum.Fields is [NonFungibleLocalId value]:
+                result = value.Value;
+                break;
+            case 12 when @enum.Fields is [I64 instant]:
+                result = DateTimeOffset.FromUnixTimeSeconds(instant.Value).AsUtcIsoDateAtSecondsPrecisionString();
+                break;
+            case 13 when @enum.Fields is [String url]:
+                result = url.Value;
+                break;
+            case 14 when @enum.Fields is [String origin]:
+                result = origin.Value;
+                break;
+            case 15 when @enum.Fields is [Enum publicKeyHashEnum]:
+                var hashKeyName = publicKeyHashEnum.VariantId switch
+                {
+                    0 => "EcdsaSecp256k1PublicKeyHash",
+                    1 => "EddsaEd25519PublicKeyHash",
+                    _ => $"PublicKeyHashType[{publicKeyHashEnum.VariantId}]", // Fallback
+                };
+
+                if (publicKeyHashEnum.Fields is [Bytes hashKeyBytes])
+                {
+                    result = $"{hashKeyName}(\"{Convert.ToHexString(hashKeyBytes.Hex).ToLowerInvariant()}\")";
+                }
+
+                break;
+        }
+
+        return result != null;
     }
 }

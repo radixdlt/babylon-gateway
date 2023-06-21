@@ -83,7 +83,7 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
     string GetNetworkName();
 }
 
-public sealed record CapturedConfig(byte NetworkId, string NetworkName, HrpDefinition HrpDefinition, WellKnownAddresses WellKnownAddresses, AddressTypeDefinition[] AddressTypeDefinitions, EventTypeIdentifiers EventTypeIdentifiers);
+public sealed record CapturedConfig(byte NetworkId, string NetworkName, HrpDefinition HrpDefinition, WellKnownAddresses WellKnownAddresses, AddressTypeDefinition[] AddressTypeDefinitions);
 
 public interface ICapturedConfigProvider
 {
@@ -133,11 +133,6 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
     public AddressTypeDefinition GetAddressTypeDefinition(AddressEntityType entityType)
     {
         return GetCapturedConfig().AddressTypeDefinitions.First(atd => atd.EntityType == entityType);
-    }
-
-    public EventTypeIdentifiers GetEventTypeIdentifiers()
-    {
-        return GetCapturedConfig().EventTypeIdentifiers;
     }
 
     private CapturedConfig GetCapturedConfig()

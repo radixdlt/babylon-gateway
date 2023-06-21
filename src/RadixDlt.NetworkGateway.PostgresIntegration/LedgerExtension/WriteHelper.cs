@@ -671,7 +671,9 @@ internal class WriteHelper
         var cd = new CommandDefinition(
             commandText: @"
 SELECT
-    setval('entity_state_history_id_seq', @EntityStateHistorySequence),
+    setval('account_default_deposit_rule_history_id_seq', @accountDefaultDepositRuleHistorySequence),
+    setval('account_resource_deposit_rule_history_id_seq', @accountResourceDepositRuleHistorySequence),
+    setval('entity_state_history_id_seq', @entityStateHistorySequence),
     setval('entities_id_seq', @entitySequence),
     setval('entity_access_rules_chain_history_id_seq', @entityAccessRulesChainHistorySequence),
     setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
@@ -689,6 +691,8 @@ SELECT
     setval('ledger_transaction_markers_id_seq', @ledgerTransactionMarkerSequence)",
             parameters: new
             {
+                accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
+                accountResourceDepositRuleHistorySequence = sequences.AccountResourceDepositRuleHistorySequence,
                 entityStateHistorySequence = sequences.EntityStateHistorySequence,
                 entitySequence = sequences.EntitySequence,
                 entityAccessRulesChainHistorySequence = sequences.EntityAccessRulesChainHistorySequence,

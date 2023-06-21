@@ -89,4 +89,26 @@ internal static class ModelExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
         };
     }
+
+    public static AccountDefaultDepositRule ToModel(this CoreModel.DefaultDepositRule input)
+    {
+        return input switch
+        {
+            CoreModel.DefaultDepositRule.Accept => AccountDefaultDepositRule.Accept,
+            CoreModel.DefaultDepositRule.Reject => AccountDefaultDepositRule.Reject,
+            CoreModel.DefaultDepositRule.AllowExisting => AccountDefaultDepositRule.AllowExisting,
+            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
+        };
+    }
+
+    public static AccountResourceDepositRule ToModel(this CoreModel.DepositRule input)
+    {
+        return input switch
+        {
+            CoreModel.DepositRule.Neither => AccountResourceDepositRule.Neither,
+            CoreModel.DepositRule.Allowed => AccountResourceDepositRule.Allowed,
+            CoreModel.DepositRule.Disallowed => AccountResourceDepositRule.Disallowed,
+            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
+        };
+    }
 }

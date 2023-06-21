@@ -93,8 +93,7 @@ internal class CapturedConfigProvider : ICapturedConfigProvider
             networkConfiguration.NetworkName,
             networkConfiguration.HrpDefinition,
             networkConfiguration.WellKnownAddresses,
-            networkConfiguration.AddressTypeDefinitions,
-            networkConfiguration.EventTypeIdentifiers
+            networkConfiguration.AddressTypeDefinitions
         );
     }
 }
