@@ -84,31 +84,76 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityMetadataItemValueAllOf
+    /// MetadataScalarArrayValue
     /// </summary>
-    [DataContract(Name = "EntityMetadataItemValue_allOf")]
-    public partial class EntityMetadataItemValueAllOf : IEquatable<EntityMetadataItemValueAllOf>
+    [DataContract(Name = "MetadataScalarArrayValue")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Bool")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "BoolArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Decimal")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "DecimalArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "GlobalAddress")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "GlobalAddressArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "I32")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "I32Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "I64")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "I64Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Instant")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "InstantArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleGlobalIdValue), "NonFungibleGlobalId")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleGlobalIdArrayValue), "NonFungibleGlobalIdArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "NonFungibleLocalId")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "NonFungibleLocalIdArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "OrigiArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Origin")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyValue), "PublicKey")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyArrayValue), "PublicKeyArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "PublicKeyHash")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "PublicKeyHashArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "String")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "StringArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U32")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "U32Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U64")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "U64Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U8")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "U8Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Url")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "UrlArray")]
+    public partial class MetadataScalarArrayValue : MetadataTypedValue, IEquatable<MetadataScalarArrayValue>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataItemValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MetadataScalarArrayValue" /> class.
         /// </summary>
-        /// <param name="typed">typed.</param>
-        public EntityMetadataItemValueAllOf(MetadataTypedValue typed = default(MetadataTypedValue))
+        [JsonConstructorAttribute]
+        protected MetadataScalarArrayValue() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MetadataScalarArrayValue" /> class.
+        /// </summary>
+        /// <param name="values">values (required).</param>
+        /// <param name="type">type (required) (default to MetadataValueType.PublicKeyHashArray).</param>
+        public MetadataScalarArrayValue(List<string> values = default(List<string>), MetadataValueType type = MetadataValueType.PublicKeyHashArray) : base(type)
         {
-            this.Typed = typed;
+            // to ensure "values" is required (not null)
+            if (values == null)
+            {
+                throw new ArgumentNullException("values is a required property for MetadataScalarArrayValue and cannot be null");
+            }
+            this.Values = values;
         }
 
         /// <summary>
-        /// Gets or Sets Typed
+        /// Gets or Sets Values
         /// </summary>
-        [DataMember(Name = "typed", EmitDefaultValue = true)]
-        public MetadataTypedValue Typed { get; set; }
+        [DataMember(Name = "values", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> Values { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -117,8 +162,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityMetadataItemValueAllOf {\n");
-            sb.Append("  Typed: ").Append(Typed).Append("\n");
+            sb.Append("class MetadataScalarArrayValue {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  Values: ").Append(Values).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -127,7 +173,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -139,25 +185,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityMetadataItemValueAllOf);
+            return this.Equals(input as MetadataScalarArrayValue);
         }
 
         /// <summary>
-        /// Returns true if EntityMetadataItemValueAllOf instances are equal
+        /// Returns true if MetadataScalarArrayValue instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityMetadataItemValueAllOf to be compared</param>
+        /// <param name="input">Instance of MetadataScalarArrayValue to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityMetadataItemValueAllOf input)
+        public bool Equals(MetadataScalarArrayValue input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.Typed == input.Typed ||
-                    (this.Typed != null &&
-                    this.Typed.Equals(input.Typed))
+                    this.Values == input.Values ||
+                    this.Values != null &&
+                    input.Values != null &&
+                    this.Values.SequenceEqual(input.Values)
                 );
         }
 
@@ -169,10 +216,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.Typed != null)
+                int hashCode = base.GetHashCode();
+                if (this.Values != null)
                 {
-                    hashCode = (hashCode * 59) + this.Typed.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Values.GetHashCode();
                 }
                 return hashCode;
             }

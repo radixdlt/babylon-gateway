@@ -839,7 +839,7 @@ ORDER BY metadata_join.ordinality ASC;",
                 result[vm.EntityId] = new GatewayModel.EntityMetadataCollection(vm.TotalCount, previousCursor, nextCursor, new List<GatewayModel.EntityMetadataItem>());
             }
 
-            var value = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(_logger, vm.Value, _networkConfigurationProvider.GetNetworkId());
+            var value = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(vm.Value, _networkConfigurationProvider.GetNetworkId(), _logger);
             result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, value, vm.FromStateVersion));
         }
 
@@ -901,7 +901,7 @@ INNER JOIN LATERAL (
                 result[mh.EntityId] = new GatewayModel.EntityMetadataCollection(items: new List<GatewayModel.EntityMetadataItem>());
             }
 
-            var value = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(_logger, mh.Value, _networkConfigurationProvider.GetNetworkId());
+            var value = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(mh.Value, _networkConfigurationProvider.GetNetworkId(), _logger);
             result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, value, mh.FromStateVersion));
         }
 

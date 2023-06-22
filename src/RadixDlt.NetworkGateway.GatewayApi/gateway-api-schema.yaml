@@ -824,12 +824,8 @@ components:
         - $ref: "#/components/schemas/ScryptoSborValue"
         - type: object
           properties:
-            as_string:
-              type: string
-            as_string_collection:
-              type: array
-              items:
-                type: string
+            typed:
+              $ref: "#/components/schemas/MetadataTypedValue"
 
     FungibleResourcesCollection:
       description: Fungible resources collection.
@@ -2177,3 +2173,157 @@ components:
           type: array
           items:
             type: string
+
+    #
+    # Metadata Typed Value
+    #
+
+    MetadataValueType:
+      type: string
+      enum:
+        - String
+        - Bool
+        - U8
+        - U32
+        - U64
+        - I32
+        - I64
+        - Decimal
+        - GlobalAddress
+        - PublicKey
+        - NonFungibleGlobalId
+        - NonFungibleLocalId
+        - Instant
+        - Url
+        - Origin
+        - PublicKeyHash
+        - StringArray
+        - BoolArray
+        - U8Array
+        - U32Array
+        - U64Array
+        - I32Array
+        - I64Array
+        - DecimalArray
+        - GlobalAddressArray
+        - PublicKeyArray
+        - NonFungibleGlobalIdArray
+        - NonFungibleLocalIdArray
+        - InstantArray
+        - UrlArray
+        - OriginArray
+        - PublicKeyHashArray
+    MetadataTypedValue:
+      type: object
+      discriminator:
+        propertyName: type
+        mapping:
+          String: "#/components/schemas/MetadataScalarValue"
+          Bool: "#/components/schemas/MetadataScalarValue"
+          U8: "#/components/schemas/MetadataScalarValue"
+          U32: "#/components/schemas/MetadataScalarValue"
+          U64: "#/components/schemas/MetadataScalarValue"
+          I32: "#/components/schemas/MetadataScalarValue"
+          I64: "#/components/schemas/MetadataScalarValue"
+          Decimal: "#/components/schemas/MetadataScalarValue"
+          GlobalAddress: "#/components/schemas/MetadataScalarValue"
+          PublicKey: "#/components/schemas/MetadataPublicKeyValue"
+          NonFungibleGlobalId: "#/components/schemas/MetadataNonFungibleGlobalIdValue"
+          NonFungibleLocalId: "#/components/schemas/MetadataScalarValue"
+          Instant: "#/components/schemas/MetadataScalarValue"
+          Url: "#/components/schemas/MetadataScalarValue"
+          Origin: "#/components/schemas/MetadataScalarValue"
+          PublicKeyHash: "#/components/schemas/MetadataScalarValue"
+          StringArray: "#/components/schemas/MetadataScalarArrayValue"
+          BoolArray: "#/components/schemas/MetadataScalarArrayValue"
+          U8Array: "#/components/schemas/MetadataScalarArrayValue"
+          U32Array: "#/components/schemas/MetadataScalarArrayValue"
+          U64Array: "#/components/schemas/MetadataScalarArrayValue"
+          I32Array: "#/components/schemas/MetadataScalarArrayValue"
+          I64Array: "#/components/schemas/MetadataScalarArrayValue"
+          DecimalArray: "#/components/schemas/MetadataScalarArrayValue"
+          GlobalAddressArray: "#/components/schemas/MetadataScalarArrayValue"
+          PublicKeyArray: "#/components/schemas/MetadataPublicKeyArrayValue"
+          NonFungibleGlobalIdArray: "#/components/schemas/MetadataNonFungibleGlobalIdArrayValue"
+          NonFungibleLocalIdArray: "#/components/schemas/MetadataScalarArrayValue"
+          InstantArray: "#/components/schemas/MetadataScalarArrayValue"
+          UrlArray: "#/components/schemas/MetadataScalarArrayValue"
+          OrigiArray: "#/components/schemas/MetadataScalarArrayValue"
+          PublicKeyHashArray: "#/components/schemas/MetadataScalarArrayValue"
+      required:
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/MetadataValueType"
+    MetadataScalarValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    MetadataPublicKeyValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              $ref: "#/components/schemas/PublicKey"
+    MetadataNonFungibleGlobalIdValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - resource_address
+            - non_fungible_id
+          properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
+            non_fungible_id:
+              $ref: "#/components/schemas/NonFungibleId"
+    MetadataScalarArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                type: string
+    MetadataPublicKeyArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                $ref: "#/components/schemas/PublicKey"
+    MetadataNonFungibleGlobalIdArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                type: object
+                required:
+                  - resource_address
+                  - non_fungible_id
+                properties:
+                  resource_address:
+                    $ref: "#/components/schemas/Address"
+                  non_fungible_id:
+                    $ref: "#/components/schemas/NonFungibleId"
+

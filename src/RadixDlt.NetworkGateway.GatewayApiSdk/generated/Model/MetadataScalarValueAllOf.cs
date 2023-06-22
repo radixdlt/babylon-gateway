@@ -90,25 +90,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityMetadataItemValueAllOf
+    /// MetadataScalarValueAllOf
     /// </summary>
-    [DataContract(Name = "EntityMetadataItemValue_allOf")]
-    public partial class EntityMetadataItemValueAllOf : IEquatable<EntityMetadataItemValueAllOf>
+    [DataContract(Name = "MetadataScalarValue_allOf")]
+    public partial class MetadataScalarValueAllOf : IEquatable<MetadataScalarValueAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataItemValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MetadataScalarValueAllOf" /> class.
         /// </summary>
-        /// <param name="typed">typed.</param>
-        public EntityMetadataItemValueAllOf(MetadataTypedValue typed = default(MetadataTypedValue))
+        [JsonConstructorAttribute]
+        protected MetadataScalarValueAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MetadataScalarValueAllOf" /> class.
+        /// </summary>
+        /// <param name="value">value (required).</param>
+        public MetadataScalarValueAllOf(string value = default(string))
         {
-            this.Typed = typed;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for MetadataScalarValueAllOf and cannot be null");
+            }
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets Typed
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "typed", EmitDefaultValue = true)]
-        public MetadataTypedValue Typed { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public string Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -117,8 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityMetadataItemValueAllOf {\n");
-            sb.Append("  Typed: ").Append(Typed).Append("\n");
+            sb.Append("class MetadataScalarValueAllOf {\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -139,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityMetadataItemValueAllOf);
+            return this.Equals(input as MetadataScalarValueAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityMetadataItemValueAllOf instances are equal
+        /// Returns true if MetadataScalarValueAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityMetadataItemValueAllOf to be compared</param>
+        /// <param name="input">Instance of MetadataScalarValueAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityMetadataItemValueAllOf input)
+        public bool Equals(MetadataScalarValueAllOf input)
         {
             if (input == null)
             {
@@ -155,9 +165,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Typed == input.Typed ||
-                    (this.Typed != null &&
-                    this.Typed.Equals(input.Typed))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -170,9 +180,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Typed != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.Typed.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

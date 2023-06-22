@@ -20,6 +20,7 @@ _Release Date: Unreleased_
 - Dropped `transaction.referenced_entities` from `/transaction/committed-details` endpoint.
 - Added `affected_global_entities` to `/transaction/committed-details` and `/stream/transactions` endpoints. To include them in response make sure to include `affected_global_entities` optin.
 - New `affected_global_entities_filter` filter in `/stream/transactions`.
+- Use strongly-typed metadata models.
 
 ### 0.3.1
 
