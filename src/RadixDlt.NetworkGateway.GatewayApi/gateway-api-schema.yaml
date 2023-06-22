@@ -2236,7 +2236,7 @@ components:
           PublicKeyHash: "#/components/schemas/MetadataScalarValue"
           StringArray: "#/components/schemas/MetadataScalarArrayValue"
           BoolArray: "#/components/schemas/MetadataScalarArrayValue"
-          U8Array: "#/components/schemas/MetadataScalarArrayValue"
+          U8Array: "#/components/schemas/MetadataScalarValue"
           U32Array: "#/components/schemas/MetadataScalarArrayValue"
           U64Array: "#/components/schemas/MetadataScalarArrayValue"
           I32Array: "#/components/schemas/MetadataScalarArrayValue"

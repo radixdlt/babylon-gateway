@@ -124,7 +124,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U64")]
     [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "U64Array")]
     [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U8")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "U8Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U8Array")]
     [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Url")]
     [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "UrlArray")]
     public partial class MetadataScalarValue : MetadataTypedValue, IEquatable<MetadataScalarValue>
@@ -138,8 +138,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="MetadataScalarValue" /> class.
         /// </summary>
         /// <param name="value">value (required).</param>
-        /// <param name="type">type (required) (default to MetadataValueType.PublicKeyHash).</param>
-        public MetadataScalarValue(string value = default(string), MetadataValueType type = MetadataValueType.PublicKeyHash) : base(type)
+        /// <param name="type">type (required) (default to MetadataValueType.U8Array).</param>
+        public MetadataScalarValue(string value = default(string), MetadataValueType type = MetadataValueType.U8Array) : base(type)
         {
             // to ensure "value" is required (not null)
             if (value == null)

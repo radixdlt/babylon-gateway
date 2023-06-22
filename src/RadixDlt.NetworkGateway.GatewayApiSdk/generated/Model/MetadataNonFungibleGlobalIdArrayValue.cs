@@ -124,7 +124,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U64")]
     [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "U64Array")]
     [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U8")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "U8Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U8Array")]
     [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Url")]
     [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "UrlArray")]
     public partial class MetadataNonFungibleGlobalIdArrayValue : MetadataTypedValue, IEquatable<MetadataNonFungibleGlobalIdArrayValue>
