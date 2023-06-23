@@ -104,8 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="PackageFieldFunctionAccessRulesSubstateAllOf" /> class.
         /// </summary>
         /// <param name="functionAuth">functionAuth (required).</param>
-        /// <param name="defaultAuth">defaultAuth (required).</param>
-        public PackageFieldFunctionAccessRulesSubstateAllOf(List<PackageFunctionAccessRule> functionAuth = default(List<PackageFunctionAccessRule>), AccessRule defaultAuth = default(AccessRule))
+        public PackageFieldFunctionAccessRulesSubstateAllOf(List<PackageFunctionAccessRule> functionAuth = default(List<PackageFunctionAccessRule>))
         {
             // to ensure "functionAuth" is required (not null)
             if (functionAuth == null)
@@ -113,12 +112,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("functionAuth is a required property for PackageFieldFunctionAccessRulesSubstateAllOf and cannot be null");
             }
             this.FunctionAuth = functionAuth;
-            // to ensure "defaultAuth" is required (not null)
-            if (defaultAuth == null)
-            {
-                throw new ArgumentNullException("defaultAuth is a required property for PackageFieldFunctionAccessRulesSubstateAllOf and cannot be null");
-            }
-            this.DefaultAuth = defaultAuth;
         }
 
         /// <summary>
@@ -126,12 +119,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "function_auth", IsRequired = true, EmitDefaultValue = true)]
         public List<PackageFunctionAccessRule> FunctionAuth { get; set; }
-
-        /// <summary>
-        /// Gets or Sets DefaultAuth
-        /// </summary>
-        [DataMember(Name = "default_auth", IsRequired = true, EmitDefaultValue = true)]
-        public AccessRule DefaultAuth { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,7 +129,6 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class PackageFieldFunctionAccessRulesSubstateAllOf {\n");
             sb.Append("  FunctionAuth: ").Append(FunctionAuth).Append("\n");
-            sb.Append("  DefaultAuth: ").Append(DefaultAuth).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -183,11 +169,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.FunctionAuth != null &&
                     input.FunctionAuth != null &&
                     this.FunctionAuth.SequenceEqual(input.FunctionAuth)
-                ) && 
-                (
-                    this.DefaultAuth == input.DefaultAuth ||
-                    (this.DefaultAuth != null &&
-                    this.DefaultAuth.Equals(input.DefaultAuth))
                 );
         }
 
@@ -203,10 +184,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.FunctionAuth != null)
                 {
                     hashCode = (hashCode * 59) + this.FunctionAuth.GetHashCode();
-                }
-                if (this.DefaultAuth != null)
-                {
-                    hashCode = (hashCode * 59) + this.DefaultAuth.GetHashCode();
                 }
                 return hashCode;
             }

@@ -99,7 +99,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     private readonly IClock _clock;
 
     /* Variables */
-    private readonly ConcurrentLruCache<long, byte[]> _quorumAccumulatorCacheByStateVersion = new(2000);
+    private readonly ConcurrentLruCache<long, byte[]> _quorumTreeHashCacheByStateVersion = new(2000);
     private readonly ConcurrentDictionary<string, long> _latestLedgerTipByNode = new();
     private readonly ConcurrentDictionary<string, ConcurrentDictionary<long, CoreModel.CommittedTransaction>> _transactionsByNode = new();
     private TransactionSummary? _knownTopOfCommittedLedger;
@@ -162,7 +162,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     /// <summary>
     /// To be called from the node worker.
     /// </summary>
-    public void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipAccumulator)
+    public void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipTreeHash)
     {
         _observers.ForEach(x => x.PreSubmitNodeNetworkStatus(nodeName, ledgerTipStateVersion));
 
@@ -174,16 +174,16 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
             return;
         }
 
-        var cachedAccumulator = _quorumAccumulatorCacheByStateVersion.GetOrDefault(ledgerTipStateVersion);
+        var cachedTreeHash = _quorumTreeHashCacheByStateVersion.GetOrDefault(ledgerTipStateVersion);
 
-        if (cachedAccumulator == null)
+        if (cachedTreeHash == null)
         {
             // Ledger Tip is too far behind -- so don't report on consistency.
             // We could change this to do a database look-up in future to give a consistency check.
 
             _observers.ForEach(x => x.SubmitNodeNetworkStatusUnknown(nodeName, ledgerTipStateVersion));
         }
-        else if (cachedAccumulator.BytesAreEqual(ledgerTipAccumulator))
+        else if (cachedTreeHash.BytesAreEqual(ledgerTipTreeHash))
         {
             _observers.ForEach(x => x.SubmitNodeNetworkStatusUpToDate(nodeName, ledgerTipStateVersion));
         }
@@ -408,9 +408,9 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     {
         foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
         {
-            _quorumAccumulatorCacheByStateVersion.Set(
+            _quorumTreeHashCacheByStateVersion.Set(
                 committedTransaction.ResultantStateIdentifiers.StateVersion,
-                committedTransaction.ResultantStateIdentifiers.GetAccumulatorHashBytes()
+                committedTransaction.ResultantStateIdentifiers.GetTransactionTreeHashBytes()
             );
         }
     }
@@ -485,21 +485,14 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     {
         var transactionBatchParentSummary = _knownTopOfCommittedLedger!;
         var previousStateVersion = transactionBatchParentSummary.StateVersion;
-        var previousAccumulator = transactionBatchParentSummary.TransactionAccumulator;
 
         try
         {
             foreach (var transaction in transactions)
             {
-                TransactionConsistency.AssertChildTransactionConsistent(
-                    previousStateVersion: previousStateVersion,
-                    previousAccumulator: previousAccumulator,
-                    stateVersion: transaction.ResultantStateIdentifiers.StateVersion,
-                    accumulator: transaction.ResultantStateIdentifiers.GetAccumulatorHashBytes(),
-                    payload: transaction.LedgerTransaction.GetPayloadBytes());
+                TransactionConsistency.AssertChildTransactionConsistent(previousStateVersion: previousStateVersion, stateVersion: transaction.ResultantStateIdentifiers.StateVersion);
 
                 previousStateVersion = transaction.ResultantStateIdentifiers.StateVersion;
-                previousAccumulator = transaction.ResultantStateIdentifiers.GetAccumulatorHashBytes();
             }
 
             _observers.ForEach(x => x.QuorumExtensionConsistentGained());

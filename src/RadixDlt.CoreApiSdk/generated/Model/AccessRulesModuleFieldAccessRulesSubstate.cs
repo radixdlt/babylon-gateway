@@ -102,8 +102,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(AccountVaultIndexEntrySubstate), "AccountVaultIndexEntry")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldConfigSubstate), "ConsensusManagerFieldConfig")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentProposalStatisticSubstate), "ConsensusManagerFieldCurrentProposalStatistic")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentValidatorSetSubstate), "ConsensusManagerFieldCurrentValidatorSet")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldStateSubstate), "ConsensusManagerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate), "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
@@ -113,12 +113,14 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(GenericKeyValueStoreEntrySubstate), "GenericKeyValueStoreEntry")]
     [JsonSubtypes.KnownSubType(typeof(GenericScryptoComponentFieldStateSubstate), "GenericScryptoComponentFieldState")]
     [JsonSubtypes.KnownSubType(typeof(MetadataModuleEntrySubstate), "MetadataModuleEntry")]
+    [JsonSubtypes.KnownSubType(typeof(MultiResourcePoolSubstate), "MultiResourcePool")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerDataEntrySubstate), "NonFungibleResourceManagerDataEntry")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldIdTypeSubstate), "NonFungibleResourceManagerFieldIdType")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldMutableFieldsSubstate), "NonFungibleResourceManagerFieldMutableFields")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldTotalSupplySubstate), "NonFungibleResourceManagerFieldTotalSupply")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultContentsIndexEntrySubstate), "NonFungibleVaultContentsIndexEntry")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldBalanceSubstate), "NonFungibleVaultFieldBalance")]
+    [JsonSubtypes.KnownSubType(typeof(OneResourcePoolSubstate), "OneResourcePool")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldCodeSubstate), "PackageFieldCode")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldCodeTypeSubstate), "PackageFieldCodeType")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldFunctionAccessRulesSubstate), "PackageFieldFunctionAccessRules")]
@@ -126,6 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltySubstate), "PackageFieldRoyalty")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldAccumulatorSubstate), "RoyaltyModuleFieldAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldConfigSubstate), "RoyaltyModuleFieldConfig")]
+    [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolSubstate), "TwoResourcePool")]
     [JsonSubtypes.KnownSubType(typeof(TypeInfoModuleFieldTypeInfoSubstate), "TypeInfoModuleFieldTypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
     public partial class AccessRulesModuleFieldAccessRulesSubstate : Substate, IEquatable<AccessRulesModuleFieldAccessRulesSubstate>
@@ -138,36 +141,36 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccessRulesModuleFieldAccessRulesSubstate" /> class.
         /// </summary>
-        /// <param name="accessRules">accessRules (required).</param>
-        /// <param name="innerBlueprintAccessRules">innerBlueprintAccessRules (required).</param>
+        /// <param name="roles">roles (required).</param>
+        /// <param name="roleMutability">roleMutability (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.AccessRulesModuleFieldAccessRules).</param>
-        public AccessRulesModuleFieldAccessRulesSubstate(NodeAuthorityRules accessRules = default(NodeAuthorityRules), List<BlueprintAccessRules> innerBlueprintAccessRules = default(List<BlueprintAccessRules>), SubstateType substateType = SubstateType.AccessRulesModuleFieldAccessRules) : base(substateType)
+        public AccessRulesModuleFieldAccessRulesSubstate(List<RoleRule> roles = default(List<RoleRule>), List<MutabilityRule> roleMutability = default(List<MutabilityRule>), SubstateType substateType = SubstateType.AccessRulesModuleFieldAccessRules) : base(substateType)
         {
-            // to ensure "accessRules" is required (not null)
-            if (accessRules == null)
+            // to ensure "roles" is required (not null)
+            if (roles == null)
             {
-                throw new ArgumentNullException("accessRules is a required property for AccessRulesModuleFieldAccessRulesSubstate and cannot be null");
+                throw new ArgumentNullException("roles is a required property for AccessRulesModuleFieldAccessRulesSubstate and cannot be null");
             }
-            this.AccessRules = accessRules;
-            // to ensure "innerBlueprintAccessRules" is required (not null)
-            if (innerBlueprintAccessRules == null)
+            this.Roles = roles;
+            // to ensure "roleMutability" is required (not null)
+            if (roleMutability == null)
             {
-                throw new ArgumentNullException("innerBlueprintAccessRules is a required property for AccessRulesModuleFieldAccessRulesSubstate and cannot be null");
+                throw new ArgumentNullException("roleMutability is a required property for AccessRulesModuleFieldAccessRulesSubstate and cannot be null");
             }
-            this.InnerBlueprintAccessRules = innerBlueprintAccessRules;
+            this.RoleMutability = roleMutability;
         }
 
         /// <summary>
-        /// Gets or Sets AccessRules
+        /// Gets or Sets Roles
         /// </summary>
-        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public NodeAuthorityRules AccessRules { get; set; }
+        [DataMember(Name = "roles", IsRequired = true, EmitDefaultValue = true)]
+        public List<RoleRule> Roles { get; set; }
 
         /// <summary>
-        /// Gets or Sets InnerBlueprintAccessRules
+        /// Gets or Sets RoleMutability
         /// </summary>
-        [DataMember(Name = "inner_blueprint_access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public List<BlueprintAccessRules> InnerBlueprintAccessRules { get; set; }
+        [DataMember(Name = "role_mutability", IsRequired = true, EmitDefaultValue = true)]
+        public List<MutabilityRule> RoleMutability { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -178,8 +181,8 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccessRulesModuleFieldAccessRulesSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
-            sb.Append("  InnerBlueprintAccessRules: ").Append(InnerBlueprintAccessRules).Append("\n");
+            sb.Append("  Roles: ").Append(Roles).Append("\n");
+            sb.Append("  RoleMutability: ").Append(RoleMutability).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -216,15 +219,16 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.AccessRules == input.AccessRules ||
-                    (this.AccessRules != null &&
-                    this.AccessRules.Equals(input.AccessRules))
+                    this.Roles == input.Roles ||
+                    this.Roles != null &&
+                    input.Roles != null &&
+                    this.Roles.SequenceEqual(input.Roles)
                 ) && base.Equals(input) && 
                 (
-                    this.InnerBlueprintAccessRules == input.InnerBlueprintAccessRules ||
-                    this.InnerBlueprintAccessRules != null &&
-                    input.InnerBlueprintAccessRules != null &&
-                    this.InnerBlueprintAccessRules.SequenceEqual(input.InnerBlueprintAccessRules)
+                    this.RoleMutability == input.RoleMutability ||
+                    this.RoleMutability != null &&
+                    input.RoleMutability != null &&
+                    this.RoleMutability.SequenceEqual(input.RoleMutability)
                 );
         }
 
@@ -237,13 +241,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.AccessRules != null)
+                if (this.Roles != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Roles.GetHashCode();
                 }
-                if (this.InnerBlueprintAccessRules != null)
+                if (this.RoleMutability != null)
                 {
-                    hashCode = (hashCode * 59) + this.InnerBlueprintAccessRules.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RoleMutability.GetHashCode();
                 }
                 return hashCode;
             }

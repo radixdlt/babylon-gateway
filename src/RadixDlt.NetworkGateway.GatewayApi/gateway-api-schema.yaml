@@ -1341,12 +1341,12 @@ components:
         flags:
           type: object
           required:
-            - unlimited_loan
+            - use_free_credit
             - assume_all_signature_proofs
             - permit_duplicate_intent_hash
             - permit_invalid_header_epoch
           properties:
-            unlimited_loan:
+            use_free_credit:
               type: boolean
             assume_all_signature_proofs:
               type: boolean

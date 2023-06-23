@@ -104,8 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="BlueprintAccessRules" /> class.
         /// </summary>
         /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="accessRules">accessRules (required).</param>
-        public BlueprintAccessRules(string blueprintName = default(string), NodeAuthorityRules accessRules = default(NodeAuthorityRules))
+        public BlueprintAccessRules(string blueprintName = default(string))
         {
             // to ensure "blueprintName" is required (not null)
             if (blueprintName == null)
@@ -113,12 +112,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("blueprintName is a required property for BlueprintAccessRules and cannot be null");
             }
             this.BlueprintName = blueprintName;
-            // to ensure "accessRules" is required (not null)
-            if (accessRules == null)
-            {
-                throw new ArgumentNullException("accessRules is a required property for BlueprintAccessRules and cannot be null");
-            }
-            this.AccessRules = accessRules;
         }
 
         /// <summary>
@@ -126,12 +119,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
         public string BlueprintName { get; set; }
-
-        /// <summary>
-        /// Gets or Sets AccessRules
-        /// </summary>
-        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public NodeAuthorityRules AccessRules { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,7 +129,6 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class BlueprintAccessRules {\n");
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
-            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -182,11 +168,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.BlueprintName == input.BlueprintName ||
                     (this.BlueprintName != null &&
                     this.BlueprintName.Equals(input.BlueprintName))
-                ) && 
-                (
-                    this.AccessRules == input.AccessRules ||
-                    (this.AccessRules != null &&
-                    this.AccessRules.Equals(input.AccessRules))
                 );
         }
 
@@ -202,10 +183,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.BlueprintName != null)
                 {
                     hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
-                }
-                if (this.AccessRules != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
                 }
                 return hashCode;
             }

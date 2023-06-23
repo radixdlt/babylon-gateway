@@ -90,35 +90,43 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ConsensusManagerCurrentTimeSubstateAllOf
+    /// SubstateValue
     /// </summary>
-    [DataContract(Name = "ConsensusManagerCurrentTimeSubstate_allOf")]
-    public partial class ConsensusManagerCurrentTimeSubstateAllOf : IEquatable<ConsensusManagerCurrentTimeSubstateAllOf>
+    [DataContract(Name = "SubstateValue")]
+    public partial class SubstateValue : IEquatable<SubstateValue>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConsensusManagerCurrentTimeSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="SubstateValue" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected ConsensusManagerCurrentTimeSubstateAllOf() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConsensusManagerCurrentTimeSubstateAllOf" /> class.
-        /// </summary>
-        /// <param name="proposerTimestamp">proposerTimestamp (required).</param>
-        public ConsensusManagerCurrentTimeSubstateAllOf(Instant proposerTimestamp = default(Instant))
+        /// <param name="substateHex">The hex-encoded, SBOR-encoded substate data bytes. Only returned if enabled in SubstateFormatOptions on your request (default false)..</param>
+        /// <param name="substateDataHash">The hex-encoded Blake2b-256 hash of the substate data bytes. Only returned if enabled in SubstateFormatOptions on your request (default false)..</param>
+        /// <param name="substateData">substateData.</param>
+        public SubstateValue(string substateHex = default(string), string substateDataHash = default(string), Substate substateData = default(Substate))
         {
-            // to ensure "proposerTimestamp" is required (not null)
-            if (proposerTimestamp == null)
-            {
-                throw new ArgumentNullException("proposerTimestamp is a required property for ConsensusManagerCurrentTimeSubstateAllOf and cannot be null");
-            }
-            this.ProposerTimestamp = proposerTimestamp;
+            this.SubstateHex = substateHex;
+            this.SubstateDataHash = substateDataHash;
+            this.SubstateData = substateData;
         }
 
         /// <summary>
-        /// Gets or Sets ProposerTimestamp
+        /// The hex-encoded, SBOR-encoded substate data bytes. Only returned if enabled in SubstateFormatOptions on your request (default false).
         /// </summary>
-        [DataMember(Name = "proposer_timestamp", IsRequired = true, EmitDefaultValue = true)]
-        public Instant ProposerTimestamp { get; set; }
+        /// <value>The hex-encoded, SBOR-encoded substate data bytes. Only returned if enabled in SubstateFormatOptions on your request (default false).</value>
+        [DataMember(Name = "substate_hex", EmitDefaultValue = true)]
+        public string SubstateHex { get; set; }
+
+        /// <summary>
+        /// The hex-encoded Blake2b-256 hash of the substate data bytes. Only returned if enabled in SubstateFormatOptions on your request (default false).
+        /// </summary>
+        /// <value>The hex-encoded Blake2b-256 hash of the substate data bytes. Only returned if enabled in SubstateFormatOptions on your request (default false).</value>
+        [DataMember(Name = "substate_data_hash", EmitDefaultValue = true)]
+        public string SubstateDataHash { get; set; }
+
+        /// <summary>
+        /// Gets or Sets SubstateData
+        /// </summary>
+        [DataMember(Name = "substate_data", EmitDefaultValue = true)]
+        public Substate SubstateData { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +135,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ConsensusManagerCurrentTimeSubstateAllOf {\n");
-            sb.Append("  ProposerTimestamp: ").Append(ProposerTimestamp).Append("\n");
+            sb.Append("class SubstateValue {\n");
+            sb.Append("  SubstateHex: ").Append(SubstateHex).Append("\n");
+            sb.Append("  SubstateDataHash: ").Append(SubstateDataHash).Append("\n");
+            sb.Append("  SubstateData: ").Append(SubstateData).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +159,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ConsensusManagerCurrentTimeSubstateAllOf);
+            return this.Equals(input as SubstateValue);
         }
 
         /// <summary>
-        /// Returns true if ConsensusManagerCurrentTimeSubstateAllOf instances are equal
+        /// Returns true if SubstateValue instances are equal
         /// </summary>
-        /// <param name="input">Instance of ConsensusManagerCurrentTimeSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of SubstateValue to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ConsensusManagerCurrentTimeSubstateAllOf input)
+        public bool Equals(SubstateValue input)
         {
             if (input == null)
             {
@@ -165,9 +175,19 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ProposerTimestamp == input.ProposerTimestamp ||
-                    (this.ProposerTimestamp != null &&
-                    this.ProposerTimestamp.Equals(input.ProposerTimestamp))
+                    this.SubstateHex == input.SubstateHex ||
+                    (this.SubstateHex != null &&
+                    this.SubstateHex.Equals(input.SubstateHex))
+                ) && 
+                (
+                    this.SubstateDataHash == input.SubstateDataHash ||
+                    (this.SubstateDataHash != null &&
+                    this.SubstateDataHash.Equals(input.SubstateDataHash))
+                ) && 
+                (
+                    this.SubstateData == input.SubstateData ||
+                    (this.SubstateData != null &&
+                    this.SubstateData.Equals(input.SubstateData))
                 );
         }
 
@@ -180,9 +200,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ProposerTimestamp != null)
+                if (this.SubstateHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.ProposerTimestamp.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SubstateHex.GetHashCode();
+                }
+                if (this.SubstateDataHash != null)
+                {
+                    hashCode = (hashCode * 59) + this.SubstateDataHash.GetHashCode();
+                }
+                if (this.SubstateData != null)
+                {
+                    hashCode = (hashCode * 59) + this.SubstateData.GetHashCode();
                 }
                 return hashCode;
             }

@@ -79,7 +79,7 @@ public static class TransactionConsistency
         }
     }
 
-    public static void AssertChildTransactionConsistent(long previousStateVersion, byte[] previousAccumulator, long stateVersion, byte[] accumulator, byte[] payload)
+    public static void AssertChildTransactionConsistent(long previousStateVersion, long stateVersion)
     {
         if (stateVersion != previousStateVersion + 1)
         {

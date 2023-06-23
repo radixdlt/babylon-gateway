@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="StateFungibleResourceManagerAllOf" /> class.
         /// </summary>
         /// <param name="divisibility">divisibility (required).</param>
-        /// <param name="totalSupply">totalSupply (required).</param>
+        /// <param name="totalSupply">totalSupply.</param>
         public StateFungibleResourceManagerAllOf(Substate divisibility = default(Substate), Substate totalSupply = default(Substate))
         {
             // to ensure "divisibility" is required (not null)
@@ -113,11 +113,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("divisibility is a required property for StateFungibleResourceManagerAllOf and cannot be null");
             }
             this.Divisibility = divisibility;
-            // to ensure "totalSupply" is required (not null)
-            if (totalSupply == null)
-            {
-                throw new ArgumentNullException("totalSupply is a required property for StateFungibleResourceManagerAllOf and cannot be null");
-            }
             this.TotalSupply = totalSupply;
         }
 
@@ -130,7 +125,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Gets or Sets TotalSupply
         /// </summary>
-        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "total_supply", EmitDefaultValue = true)]
         public Substate TotalSupply { get; set; }
 
         /// <summary>

@@ -62,9 +62,9 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions;
 using System.Linq;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -105,26 +105,26 @@ public static class SchemaNames
 
 public static class SchemaExtractor
 {
-    public static EventTypeIdentifiers ExtractEventTypeIdentifiers(TransactionReceipt genesisLedgerTransactionReceipt)
+    public static EventTypeIdentifiers ExtractEventTypeIdentifiers(CoreModel.TransactionReceipt genesisLedgerTransactionReceipt)
     {
         var schemas = genesisLedgerTransactionReceipt.StateUpdates.CreatedSubstates
-            .Where(x => x.SubstateData is PackageFieldInfoSubstate)
-            .SelectMany(x => (x.SubstateData as PackageFieldInfoSubstate)!.PackageSchema.BlueprintSchemas)
+            .Where(x => x.Value.SubstateData is CoreModel.PackageFieldInfoSubstate)
+            .SelectMany(x => ((CoreModel.PackageFieldInfoSubstate)x.Value.SubstateData).PackageSchema.BlueprintDefinitions)
             .ToList();
 
-        var fungibleVaultSchema = schemas.First(x => x.Key == SchemaNames.FungibleVault).Value;
+        var fungibleVaultSchema = schemas.First(x => x.Key == SchemaNames.FungibleVault).Value.Schema;
         var fungibleVaultWithdrawEventId = fungibleVaultSchema.EventSchemas.First(x => x.Key == EventNames.FungibleVault.Withdraw).Value.Index;
         var fungibleVaultDepositEventId = fungibleVaultSchema.EventSchemas.First(x => x.Key == EventNames.FungibleVault.Deposit).Value.Index;
 
-        var nonFungibleVaultSchema = schemas.First(x => x.Key == SchemaNames.NonFungibleVault).Value;
+        var nonFungibleVaultSchema = schemas.First(x => x.Key == SchemaNames.NonFungibleVault).Value.Schema;
         var nonFungibleVaultWithdrawEventId = nonFungibleVaultSchema.EventSchemas.First(x => x.Key == EventNames.NonFungibleVault.Withdraw).Value.Index;
         var nonFungibleVaultDepositEventId = nonFungibleVaultSchema.EventSchemas.First(x => x.Key == EventNames.NonFungibleVault.Deposit).Value.Index;
 
-        var fungibleResourceManagerSchema = schemas.First(x => x.Key == SchemaNames.FungibleResourceManager).Value;
+        var fungibleResourceManagerSchema = schemas.First(x => x.Key == SchemaNames.FungibleResourceManager).Value.Schema;
         var mintFungibleResourceEventId = fungibleResourceManagerSchema.EventSchemas.First(x => x.Key == EventNames.FungibleResourceManager.Mint).Value.Index;
         var burnFungibleResourceEventId = fungibleResourceManagerSchema.EventSchemas.First(x => x.Key == EventNames.FungibleResourceManager.Burn).Value.Index;
 
-        var nonFungibleResourceManagerSchema = schemas.First(x => x.Key == SchemaNames.NonFungibleResourceManager).Value;
+        var nonFungibleResourceManagerSchema = schemas.First(x => x.Key == SchemaNames.NonFungibleResourceManager).Value.Schema;
         var mintNonFungibleResourceEventId = nonFungibleResourceManagerSchema.EventSchemas.First(x => x.Key == EventNames.NonFungibleResourceManager.Mint).Value.Index;
         var burnNonFungibleResourceEventId = nonFungibleResourceManagerSchema.EventSchemas.First(x => x.Key == EventNames.NonFungibleResourceManager.Burn).Value.Index;
 
