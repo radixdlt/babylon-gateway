@@ -219,6 +219,9 @@ internal static class ScryptoSborUtils
                     case 1 when array.Elements.All(e => e is Bool):
                         typedValue = new GatewayModel.MetadataScalarArrayValue(array.Elements.Cast<Bool>().Select(e => e.Value.ToString()).ToList(), GatewayModel.MetadataValueType.BoolArray);
                         break;
+                    case 2 when array.Elements.All(e => e is U8):
+                        typedValue = new GatewayModel.MetadataScalarValue(array.Elements.Cast<U8>().Select(e => e.Value).ToArray().ToHex(), GatewayModel.MetadataValueType.U8Array);
+                        break;
                     case 3 when array.Elements.All(e => e is U32):
                         typedValue = new GatewayModel.MetadataScalarArrayValue(array.Elements.Cast<U32>().Select(e => e.Value.ToString()).ToList(), GatewayModel.MetadataValueType.U32Array);
                         break;
@@ -323,6 +326,7 @@ internal static class ScryptoSborUtils
             }
             else if (scalarVariant == 2 && @enum.Fields is [Bytes bytes])
             {
+                // alternate encoding for array of u8s
                 typedValue = new GatewayModel.MetadataScalarValue(((byte[])bytes.Hex).ToHex(), GatewayModel.MetadataValueType.U8Array);
             }
         }
