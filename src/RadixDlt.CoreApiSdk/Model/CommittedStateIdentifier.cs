@@ -68,7 +68,13 @@ namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class CommittedStateIdentifier
 {
-    private byte[] _accumulatorHashBytes;
+    private byte[] _stateTreeHashBytes;
+    private byte[] _transactionTreeHashBytes;
+    private byte[] _receiptTreeHashBytes;
 
-    public byte[] GetAccumulatorHashBytes() => _accumulatorHashBytes ??= Convert.FromHexString(AccumulatorHash);
+    public byte[] GetStateTreeHashBytes() => _stateTreeHashBytes ??= Convert.FromHexString(StateTreeHash);
+
+    public byte[] GetTransactionTreeHashBytes() => _transactionTreeHashBytes ??= Convert.FromHexString(TransactionTreeHash);
+
+    public byte[] GetReceiptTreeHashBytes() => _receiptTreeHashBytes ??= Convert.FromHexString(ReceiptTreeHash);
 }

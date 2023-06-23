@@ -108,7 +108,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="global">global (required).</param>
         /// <param name="outerObject">The Bech32m-encoded human readable version of any global address.</param>
         /// <param name="instanceSchema">instanceSchema.</param>
-        public ObjectTypeInfoDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), bool global = default(bool), string outerObject = default(string), InstanceSchema instanceSchema = default(InstanceSchema))
+        /// <param name="features">features (required).</param>
+        public ObjectTypeInfoDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), bool global = default(bool), string outerObject = default(string), InstanceSchema instanceSchema = default(InstanceSchema), List<string> features = default(List<string>))
         {
             // to ensure "packageAddress" is required (not null)
             if (packageAddress == null)
@@ -123,6 +124,12 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.BlueprintName = blueprintName;
             this.Global = global;
+            // to ensure "features" is required (not null)
+            if (features == null)
+            {
+                throw new ArgumentNullException("features is a required property for ObjectTypeInfoDetailsAllOf and cannot be null");
+            }
+            this.Features = features;
             this.OuterObject = outerObject;
             this.InstanceSchema = instanceSchema;
         }
@@ -160,6 +167,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public InstanceSchema InstanceSchema { get; set; }
 
         /// <summary>
+        /// Gets or Sets Features
+        /// </summary>
+        [DataMember(Name = "features", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> Features { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -172,6 +185,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  Global: ").Append(Global).Append("\n");
             sb.Append("  OuterObject: ").Append(OuterObject).Append("\n");
             sb.Append("  InstanceSchema: ").Append(InstanceSchema).Append("\n");
+            sb.Append("  Features: ").Append(Features).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -230,6 +244,12 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.InstanceSchema == input.InstanceSchema ||
                     (this.InstanceSchema != null &&
                     this.InstanceSchema.Equals(input.InstanceSchema))
+                ) && 
+                (
+                    this.Features == input.Features ||
+                    this.Features != null &&
+                    input.Features != null &&
+                    this.Features.SequenceEqual(input.Features)
                 );
         }
 
@@ -258,6 +278,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.InstanceSchema != null)
                 {
                     hashCode = (hashCode * 59) + this.InstanceSchema.GetHashCode();
+                }
+                if (this.Features != null)
+                {
+                    hashCode = (hashCode * 59) + this.Features.GetHashCode();
                 }
                 return hashCode;
             }

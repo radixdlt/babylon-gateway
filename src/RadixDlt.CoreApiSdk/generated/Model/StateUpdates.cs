@@ -107,7 +107,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="updatedSubstates">updatedSubstates (required).</param>
         /// <param name="deletedSubstates">deletedSubstates (required).</param>
         /// <param name="newGlobalEntities">newGlobalEntities (required).</param>
-        public StateUpdates(List<CreatedOrUpdatedSubstate> createdSubstates = default(List<CreatedOrUpdatedSubstate>), List<CreatedOrUpdatedSubstate> updatedSubstates = default(List<CreatedOrUpdatedSubstate>), List<DeletedSubstate> deletedSubstates = default(List<DeletedSubstate>), List<EntityReference> newGlobalEntities = default(List<EntityReference>))
+        public StateUpdates(List<CreatedSubstate> createdSubstates = default(List<CreatedSubstate>), List<UpdatedSubstate> updatedSubstates = default(List<UpdatedSubstate>), List<DeletedSubstate> deletedSubstates = default(List<DeletedSubstate>), List<EntityReference> newGlobalEntities = default(List<EntityReference>))
         {
             // to ensure "createdSubstates" is required (not null)
             if (createdSubstates == null)
@@ -139,13 +139,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets CreatedSubstates
         /// </summary>
         [DataMember(Name = "created_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<CreatedOrUpdatedSubstate> CreatedSubstates { get; set; }
+        public List<CreatedSubstate> CreatedSubstates { get; set; }
 
         /// <summary>
         /// Gets or Sets UpdatedSubstates
         /// </summary>
         [DataMember(Name = "updated_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<CreatedOrUpdatedSubstate> UpdatedSubstates { get; set; }
+        public List<UpdatedSubstate> UpdatedSubstates { get; set; }
 
         /// <summary>
         /// Gets or Sets DeletedSubstates

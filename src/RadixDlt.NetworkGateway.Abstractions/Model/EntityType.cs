@@ -80,4 +80,7 @@ public enum EntityType
     GlobalValidator,
     GlobalAccessController,
     GlobalIdentity,
+    GlobalOneResourcePool,
+    GlobalTwoResourcePool,
+    GlobalMultiResourcePool,
 }

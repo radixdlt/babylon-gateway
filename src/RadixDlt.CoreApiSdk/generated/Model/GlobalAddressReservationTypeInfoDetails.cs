@@ -84,41 +84,49 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// AuthorityRuleNodeAllOf
+    /// GlobalAddressReservationTypeInfoDetails
     /// </summary>
-    [DataContract(Name = "AuthorityRuleNode_allOf")]
-    public partial class AuthorityRuleNodeAllOf : IEquatable<AuthorityRuleNodeAllOf>
+    [DataContract(Name = "GlobalAddressReservationTypeInfoDetails")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(GlobalAddressPhantomTypeInfoDetails), "GlobalAddressPhantom")]
+    [JsonSubtypes.KnownSubType(typeof(GlobalAddressReservationTypeInfoDetails), "GlobalAddressReservation")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreTypeInfoDetails), "KeyValueStore")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectTypeInfoDetails), "Object")]
+    public partial class GlobalAddressReservationTypeInfoDetails : TypeInfoDetails, IEquatable<GlobalAddressReservationTypeInfoDetails>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AuthorityRuleNodeAllOf" /> class.
+        /// Initializes a new instance of the <see cref="GlobalAddressReservationTypeInfoDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AuthorityRuleNodeAllOf() { }
+        protected GlobalAddressReservationTypeInfoDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AuthorityRuleNodeAllOf" /> class.
+        /// Initializes a new instance of the <see cref="GlobalAddressReservationTypeInfoDetails" /> class.
         /// </summary>
-        /// <param name="key">key (required).</param>
-        public AuthorityRuleNodeAllOf(AuthorityKey key = default(AuthorityKey))
+        /// <param name="globalAddress">The Bech32m-encoded human readable version of any global address (required).</param>
+        /// <param name="type">type (required) (default to TypeInfoType.GlobalAddressReservation).</param>
+        public GlobalAddressReservationTypeInfoDetails(string globalAddress = default(string), TypeInfoType type = TypeInfoType.GlobalAddressReservation) : base(type)
         {
-            // to ensure "key" is required (not null)
-            if (key == null)
+            // to ensure "globalAddress" is required (not null)
+            if (globalAddress == null)
             {
-                throw new ArgumentNullException("key is a required property for AuthorityRuleNodeAllOf and cannot be null");
+                throw new ArgumentNullException("globalAddress is a required property for GlobalAddressReservationTypeInfoDetails and cannot be null");
             }
-            this.Key = key;
+            this.GlobalAddress = globalAddress;
         }
 
         /// <summary>
-        /// Gets or Sets Key
+        /// The Bech32m-encoded human readable version of any global address
         /// </summary>
-        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
-        public AuthorityKey Key { get; set; }
+        /// <value>The Bech32m-encoded human readable version of any global address</value>
+        [DataMember(Name = "global_address", IsRequired = true, EmitDefaultValue = true)]
+        public string GlobalAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +135,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AuthorityRuleNodeAllOf {\n");
-            sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("class GlobalAddressReservationTypeInfoDetails {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  GlobalAddress: ").Append(GlobalAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -137,7 +146,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -149,25 +158,25 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AuthorityRuleNodeAllOf);
+            return this.Equals(input as GlobalAddressReservationTypeInfoDetails);
         }
 
         /// <summary>
-        /// Returns true if AuthorityRuleNodeAllOf instances are equal
+        /// Returns true if GlobalAddressReservationTypeInfoDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of AuthorityRuleNodeAllOf to be compared</param>
+        /// <param name="input">Instance of GlobalAddressReservationTypeInfoDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AuthorityRuleNodeAllOf input)
+        public bool Equals(GlobalAddressReservationTypeInfoDetails input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.Key == input.Key ||
-                    (this.Key != null &&
-                    this.Key.Equals(input.Key))
+                    this.GlobalAddress == input.GlobalAddress ||
+                    (this.GlobalAddress != null &&
+                    this.GlobalAddress.Equals(input.GlobalAddress))
                 );
         }
 
@@ -179,10 +188,10 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.Key != null)
+                int hashCode = base.GetHashCode();
+                if (this.GlobalAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                    hashCode = (hashCode * 59) + this.GlobalAddress.GetHashCode();
                 }
                 return hashCode;
             }

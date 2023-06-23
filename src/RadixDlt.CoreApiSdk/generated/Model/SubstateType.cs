@@ -291,7 +291,25 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum GenericKeyValueStoreEntry for value: GenericKeyValueStoreEntry
         /// </summary>
         [EnumMember(Value = "GenericKeyValueStoreEntry")]
-        GenericKeyValueStoreEntry = 33
+        GenericKeyValueStoreEntry = 33,
+
+        /// <summary>
+        /// Enum OneResourcePool for value: OneResourcePool
+        /// </summary>
+        [EnumMember(Value = "OneResourcePool")]
+        OneResourcePool = 34,
+
+        /// <summary>
+        /// Enum TwoResourcePool for value: TwoResourcePool
+        /// </summary>
+        [EnumMember(Value = "TwoResourcePool")]
+        TwoResourcePool = 35,
+
+        /// <summary>
+        /// Enum MultiResourcePool for value: MultiResourcePool
+        /// </summary>
+        [EnumMember(Value = "MultiResourcePool")]
+        MultiResourcePool = 36
 
     }
 

@@ -104,9 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="PackageFieldInfoSubstateAllOf" /> class.
         /// </summary>
         /// <param name="packageSchema">packageSchema (required).</param>
-        /// <param name="dependentResources">dependentResources (required).</param>
-        /// <param name="dependentComponents">dependentComponents (required).</param>
-        public PackageFieldInfoSubstateAllOf(PackageSchema packageSchema = default(PackageSchema), List<string> dependentResources = default(List<string>), List<string> dependentComponents = default(List<string>))
+        public PackageFieldInfoSubstateAllOf(PackageSchema packageSchema = default(PackageSchema))
         {
             // to ensure "packageSchema" is required (not null)
             if (packageSchema == null)
@@ -114,18 +112,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("packageSchema is a required property for PackageFieldInfoSubstateAllOf and cannot be null");
             }
             this.PackageSchema = packageSchema;
-            // to ensure "dependentResources" is required (not null)
-            if (dependentResources == null)
-            {
-                throw new ArgumentNullException("dependentResources is a required property for PackageFieldInfoSubstateAllOf and cannot be null");
-            }
-            this.DependentResources = dependentResources;
-            // to ensure "dependentComponents" is required (not null)
-            if (dependentComponents == null)
-            {
-                throw new ArgumentNullException("dependentComponents is a required property for PackageFieldInfoSubstateAllOf and cannot be null");
-            }
-            this.DependentComponents = dependentComponents;
         }
 
         /// <summary>
@@ -133,18 +119,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "package_schema", IsRequired = true, EmitDefaultValue = true)]
         public PackageSchema PackageSchema { get; set; }
-
-        /// <summary>
-        /// Gets or Sets DependentResources
-        /// </summary>
-        [DataMember(Name = "dependent_resources", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> DependentResources { get; set; }
-
-        /// <summary>
-        /// Gets or Sets DependentComponents
-        /// </summary>
-        [DataMember(Name = "dependent_components", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> DependentComponents { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -155,8 +129,6 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class PackageFieldInfoSubstateAllOf {\n");
             sb.Append("  PackageSchema: ").Append(PackageSchema).Append("\n");
-            sb.Append("  DependentResources: ").Append(DependentResources).Append("\n");
-            sb.Append("  DependentComponents: ").Append(DependentComponents).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -196,18 +168,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.PackageSchema == input.PackageSchema ||
                     (this.PackageSchema != null &&
                     this.PackageSchema.Equals(input.PackageSchema))
-                ) && 
-                (
-                    this.DependentResources == input.DependentResources ||
-                    this.DependentResources != null &&
-                    input.DependentResources != null &&
-                    this.DependentResources.SequenceEqual(input.DependentResources)
-                ) && 
-                (
-                    this.DependentComponents == input.DependentComponents ||
-                    this.DependentComponents != null &&
-                    input.DependentComponents != null &&
-                    this.DependentComponents.SequenceEqual(input.DependentComponents)
                 );
         }
 
@@ -223,14 +183,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.PackageSchema != null)
                 {
                     hashCode = (hashCode * 59) + this.PackageSchema.GetHashCode();
-                }
-                if (this.DependentResources != null)
-                {
-                    hashCode = (hashCode * 59) + this.DependentResources.GetHashCode();
-                }
-                if (this.DependentComponents != null)
-                {
-                    hashCode = (hashCode * 59) + this.DependentComponents.GetHashCode();
                 }
                 return hashCode;
             }

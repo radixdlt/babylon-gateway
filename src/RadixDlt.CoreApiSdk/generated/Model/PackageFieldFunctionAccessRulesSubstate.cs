@@ -102,8 +102,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(AccountVaultIndexEntrySubstate), "AccountVaultIndexEntry")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldConfigSubstate), "ConsensusManagerFieldConfig")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentProposalStatisticSubstate), "ConsensusManagerFieldCurrentProposalStatistic")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentValidatorSetSubstate), "ConsensusManagerFieldCurrentValidatorSet")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldStateSubstate), "ConsensusManagerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate), "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
@@ -113,12 +113,14 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(GenericKeyValueStoreEntrySubstate), "GenericKeyValueStoreEntry")]
     [JsonSubtypes.KnownSubType(typeof(GenericScryptoComponentFieldStateSubstate), "GenericScryptoComponentFieldState")]
     [JsonSubtypes.KnownSubType(typeof(MetadataModuleEntrySubstate), "MetadataModuleEntry")]
+    [JsonSubtypes.KnownSubType(typeof(MultiResourcePoolSubstate), "MultiResourcePool")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerDataEntrySubstate), "NonFungibleResourceManagerDataEntry")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldIdTypeSubstate), "NonFungibleResourceManagerFieldIdType")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldMutableFieldsSubstate), "NonFungibleResourceManagerFieldMutableFields")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldTotalSupplySubstate), "NonFungibleResourceManagerFieldTotalSupply")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultContentsIndexEntrySubstate), "NonFungibleVaultContentsIndexEntry")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldBalanceSubstate), "NonFungibleVaultFieldBalance")]
+    [JsonSubtypes.KnownSubType(typeof(OneResourcePoolSubstate), "OneResourcePool")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldCodeSubstate), "PackageFieldCode")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldCodeTypeSubstate), "PackageFieldCodeType")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldFunctionAccessRulesSubstate), "PackageFieldFunctionAccessRules")]
@@ -126,6 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltySubstate), "PackageFieldRoyalty")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldAccumulatorSubstate), "RoyaltyModuleFieldAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldConfigSubstate), "RoyaltyModuleFieldConfig")]
+    [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolSubstate), "TwoResourcePool")]
     [JsonSubtypes.KnownSubType(typeof(TypeInfoModuleFieldTypeInfoSubstate), "TypeInfoModuleFieldTypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
     public partial class PackageFieldFunctionAccessRulesSubstate : Substate, IEquatable<PackageFieldFunctionAccessRulesSubstate>
@@ -139,9 +142,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="PackageFieldFunctionAccessRulesSubstate" /> class.
         /// </summary>
         /// <param name="functionAuth">functionAuth (required).</param>
-        /// <param name="defaultAuth">defaultAuth (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.PackageFieldFunctionAccessRules).</param>
-        public PackageFieldFunctionAccessRulesSubstate(List<PackageFunctionAccessRule> functionAuth = default(List<PackageFunctionAccessRule>), AccessRule defaultAuth = default(AccessRule), SubstateType substateType = SubstateType.PackageFieldFunctionAccessRules) : base(substateType)
+        public PackageFieldFunctionAccessRulesSubstate(List<PackageFunctionAccessRule> functionAuth = default(List<PackageFunctionAccessRule>), SubstateType substateType = SubstateType.PackageFieldFunctionAccessRules) : base(substateType)
         {
             // to ensure "functionAuth" is required (not null)
             if (functionAuth == null)
@@ -149,12 +151,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("functionAuth is a required property for PackageFieldFunctionAccessRulesSubstate and cannot be null");
             }
             this.FunctionAuth = functionAuth;
-            // to ensure "defaultAuth" is required (not null)
-            if (defaultAuth == null)
-            {
-                throw new ArgumentNullException("defaultAuth is a required property for PackageFieldFunctionAccessRulesSubstate and cannot be null");
-            }
-            this.DefaultAuth = defaultAuth;
         }
 
         /// <summary>
@@ -162,12 +158,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "function_auth", IsRequired = true, EmitDefaultValue = true)]
         public List<PackageFunctionAccessRule> FunctionAuth { get; set; }
-
-        /// <summary>
-        /// Gets or Sets DefaultAuth
-        /// </summary>
-        [DataMember(Name = "default_auth", IsRequired = true, EmitDefaultValue = true)]
-        public AccessRule DefaultAuth { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -179,7 +169,6 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class PackageFieldFunctionAccessRulesSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  FunctionAuth: ").Append(FunctionAuth).Append("\n");
-            sb.Append("  DefaultAuth: ").Append(DefaultAuth).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -220,11 +209,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.FunctionAuth != null &&
                     input.FunctionAuth != null &&
                     this.FunctionAuth.SequenceEqual(input.FunctionAuth)
-                ) && base.Equals(input) && 
-                (
-                    this.DefaultAuth == input.DefaultAuth ||
-                    (this.DefaultAuth != null &&
-                    this.DefaultAuth.Equals(input.DefaultAuth))
                 );
         }
 
@@ -240,10 +224,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.FunctionAuth != null)
                 {
                     hashCode = (hashCode * 59) + this.FunctionAuth.GetHashCode();
-                }
-                if (this.DefaultAuth != null)
-                {
-                    hashCode = (hashCode * 59) + this.DefaultAuth.GetHashCode();
                 }
                 return hashCode;
             }

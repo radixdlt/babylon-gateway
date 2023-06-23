@@ -90,48 +90,49 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NodeAuthorityRules
+    /// TwoResourcePoolSubstateAllOf
     /// </summary>
-    [DataContract(Name = "NodeAuthorityRules")]
-    public partial class NodeAuthorityRules : IEquatable<NodeAuthorityRules>
+    [DataContract(Name = "TwoResourcePoolSubstate_allOf")]
+    public partial class TwoResourcePoolSubstateAllOf : IEquatable<TwoResourcePoolSubstateAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NodeAuthorityRules" /> class.
+        /// Initializes a new instance of the <see cref="TwoResourcePoolSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NodeAuthorityRules() { }
+        protected TwoResourcePoolSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NodeAuthorityRules" /> class.
+        /// Initializes a new instance of the <see cref="TwoResourcePoolSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="rules">rules (required).</param>
-        /// <param name="mutability">mutability (required).</param>
-        public NodeAuthorityRules(List<AuthorityRule> rules = default(List<AuthorityRule>), List<AuthorityRule> mutability = default(List<AuthorityRule>))
+        /// <param name="vaults">vaults (required).</param>
+        /// <param name="poolUnitResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        public TwoResourcePoolSubstateAllOf(List<PoolVault> vaults = default(List<PoolVault>), string poolUnitResourceAddress = default(string))
         {
-            // to ensure "rules" is required (not null)
-            if (rules == null)
+            // to ensure "vaults" is required (not null)
+            if (vaults == null)
             {
-                throw new ArgumentNullException("rules is a required property for NodeAuthorityRules and cannot be null");
+                throw new ArgumentNullException("vaults is a required property for TwoResourcePoolSubstateAllOf and cannot be null");
             }
-            this.Rules = rules;
-            // to ensure "mutability" is required (not null)
-            if (mutability == null)
+            this.Vaults = vaults;
+            // to ensure "poolUnitResourceAddress" is required (not null)
+            if (poolUnitResourceAddress == null)
             {
-                throw new ArgumentNullException("mutability is a required property for NodeAuthorityRules and cannot be null");
+                throw new ArgumentNullException("poolUnitResourceAddress is a required property for TwoResourcePoolSubstateAllOf and cannot be null");
             }
-            this.Mutability = mutability;
+            this.PoolUnitResourceAddress = poolUnitResourceAddress;
         }
 
         /// <summary>
-        /// Gets or Sets Rules
+        /// Gets or Sets Vaults
         /// </summary>
-        [DataMember(Name = "rules", IsRequired = true, EmitDefaultValue = true)]
-        public List<AuthorityRule> Rules { get; set; }
+        [DataMember(Name = "vaults", IsRequired = true, EmitDefaultValue = true)]
+        public List<PoolVault> Vaults { get; set; }
 
         /// <summary>
-        /// Gets or Sets Mutability
+        /// The Bech32m-encoded human readable version of the resource address
         /// </summary>
-        [DataMember(Name = "mutability", IsRequired = true, EmitDefaultValue = true)]
-        public List<AuthorityRule> Mutability { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource address</value>
+        [DataMember(Name = "pool_unit_resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PoolUnitResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -140,9 +141,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NodeAuthorityRules {\n");
-            sb.Append("  Rules: ").Append(Rules).Append("\n");
-            sb.Append("  Mutability: ").Append(Mutability).Append("\n");
+            sb.Append("class TwoResourcePoolSubstateAllOf {\n");
+            sb.Append("  Vaults: ").Append(Vaults).Append("\n");
+            sb.Append("  PoolUnitResourceAddress: ").Append(PoolUnitResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -163,15 +164,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NodeAuthorityRules);
+            return this.Equals(input as TwoResourcePoolSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if NodeAuthorityRules instances are equal
+        /// Returns true if TwoResourcePoolSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of NodeAuthorityRules to be compared</param>
+        /// <param name="input">Instance of TwoResourcePoolSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NodeAuthorityRules input)
+        public bool Equals(TwoResourcePoolSubstateAllOf input)
         {
             if (input == null)
             {
@@ -179,16 +180,15 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Rules == input.Rules ||
-                    this.Rules != null &&
-                    input.Rules != null &&
-                    this.Rules.SequenceEqual(input.Rules)
+                    this.Vaults == input.Vaults ||
+                    this.Vaults != null &&
+                    input.Vaults != null &&
+                    this.Vaults.SequenceEqual(input.Vaults)
                 ) && 
                 (
-                    this.Mutability == input.Mutability ||
-                    this.Mutability != null &&
-                    input.Mutability != null &&
-                    this.Mutability.SequenceEqual(input.Mutability)
+                    this.PoolUnitResourceAddress == input.PoolUnitResourceAddress ||
+                    (this.PoolUnitResourceAddress != null &&
+                    this.PoolUnitResourceAddress.Equals(input.PoolUnitResourceAddress))
                 );
         }
 
@@ -201,13 +201,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Rules != null)
+                if (this.Vaults != null)
                 {
-                    hashCode = (hashCode * 59) + this.Rules.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Vaults.GetHashCode();
                 }
-                if (this.Mutability != null)
+                if (this.PoolUnitResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Mutability.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PoolUnitResourceAddress.GetHashCode();
                 }
                 return hashCode;
             }

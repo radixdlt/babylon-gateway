@@ -66,18 +66,23 @@ using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class PackageFieldInfoSubstate : IEntityAddressPointer
+public partial class TwoResourcePoolSubstate : IEntityAddressPointer, IEntityOwner
 {
     public IEnumerable<string> GetEntityAddresses()
     {
-        foreach (var dependentResource in DependentResources)
-        {
-            yield return dependentResource;
-        }
+        yield return PoolUnitResourceAddress;
 
-        foreach (var dependentComponent in DependentComponents)
+        foreach (var vault in Vaults)
         {
-            yield return dependentComponent;
+            yield return vault.ResourceAddress;
+        }
+    }
+
+    public IEnumerable<EntityReference> GetOwnedEntities()
+    {
+        foreach (var poolVault in Vaults)
+        {
+            yield return poolVault.Vault;
         }
     }
 }

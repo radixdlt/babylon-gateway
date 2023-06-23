@@ -201,7 +201,25 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum InternalKeyValueStore for value: InternalKeyValueStore
         /// </summary>
         [EnumMember(Value = "InternalKeyValueStore")]
-        InternalKeyValueStore = 18
+        InternalKeyValueStore = 18,
+
+        /// <summary>
+        /// Enum GlobalOneResourcePool for value: GlobalOneResourcePool
+        /// </summary>
+        [EnumMember(Value = "GlobalOneResourcePool")]
+        GlobalOneResourcePool = 19,
+
+        /// <summary>
+        /// Enum GlobalTwoResourcePool for value: GlobalTwoResourcePool
+        /// </summary>
+        [EnumMember(Value = "GlobalTwoResourcePool")]
+        GlobalTwoResourcePool = 20,
+
+        /// <summary>
+        /// Enum GlobalMultiResourcePool for value: GlobalMultiResourcePool
+        /// </summary>
+        [EnumMember(Value = "GlobalMultiResourcePool")]
+        GlobalMultiResourcePool = 21
 
     }
 

@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="MethodRoyaltyRule" /> class.
         /// </summary>
         /// <param name="methodName">methodName (required).</param>
-        /// <param name="royaltyRule">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the number of cost units required to access this method. (required).</param>
-        public MethodRoyaltyRule(string methodName = default(string), long royaltyRule = default(long))
+        /// <param name="royaltyAmount">royaltyAmount.</param>
+        public MethodRoyaltyRule(string methodName = default(string), RoyaltyAmount royaltyAmount = default(RoyaltyAmount))
         {
             // to ensure "methodName" is required (not null)
             if (methodName == null)
@@ -113,7 +113,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("methodName is a required property for MethodRoyaltyRule and cannot be null");
             }
             this.MethodName = methodName;
-            this.RoyaltyRule = royaltyRule;
+            this.RoyaltyAmount = royaltyAmount;
         }
 
         /// <summary>
@@ -123,11 +123,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public string MethodName { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the number of cost units required to access this method.
+        /// Gets or Sets RoyaltyAmount
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the number of cost units required to access this method.</value>
-        [DataMember(Name = "royalty_rule", IsRequired = true, EmitDefaultValue = true)]
-        public long RoyaltyRule { get; set; }
+        [DataMember(Name = "royalty_amount", EmitDefaultValue = true)]
+        public RoyaltyAmount RoyaltyAmount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -138,7 +137,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class MethodRoyaltyRule {\n");
             sb.Append("  MethodName: ").Append(MethodName).Append("\n");
-            sb.Append("  RoyaltyRule: ").Append(RoyaltyRule).Append("\n");
+            sb.Append("  RoyaltyAmount: ").Append(RoyaltyAmount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -180,8 +179,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.MethodName.Equals(input.MethodName))
                 ) && 
                 (
-                    this.RoyaltyRule == input.RoyaltyRule ||
-                    this.RoyaltyRule.Equals(input.RoyaltyRule)
+                    this.RoyaltyAmount == input.RoyaltyAmount ||
+                    (this.RoyaltyAmount != null &&
+                    this.RoyaltyAmount.Equals(input.RoyaltyAmount))
                 );
         }
 
@@ -198,7 +198,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.MethodName.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.RoyaltyRule.GetHashCode();
+                if (this.RoyaltyAmount != null)
+                {
+                    hashCode = (hashCode * 59) + this.RoyaltyAmount.GetHashCode();
+                }
                 return hashCode;
             }
         }

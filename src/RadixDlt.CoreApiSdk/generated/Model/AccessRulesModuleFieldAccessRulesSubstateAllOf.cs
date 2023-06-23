@@ -103,35 +103,35 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccessRulesModuleFieldAccessRulesSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="accessRules">accessRules (required).</param>
-        /// <param name="innerBlueprintAccessRules">innerBlueprintAccessRules (required).</param>
-        public AccessRulesModuleFieldAccessRulesSubstateAllOf(NodeAuthorityRules accessRules = default(NodeAuthorityRules), List<BlueprintAccessRules> innerBlueprintAccessRules = default(List<BlueprintAccessRules>))
+        /// <param name="roles">roles (required).</param>
+        /// <param name="roleMutability">roleMutability (required).</param>
+        public AccessRulesModuleFieldAccessRulesSubstateAllOf(List<RoleRule> roles = default(List<RoleRule>), List<MutabilityRule> roleMutability = default(List<MutabilityRule>))
         {
-            // to ensure "accessRules" is required (not null)
-            if (accessRules == null)
+            // to ensure "roles" is required (not null)
+            if (roles == null)
             {
-                throw new ArgumentNullException("accessRules is a required property for AccessRulesModuleFieldAccessRulesSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("roles is a required property for AccessRulesModuleFieldAccessRulesSubstateAllOf and cannot be null");
             }
-            this.AccessRules = accessRules;
-            // to ensure "innerBlueprintAccessRules" is required (not null)
-            if (innerBlueprintAccessRules == null)
+            this.Roles = roles;
+            // to ensure "roleMutability" is required (not null)
+            if (roleMutability == null)
             {
-                throw new ArgumentNullException("innerBlueprintAccessRules is a required property for AccessRulesModuleFieldAccessRulesSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("roleMutability is a required property for AccessRulesModuleFieldAccessRulesSubstateAllOf and cannot be null");
             }
-            this.InnerBlueprintAccessRules = innerBlueprintAccessRules;
+            this.RoleMutability = roleMutability;
         }
 
         /// <summary>
-        /// Gets or Sets AccessRules
+        /// Gets or Sets Roles
         /// </summary>
-        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public NodeAuthorityRules AccessRules { get; set; }
+        [DataMember(Name = "roles", IsRequired = true, EmitDefaultValue = true)]
+        public List<RoleRule> Roles { get; set; }
 
         /// <summary>
-        /// Gets or Sets InnerBlueprintAccessRules
+        /// Gets or Sets RoleMutability
         /// </summary>
-        [DataMember(Name = "inner_blueprint_access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public List<BlueprintAccessRules> InnerBlueprintAccessRules { get; set; }
+        [DataMember(Name = "role_mutability", IsRequired = true, EmitDefaultValue = true)]
+        public List<MutabilityRule> RoleMutability { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,8 +141,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccessRulesModuleFieldAccessRulesSubstateAllOf {\n");
-            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
-            sb.Append("  InnerBlueprintAccessRules: ").Append(InnerBlueprintAccessRules).Append("\n");
+            sb.Append("  Roles: ").Append(Roles).Append("\n");
+            sb.Append("  RoleMutability: ").Append(RoleMutability).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,15 +179,16 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.AccessRules == input.AccessRules ||
-                    (this.AccessRules != null &&
-                    this.AccessRules.Equals(input.AccessRules))
+                    this.Roles == input.Roles ||
+                    this.Roles != null &&
+                    input.Roles != null &&
+                    this.Roles.SequenceEqual(input.Roles)
                 ) && 
                 (
-                    this.InnerBlueprintAccessRules == input.InnerBlueprintAccessRules ||
-                    this.InnerBlueprintAccessRules != null &&
-                    input.InnerBlueprintAccessRules != null &&
-                    this.InnerBlueprintAccessRules.SequenceEqual(input.InnerBlueprintAccessRules)
+                    this.RoleMutability == input.RoleMutability ||
+                    this.RoleMutability != null &&
+                    input.RoleMutability != null &&
+                    this.RoleMutability.SequenceEqual(input.RoleMutability)
                 );
         }
 
@@ -200,13 +201,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AccessRules != null)
+                if (this.Roles != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Roles.GetHashCode();
                 }
-                if (this.InnerBlueprintAccessRules != null)
+                if (this.RoleMutability != null)
                 {
-                    hashCode = (hashCode * 59) + this.InnerBlueprintAccessRules.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RoleMutability.GetHashCode();
                 }
                 return hashCode;
             }

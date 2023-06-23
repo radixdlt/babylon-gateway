@@ -102,8 +102,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(AccountVaultIndexEntrySubstate), "AccountVaultIndexEntry")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldConfigSubstate), "ConsensusManagerFieldConfig")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentProposalStatisticSubstate), "ConsensusManagerFieldCurrentProposalStatistic")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentValidatorSetSubstate), "ConsensusManagerFieldCurrentValidatorSet")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldStateSubstate), "ConsensusManagerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate), "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
@@ -113,12 +113,14 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(GenericKeyValueStoreEntrySubstate), "GenericKeyValueStoreEntry")]
     [JsonSubtypes.KnownSubType(typeof(GenericScryptoComponentFieldStateSubstate), "GenericScryptoComponentFieldState")]
     [JsonSubtypes.KnownSubType(typeof(MetadataModuleEntrySubstate), "MetadataModuleEntry")]
+    [JsonSubtypes.KnownSubType(typeof(MultiResourcePoolSubstate), "MultiResourcePool")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerDataEntrySubstate), "NonFungibleResourceManagerDataEntry")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldIdTypeSubstate), "NonFungibleResourceManagerFieldIdType")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldMutableFieldsSubstate), "NonFungibleResourceManagerFieldMutableFields")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldTotalSupplySubstate), "NonFungibleResourceManagerFieldTotalSupply")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultContentsIndexEntrySubstate), "NonFungibleVaultContentsIndexEntry")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldBalanceSubstate), "NonFungibleVaultFieldBalance")]
+    [JsonSubtypes.KnownSubType(typeof(OneResourcePoolSubstate), "OneResourcePool")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldCodeSubstate), "PackageFieldCode")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldCodeTypeSubstate), "PackageFieldCodeType")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldFunctionAccessRulesSubstate), "PackageFieldFunctionAccessRules")]
@@ -126,6 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltySubstate), "PackageFieldRoyalty")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldAccumulatorSubstate), "RoyaltyModuleFieldAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldConfigSubstate), "RoyaltyModuleFieldConfig")]
+    [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolSubstate), "TwoResourcePool")]
     [JsonSubtypes.KnownSubType(typeof(TypeInfoModuleFieldTypeInfoSubstate), "TypeInfoModuleFieldTypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
     public partial class PackageFieldInfoSubstate : Substate, IEquatable<PackageFieldInfoSubstate>
@@ -139,10 +142,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="PackageFieldInfoSubstate" /> class.
         /// </summary>
         /// <param name="packageSchema">packageSchema (required).</param>
-        /// <param name="dependentResources">dependentResources (required).</param>
-        /// <param name="dependentComponents">dependentComponents (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.PackageFieldInfo).</param>
-        public PackageFieldInfoSubstate(PackageSchema packageSchema = default(PackageSchema), List<string> dependentResources = default(List<string>), List<string> dependentComponents = default(List<string>), SubstateType substateType = SubstateType.PackageFieldInfo) : base(substateType)
+        public PackageFieldInfoSubstate(PackageSchema packageSchema = default(PackageSchema), SubstateType substateType = SubstateType.PackageFieldInfo) : base(substateType)
         {
             // to ensure "packageSchema" is required (not null)
             if (packageSchema == null)
@@ -150,18 +151,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("packageSchema is a required property for PackageFieldInfoSubstate and cannot be null");
             }
             this.PackageSchema = packageSchema;
-            // to ensure "dependentResources" is required (not null)
-            if (dependentResources == null)
-            {
-                throw new ArgumentNullException("dependentResources is a required property for PackageFieldInfoSubstate and cannot be null");
-            }
-            this.DependentResources = dependentResources;
-            // to ensure "dependentComponents" is required (not null)
-            if (dependentComponents == null)
-            {
-                throw new ArgumentNullException("dependentComponents is a required property for PackageFieldInfoSubstate and cannot be null");
-            }
-            this.DependentComponents = dependentComponents;
         }
 
         /// <summary>
@@ -169,18 +158,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "package_schema", IsRequired = true, EmitDefaultValue = true)]
         public PackageSchema PackageSchema { get; set; }
-
-        /// <summary>
-        /// Gets or Sets DependentResources
-        /// </summary>
-        [DataMember(Name = "dependent_resources", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> DependentResources { get; set; }
-
-        /// <summary>
-        /// Gets or Sets DependentComponents
-        /// </summary>
-        [DataMember(Name = "dependent_components", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> DependentComponents { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -192,8 +169,6 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class PackageFieldInfoSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  PackageSchema: ").Append(PackageSchema).Append("\n");
-            sb.Append("  DependentResources: ").Append(DependentResources).Append("\n");
-            sb.Append("  DependentComponents: ").Append(DependentComponents).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -233,18 +208,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.PackageSchema == input.PackageSchema ||
                     (this.PackageSchema != null &&
                     this.PackageSchema.Equals(input.PackageSchema))
-                ) && base.Equals(input) && 
-                (
-                    this.DependentResources == input.DependentResources ||
-                    this.DependentResources != null &&
-                    input.DependentResources != null &&
-                    this.DependentResources.SequenceEqual(input.DependentResources)
-                ) && base.Equals(input) && 
-                (
-                    this.DependentComponents == input.DependentComponents ||
-                    this.DependentComponents != null &&
-                    input.DependentComponents != null &&
-                    this.DependentComponents.SequenceEqual(input.DependentComponents)
                 );
         }
 
@@ -260,14 +223,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.PackageSchema != null)
                 {
                     hashCode = (hashCode * 59) + this.PackageSchema.GetHashCode();
-                }
-                if (this.DependentResources != null)
-                {
-                    hashCode = (hashCode * 59) + this.DependentResources.GetHashCode();
-                }
-                if (this.DependentComponents != null)
-                {
-                    hashCode = (hashCode * 59) + this.DependentComponents.GetHashCode();
                 }
                 return hashCode;
             }

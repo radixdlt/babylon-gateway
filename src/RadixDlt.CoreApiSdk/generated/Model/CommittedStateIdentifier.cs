@@ -104,19 +104,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="CommittedStateIdentifier" /> class.
         /// </summary>
         /// <param name="stateVersion">An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, representing the state version. The state version increments with each transaction, starting at &#x60;0&#x60; pre-genesis. (required).</param>
-        /// <param name="accumulatorHash">The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger. This hash is &#x60;ACC_{N+1} &#x3D; Blake2b-256(CONCAT(ACC_N, LEDGER_HASH_{N}))&#x60;, starting with &#x60;ACC_0 &#x3D; 000..000&#x60; the pre-genesis accumulator.  (required).</param>
         /// <param name="stateTreeHash">The hex-encoded root hash of the state tree. This captures the current state of the state on the ledger.  (required).</param>
         /// <param name="transactionTreeHash">The hex-encoded root hash of the transaction tree. This captures the ledger transactions committed to the ledger.  (required).</param>
         /// <param name="receiptTreeHash">The hex-encoded root hash of the receipt tree. This captures the consensus-agreed output of each transaction on the ledger.  (required).</param>
-        public CommittedStateIdentifier(long stateVersion = default(long), string accumulatorHash = default(string), string stateTreeHash = default(string), string transactionTreeHash = default(string), string receiptTreeHash = default(string))
+        public CommittedStateIdentifier(long stateVersion = default(long), string stateTreeHash = default(string), string transactionTreeHash = default(string), string receiptTreeHash = default(string))
         {
             this.StateVersion = stateVersion;
-            // to ensure "accumulatorHash" is required (not null)
-            if (accumulatorHash == null)
-            {
-                throw new ArgumentNullException("accumulatorHash is a required property for CommittedStateIdentifier and cannot be null");
-            }
-            this.AccumulatorHash = accumulatorHash;
             // to ensure "stateTreeHash" is required (not null)
             if (stateTreeHash == null)
             {
@@ -143,13 +136,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <value>An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, representing the state version. The state version increments with each transaction, starting at &#x60;0&#x60; pre-genesis.</value>
         [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
         public long StateVersion { get; set; }
-
-        /// <summary>
-        /// The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger. This hash is &#x60;ACC_{N+1} &#x3D; Blake2b-256(CONCAT(ACC_N, LEDGER_HASH_{N}))&#x60;, starting with &#x60;ACC_0 &#x3D; 000..000&#x60; the pre-genesis accumulator. 
-        /// </summary>
-        /// <value>The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger. This hash is &#x60;ACC_{N+1} &#x3D; Blake2b-256(CONCAT(ACC_N, LEDGER_HASH_{N}))&#x60;, starting with &#x60;ACC_0 &#x3D; 000..000&#x60; the pre-genesis accumulator. </value>
-        [DataMember(Name = "accumulator_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string AccumulatorHash { get; set; }
 
         /// <summary>
         /// The hex-encoded root hash of the state tree. This captures the current state of the state on the ledger. 
@@ -181,7 +167,6 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class CommittedStateIdentifier {\n");
             sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
-            sb.Append("  AccumulatorHash: ").Append(AccumulatorHash).Append("\n");
             sb.Append("  StateTreeHash: ").Append(StateTreeHash).Append("\n");
             sb.Append("  TransactionTreeHash: ").Append(TransactionTreeHash).Append("\n");
             sb.Append("  ReceiptTreeHash: ").Append(ReceiptTreeHash).Append("\n");
@@ -225,11 +210,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.StateVersion.Equals(input.StateVersion)
                 ) && 
                 (
-                    this.AccumulatorHash == input.AccumulatorHash ||
-                    (this.AccumulatorHash != null &&
-                    this.AccumulatorHash.Equals(input.AccumulatorHash))
-                ) && 
-                (
                     this.StateTreeHash == input.StateTreeHash ||
                     (this.StateTreeHash != null &&
                     this.StateTreeHash.Equals(input.StateTreeHash))
@@ -256,10 +236,6 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
-                if (this.AccumulatorHash != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccumulatorHash.GetHashCode();
-                }
                 if (this.StateTreeHash != null)
                 {
                     hashCode = (hashCode * 59) + this.StateTreeHash.GetHashCode();
