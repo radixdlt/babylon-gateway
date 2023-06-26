@@ -151,7 +151,7 @@ public sealed class NodeTransactionLogWorker : NodeWorker
         var networkStatus = await _services.GetRequiredService<INetworkStatusReader>().GetNetworkStatus(cancellationToken);
         var nodeLedgerTip = networkStatus.CurrentStateIdentifier.StateVersion;
 
-        _ledgerConfirmationService.SubmitNodeNetworkStatus(NodeName, nodeLedgerTip, networkStatus.CurrentStateIdentifier.GetAccumulatorHashBytes());
+        _ledgerConfirmationService.SubmitNodeNetworkStatus(NodeName, nodeLedgerTip, networkStatus.CurrentStateIdentifier.GetTransactionTreeHashBytes());
 
         var toFetch = _ledgerConfirmationService.GetWhichTransactionsAreRequestedFromNode(NodeName);
 

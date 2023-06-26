@@ -103,11 +103,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyValueStoreSchema" /> class.
         /// </summary>
+        /// <param name="schema">schema (required).</param>
         /// <param name="keyType">keyType (required).</param>
         /// <param name="valueType">valueType (required).</param>
         /// <param name="canOwn">Whether the key value store can own any children. (required).</param>
-        public KeyValueStoreSchema(LocalTypeIndex keyType = default(LocalTypeIndex), LocalTypeIndex valueType = default(LocalTypeIndex), bool canOwn = default(bool))
+        public KeyValueStoreSchema(ScryptoSchema schema = default(ScryptoSchema), LocalTypeIndex keyType = default(LocalTypeIndex), LocalTypeIndex valueType = default(LocalTypeIndex), bool canOwn = default(bool))
         {
+            // to ensure "schema" is required (not null)
+            if (schema == null)
+            {
+                throw new ArgumentNullException("schema is a required property for KeyValueStoreSchema and cannot be null");
+            }
+            this.Schema = schema;
             // to ensure "keyType" is required (not null)
             if (keyType == null)
             {
@@ -122,6 +129,12 @@ namespace RadixDlt.CoreApiSdk.Model
             this.ValueType = valueType;
             this.CanOwn = canOwn;
         }
+
+        /// <summary>
+        /// Gets or Sets Schema
+        /// </summary>
+        [DataMember(Name = "schema", IsRequired = true, EmitDefaultValue = true)]
+        public ScryptoSchema Schema { get; set; }
 
         /// <summary>
         /// Gets or Sets KeyType
@@ -150,6 +163,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class KeyValueStoreSchema {\n");
+            sb.Append("  Schema: ").Append(Schema).Append("\n");
             sb.Append("  KeyType: ").Append(KeyType).Append("\n");
             sb.Append("  ValueType: ").Append(ValueType).Append("\n");
             sb.Append("  CanOwn: ").Append(CanOwn).Append("\n");
@@ -189,6 +203,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.Schema == input.Schema ||
+                    (this.Schema != null &&
+                    this.Schema.Equals(input.Schema))
+                ) && 
+                (
                     this.KeyType == input.KeyType ||
                     (this.KeyType != null &&
                     this.KeyType.Equals(input.KeyType))
@@ -213,6 +232,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.Schema != null)
+                {
+                    hashCode = (hashCode * 59) + this.Schema.GetHashCode();
+                }
                 if (this.KeyType != null)
                 {
                     hashCode = (hashCode * 59) + this.KeyType.GetHashCode();

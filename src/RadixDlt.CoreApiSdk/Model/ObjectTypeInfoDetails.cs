@@ -70,7 +70,11 @@ public partial class ObjectTypeInfoDetails : IEntityAddressPointer
 {
     public IEnumerable<string> GetEntityAddresses()
     {
-        yield return OuterObject;
         yield return PackageAddress;
+
+        if (OuterObject != null)
+        {
+            yield return OuterObject;
+        }
     }
 }

@@ -275,3 +275,19 @@ internal class InternalKeyValueStoreEntity : Entity
 internal class GlobalAccessControllerEntity : ComponentEntity
 {
 }
+
+internal class ResourcePoolEntity : ComponentEntity
+{
+}
+
+internal class GlobalOneResourcePoolEntity : ResourcePoolEntity
+{
+}
+
+internal class GlobalTwoResourcePoolEntity : ResourcePoolEntity
+{
+}
+
+internal class GlobalMultiResourcePoolEntity : ResourcePoolEntity
+{
+}

@@ -357,10 +357,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         });
                     }
 
-                    foreach (var substate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
+                    foreach (var substate in stateUpdates.CreatedSubstates.Select(x => new { x.SubstateId, x.Value }).Concat(stateUpdates.UpdatedSubstates.Select(x => new { x.SubstateId, Value = x.NewValue })))
                     {
                         var substateId = substate.SubstateId;
-                        var substateData = substate.SubstateData;
+                        var substateData = substate.Value.SubstateData;
                         var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)substateId.EntityAddress, ea => new ReferencedEntity(ea, substateId.EntityType, stateVersion));
 
                         if (substateData is CoreModel.IEntityOwner entityOwner)
@@ -414,9 +414,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         {
                             switch (typeInfoSubstate.Details)
                             {
-                                case CoreModel.KeyValueStoreTypeInfoDetails _:
-                                    // TODO schema not supported yet
-                                    break;
                                 case CoreModel.ObjectTypeInfoDetails objectDetails:
                                     referencedEntity.PostResolveConfigure((ComponentEntity e) =>
                                     {
@@ -432,6 +429,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                         });
                                     }
 
+                                    break;
+                                case CoreModel.KeyValueStoreTypeInfoDetails:
+                                    // TODO not supported yet
+                                    break;
+                                case CoreModel.GlobalAddressReservationTypeInfoDetails:
+                                    // TODO not supported yet
+                                    break;
+                                case CoreModel.GlobalAddressPhantomTypeInfoDetails:
+                                    // TODO not supported yet
                                     break;
                                 default:
                                     throw new UnreachableException($"Didn't expect '{typeInfoSubstate.Details.Type}' value");
@@ -516,8 +522,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         RoundInEpoch: roundInEpochUpdate ?? lastTransactionSummary.RoundInEpoch,
                         IndexInEpoch: isStartOfEpoch ? 0 : lastTransactionSummary.IndexInEpoch + 1,
                         IndexInRound: isStartOfRound ? 0 : lastTransactionSummary.IndexInRound + 1,
-                        IsEndOfEpoch: epochUpdate != null,
-                        TransactionAccumulator: committedTransaction.LedgerTransaction.GetPayloadBytes());
+                        IsEndOfEpoch: epochUpdate != null);
 
                     LedgerTransaction ledgerTransaction = committedTransaction.LedgerTransaction switch
                     {
@@ -535,7 +540,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     var feeSummary = committedTransaction.Receipt.FeeSummary;
 
                     ledgerTransaction.StateVersion = stateVersion;
-                    ledgerTransaction.TransactionAccumulator = committedTransaction.ResultantStateIdentifiers.GetAccumulatorHashBytes();
                     // TODO commented out as incompatible with current Core API version
                     ledgerTransaction.Message = null; // message: transaction.Metadata.Message?.ConvertFromHex(),
                     ledgerTransaction.Epoch = summary.Epoch;
@@ -612,6 +616,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     GlobalGenericComponentEntity => CoreModel.EntityType.GlobalGenericComponent,
                     InternalGenericComponentEntity => CoreModel.EntityType.InternalGenericComponent,
                     InternalKeyValueStoreEntity => CoreModel.EntityType.InternalKeyValueStore,
+                    GlobalOneResourcePoolEntity => CoreModel.EntityType.GlobalOneResourcePool,
+                    GlobalTwoResourcePoolEntity => CoreModel.EntityType.GlobalTwoResourcePool,
+                    GlobalMultiResourcePoolEntity => CoreModel.EntityType.GlobalMultiResourcePool,
                     _ => throw new ArgumentOutOfRangeException(nameof(knownDbEntity), knownDbEntity.GetType().Name),
                 };
 
@@ -647,6 +654,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     CoreModel.EntityType.GlobalVirtualSecp256k1Identity => new GlobalIdentityEntity(),
                     CoreModel.EntityType.GlobalVirtualEd25519Account => new GlobalAccountEntity(),
                     CoreModel.EntityType.GlobalVirtualSecp256k1Account => new GlobalAccountEntity(),
+                    CoreModel.EntityType.GlobalOneResourcePool => new GlobalOneResourcePoolEntity(),
+                    CoreModel.EntityType.GlobalTwoResourcePool => new GlobalTwoResourcePoolEntity(),
+                    CoreModel.EntityType.GlobalMultiResourcePool => new GlobalMultiResourcePoolEntity(),
                     _ => throw new ArgumentOutOfRangeException(nameof(referencedEntity.Type), referencedEntity.Type, "Unexpected entity type"),
                 };
 
@@ -739,10 +749,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 try
                 {
-                    foreach (var substate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
+                    foreach (var substate in stateUpdates.CreatedSubstates.Select(x => new { x.SubstateId, x.Value }).Concat(stateUpdates.UpdatedSubstates.Select(x => new { x.SubstateId, Value = x.NewValue })))
                     {
                         var substateId = substate.SubstateId;
-                        var substateData = substate.SubstateData;
+                        var substateData = substate.Value.SubstateData;
                         var referencedEntity = referencedEntities.Get((EntityAddress)substateId.EntityAddress);
                         affectedGlobalEntities.Add(referencedEntity.AffectedGlobalEntityId);
 
@@ -750,9 +760,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         {
                             var key = metadata.FieldName;
                             var value = metadata.DataStruct?.StructData.Hex.ConvertFromHex();
-                            var isDeleted = metadata.IsDeleted;
 
-                            metadataChanges.Add(new MetadataChange(referencedEntity, key, value, isDeleted, stateVersion));
+                            metadataChanges.Add(new MetadataChange(referencedEntity, key, value, metadata.IsDeleted, metadata.IsMutable, stateVersion));
                         }
 
                         if (substateData is CoreModel.FungibleResourceManagerFieldTotalSupplySubstate fungibleResourceManagerFieldTotalSupplySubstate)
@@ -797,12 +806,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         {
                             var resourceManagerEntityId = substateId.EntityAddress;
                             var resourceManagerEntity = referencedEntities.Get((EntityAddress)resourceManagerEntityId);
-                            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId(
-                                (substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex,
-                                _networkConfigurationProvider.GetNetworkId());
+                            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex, _networkConfigurationProvider.GetNetworkId());
 
-                            nonFungibleIdChanges.Add(new NonFungibleIdChange(resourceManagerEntity, nonFungibleId,
-                                nonFungibleResourceManagerDataEntrySubstate.IsDeleted, nonFungibleResourceManagerDataEntrySubstate.DataStruct?.StructData.GetDataBytes(), stateVersion));
+                            nonFungibleIdChanges.Add(new NonFungibleIdChange(
+                                resourceManagerEntity,
+                                nonFungibleId,
+                                nonFungibleResourceManagerDataEntrySubstate.IsDeleted,
+                                nonFungibleResourceManagerDataEntrySubstate.IsMutable,
+                                nonFungibleResourceManagerDataEntrySubstate.DataStruct?.StructData.GetDataBytes(),
+                                stateVersion));
                         }
 
                         if (substateData is CoreModel.AccessRulesModuleFieldAccessRulesSubstate accessRulesModuleFieldAccessRulesSubstate)
@@ -813,18 +825,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 FromStateVersion = stateVersion,
                                 EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
                                 ChildBlueprintName = null,
-                                AccessRulesChain = JsonConvert.SerializeObject(accessRulesModuleFieldAccessRulesSubstate.AccessRules),
-                            });
-
-                            entityAccessRulesChainHistoryToAdd.AddRange(accessRulesModuleFieldAccessRulesSubstate.InnerBlueprintAccessRules
-                                .Select(x => new EntityAccessRulesChainHistory
+                                AccessRulesChain = JsonConvert.SerializeObject(new
                                 {
-                                    Id = sequences.EntityAccessRulesChainHistorySequence++,
-                                    FromStateVersion = stateVersion,
-                                    EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
-                                    ChildBlueprintName = x.BlueprintName,
-                                    AccessRulesChain = JsonConvert.SerializeObject(accessRulesModuleFieldAccessRulesSubstate.AccessRules),
-                                }));
+                                    accessRulesModuleFieldAccessRulesSubstate.Roles,
+                                    accessRulesModuleFieldAccessRulesSubstate.RoleMutability,
+                                }),
+                            });
                         }
 
                         if (substateData is CoreModel.GenericScryptoComponentFieldStateSubstate componentState)
@@ -1651,8 +1657,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 RoundInEpoch: lastTransaction.RoundInEpoch,
                 IndexInEpoch: lastTransaction.IndexInEpoch,
                 IndexInRound: lastTransaction.IndexInRound,
-                IsEndOfEpoch: lastTransaction.IsEndOfEpoch,
-                TransactionAccumulator: lastTransaction.TransactionAccumulator
+                IsEndOfEpoch: lastTransaction.IsEndOfEpoch
             );
 
         return lastOverview ?? PreGenesisTransactionSummary();
@@ -1670,8 +1675,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             RoundInEpoch: 0,
             IndexInEpoch: 0,
             IndexInRound: 0,
-            IsEndOfEpoch: false,
-            TransactionAccumulator: new byte[32]
+            IsEndOfEpoch: false
         );
     }
 }

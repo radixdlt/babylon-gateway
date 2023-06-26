@@ -103,23 +103,23 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageSchema" /> class.
         /// </summary>
-        /// <param name="blueprintSchemas">A map from the blueprint name to BlueprintSchema (required).</param>
-        public PackageSchema(Dictionary<string, BlueprintSchema> blueprintSchemas = default(Dictionary<string, BlueprintSchema>))
+        /// <param name="blueprintDefinitions">A map from the blueprint name to BlueprintDefinition (required).</param>
+        public PackageSchema(Dictionary<string, BlueprintDefinition> blueprintDefinitions = default(Dictionary<string, BlueprintDefinition>))
         {
-            // to ensure "blueprintSchemas" is required (not null)
-            if (blueprintSchemas == null)
+            // to ensure "blueprintDefinitions" is required (not null)
+            if (blueprintDefinitions == null)
             {
-                throw new ArgumentNullException("blueprintSchemas is a required property for PackageSchema and cannot be null");
+                throw new ArgumentNullException("blueprintDefinitions is a required property for PackageSchema and cannot be null");
             }
-            this.BlueprintSchemas = blueprintSchemas;
+            this.BlueprintDefinitions = blueprintDefinitions;
         }
 
         /// <summary>
-        /// A map from the blueprint name to BlueprintSchema
+        /// A map from the blueprint name to BlueprintDefinition
         /// </summary>
-        /// <value>A map from the blueprint name to BlueprintSchema</value>
-        [DataMember(Name = "blueprint_schemas", IsRequired = true, EmitDefaultValue = true)]
-        public Dictionary<string, BlueprintSchema> BlueprintSchemas { get; set; }
+        /// <value>A map from the blueprint name to BlueprintDefinition</value>
+        [DataMember(Name = "blueprint_definitions", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, BlueprintDefinition> BlueprintDefinitions { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,7 +129,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class PackageSchema {\n");
-            sb.Append("  BlueprintSchemas: ").Append(BlueprintSchemas).Append("\n");
+            sb.Append("  BlueprintDefinitions: ").Append(BlueprintDefinitions).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,10 +166,10 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.BlueprintSchemas == input.BlueprintSchemas ||
-                    this.BlueprintSchemas != null &&
-                    input.BlueprintSchemas != null &&
-                    this.BlueprintSchemas.SequenceEqual(input.BlueprintSchemas)
+                    this.BlueprintDefinitions == input.BlueprintDefinitions ||
+                    this.BlueprintDefinitions != null &&
+                    input.BlueprintDefinitions != null &&
+                    this.BlueprintDefinitions.SequenceEqual(input.BlueprintDefinitions)
                 );
         }
 
@@ -182,9 +182,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.BlueprintSchemas != null)
+                if (this.BlueprintDefinitions != null)
                 {
-                    hashCode = (hashCode * 59) + this.BlueprintSchemas.GetHashCode();
+                    hashCode = (hashCode * 59) + this.BlueprintDefinitions.GetHashCode();
                 }
                 return hashCode;
             }

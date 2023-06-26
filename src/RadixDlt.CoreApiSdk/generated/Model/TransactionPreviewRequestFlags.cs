@@ -103,23 +103,23 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionPreviewRequestFlags" /> class.
         /// </summary>
-        /// <param name="unlimitedLoan">unlimitedLoan (required).</param>
+        /// <param name="useFreeCredit">useFreeCredit (required).</param>
         /// <param name="assumeAllSignatureProofs">assumeAllSignatureProofs (required).</param>
         /// <param name="permitDuplicateIntentHash">permitDuplicateIntentHash (required).</param>
         /// <param name="permitInvalidHeaderEpoch">permitInvalidHeaderEpoch (required).</param>
-        public TransactionPreviewRequestFlags(bool unlimitedLoan = default(bool), bool assumeAllSignatureProofs = default(bool), bool permitDuplicateIntentHash = default(bool), bool permitInvalidHeaderEpoch = default(bool))
+        public TransactionPreviewRequestFlags(bool useFreeCredit = default(bool), bool assumeAllSignatureProofs = default(bool), bool permitDuplicateIntentHash = default(bool), bool permitInvalidHeaderEpoch = default(bool))
         {
-            this.UnlimitedLoan = unlimitedLoan;
+            this.UseFreeCredit = useFreeCredit;
             this.AssumeAllSignatureProofs = assumeAllSignatureProofs;
             this.PermitDuplicateIntentHash = permitDuplicateIntentHash;
             this.PermitInvalidHeaderEpoch = permitInvalidHeaderEpoch;
         }
 
         /// <summary>
-        /// Gets or Sets UnlimitedLoan
+        /// Gets or Sets UseFreeCredit
         /// </summary>
-        [DataMember(Name = "unlimited_loan", IsRequired = true, EmitDefaultValue = true)]
-        public bool UnlimitedLoan { get; set; }
+        [DataMember(Name = "use_free_credit", IsRequired = true, EmitDefaultValue = true)]
+        public bool UseFreeCredit { get; set; }
 
         /// <summary>
         /// Gets or Sets AssumeAllSignatureProofs
@@ -147,7 +147,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionPreviewRequestFlags {\n");
-            sb.Append("  UnlimitedLoan: ").Append(UnlimitedLoan).Append("\n");
+            sb.Append("  UseFreeCredit: ").Append(UseFreeCredit).Append("\n");
             sb.Append("  AssumeAllSignatureProofs: ").Append(AssumeAllSignatureProofs).Append("\n");
             sb.Append("  PermitDuplicateIntentHash: ").Append(PermitDuplicateIntentHash).Append("\n");
             sb.Append("  PermitInvalidHeaderEpoch: ").Append(PermitInvalidHeaderEpoch).Append("\n");
@@ -187,8 +187,8 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.UnlimitedLoan == input.UnlimitedLoan ||
-                    this.UnlimitedLoan.Equals(input.UnlimitedLoan)
+                    this.UseFreeCredit == input.UseFreeCredit ||
+                    this.UseFreeCredit.Equals(input.UseFreeCredit)
                 ) && 
                 (
                     this.AssumeAllSignatureProofs == input.AssumeAllSignatureProofs ||
@@ -213,7 +213,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.UnlimitedLoan.GetHashCode();
+                hashCode = (hashCode * 59) + this.UseFreeCredit.GetHashCode();
                 hashCode = (hashCode * 59) + this.AssumeAllSignatureProofs.GetHashCode();
                 hashCode = (hashCode * 59) + this.PermitDuplicateIntentHash.GetHashCode();
                 hashCode = (hashCode * 59) + this.PermitInvalidHeaderEpoch.GetHashCode();

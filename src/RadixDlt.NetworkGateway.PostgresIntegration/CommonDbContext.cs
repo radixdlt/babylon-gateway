@@ -258,7 +258,10 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<InternalNonFungibleVaultEntity>(EntityType.InternalNonFungibleVault)
             .HasValue<GlobalValidatorEntity>(EntityType.GlobalValidator)
             .HasValue<GlobalAccessControllerEntity>(EntityType.GlobalAccessController)
-            .HasValue<GlobalIdentityEntity>(EntityType.GlobalIdentity);
+            .HasValue<GlobalIdentityEntity>(EntityType.GlobalIdentity)
+            .HasValue<GlobalOneResourcePoolEntity>(EntityType.GlobalOneResourcePool)
+            .HasValue<GlobalTwoResourcePoolEntity>(EntityType.GlobalTwoResourcePool)
+            .HasValue<GlobalMultiResourcePoolEntity>(EntityType.GlobalMultiResourcePool);
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)

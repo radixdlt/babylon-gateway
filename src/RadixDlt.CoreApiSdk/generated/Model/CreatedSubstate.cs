@@ -84,77 +84,54 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ConsensusManagerCurrentTimeSubstate
+    /// CreatedSubstate
     /// </summary>
-    [DataContract(Name = "ConsensusManagerCurrentTimeSubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerFieldStateSubstate), "AccessControllerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesModuleFieldAccessRulesSubstate), "AccessRulesModuleFieldAccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(AccountDepositRuleIndexEntrySubstate), "AccountDepositRuleIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(AccountFieldStateSubstate), "AccountFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(AccountVaultIndexEntrySubstate), "AccountVaultIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldConfigSubstate), "ConsensusManagerFieldConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentProposalStatisticSubstate), "ConsensusManagerFieldCurrentProposalStatistic")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentValidatorSetSubstate), "ConsensusManagerFieldCurrentValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldStateSubstate), "ConsensusManagerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate), "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldDivisibilitySubstate), "FungibleResourceManagerFieldDivisibility")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldTotalSupplySubstate), "FungibleResourceManagerFieldTotalSupply")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleVaultFieldBalanceSubstate), "FungibleVaultFieldBalance")]
-    [JsonSubtypes.KnownSubType(typeof(GenericKeyValueStoreEntrySubstate), "GenericKeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(GenericScryptoComponentFieldStateSubstate), "GenericScryptoComponentFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataModuleEntrySubstate), "MetadataModuleEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerDataEntrySubstate), "NonFungibleResourceManagerDataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldIdTypeSubstate), "NonFungibleResourceManagerFieldIdType")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldMutableFieldsSubstate), "NonFungibleResourceManagerFieldMutableFields")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldTotalSupplySubstate), "NonFungibleResourceManagerFieldTotalSupply")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultContentsIndexEntrySubstate), "NonFungibleVaultContentsIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldBalanceSubstate), "NonFungibleVaultFieldBalance")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFieldCodeSubstate), "PackageFieldCode")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFieldCodeTypeSubstate), "PackageFieldCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFieldFunctionAccessRulesSubstate), "PackageFieldFunctionAccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFieldInfoSubstate), "PackageFieldInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltySubstate), "PackageFieldRoyalty")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldAccumulatorSubstate), "RoyaltyModuleFieldAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldConfigSubstate), "RoyaltyModuleFieldConfig")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoModuleFieldTypeInfoSubstate), "TypeInfoModuleFieldTypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
-    public partial class ConsensusManagerCurrentTimeSubstate : Substate, IEquatable<ConsensusManagerCurrentTimeSubstate>
+    [DataContract(Name = "CreatedSubstate")]
+    public partial class CreatedSubstate : IEquatable<CreatedSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConsensusManagerCurrentTimeSubstate" /> class.
+        /// Initializes a new instance of the <see cref="CreatedSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ConsensusManagerCurrentTimeSubstate() { }
+        protected CreatedSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConsensusManagerCurrentTimeSubstate" /> class.
+        /// Initializes a new instance of the <see cref="CreatedSubstate" /> class.
         /// </summary>
-        /// <param name="proposerTimestamp">proposerTimestamp (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.ConsensusManagerFieldCurrentTime).</param>
-        public ConsensusManagerCurrentTimeSubstate(Instant proposerTimestamp = default(Instant), SubstateType substateType = SubstateType.ConsensusManagerFieldCurrentTime) : base(substateType)
+        /// <param name="substateId">substateId (required).</param>
+        /// <param name="value">value (required).</param>
+        public CreatedSubstate(SubstateId substateId = default(SubstateId), SubstateValue value = default(SubstateValue))
         {
-            // to ensure "proposerTimestamp" is required (not null)
-            if (proposerTimestamp == null)
+            // to ensure "substateId" is required (not null)
+            if (substateId == null)
             {
-                throw new ArgumentNullException("proposerTimestamp is a required property for ConsensusManagerCurrentTimeSubstate and cannot be null");
+                throw new ArgumentNullException("substateId is a required property for CreatedSubstate and cannot be null");
             }
-            this.ProposerTimestamp = proposerTimestamp;
+            this.SubstateId = substateId;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for CreatedSubstate and cannot be null");
+            }
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets ProposerTimestamp
+        /// Gets or Sets SubstateId
         /// </summary>
-        [DataMember(Name = "proposer_timestamp", IsRequired = true, EmitDefaultValue = true)]
-        public Instant ProposerTimestamp { get; set; }
+        [DataMember(Name = "substate_id", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateId SubstateId { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Value
+        /// </summary>
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -163,9 +140,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ConsensusManagerCurrentTimeSubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  ProposerTimestamp: ").Append(ProposerTimestamp).Append("\n");
+            sb.Append("class CreatedSubstate {\n");
+            sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,7 +151,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -186,25 +163,30 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ConsensusManagerCurrentTimeSubstate);
+            return this.Equals(input as CreatedSubstate);
         }
 
         /// <summary>
-        /// Returns true if ConsensusManagerCurrentTimeSubstate instances are equal
+        /// Returns true if CreatedSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of ConsensusManagerCurrentTimeSubstate to be compared</param>
+        /// <param name="input">Instance of CreatedSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ConsensusManagerCurrentTimeSubstate input)
+        public bool Equals(CreatedSubstate input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.ProposerTimestamp == input.ProposerTimestamp ||
-                    (this.ProposerTimestamp != null &&
-                    this.ProposerTimestamp.Equals(input.ProposerTimestamp))
+                    this.SubstateId == input.SubstateId ||
+                    (this.SubstateId != null &&
+                    this.SubstateId.Equals(input.SubstateId))
+                ) && 
+                (
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -216,10 +198,14 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.ProposerTimestamp != null)
+                int hashCode = 41;
+                if (this.SubstateId != null)
                 {
-                    hashCode = (hashCode * 59) + this.ProposerTimestamp.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SubstateId.GetHashCode();
+                }
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

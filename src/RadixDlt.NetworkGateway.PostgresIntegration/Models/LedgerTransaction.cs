@@ -84,9 +84,6 @@ internal abstract class LedgerTransaction
     [Column("state_version")]
     public long StateVersion { get; set; }
 
-    [Column("transaction_accumulator")]
-    public byte[] TransactionAccumulator { get; set; }
-
     [Column("message")]
     public byte[]? Message { get; set; }
 

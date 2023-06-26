@@ -102,8 +102,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(AccountVaultIndexEntrySubstate), "AccountVaultIndexEntry")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldConfigSubstate), "ConsensusManagerFieldConfig")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentProposalStatisticSubstate), "ConsensusManagerFieldCurrentProposalStatistic")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentValidatorSetSubstate), "ConsensusManagerFieldCurrentValidatorSet")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldStateSubstate), "ConsensusManagerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate), "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
@@ -113,12 +113,14 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(GenericKeyValueStoreEntrySubstate), "GenericKeyValueStoreEntry")]
     [JsonSubtypes.KnownSubType(typeof(GenericScryptoComponentFieldStateSubstate), "GenericScryptoComponentFieldState")]
     [JsonSubtypes.KnownSubType(typeof(MetadataModuleEntrySubstate), "MetadataModuleEntry")]
+    [JsonSubtypes.KnownSubType(typeof(MultiResourcePoolSubstate), "MultiResourcePool")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerDataEntrySubstate), "NonFungibleResourceManagerDataEntry")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldIdTypeSubstate), "NonFungibleResourceManagerFieldIdType")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldMutableFieldsSubstate), "NonFungibleResourceManagerFieldMutableFields")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldTotalSupplySubstate), "NonFungibleResourceManagerFieldTotalSupply")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultContentsIndexEntrySubstate), "NonFungibleVaultContentsIndexEntry")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldBalanceSubstate), "NonFungibleVaultFieldBalance")]
+    [JsonSubtypes.KnownSubType(typeof(OneResourcePoolSubstate), "OneResourcePool")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldCodeSubstate), "PackageFieldCode")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldCodeTypeSubstate), "PackageFieldCodeType")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldFunctionAccessRulesSubstate), "PackageFieldFunctionAccessRules")]
@@ -126,6 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltySubstate), "PackageFieldRoyalty")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldAccumulatorSubstate), "RoyaltyModuleFieldAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldConfigSubstate), "RoyaltyModuleFieldConfig")]
+    [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolSubstate), "TwoResourcePool")]
     [JsonSubtypes.KnownSubType(typeof(TypeInfoModuleFieldTypeInfoSubstate), "TypeInfoModuleFieldTypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
     public partial class MetadataModuleEntrySubstate : Substate, IEquatable<MetadataModuleEntrySubstate>
@@ -141,8 +144,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="fieldName">fieldName (required).</param>
         /// <param name="isDeleted">isDeleted (required).</param>
         /// <param name="dataStruct">dataStruct.</param>
+        /// <param name="isMutable">isMutable (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.MetadataModuleEntry).</param>
-        public MetadataModuleEntrySubstate(string fieldName = default(string), bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct), SubstateType substateType = SubstateType.MetadataModuleEntry) : base(substateType)
+        public MetadataModuleEntrySubstate(string fieldName = default(string), bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct), bool isMutable = default(bool), SubstateType substateType = SubstateType.MetadataModuleEntry) : base(substateType)
         {
             // to ensure "fieldName" is required (not null)
             if (fieldName == null)
@@ -151,6 +155,7 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.FieldName = fieldName;
             this.IsDeleted = isDeleted;
+            this.IsMutable = isMutable;
             this.DataStruct = dataStruct;
         }
 
@@ -173,6 +178,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public DataStruct DataStruct { get; set; }
 
         /// <summary>
+        /// Gets or Sets IsMutable
+        /// </summary>
+        [DataMember(Name = "is_mutable", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsMutable { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -184,6 +195,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  FieldName: ").Append(FieldName).Append("\n");
             sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
             sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
+            sb.Append("  IsMutable: ").Append(IsMutable).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -232,6 +244,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.DataStruct == input.DataStruct ||
                     (this.DataStruct != null &&
                     this.DataStruct.Equals(input.DataStruct))
+                ) && base.Equals(input) && 
+                (
+                    this.IsMutable == input.IsMutable ||
+                    this.IsMutable.Equals(input.IsMutable)
                 );
         }
 
@@ -253,6 +269,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.IsMutable.GetHashCode();
                 return hashCode;
             }
         }

@@ -105,7 +105,19 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum KeyValueStore for value: KeyValueStore
         /// </summary>
         [EnumMember(Value = "KeyValueStore")]
-        KeyValueStore = 2
+        KeyValueStore = 2,
+
+        /// <summary>
+        /// Enum GlobalAddressReservation for value: GlobalAddressReservation
+        /// </summary>
+        [EnumMember(Value = "GlobalAddressReservation")]
+        GlobalAddressReservation = 3,
+
+        /// <summary>
+        /// Enum GlobalAddressPhantom for value: GlobalAddressPhantom
+        /// </summary>
+        [EnumMember(Value = "GlobalAddressPhantom")]
+        GlobalAddressPhantom = 4
 
     }
 
