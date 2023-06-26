@@ -61,14 +61,12 @@ jobs:
   setup-tags:
     runs-on: ubuntu-22.04
     outputs:
-      database-migrations-tag: ${{ steps.setup_tags.outputs.database-migrations-tag }}
-      data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag }}
-      gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag }}
+      version-suffix: ${{ steps.setup_tags.outputs.version-suffix }}
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - name: Get rele ase
         id: get_release
-        uses: bruceadams/get-release@74c3d60f5a28f358ccf241a00c9021ea16f0569f
+        uses: bruceadams/get-release@f589ce0779c7bef1faf175f7488c972eb47dc046
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Setup tags for docker image
@@ -77,28 +75,11 @@ jobs:
         with:
           github_event_name: ${{ github.event_name }}
           github_action_name: ${{ github.event.action}}
-      - name: Setup application version
-        run: |
-          echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/DataAggregator/appsettings.json )" > src/DataAggregator/appsettings.json
-          echo "$( jq '.+{DatabaseMigrationsVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/DatabaseMigrations/appsettings.json )" > src/DatabaseMigrations/appsettings.json
-          echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/GatewayApi/appsettings.json )" > src/GatewayAPI/appsettings.json
       - name: Publish Gateway Settings
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        uses: actions/upload-artifact@v3
         with:
-          path: src/GatewayAPI/appsettings.json
-          name: gateway
-          retention-days: 1
-      - name: Publish DatabaseMigrations Settings
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
-        with:
-          path: src/DatabaseMigrations/appsettings.json
-          name: migrations
-          retention-days: 1
-      - name: Publish DataAggregator Settings
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
-        with:
-          path: src/DataAggregator/appsettings.json
-          name: aggregator
+          path: Directory.Build.props
+          name: build_props
           retention-days: 1
 
   docker-database-migrations-dockerhub:
@@ -111,7 +92,7 @@ jobs:
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "babylon-ng-database-migrations"
-      tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}
+      tag: ${{ needs.setup-tags.outputs.version-suffix }}
       context: "."
       dockerfile: "./apps/DatabaseMigrations/Dockerfile"
       platforms: "linux/amd64"
@@ -119,8 +100,8 @@ jobs:
       cache_tag_suffix: "release"
       enable_dockerhub: "true"
       restore_artifact: "true"
-      artifact_location: "src/DatabaseMigrations/appsettings.json"
-      artifact_name: "migrations"
+      artifact_location: "./"
+      artifact_name: build_props
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -136,7 +117,7 @@ jobs:
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "babylon-ng-data-aggregator"
-      tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}
+      tag: ${{ needs.setup-tags.outputs.version-suffix }}
       context: "."
       dockerfile: "./apps/DataAggregator/Dockerfile"
       platforms: "linux/amd64"
@@ -144,8 +125,8 @@ jobs:
       cache_tag_suffix: "release"
       enable_dockerhub: "true"
       restore_artifact: "true"
-      artifact_location: "src/DataAggregator/appsettings.json"
-      artifact_name: "aggregator"
+      artifact_location: "./"
+      artifact_name: build_props
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -161,7 +142,7 @@ jobs:
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "babylon-ng-gateway-api"
-      tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}
+      tag: ${{ needs.setup-tags.outputs.version-suffix }}
       context: "."
       dockerfile: "./apps/GatewayApi/Dockerfile"
       platforms: "linux/amd64"
@@ -169,8 +150,8 @@ jobs:
       cache_tag_suffix: "release"
       enable_dockerhub: "true"
       restore_artifact: "true"
-      artifact_location: "src/GatewayAPI/appsettings.json"
-      artifact_name: "gateway"
+      artifact_location: "./"
+      artifact_name: build_props
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
