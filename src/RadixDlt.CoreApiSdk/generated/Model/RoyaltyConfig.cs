@@ -104,8 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="RoyaltyConfig" /> class.
         /// </summary>
         /// <param name="methodRules">The royalty rules by method (required).</param>
-        /// <param name="defaultRule">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the number of cost units required to access this method. (required).</param>
-        public RoyaltyConfig(List<MethodRoyaltyRule> methodRules = default(List<MethodRoyaltyRule>), long defaultRule = default(long))
+        public RoyaltyConfig(List<MethodRoyaltyRule> methodRules = default(List<MethodRoyaltyRule>))
         {
             // to ensure "methodRules" is required (not null)
             if (methodRules == null)
@@ -113,7 +112,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("methodRules is a required property for RoyaltyConfig and cannot be null");
             }
             this.MethodRules = methodRules;
-            this.DefaultRule = defaultRule;
         }
 
         /// <summary>
@@ -124,13 +122,6 @@ namespace RadixDlt.CoreApiSdk.Model
         public List<MethodRoyaltyRule> MethodRules { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the number of cost units required to access this method.
-        /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the number of cost units required to access this method.</value>
-        [DataMember(Name = "default_rule", IsRequired = true, EmitDefaultValue = true)]
-        public long DefaultRule { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -139,7 +130,6 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class RoyaltyConfig {\n");
             sb.Append("  MethodRules: ").Append(MethodRules).Append("\n");
-            sb.Append("  DefaultRule: ").Append(DefaultRule).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -180,10 +170,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.MethodRules != null &&
                     input.MethodRules != null &&
                     this.MethodRules.SequenceEqual(input.MethodRules)
-                ) && 
-                (
-                    this.DefaultRule == input.DefaultRule ||
-                    this.DefaultRule.Equals(input.DefaultRule)
                 );
         }
 
@@ -200,7 +186,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.MethodRules.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.DefaultRule.GetHashCode();
                 return hashCode;
             }
         }

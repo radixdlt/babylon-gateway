@@ -103,16 +103,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyValueStoreInfo" /> class.
         /// </summary>
-        /// <param name="schema">schema (required).</param>
         /// <param name="kvStoreSchema">kvStoreSchema (required).</param>
-        public KeyValueStoreInfo(ScryptoSchema schema = default(ScryptoSchema), KeyValueStoreSchema kvStoreSchema = default(KeyValueStoreSchema))
+        public KeyValueStoreInfo(KeyValueStoreSchema kvStoreSchema = default(KeyValueStoreSchema))
         {
-            // to ensure "schema" is required (not null)
-            if (schema == null)
-            {
-                throw new ArgumentNullException("schema is a required property for KeyValueStoreInfo and cannot be null");
-            }
-            this.Schema = schema;
             // to ensure "kvStoreSchema" is required (not null)
             if (kvStoreSchema == null)
             {
@@ -120,12 +113,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.KvStoreSchema = kvStoreSchema;
         }
-
-        /// <summary>
-        /// Gets or Sets Schema
-        /// </summary>
-        [DataMember(Name = "schema", IsRequired = true, EmitDefaultValue = true)]
-        public ScryptoSchema Schema { get; set; }
 
         /// <summary>
         /// Gets or Sets KvStoreSchema
@@ -141,7 +128,6 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class KeyValueStoreInfo {\n");
-            sb.Append("  Schema: ").Append(Schema).Append("\n");
             sb.Append("  KvStoreSchema: ").Append(KvStoreSchema).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -179,11 +165,6 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Schema == input.Schema ||
-                    (this.Schema != null &&
-                    this.Schema.Equals(input.Schema))
-                ) && 
-                (
                     this.KvStoreSchema == input.KvStoreSchema ||
                     (this.KvStoreSchema != null &&
                     this.KvStoreSchema.Equals(input.KvStoreSchema))
@@ -199,10 +180,6 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Schema != null)
-                {
-                    hashCode = (hashCode * 59) + this.Schema.GetHashCode();
-                }
                 if (this.KvStoreSchema != null)
                 {
                     hashCode = (hashCode * 59) + this.KvStoreSchema.GetHashCode();

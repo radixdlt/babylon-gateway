@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="StateNonFungibleResourceManagerAllOf" /> class.
         /// </summary>
         /// <param name="idType">idType (required).</param>
-        /// <param name="totalSupply">totalSupply (required).</param>
+        /// <param name="totalSupply">totalSupply.</param>
         /// <param name="mutableFields">mutableFields (required).</param>
         public StateNonFungibleResourceManagerAllOf(Substate idType = default(Substate), Substate totalSupply = default(Substate), Substate mutableFields = default(Substate))
         {
@@ -114,18 +114,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("idType is a required property for StateNonFungibleResourceManagerAllOf and cannot be null");
             }
             this.IdType = idType;
-            // to ensure "totalSupply" is required (not null)
-            if (totalSupply == null)
-            {
-                throw new ArgumentNullException("totalSupply is a required property for StateNonFungibleResourceManagerAllOf and cannot be null");
-            }
-            this.TotalSupply = totalSupply;
             // to ensure "mutableFields" is required (not null)
             if (mutableFields == null)
             {
                 throw new ArgumentNullException("mutableFields is a required property for StateNonFungibleResourceManagerAllOf and cannot be null");
             }
             this.MutableFields = mutableFields;
+            this.TotalSupply = totalSupply;
         }
 
         /// <summary>
@@ -137,7 +132,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Gets or Sets TotalSupply
         /// </summary>
-        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "total_supply", EmitDefaultValue = true)]
         public Substate TotalSupply { get; set; }
 
         /// <summary>

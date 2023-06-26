@@ -90,81 +90,56 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// AuthorityKey
+    /// UpdatedSubstate
     /// </summary>
-    [DataContract(Name = "AuthorityKey")]
-    public partial class AuthorityKey : IEquatable<AuthorityKey>
+    [DataContract(Name = "UpdatedSubstate")]
+    public partial class UpdatedSubstate : IEquatable<UpdatedSubstate>
     {
         /// <summary>
-        /// Defines Module
-        /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum ModuleEnum
-        {
-            /// <summary>
-            /// Enum Object for value: Object
-            /// </summary>
-            [EnumMember(Value = "Object")]
-            Object = 1,
-
-            /// <summary>
-            /// Enum Main for value: Main
-            /// </summary>
-            [EnumMember(Value = "Main")]
-            Main = 2,
-
-            /// <summary>
-            /// Enum Metadata for value: Metadata
-            /// </summary>
-            [EnumMember(Value = "Metadata")]
-            Metadata = 3,
-
-            /// <summary>
-            /// Enum Royalty for value: Royalty
-            /// </summary>
-            [EnumMember(Value = "Royalty")]
-            Royalty = 4,
-
-            /// <summary>
-            /// Enum AccessRules for value: AccessRules
-            /// </summary>
-            [EnumMember(Value = "AccessRules")]
-            AccessRules = 5
-
-        }
-
-
-        /// <summary>
-        /// Gets or Sets Module
-        /// </summary>
-        [DataMember(Name = "module", IsRequired = true, EmitDefaultValue = true)]
-        public ModuleEnum Module { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AuthorityKey" /> class.
+        /// Initializes a new instance of the <see cref="UpdatedSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AuthorityKey() { }
+        protected UpdatedSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AuthorityKey" /> class.
+        /// Initializes a new instance of the <see cref="UpdatedSubstate" /> class.
         /// </summary>
-        /// <param name="module">module (required).</param>
-        /// <param name="name">name (required).</param>
-        public AuthorityKey(ModuleEnum module = default(ModuleEnum), string name = default(string))
+        /// <param name="substateId">substateId (required).</param>
+        /// <param name="newValue">newValue (required).</param>
+        /// <param name="previousValue">previousValue.</param>
+        public UpdatedSubstate(SubstateId substateId = default(SubstateId), SubstateValue newValue = default(SubstateValue), SubstateValue previousValue = default(SubstateValue))
         {
-            this.Module = module;
-            // to ensure "name" is required (not null)
-            if (name == null)
+            // to ensure "substateId" is required (not null)
+            if (substateId == null)
             {
-                throw new ArgumentNullException("name is a required property for AuthorityKey and cannot be null");
+                throw new ArgumentNullException("substateId is a required property for UpdatedSubstate and cannot be null");
             }
-            this.Name = name;
+            this.SubstateId = substateId;
+            // to ensure "newValue" is required (not null)
+            if (newValue == null)
+            {
+                throw new ArgumentNullException("newValue is a required property for UpdatedSubstate and cannot be null");
+            }
+            this.NewValue = newValue;
+            this.PreviousValue = previousValue;
         }
 
         /// <summary>
-        /// Gets or Sets Name
+        /// Gets or Sets SubstateId
         /// </summary>
-        [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
-        public string Name { get; set; }
+        [DataMember(Name = "substate_id", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateId SubstateId { get; set; }
+
+        /// <summary>
+        /// Gets or Sets NewValue
+        /// </summary>
+        [DataMember(Name = "new_value", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateValue NewValue { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PreviousValue
+        /// </summary>
+        [DataMember(Name = "previous_value", EmitDefaultValue = true)]
+        public SubstateValue PreviousValue { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -173,9 +148,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AuthorityKey {\n");
-            sb.Append("  Module: ").Append(Module).Append("\n");
-            sb.Append("  Name: ").Append(Name).Append("\n");
+            sb.Append("class UpdatedSubstate {\n");
+            sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
+            sb.Append("  NewValue: ").Append(NewValue).Append("\n");
+            sb.Append("  PreviousValue: ").Append(PreviousValue).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -196,15 +172,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AuthorityKey);
+            return this.Equals(input as UpdatedSubstate);
         }
 
         /// <summary>
-        /// Returns true if AuthorityKey instances are equal
+        /// Returns true if UpdatedSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of AuthorityKey to be compared</param>
+        /// <param name="input">Instance of UpdatedSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AuthorityKey input)
+        public bool Equals(UpdatedSubstate input)
         {
             if (input == null)
             {
@@ -212,13 +188,19 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Module == input.Module ||
-                    this.Module.Equals(input.Module)
+                    this.SubstateId == input.SubstateId ||
+                    (this.SubstateId != null &&
+                    this.SubstateId.Equals(input.SubstateId))
                 ) && 
                 (
-                    this.Name == input.Name ||
-                    (this.Name != null &&
-                    this.Name.Equals(input.Name))
+                    this.NewValue == input.NewValue ||
+                    (this.NewValue != null &&
+                    this.NewValue.Equals(input.NewValue))
+                ) && 
+                (
+                    this.PreviousValue == input.PreviousValue ||
+                    (this.PreviousValue != null &&
+                    this.PreviousValue.Equals(input.PreviousValue))
                 );
         }
 
@@ -231,10 +213,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Module.GetHashCode();
-                if (this.Name != null)
+                if (this.SubstateId != null)
                 {
-                    hashCode = (hashCode * 59) + this.Name.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SubstateId.GetHashCode();
+                }
+                if (this.NewValue != null)
+                {
+                    hashCode = (hashCode * 59) + this.NewValue.GetHashCode();
+                }
+                if (this.PreviousValue != null)
+                {
+                    hashCode = (hashCode * 59) + this.PreviousValue.GetHashCode();
                 }
                 return hashCode;
             }

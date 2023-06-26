@@ -101,11 +101,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="raw">Whether to return the raw substate value bytes (default false).</param>
         /// <param name="hash">Whether to return the raw substate value bytes hash (default false).</param>
         /// <param name="typed">Whether to return the typed substate information (default true).</param>
-        public SubstateFormatOptions(bool raw = default(bool), bool hash = default(bool), bool typed = default(bool))
+        /// <param name="previous">Whether to return the previous substate value for updates (default false).</param>
+        public SubstateFormatOptions(bool raw = default(bool), bool hash = default(bool), bool typed = default(bool), bool previous = default(bool))
         {
             this.Raw = raw;
             this.Hash = hash;
             this.Typed = typed;
+            this.Previous = previous;
         }
 
         /// <summary>
@@ -130,6 +132,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool Typed { get; set; }
 
         /// <summary>
+        /// Whether to return the previous substate value for updates (default false)
+        /// </summary>
+        /// <value>Whether to return the previous substate value for updates (default false)</value>
+        [DataMember(Name = "previous", EmitDefaultValue = true)]
+        public bool Previous { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -140,6 +149,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  Raw: ").Append(Raw).Append("\n");
             sb.Append("  Hash: ").Append(Hash).Append("\n");
             sb.Append("  Typed: ").Append(Typed).Append("\n");
+            sb.Append("  Previous: ").Append(Previous).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -186,6 +196,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.Typed == input.Typed ||
                     this.Typed.Equals(input.Typed)
+                ) && 
+                (
+                    this.Previous == input.Previous ||
+                    this.Previous.Equals(input.Previous)
                 );
         }
 
@@ -201,6 +215,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 hashCode = (hashCode * 59) + this.Raw.GetHashCode();
                 hashCode = (hashCode * 59) + this.Hash.GetHashCode();
                 hashCode = (hashCode * 59) + this.Typed.GetHashCode();
+                hashCode = (hashCode * 59) + this.Previous.GetHashCode();
                 return hashCode;
             }
         }

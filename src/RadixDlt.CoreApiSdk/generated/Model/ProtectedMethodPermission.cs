@@ -84,41 +84,46 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ConsensusManagerCurrentTimeRoundedToMinutesSubstateAllOf
+    /// ProtectedMethodPermission
     /// </summary>
-    [DataContract(Name = "ConsensusManagerCurrentTimeRoundedToMinutesSubstate_allOf")]
-    public partial class ConsensusManagerCurrentTimeRoundedToMinutesSubstateAllOf : IEquatable<ConsensusManagerCurrentTimeRoundedToMinutesSubstateAllOf>
+    [DataContract(Name = "ProtectedMethodPermission")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(ProtectedMethodPermission), "Protected")]
+    [JsonSubtypes.KnownSubType(typeof(PublicMethodPermission), "Public")]
+    public partial class ProtectedMethodPermission : MethodPermission, IEquatable<ProtectedMethodPermission>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConsensusManagerCurrentTimeRoundedToMinutesSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ProtectedMethodPermission" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ConsensusManagerCurrentTimeRoundedToMinutesSubstateAllOf() { }
+        protected ProtectedMethodPermission() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConsensusManagerCurrentTimeRoundedToMinutesSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ProtectedMethodPermission" /> class.
         /// </summary>
-        /// <param name="proposerTimestampRoundedDownToMinute">proposerTimestampRoundedDownToMinute (required).</param>
-        public ConsensusManagerCurrentTimeRoundedToMinutesSubstateAllOf(Instant proposerTimestampRoundedDownToMinute = default(Instant))
+        /// <param name="allowedRoleKeys">allowedRoleKeys (required).</param>
+        /// <param name="type">type (required) (default to MethodPermissionType.Protected).</param>
+        public ProtectedMethodPermission(List<string> allowedRoleKeys = default(List<string>), MethodPermissionType type = MethodPermissionType.Protected) : base(type)
         {
-            // to ensure "proposerTimestampRoundedDownToMinute" is required (not null)
-            if (proposerTimestampRoundedDownToMinute == null)
+            // to ensure "allowedRoleKeys" is required (not null)
+            if (allowedRoleKeys == null)
             {
-                throw new ArgumentNullException("proposerTimestampRoundedDownToMinute is a required property for ConsensusManagerCurrentTimeRoundedToMinutesSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("allowedRoleKeys is a required property for ProtectedMethodPermission and cannot be null");
             }
-            this.ProposerTimestampRoundedDownToMinute = proposerTimestampRoundedDownToMinute;
+            this.AllowedRoleKeys = allowedRoleKeys;
         }
 
         /// <summary>
-        /// Gets or Sets ProposerTimestampRoundedDownToMinute
+        /// Gets or Sets AllowedRoleKeys
         /// </summary>
-        [DataMember(Name = "proposer_timestamp_rounded_down_to_minute", IsRequired = true, EmitDefaultValue = true)]
-        public Instant ProposerTimestampRoundedDownToMinute { get; set; }
+        [DataMember(Name = "allowed_role_keys", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> AllowedRoleKeys { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +132,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ConsensusManagerCurrentTimeRoundedToMinutesSubstateAllOf {\n");
-            sb.Append("  ProposerTimestampRoundedDownToMinute: ").Append(ProposerTimestampRoundedDownToMinute).Append("\n");
+            sb.Append("class ProtectedMethodPermission {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  AllowedRoleKeys: ").Append(AllowedRoleKeys).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -137,7 +143,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -149,25 +155,26 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ConsensusManagerCurrentTimeRoundedToMinutesSubstateAllOf);
+            return this.Equals(input as ProtectedMethodPermission);
         }
 
         /// <summary>
-        /// Returns true if ConsensusManagerCurrentTimeRoundedToMinutesSubstateAllOf instances are equal
+        /// Returns true if ProtectedMethodPermission instances are equal
         /// </summary>
-        /// <param name="input">Instance of ConsensusManagerCurrentTimeRoundedToMinutesSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of ProtectedMethodPermission to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ConsensusManagerCurrentTimeRoundedToMinutesSubstateAllOf input)
+        public bool Equals(ProtectedMethodPermission input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.ProposerTimestampRoundedDownToMinute == input.ProposerTimestampRoundedDownToMinute ||
-                    (this.ProposerTimestampRoundedDownToMinute != null &&
-                    this.ProposerTimestampRoundedDownToMinute.Equals(input.ProposerTimestampRoundedDownToMinute))
+                    this.AllowedRoleKeys == input.AllowedRoleKeys ||
+                    this.AllowedRoleKeys != null &&
+                    input.AllowedRoleKeys != null &&
+                    this.AllowedRoleKeys.SequenceEqual(input.AllowedRoleKeys)
                 );
         }
 
@@ -179,10 +186,10 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.ProposerTimestampRoundedDownToMinute != null)
+                int hashCode = base.GetHashCode();
+                if (this.AllowedRoleKeys != null)
                 {
-                    hashCode = (hashCode * 59) + this.ProposerTimestampRoundedDownToMinute.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AllowedRoleKeys.GetHashCode();
                 }
                 return hashCode;
             }

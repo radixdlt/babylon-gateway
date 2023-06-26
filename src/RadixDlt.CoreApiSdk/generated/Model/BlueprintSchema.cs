@@ -110,7 +110,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="eventSchemas">A map from the event name to the local type index for the event payload under the blueprint schema. (required).</param>
         /// <param name="fieldPartition">fieldPartition.</param>
         /// <param name="collectionPartitions">The collection partitions for this blueprint. (required).</param>
-        public BlueprintSchema(string outerBlueprint = default(string), ScryptoSchema schema = default(ScryptoSchema), Dictionary<string, FunctionSchema> functionSchemas = default(Dictionary<string, FunctionSchema>), Dictionary<string, VirtualLazyLoadSchema> virtualLazyLoadFunctionSchemas = default(Dictionary<string, VirtualLazyLoadSchema>), Dictionary<string, LocalTypeIndex> eventSchemas = default(Dictionary<string, LocalTypeIndex>), BlueprintSchemaFieldPartition fieldPartition = default(BlueprintSchemaFieldPartition), List<BlueprintSchemaCollectionPartition> collectionPartitions = default(List<BlueprintSchemaCollectionPartition>))
+        /// <param name="dependencies">dependencies (required).</param>
+        /// <param name="features">features (required).</param>
+        public BlueprintSchema(string outerBlueprint = default(string), ScryptoSchema schema = default(ScryptoSchema), Dictionary<string, FunctionSchema> functionSchemas = default(Dictionary<string, FunctionSchema>), Dictionary<string, VirtualLazyLoadSchema> virtualLazyLoadFunctionSchemas = default(Dictionary<string, VirtualLazyLoadSchema>), Dictionary<string, LocalTypeIndex> eventSchemas = default(Dictionary<string, LocalTypeIndex>), BlueprintSchemaFieldPartition fieldPartition = default(BlueprintSchemaFieldPartition), List<BlueprintSchemaCollectionPartition> collectionPartitions = default(List<BlueprintSchemaCollectionPartition>), List<string> dependencies = default(List<string>), List<string> features = default(List<string>))
         {
             // to ensure "schema" is required (not null)
             if (schema == null)
@@ -142,6 +144,18 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("collectionPartitions is a required property for BlueprintSchema and cannot be null");
             }
             this.CollectionPartitions = collectionPartitions;
+            // to ensure "dependencies" is required (not null)
+            if (dependencies == null)
+            {
+                throw new ArgumentNullException("dependencies is a required property for BlueprintSchema and cannot be null");
+            }
+            this.Dependencies = dependencies;
+            // to ensure "features" is required (not null)
+            if (features == null)
+            {
+                throw new ArgumentNullException("features is a required property for BlueprintSchema and cannot be null");
+            }
+            this.Features = features;
             this.OuterBlueprint = outerBlueprint;
             this.FieldPartition = fieldPartition;
         }
@@ -193,6 +207,18 @@ namespace RadixDlt.CoreApiSdk.Model
         public List<BlueprintSchemaCollectionPartition> CollectionPartitions { get; set; }
 
         /// <summary>
+        /// Gets or Sets Dependencies
+        /// </summary>
+        [DataMember(Name = "dependencies", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> Dependencies { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Features
+        /// </summary>
+        [DataMember(Name = "features", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> Features { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -207,6 +233,8 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  EventSchemas: ").Append(EventSchemas).Append("\n");
             sb.Append("  FieldPartition: ").Append(FieldPartition).Append("\n");
             sb.Append("  CollectionPartitions: ").Append(CollectionPartitions).Append("\n");
+            sb.Append("  Dependencies: ").Append(Dependencies).Append("\n");
+            sb.Append("  Features: ").Append(Features).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -280,6 +308,18 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.CollectionPartitions != null &&
                     input.CollectionPartitions != null &&
                     this.CollectionPartitions.SequenceEqual(input.CollectionPartitions)
+                ) && 
+                (
+                    this.Dependencies == input.Dependencies ||
+                    this.Dependencies != null &&
+                    input.Dependencies != null &&
+                    this.Dependencies.SequenceEqual(input.Dependencies)
+                ) && 
+                (
+                    this.Features == input.Features ||
+                    this.Features != null &&
+                    input.Features != null &&
+                    this.Features.SequenceEqual(input.Features)
                 );
         }
 
@@ -319,6 +359,14 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.CollectionPartitions != null)
                 {
                     hashCode = (hashCode * 59) + this.CollectionPartitions.GetHashCode();
+                }
+                if (this.Dependencies != null)
+                {
+                    hashCode = (hashCode * 59) + this.Dependencies.GetHashCode();
+                }
+                if (this.Features != null)
+                {
+                    hashCode = (hashCode * 59) + this.Features.GetHashCode();
                 }
                 return hashCode;
             }

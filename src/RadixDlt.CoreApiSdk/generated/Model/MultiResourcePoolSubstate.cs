@@ -84,67 +84,94 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CreatedOrUpdatedSubstate
+    /// MultiResourcePoolSubstate
     /// </summary>
-    [DataContract(Name = "CreatedOrUpdatedSubstate")]
-    public partial class CreatedOrUpdatedSubstate : IEquatable<CreatedOrUpdatedSubstate>
+    [DataContract(Name = "MultiResourcePoolSubstate")]
+    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
+    [JsonSubtypes.KnownSubType(typeof(AccessControllerFieldStateSubstate), "AccessControllerFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesModuleFieldAccessRulesSubstate), "AccessRulesModuleFieldAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(AccountDepositRuleIndexEntrySubstate), "AccountDepositRuleIndexEntry")]
+    [JsonSubtypes.KnownSubType(typeof(AccountFieldStateSubstate), "AccountFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(AccountVaultIndexEntrySubstate), "AccountVaultIndexEntry")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldConfigSubstate), "ConsensusManagerFieldConfig")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentProposalStatisticSubstate), "ConsensusManagerFieldCurrentProposalStatistic")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentValidatorSetSubstate), "ConsensusManagerFieldCurrentValidatorSet")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldStateSubstate), "ConsensusManagerFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate), "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
+    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldDivisibilitySubstate), "FungibleResourceManagerFieldDivisibility")]
+    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldTotalSupplySubstate), "FungibleResourceManagerFieldTotalSupply")]
+    [JsonSubtypes.KnownSubType(typeof(FungibleVaultFieldBalanceSubstate), "FungibleVaultFieldBalance")]
+    [JsonSubtypes.KnownSubType(typeof(GenericKeyValueStoreEntrySubstate), "GenericKeyValueStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(GenericScryptoComponentFieldStateSubstate), "GenericScryptoComponentFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataModuleEntrySubstate), "MetadataModuleEntry")]
+    [JsonSubtypes.KnownSubType(typeof(MultiResourcePoolSubstate), "MultiResourcePool")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerDataEntrySubstate), "NonFungibleResourceManagerDataEntry")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldIdTypeSubstate), "NonFungibleResourceManagerFieldIdType")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldMutableFieldsSubstate), "NonFungibleResourceManagerFieldMutableFields")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldTotalSupplySubstate), "NonFungibleResourceManagerFieldTotalSupply")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultContentsIndexEntrySubstate), "NonFungibleVaultContentsIndexEntry")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldBalanceSubstate), "NonFungibleVaultFieldBalance")]
+    [JsonSubtypes.KnownSubType(typeof(OneResourcePoolSubstate), "OneResourcePool")]
+    [JsonSubtypes.KnownSubType(typeof(PackageFieldCodeSubstate), "PackageFieldCode")]
+    [JsonSubtypes.KnownSubType(typeof(PackageFieldCodeTypeSubstate), "PackageFieldCodeType")]
+    [JsonSubtypes.KnownSubType(typeof(PackageFieldFunctionAccessRulesSubstate), "PackageFieldFunctionAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(PackageFieldInfoSubstate), "PackageFieldInfo")]
+    [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltySubstate), "PackageFieldRoyalty")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldAccumulatorSubstate), "RoyaltyModuleFieldAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldConfigSubstate), "RoyaltyModuleFieldConfig")]
+    [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolSubstate), "TwoResourcePool")]
+    [JsonSubtypes.KnownSubType(typeof(TypeInfoModuleFieldTypeInfoSubstate), "TypeInfoModuleFieldTypeInfo")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
+    public partial class MultiResourcePoolSubstate : Substate, IEquatable<MultiResourcePoolSubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CreatedOrUpdatedSubstate" /> class.
+        /// Initializes a new instance of the <see cref="MultiResourcePoolSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CreatedOrUpdatedSubstate() { }
+        protected MultiResourcePoolSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CreatedOrUpdatedSubstate" /> class.
+        /// Initializes a new instance of the <see cref="MultiResourcePoolSubstate" /> class.
         /// </summary>
-        /// <param name="substateId">substateId (required).</param>
-        /// <param name="substateHex">The hex-encoded, SBOR-encoded substate data bytes. Only returned if enabled in SubstateFormatOptions on your request (default false)..</param>
-        /// <param name="substateDataHash">The hex-encoded Blake2b-256 hash of the substate data bytes. Only returned if enabled in SubstateFormatOptions on your request (default false)..</param>
-        /// <param name="substateData">substateData.</param>
-        public CreatedOrUpdatedSubstate(SubstateId substateId = default(SubstateId), string substateHex = default(string), string substateDataHash = default(string), Substate substateData = default(Substate))
+        /// <param name="vaults">vaults (required).</param>
+        /// <param name="poolUnitResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        /// <param name="substateType">substateType (required) (default to SubstateType.MultiResourcePool).</param>
+        public MultiResourcePoolSubstate(List<PoolVault> vaults = default(List<PoolVault>), string poolUnitResourceAddress = default(string), SubstateType substateType = SubstateType.MultiResourcePool) : base(substateType)
         {
-            // to ensure "substateId" is required (not null)
-            if (substateId == null)
+            // to ensure "vaults" is required (not null)
+            if (vaults == null)
             {
-                throw new ArgumentNullException("substateId is a required property for CreatedOrUpdatedSubstate and cannot be null");
+                throw new ArgumentNullException("vaults is a required property for MultiResourcePoolSubstate and cannot be null");
             }
-            this.SubstateId = substateId;
-            this.SubstateHex = substateHex;
-            this.SubstateDataHash = substateDataHash;
-            this.SubstateData = substateData;
+            this.Vaults = vaults;
+            // to ensure "poolUnitResourceAddress" is required (not null)
+            if (poolUnitResourceAddress == null)
+            {
+                throw new ArgumentNullException("poolUnitResourceAddress is a required property for MultiResourcePoolSubstate and cannot be null");
+            }
+            this.PoolUnitResourceAddress = poolUnitResourceAddress;
         }
 
         /// <summary>
-        /// Gets or Sets SubstateId
+        /// Gets or Sets Vaults
         /// </summary>
-        [DataMember(Name = "substate_id", IsRequired = true, EmitDefaultValue = true)]
-        public SubstateId SubstateId { get; set; }
+        [DataMember(Name = "vaults", IsRequired = true, EmitDefaultValue = true)]
+        public List<PoolVault> Vaults { get; set; }
 
         /// <summary>
-        /// The hex-encoded, SBOR-encoded substate data bytes. Only returned if enabled in SubstateFormatOptions on your request (default false).
+        /// The Bech32m-encoded human readable version of the resource address
         /// </summary>
-        /// <value>The hex-encoded, SBOR-encoded substate data bytes. Only returned if enabled in SubstateFormatOptions on your request (default false).</value>
-        [DataMember(Name = "substate_hex", EmitDefaultValue = true)]
-        public string SubstateHex { get; set; }
-
-        /// <summary>
-        /// The hex-encoded Blake2b-256 hash of the substate data bytes. Only returned if enabled in SubstateFormatOptions on your request (default false).
-        /// </summary>
-        /// <value>The hex-encoded Blake2b-256 hash of the substate data bytes. Only returned if enabled in SubstateFormatOptions on your request (default false).</value>
-        [DataMember(Name = "substate_data_hash", EmitDefaultValue = true)]
-        public string SubstateDataHash { get; set; }
-
-        /// <summary>
-        /// Gets or Sets SubstateData
-        /// </summary>
-        [DataMember(Name = "substate_data", EmitDefaultValue = true)]
-        public Substate SubstateData { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource address</value>
+        [DataMember(Name = "pool_unit_resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PoolUnitResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -153,11 +180,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CreatedOrUpdatedSubstate {\n");
-            sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
-            sb.Append("  SubstateHex: ").Append(SubstateHex).Append("\n");
-            sb.Append("  SubstateDataHash: ").Append(SubstateDataHash).Append("\n");
-            sb.Append("  SubstateData: ").Append(SubstateData).Append("\n");
+            sb.Append("class MultiResourcePoolSubstate {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  Vaults: ").Append(Vaults).Append("\n");
+            sb.Append("  PoolUnitResourceAddress: ").Append(PoolUnitResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,7 +192,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -178,40 +204,31 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CreatedOrUpdatedSubstate);
+            return this.Equals(input as MultiResourcePoolSubstate);
         }
 
         /// <summary>
-        /// Returns true if CreatedOrUpdatedSubstate instances are equal
+        /// Returns true if MultiResourcePoolSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of CreatedOrUpdatedSubstate to be compared</param>
+        /// <param name="input">Instance of MultiResourcePoolSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CreatedOrUpdatedSubstate input)
+        public bool Equals(MultiResourcePoolSubstate input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.SubstateId == input.SubstateId ||
-                    (this.SubstateId != null &&
-                    this.SubstateId.Equals(input.SubstateId))
-                ) && 
+                    this.Vaults == input.Vaults ||
+                    this.Vaults != null &&
+                    input.Vaults != null &&
+                    this.Vaults.SequenceEqual(input.Vaults)
+                ) && base.Equals(input) && 
                 (
-                    this.SubstateHex == input.SubstateHex ||
-                    (this.SubstateHex != null &&
-                    this.SubstateHex.Equals(input.SubstateHex))
-                ) && 
-                (
-                    this.SubstateDataHash == input.SubstateDataHash ||
-                    (this.SubstateDataHash != null &&
-                    this.SubstateDataHash.Equals(input.SubstateDataHash))
-                ) && 
-                (
-                    this.SubstateData == input.SubstateData ||
-                    (this.SubstateData != null &&
-                    this.SubstateData.Equals(input.SubstateData))
+                    this.PoolUnitResourceAddress == input.PoolUnitResourceAddress ||
+                    (this.PoolUnitResourceAddress != null &&
+                    this.PoolUnitResourceAddress.Equals(input.PoolUnitResourceAddress))
                 );
         }
 
@@ -223,22 +240,14 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.SubstateId != null)
+                int hashCode = base.GetHashCode();
+                if (this.Vaults != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Vaults.GetHashCode();
                 }
-                if (this.SubstateHex != null)
+                if (this.PoolUnitResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateHex.GetHashCode();
-                }
-                if (this.SubstateDataHash != null)
-                {
-                    hashCode = (hashCode * 59) + this.SubstateDataHash.GetHashCode();
-                }
-                if (this.SubstateData != null)
-                {
-                    hashCode = (hashCode * 59) + this.SubstateData.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PoolUnitResourceAddress.GetHashCode();
                 }
                 return hashCode;
             }

@@ -105,9 +105,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="isDeleted">isDeleted (required).</param>
         /// <param name="dataStruct">dataStruct.</param>
-        public NonFungibleResourceManagerDataEntrySubstateAllOf(bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct))
+        /// <param name="isMutable">isMutable (required).</param>
+        public NonFungibleResourceManagerDataEntrySubstateAllOf(bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct), bool isMutable = default(bool))
         {
             this.IsDeleted = isDeleted;
+            this.IsMutable = isMutable;
             this.DataStruct = dataStruct;
         }
 
@@ -124,6 +126,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public DataStruct DataStruct { get; set; }
 
         /// <summary>
+        /// Gets or Sets IsMutable
+        /// </summary>
+        [DataMember(Name = "is_mutable", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsMutable { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -133,6 +141,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class NonFungibleResourceManagerDataEntrySubstateAllOf {\n");
             sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
             sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
+            sb.Append("  IsMutable: ").Append(IsMutable).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -176,6 +185,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.DataStruct == input.DataStruct ||
                     (this.DataStruct != null &&
                     this.DataStruct.Equals(input.DataStruct))
+                ) && 
+                (
+                    this.IsMutable == input.IsMutable ||
+                    this.IsMutable.Equals(input.IsMutable)
                 );
         }
 
@@ -193,6 +206,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.IsMutable.GetHashCode();
                 return hashCode;
             }
         }

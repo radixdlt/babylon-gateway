@@ -123,7 +123,7 @@ internal class PreviewService : IPreviewService
         };
 
         var coreRequestFlags = new CoreModel.TransactionPreviewRequestFlags(
-            unlimitedLoan: request.Flags.UnlimitedLoan,
+            useFreeCredit: request.Flags.UseFreeCredit,
             assumeAllSignatureProofs: request.Flags.AssumeAllSignatureProofs,
             permitDuplicateIntentHash: request.Flags.PermitDuplicateIntentHash,
             permitInvalidHeaderEpoch: request.Flags.PermitInvalidHeaderEpoch);

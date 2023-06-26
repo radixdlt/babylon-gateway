@@ -75,7 +75,7 @@ public interface ILedgerConfirmationService
     Task HandleLedgerExtensionIfQuorum(CancellationToken token);
 
     // Below are to be called from the node transaction log workers - to communicate with the LedgerConfirmationService
-    void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipAccumulator);
+    void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipTreeHash);
 
     void SubmitTransactionsFromNode(string nodeName, List<CoreModel.CommittedTransaction> transactions);
 
