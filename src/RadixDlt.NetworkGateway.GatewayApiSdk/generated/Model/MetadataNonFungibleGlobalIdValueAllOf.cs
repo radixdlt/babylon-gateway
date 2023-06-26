@@ -90,25 +90,50 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityMetadataItemValueAllOf
+    /// MetadataNonFungibleGlobalIdValueAllOf
     /// </summary>
-    [DataContract(Name = "EntityMetadataItemValue_allOf")]
-    public partial class EntityMetadataItemValueAllOf : IEquatable<EntityMetadataItemValueAllOf>
+    [DataContract(Name = "MetadataNonFungibleGlobalIdValue_allOf")]
+    public partial class MetadataNonFungibleGlobalIdValueAllOf : IEquatable<MetadataNonFungibleGlobalIdValueAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataItemValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdValueAllOf" /> class.
         /// </summary>
-        /// <param name="typed">typed.</param>
-        public EntityMetadataItemValueAllOf(MetadataTypedValue typed = default(MetadataTypedValue))
+        [JsonConstructorAttribute]
+        protected MetadataNonFungibleGlobalIdValueAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdValueAllOf" /> class.
+        /// </summary>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
+        public MetadataNonFungibleGlobalIdValueAllOf(string resourceAddress = default(string), string nonFungibleId = default(string))
         {
-            this.Typed = typed;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
+            {
+                throw new ArgumentNullException("resourceAddress is a required property for MetadataNonFungibleGlobalIdValueAllOf and cannot be null");
+            }
+            this.ResourceAddress = resourceAddress;
+            // to ensure "nonFungibleId" is required (not null)
+            if (nonFungibleId == null)
+            {
+                throw new ArgumentNullException("nonFungibleId is a required property for MetadataNonFungibleGlobalIdValueAllOf and cannot be null");
+            }
+            this.NonFungibleId = nonFungibleId;
         }
 
         /// <summary>
-        /// Gets or Sets Typed
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        [DataMember(Name = "typed", EmitDefaultValue = true)]
-        public MetadataTypedValue Typed { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
+
+        /// <summary>
+        /// String-encoded non-fungible ID.
+        /// </summary>
+        /// <value>String-encoded non-fungible ID.</value>
+        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
+        public string NonFungibleId { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -117,8 +142,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityMetadataItemValueAllOf {\n");
-            sb.Append("  Typed: ").Append(Typed).Append("\n");
+            sb.Append("class MetadataNonFungibleGlobalIdValueAllOf {\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -139,15 +165,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityMetadataItemValueAllOf);
+            return this.Equals(input as MetadataNonFungibleGlobalIdValueAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityMetadataItemValueAllOf instances are equal
+        /// Returns true if MetadataNonFungibleGlobalIdValueAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityMetadataItemValueAllOf to be compared</param>
+        /// <param name="input">Instance of MetadataNonFungibleGlobalIdValueAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityMetadataItemValueAllOf input)
+        public bool Equals(MetadataNonFungibleGlobalIdValueAllOf input)
         {
             if (input == null)
             {
@@ -155,9 +181,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Typed == input.Typed ||
-                    (this.Typed != null &&
-                    this.Typed.Equals(input.Typed))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
+                ) && 
+                (
+                    this.NonFungibleId == input.NonFungibleId ||
+                    (this.NonFungibleId != null &&
+                    this.NonFungibleId.Equals(input.NonFungibleId))
                 );
         }
 
@@ -170,9 +201,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Typed != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Typed.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
+                if (this.NonFungibleId != null)
+                {
+                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
                 }
                 return hashCode;
             }

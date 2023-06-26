@@ -90,25 +90,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityMetadataItemValueAllOf
+    /// MetadataPublicKeyArrayValueAllOf
     /// </summary>
-    [DataContract(Name = "EntityMetadataItemValue_allOf")]
-    public partial class EntityMetadataItemValueAllOf : IEquatable<EntityMetadataItemValueAllOf>
+    [DataContract(Name = "MetadataPublicKeyArrayValue_allOf")]
+    public partial class MetadataPublicKeyArrayValueAllOf : IEquatable<MetadataPublicKeyArrayValueAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataItemValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MetadataPublicKeyArrayValueAllOf" /> class.
         /// </summary>
-        /// <param name="typed">typed.</param>
-        public EntityMetadataItemValueAllOf(MetadataTypedValue typed = default(MetadataTypedValue))
+        [JsonConstructorAttribute]
+        protected MetadataPublicKeyArrayValueAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MetadataPublicKeyArrayValueAllOf" /> class.
+        /// </summary>
+        /// <param name="values">values (required).</param>
+        public MetadataPublicKeyArrayValueAllOf(List<PublicKey> values = default(List<PublicKey>))
         {
-            this.Typed = typed;
+            // to ensure "values" is required (not null)
+            if (values == null)
+            {
+                throw new ArgumentNullException("values is a required property for MetadataPublicKeyArrayValueAllOf and cannot be null");
+            }
+            this.Values = values;
         }
 
         /// <summary>
-        /// Gets or Sets Typed
+        /// Gets or Sets Values
         /// </summary>
-        [DataMember(Name = "typed", EmitDefaultValue = true)]
-        public MetadataTypedValue Typed { get; set; }
+        [DataMember(Name = "values", IsRequired = true, EmitDefaultValue = true)]
+        public List<PublicKey> Values { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -117,8 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityMetadataItemValueAllOf {\n");
-            sb.Append("  Typed: ").Append(Typed).Append("\n");
+            sb.Append("class MetadataPublicKeyArrayValueAllOf {\n");
+            sb.Append("  Values: ").Append(Values).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -139,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityMetadataItemValueAllOf);
+            return this.Equals(input as MetadataPublicKeyArrayValueAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityMetadataItemValueAllOf instances are equal
+        /// Returns true if MetadataPublicKeyArrayValueAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityMetadataItemValueAllOf to be compared</param>
+        /// <param name="input">Instance of MetadataPublicKeyArrayValueAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityMetadataItemValueAllOf input)
+        public bool Equals(MetadataPublicKeyArrayValueAllOf input)
         {
             if (input == null)
             {
@@ -155,9 +165,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Typed == input.Typed ||
-                    (this.Typed != null &&
-                    this.Typed.Equals(input.Typed))
+                    this.Values == input.Values ||
+                    this.Values != null &&
+                    input.Values != null &&
+                    this.Values.SequenceEqual(input.Values)
                 );
         }
 
@@ -170,9 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Typed != null)
+                if (this.Values != null)
                 {
-                    hashCode = (hashCode * 59) + this.Typed.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Values.GetHashCode();
                 }
                 return hashCode;
             }

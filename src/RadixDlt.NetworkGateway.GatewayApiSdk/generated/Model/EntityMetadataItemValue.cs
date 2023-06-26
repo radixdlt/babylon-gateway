@@ -105,9 +105,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="rawHex">rawHex (required).</param>
         /// <param name="rawJson">rawJson (required).</param>
-        /// <param name="asString">asString.</param>
-        /// <param name="asStringCollection">asStringCollection.</param>
-        public EntityMetadataItemValue(string rawHex = default(string), Object rawJson = default(Object), string asString = default(string), List<string> asStringCollection = default(List<string>))
+        /// <param name="typed">typed.</param>
+        public EntityMetadataItemValue(string rawHex = default(string), Object rawJson = default(Object), MetadataTypedValue typed = default(MetadataTypedValue))
         {
             // to ensure "rawHex" is required (not null)
             if (rawHex == null)
@@ -121,8 +120,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("rawJson is a required property for EntityMetadataItemValue and cannot be null");
             }
             this.RawJson = rawJson;
-            this.AsString = asString;
-            this.AsStringCollection = asStringCollection;
+            this.Typed = typed;
         }
 
         /// <summary>
@@ -138,16 +136,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public Object RawJson { get; set; }
 
         /// <summary>
-        /// Gets or Sets AsString
+        /// Gets or Sets Typed
         /// </summary>
-        [DataMember(Name = "as_string", EmitDefaultValue = true)]
-        public string AsString { get; set; }
-
-        /// <summary>
-        /// Gets or Sets AsStringCollection
-        /// </summary>
-        [DataMember(Name = "as_string_collection", EmitDefaultValue = true)]
-        public List<string> AsStringCollection { get; set; }
+        [DataMember(Name = "typed", EmitDefaultValue = true)]
+        public MetadataTypedValue Typed { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -159,8 +151,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class EntityMetadataItemValue {\n");
             sb.Append("  RawHex: ").Append(RawHex).Append("\n");
             sb.Append("  RawJson: ").Append(RawJson).Append("\n");
-            sb.Append("  AsString: ").Append(AsString).Append("\n");
-            sb.Append("  AsStringCollection: ").Append(AsStringCollection).Append("\n");
+            sb.Append("  Typed: ").Append(Typed).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -207,15 +198,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.RawJson.Equals(input.RawJson))
                 ) && 
                 (
-                    this.AsString == input.AsString ||
-                    (this.AsString != null &&
-                    this.AsString.Equals(input.AsString))
-                ) && 
-                (
-                    this.AsStringCollection == input.AsStringCollection ||
-                    this.AsStringCollection != null &&
-                    input.AsStringCollection != null &&
-                    this.AsStringCollection.SequenceEqual(input.AsStringCollection)
+                    this.Typed == input.Typed ||
+                    (this.Typed != null &&
+                    this.Typed.Equals(input.Typed))
                 );
         }
 
@@ -236,13 +221,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.RawJson.GetHashCode();
                 }
-                if (this.AsString != null)
+                if (this.Typed != null)
                 {
-                    hashCode = (hashCode * 59) + this.AsString.GetHashCode();
-                }
-                if (this.AsStringCollection != null)
-                {
-                    hashCode = (hashCode * 59) + this.AsStringCollection.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Typed.GetHashCode();
                 }
                 return hashCode;
             }

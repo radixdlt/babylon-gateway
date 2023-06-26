@@ -82,20 +82,20 @@ public interface IVirtualEntityMetadataProvider
 
 public class VirtualEntityMetadataProvider : IVirtualEntityMetadataProvider
 {
-    private readonly ILogger<VirtualEntityMetadataProvider> _logger;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly ILogger _logger;
 
-    public VirtualEntityMetadataProvider(ILogger<VirtualEntityMetadataProvider> logger, INetworkConfigurationProvider networkConfigurationProvider)
+    public VirtualEntityMetadataProvider(INetworkConfigurationProvider networkConfigurationProvider, ILogger<VirtualEntityMetadataProvider> logger)
     {
-        _logger = logger;
         _networkConfigurationProvider = networkConfigurationProvider;
+        _logger = logger;
     }
 
     public GatewayApiSdk.Model.EntityMetadataCollection GetVirtualEntityMetadata(EntityAddress virtualEntityAddress)
     {
         var sbor = GetSbor(virtualEntityAddress);
         var encodedSbor = RadixEngineToolkit.RadixEngineToolkit.ScryptoSborEncode(sbor);
-        var metadataItem = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(_logger, encodedSbor, _networkConfigurationProvider.GetNetworkId());
+        var metadataItem = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(encodedSbor, _networkConfigurationProvider.GetNetworkId(), _logger);
 
         return new GatewayApiSdk.Model.EntityMetadataCollection(1, null, null, new List<GatewayApiSdk.Model.EntityMetadataItem> { new("owner_keys", metadataItem) });
     }

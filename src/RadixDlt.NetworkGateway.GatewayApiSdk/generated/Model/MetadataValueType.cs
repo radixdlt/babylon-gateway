@@ -90,93 +90,202 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityMetadataItemValueAllOf
+    /// Defines MetadataValueType
     /// </summary>
-    [DataContract(Name = "EntityMetadataItemValue_allOf")]
-    public partial class EntityMetadataItemValueAllOf : IEquatable<EntityMetadataItemValueAllOf>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum MetadataValueType
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataItemValueAllOf" /> class.
+        /// Enum String for value: String
         /// </summary>
-        /// <param name="typed">typed.</param>
-        public EntityMetadataItemValueAllOf(MetadataTypedValue typed = default(MetadataTypedValue))
-        {
-            this.Typed = typed;
-        }
+        [EnumMember(Value = "String")]
+        String = 1,
 
         /// <summary>
-        /// Gets or Sets Typed
+        /// Enum Bool for value: Bool
         /// </summary>
-        [DataMember(Name = "typed", EmitDefaultValue = true)]
-        public MetadataTypedValue Typed { get; set; }
+        [EnumMember(Value = "Bool")]
+        Bool = 2,
 
         /// <summary>
-        /// Returns the string presentation of the object
+        /// Enum U8 for value: U8
         /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityMetadataItemValueAllOf {\n");
-            sb.Append("  Typed: ").Append(Typed).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
+        [EnumMember(Value = "U8")]
+        U8 = 3,
 
         /// <summary>
-        /// Returns the JSON string presentation of the object
+        /// Enum U32 for value: U32
         /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
+        [EnumMember(Value = "U32")]
+        U32 = 4,
 
         /// <summary>
-        /// Returns true if objects are equal
+        /// Enum U64 for value: U64
         /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as EntityMetadataItemValueAllOf);
-        }
+        [EnumMember(Value = "U64")]
+        U64 = 5,
 
         /// <summary>
-        /// Returns true if EntityMetadataItemValueAllOf instances are equal
+        /// Enum I32 for value: I32
         /// </summary>
-        /// <param name="input">Instance of EntityMetadataItemValueAllOf to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(EntityMetadataItemValueAllOf input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.Typed == input.Typed ||
-                    (this.Typed != null &&
-                    this.Typed.Equals(input.Typed))
-                );
-        }
+        [EnumMember(Value = "I32")]
+        I32 = 6,
 
         /// <summary>
-        /// Gets the hash code
+        /// Enum I64 for value: I64
         /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                if (this.Typed != null)
-                {
-                    hashCode = (hashCode * 59) + this.Typed.GetHashCode();
-                }
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "I64")]
+        I64 = 7,
+
+        /// <summary>
+        /// Enum Decimal for value: Decimal
+        /// </summary>
+        [EnumMember(Value = "Decimal")]
+        Decimal = 8,
+
+        /// <summary>
+        /// Enum GlobalAddress for value: GlobalAddress
+        /// </summary>
+        [EnumMember(Value = "GlobalAddress")]
+        GlobalAddress = 9,
+
+        /// <summary>
+        /// Enum PublicKey for value: PublicKey
+        /// </summary>
+        [EnumMember(Value = "PublicKey")]
+        PublicKey = 10,
+
+        /// <summary>
+        /// Enum NonFungibleGlobalId for value: NonFungibleGlobalId
+        /// </summary>
+        [EnumMember(Value = "NonFungibleGlobalId")]
+        NonFungibleGlobalId = 11,
+
+        /// <summary>
+        /// Enum NonFungibleLocalId for value: NonFungibleLocalId
+        /// </summary>
+        [EnumMember(Value = "NonFungibleLocalId")]
+        NonFungibleLocalId = 12,
+
+        /// <summary>
+        /// Enum Instant for value: Instant
+        /// </summary>
+        [EnumMember(Value = "Instant")]
+        Instant = 13,
+
+        /// <summary>
+        /// Enum Url for value: Url
+        /// </summary>
+        [EnumMember(Value = "Url")]
+        Url = 14,
+
+        /// <summary>
+        /// Enum Origin for value: Origin
+        /// </summary>
+        [EnumMember(Value = "Origin")]
+        Origin = 15,
+
+        /// <summary>
+        /// Enum PublicKeyHash for value: PublicKeyHash
+        /// </summary>
+        [EnumMember(Value = "PublicKeyHash")]
+        PublicKeyHash = 16,
+
+        /// <summary>
+        /// Enum StringArray for value: StringArray
+        /// </summary>
+        [EnumMember(Value = "StringArray")]
+        StringArray = 17,
+
+        /// <summary>
+        /// Enum BoolArray for value: BoolArray
+        /// </summary>
+        [EnumMember(Value = "BoolArray")]
+        BoolArray = 18,
+
+        /// <summary>
+        /// Enum U8Array for value: U8Array
+        /// </summary>
+        [EnumMember(Value = "U8Array")]
+        U8Array = 19,
+
+        /// <summary>
+        /// Enum U32Array for value: U32Array
+        /// </summary>
+        [EnumMember(Value = "U32Array")]
+        U32Array = 20,
+
+        /// <summary>
+        /// Enum U64Array for value: U64Array
+        /// </summary>
+        [EnumMember(Value = "U64Array")]
+        U64Array = 21,
+
+        /// <summary>
+        /// Enum I32Array for value: I32Array
+        /// </summary>
+        [EnumMember(Value = "I32Array")]
+        I32Array = 22,
+
+        /// <summary>
+        /// Enum I64Array for value: I64Array
+        /// </summary>
+        [EnumMember(Value = "I64Array")]
+        I64Array = 23,
+
+        /// <summary>
+        /// Enum DecimalArray for value: DecimalArray
+        /// </summary>
+        [EnumMember(Value = "DecimalArray")]
+        DecimalArray = 24,
+
+        /// <summary>
+        /// Enum GlobalAddressArray for value: GlobalAddressArray
+        /// </summary>
+        [EnumMember(Value = "GlobalAddressArray")]
+        GlobalAddressArray = 25,
+
+        /// <summary>
+        /// Enum PublicKeyArray for value: PublicKeyArray
+        /// </summary>
+        [EnumMember(Value = "PublicKeyArray")]
+        PublicKeyArray = 26,
+
+        /// <summary>
+        /// Enum NonFungibleGlobalIdArray for value: NonFungibleGlobalIdArray
+        /// </summary>
+        [EnumMember(Value = "NonFungibleGlobalIdArray")]
+        NonFungibleGlobalIdArray = 27,
+
+        /// <summary>
+        /// Enum NonFungibleLocalIdArray for value: NonFungibleLocalIdArray
+        /// </summary>
+        [EnumMember(Value = "NonFungibleLocalIdArray")]
+        NonFungibleLocalIdArray = 28,
+
+        /// <summary>
+        /// Enum InstantArray for value: InstantArray
+        /// </summary>
+        [EnumMember(Value = "InstantArray")]
+        InstantArray = 29,
+
+        /// <summary>
+        /// Enum UrlArray for value: UrlArray
+        /// </summary>
+        [EnumMember(Value = "UrlArray")]
+        UrlArray = 30,
+
+        /// <summary>
+        /// Enum OriginArray for value: OriginArray
+        /// </summary>
+        [EnumMember(Value = "OriginArray")]
+        OriginArray = 31,
+
+        /// <summary>
+        /// Enum PublicKeyHashArray for value: PublicKeyHashArray
+        /// </summary>
+        [EnumMember(Value = "PublicKeyHashArray")]
+        PublicKeyHashArray = 32
 
     }
 

@@ -84,31 +84,91 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityMetadataItemValueAllOf
+    /// MetadataNonFungibleGlobalIdValue
     /// </summary>
-    [DataContract(Name = "EntityMetadataItemValue_allOf")]
-    public partial class EntityMetadataItemValueAllOf : IEquatable<EntityMetadataItemValueAllOf>
+    [DataContract(Name = "MetadataNonFungibleGlobalIdValue")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Bool")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "BoolArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Decimal")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "DecimalArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "GlobalAddress")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "GlobalAddressArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "I32")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "I32Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "I64")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "I64Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Instant")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "InstantArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleGlobalIdValue), "NonFungibleGlobalId")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleGlobalIdArrayValue), "NonFungibleGlobalIdArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "NonFungibleLocalId")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "NonFungibleLocalIdArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "OrigiArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Origin")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyValue), "PublicKey")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyArrayValue), "PublicKeyArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "PublicKeyHash")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "PublicKeyHashArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "String")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "StringArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U32")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "U32Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U64")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "U64Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U8")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U8Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Url")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "UrlArray")]
+    public partial class MetadataNonFungibleGlobalIdValue : MetadataTypedValue, IEquatable<MetadataNonFungibleGlobalIdValue>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataItemValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdValue" /> class.
         /// </summary>
-        /// <param name="typed">typed.</param>
-        public EntityMetadataItemValueAllOf(MetadataTypedValue typed = default(MetadataTypedValue))
+        [JsonConstructorAttribute]
+        protected MetadataNonFungibleGlobalIdValue() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdValue" /> class.
+        /// </summary>
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
+        /// <param name="type">type (required) (default to MetadataValueType.NonFungibleGlobalId).</param>
+        public MetadataNonFungibleGlobalIdValue(string resourceAddress = default(string), string nonFungibleId = default(string), MetadataValueType type = MetadataValueType.NonFungibleGlobalId) : base(type)
         {
-            this.Typed = typed;
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
+            {
+                throw new ArgumentNullException("resourceAddress is a required property for MetadataNonFungibleGlobalIdValue and cannot be null");
+            }
+            this.ResourceAddress = resourceAddress;
+            // to ensure "nonFungibleId" is required (not null)
+            if (nonFungibleId == null)
+            {
+                throw new ArgumentNullException("nonFungibleId is a required property for MetadataNonFungibleGlobalIdValue and cannot be null");
+            }
+            this.NonFungibleId = nonFungibleId;
         }
 
         /// <summary>
-        /// Gets or Sets Typed
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        [DataMember(Name = "typed", EmitDefaultValue = true)]
-        public MetadataTypedValue Typed { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
+
+        /// <summary>
+        /// String-encoded non-fungible ID.
+        /// </summary>
+        /// <value>String-encoded non-fungible ID.</value>
+        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
+        public string NonFungibleId { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -117,8 +177,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityMetadataItemValueAllOf {\n");
-            sb.Append("  Typed: ").Append(Typed).Append("\n");
+            sb.Append("class MetadataNonFungibleGlobalIdValue {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -127,7 +189,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -139,25 +201,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityMetadataItemValueAllOf);
+            return this.Equals(input as MetadataNonFungibleGlobalIdValue);
         }
 
         /// <summary>
-        /// Returns true if EntityMetadataItemValueAllOf instances are equal
+        /// Returns true if MetadataNonFungibleGlobalIdValue instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityMetadataItemValueAllOf to be compared</param>
+        /// <param name="input">Instance of MetadataNonFungibleGlobalIdValue to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityMetadataItemValueAllOf input)
+        public bool Equals(MetadataNonFungibleGlobalIdValue input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.Typed == input.Typed ||
-                    (this.Typed != null &&
-                    this.Typed.Equals(input.Typed))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
+                ) && base.Equals(input) && 
+                (
+                    this.NonFungibleId == input.NonFungibleId ||
+                    (this.NonFungibleId != null &&
+                    this.NonFungibleId.Equals(input.NonFungibleId))
                 );
         }
 
@@ -169,10 +236,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.Typed != null)
+                int hashCode = base.GetHashCode();
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Typed.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
+                if (this.NonFungibleId != null)
+                {
+                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
                 }
                 return hashCode;
             }

@@ -64,10 +64,12 @@
 
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
+using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using System;
 using System.Collections.Generic;
 using Xunit;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.UnitTests.PostgresIntegration;
 
@@ -77,29 +79,67 @@ public class ScryptoSborUtilsTests
     public void ParseStringScalarMetadata()
     {
         const string Input = "5c2200010c124d79206d6574616461746120737472696e67";
-        var result = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(NullLogger<ScryptoSborUtilsTests>.Instance, Convert.FromHexString(Input), 1);
+        var result = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(Convert.FromHexString(Input), 1, NullLogger.Instance);
 
         result.ShouldNotBeNull();
         result.RawHex.Should().Be(Input);
         result.RawJson.ShouldNotBeNull();
-        result.AsString.Should().Be("My metadata string");
-        result.AsStringCollection.Should().BeNull();
+        result.Typed.Should().BeEquivalentTo(new GatewayModel.MetadataScalarValue("My metadata string", GatewayModel.MetadataValueType.String));
     }
 
     [Fact]
     public void ParseStringArrayMetadata()
     {
         const string Input = "5c228001200c021a4d79206d6574616461746120617272617920737472696e6720311a4d79206d6574616461746120617272617920737472696e672032";
-        var result = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(NullLogger<ScryptoSborUtilsTests>.Instance, Convert.FromHexString(Input), 1);
+        var result = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(Convert.FromHexString(Input), 1, NullLogger.Instance);
+        var expected = new List<string> { "My metadata array string 1", "My metadata array string 2" };
 
         result.ShouldNotBeNull();
         result.RawHex.Should().Be(Input);
         result.RawJson.ShouldNotBeNull();
-        result.AsString.Should().BeNull();
-        result.AsStringCollection.Should().BeEquivalentTo(new List<string>
-        {
-            "My metadata array string 1",
-            "My metadata array string 2",
-        });
+        result.Typed.Should().BeEquivalentTo(new GatewayModel.MetadataScalarArrayValue(expected, GatewayModel.MetadataValueType.StringArray));
+    }
+
+    [Theory]
+    [InlineData("5c2200010c0548656c6c6f")]
+    [InlineData("5c228001200c020548656c6c6f06776f726c6421")]
+    [InlineData("5c2201010101")]
+    [InlineData("5c2281012001020100")]
+    [InlineData("5c2202010701")]
+    [InlineData("5c2282012007020102")]
+    [InlineData("5c2203010902000000")]
+    [InlineData("5c2283012009020200000003000000")]
+    [InlineData("5c2204010a0300000000000000")]
+    [InlineData("5c228401200a0203000000000000000400000000000000")]
+    [InlineData("5c2205010404000000")]
+    [InlineData("5c2285012004020400000005000000")]
+    [InlineData("5c220601050500000000000000")]
+    [InlineData("5c22860120050205000000000000000600000000000000")]
+    [InlineData("5c220701a0000064a7b3b6e00d000000000000000000000000000000000000000000000000")]
+    [InlineData("5c22870120a002000064a7b3b6e00d000000000000000000000000000000000000000000000000000052acdfb2241d000000000000000000000000000000000000000000000000")]
+    [InlineData("5c220801805da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6")]
+    [InlineData("5c2288012080015da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6")]
+    [InlineData("5c2209012201012007200000000000000000000000000000000000000000000000000000000000000000")]
+    [InlineData("5c228901202202010120072000000000000000000000000000000000000000000000000000000000000000000001200721000000000000000000000000000000000000000000000000000000000000000000")]
+    [InlineData("5c220a012102809a4c6318c6318c60db1ff8cc6318c6318cf7c75456aba2fbc6318c6318c6c0022043633bb90fe8ed9c006d718d57e51b644519f36fa9cf033bb83d72d77247a5ec")]
+    [InlineData("5c228a0120210102809a4c6318c6318c60db1ff8cc6318c6318cf7c75456aba2fbc6318c6318c6c0022043633bb90fe8ed9c006d718d57e51b644519f36fa9cf033bb83d72d77247a5ec")]
+    [InlineData("5c220b01c0000b48656c6c6f5f776f726c64")]
+    [InlineData("5c228b0120c003000b48656c6c6f5f776f726c6401000000000000002a020101")]
+    [InlineData("5c220c01057962946400000000")]
+    [InlineData("5c228c012005017962946400000000")]
+    [InlineData("5c220d010c1868747470733a2f2f7777772e7261646978646c742e636f6d")]
+    [InlineData("5c228d01200c011868747470733a2f2f7777772e7261646978646c742e636f6d")]
+    [InlineData("5c220e010c107777772e7261646978646c742e636f6d")]
+    [InlineData("5c228e01200c01107777772e7261646978646c742e636f6d")]
+    [InlineData("5c220f0122010120071d6a8a691dae2cd15ed0369931ce0a949ecafa5c3f93f8121833646e15c3")]
+    [InlineData("5c228f01202202010120071d6a8a691dae2cd15ed0369931ce0a949ecafa5c3f93f8121833646e15c3000120071d165dee785924e7421a0fd0418a19d5daeec395fd505a92a0fd3117e428")]
+    public void ShouldNotFail(string input)
+    {
+        var result = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(Convert.FromHexString(input), 1, NullLogger.Instance);
+
+        result.ShouldNotBeNull();
+        result.RawHex.Should().Be(input);
+        result.RawJson.ShouldNotBeNull();
+        result.Typed.ShouldNotBeNull();
     }
 }
