@@ -30,7 +30,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./data-aggregator.zip
           asset_name: data-aggregator-${{ github.event.release.tag_name }}-linux-x64.zip
           asset_content_type: application/zip
@@ -59,11 +59,6 @@ jobs:
       version-suffix: ${{ steps.setup_tags.outputs.version-suffix }}
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-      - name: Get rele ase
-        id: get_release
-        uses: bruceadams/get-release@f589ce0779c7bef1faf175f7488c972eb47dc046
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
       - name: Setup tags for docker image
         id: setup_tags
         uses: ./.github/actions/set-variables
