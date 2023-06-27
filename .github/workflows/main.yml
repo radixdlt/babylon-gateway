@@ -63,7 +63,7 @@ jobs:
       tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}
       context: "."
       dockerfile: "./apps/DatabaseMigrations/Dockerfile"
-      platforms: "linux/amd64,linux/arm64"
+      platforms: "linux/amd64"
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
@@ -84,7 +84,7 @@ jobs:
       tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}
       context: "."
       dockerfile: "./apps/DataAggregator/Dockerfile"
-      platforms: "linux/amd64,linux/arm64"
+      platforms: "linux/amd64"
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
@@ -105,7 +105,7 @@ jobs:
       tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}
       context: "."
       dockerfile: "./apps/GatewayApi/Dockerfile"
-      platforms: "linux/amd64,linux/arm64"
+      platforms: "linux/amd64"
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
