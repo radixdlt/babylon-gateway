@@ -43,57 +43,72 @@ jobs:
         with:
           github_event_name: ${{ github.event_name }}
           github_action_name: ${{ github.event.action}}
+      - name: Publish Gateway Settings
+        uses: actions/upload-artifact@v3
+        with:
+          path: Directory.Build.props
+          name: build_props
+          retention-days: 1
 
-  docker-database-migrations-gcr:
+  docker-database-migrations-private:
     name: (DatabaseMigrations) Docker
     needs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
-      image_registry: "eu.gcr.io"
-      image_organization: "dev-container-repo"
-      image_name: "babylon-ng-database-migrations"
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "private-babylon-ng-database-migrations"
       tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}
       context: "."
       dockerfile: "./apps/DatabaseMigrations/Dockerfile"
       platforms: "linux/amd64"
+      restore_artifact: "true"
+      artifact_location: "./"
+      artifact_name: build_props
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-  docker-data-aggregator-gcr:
+  docker-data-aggregator-private:
     name: (DataAggregator) Docker
     needs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
-      image_registry: "eu.gcr.io"
-      image_organization: "dev-container-repo"
-      image_name: "babylon-ng-data-aggregator"
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "private-babylon-ng-data-aggregator"
       tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}
       context: "."
       dockerfile: "./apps/DataAggregator/Dockerfile"
       platforms: "linux/amd64"
+      restore_artifact: "true"
+      artifact_location: "./"
+      artifact_name: build_props
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-  docker-gateway-api-gcr:
+  docker-gateway-api-private:
     name: (GatewayApi) Docker
     needs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
-      image_registry: "eu.gcr.io"
-      image_organization: "dev-container-repo"
-      image_name: "babylon-ng-gateway-api"
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "private-babylon-ng-gateway-api"
       tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}
       context: "."
       dockerfile: "./apps/GatewayApi/Dockerfile"
       platforms: "linux/amd64"
+      restore_artifact: "true"
+      artifact_location: "./"
+      artifact_name: build_props
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -101,9 +116,9 @@ jobs:
   deploy-on-mardunet:
     runs-on: ubuntu-22.04
     needs:
-      - docker-gateway-api-gcr
-      - docker-data-aggregator-gcr
-      - docker-database-migrations-gcr
+      - docker-gateway-api-private
+      - docker-data-aggregator-private
+      - docker-database-migrations-private
       - setup-tags
     if: github.ref == 'refs/heads/develop'
     permissions:
@@ -112,7 +127,7 @@ jobs:
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - uses: ./.github/actions/fetch-secrets
-        with: 
+        with:
           role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "deploy-on-mardunet"
@@ -123,6 +138,12 @@ jobs:
         run: |
           export $(grep -v '^#' ./deployment/ci.env | xargs)
           echo "FULLNODE_VERSION=$FULLNODE_VERSION" >> $GITHUB_ENV
+      - name: Check if ci.env changed
+        id: changed-files
+        uses: tj-actions/changed-files@db5dd7c176cf59a19ef6561bf1936f059dee4b74
+        with:
+          files: |
+            deployment/ci.env
       - name: Trigger deployment event ${{ github.ref }}
         env:
           NAMESPACE: "ng-mardunet"
@@ -136,6 +157,7 @@ jobs:
                 "event_type": "${{env.EVENT_TYPE}}",
                 "client_payload": {
                   "namespace_postfix": "${{env.NAMESPACE}}",
+                  "ci_env_changed": "${{steps.changed-files.outputs.any_changed}}",
                   "data_aggregator_image_tag": "${{ needs.setup-tags.outputs.data-aggregator-tag }}",
                   "gateway_api_image_tag": "${{ needs.setup-tags.outputs.gateway-api-tag }}",
                   "database_migrations_image_tag": "${{ needs.setup-tags.outputs.database-migrations-tag }}",
@@ -146,18 +168,18 @@ jobs:
   ephemeral-deploy-and-benchmark:
     runs-on: ubuntu-22.04
     needs:
-      - docker-gateway-api-gcr
-      - docker-data-aggregator-gcr
-      - docker-database-migrations-gcr
+      - docker-gateway-api-private
+      - docker-data-aggregator-private
+      - docker-database-migrations-private
       - setup-tags
-    if: github.ref == 'refs/heads/develop'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     permissions:
       id-token: write
       contents: read
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - uses: ./.github/actions/fetch-secrets
-        with: 
+        with:
           role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "ephemeral-deploy-and-benchmark"
@@ -193,9 +215,9 @@ jobs:
   deploy-pr:
     runs-on: ubuntu-22.04
     needs:
-      - docker-gateway-api-gcr
-      - docker-data-aggregator-gcr
-      - docker-database-migrations-gcr
+      - docker-gateway-api-private
+      - docker-data-aggregator-private
+      - docker-database-migrations-private
       - setup-tags
     if: github.event_name == 'pull_request'
     permissions:
@@ -204,7 +226,7 @@ jobs:
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - uses: ./.github/actions/fetch-secrets
-        with: 
+        with:
           role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "deploy-pr"
@@ -236,9 +258,9 @@ jobs:
   ephemeral-deploy-and-test:
     runs-on: ubuntu-22.04
     needs:
-      - docker-gateway-api-gcr
-      - docker-data-aggregator-gcr
-      - docker-database-migrations-gcr
+      - docker-gateway-api-private
+      - docker-data-aggregator-private
+      - docker-database-migrations-private
       - setup-tags
     if: github.event_name == 'pull_request'
     permissions:
@@ -247,7 +269,7 @@ jobs:
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - uses: ./.github/actions/fetch-secrets
-        with: 
+        with:
           role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "ephemeral-deploy-and-test"
@@ -288,7 +310,7 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - uses: ./.github/actions/fetch-secrets
-        with: 
+        with:
           role_name: "arn:aws:iam::308190735829:role/gh-common-secrets-read-access"
           app_name: "babylon-gateway"
           step_name: "sonarcloud"
