@@ -72,6 +72,13 @@ High Level APIs will grow over time as we start encountering repeating patterns 
 ### State
 
 - `getEntityDetailsVaultAggregated(entities: string | string[])` - detailed information about entities
+- `getAllEntityMetadata(entity: string)` - get all metadata about given entity
+- `getEntityMetadata(entity: string, cursor?: string)` - get paged metadata about given entity
+- `getValidators(cursor?: string)` - get paged validators
+- `getAllValidators()` - get all validators
+- `getNonFungibleIds(address:string, cursor?: string)` - get paged non fungible ids for given address
+- `getAllNonFungibleIds(address: string)` - get all non fungible ids for given address
+- `getNonFungibleData(address: string, ids: string | string[])` - get non fungible data
 
 ### Status
 
@@ -81,7 +88,11 @@ High Level APIs will grow over time as we start encountering repeating patterns 
 ### Transaction
 
 - `getStatus(txID: string)` - transaction status for given transaction id (the intent hash)
-- `getCommittedDetails(txID: string)` - transaction details for given transaction id (the intent hash)
+- `getCommittedDetails(txID: string, options)` - transaction details for given transaction id (the intent hash)
+
+### Stream
+
+- `getTransactionsList(affectedEntities?: string[], cursor?: string)` - get transaction list for given list of entities
 
 ## Fetch polyfill
 
