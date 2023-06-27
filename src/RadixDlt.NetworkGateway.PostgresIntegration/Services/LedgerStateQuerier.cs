@@ -241,7 +241,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
     private static (string FullVersion, string DeployedImage) GetGatewayProductVersion()
     {
-        var productVersion = FileVersionInfo.GetVersionInfo(AppContext.BaseDirectory).ProductVersion;
+        var productVersion = FileVersionInfo.GetVersionInfo(typeof(NetworkGatewayConstants).Assembly.Location).ProductVersion;
         if (productVersion == null)
         {
             throw new InvalidOperationException("Unable to determine product version");
