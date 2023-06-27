@@ -1,13 +1,19 @@
 import { chunk } from '../chunk'
 import { MAX_ADDRESSES_COUNT } from '../constants'
 import {
+  EntityMetadataItem,
   FungibleResourcesCollection,
   FungibleResourcesCollectionItemVaultAggregated,
+  NonFungibleIdsCollection,
   NonFungibleResourcesCollection,
   NonFungibleResourcesCollectionItemVaultAggregated,
   ResourceAggregationLevel,
   StateApi,
   StateEntityDetailsResponseItem,
+  StateEntityMetadataPageResponse,
+  StateNonFungibleDetailsResponseItem,
+  ValidatorCollection,
+  ValidatorCollectionItem,
 } from '../generated'
 
 export type ReplaceProperty<
@@ -79,5 +85,135 @@ export class State {
     return isArray
       ? (items as StateEntityDetailsVaultResponseItem[])
       : (items[0] as StateEntityDetailsVaultResponseItem)
+  }
+
+  /**
+   * Get list of all metadata items for given entity. This will iterate over returned cursors and aggregate all responses,
+   * which is why multiple API requests can be made.
+   * @param address
+   */
+  async getAllEntityMetadata(address: string): Promise<EntityMetadataItem[]> {
+    let next_cursor
+    const allMetadata: EntityMetadataItem[] = []
+
+    do {
+      const metadataResponse: StateEntityMetadataPageResponse =
+        await this.getEntityMetadata(address, next_cursor)
+      allMetadata.push(...metadataResponse.items)
+      next_cursor = metadataResponse.next_cursor
+    } while (next_cursor)
+
+    return allMetadata
+  }
+
+  /**
+   * Get paged list of validators
+   * @param cursor
+   */
+  async getValidators(cursor?: string): Promise<ValidatorCollection> {
+    return this.innerClient
+      .stateValidatorsList({
+        stateValidatorsListRequest: {
+          cursor: cursor || null,
+        },
+      })
+      .then(({ validators }) => validators)
+  }
+
+  /**
+   * Get list of all validators. This will iterate over returned cursors and aggregate all responses.
+   */
+  async getAllValidators(): Promise<ValidatorCollectionItem[]> {
+    let next_cursor
+    const allValidators: ValidatorCollectionItem[] = []
+
+    do {
+      const validatorsResponse: ValidatorCollection = await this.getValidators(
+        next_cursor
+      )
+      allValidators.push(...validatorsResponse.items)
+      next_cursor = validatorsResponse.next_cursor
+    } while (next_cursor)
+
+    return allValidators
+  }
+
+  /**
+   * Get paged list of entity metadata
+   * @param address
+   * @param cursor
+   */
+  async getEntityMetadata(
+    address: string,
+    cursor?: string
+  ): Promise<StateEntityMetadataPageResponse> {
+    return this.innerClient.entityMetadataPage({
+      stateEntityMetadataPageRequest: {
+        address,
+        cursor,
+      },
+    })
+  }
+
+  /**
+   *  Get paged list of non fungible ids for given non fungible resource address
+   */
+  async getNonFungibleIds(
+    address: string,
+    cursor?: string
+  ): Promise<NonFungibleIdsCollection> {
+    return this.innerClient
+      .nonFungibleIds({
+        stateNonFungibleIdsRequest: {
+          resource_address: address,
+          cursor,
+        },
+      })
+      .then(({ non_fungible_ids }) => non_fungible_ids)
+  }
+
+  /**
+   * Get list of non fungible ids for given non fungible resource address. This will iterate over returned cursors and aggregate all responses.
+   */
+  async getAllNonFungibleIds(address: string): Promise<string[]> {
+    let next_cursor
+    const allIds: string[] = []
+
+    do {
+      const idsResponse: NonFungibleIdsCollection =
+        await this.getNonFungibleIds(address, next_cursor)
+      allIds.push(...idsResponse.items)
+      next_cursor = idsResponse.next_cursor
+    } while (next_cursor)
+
+    return allIds
+  }
+
+  getNonFungibleData(
+    address: string,
+    ids: string
+  ): Promise<StateNonFungibleDetailsResponseItem>
+  getNonFungibleData(
+    address: string,
+    ids: string[]
+  ): Promise<StateNonFungibleDetailsResponseItem[]>
+  getNonFungibleData(
+    address: string,
+    ids: string | string[]
+  ): Promise<
+    StateNonFungibleDetailsResponseItem | StateNonFungibleDetailsResponseItem[]
+  > {
+    const isArray = Array.isArray(ids)
+    const non_fungible_ids = isArray ? ids : [ids]
+    return this.innerClient
+      .nonFungibleData({
+        stateNonFungibleDataRequest: {
+          resource_address: address,
+          non_fungible_ids,
+        },
+      })
+      .then(({ non_fungible_ids }) =>
+        isArray ? non_fungible_ids : non_fungible_ids[0]
+      )
   }
 }
