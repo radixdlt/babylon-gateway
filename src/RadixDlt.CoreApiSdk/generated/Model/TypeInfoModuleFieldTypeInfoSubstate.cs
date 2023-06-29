@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -152,7 +152,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="details">details (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.TypeInfoModuleFieldTypeInfo).</param>
-        public TypeInfoModuleFieldTypeInfoSubstate(TypeInfoDetails details = default(TypeInfoDetails), SubstateType substateType = SubstateType.TypeInfoModuleFieldTypeInfo) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public TypeInfoModuleFieldTypeInfoSubstate(TypeInfoDetails details = default(TypeInfoDetails), SubstateType substateType = SubstateType.TypeInfoModuleFieldTypeInfo, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "details" is required (not null)
             if (details == null)

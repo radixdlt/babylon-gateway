@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -165,7 +165,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="pendingOwnerStakeUnitWithdrawals">pendingOwnerStakeUnitWithdrawals (required).</param>
         /// <param name="alreadyUnlockedOwnerStakeUnitAmount">A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.ValidatorFieldState).</param>
-        public ValidatorFieldStateSubstate(SubstateKey sortedKey = default(SubstateKey), EcdsaSecp256k1PublicKey publicKey = default(EcdsaSecp256k1PublicKey), bool isRegistered = default(bool), bool acceptsDelegatedStake = default(bool), string validatorFeeFactor = default(string), ValidatorFeeChangeRequest validatorFeeChangeRequest = default(ValidatorFeeChangeRequest), string stakeUnitResourceAddress = default(string), EntityReference stakeXrdVault = default(EntityReference), string unstakeClaimTokenResourceAddress = default(string), EntityReference pendingXrdWithdrawVault = default(EntityReference), EntityReference lockedOwnerStakeUnitVault = default(EntityReference), EntityReference pendingOwnerStakeUnitUnlockVault = default(EntityReference), List<PendingOwnerStakeWithdrawal> pendingOwnerStakeUnitWithdrawals = default(List<PendingOwnerStakeWithdrawal>), string alreadyUnlockedOwnerStakeUnitAmount = default(string), SubstateType substateType = SubstateType.ValidatorFieldState) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public ValidatorFieldStateSubstate(SubstateKey sortedKey = default(SubstateKey), EcdsaSecp256k1PublicKey publicKey = default(EcdsaSecp256k1PublicKey), bool isRegistered = default(bool), bool acceptsDelegatedStake = default(bool), string validatorFeeFactor = default(string), ValidatorFeeChangeRequest validatorFeeChangeRequest = default(ValidatorFeeChangeRequest), string stakeUnitResourceAddress = default(string), EntityReference stakeXrdVault = default(EntityReference), string unstakeClaimTokenResourceAddress = default(string), EntityReference pendingXrdWithdrawVault = default(EntityReference), EntityReference lockedOwnerStakeUnitVault = default(EntityReference), EntityReference pendingOwnerStakeUnitUnlockVault = default(EntityReference), List<PendingOwnerStakeWithdrawal> pendingOwnerStakeUnitWithdrawals = default(List<PendingOwnerStakeWithdrawal>), string alreadyUnlockedOwnerStakeUnitAmount = default(string), SubstateType substateType = SubstateType.ValidatorFieldState, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "publicKey" is required (not null)
             if (publicKey == null)

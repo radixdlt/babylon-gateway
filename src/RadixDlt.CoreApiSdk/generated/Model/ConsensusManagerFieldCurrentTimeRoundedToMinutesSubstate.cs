@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -152,7 +152,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="proposerTimestampRoundedDownToMinute">proposerTimestampRoundedDownToMinute (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.ConsensusManagerFieldCurrentTimeRoundedToMinutes).</param>
-        public ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstate(Instant proposerTimestampRoundedDownToMinute = default(Instant), SubstateType substateType = SubstateType.ConsensusManagerFieldCurrentTimeRoundedToMinutes) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstate(Instant proposerTimestampRoundedDownToMinute = default(Instant), SubstateType substateType = SubstateType.ConsensusManagerFieldCurrentTimeRoundedToMinutes, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "proposerTimestampRoundedDownToMinute" is required (not null)
             if (proposerTimestampRoundedDownToMinute == null)

@@ -109,25 +109,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionTrackerCollectionEntrySubstateAllOf" /> class.
         /// </summary>
-        /// <param name="intentHash">The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent.  (required).</param>
+        /// <param name="key">key (required).</param>
         /// <param name="status">status.</param>
-        public TransactionTrackerCollectionEntrySubstateAllOf(string intentHash = default(string), TransactionTrackerTransactionStatus? status = default(TransactionTrackerTransactionStatus?))
+        public TransactionTrackerCollectionEntrySubstateAllOf(TransactionIdKey key = default(TransactionIdKey), TransactionTrackerTransactionStatus? status = default(TransactionTrackerTransactionStatus?))
         {
-            // to ensure "intentHash" is required (not null)
-            if (intentHash == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("intentHash is a required property for TransactionTrackerCollectionEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("key is a required property for TransactionTrackerCollectionEntrySubstateAllOf and cannot be null");
             }
-            this.IntentHash = intentHash;
+            this.Key = key;
             this.Status = status;
         }
 
         /// <summary>
-        /// The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. 
+        /// Gets or Sets Key
         /// </summary>
-        /// <value>The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. </value>
-        [DataMember(Name = "intent_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string IntentHash { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionIdKey Key { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,7 +136,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionTrackerCollectionEntrySubstateAllOf {\n");
-            sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -175,9 +174,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.IntentHash == input.IntentHash ||
-                    (this.IntentHash != null &&
-                    this.IntentHash.Equals(input.IntentHash))
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && 
                 (
                     this.Status == input.Status ||
@@ -194,9 +193,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.IntentHash != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.Status.GetHashCode();
                 return hashCode;

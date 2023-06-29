@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -150,34 +150,32 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="GenericKeyValueStoreEntrySubstate" /> class.
         /// </summary>
-        /// <param name="isDeleted">isDeleted (required).</param>
-        /// <param name="dataStruct">dataStruct.</param>
-        /// <param name="isLocked">isLocked (required).</param>
+        /// <param name="key">key (required).</param>
+        /// <param name="value">value.</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.GenericKeyValueStoreEntry).</param>
-        public GenericKeyValueStoreEntrySubstate(bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct), bool isLocked = default(bool), SubstateType substateType = SubstateType.GenericKeyValueStoreEntry) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public GenericKeyValueStoreEntrySubstate(GenericKey key = default(GenericKey), GenericKeyValueStoreEntryValue value = default(GenericKeyValueStoreEntryValue), SubstateType substateType = SubstateType.GenericKeyValueStoreEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            this.IsDeleted = isDeleted;
-            this.IsLocked = isLocked;
-            this.DataStruct = dataStruct;
+            // to ensure "key" is required (not null)
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is a required property for GenericKeyValueStoreEntrySubstate and cannot be null");
+            }
+            this.Key = key;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets IsDeleted
+        /// Gets or Sets Key
         /// </summary>
-        [DataMember(Name = "is_deleted", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsDeleted { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public GenericKey Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets DataStruct
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "data_struct", EmitDefaultValue = true)]
-        public DataStruct DataStruct { get; set; }
-
-        /// <summary>
-        /// Gets or Sets IsLocked
-        /// </summary>
-        [DataMember(Name = "is_locked", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsLocked { get; set; }
+        [DataMember(Name = "value", EmitDefaultValue = true)]
+        public GenericKeyValueStoreEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -188,9 +186,8 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class GenericKeyValueStoreEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
-            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
-            sb.Append("  IsLocked: ").Append(IsLocked).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -227,17 +224,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.IsDeleted == input.IsDeleted ||
-                    this.IsDeleted.Equals(input.IsDeleted)
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && base.Equals(input) && 
                 (
-                    this.DataStruct == input.DataStruct ||
-                    (this.DataStruct != null &&
-                    this.DataStruct.Equals(input.DataStruct))
-                ) && base.Equals(input) && 
-                (
-                    this.IsLocked == input.IsLocked ||
-                    this.IsLocked.Equals(input.IsLocked)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -250,12 +244,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
-                if (this.DataStruct != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.IsLocked.GetHashCode();
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                }
                 return hashCode;
             }
         }

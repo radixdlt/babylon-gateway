@@ -746,10 +746,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.MetadataModuleEntrySubstate metadata)
                         {
-                            var key = metadata.FieldName;
+                            var key = metadata.Key.Name;
                             var value = metadata.DataStruct?.StructData.Hex.ConvertFromHex();
+                            var isDeleted = metadata.DataStruct == null;
 
-                            metadataChanges.Add(new MetadataChange(referencedEntity, key, value, metadata.IsDeleted, metadata.IsLocked, stateVersion));
+                            metadataChanges.Add(new MetadataChange(referencedEntity, key, value, isDeleted, metadata.IsLocked, stateVersion));
                         }
 
                         if (substateData is CoreModel.FungibleResourceManagerFieldTotalSupplySubstate fungibleResourceManagerFieldTotalSupplySubstate)
@@ -785,7 +786,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             nonFungibleVaultChanges.Add(new NonFungibleVaultChange(
                                 referencedEntity,
                                 resourceEntity,
-                                nonFungibleVaultContentsIndexEntrySubstate.NonFungibleLocalId.SimpleRep,
+                                nonFungibleVaultContentsIndexEntrySubstate.Key.NonFungibleLocalId.SimpleRep,
                                 false,
                                 stateVersion));
                         }
@@ -795,11 +796,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             var resourceManagerEntityId = substateId.EntityAddress;
                             var resourceManagerEntity = referencedEntities.Get((EntityAddress)resourceManagerEntityId);
                             var nonFungibleId = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex, _networkConfigurationProvider.GetNetworkId());
+                            var isDeleted = nonFungibleResourceManagerDataEntrySubstate.DataStruct == null;
 
                             nonFungibleIdChanges.Add(new NonFungibleIdChange(
                                 resourceManagerEntity,
                                 nonFungibleId,
-                                nonFungibleResourceManagerDataEntrySubstate.IsDeleted,
+                                isDeleted,
                                 nonFungibleResourceManagerDataEntrySubstate.IsLocked,
                                 nonFungibleResourceManagerDataEntrySubstate.DataStruct?.StructData.GetDataBytes(),
                                 stateVersion));
@@ -894,7 +896,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 Id = sequences.AccountResourceDepositRuleHistorySequence++,
                                 FromStateVersion = stateVersion,
                                 AccountEntityId = referencedEntity.DatabaseId,
-                                ResourceEntityId = referencedEntities.Get((EntityAddress)accountDepositRule.ResourceAddress).DatabaseId,
+                                ResourceEntityId = referencedEntities.Get((EntityAddress)accountDepositRule.Key.ResourceAddress).DatabaseId,
                                 ResourceDepositRule = accountDepositRule.DepositRule.Value.ToModel(),
                             });
                         }

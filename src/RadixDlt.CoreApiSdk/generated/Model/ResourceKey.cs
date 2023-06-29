@@ -90,51 +90,36 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// RoyaltyMethodRoyaltyEntrySubstateAllOf
+    /// ResourceKey
     /// </summary>
-    [DataContract(Name = "RoyaltyMethodRoyaltyEntrySubstate_allOf")]
-    public partial class RoyaltyMethodRoyaltyEntrySubstateAllOf : IEquatable<RoyaltyMethodRoyaltyEntrySubstateAllOf>
+    [DataContract(Name = "ResourceKey")]
+    public partial class ResourceKey : IEquatable<ResourceKey>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RoyaltyMethodRoyaltyEntrySubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ResourceKey" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected RoyaltyMethodRoyaltyEntrySubstateAllOf() { }
+        protected ResourceKey() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="RoyaltyMethodRoyaltyEntrySubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ResourceKey" /> class.
         /// </summary>
-        /// <param name="isLocked">isLocked (required).</param>
-        /// <param name="methodName">methodName (required).</param>
-        /// <param name="royaltyAmount">royaltyAmount.</param>
-        public RoyaltyMethodRoyaltyEntrySubstateAllOf(bool isLocked = default(bool), string methodName = default(string), RoyaltyAmount royaltyAmount = default(RoyaltyAmount))
+        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the component address (required).</param>
+        public ResourceKey(string resourceAddress = default(string))
         {
-            this.IsLocked = isLocked;
-            // to ensure "methodName" is required (not null)
-            if (methodName == null)
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("methodName is a required property for RoyaltyMethodRoyaltyEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for ResourceKey and cannot be null");
             }
-            this.MethodName = methodName;
-            this.RoyaltyAmount = royaltyAmount;
+            this.ResourceAddress = resourceAddress;
         }
 
         /// <summary>
-        /// Gets or Sets IsLocked
+        /// The Bech32m-encoded human readable version of the component address
         /// </summary>
-        [DataMember(Name = "is_locked", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsLocked { get; set; }
-
-        /// <summary>
-        /// Gets or Sets MethodName
-        /// </summary>
-        [DataMember(Name = "method_name", IsRequired = true, EmitDefaultValue = true)]
-        public string MethodName { get; set; }
-
-        /// <summary>
-        /// Gets or Sets RoyaltyAmount
-        /// </summary>
-        [DataMember(Name = "royalty_amount", EmitDefaultValue = true)]
-        public RoyaltyAmount RoyaltyAmount { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the component address</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,10 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class RoyaltyMethodRoyaltyEntrySubstateAllOf {\n");
-            sb.Append("  IsLocked: ").Append(IsLocked).Append("\n");
-            sb.Append("  MethodName: ").Append(MethodName).Append("\n");
-            sb.Append("  RoyaltyAmount: ").Append(RoyaltyAmount).Append("\n");
+            sb.Append("class ResourceKey {\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -167,15 +150,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as RoyaltyMethodRoyaltyEntrySubstateAllOf);
+            return this.Equals(input as ResourceKey);
         }
 
         /// <summary>
-        /// Returns true if RoyaltyMethodRoyaltyEntrySubstateAllOf instances are equal
+        /// Returns true if ResourceKey instances are equal
         /// </summary>
-        /// <param name="input">Instance of RoyaltyMethodRoyaltyEntrySubstateAllOf to be compared</param>
+        /// <param name="input">Instance of ResourceKey to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(RoyaltyMethodRoyaltyEntrySubstateAllOf input)
+        public bool Equals(ResourceKey input)
         {
             if (input == null)
             {
@@ -183,18 +166,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.IsLocked == input.IsLocked ||
-                    this.IsLocked.Equals(input.IsLocked)
-                ) && 
-                (
-                    this.MethodName == input.MethodName ||
-                    (this.MethodName != null &&
-                    this.MethodName.Equals(input.MethodName))
-                ) && 
-                (
-                    this.RoyaltyAmount == input.RoyaltyAmount ||
-                    (this.RoyaltyAmount != null &&
-                    this.RoyaltyAmount.Equals(input.RoyaltyAmount))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 );
         }
 
@@ -207,14 +181,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.IsLocked.GetHashCode();
-                if (this.MethodName != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.MethodName.GetHashCode();
-                }
-                if (this.RoyaltyAmount != null)
-                {
-                    hashCode = (hashCode * 59) + this.RoyaltyAmount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
                 return hashCode;
             }

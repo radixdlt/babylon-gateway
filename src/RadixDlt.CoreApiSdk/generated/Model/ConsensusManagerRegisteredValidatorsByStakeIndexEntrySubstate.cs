@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -150,10 +150,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate" /> class.
         /// </summary>
+        /// <param name="key">key (required).</param>
         /// <param name="activeValidator">activeValidator (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.ConsensusManagerRegisteredValidatorsByStakeIndexEntry).</param>
-        public ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate(ActiveValidator activeValidator = default(ActiveValidator), SubstateType substateType = SubstateType.ConsensusManagerRegisteredValidatorsByStakeIndexEntry) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate(ActiveValidatorKey key = default(ActiveValidatorKey), ActiveValidator activeValidator = default(ActiveValidator), SubstateType substateType = SubstateType.ConsensusManagerRegisteredValidatorsByStakeIndexEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
+            // to ensure "key" is required (not null)
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is a required property for ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate and cannot be null");
+            }
+            this.Key = key;
             // to ensure "activeValidator" is required (not null)
             if (activeValidator == null)
             {
@@ -161,6 +169,12 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.ActiveValidator = activeValidator;
         }
+
+        /// <summary>
+        /// Gets or Sets Key
+        /// </summary>
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public ActiveValidatorKey Key { get; set; }
 
         /// <summary>
         /// Gets or Sets ActiveValidator
@@ -177,6 +191,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("  ActiveValidator: ").Append(ActiveValidator).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -214,6 +229,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
+                ) && base.Equals(input) && 
+                (
                     this.ActiveValidator == input.ActiveValidator ||
                     (this.ActiveValidator != null &&
                     this.ActiveValidator.Equals(input.ActiveValidator))
@@ -229,6 +249,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
+                if (this.Key != null)
+                {
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                }
                 if (this.ActiveValidator != null)
                 {
                     hashCode = (hashCode * 59) + this.ActiveValidator.GetHashCode();

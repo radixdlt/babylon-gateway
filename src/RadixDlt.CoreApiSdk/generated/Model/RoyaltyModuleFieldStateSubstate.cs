@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -153,7 +153,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="isEnabled">isEnabled (required).</param>
         /// <param name="vaultEntity">vaultEntity (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.RoyaltyModuleFieldState).</param>
-        public RoyaltyModuleFieldStateSubstate(bool isEnabled = default(bool), EntityReference vaultEntity = default(EntityReference), SubstateType substateType = SubstateType.RoyaltyModuleFieldState) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public RoyaltyModuleFieldStateSubstate(bool isEnabled = default(bool), EntityReference vaultEntity = default(EntityReference), SubstateType substateType = SubstateType.RoyaltyModuleFieldState, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             this.IsEnabled = isEnabled;
             // to ensure "vaultEntity" is required (not null)

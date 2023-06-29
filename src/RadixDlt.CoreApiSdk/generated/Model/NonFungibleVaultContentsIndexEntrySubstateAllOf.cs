@@ -103,22 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleVaultContentsIndexEntrySubstateAllOf" /> class.
         /// </summary>
-        /// <param name="nonFungibleLocalId">nonFungibleLocalId (required).</param>
-        public NonFungibleVaultContentsIndexEntrySubstateAllOf(NonFungibleLocalId nonFungibleLocalId = default(NonFungibleLocalId))
+        /// <param name="key">key (required).</param>
+        public NonFungibleVaultContentsIndexEntrySubstateAllOf(LocalNonFungibleKey key = default(LocalNonFungibleKey))
         {
-            // to ensure "nonFungibleLocalId" is required (not null)
-            if (nonFungibleLocalId == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("nonFungibleLocalId is a required property for NonFungibleVaultContentsIndexEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("key is a required property for NonFungibleVaultContentsIndexEntrySubstateAllOf and cannot be null");
             }
-            this.NonFungibleLocalId = nonFungibleLocalId;
+            this.Key = key;
         }
 
         /// <summary>
-        /// Gets or Sets NonFungibleLocalId
+        /// Gets or Sets Key
         /// </summary>
-        [DataMember(Name = "non_fungible_local_id", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleLocalId NonFungibleLocalId { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public LocalNonFungibleKey Key { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleVaultContentsIndexEntrySubstateAllOf {\n");
-            sb.Append("  NonFungibleLocalId: ").Append(NonFungibleLocalId).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,9 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.NonFungibleLocalId == input.NonFungibleLocalId ||
-                    (this.NonFungibleLocalId != null &&
-                    this.NonFungibleLocalId.Equals(input.NonFungibleLocalId))
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 );
         }
 
@@ -180,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.NonFungibleLocalId != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleLocalId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
                 return hashCode;
             }

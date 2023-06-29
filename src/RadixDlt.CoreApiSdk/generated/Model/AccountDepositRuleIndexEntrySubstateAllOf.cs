@@ -109,33 +109,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountDepositRuleIndexEntrySubstateAllOf" /> class.
         /// </summary>
-        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        /// <param name="key">key (required).</param>
         /// <param name="depositRule">depositRule.</param>
-        /// <param name="isLocked">isLocked (required).</param>
-        public AccountDepositRuleIndexEntrySubstateAllOf(string resourceAddress = default(string), DepositRule? depositRule = default(DepositRule?), bool isLocked = default(bool))
+        public AccountDepositRuleIndexEntrySubstateAllOf(ResourceKey key = default(ResourceKey), DepositRule? depositRule = default(DepositRule?))
         {
-            // to ensure "resourceAddress" is required (not null)
-            if (resourceAddress == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("resourceAddress is a required property for AccountDepositRuleIndexEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("key is a required property for AccountDepositRuleIndexEntrySubstateAllOf and cannot be null");
             }
-            this.ResourceAddress = resourceAddress;
-            this.IsLocked = isLocked;
+            this.Key = key;
             this.DepositRule = depositRule;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the resource address
+        /// Gets or Sets Key
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the resource address</value>
-        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string ResourceAddress { get; set; }
-
-        /// <summary>
-        /// Gets or Sets IsLocked
-        /// </summary>
-        [DataMember(Name = "is_locked", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsLocked { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public ResourceKey Key { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,9 +136,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccountDepositRuleIndexEntrySubstateAllOf {\n");
-            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("  DepositRule: ").Append(DepositRule).Append("\n");
-            sb.Append("  IsLocked: ").Append(IsLocked).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -184,17 +174,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ResourceAddress == input.ResourceAddress ||
-                    (this.ResourceAddress != null &&
-                    this.ResourceAddress.Equals(input.ResourceAddress))
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && 
                 (
                     this.DepositRule == input.DepositRule ||
                     this.DepositRule.Equals(input.DepositRule)
-                ) && 
-                (
-                    this.IsLocked == input.IsLocked ||
-                    this.IsLocked.Equals(input.IsLocked)
                 );
         }
 
@@ -207,12 +193,11 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ResourceAddress != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.DepositRule.GetHashCode();
-                hashCode = (hashCode * 59) + this.IsLocked.GetHashCode();
                 return hashCode;
             }
         }

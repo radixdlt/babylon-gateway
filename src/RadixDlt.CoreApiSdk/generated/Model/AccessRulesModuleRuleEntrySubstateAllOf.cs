@@ -95,12 +95,6 @@ namespace RadixDlt.CoreApiSdk.Model
     [DataContract(Name = "AccessRulesModuleRuleEntrySubstate_allOf")]
     public partial class AccessRulesModuleRuleEntrySubstateAllOf : IEquatable<AccessRulesModuleRuleEntrySubstateAllOf>
     {
-
-        /// <summary>
-        /// Gets or Sets ObjectModuleId
-        /// </summary>
-        [DataMember(Name = "object_module_id", IsRequired = true, EmitDefaultValue = true)]
-        public ObjectModuleId ObjectModuleId { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="AccessRulesModuleRuleEntrySubstateAllOf" /> class.
         /// </summary>
@@ -109,26 +103,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccessRulesModuleRuleEntrySubstateAllOf" /> class.
         /// </summary>
-        /// <param name="objectModuleId">objectModuleId (required).</param>
-        /// <param name="roleKey">roleKey (required).</param>
+        /// <param name="key">key (required).</param>
         /// <param name="accessRule">accessRule.</param>
-        public AccessRulesModuleRuleEntrySubstateAllOf(ObjectModuleId objectModuleId = default(ObjectModuleId), string roleKey = default(string), AccessRule accessRule = default(AccessRule))
+        public AccessRulesModuleRuleEntrySubstateAllOf(ObjectRoleKey key = default(ObjectRoleKey), AccessRule accessRule = default(AccessRule))
         {
-            this.ObjectModuleId = objectModuleId;
-            // to ensure "roleKey" is required (not null)
-            if (roleKey == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("roleKey is a required property for AccessRulesModuleRuleEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("key is a required property for AccessRulesModuleRuleEntrySubstateAllOf and cannot be null");
             }
-            this.RoleKey = roleKey;
+            this.Key = key;
             this.AccessRule = accessRule;
         }
 
         /// <summary>
-        /// Gets or Sets RoleKey
+        /// Gets or Sets Key
         /// </summary>
-        [DataMember(Name = "role_key", IsRequired = true, EmitDefaultValue = true)]
-        public string RoleKey { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public ObjectRoleKey Key { get; set; }
 
         /// <summary>
         /// Gets or Sets AccessRule
@@ -144,8 +136,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccessRulesModuleRuleEntrySubstateAllOf {\n");
-            sb.Append("  ObjectModuleId: ").Append(ObjectModuleId).Append("\n");
-            sb.Append("  RoleKey: ").Append(RoleKey).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("  AccessRule: ").Append(AccessRule).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -183,13 +174,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ObjectModuleId == input.ObjectModuleId ||
-                    this.ObjectModuleId.Equals(input.ObjectModuleId)
-                ) && 
-                (
-                    this.RoleKey == input.RoleKey ||
-                    (this.RoleKey != null &&
-                    this.RoleKey.Equals(input.RoleKey))
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && 
                 (
                     this.AccessRule == input.AccessRule ||
@@ -207,10 +194,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.ObjectModuleId.GetHashCode();
-                if (this.RoleKey != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoleKey.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
                 if (this.AccessRule != null)
                 {

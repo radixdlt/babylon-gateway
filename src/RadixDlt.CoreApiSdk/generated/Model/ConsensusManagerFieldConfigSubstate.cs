@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -159,7 +159,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="numFeeIncreaseDelayEpochs">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the minimum number of epochs before a fee increase takes effect.  (required).</param>
         /// <param name="validatorCreationXrdCost">The amount of XRD required to be passed in a bucket to create a validator. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.ConsensusManagerFieldConfig).</param>
-        public ConsensusManagerFieldConfigSubstate(long maxValidators = default(long), EpochChangeCondition epochChangeCondition = default(EpochChangeCondition), long numUnstakeEpochs = default(long), string totalEmissionXrdPerEpoch = default(string), string minValidatorReliability = default(string), long numOwnerStakeUnitsUnlockEpochs = default(long), long numFeeIncreaseDelayEpochs = default(long), string validatorCreationXrdCost = default(string), SubstateType substateType = SubstateType.ConsensusManagerFieldConfig) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public ConsensusManagerFieldConfigSubstate(long maxValidators = default(long), EpochChangeCondition epochChangeCondition = default(EpochChangeCondition), long numUnstakeEpochs = default(long), string totalEmissionXrdPerEpoch = default(string), string minValidatorReliability = default(string), long numOwnerStakeUnitsUnlockEpochs = default(long), long numFeeIncreaseDelayEpochs = default(long), string validatorCreationXrdCost = default(string), SubstateType substateType = SubstateType.ConsensusManagerFieldConfig, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             this.MaxValidators = maxValidators;
             // to ensure "epochChangeCondition" is required (not null)

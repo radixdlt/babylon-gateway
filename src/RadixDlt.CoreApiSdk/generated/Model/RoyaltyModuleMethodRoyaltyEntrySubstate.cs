@@ -91,9 +91,9 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// RoyaltyMethodRoyaltyEntrySubstate
+    /// RoyaltyModuleMethodRoyaltyEntrySubstate
     /// </summary>
-    [DataContract(Name = "RoyaltyMethodRoyaltyEntrySubstate")]
+    [DataContract(Name = "RoyaltyModuleMethodRoyaltyEntrySubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerFieldStateSubstate), "AccessControllerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(AccessRulesModuleFieldOwnerRoleSubstate), "AccessRulesModuleFieldOwnerRole")]
@@ -132,51 +132,44 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TypeInfoModuleFieldTypeInfoSubstate), "TypeInfoModuleFieldTypeInfo")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorFieldProtocolUpdateReadinessSignalSubstate), "ValidatorFieldProtocolUpdateReadinessSignal")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
-    public partial class RoyaltyMethodRoyaltyEntrySubstate : Substate, IEquatable<RoyaltyMethodRoyaltyEntrySubstate>
+    public partial class RoyaltyModuleMethodRoyaltyEntrySubstate : Substate, IEquatable<RoyaltyModuleMethodRoyaltyEntrySubstate>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RoyaltyMethodRoyaltyEntrySubstate" /> class.
+        /// Initializes a new instance of the <see cref="RoyaltyModuleMethodRoyaltyEntrySubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected RoyaltyMethodRoyaltyEntrySubstate() { }
+        protected RoyaltyModuleMethodRoyaltyEntrySubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="RoyaltyMethodRoyaltyEntrySubstate" /> class.
+        /// Initializes a new instance of the <see cref="RoyaltyModuleMethodRoyaltyEntrySubstate" /> class.
         /// </summary>
-        /// <param name="isLocked">isLocked (required).</param>
-        /// <param name="methodName">methodName (required).</param>
+        /// <param name="key">key (required).</param>
         /// <param name="royaltyAmount">royaltyAmount.</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.RoyaltyMethodRoyaltyEntry).</param>
-        public RoyaltyMethodRoyaltyEntrySubstate(bool isLocked = default(bool), string methodName = default(string), RoyaltyAmount royaltyAmount = default(RoyaltyAmount), SubstateType substateType = SubstateType.RoyaltyMethodRoyaltyEntry) : base(substateType)
+        /// <param name="substateType">substateType (required) (default to SubstateType.RoyaltyModuleMethodRoyaltyEntry).</param>
+        /// <param name="isLocked">isLocked (required).</param>
+        public RoyaltyModuleMethodRoyaltyEntrySubstate(MainMethodKey key = default(MainMethodKey), RoyaltyAmount royaltyAmount = default(RoyaltyAmount), SubstateType substateType = SubstateType.RoyaltyModuleMethodRoyaltyEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            this.IsLocked = isLocked;
-            // to ensure "methodName" is required (not null)
-            if (methodName == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("methodName is a required property for RoyaltyMethodRoyaltyEntrySubstate and cannot be null");
+                throw new ArgumentNullException("key is a required property for RoyaltyModuleMethodRoyaltyEntrySubstate and cannot be null");
             }
-            this.MethodName = methodName;
+            this.Key = key;
             this.RoyaltyAmount = royaltyAmount;
         }
 
         /// <summary>
-        /// Gets or Sets IsLocked
+        /// Gets or Sets Key
         /// </summary>
-        [DataMember(Name = "is_locked", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsLocked { get; set; }
-
-        /// <summary>
-        /// Gets or Sets MethodName
-        /// </summary>
-        [DataMember(Name = "method_name", IsRequired = true, EmitDefaultValue = true)]
-        public string MethodName { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public MainMethodKey Key { get; set; }
 
         /// <summary>
         /// Gets or Sets RoyaltyAmount
@@ -191,10 +184,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class RoyaltyMethodRoyaltyEntrySubstate {\n");
+            sb.Append("class RoyaltyModuleMethodRoyaltyEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  IsLocked: ").Append(IsLocked).Append("\n");
-            sb.Append("  MethodName: ").Append(MethodName).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("  RoyaltyAmount: ").Append(RoyaltyAmount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -216,15 +208,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as RoyaltyMethodRoyaltyEntrySubstate);
+            return this.Equals(input as RoyaltyModuleMethodRoyaltyEntrySubstate);
         }
 
         /// <summary>
-        /// Returns true if RoyaltyMethodRoyaltyEntrySubstate instances are equal
+        /// Returns true if RoyaltyModuleMethodRoyaltyEntrySubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of RoyaltyMethodRoyaltyEntrySubstate to be compared</param>
+        /// <param name="input">Instance of RoyaltyModuleMethodRoyaltyEntrySubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(RoyaltyMethodRoyaltyEntrySubstate input)
+        public bool Equals(RoyaltyModuleMethodRoyaltyEntrySubstate input)
         {
             if (input == null)
             {
@@ -232,13 +224,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.IsLocked == input.IsLocked ||
-                    this.IsLocked.Equals(input.IsLocked)
-                ) && base.Equals(input) && 
-                (
-                    this.MethodName == input.MethodName ||
-                    (this.MethodName != null &&
-                    this.MethodName.Equals(input.MethodName))
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && base.Equals(input) && 
                 (
                     this.RoyaltyAmount == input.RoyaltyAmount ||
@@ -256,10 +244,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.IsLocked.GetHashCode();
-                if (this.MethodName != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.MethodName.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
                 if (this.RoyaltyAmount != null)
                 {

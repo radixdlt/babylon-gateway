@@ -103,9 +103,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf" /> class.
         /// </summary>
+        /// <param name="key">key (required).</param>
         /// <param name="activeValidator">activeValidator (required).</param>
-        public ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf(ActiveValidator activeValidator = default(ActiveValidator))
+        public ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf(ActiveValidatorKey key = default(ActiveValidatorKey), ActiveValidator activeValidator = default(ActiveValidator))
         {
+            // to ensure "key" is required (not null)
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is a required property for ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf and cannot be null");
+            }
+            this.Key = key;
             // to ensure "activeValidator" is required (not null)
             if (activeValidator == null)
             {
@@ -113,6 +120,12 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.ActiveValidator = activeValidator;
         }
+
+        /// <summary>
+        /// Gets or Sets Key
+        /// </summary>
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public ActiveValidatorKey Key { get; set; }
 
         /// <summary>
         /// Gets or Sets ActiveValidator
@@ -128,6 +141,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf {\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("  ActiveValidator: ").Append(ActiveValidator).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -165,6 +179,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
+                ) && 
+                (
                     this.ActiveValidator == input.ActiveValidator ||
                     (this.ActiveValidator != null &&
                     this.ActiveValidator.Equals(input.ActiveValidator))
@@ -180,6 +199,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.Key != null)
+                {
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                }
                 if (this.ActiveValidator != null)
                 {
                     hashCode = (hashCode * 59) + this.ActiveValidator.GetHashCode();

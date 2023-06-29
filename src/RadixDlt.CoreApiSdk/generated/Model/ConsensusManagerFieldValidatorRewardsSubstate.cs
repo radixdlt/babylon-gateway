@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -153,7 +153,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="proposerRewards">proposerRewards (required).</param>
         /// <param name="rewardsVault">rewardsVault (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.ConsensusManagerFieldValidatorRewards).</param>
-        public ConsensusManagerFieldValidatorRewardsSubstate(List<ProposerReward> proposerRewards = default(List<ProposerReward>), EntityReference rewardsVault = default(EntityReference), SubstateType substateType = SubstateType.ConsensusManagerFieldValidatorRewards) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public ConsensusManagerFieldValidatorRewardsSubstate(List<ProposerReward> proposerRewards = default(List<ProposerReward>), EntityReference rewardsVault = default(EntityReference), SubstateType substateType = SubstateType.ConsensusManagerFieldValidatorRewards, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "proposerRewards" is required (not null)
             if (proposerRewards == null)

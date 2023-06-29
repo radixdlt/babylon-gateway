@@ -112,19 +112,19 @@ public static class SchemaExtractor
             .Select(x => ((CoreModel.PackageBlueprintDefinitionEntrySubstate)x.Value.SubstateData))
             .ToList();
 
-        var fungibleVaultSchemaEvents = schemas.First(x => x.BlueprintName == SchemaNames.FungibleVault).Definition.Interface.Events;
+        var fungibleVaultSchemaEvents = schemas.First(x => x.Key.BlueprintName == SchemaNames.FungibleVault).Definition.Interface.Events;
         var fungibleVaultWithdrawEventId = ((CoreModel.PackageTypePointer)fungibleVaultSchemaEvents.First(x => x.Key == EventNames.FungibleVault.Withdraw).Value).LocalTypeIndex.Index;
         var fungibleVaultDepositEventId = ((CoreModel.PackageTypePointer)fungibleVaultSchemaEvents.First(x => x.Key == EventNames.FungibleVault.Deposit).Value).LocalTypeIndex.Index;
 
-        var nonFungibleVaultSchemaEvents = schemas.First(x => x.BlueprintName == SchemaNames.NonFungibleVault).Definition.Interface.Events;
+        var nonFungibleVaultSchemaEvents = schemas.First(x => x.Key.BlueprintName == SchemaNames.NonFungibleVault).Definition.Interface.Events;
         var nonFungibleVaultWithdrawEventId = ((CoreModel.PackageTypePointer)nonFungibleVaultSchemaEvents.First(x => x.Key == EventNames.NonFungibleVault.Withdraw).Value).LocalTypeIndex.Index;
         var nonFungibleVaultDepositEventId = ((CoreModel.PackageTypePointer)nonFungibleVaultSchemaEvents.First(x => x.Key == EventNames.NonFungibleVault.Deposit).Value).LocalTypeIndex.Index;
 
-        var fungibleResourceManagerSchemaEvents = schemas.First(x => x.BlueprintName == SchemaNames.FungibleResourceManager).Definition.Interface.Events;
+        var fungibleResourceManagerSchemaEvents = schemas.First(x => x.Key.BlueprintName == SchemaNames.FungibleResourceManager).Definition.Interface.Events;
         var mintFungibleResourceEventId = ((CoreModel.PackageTypePointer)fungibleResourceManagerSchemaEvents.First(x => x.Key == EventNames.FungibleResourceManager.Mint).Value).LocalTypeIndex.Index;
         var burnFungibleResourceEventId = ((CoreModel.PackageTypePointer)fungibleResourceManagerSchemaEvents.First(x => x.Key == EventNames.FungibleResourceManager.Burn).Value).LocalTypeIndex.Index;
 
-        var nonFungibleResourceManagerSchemaEvents = schemas.First(x => x.BlueprintName == SchemaNames.NonFungibleResourceManager).Definition.Interface.Events;
+        var nonFungibleResourceManagerSchemaEvents = schemas.First(x => x.Key.BlueprintName == SchemaNames.NonFungibleResourceManager).Definition.Interface.Events;
         var mintNonFungibleResourceEventId = ((CoreModel.PackageTypePointer)nonFungibleResourceManagerSchemaEvents.First(x => x.Key == EventNames.NonFungibleResourceManager.Mint).Value).LocalTypeIndex.Index;
         var burnNonFungibleResourceEventId = ((CoreModel.PackageTypePointer)nonFungibleResourceManagerSchemaEvents.First(x => x.Key == EventNames.NonFungibleResourceManager.Burn).Value).LocalTypeIndex.Index;
 

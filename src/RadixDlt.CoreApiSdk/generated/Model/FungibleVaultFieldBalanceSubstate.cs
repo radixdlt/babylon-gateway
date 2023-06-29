@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -152,7 +152,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="amount">The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.FungibleVaultFieldBalance).</param>
-        public FungibleVaultFieldBalanceSubstate(string amount = default(string), SubstateType substateType = SubstateType.FungibleVaultFieldBalance) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public FungibleVaultFieldBalanceSubstate(string amount = default(string), SubstateType substateType = SubstateType.FungibleVaultFieldBalance, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "amount" is required (not null)
             if (amount == null)

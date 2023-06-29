@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -152,7 +152,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="protocolVersionName">If present, indicates the validator is currently signalling readiness for the given protocl version. Is validated to be exactly 32 chars long (if it exists). .</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.ValidatorFieldProtocolUpdateReadinessSignal).</param>
-        public ValidatorFieldProtocolUpdateReadinessSignalSubstate(string protocolVersionName = default(string), SubstateType substateType = SubstateType.ValidatorFieldProtocolUpdateReadinessSignal) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public ValidatorFieldProtocolUpdateReadinessSignalSubstate(string protocolVersionName = default(string), SubstateType substateType = SubstateType.ValidatorFieldProtocolUpdateReadinessSignal, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             this.ProtocolVersionName = protocolVersionName;
         }

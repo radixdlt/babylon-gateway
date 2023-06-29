@@ -90,48 +90,25 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// PackageBlueprintRoyaltyEntrySubstateAllOf
+    /// GenericKey
     /// </summary>
-    [DataContract(Name = "PackageBlueprintRoyaltyEntrySubstate_allOf")]
-    public partial class PackageBlueprintRoyaltyEntrySubstateAllOf : IEquatable<PackageBlueprintRoyaltyEntrySubstateAllOf>
+    [DataContract(Name = "GenericKey")]
+    public partial class GenericKey : IEquatable<GenericKey>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PackageBlueprintRoyaltyEntrySubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="GenericKey" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected PackageBlueprintRoyaltyEntrySubstateAllOf() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PackageBlueprintRoyaltyEntrySubstateAllOf" /> class.
-        /// </summary>
-        /// <param name="key">key (required).</param>
-        /// <param name="royaltyConfig">royaltyConfig (required).</param>
-        public PackageBlueprintRoyaltyEntrySubstateAllOf(BlueprintVersionKey key = default(BlueprintVersionKey), RoyaltyConfig royaltyConfig = default(RoyaltyConfig))
+        /// <param name="keyData">keyData.</param>
+        public GenericKey(SborData keyData = default(SborData))
         {
-            // to ensure "key" is required (not null)
-            if (key == null)
-            {
-                throw new ArgumentNullException("key is a required property for PackageBlueprintRoyaltyEntrySubstateAllOf and cannot be null");
-            }
-            this.Key = key;
-            // to ensure "royaltyConfig" is required (not null)
-            if (royaltyConfig == null)
-            {
-                throw new ArgumentNullException("royaltyConfig is a required property for PackageBlueprintRoyaltyEntrySubstateAllOf and cannot be null");
-            }
-            this.RoyaltyConfig = royaltyConfig;
+            this.KeyData = keyData;
         }
 
         /// <summary>
-        /// Gets or Sets Key
+        /// Gets or Sets KeyData
         /// </summary>
-        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
-        public BlueprintVersionKey Key { get; set; }
-
-        /// <summary>
-        /// Gets or Sets RoyaltyConfig
-        /// </summary>
-        [DataMember(Name = "royalty_config", IsRequired = true, EmitDefaultValue = true)]
-        public RoyaltyConfig RoyaltyConfig { get; set; }
+        [DataMember(Name = "key_data", EmitDefaultValue = true)]
+        public SborData KeyData { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -140,9 +117,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PackageBlueprintRoyaltyEntrySubstateAllOf {\n");
-            sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
+            sb.Append("class GenericKey {\n");
+            sb.Append("  KeyData: ").Append(KeyData).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -163,15 +139,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PackageBlueprintRoyaltyEntrySubstateAllOf);
+            return this.Equals(input as GenericKey);
         }
 
         /// <summary>
-        /// Returns true if PackageBlueprintRoyaltyEntrySubstateAllOf instances are equal
+        /// Returns true if GenericKey instances are equal
         /// </summary>
-        /// <param name="input">Instance of PackageBlueprintRoyaltyEntrySubstateAllOf to be compared</param>
+        /// <param name="input">Instance of GenericKey to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PackageBlueprintRoyaltyEntrySubstateAllOf input)
+        public bool Equals(GenericKey input)
         {
             if (input == null)
             {
@@ -179,14 +155,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Key == input.Key ||
-                    (this.Key != null &&
-                    this.Key.Equals(input.Key))
-                ) && 
-                (
-                    this.RoyaltyConfig == input.RoyaltyConfig ||
-                    (this.RoyaltyConfig != null &&
-                    this.RoyaltyConfig.Equals(input.RoyaltyConfig))
+                    this.KeyData == input.KeyData ||
+                    (this.KeyData != null &&
+                    this.KeyData.Equals(input.KeyData))
                 );
         }
 
@@ -199,13 +170,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Key != null)
+                if (this.KeyData != null)
                 {
-                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
-                }
-                if (this.RoyaltyConfig != null)
-                {
-                    hashCode = (hashCode * 59) + this.RoyaltyConfig.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyData.GetHashCode();
                 }
                 return hashCode;
             }

@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -152,7 +152,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="mutableFields">The field names of the NF Metadata which are mutable.  (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.NonFungibleResourceManagerFieldMutableFields).</param>
-        public NonFungibleResourceManagerFieldMutableFieldsSubstate(List<string> mutableFields = default(List<string>), SubstateType substateType = SubstateType.NonFungibleResourceManagerFieldMutableFields) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public NonFungibleResourceManagerFieldMutableFieldsSubstate(List<string> mutableFields = default(List<string>), SubstateType substateType = SubstateType.NonFungibleResourceManagerFieldMutableFields, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "mutableFields" is required (not null)
             if (mutableFields == null)

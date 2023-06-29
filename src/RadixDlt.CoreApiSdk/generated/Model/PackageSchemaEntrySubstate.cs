@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -150,17 +150,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageSchemaEntrySubstate" /> class.
         /// </summary>
-        /// <param name="schemaHash">The hex-encoded schema hash, capturing the identity of an SBOR schema. (required).</param>
+        /// <param name="key">key (required).</param>
         /// <param name="schema">schema (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.PackageSchemaEntry).</param>
-        public PackageSchemaEntrySubstate(string schemaHash = default(string), ScryptoSchema schema = default(ScryptoSchema), SubstateType substateType = SubstateType.PackageSchemaEntry) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public PackageSchemaEntrySubstate(SchemaKey key = default(SchemaKey), ScryptoSchema schema = default(ScryptoSchema), SubstateType substateType = SubstateType.PackageSchemaEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            // to ensure "schemaHash" is required (not null)
-            if (schemaHash == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("schemaHash is a required property for PackageSchemaEntrySubstate and cannot be null");
+                throw new ArgumentNullException("key is a required property for PackageSchemaEntrySubstate and cannot be null");
             }
-            this.SchemaHash = schemaHash;
+            this.Key = key;
             // to ensure "schema" is required (not null)
             if (schema == null)
             {
@@ -170,11 +171,10 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The hex-encoded schema hash, capturing the identity of an SBOR schema.
+        /// Gets or Sets Key
         /// </summary>
-        /// <value>The hex-encoded schema hash, capturing the identity of an SBOR schema.</value>
-        [DataMember(Name = "schema_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string SchemaHash { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public SchemaKey Key { get; set; }
 
         /// <summary>
         /// Gets or Sets Schema
@@ -191,7 +191,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class PackageSchemaEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  SchemaHash: ").Append(SchemaHash).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("  Schema: ").Append(Schema).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -229,9 +229,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.SchemaHash == input.SchemaHash ||
-                    (this.SchemaHash != null &&
-                    this.SchemaHash.Equals(input.SchemaHash))
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && base.Equals(input) && 
                 (
                     this.Schema == input.Schema ||
@@ -249,9 +249,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.SchemaHash != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.SchemaHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
                 if (this.Schema != null)
                 {

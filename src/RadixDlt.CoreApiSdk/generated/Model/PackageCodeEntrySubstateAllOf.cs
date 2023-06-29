@@ -109,17 +109,17 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageCodeEntrySubstateAllOf" /> class.
         /// </summary>
-        /// <param name="codeHash">The hex-encoded code hash, capturing the vm-type and the code itself. (required).</param>
+        /// <param name="key">key (required).</param>
         /// <param name="vmType">vmType (required).</param>
         /// <param name="codeHex">Either the hex-encoded WASM package code (if Scrypto), or the native package identifier.  (required).</param>
-        public PackageCodeEntrySubstateAllOf(string codeHash = default(string), VmType vmType = default(VmType), string codeHex = default(string))
+        public PackageCodeEntrySubstateAllOf(PackageCodeKey key = default(PackageCodeKey), VmType vmType = default(VmType), string codeHex = default(string))
         {
-            // to ensure "codeHash" is required (not null)
-            if (codeHash == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("codeHash is a required property for PackageCodeEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("key is a required property for PackageCodeEntrySubstateAllOf and cannot be null");
             }
-            this.CodeHash = codeHash;
+            this.Key = key;
             this.VmType = vmType;
             // to ensure "codeHex" is required (not null)
             if (codeHex == null)
@@ -130,11 +130,10 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The hex-encoded code hash, capturing the vm-type and the code itself.
+        /// Gets or Sets Key
         /// </summary>
-        /// <value>The hex-encoded code hash, capturing the vm-type and the code itself.</value>
-        [DataMember(Name = "code_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string CodeHash { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public PackageCodeKey Key { get; set; }
 
         /// <summary>
         /// Either the hex-encoded WASM package code (if Scrypto), or the native package identifier. 
@@ -151,7 +150,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class PackageCodeEntrySubstateAllOf {\n");
-            sb.Append("  CodeHash: ").Append(CodeHash).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("  VmType: ").Append(VmType).Append("\n");
             sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
             sb.Append("}\n");
@@ -190,9 +189,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.CodeHash == input.CodeHash ||
-                    (this.CodeHash != null &&
-                    this.CodeHash.Equals(input.CodeHash))
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && 
                 (
                     this.VmType == input.VmType ||
@@ -214,9 +213,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.CodeHash != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.CodeHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.VmType.GetHashCode();
                 if (this.CodeHex != null)

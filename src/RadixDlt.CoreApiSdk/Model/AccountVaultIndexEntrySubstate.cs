@@ -70,7 +70,7 @@ public partial class AccountVaultIndexEntrySubstate : IEntityAddressPointer, IEn
 {
     public IEnumerable<string> GetEntityAddresses()
     {
-        yield return ResourceAddress;
+        yield return Key.ResourceAddress;
     }
 
     public IEnumerable<EntityReference> GetOwnedEntities()

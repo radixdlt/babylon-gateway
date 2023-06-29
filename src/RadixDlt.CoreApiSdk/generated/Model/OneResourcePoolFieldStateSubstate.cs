@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -153,7 +153,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="vault">vault (required).</param>
         /// <param name="poolUnitResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.OneResourcePoolFieldState).</param>
-        public OneResourcePoolFieldStateSubstate(EntityReference vault = default(EntityReference), string poolUnitResourceAddress = default(string), SubstateType substateType = SubstateType.OneResourcePoolFieldState) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public OneResourcePoolFieldStateSubstate(EntityReference vault = default(EntityReference), string poolUnitResourceAddress = default(string), SubstateType substateType = SubstateType.OneResourcePoolFieldState, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "vault" is required (not null)
             if (vault == null)

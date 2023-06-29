@@ -169,10 +169,10 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulatorSubstate")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntrySubstate")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntrySubstate")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldStateSubstate")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntrySubstate")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntrySubstate")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
@@ -202,10 +202,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="Substate" /> class.
         /// </summary>
         /// <param name="substateType">substateType (required).</param>
-        public Substate(SubstateType substateType = default(SubstateType))
+        /// <param name="isLocked">isLocked (required).</param>
+        public Substate(SubstateType substateType = default(SubstateType), bool isLocked = default(bool))
         {
             this.SubstateType = substateType;
+            this.IsLocked = isLocked;
         }
+
+        /// <summary>
+        /// Gets or Sets IsLocked
+        /// </summary>
+        [DataMember(Name = "is_locked", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsLocked { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -216,6 +224,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class Substate {\n");
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
+            sb.Append("  IsLocked: ").Append(IsLocked).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -254,6 +263,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.SubstateType == input.SubstateType ||
                     this.SubstateType.Equals(input.SubstateType)
+                ) && 
+                (
+                    this.IsLocked == input.IsLocked ||
+                    this.IsLocked.Equals(input.IsLocked)
                 );
         }
 
@@ -267,6 +280,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
+                hashCode = (hashCode * 59) + this.IsLocked.GetHashCode();
                 return hashCode;
             }
         }

@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -152,7 +152,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="dataStruct">dataStruct (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.GenericScryptoComponentFieldState).</param>
-        public GenericScryptoComponentFieldStateSubstate(DataStruct dataStruct = default(DataStruct), SubstateType substateType = SubstateType.GenericScryptoComponentFieldState) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public GenericScryptoComponentFieldStateSubstate(DataStruct dataStruct = default(DataStruct), SubstateType substateType = SubstateType.GenericScryptoComponentFieldState, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "dataStruct" is required (not null)
             if (dataStruct == null)

@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -156,18 +156,19 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageCodeEntrySubstate" /> class.
         /// </summary>
-        /// <param name="codeHash">The hex-encoded code hash, capturing the vm-type and the code itself. (required).</param>
+        /// <param name="key">key (required).</param>
         /// <param name="vmType">vmType (required).</param>
         /// <param name="codeHex">Either the hex-encoded WASM package code (if Scrypto), or the native package identifier.  (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.PackageCodeEntry).</param>
-        public PackageCodeEntrySubstate(string codeHash = default(string), VmType vmType = default(VmType), string codeHex = default(string), SubstateType substateType = SubstateType.PackageCodeEntry) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public PackageCodeEntrySubstate(PackageCodeKey key = default(PackageCodeKey), VmType vmType = default(VmType), string codeHex = default(string), SubstateType substateType = SubstateType.PackageCodeEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            // to ensure "codeHash" is required (not null)
-            if (codeHash == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("codeHash is a required property for PackageCodeEntrySubstate and cannot be null");
+                throw new ArgumentNullException("key is a required property for PackageCodeEntrySubstate and cannot be null");
             }
-            this.CodeHash = codeHash;
+            this.Key = key;
             this.VmType = vmType;
             // to ensure "codeHex" is required (not null)
             if (codeHex == null)
@@ -178,11 +179,10 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The hex-encoded code hash, capturing the vm-type and the code itself.
+        /// Gets or Sets Key
         /// </summary>
-        /// <value>The hex-encoded code hash, capturing the vm-type and the code itself.</value>
-        [DataMember(Name = "code_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string CodeHash { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public PackageCodeKey Key { get; set; }
 
         /// <summary>
         /// Either the hex-encoded WASM package code (if Scrypto), or the native package identifier. 
@@ -200,7 +200,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class PackageCodeEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  CodeHash: ").Append(CodeHash).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("  VmType: ").Append(VmType).Append("\n");
             sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
             sb.Append("}\n");
@@ -239,9 +239,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.CodeHash == input.CodeHash ||
-                    (this.CodeHash != null &&
-                    this.CodeHash.Equals(input.CodeHash))
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && base.Equals(input) && 
                 (
                     this.VmType == input.VmType ||
@@ -263,9 +263,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.CodeHash != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.CodeHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.VmType.GetHashCode();
                 if (this.CodeHex != null)

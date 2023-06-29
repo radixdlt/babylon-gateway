@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -153,7 +153,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="completed">The number of successfully completed proposals this epoch for each validator, indexed by the validator order in the active set. (required).</param>
         /// <param name="missed">The number of missed proposals this epoch for each validator, indexed by the validator order in the active set. (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.ConsensusManagerFieldCurrentProposalStatistic).</param>
-        public ConsensusManagerFieldCurrentProposalStatisticSubstate(List<long> completed = default(List<long>), List<long> missed = default(List<long>), SubstateType substateType = SubstateType.ConsensusManagerFieldCurrentProposalStatistic) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public ConsensusManagerFieldCurrentProposalStatisticSubstate(List<long> completed = default(List<long>), List<long> missed = default(List<long>), SubstateType substateType = SubstateType.ConsensusManagerFieldCurrentProposalStatistic, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "completed" is required (not null)
             if (completed == null)

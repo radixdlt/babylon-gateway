@@ -84,90 +84,41 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleVaultContentsIndexEntrySubstate
+    /// GenericKeyValueStoreEntryValue
     /// </summary>
-    [DataContract(Name = "NonFungibleVaultContentsIndexEntrySubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerFieldStateSubstate), "AccessControllerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesModuleFieldOwnerRoleSubstate), "AccessRulesModuleFieldOwnerRole")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesModuleRuleEntrySubstate), "AccessRulesModuleRuleEntry")]
-    [JsonSubtypes.KnownSubType(typeof(AccountDepositRuleIndexEntrySubstate), "AccountDepositRuleIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(AccountFieldStateSubstate), "AccountFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(AccountVaultIndexEntrySubstate), "AccountVaultIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldConfigSubstate), "ConsensusManagerFieldConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentProposalStatisticSubstate), "ConsensusManagerFieldCurrentProposalStatistic")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentValidatorSetSubstate), "ConsensusManagerFieldCurrentValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldStateSubstate), "ConsensusManagerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldValidatorRewardsSubstate), "ConsensusManagerFieldValidatorRewards")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate), "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldDivisibilitySubstate), "FungibleResourceManagerFieldDivisibility")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldTotalSupplySubstate), "FungibleResourceManagerFieldTotalSupply")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleVaultFieldBalanceSubstate), "FungibleVaultFieldBalance")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleVaultFieldFrozenStatusSubstate), "FungibleVaultFieldFrozenStatus")]
-    [JsonSubtypes.KnownSubType(typeof(GenericKeyValueStoreEntrySubstate), "GenericKeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(GenericScryptoComponentFieldStateSubstate), "GenericScryptoComponentFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataModuleEntrySubstate), "MetadataModuleEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MultiResourcePoolFieldStateSubstate), "MultiResourcePoolFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerDataEntrySubstate), "NonFungibleResourceManagerDataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldIdTypeSubstate), "NonFungibleResourceManagerFieldIdType")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldMutableFieldsSubstate), "NonFungibleResourceManagerFieldMutableFields")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldTotalSupplySubstate), "NonFungibleResourceManagerFieldTotalSupply")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultContentsIndexEntrySubstate), "NonFungibleVaultContentsIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldBalanceSubstate), "NonFungibleVaultFieldBalance")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldFrozenStatusSubstate), "NonFungibleVaultFieldFrozenStatus")]
-    [JsonSubtypes.KnownSubType(typeof(OneResourcePoolFieldStateSubstate), "OneResourcePoolFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintAuthTemplateEntrySubstate), "PackageBlueprintAuthTemplateEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoModuleFieldTypeInfoSubstate), "TypeInfoModuleFieldTypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorFieldProtocolUpdateReadinessSignalSubstate), "ValidatorFieldProtocolUpdateReadinessSignal")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
-    public partial class NonFungibleVaultContentsIndexEntrySubstate : Substate, IEquatable<NonFungibleVaultContentsIndexEntrySubstate>
+    [DataContract(Name = "GenericKeyValueStoreEntryValue")]
+    public partial class GenericKeyValueStoreEntryValue : IEquatable<GenericKeyValueStoreEntryValue>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleVaultContentsIndexEntrySubstate" /> class.
+        /// Initializes a new instance of the <see cref="GenericKeyValueStoreEntryValue" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleVaultContentsIndexEntrySubstate() { }
+        protected GenericKeyValueStoreEntryValue() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleVaultContentsIndexEntrySubstate" /> class.
+        /// Initializes a new instance of the <see cref="GenericKeyValueStoreEntryValue" /> class.
         /// </summary>
-        /// <param name="key">key (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.NonFungibleVaultContentsIndexEntry).</param>
-        /// <param name="isLocked">isLocked (required).</param>
-        public NonFungibleVaultContentsIndexEntrySubstate(LocalNonFungibleKey key = default(LocalNonFungibleKey), SubstateType substateType = SubstateType.NonFungibleVaultContentsIndexEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
+        /// <param name="data">data (required).</param>
+        public GenericKeyValueStoreEntryValue(DataStruct data = default(DataStruct))
         {
-            // to ensure "key" is required (not null)
-            if (key == null)
+            // to ensure "data" is required (not null)
+            if (data == null)
             {
-                throw new ArgumentNullException("key is a required property for NonFungibleVaultContentsIndexEntrySubstate and cannot be null");
+                throw new ArgumentNullException("data is a required property for GenericKeyValueStoreEntryValue and cannot be null");
             }
-            this.Key = key;
+            this.Data = data;
         }
 
         /// <summary>
-        /// Gets or Sets Key
+        /// Gets or Sets Data
         /// </summary>
-        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
-        public LocalNonFungibleKey Key { get; set; }
+        [DataMember(Name = "data", IsRequired = true, EmitDefaultValue = true)]
+        public DataStruct Data { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -176,9 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleVaultContentsIndexEntrySubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("class GenericKeyValueStoreEntryValue {\n");
+            sb.Append("  Data: ").Append(Data).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -187,7 +137,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -199,25 +149,25 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleVaultContentsIndexEntrySubstate);
+            return this.Equals(input as GenericKeyValueStoreEntryValue);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleVaultContentsIndexEntrySubstate instances are equal
+        /// Returns true if GenericKeyValueStoreEntryValue instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleVaultContentsIndexEntrySubstate to be compared</param>
+        /// <param name="input">Instance of GenericKeyValueStoreEntryValue to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleVaultContentsIndexEntrySubstate input)
+        public bool Equals(GenericKeyValueStoreEntryValue input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.Key == input.Key ||
-                    (this.Key != null &&
-                    this.Key.Equals(input.Key))
+                    this.Data == input.Data ||
+                    (this.Data != null &&
+                    this.Data.Equals(input.Data))
                 );
         }
 
@@ -229,10 +179,10 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.Key != null)
+                int hashCode = 41;
+                if (this.Data != null)
                 {
-                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Data.GetHashCode();
                 }
                 return hashCode;
             }

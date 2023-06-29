@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -150,24 +150,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageBlueprintRoyaltyEntrySubstate" /> class.
         /// </summary>
-        /// <param name="blueprintName">The first part of the substate key &#x60;(blueprint_name, blueprint_version)&#x60;. (required).</param>
-        /// <param name="blueprintVersion">The second part of the substate key &#x60;(blueprint_name, blueprint_version)&#x60;. (required).</param>
+        /// <param name="key">key (required).</param>
         /// <param name="royaltyConfig">royaltyConfig (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.PackageBlueprintRoyaltyEntry).</param>
-        public PackageBlueprintRoyaltyEntrySubstate(string blueprintName = default(string), string blueprintVersion = default(string), RoyaltyConfig royaltyConfig = default(RoyaltyConfig), SubstateType substateType = SubstateType.PackageBlueprintRoyaltyEntry) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public PackageBlueprintRoyaltyEntrySubstate(BlueprintVersionKey key = default(BlueprintVersionKey), RoyaltyConfig royaltyConfig = default(RoyaltyConfig), SubstateType substateType = SubstateType.PackageBlueprintRoyaltyEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            // to ensure "blueprintName" is required (not null)
-            if (blueprintName == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("blueprintName is a required property for PackageBlueprintRoyaltyEntrySubstate and cannot be null");
+                throw new ArgumentNullException("key is a required property for PackageBlueprintRoyaltyEntrySubstate and cannot be null");
             }
-            this.BlueprintName = blueprintName;
-            // to ensure "blueprintVersion" is required (not null)
-            if (blueprintVersion == null)
-            {
-                throw new ArgumentNullException("blueprintVersion is a required property for PackageBlueprintRoyaltyEntrySubstate and cannot be null");
-            }
-            this.BlueprintVersion = blueprintVersion;
+            this.Key = key;
             // to ensure "royaltyConfig" is required (not null)
             if (royaltyConfig == null)
             {
@@ -177,18 +171,10 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The first part of the substate key &#x60;(blueprint_name, blueprint_version)&#x60;.
+        /// Gets or Sets Key
         /// </summary>
-        /// <value>The first part of the substate key &#x60;(blueprint_name, blueprint_version)&#x60;.</value>
-        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
-        public string BlueprintName { get; set; }
-
-        /// <summary>
-        /// The second part of the substate key &#x60;(blueprint_name, blueprint_version)&#x60;.
-        /// </summary>
-        /// <value>The second part of the substate key &#x60;(blueprint_name, blueprint_version)&#x60;.</value>
-        [DataMember(Name = "blueprint_version", IsRequired = true, EmitDefaultValue = true)]
-        public string BlueprintVersion { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public BlueprintVersionKey Key { get; set; }
 
         /// <summary>
         /// Gets or Sets RoyaltyConfig
@@ -205,8 +191,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class PackageBlueprintRoyaltyEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
-            sb.Append("  BlueprintVersion: ").Append(BlueprintVersion).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -244,14 +229,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.BlueprintName == input.BlueprintName ||
-                    (this.BlueprintName != null &&
-                    this.BlueprintName.Equals(input.BlueprintName))
-                ) && base.Equals(input) && 
-                (
-                    this.BlueprintVersion == input.BlueprintVersion ||
-                    (this.BlueprintVersion != null &&
-                    this.BlueprintVersion.Equals(input.BlueprintVersion))
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && base.Equals(input) && 
                 (
                     this.RoyaltyConfig == input.RoyaltyConfig ||
@@ -269,13 +249,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.BlueprintName != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
-                }
-                if (this.BlueprintVersion != null)
-                {
-                    hashCode = (hashCode * 59) + this.BlueprintVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
                 if (this.RoyaltyConfig != null)
                 {

@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -157,7 +157,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="actualEpochStart">actualEpochStart (required).</param>
         /// <param name="currentLeader">currentLeader.</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.ConsensusManagerFieldState).</param>
-        public ConsensusManagerFieldStateSubstate(long epoch = default(long), long round = default(long), bool isStarted = default(bool), Instant effectiveEpochStart = default(Instant), Instant actualEpochStart = default(Instant), ActiveValidatorIndex currentLeader = default(ActiveValidatorIndex), SubstateType substateType = SubstateType.ConsensusManagerFieldState) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public ConsensusManagerFieldStateSubstate(long epoch = default(long), long round = default(long), bool isStarted = default(bool), Instant effectiveEpochStart = default(Instant), Instant actualEpochStart = default(Instant), ActiveValidatorIndex currentLeader = default(ActiveValidatorIndex), SubstateType substateType = SubstateType.ConsensusManagerFieldState, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             this.Epoch = epoch;
             this.Round = round;

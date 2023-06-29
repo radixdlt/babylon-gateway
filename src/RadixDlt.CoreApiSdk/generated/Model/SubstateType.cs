@@ -126,10 +126,10 @@ namespace RadixDlt.CoreApiSdk.Model
         RoyaltyModuleFieldState = 5,
 
         /// <summary>
-        /// Enum RoyaltyMethodRoyaltyEntry for value: RoyaltyMethodRoyaltyEntry
+        /// Enum RoyaltyModuleMethodRoyaltyEntry for value: RoyaltyModuleMethodRoyaltyEntry
         /// </summary>
-        [EnumMember(Value = "RoyaltyMethodRoyaltyEntry")]
-        RoyaltyMethodRoyaltyEntry = 6,
+        [EnumMember(Value = "RoyaltyModuleMethodRoyaltyEntry")]
+        RoyaltyModuleMethodRoyaltyEntry = 6,
 
         /// <summary>
         /// Enum MetadataModuleEntry for value: MetadataModuleEntry

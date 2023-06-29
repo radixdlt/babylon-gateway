@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -142,12 +142,6 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
     public partial class AccessRulesModuleRuleEntrySubstate : Substate, IEquatable<AccessRulesModuleRuleEntrySubstate>
     {
-
-        /// <summary>
-        /// Gets or Sets ObjectModuleId
-        /// </summary>
-        [DataMember(Name = "object_module_id", IsRequired = true, EmitDefaultValue = true)]
-        public ObjectModuleId ObjectModuleId { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="AccessRulesModuleRuleEntrySubstate" /> class.
         /// </summary>
@@ -156,27 +150,26 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccessRulesModuleRuleEntrySubstate" /> class.
         /// </summary>
-        /// <param name="objectModuleId">objectModuleId (required).</param>
-        /// <param name="roleKey">roleKey (required).</param>
+        /// <param name="key">key (required).</param>
         /// <param name="accessRule">accessRule.</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.AccessRulesModuleRuleEntry).</param>
-        public AccessRulesModuleRuleEntrySubstate(ObjectModuleId objectModuleId = default(ObjectModuleId), string roleKey = default(string), AccessRule accessRule = default(AccessRule), SubstateType substateType = SubstateType.AccessRulesModuleRuleEntry) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public AccessRulesModuleRuleEntrySubstate(ObjectRoleKey key = default(ObjectRoleKey), AccessRule accessRule = default(AccessRule), SubstateType substateType = SubstateType.AccessRulesModuleRuleEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            this.ObjectModuleId = objectModuleId;
-            // to ensure "roleKey" is required (not null)
-            if (roleKey == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("roleKey is a required property for AccessRulesModuleRuleEntrySubstate and cannot be null");
+                throw new ArgumentNullException("key is a required property for AccessRulesModuleRuleEntrySubstate and cannot be null");
             }
-            this.RoleKey = roleKey;
+            this.Key = key;
             this.AccessRule = accessRule;
         }
 
         /// <summary>
-        /// Gets or Sets RoleKey
+        /// Gets or Sets Key
         /// </summary>
-        [DataMember(Name = "role_key", IsRequired = true, EmitDefaultValue = true)]
-        public string RoleKey { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public ObjectRoleKey Key { get; set; }
 
         /// <summary>
         /// Gets or Sets AccessRule
@@ -193,8 +186,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccessRulesModuleRuleEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  ObjectModuleId: ").Append(ObjectModuleId).Append("\n");
-            sb.Append("  RoleKey: ").Append(RoleKey).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("  AccessRule: ").Append(AccessRule).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -232,13 +224,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.ObjectModuleId == input.ObjectModuleId ||
-                    this.ObjectModuleId.Equals(input.ObjectModuleId)
-                ) && base.Equals(input) && 
-                (
-                    this.RoleKey == input.RoleKey ||
-                    (this.RoleKey != null &&
-                    this.RoleKey.Equals(input.RoleKey))
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && base.Equals(input) && 
                 (
                     this.AccessRule == input.AccessRule ||
@@ -256,10 +244,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.ObjectModuleId.GetHashCode();
-                if (this.RoleKey != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoleKey.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
                 if (this.AccessRule != null)
                 {

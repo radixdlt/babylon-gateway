@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -156,26 +156,26 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionTrackerCollectionEntrySubstate" /> class.
         /// </summary>
-        /// <param name="intentHash">The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent.  (required).</param>
+        /// <param name="key">key (required).</param>
         /// <param name="status">status.</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.TransactionTrackerCollectionEntry).</param>
-        public TransactionTrackerCollectionEntrySubstate(string intentHash = default(string), TransactionTrackerTransactionStatus? status = default(TransactionTrackerTransactionStatus?), SubstateType substateType = SubstateType.TransactionTrackerCollectionEntry) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public TransactionTrackerCollectionEntrySubstate(TransactionIdKey key = default(TransactionIdKey), TransactionTrackerTransactionStatus? status = default(TransactionTrackerTransactionStatus?), SubstateType substateType = SubstateType.TransactionTrackerCollectionEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            // to ensure "intentHash" is required (not null)
-            if (intentHash == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("intentHash is a required property for TransactionTrackerCollectionEntrySubstate and cannot be null");
+                throw new ArgumentNullException("key is a required property for TransactionTrackerCollectionEntrySubstate and cannot be null");
             }
-            this.IntentHash = intentHash;
+            this.Key = key;
             this.Status = status;
         }
 
         /// <summary>
-        /// The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. 
+        /// Gets or Sets Key
         /// </summary>
-        /// <value>The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. </value>
-        [DataMember(Name = "intent_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string IntentHash { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionIdKey Key { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -186,7 +186,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionTrackerCollectionEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -224,9 +224,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.IntentHash == input.IntentHash ||
-                    (this.IntentHash != null &&
-                    this.IntentHash.Equals(input.IntentHash))
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && base.Equals(input) && 
                 (
                     this.Status == input.Status ||
@@ -243,9 +243,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.IntentHash != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.Status.GetHashCode();
                 return hashCode;

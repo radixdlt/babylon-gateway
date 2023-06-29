@@ -132,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyMethodRoyaltyEntrySubstate), "RoyaltyMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
     [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
@@ -150,47 +150,32 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="MetadataModuleEntrySubstate" /> class.
         /// </summary>
-        /// <param name="fieldName">fieldName (required).</param>
-        /// <param name="isDeleted">isDeleted (required).</param>
+        /// <param name="key">key (required).</param>
         /// <param name="dataStruct">dataStruct.</param>
-        /// <param name="isLocked">isLocked (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.MetadataModuleEntry).</param>
-        public MetadataModuleEntrySubstate(string fieldName = default(string), bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct), bool isLocked = default(bool), SubstateType substateType = SubstateType.MetadataModuleEntry) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public MetadataModuleEntrySubstate(MetadataKey key = default(MetadataKey), DataStruct dataStruct = default(DataStruct), SubstateType substateType = SubstateType.MetadataModuleEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            // to ensure "fieldName" is required (not null)
-            if (fieldName == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("fieldName is a required property for MetadataModuleEntrySubstate and cannot be null");
+                throw new ArgumentNullException("key is a required property for MetadataModuleEntrySubstate and cannot be null");
             }
-            this.FieldName = fieldName;
-            this.IsDeleted = isDeleted;
-            this.IsLocked = isLocked;
+            this.Key = key;
             this.DataStruct = dataStruct;
         }
 
         /// <summary>
-        /// Gets or Sets FieldName
+        /// Gets or Sets Key
         /// </summary>
-        [DataMember(Name = "field_name", IsRequired = true, EmitDefaultValue = true)]
-        public string FieldName { get; set; }
-
-        /// <summary>
-        /// Gets or Sets IsDeleted
-        /// </summary>
-        [DataMember(Name = "is_deleted", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsDeleted { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public MetadataKey Key { get; set; }
 
         /// <summary>
         /// Gets or Sets DataStruct
         /// </summary>
         [DataMember(Name = "data_struct", EmitDefaultValue = true)]
         public DataStruct DataStruct { get; set; }
-
-        /// <summary>
-        /// Gets or Sets IsLocked
-        /// </summary>
-        [DataMember(Name = "is_locked", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsLocked { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -201,10 +186,8 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class MetadataModuleEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  FieldName: ").Append(FieldName).Append("\n");
-            sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
-            sb.Append("  IsLocked: ").Append(IsLocked).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -241,22 +224,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.FieldName == input.FieldName ||
-                    (this.FieldName != null &&
-                    this.FieldName.Equals(input.FieldName))
-                ) && base.Equals(input) && 
-                (
-                    this.IsDeleted == input.IsDeleted ||
-                    this.IsDeleted.Equals(input.IsDeleted)
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && base.Equals(input) && 
                 (
                     this.DataStruct == input.DataStruct ||
                     (this.DataStruct != null &&
                     this.DataStruct.Equals(input.DataStruct))
-                ) && base.Equals(input) && 
-                (
-                    this.IsLocked == input.IsLocked ||
-                    this.IsLocked.Equals(input.IsLocked)
                 );
         }
 
@@ -269,16 +244,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.FieldName != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.FieldName.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
                 if (this.DataStruct != null)
                 {
                     hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.IsLocked.GetHashCode();
                 return hashCode;
             }
         }
