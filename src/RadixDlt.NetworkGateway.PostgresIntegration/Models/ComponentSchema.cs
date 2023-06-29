@@ -63,13 +63,24 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("component_schema")]
-internal class ComponentSchema : SingleEntryBase
+internal class ComponentSchema
 {
+    [Key]
+    [Column(name: "id")]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    public int Id
+    {
+        get { return 1; }
+        // ReSharper disable once ValueParameterNotUsed
+        set { }
+    }
+
     [Column("event_type_identifiers", TypeName = "jsonb")]
     public EventTypeIdentifiers EventTypeIdentifiers { get; set; }
 }

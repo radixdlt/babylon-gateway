@@ -95,8 +95,6 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [DataContract(Name = "KeyValueStoreTypeInfoDetails")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(GlobalAddressPhantomTypeInfoDetails), "GlobalAddressPhantom")]
-    [JsonSubtypes.KnownSubType(typeof(GlobalAddressReservationTypeInfoDetails), "GlobalAddressReservation")]
     [JsonSubtypes.KnownSubType(typeof(KeyValueStoreTypeInfoDetails), "KeyValueStore")]
     [JsonSubtypes.KnownSubType(typeof(ObjectTypeInfoDetails), "Object")]
     public partial class KeyValueStoreTypeInfoDetails : TypeInfoDetails, IEquatable<KeyValueStoreTypeInfoDetails>

@@ -183,7 +183,7 @@ internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Typ
 
         if (dbEntity is not T typedDbEntity)
         {
-            throw new ArgumentException($"Action argument type does not match underlying entity type.");
+            throw new ArgumentException("Action argument type does not match underlying entity type.");
         }
 
         return typedDbEntity;

@@ -103,23 +103,26 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="RoyaltyConfig" /> class.
         /// </summary>
-        /// <param name="methodRules">The royalty rules by method (required).</param>
-        public RoyaltyConfig(List<MethodRoyaltyRule> methodRules = default(List<MethodRoyaltyRule>))
+        /// <param name="isEnabled">isEnabled (required).</param>
+        /// <param name="methodRules">The royalty rules by method. The array is only present if royalties are enabled..</param>
+        public RoyaltyConfig(bool isEnabled = default(bool), List<MethodRoyalty> methodRules = default(List<MethodRoyalty>))
         {
-            // to ensure "methodRules" is required (not null)
-            if (methodRules == null)
-            {
-                throw new ArgumentNullException("methodRules is a required property for RoyaltyConfig and cannot be null");
-            }
+            this.IsEnabled = isEnabled;
             this.MethodRules = methodRules;
         }
 
         /// <summary>
-        /// The royalty rules by method
+        /// Gets or Sets IsEnabled
         /// </summary>
-        /// <value>The royalty rules by method</value>
-        [DataMember(Name = "method_rules", IsRequired = true, EmitDefaultValue = true)]
-        public List<MethodRoyaltyRule> MethodRules { get; set; }
+        [DataMember(Name = "is_enabled", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsEnabled { get; set; }
+
+        /// <summary>
+        /// The royalty rules by method. The array is only present if royalties are enabled.
+        /// </summary>
+        /// <value>The royalty rules by method. The array is only present if royalties are enabled.</value>
+        [DataMember(Name = "method_rules", EmitDefaultValue = true)]
+        public List<MethodRoyalty> MethodRules { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,6 +132,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class RoyaltyConfig {\n");
+            sb.Append("  IsEnabled: ").Append(IsEnabled).Append("\n");
             sb.Append("  MethodRules: ").Append(MethodRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -166,6 +170,10 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.IsEnabled == input.IsEnabled ||
+                    this.IsEnabled.Equals(input.IsEnabled)
+                ) && 
+                (
                     this.MethodRules == input.MethodRules ||
                     this.MethodRules != null &&
                     input.MethodRules != null &&
@@ -182,6 +190,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                hashCode = (hashCode * 59) + this.IsEnabled.GetHashCode();
                 if (this.MethodRules != null)
                 {
                     hashCode = (hashCode * 59) + this.MethodRules.GetHashCode();

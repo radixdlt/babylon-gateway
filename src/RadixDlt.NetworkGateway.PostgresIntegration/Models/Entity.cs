@@ -243,11 +243,6 @@ internal class GlobalIdentityEntity : ComponentEntity
 
 internal class GlobalPackageEntity : ComponentEntity
 {
-    [Column("code")]
-    public byte[] Code { get; set; }
-
-    [Column("code_type")]
-    public string CodeType { get; set; }
 }
 
 // This is transient model, not stored in database
@@ -289,5 +284,9 @@ internal class GlobalTwoResourcePoolEntity : ResourcePoolEntity
 }
 
 internal class GlobalMultiResourcePoolEntity : ResourcePoolEntity
+{
+}
+
+internal class GlobalTransactionTrackerEntity : ComponentEntity
 {
 }

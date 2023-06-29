@@ -106,6 +106,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="sortedKey">sortedKey.</param>
         /// <param name="publicKey">publicKey (required).</param>
         /// <param name="isRegistered">isRegistered (required).</param>
+        /// <param name="acceptsDelegatedStake">acceptsDelegatedStake (required).</param>
         /// <param name="validatorFeeFactor">A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
         /// <param name="validatorFeeChangeRequest">validatorFeeChangeRequest.</param>
         /// <param name="stakeUnitResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
@@ -116,7 +117,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="pendingOwnerStakeUnitUnlockVault">pendingOwnerStakeUnitUnlockVault (required).</param>
         /// <param name="pendingOwnerStakeUnitWithdrawals">pendingOwnerStakeUnitWithdrawals (required).</param>
         /// <param name="alreadyUnlockedOwnerStakeUnitAmount">A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
-        public ValidatorFieldStateSubstateAllOf(SubstateKey sortedKey = default(SubstateKey), EcdsaSecp256k1PublicKey publicKey = default(EcdsaSecp256k1PublicKey), bool isRegistered = default(bool), string validatorFeeFactor = default(string), ValidatorFeeChangeRequest validatorFeeChangeRequest = default(ValidatorFeeChangeRequest), string stakeUnitResourceAddress = default(string), EntityReference stakeXrdVault = default(EntityReference), string unstakeClaimTokenResourceAddress = default(string), EntityReference pendingXrdWithdrawVault = default(EntityReference), EntityReference lockedOwnerStakeUnitVault = default(EntityReference), EntityReference pendingOwnerStakeUnitUnlockVault = default(EntityReference), List<PendingOwnerStakeWithdrawal> pendingOwnerStakeUnitWithdrawals = default(List<PendingOwnerStakeWithdrawal>), string alreadyUnlockedOwnerStakeUnitAmount = default(string))
+        public ValidatorFieldStateSubstateAllOf(SubstateKey sortedKey = default(SubstateKey), EcdsaSecp256k1PublicKey publicKey = default(EcdsaSecp256k1PublicKey), bool isRegistered = default(bool), bool acceptsDelegatedStake = default(bool), string validatorFeeFactor = default(string), ValidatorFeeChangeRequest validatorFeeChangeRequest = default(ValidatorFeeChangeRequest), string stakeUnitResourceAddress = default(string), EntityReference stakeXrdVault = default(EntityReference), string unstakeClaimTokenResourceAddress = default(string), EntityReference pendingXrdWithdrawVault = default(EntityReference), EntityReference lockedOwnerStakeUnitVault = default(EntityReference), EntityReference pendingOwnerStakeUnitUnlockVault = default(EntityReference), List<PendingOwnerStakeWithdrawal> pendingOwnerStakeUnitWithdrawals = default(List<PendingOwnerStakeWithdrawal>), string alreadyUnlockedOwnerStakeUnitAmount = default(string))
         {
             // to ensure "publicKey" is required (not null)
             if (publicKey == null)
@@ -125,6 +126,7 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.PublicKey = publicKey;
             this.IsRegistered = isRegistered;
+            this.AcceptsDelegatedStake = acceptsDelegatedStake;
             // to ensure "validatorFeeFactor" is required (not null)
             if (validatorFeeFactor == null)
             {
@@ -202,6 +204,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool IsRegistered { get; set; }
 
         /// <summary>
+        /// Gets or Sets AcceptsDelegatedStake
+        /// </summary>
+        [DataMember(Name = "accepts_delegated_stake", IsRequired = true, EmitDefaultValue = true)]
+        public bool AcceptsDelegatedStake { get; set; }
+
+        /// <summary>
         /// A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
         /// </summary>
         /// <value>A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
@@ -276,6 +284,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  SortedKey: ").Append(SortedKey).Append("\n");
             sb.Append("  PublicKey: ").Append(PublicKey).Append("\n");
             sb.Append("  IsRegistered: ").Append(IsRegistered).Append("\n");
+            sb.Append("  AcceptsDelegatedStake: ").Append(AcceptsDelegatedStake).Append("\n");
             sb.Append("  ValidatorFeeFactor: ").Append(ValidatorFeeFactor).Append("\n");
             sb.Append("  ValidatorFeeChangeRequest: ").Append(ValidatorFeeChangeRequest).Append("\n");
             sb.Append("  StakeUnitResourceAddress: ").Append(StakeUnitResourceAddress).Append("\n");
@@ -334,6 +343,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.IsRegistered == input.IsRegistered ||
                     this.IsRegistered.Equals(input.IsRegistered)
+                ) && 
+                (
+                    this.AcceptsDelegatedStake == input.AcceptsDelegatedStake ||
+                    this.AcceptsDelegatedStake.Equals(input.AcceptsDelegatedStake)
                 ) && 
                 (
                     this.ValidatorFeeFactor == input.ValidatorFeeFactor ||
@@ -406,6 +419,7 @@ namespace RadixDlt.CoreApiSdk.Model
                     hashCode = (hashCode * 59) + this.PublicKey.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.IsRegistered.GetHashCode();
+                hashCode = (hashCode * 59) + this.AcceptsDelegatedStake.GetHashCode();
                 if (this.ValidatorFeeFactor != null)
                 {
                     hashCode = (hashCode * 59) + this.ValidatorFeeFactor.GetHashCode();

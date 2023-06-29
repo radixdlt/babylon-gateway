@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="EventTypeIdentifier" /> class.
         /// </summary>
         /// <param name="emitter">emitter (required).</param>
-        /// <param name="localTypeIndex">localTypeIndex (required).</param>
-        public EventTypeIdentifier(EventEmitterIdentifier emitter = default(EventEmitterIdentifier), LocalTypeIndex localTypeIndex = default(LocalTypeIndex))
+        /// <param name="typePointer">typePointer (required).</param>
+        public EventTypeIdentifier(EventEmitterIdentifier emitter = default(EventEmitterIdentifier), TypePointer typePointer = default(TypePointer))
         {
             // to ensure "emitter" is required (not null)
             if (emitter == null)
@@ -113,12 +113,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("emitter is a required property for EventTypeIdentifier and cannot be null");
             }
             this.Emitter = emitter;
-            // to ensure "localTypeIndex" is required (not null)
-            if (localTypeIndex == null)
+            // to ensure "typePointer" is required (not null)
+            if (typePointer == null)
             {
-                throw new ArgumentNullException("localTypeIndex is a required property for EventTypeIdentifier and cannot be null");
+                throw new ArgumentNullException("typePointer is a required property for EventTypeIdentifier and cannot be null");
             }
-            this.LocalTypeIndex = localTypeIndex;
+            this.TypePointer = typePointer;
         }
 
         /// <summary>
@@ -128,10 +128,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public EventEmitterIdentifier Emitter { get; set; }
 
         /// <summary>
-        /// Gets or Sets LocalTypeIndex
+        /// Gets or Sets TypePointer
         /// </summary>
-        [DataMember(Name = "local_type_index", IsRequired = true, EmitDefaultValue = true)]
-        public LocalTypeIndex LocalTypeIndex { get; set; }
+        [DataMember(Name = "type_pointer", IsRequired = true, EmitDefaultValue = true)]
+        public TypePointer TypePointer { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,7 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EventTypeIdentifier {\n");
             sb.Append("  Emitter: ").Append(Emitter).Append("\n");
-            sb.Append("  LocalTypeIndex: ").Append(LocalTypeIndex).Append("\n");
+            sb.Append("  TypePointer: ").Append(TypePointer).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -184,9 +184,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Emitter.Equals(input.Emitter))
                 ) && 
                 (
-                    this.LocalTypeIndex == input.LocalTypeIndex ||
-                    (this.LocalTypeIndex != null &&
-                    this.LocalTypeIndex.Equals(input.LocalTypeIndex))
+                    this.TypePointer == input.TypePointer ||
+                    (this.TypePointer != null &&
+                    this.TypePointer.Equals(input.TypePointer))
                 );
         }
 
@@ -203,9 +203,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Emitter.GetHashCode();
                 }
-                if (this.LocalTypeIndex != null)
+                if (this.TypePointer != null)
                 {
-                    hashCode = (hashCode * 59) + this.LocalTypeIndex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TypePointer.GetHashCode();
                 }
                 return hashCode;
             }

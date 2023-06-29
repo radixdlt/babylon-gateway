@@ -103,37 +103,37 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyValueBlueprintCollectionSchemaAllOf" /> class.
         /// </summary>
-        /// <param name="keyTypeReference">keyTypeReference (required).</param>
-        /// <param name="valueTypeReference">valueTypeReference (required).</param>
+        /// <param name="keyTypePointer">keyTypePointer (required).</param>
+        /// <param name="valueTypePointer">valueTypePointer (required).</param>
         /// <param name="canOwn">Whether the entries of the key-value store are allowed to own child nodes. (required).</param>
-        public KeyValueBlueprintCollectionSchemaAllOf(BlueprintTypeReference keyTypeReference = default(BlueprintTypeReference), BlueprintTypeReference valueTypeReference = default(BlueprintTypeReference), bool canOwn = default(bool))
+        public KeyValueBlueprintCollectionSchemaAllOf(TypePointer keyTypePointer = default(TypePointer), TypePointer valueTypePointer = default(TypePointer), bool canOwn = default(bool))
         {
-            // to ensure "keyTypeReference" is required (not null)
-            if (keyTypeReference == null)
+            // to ensure "keyTypePointer" is required (not null)
+            if (keyTypePointer == null)
             {
-                throw new ArgumentNullException("keyTypeReference is a required property for KeyValueBlueprintCollectionSchemaAllOf and cannot be null");
+                throw new ArgumentNullException("keyTypePointer is a required property for KeyValueBlueprintCollectionSchemaAllOf and cannot be null");
             }
-            this.KeyTypeReference = keyTypeReference;
-            // to ensure "valueTypeReference" is required (not null)
-            if (valueTypeReference == null)
+            this.KeyTypePointer = keyTypePointer;
+            // to ensure "valueTypePointer" is required (not null)
+            if (valueTypePointer == null)
             {
-                throw new ArgumentNullException("valueTypeReference is a required property for KeyValueBlueprintCollectionSchemaAllOf and cannot be null");
+                throw new ArgumentNullException("valueTypePointer is a required property for KeyValueBlueprintCollectionSchemaAllOf and cannot be null");
             }
-            this.ValueTypeReference = valueTypeReference;
+            this.ValueTypePointer = valueTypePointer;
             this.CanOwn = canOwn;
         }
 
         /// <summary>
-        /// Gets or Sets KeyTypeReference
+        /// Gets or Sets KeyTypePointer
         /// </summary>
-        [DataMember(Name = "key_type_reference", IsRequired = true, EmitDefaultValue = true)]
-        public BlueprintTypeReference KeyTypeReference { get; set; }
+        [DataMember(Name = "key_type_pointer", IsRequired = true, EmitDefaultValue = true)]
+        public TypePointer KeyTypePointer { get; set; }
 
         /// <summary>
-        /// Gets or Sets ValueTypeReference
+        /// Gets or Sets ValueTypePointer
         /// </summary>
-        [DataMember(Name = "value_type_reference", IsRequired = true, EmitDefaultValue = true)]
-        public BlueprintTypeReference ValueTypeReference { get; set; }
+        [DataMember(Name = "value_type_pointer", IsRequired = true, EmitDefaultValue = true)]
+        public TypePointer ValueTypePointer { get; set; }
 
         /// <summary>
         /// Whether the entries of the key-value store are allowed to own child nodes.
@@ -150,8 +150,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class KeyValueBlueprintCollectionSchemaAllOf {\n");
-            sb.Append("  KeyTypeReference: ").Append(KeyTypeReference).Append("\n");
-            sb.Append("  ValueTypeReference: ").Append(ValueTypeReference).Append("\n");
+            sb.Append("  KeyTypePointer: ").Append(KeyTypePointer).Append("\n");
+            sb.Append("  ValueTypePointer: ").Append(ValueTypePointer).Append("\n");
             sb.Append("  CanOwn: ").Append(CanOwn).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -189,14 +189,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.KeyTypeReference == input.KeyTypeReference ||
-                    (this.KeyTypeReference != null &&
-                    this.KeyTypeReference.Equals(input.KeyTypeReference))
+                    this.KeyTypePointer == input.KeyTypePointer ||
+                    (this.KeyTypePointer != null &&
+                    this.KeyTypePointer.Equals(input.KeyTypePointer))
                 ) && 
                 (
-                    this.ValueTypeReference == input.ValueTypeReference ||
-                    (this.ValueTypeReference != null &&
-                    this.ValueTypeReference.Equals(input.ValueTypeReference))
+                    this.ValueTypePointer == input.ValueTypePointer ||
+                    (this.ValueTypePointer != null &&
+                    this.ValueTypePointer.Equals(input.ValueTypePointer))
                 ) && 
                 (
                     this.CanOwn == input.CanOwn ||
@@ -213,13 +213,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.KeyTypeReference != null)
+                if (this.KeyTypePointer != null)
                 {
-                    hashCode = (hashCode * 59) + this.KeyTypeReference.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyTypePointer.GetHashCode();
                 }
-                if (this.ValueTypeReference != null)
+                if (this.ValueTypePointer != null)
                 {
-                    hashCode = (hashCode * 59) + this.ValueTypeReference.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ValueTypePointer.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.CanOwn.GetHashCode();
                 return hashCode;

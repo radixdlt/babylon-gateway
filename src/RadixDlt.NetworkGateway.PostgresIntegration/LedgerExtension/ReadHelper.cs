@@ -289,6 +289,13 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.VaultEntityId, e => (EntityNonFungibleVaultHistory)e, token);
     }
 
+    // public async Task<> MostRecentPackageDefinitionHistory(List<PackageChange> packageChanges, CancellationToken token)
+    // {
+    //     var packageIds = packageChanges.Select(x => x.PackageEntityId).Distinct().ToList();
+    //
+    //     return await _dbContext.
+    // }
+
     public async Task<Dictionary<long, NonFungibleIdStoreHistory>> MostRecentNonFungibleIdStoreHistoryFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, CancellationToken token)
     {
         var ids = nonFungibleIdStoreChanges.Select(x => x.ReferencedResource.DatabaseId).Distinct().ToList();

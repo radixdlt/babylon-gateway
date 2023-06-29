@@ -261,7 +261,8 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<GlobalIdentityEntity>(EntityType.GlobalIdentity)
             .HasValue<GlobalOneResourcePoolEntity>(EntityType.GlobalOneResourcePool)
             .HasValue<GlobalTwoResourcePoolEntity>(EntityType.GlobalTwoResourcePool)
-            .HasValue<GlobalMultiResourcePoolEntity>(EntityType.GlobalMultiResourcePool);
+            .HasValue<GlobalMultiResourcePoolEntity>(EntityType.GlobalMultiResourcePool)
+            .HasValue<GlobalTransactionTrackerEntity>(EntityType.GlobalTransactionTracker);
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)

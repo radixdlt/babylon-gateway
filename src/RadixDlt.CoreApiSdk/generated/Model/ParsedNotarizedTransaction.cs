@@ -113,7 +113,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="identifiers">identifiers (required).</param>
         /// <param name="validationError">validationError.</param>
         /// <param name="type">type (required) (default to ParsedTransactionType.NotarizedTransaction).</param>
-        public ParsedNotarizedTransaction(NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), ParsedNotarizedTransactionAllOfIdentifiers identifiers = default(ParsedNotarizedTransactionAllOfIdentifiers), ParsedNotarizedTransactionAllOfValidationError validationError = default(ParsedNotarizedTransactionAllOfValidationError), ParsedTransactionType type = ParsedTransactionType.NotarizedTransaction) : base(type)
+        public ParsedNotarizedTransaction(NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), ParsedNotarizedTransactionIdentifiers identifiers = default(ParsedNotarizedTransactionIdentifiers), ParsedNotarizedTransactionAllOfValidationError validationError = default(ParsedNotarizedTransactionAllOfValidationError), ParsedTransactionType type = ParsedTransactionType.NotarizedTransaction) : base(type)
         {
             // to ensure "identifiers" is required (not null)
             if (identifiers == null)
@@ -135,7 +135,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Identifiers
         /// </summary>
         [DataMember(Name = "identifiers", IsRequired = true, EmitDefaultValue = true)]
-        public ParsedNotarizedTransactionAllOfIdentifiers Identifiers { get; set; }
+        public ParsedNotarizedTransactionIdentifiers Identifiers { get; set; }
 
         /// <summary>
         /// Gets or Sets ValidationError

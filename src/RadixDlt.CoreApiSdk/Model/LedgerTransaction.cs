@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using System;
 using System.Diagnostics;
 
 namespace RadixDlt.CoreApiSdk.Model;
@@ -87,7 +88,7 @@ public partial class LedgerTransaction
     {
         return this switch
         {
-            GenesisLedgerTransaction glt => glt.SystemTransaction.GetPayloadBytes(),
+            GenesisLedgerTransaction glt => glt.IsFlash ? Array.Empty<byte>() : glt.SystemTransaction.GetPayloadBytes(),
             UserLedgerTransaction ult => ult.NotarizedTransaction.GetPayloadBytes(),
             RoundUpdateLedgerTransaction rult => rult.GetPayloadBytes(),
             _ => throw new UnreachableException($"Didn't expect {this.GetType().Name} type"),

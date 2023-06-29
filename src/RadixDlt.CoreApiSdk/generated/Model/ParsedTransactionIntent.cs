@@ -112,7 +112,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="intent">intent.</param>
         /// <param name="identifiers">identifiers (required).</param>
         /// <param name="type">type (required) (default to ParsedTransactionType.TransactionIntent).</param>
-        public ParsedTransactionIntent(TransactionIntent intent = default(TransactionIntent), ParsedTransactionIntentAllOfIdentifiers identifiers = default(ParsedTransactionIntentAllOfIdentifiers), ParsedTransactionType type = ParsedTransactionType.TransactionIntent) : base(type)
+        public ParsedTransactionIntent(TransactionIntent intent = default(TransactionIntent), ParsedTransactionIntentIdentifiers identifiers = default(ParsedTransactionIntentIdentifiers), ParsedTransactionType type = ParsedTransactionType.TransactionIntent) : base(type)
         {
             // to ensure "identifiers" is required (not null)
             if (identifiers == null)
@@ -133,7 +133,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Identifiers
         /// </summary>
         [DataMember(Name = "identifiers", IsRequired = true, EmitDefaultValue = true)]
-        public ParsedTransactionIntentAllOfIdentifiers Identifiers { get; set; }
+        public ParsedTransactionIntentIdentifiers Identifiers { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

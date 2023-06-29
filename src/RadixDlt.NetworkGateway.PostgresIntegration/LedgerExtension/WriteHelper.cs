@@ -96,7 +96,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, divisibility, non_fungible_id_type, code, code_type, stake_vault_entity_id, unstake_vault_entity_id, resource_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, divisibility, non_fungible_id_type, stake_vault_entity_id, unstake_vault_entity_id, resource_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -123,17 +123,6 @@ internal class WriteHelper
             }
             else
             {
-                await writer.WriteNullAsync(token);
-            }
-
-            if (e is GlobalPackageEntity pe)
-            {
-                await writer.WriteAsync(pe.Code, NpgsqlDbType.Bytea, token);
-                await writer.WriteAsync(pe.CodeType, NpgsqlDbType.Text, token);
-            }
-            else
-            {
-                await writer.WriteNullAsync(token);
                 await writer.WriteNullAsync(token);
             }
 

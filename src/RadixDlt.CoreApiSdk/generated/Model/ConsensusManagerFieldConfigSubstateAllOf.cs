@@ -110,7 +110,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="minValidatorReliability">A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
         /// <param name="numOwnerStakeUnitsUnlockEpochs">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the minimum number of epochs before an owner can take their stake units after attempting to withdraw them.  (required).</param>
         /// <param name="numFeeIncreaseDelayEpochs">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the minimum number of epochs before a fee increase takes effect.  (required).</param>
-        public ConsensusManagerFieldConfigSubstateAllOf(long maxValidators = default(long), EpochChangeCondition epochChangeCondition = default(EpochChangeCondition), long numUnstakeEpochs = default(long), string totalEmissionXrdPerEpoch = default(string), string minValidatorReliability = default(string), long numOwnerStakeUnitsUnlockEpochs = default(long), long numFeeIncreaseDelayEpochs = default(long))
+        /// <param name="validatorCreationXrdCost">The amount of XRD required to be passed in a bucket to create a validator. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        public ConsensusManagerFieldConfigSubstateAllOf(long maxValidators = default(long), EpochChangeCondition epochChangeCondition = default(EpochChangeCondition), long numUnstakeEpochs = default(long), string totalEmissionXrdPerEpoch = default(string), string minValidatorReliability = default(string), long numOwnerStakeUnitsUnlockEpochs = default(long), long numFeeIncreaseDelayEpochs = default(long), string validatorCreationXrdCost = default(string))
         {
             this.MaxValidators = maxValidators;
             // to ensure "epochChangeCondition" is required (not null)
@@ -134,6 +135,12 @@ namespace RadixDlt.CoreApiSdk.Model
             this.MinValidatorReliability = minValidatorReliability;
             this.NumOwnerStakeUnitsUnlockEpochs = numOwnerStakeUnitsUnlockEpochs;
             this.NumFeeIncreaseDelayEpochs = numFeeIncreaseDelayEpochs;
+            // to ensure "validatorCreationXrdCost" is required (not null)
+            if (validatorCreationXrdCost == null)
+            {
+                throw new ArgumentNullException("validatorCreationXrdCost is a required property for ConsensusManagerFieldConfigSubstateAllOf and cannot be null");
+            }
+            this.ValidatorCreationXrdCost = validatorCreationXrdCost;
         }
 
         /// <summary>
@@ -185,6 +192,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public long NumFeeIncreaseDelayEpochs { get; set; }
 
         /// <summary>
+        /// The amount of XRD required to be passed in a bucket to create a validator. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// </summary>
+        /// <value>The amount of XRD required to be passed in a bucket to create a validator. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        [DataMember(Name = "validator_creation_xrd_cost", IsRequired = true, EmitDefaultValue = true)]
+        public string ValidatorCreationXrdCost { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -199,6 +213,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  MinValidatorReliability: ").Append(MinValidatorReliability).Append("\n");
             sb.Append("  NumOwnerStakeUnitsUnlockEpochs: ").Append(NumOwnerStakeUnitsUnlockEpochs).Append("\n");
             sb.Append("  NumFeeIncreaseDelayEpochs: ").Append(NumFeeIncreaseDelayEpochs).Append("\n");
+            sb.Append("  ValidatorCreationXrdCost: ").Append(ValidatorCreationXrdCost).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -264,6 +279,11 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.NumFeeIncreaseDelayEpochs == input.NumFeeIncreaseDelayEpochs ||
                     this.NumFeeIncreaseDelayEpochs.Equals(input.NumFeeIncreaseDelayEpochs)
+                ) && 
+                (
+                    this.ValidatorCreationXrdCost == input.ValidatorCreationXrdCost ||
+                    (this.ValidatorCreationXrdCost != null &&
+                    this.ValidatorCreationXrdCost.Equals(input.ValidatorCreationXrdCost))
                 );
         }
 
@@ -292,6 +312,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 }
                 hashCode = (hashCode * 59) + this.NumOwnerStakeUnitsUnlockEpochs.GetHashCode();
                 hashCode = (hashCode * 59) + this.NumFeeIncreaseDelayEpochs.GetHashCode();
+                if (this.ValidatorCreationXrdCost != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValidatorCreationXrdCost.GetHashCode();
+                }
                 return hashCode;
             }
         }

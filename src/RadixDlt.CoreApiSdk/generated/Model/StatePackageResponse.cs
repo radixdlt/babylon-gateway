@@ -103,36 +103,23 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StatePackageResponse" /> class.
         /// </summary>
-        /// <param name="info">info (required).</param>
         /// <param name="royalty">royalty (required).</param>
-        /// <param name="accessRules">accessRules (required).</param>
-        public StatePackageResponse(Substate info = default(Substate), Substate royalty = default(Substate), Substate accessRules = default(Substate))
+        /// <param name="ownerRole">ownerRole (required).</param>
+        public StatePackageResponse(Substate royalty = default(Substate), Substate ownerRole = default(Substate))
         {
-            // to ensure "info" is required (not null)
-            if (info == null)
-            {
-                throw new ArgumentNullException("info is a required property for StatePackageResponse and cannot be null");
-            }
-            this.Info = info;
             // to ensure "royalty" is required (not null)
             if (royalty == null)
             {
                 throw new ArgumentNullException("royalty is a required property for StatePackageResponse and cannot be null");
             }
             this.Royalty = royalty;
-            // to ensure "accessRules" is required (not null)
-            if (accessRules == null)
+            // to ensure "ownerRole" is required (not null)
+            if (ownerRole == null)
             {
-                throw new ArgumentNullException("accessRules is a required property for StatePackageResponse and cannot be null");
+                throw new ArgumentNullException("ownerRole is a required property for StatePackageResponse and cannot be null");
             }
-            this.AccessRules = accessRules;
+            this.OwnerRole = ownerRole;
         }
-
-        /// <summary>
-        /// Gets or Sets Info
-        /// </summary>
-        [DataMember(Name = "info", IsRequired = true, EmitDefaultValue = true)]
-        public Substate Info { get; set; }
 
         /// <summary>
         /// Gets or Sets Royalty
@@ -141,10 +128,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public Substate Royalty { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccessRules
+        /// Gets or Sets OwnerRole
         /// </summary>
-        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public Substate AccessRules { get; set; }
+        [DataMember(Name = "owner_role", IsRequired = true, EmitDefaultValue = true)]
+        public Substate OwnerRole { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -154,9 +141,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StatePackageResponse {\n");
-            sb.Append("  Info: ").Append(Info).Append("\n");
             sb.Append("  Royalty: ").Append(Royalty).Append("\n");
-            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
+            sb.Append("  OwnerRole: ").Append(OwnerRole).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -193,19 +179,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Info == input.Info ||
-                    (this.Info != null &&
-                    this.Info.Equals(input.Info))
-                ) && 
-                (
                     this.Royalty == input.Royalty ||
                     (this.Royalty != null &&
                     this.Royalty.Equals(input.Royalty))
                 ) && 
                 (
-                    this.AccessRules == input.AccessRules ||
-                    (this.AccessRules != null &&
-                    this.AccessRules.Equals(input.AccessRules))
+                    this.OwnerRole == input.OwnerRole ||
+                    (this.OwnerRole != null &&
+                    this.OwnerRole.Equals(input.OwnerRole))
                 );
         }
 
@@ -218,17 +199,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Info != null)
-                {
-                    hashCode = (hashCode * 59) + this.Info.GetHashCode();
-                }
                 if (this.Royalty != null)
                 {
                     hashCode = (hashCode * 59) + this.Royalty.GetHashCode();
                 }
-                if (this.AccessRules != null)
+                if (this.OwnerRole != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
+                    hashCode = (hashCode * 59) + this.OwnerRole.GetHashCode();
                 }
                 return hashCode;
             }

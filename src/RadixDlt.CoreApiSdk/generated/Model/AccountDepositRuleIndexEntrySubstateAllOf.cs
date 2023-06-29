@@ -111,7 +111,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
         /// <param name="depositRule">depositRule.</param>
-        public AccountDepositRuleIndexEntrySubstateAllOf(string resourceAddress = default(string), DepositRule? depositRule = default(DepositRule?))
+        /// <param name="isLocked">isLocked (required).</param>
+        public AccountDepositRuleIndexEntrySubstateAllOf(string resourceAddress = default(string), DepositRule? depositRule = default(DepositRule?), bool isLocked = default(bool))
         {
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
@@ -119,6 +120,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("resourceAddress is a required property for AccountDepositRuleIndexEntrySubstateAllOf and cannot be null");
             }
             this.ResourceAddress = resourceAddress;
+            this.IsLocked = isLocked;
             this.DepositRule = depositRule;
         }
 
@@ -130,6 +132,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public string ResourceAddress { get; set; }
 
         /// <summary>
+        /// Gets or Sets IsLocked
+        /// </summary>
+        [DataMember(Name = "is_locked", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsLocked { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -139,6 +147,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class AccountDepositRuleIndexEntrySubstateAllOf {\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("  DepositRule: ").Append(DepositRule).Append("\n");
+            sb.Append("  IsLocked: ").Append(IsLocked).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -182,6 +191,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.DepositRule == input.DepositRule ||
                     this.DepositRule.Equals(input.DepositRule)
+                ) && 
+                (
+                    this.IsLocked == input.IsLocked ||
+                    this.IsLocked.Equals(input.IsLocked)
                 );
         }
 
@@ -199,6 +212,7 @@ namespace RadixDlt.CoreApiSdk.Model
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.DepositRule.GetHashCode();
+                hashCode = (hashCode * 59) + this.IsLocked.GetHashCode();
                 return hashCode;
             }
         }

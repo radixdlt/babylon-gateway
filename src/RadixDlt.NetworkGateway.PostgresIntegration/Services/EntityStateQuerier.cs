@@ -209,7 +209,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     var packageRoyaltyVaultBalance = royaltyVaultsBalance?.SingleOrDefault(x => x.OwnerEntityId == pe.Id)?.Balance;
 
                     details = new GatewayModel.StateEntityDetailsResponsePackageDetails(
-                        codeHex: pe.Code?.ToHex(),
+                        codeHex: "missing...", // TODO restore pe.Code?.ToHex(),
                         royaltyVaultBalance: packageRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(packageRoyaltyVaultBalance).ToString() : null
                         );
                     break;
