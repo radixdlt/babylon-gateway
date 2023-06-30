@@ -654,6 +654,36 @@ internal class WriteHelper
         return entities.Count;
     }
 
+    public async Task<int> CopyPackageDefinitionHistory(ICollection<PackageDefinitionHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY package_definition_history (id, from_state_version, package_entity_id, code_hash, code, vm_type, schema_hash, schema, blueprint_name, blueprint_version, blueprint) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.PackageEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.CodeHash, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.Code, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.VmType, "package_vm_type", token);
+            await writer.WriteAsync(e.SchemaHash, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.Schema, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.BlueprintName, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.BlueprintVersion, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.Blueprint, NpgsqlDbType.Jsonb, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
     public async Task UpdateSequences(SequencesHolder sequences, CancellationToken token)
     {
         var cd = new CommandDefinition(
@@ -676,7 +706,8 @@ SELECT
     setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence),
     setval('validator_public_key_history_id_seq', @validatorPublicKeyHistorySequence),
     setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence),
-    setval('ledger_transaction_markers_id_seq', @ledgerTransactionMarkerSequence)",
+    setval('ledger_transaction_markers_id_seq', @ledgerTransactionMarkerSequence),
+    setval('package_definition_history_id_seq', @packageDefinitionHistorySequence)",
             parameters: new
             {
                 accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
@@ -697,6 +728,7 @@ SELECT
                 validatorPublicKeyHistorySequence = sequences.ValidatorPublicKeyHistorySequence,
                 validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,
                 ledgerTransactionMarkerSequence = sequences.LedgerTransactionMarkerSequence,
+                packageDefinitionHistorySequence = sequences.PackageDefinitionHistorySequence,
             },
             cancellationToken: token);
 

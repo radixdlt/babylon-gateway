@@ -454,7 +454,8 @@ SELECT
     nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence,
     nextval('validator_public_key_history_id_seq') AS ValidatorPublicKeyHistorySequence,
     nextval('validator_active_set_history_id_seq') AS ValidatorActiveSetHistorySequence,
-    nextval('ledger_transaction_markers_id_seq') AS LedgerTransactionMarkerSequence",
+    nextval('ledger_transaction_markers_id_seq') AS LedgerTransactionMarkerSequence,
+    nextval('package_definition_history_id_seq') AS PackageDefinitionHistorySequence",
             cancellationToken: token);
 
         return await _connection.QueryFirstAsync<SequencesHolder>(cd);

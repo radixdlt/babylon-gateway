@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -83,15 +84,24 @@ public class PackageDefinitionHistory
     [Column("code_hash")]
     public byte[] CodeHash { get; set; }
 
-    [Column("schema_hash")]
-    public byte[] SchemaHash { get; set; }
-
     [Column("code")]
     public byte[] Code { get; set; }
 
     [Column("vm_type")]
-    public object VmType { get; set; } // TODO add enum VmType
+    public PackageVmType VmType { get; set; }
 
-    [Column("schema", TypeName = "jsonb")]
-    public string Schema { get; set; }
+    [Column("schema_hash")]
+    public byte[] SchemaHash { get; set; }
+
+    [Column("schema")]
+    public byte[] Schema { get; set; }
+
+    [Column("blueprint_name")]
+    public string BlueprintName { get; set; }
+
+    [Column("blueprint_version")]
+    public string BlueprintVersion { get; set; }
+
+    [Column("blueprint", TypeName = "jsonb")]
+    public string Blueprint { get; set; }
 }

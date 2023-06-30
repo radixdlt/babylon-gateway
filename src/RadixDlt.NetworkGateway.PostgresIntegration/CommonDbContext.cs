@@ -123,6 +123,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityAccessRulesChainHistory> EntityAccessRulesChainHistory => Set<EntityAccessRulesChainHistory>();
 
+    public DbSet<PackageDefinitionHistory> PackageDefinitionHistory => Set<PackageDefinitionHistory>();
+
     public DbSet<ComponentSchema> ComponentSchema => Set<ComponentSchema>();
 
     public CommonDbContext(DbContextOptions options)
@@ -144,6 +146,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOperationType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOriginType>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
+        modelBuilder.HasPostgresEnum<PackageVmType>();
         modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();
         modelBuilder.HasPostgresEnum<ResourceType>();

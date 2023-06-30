@@ -93,6 +93,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update")
                 .Annotation("Npgsql:Enum:non_fungible_id_type", "string,integer,bytes,ruid")
+                .Annotation("Npgsql:Enum:package_vm_type", "native,scrypto_v1")
                 .Annotation("Npgsql:Enum:pending_transaction_status", "submitted_or_known_in_node_mempool,missing,rejected_temporarily,rejected_permanently,committed_success,committed_failure")
                 .Annotation("Npgsql:Enum:public_key_type", "ecdsa_secp256k1,eddsa_ed25519")
                 .Annotation("Npgsql:Enum:resource_type", "fungible,non_fungible");
@@ -424,6 +425,28 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "package_definition_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    package_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    code_hash = table.Column<byte[]>(type: "bytea", nullable: false),
+                    code = table.Column<byte[]>(type: "bytea", nullable: false),
+                    vm_type = table.Column<PackageVmType>(type: "package_vm_type", nullable: false),
+                    schema_hash = table.Column<byte[]>(type: "bytea", nullable: false),
+                    schema = table.Column<byte[]>(type: "bytea", nullable: false),
+                    blueprint_name = table.Column<string>(type: "text", nullable: false),
+                    blueprint_version = table.Column<string>(type: "text", nullable: false),
+                    blueprint = table.Column<string>(type: "jsonb", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_package_definition_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "pending_transactions",
                 columns: table => new
                 {
@@ -733,6 +756,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "non_fungible_id_store_history");
+
+            migrationBuilder.DropTable(
+                name: "package_definition_history");
 
             migrationBuilder.DropTable(
                 name: "pending_transactions");

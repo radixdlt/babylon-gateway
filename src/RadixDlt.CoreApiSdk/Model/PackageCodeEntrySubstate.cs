@@ -68,7 +68,10 @@ namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class PackageCodeEntrySubstate
 {
+    private byte[] _codeHashBytes;
     private byte[] _codeBytes;
+
+    public byte[] GetCodeHashBytes() => _codeHashBytes ??= Convert.FromHexString(Key.CodeHash);
 
     public byte[] GetCodeBytes() => _codeBytes ??= Convert.FromHexString(CodeHex);
 }

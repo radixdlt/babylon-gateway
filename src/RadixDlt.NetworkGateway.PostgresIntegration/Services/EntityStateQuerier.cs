@@ -149,6 +149,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var entities = await GetEntities(addresses, ledgerState, token);
         var componentEntities = entities.OfType<ComponentEntity>().ToList();
         var resourceEntities = entities.OfType<ResourceEntity>().ToList();
+        var packageEntities = entities.OfType<GlobalPackageEntity>().ToList();
 
         // TODO ideally we'd like to run those in parallel
         var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
@@ -156,6 +157,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var stateHistory = await GetStateHistory(componentEntities, ledgerState, token);
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, componentEntities, ledgerState, token);
         var resourcesSupplyData = await GetResourcesSupplyData(resourceEntities.Select(x => x.Id).ToArray(), ledgerState, token);
+        var packageDefinitions = await GetPackageDefinitionHistory(packageEntities.Select(e => e.Id).ToArray(), ledgerState, token);
 
         var royaltyVaultsBalance = componentEntities.Any() && (optIns.ComponentRoyaltyVaultBalance || optIns.PackageRoyaltyVaultBalance)
             ? await RoyaltyVaultBalance(componentEntities.Select(x => x.Id).ToArray(), ledgerState, token)
@@ -209,7 +211,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     var packageRoyaltyVaultBalance = royaltyVaultsBalance?.SingleOrDefault(x => x.OwnerEntityId == pe.Id)?.Balance;
 
                     details = new GatewayModel.StateEntityDetailsResponsePackageDetails(
-                        codeHex: "missing...", // TODO restore pe.Code?.ToHex(),
+                        codeHex: packageDefinitions[entity.Id].Code.ToHex(),
                         royaltyVaultBalance: packageRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(packageRoyaltyVaultBalance).ToString() : null
                         );
                     break;
@@ -1644,6 +1646,30 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) esh ON TRUE;")
             .ToDictionaryAsync(e => e.EntityId, token);
+    }
+
+    private async Task<Dictionary<long, PackageDefinitionHistory>> GetPackageDefinitionHistory(long[] entityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    {
+        if (!entityIds.Any())
+        {
+            return new Dictionary<long, PackageDefinitionHistory>();
+        }
+
+        // TODO we do not want to select package's code unless explicitly requested as it may be a truly massive payload
+        var result = await _dbContext.PackageDefinitionHistory.FromSqlInterpolated($@"
+WITH variables (entity_id) AS (SELECT UNNEST({entityIds}))
+SELECT pdh.*
+FROM variables
+INNER JOIN LATERAL(
+    SELECT *
+    FROM package_definition_history
+    WHERE from_state_version <= {ledgerState.StateVersion} AND package_entity_id = variables.entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) pdh ON true")
+            .ToDictionaryAsync(e => e.PackageEntityId, token);
+
+        return result;
     }
 
     private async Task<Dictionary<long, EntityAddress>> GetCorrelatedEntityAddresses(ICollection<Entity> entities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)

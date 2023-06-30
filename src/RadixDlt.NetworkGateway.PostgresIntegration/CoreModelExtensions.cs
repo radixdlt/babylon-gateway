@@ -62,91 +62,63 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-internal record FungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion);
-
-internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsWithdrawal, long StateVersion);
-
-internal record NonFungibleIdChange(ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
-
-internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, bool IsLocked, long StateVersion); // TODO use ScryptoSbor.String/ValueButes Key, ScryptoSbor.Enum/ValueBytes? Value
-
-internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, TokenAmount? TotalSupply = null, TokenAmount? Minted = null, TokenAmount? Burned = null);
-
-internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
-
-internal record PackageChange(long PackageEntityId, byte[] CodeHash, byte[] Code, PackageVmType VmType, byte[] SchemaHash, byte[] Schema, string BlueprintName, string BlueprintVersion, string Blueprint, long StateVersion);
-
-internal record PackageChangeBuilder(long PackageEntityId, long StateVersion)
+internal static class CoreModelExtensions
 {
-    private byte[]? _codeHash;
-    private byte[]? _code;
-    private PackageVmType? _vmType;
-    private byte[]? _schemaHash;
-    private byte[]? _schema;
-    private string? _blueprintName;
-    private string? _blueprintVersion;
-    private string? _blueprint;
-
-    public void WithCode(byte[] codeHash, byte[] code, PackageVmType vmType)
+    public static LedgerTransactionStatus ToModel(this CoreModel.TransactionStatus input)
     {
-        _codeHash = codeHash;
-        _code = code;
-        _vmType = vmType;
+        return input switch
+        {
+            CoreModel.TransactionStatus.Succeeded => LedgerTransactionStatus.Succeeded,
+            CoreModel.TransactionStatus.Failed => LedgerTransactionStatus.Failed,
+            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
+        };
     }
 
-    public void WithSchema(byte[] schemaHash, byte[] schema)
+    public static PublicKeyType ToModel(this CoreModel.PublicKeyType input)
     {
-        _schemaHash = schemaHash;
-        _schema = schema;
+        return input switch
+        {
+            CoreModel.PublicKeyType.EcdsaSecp256k1 => PublicKeyType.EcdsaSecp256k1,
+            CoreModel.PublicKeyType.EddsaEd25519 => PublicKeyType.EddsaEd25519,
+            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
+        };
     }
 
-    public void WithBlueprint(string name, string version, string blueprintJson)
+    public static AccountDefaultDepositRule ToModel(this CoreModel.DefaultDepositRule input)
     {
-        _blueprintName = name;
-        _blueprintVersion = version;
-        _blueprint = blueprintJson;
+        return input switch
+        {
+            CoreModel.DefaultDepositRule.Accept => AccountDefaultDepositRule.Accept,
+            CoreModel.DefaultDepositRule.Reject => AccountDefaultDepositRule.Reject,
+            CoreModel.DefaultDepositRule.AllowExisting => AccountDefaultDepositRule.AllowExisting,
+            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
+        };
     }
 
-    public PackageChange Build()
+    public static AccountResourceDepositRule ToModel(this CoreModel.DepositRule input)
     {
-        return new PackageChange(
-            PackageEntityId,
-            _codeHash ?? throw CreateMissingPropertyException(nameof(_codeHash)),
-            _code ?? throw CreateMissingPropertyException(nameof(_code)),
-            _vmType ?? throw CreateMissingPropertyException(nameof(_vmType)),
-            _schemaHash ?? throw CreateMissingPropertyException(nameof(_schemaHash)),
-            _schema ?? throw CreateMissingPropertyException(nameof(_schema)),
-            _blueprintName ?? throw CreateMissingPropertyException(nameof(_blueprintName)),
-            _blueprintVersion ?? throw CreateMissingPropertyException(nameof(_blueprintVersion)),
-            _blueprint ?? throw CreateMissingPropertyException(nameof(_blueprint)),
-            StateVersion);
+        return input switch
+        {
+            CoreModel.DepositRule.Neither => AccountResourceDepositRule.Neither,
+            CoreModel.DepositRule.Allowed => AccountResourceDepositRule.Allowed,
+            CoreModel.DepositRule.Disallowed => AccountResourceDepositRule.Disallowed,
+            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
+        };
     }
 
-    private InvalidOperationException CreateMissingPropertyException(string propertyName)
+    public static PackageVmType ToModel(this CoreModel.VmType input)
     {
-        return new InvalidOperationException($"Incomplete PackageChange definition of PackageEntityId={PackageEntityId} at StateVersion={StateVersion}, missing {propertyName}.");
+        return input switch
+        {
+            CoreModel.VmType.Native => PackageVmType.Native,
+            CoreModel.VmType.ScryptoV1 => PackageVmType.ScryptoV1,
+            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
+        };
     }
 }
-
-internal record struct MetadataLookup(long EntityId, string Key);
-
-internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
-
-internal record struct EntityResourceVaultLookup(long EntityId, long ResourceEntityId);
-
-internal record struct NonFungibleStoreLookup(long NonFungibleEntityId, long StateVersion);
-
-internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFungibleId);
-
-internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);
-
-internal record struct PackageChangeLookup(long PackageEntityId, long StateVersion);

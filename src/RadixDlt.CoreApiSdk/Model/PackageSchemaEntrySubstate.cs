@@ -62,53 +62,13 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using System;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.CoreApiSdk.Model;
 
-internal static class ModelExtensions
+public partial class PackageSchemaEntrySubstate
 {
-    public static LedgerTransactionStatus ToModel(this CoreModel.TransactionStatus input)
-    {
-        return input switch
-        {
-            CoreModel.TransactionStatus.Succeeded => LedgerTransactionStatus.Succeeded,
-            CoreModel.TransactionStatus.Failed => LedgerTransactionStatus.Failed,
-            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
-        };
-    }
+    private byte[] _schemaHashBytes;
 
-    public static PublicKeyType ToModel(this CoreModel.PublicKeyType input)
-    {
-        return input switch
-        {
-            CoreModel.PublicKeyType.EcdsaSecp256k1 => PublicKeyType.EcdsaSecp256k1,
-            CoreModel.PublicKeyType.EddsaEd25519 => PublicKeyType.EddsaEd25519,
-            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
-        };
-    }
-
-    public static AccountDefaultDepositRule ToModel(this CoreModel.DefaultDepositRule input)
-    {
-        return input switch
-        {
-            CoreModel.DefaultDepositRule.Accept => AccountDefaultDepositRule.Accept,
-            CoreModel.DefaultDepositRule.Reject => AccountDefaultDepositRule.Reject,
-            CoreModel.DefaultDepositRule.AllowExisting => AccountDefaultDepositRule.AllowExisting,
-            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
-        };
-    }
-
-    public static AccountResourceDepositRule ToModel(this CoreModel.DepositRule input)
-    {
-        return input switch
-        {
-            CoreModel.DepositRule.Neither => AccountResourceDepositRule.Neither,
-            CoreModel.DepositRule.Allowed => AccountResourceDepositRule.Allowed,
-            CoreModel.DepositRule.Disallowed => AccountResourceDepositRule.Disallowed,
-            _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
-        };
-    }
+    public byte[] GetSchemaHashBytes() => _schemaHashBytes ??= Convert.FromHexString(Key.SchemaHash);
 }

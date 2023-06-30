@@ -719,7 +719,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var metadataChanges = new List<MetadataChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
-        var packageChanges = new List<ValidatorSetChange>();
+        var packageChangeBuilders = new Dictionary<PackageChangeLookup, PackageChangeBuilder>();
         var entityAccessRulesChainHistoryToAdd = new List<EntityAccessRulesChainHistory>();
         var entityStateToAdd = new List<EntityStateHistory>();
         var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>();
@@ -899,6 +899,42 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 ResourceEntityId = referencedEntities.Get((EntityAddress)accountDepositRule.Key.ResourceAddress).DatabaseId,
                                 ResourceDepositRule = accountDepositRule.DepositRule.Value.ToModel(),
                             });
+                        }
+
+                        if (substateData is CoreModel.PackageCodeEntrySubstate packageCode)
+                        {
+                            packageChangeBuilders
+                                .GetOrAdd(new PackageChangeLookup(referencedEntity.DatabaseId, stateVersion), l => new PackageChangeBuilder(l.PackageEntityId, l.StateVersion))
+                                .WithCode(packageCode.GetCodeHashBytes(), packageCode.GetCodeBytes(), packageCode.VmType.ToModel());
+                        }
+
+                        if (substateData is CoreModel.PackageSchemaEntrySubstate packageSchema)
+                        {
+                            packageChangeBuilders
+                                .GetOrAdd(new PackageChangeLookup(referencedEntity.DatabaseId, stateVersion), l => new PackageChangeBuilder(l.PackageEntityId, l.StateVersion))
+                                .WithSchema(packageSchema.GetSchemaHashBytes(), packageSchema.Schema.SborData.GetDataBytes());
+                        }
+
+                        if (substateData is CoreModel.PackageBlueprintDefinitionEntrySubstate packageBlueprintDefinition)
+                        {
+                            packageChangeBuilders
+                                .GetOrAdd(new PackageChangeLookup(referencedEntity.DatabaseId, stateVersion), l => new PackageChangeBuilder(l.PackageEntityId, l.StateVersion))
+                                .WithBlueprint(packageBlueprintDefinition.Key.BlueprintName, packageBlueprintDefinition.Key.BlueprintVersion, packageBlueprintDefinition.Definition.ToJson());
+                        }
+
+                        if (substateData is CoreModel.PackageBlueprintDependenciesEntrySubstate)
+                        {
+                            // no-op so far
+                        }
+
+                        if (substateData is CoreModel.PackageBlueprintRoyaltyEntrySubstate)
+                        {
+                            // no-op so far but we should most likely store this information separately from package itself
+                        }
+
+                        if (substateData is CoreModel.PackageBlueprintAuthTemplateEntrySubstate)
+                        {
+                            // no-op so far but we should most likely store this information separately from package itself
                         }
                     }
 
@@ -1589,6 +1625,24 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 })
                 .ToList();
 
+            var packageDefinitionHistoryToAdd = packageChangeBuilders
+                .Select(kvp => kvp.Value.Build())
+                .Select(pc => new PackageDefinitionHistory
+                {
+                    Id = sequences.PackageDefinitionHistorySequence++,
+                    FromStateVersion = pc.StateVersion,
+                    PackageEntityId = pc.PackageEntityId,
+                    CodeHash = pc.CodeHash,
+                    Code = pc.Code,
+                    VmType = pc.VmType,
+                    SchemaHash = pc.SchemaHash,
+                    Schema = pc.Schema,
+                    BlueprintName = pc.BlueprintName,
+                    BlueprintVersion = pc.BlueprintVersion,
+                    Blueprint = pc.Blueprint,
+                })
+                .ToList();
+
             var entityResourceAggregateHistoryToAdd = entityResourceAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()).ToList();
 
             sw = Stopwatch.StartNew();
@@ -1610,6 +1664,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorKeyHistory(validatorKeyHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyPackageDefinitionHistory(packageDefinitionHistoryToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);
 
             dbWriteDuration += sw.Elapsed;

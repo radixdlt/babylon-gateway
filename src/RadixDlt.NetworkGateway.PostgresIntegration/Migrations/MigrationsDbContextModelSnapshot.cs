@@ -100,6 +100,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_type", new[] { "genesis", "user", "round_update" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "non_fungible_id_type", new[] { "string", "integer", "bytes", "ruid" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "package_vm_type", new[] { "native", "scrypto_v1" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_status", new[] { "submitted_or_known_in_node_mempool", "missing", "rejected_temporarily", "rejected_permanently", "committed_success", "committed_failure" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public_key_type", new[] { "ecdsa_secp256k1", "eddsa_ed25519" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "resource_type", new[] { "fungible", "non_fungible" });
@@ -761,6 +762,67 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("non_fungible_id_store_history");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageDefinitionHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Blueprint")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("blueprint");
+
+                    b.Property<string>("BlueprintName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_name");
+
+                    b.Property<string>("BlueprintVersion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_version");
+
+                    b.Property<byte[]>("Code")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("code");
+
+                    b.Property<byte[]>("CodeHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("code_hash");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("PackageEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("package_entity_id");
+
+                    b.Property<byte[]>("Schema")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("schema");
+
+                    b.Property<byte[]>("SchemaHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("schema_hash");
+
+                    b.Property<PackageVmType>("VmType")
+                        .HasColumnType("package_vm_type")
+                        .HasColumnName("vm_type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("package_definition_history");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransaction", b =>
                 {
                     b.Property<long>("Id")
@@ -1173,6 +1235,17 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalTransactionTrackerEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.Property<string>("BlueprintName")
+                        .IsRequired()
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("text")
+                        .HasColumnName("blueprint_name");
+
+                    b.Property<long>("PackageId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("package_id");
 
                     b.ToTable("entities");
 
