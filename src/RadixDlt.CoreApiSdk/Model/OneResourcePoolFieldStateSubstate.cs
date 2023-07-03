@@ -70,11 +70,11 @@ public partial class OneResourcePoolFieldStateSubstate : IEntityAddressPointer, 
 {
     public IEnumerable<string> GetEntityAddresses()
     {
-        yield return PoolUnitResourceAddress;
+        yield return Value.PoolUnitResourceAddress;
     }
 
     public IEnumerable<EntityReference> GetOwnedEntities()
     {
-        yield return Vault;
+        yield return Value.Vault;
     }
 }

@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -150,24 +152,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="GenericScryptoComponentFieldStateSubstate" /> class.
         /// </summary>
-        /// <param name="dataStruct">dataStruct (required).</param>
+        /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.GenericScryptoComponentFieldState).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public GenericScryptoComponentFieldStateSubstate(DataStruct dataStruct = default(DataStruct), SubstateType substateType = SubstateType.GenericScryptoComponentFieldState, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public GenericScryptoComponentFieldStateSubstate(GenericScryptoComponentFieldStateValue value = default(GenericScryptoComponentFieldStateValue), SubstateType substateType = SubstateType.GenericScryptoComponentFieldState, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            // to ensure "dataStruct" is required (not null)
-            if (dataStruct == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("dataStruct is a required property for GenericScryptoComponentFieldStateSubstate and cannot be null");
+                throw new ArgumentNullException("value is a required property for GenericScryptoComponentFieldStateSubstate and cannot be null");
             }
-            this.DataStruct = dataStruct;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets DataStruct
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "data_struct", IsRequired = true, EmitDefaultValue = true)]
-        public DataStruct DataStruct { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public GenericScryptoComponentFieldStateValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -178,7 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class GenericScryptoComponentFieldStateSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -215,9 +217,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.DataStruct == input.DataStruct ||
-                    (this.DataStruct != null &&
-                    this.DataStruct.Equals(input.DataStruct))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -230,9 +232,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.DataStruct != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

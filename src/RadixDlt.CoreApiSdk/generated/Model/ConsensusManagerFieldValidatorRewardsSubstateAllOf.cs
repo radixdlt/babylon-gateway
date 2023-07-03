@@ -103,35 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsensusManagerFieldValidatorRewardsSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="proposerRewards">proposerRewards (required).</param>
-        /// <param name="rewardsVault">rewardsVault (required).</param>
-        public ConsensusManagerFieldValidatorRewardsSubstateAllOf(List<ProposerReward> proposerRewards = default(List<ProposerReward>), EntityReference rewardsVault = default(EntityReference))
+        /// <param name="value">value (required).</param>
+        public ConsensusManagerFieldValidatorRewardsSubstateAllOf(ConsensusManagerFieldValidatorRewardsValue value = default(ConsensusManagerFieldValidatorRewardsValue))
         {
-            // to ensure "proposerRewards" is required (not null)
-            if (proposerRewards == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("proposerRewards is a required property for ConsensusManagerFieldValidatorRewardsSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for ConsensusManagerFieldValidatorRewardsSubstateAllOf and cannot be null");
             }
-            this.ProposerRewards = proposerRewards;
-            // to ensure "rewardsVault" is required (not null)
-            if (rewardsVault == null)
-            {
-                throw new ArgumentNullException("rewardsVault is a required property for ConsensusManagerFieldValidatorRewardsSubstateAllOf and cannot be null");
-            }
-            this.RewardsVault = rewardsVault;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets ProposerRewards
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "proposer_rewards", IsRequired = true, EmitDefaultValue = true)]
-        public List<ProposerReward> ProposerRewards { get; set; }
-
-        /// <summary>
-        /// Gets or Sets RewardsVault
-        /// </summary>
-        [DataMember(Name = "rewards_vault", IsRequired = true, EmitDefaultValue = true)]
-        public EntityReference RewardsVault { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public ConsensusManagerFieldValidatorRewardsValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,8 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ConsensusManagerFieldValidatorRewardsSubstateAllOf {\n");
-            sb.Append("  ProposerRewards: ").Append(ProposerRewards).Append("\n");
-            sb.Append("  RewardsVault: ").Append(RewardsVault).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,15 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ProposerRewards == input.ProposerRewards ||
-                    this.ProposerRewards != null &&
-                    input.ProposerRewards != null &&
-                    this.ProposerRewards.SequenceEqual(input.ProposerRewards)
-                ) && 
-                (
-                    this.RewardsVault == input.RewardsVault ||
-                    (this.RewardsVault != null &&
-                    this.RewardsVault.Equals(input.RewardsVault))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -200,13 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ProposerRewards != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.ProposerRewards.GetHashCode();
-                }
-                if (this.RewardsVault != null)
-                {
-                    hashCode = (hashCode * 59) + this.RewardsVault.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

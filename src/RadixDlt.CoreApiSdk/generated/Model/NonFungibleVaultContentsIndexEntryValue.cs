@@ -90,39 +90,31 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// RoyaltyConfig
+    /// This object is empty, and always present on this substate. Note that when a non-fungible is withdrawn from the vault, the full substate is deleted, which is marked by a DeletedSubstate action (rather than deletion of the value property in an UpdateSubstate action). This is because this is an Index entry, not a KeyValueStore entry. 
     /// </summary>
-    [DataContract(Name = "RoyaltyConfig")]
-    public partial class RoyaltyConfig : IEquatable<RoyaltyConfig>
+    [DataContract(Name = "NonFungibleVaultContentsIndexEntryValue")]
+    public partial class NonFungibleVaultContentsIndexEntryValue : IEquatable<NonFungibleVaultContentsIndexEntryValue>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RoyaltyConfig" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleVaultContentsIndexEntryValue" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected RoyaltyConfig() { }
+        protected NonFungibleVaultContentsIndexEntryValue() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="RoyaltyConfig" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleVaultContentsIndexEntryValue" /> class.
         /// </summary>
-        /// <param name="isEnabled">isEnabled (required).</param>
-        /// <param name="methodRules">The royalty rules by method. The array is only present if royalties are enabled..</param>
-        public RoyaltyConfig(bool isEnabled = default(bool), List<MethodRoyalty> methodRules = default(List<MethodRoyalty>))
+        /// <param name="isPresent">This is a dummy property which is always set to true and means nothing. It exists just to ensure this object has a well-defined type in OpenAPI schemas.  (required).</param>
+        public NonFungibleVaultContentsIndexEntryValue(bool isPresent = default(bool))
         {
-            this.IsEnabled = isEnabled;
-            this.MethodRules = methodRules;
+            this.IsPresent = isPresent;
         }
 
         /// <summary>
-        /// Gets or Sets IsEnabled
+        /// This is a dummy property which is always set to true and means nothing. It exists just to ensure this object has a well-defined type in OpenAPI schemas. 
         /// </summary>
-        [DataMember(Name = "is_enabled", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsEnabled { get; set; }
-
-        /// <summary>
-        /// The royalty rules by method. The array is only present if royalties are enabled.
-        /// </summary>
-        /// <value>The royalty rules by method. The array is only present if royalties are enabled.</value>
-        [DataMember(Name = "method_rules", EmitDefaultValue = true)]
-        public List<MethodRoyalty> MethodRules { get; set; }
+        /// <value>This is a dummy property which is always set to true and means nothing. It exists just to ensure this object has a well-defined type in OpenAPI schemas. </value>
+        [DataMember(Name = "is_present", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsPresent { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -131,9 +123,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class RoyaltyConfig {\n");
-            sb.Append("  IsEnabled: ").Append(IsEnabled).Append("\n");
-            sb.Append("  MethodRules: ").Append(MethodRules).Append("\n");
+            sb.Append("class NonFungibleVaultContentsIndexEntryValue {\n");
+            sb.Append("  IsPresent: ").Append(IsPresent).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -154,15 +145,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as RoyaltyConfig);
+            return this.Equals(input as NonFungibleVaultContentsIndexEntryValue);
         }
 
         /// <summary>
-        /// Returns true if RoyaltyConfig instances are equal
+        /// Returns true if NonFungibleVaultContentsIndexEntryValue instances are equal
         /// </summary>
-        /// <param name="input">Instance of RoyaltyConfig to be compared</param>
+        /// <param name="input">Instance of NonFungibleVaultContentsIndexEntryValue to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(RoyaltyConfig input)
+        public bool Equals(NonFungibleVaultContentsIndexEntryValue input)
         {
             if (input == null)
             {
@@ -170,14 +161,8 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.IsEnabled == input.IsEnabled ||
-                    this.IsEnabled.Equals(input.IsEnabled)
-                ) && 
-                (
-                    this.MethodRules == input.MethodRules ||
-                    this.MethodRules != null &&
-                    input.MethodRules != null &&
-                    this.MethodRules.SequenceEqual(input.MethodRules)
+                    this.IsPresent == input.IsPresent ||
+                    this.IsPresent.Equals(input.IsPresent)
                 );
         }
 
@@ -190,11 +175,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.IsEnabled.GetHashCode();
-                if (this.MethodRules != null)
-                {
-                    hashCode = (hashCode * 59) + this.MethodRules.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.IsPresent.GetHashCode();
                 return hashCode;
             }
         }

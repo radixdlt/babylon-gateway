@@ -70,6 +70,6 @@ public partial class PackageBlueprintDependenciesEntrySubstate : IEntityAddressP
 {
     public IEnumerable<string> GetEntityAddresses()
     {
-        return Dependencies.Dependencies;
+        return Value.Dependencies.Dependencies;
     }
 }

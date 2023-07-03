@@ -70,9 +70,9 @@ public partial class TwoResourcePoolFieldStateSubstate : IEntityAddressPointer, 
 {
     public IEnumerable<string> GetEntityAddresses()
     {
-        yield return PoolUnitResourceAddress;
+        yield return Value.PoolUnitResourceAddress;
 
-        foreach (var vault in Vaults)
+        foreach (var vault in Value.Vaults)
         {
             yield return vault.ResourceAddress;
         }
@@ -80,7 +80,7 @@ public partial class TwoResourcePoolFieldStateSubstate : IEntityAddressPointer, 
 
     public IEnumerable<EntityReference> GetOwnedEntities()
     {
-        foreach (var poolVault in Vaults)
+        foreach (var poolVault in Value.Vaults)
         {
             yield return poolVault.Vault;
         }

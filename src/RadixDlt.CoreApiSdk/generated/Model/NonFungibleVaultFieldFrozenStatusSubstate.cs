@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -150,24 +152,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleVaultFieldFrozenStatusSubstate" /> class.
         /// </summary>
-        /// <param name="frozenStatus">frozenStatus (required).</param>
+        /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.NonFungibleVaultFieldFrozenStatus).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public NonFungibleVaultFieldFrozenStatusSubstate(FrozenStatus frozenStatus = default(FrozenStatus), SubstateType substateType = SubstateType.NonFungibleVaultFieldFrozenStatus, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public NonFungibleVaultFieldFrozenStatusSubstate(NonFungibleVaultFieldFrozenStatusValue value = default(NonFungibleVaultFieldFrozenStatusValue), SubstateType substateType = SubstateType.NonFungibleVaultFieldFrozenStatus, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            // to ensure "frozenStatus" is required (not null)
-            if (frozenStatus == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("frozenStatus is a required property for NonFungibleVaultFieldFrozenStatusSubstate and cannot be null");
+                throw new ArgumentNullException("value is a required property for NonFungibleVaultFieldFrozenStatusSubstate and cannot be null");
             }
-            this.FrozenStatus = frozenStatus;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets FrozenStatus
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "frozen_status", IsRequired = true, EmitDefaultValue = true)]
-        public FrozenStatus FrozenStatus { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public NonFungibleVaultFieldFrozenStatusValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -178,7 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleVaultFieldFrozenStatusSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  FrozenStatus: ").Append(FrozenStatus).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -215,9 +217,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.FrozenStatus == input.FrozenStatus ||
-                    (this.FrozenStatus != null &&
-                    this.FrozenStatus.Equals(input.FrozenStatus))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -230,9 +232,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.FrozenStatus != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.FrozenStatus.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

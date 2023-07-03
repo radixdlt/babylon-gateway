@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -142,12 +144,6 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
     public partial class AccountDepositRuleIndexEntrySubstate : Substate, IEquatable<AccountDepositRuleIndexEntrySubstate>
     {
-
-        /// <summary>
-        /// Gets or Sets DepositRule
-        /// </summary>
-        [DataMember(Name = "deposit_rule", EmitDefaultValue = true)]
-        public DepositRule? DepositRule { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountDepositRuleIndexEntrySubstate" /> class.
         /// </summary>
@@ -157,10 +153,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="AccountDepositRuleIndexEntrySubstate" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        /// <param name="depositRule">depositRule.</param>
+        /// <param name="value">value.</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.AccountDepositRuleIndexEntry).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public AccountDepositRuleIndexEntrySubstate(ResourceKey key = default(ResourceKey), DepositRule? depositRule = default(DepositRule?), SubstateType substateType = SubstateType.AccountDepositRuleIndexEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public AccountDepositRuleIndexEntrySubstate(ResourceKey key = default(ResourceKey), AccountDepositRuleIndexEntryValue value = default(AccountDepositRuleIndexEntryValue), SubstateType substateType = SubstateType.AccountDepositRuleIndexEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -168,7 +164,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for AccountDepositRuleIndexEntrySubstate and cannot be null");
             }
             this.Key = key;
-            this.DepositRule = depositRule;
+            this.Value = value;
         }
 
         /// <summary>
@@ -176,6 +172,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
         public ResourceKey Key { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Value
+        /// </summary>
+        [DataMember(Name = "value", EmitDefaultValue = true)]
+        public AccountDepositRuleIndexEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -187,7 +189,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class AccountDepositRuleIndexEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  DepositRule: ").Append(DepositRule).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -229,8 +231,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key.Equals(input.Key))
                 ) && base.Equals(input) && 
                 (
-                    this.DepositRule == input.DepositRule ||
-                    this.DepositRule.Equals(input.DepositRule)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -247,7 +250,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.DepositRule.GetHashCode();
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                }
                 return hashCode;
             }
         }

@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="RoyaltyModuleMethodRoyaltyEntrySubstateAllOf" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        /// <param name="royaltyAmount">royaltyAmount.</param>
-        public RoyaltyModuleMethodRoyaltyEntrySubstateAllOf(MainMethodKey key = default(MainMethodKey), RoyaltyAmount royaltyAmount = default(RoyaltyAmount))
+        /// <param name="value">value.</param>
+        public RoyaltyModuleMethodRoyaltyEntrySubstateAllOf(MainMethodKey key = default(MainMethodKey), RoyaltyModuleMethodRoyaltyEntryValue value = default(RoyaltyModuleMethodRoyaltyEntryValue))
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -113,7 +113,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for RoyaltyModuleMethodRoyaltyEntrySubstateAllOf and cannot be null");
             }
             this.Key = key;
-            this.RoyaltyAmount = royaltyAmount;
+            this.Value = value;
         }
 
         /// <summary>
@@ -123,10 +123,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public MainMethodKey Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets RoyaltyAmount
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "royalty_amount", EmitDefaultValue = true)]
-        public RoyaltyAmount RoyaltyAmount { get; set; }
+        [DataMember(Name = "value", EmitDefaultValue = true)]
+        public RoyaltyModuleMethodRoyaltyEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,7 +137,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class RoyaltyModuleMethodRoyaltyEntrySubstateAllOf {\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  RoyaltyAmount: ").Append(RoyaltyAmount).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,9 +179,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key.Equals(input.Key))
                 ) && 
                 (
-                    this.RoyaltyAmount == input.RoyaltyAmount ||
-                    (this.RoyaltyAmount != null &&
-                    this.RoyaltyAmount.Equals(input.RoyaltyAmount))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -198,9 +198,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                if (this.RoyaltyAmount != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoyaltyAmount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

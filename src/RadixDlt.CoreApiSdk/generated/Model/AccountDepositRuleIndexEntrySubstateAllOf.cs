@@ -95,12 +95,6 @@ namespace RadixDlt.CoreApiSdk.Model
     [DataContract(Name = "AccountDepositRuleIndexEntrySubstate_allOf")]
     public partial class AccountDepositRuleIndexEntrySubstateAllOf : IEquatable<AccountDepositRuleIndexEntrySubstateAllOf>
     {
-
-        /// <summary>
-        /// Gets or Sets DepositRule
-        /// </summary>
-        [DataMember(Name = "deposit_rule", EmitDefaultValue = true)]
-        public DepositRule? DepositRule { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountDepositRuleIndexEntrySubstateAllOf" /> class.
         /// </summary>
@@ -110,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="AccountDepositRuleIndexEntrySubstateAllOf" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        /// <param name="depositRule">depositRule.</param>
-        public AccountDepositRuleIndexEntrySubstateAllOf(ResourceKey key = default(ResourceKey), DepositRule? depositRule = default(DepositRule?))
+        /// <param name="value">value.</param>
+        public AccountDepositRuleIndexEntrySubstateAllOf(ResourceKey key = default(ResourceKey), AccountDepositRuleIndexEntryValue value = default(AccountDepositRuleIndexEntryValue))
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -119,7 +113,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for AccountDepositRuleIndexEntrySubstateAllOf and cannot be null");
             }
             this.Key = key;
-            this.DepositRule = depositRule;
+            this.Value = value;
         }
 
         /// <summary>
@@ -127,6 +121,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
         public ResourceKey Key { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Value
+        /// </summary>
+        [DataMember(Name = "value", EmitDefaultValue = true)]
+        public AccountDepositRuleIndexEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,7 +137,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccountDepositRuleIndexEntrySubstateAllOf {\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  DepositRule: ").Append(DepositRule).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,8 +179,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key.Equals(input.Key))
                 ) && 
                 (
-                    this.DepositRule == input.DepositRule ||
-                    this.DepositRule.Equals(input.DepositRule)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -197,7 +198,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.DepositRule.GetHashCode();
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                }
                 return hashCode;
             }
         }

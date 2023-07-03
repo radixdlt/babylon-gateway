@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -142,12 +144,6 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
     public partial class NonFungibleResourceManagerFieldIdTypeSubstate : Substate, IEquatable<NonFungibleResourceManagerFieldIdTypeSubstate>
     {
-
-        /// <summary>
-        /// Gets or Sets NonFungibleIdType
-        /// </summary>
-        [DataMember(Name = "non_fungible_id_type", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleIdType NonFungibleIdType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourceManagerFieldIdTypeSubstate" /> class.
         /// </summary>
@@ -156,13 +152,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourceManagerFieldIdTypeSubstate" /> class.
         /// </summary>
-        /// <param name="nonFungibleIdType">nonFungibleIdType (required).</param>
+        /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.NonFungibleResourceManagerFieldIdType).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public NonFungibleResourceManagerFieldIdTypeSubstate(NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), SubstateType substateType = SubstateType.NonFungibleResourceManagerFieldIdType, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public NonFungibleResourceManagerFieldIdTypeSubstate(NonFungibleResourceManagerFieldIdTypeValue value = default(NonFungibleResourceManagerFieldIdTypeValue), SubstateType substateType = SubstateType.NonFungibleResourceManagerFieldIdType, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            this.NonFungibleIdType = nonFungibleIdType;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for NonFungibleResourceManagerFieldIdTypeSubstate and cannot be null");
+            }
+            this.Value = value;
         }
+
+        /// <summary>
+        /// Gets or Sets Value
+        /// </summary>
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public NonFungibleResourceManagerFieldIdTypeValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -173,7 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleResourceManagerFieldIdTypeSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -210,8 +217,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.NonFungibleIdType == input.NonFungibleIdType ||
-                    this.NonFungibleIdType.Equals(input.NonFungibleIdType)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -224,7 +232,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                }
                 return hashCode;
             }
         }

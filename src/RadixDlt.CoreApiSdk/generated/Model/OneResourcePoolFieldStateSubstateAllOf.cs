@@ -103,36 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="OneResourcePoolFieldStateSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="vault">vault (required).</param>
-        /// <param name="poolUnitResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
-        public OneResourcePoolFieldStateSubstateAllOf(EntityReference vault = default(EntityReference), string poolUnitResourceAddress = default(string))
+        /// <param name="value">value (required).</param>
+        public OneResourcePoolFieldStateSubstateAllOf(OneResourcePoolFieldStateValue value = default(OneResourcePoolFieldStateValue))
         {
-            // to ensure "vault" is required (not null)
-            if (vault == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("vault is a required property for OneResourcePoolFieldStateSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for OneResourcePoolFieldStateSubstateAllOf and cannot be null");
             }
-            this.Vault = vault;
-            // to ensure "poolUnitResourceAddress" is required (not null)
-            if (poolUnitResourceAddress == null)
-            {
-                throw new ArgumentNullException("poolUnitResourceAddress is a required property for OneResourcePoolFieldStateSubstateAllOf and cannot be null");
-            }
-            this.PoolUnitResourceAddress = poolUnitResourceAddress;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets Vault
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "vault", IsRequired = true, EmitDefaultValue = true)]
-        public EntityReference Vault { get; set; }
-
-        /// <summary>
-        /// The Bech32m-encoded human readable version of the resource address
-        /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the resource address</value>
-        [DataMember(Name = "pool_unit_resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string PoolUnitResourceAddress { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public OneResourcePoolFieldStateValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,8 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class OneResourcePoolFieldStateSubstateAllOf {\n");
-            sb.Append("  Vault: ").Append(Vault).Append("\n");
-            sb.Append("  PoolUnitResourceAddress: ").Append(PoolUnitResourceAddress).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -180,14 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Vault == input.Vault ||
-                    (this.Vault != null &&
-                    this.Vault.Equals(input.Vault))
-                ) && 
-                (
-                    this.PoolUnitResourceAddress == input.PoolUnitResourceAddress ||
-                    (this.PoolUnitResourceAddress != null &&
-                    this.PoolUnitResourceAddress.Equals(input.PoolUnitResourceAddress))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -200,13 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Vault != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.Vault.GetHashCode();
-                }
-                if (this.PoolUnitResourceAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.PoolUnitResourceAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

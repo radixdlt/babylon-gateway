@@ -103,22 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeInfoModuleFieldTypeInfoSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="details">details (required).</param>
-        public TypeInfoModuleFieldTypeInfoSubstateAllOf(TypeInfoDetails details = default(TypeInfoDetails))
+        /// <param name="value">value (required).</param>
+        public TypeInfoModuleFieldTypeInfoSubstateAllOf(TypeInfoModuleFieldTypeInfoValue value = default(TypeInfoModuleFieldTypeInfoValue))
         {
-            // to ensure "details" is required (not null)
-            if (details == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("details is a required property for TypeInfoModuleFieldTypeInfoSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for TypeInfoModuleFieldTypeInfoSubstateAllOf and cannot be null");
             }
-            this.Details = details;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets Details
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
-        public TypeInfoDetails Details { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public TypeInfoModuleFieldTypeInfoValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TypeInfoModuleFieldTypeInfoSubstateAllOf {\n");
-            sb.Append("  Details: ").Append(Details).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,9 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Details == input.Details ||
-                    (this.Details != null &&
-                    this.Details.Equals(input.Details))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -180,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Details != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

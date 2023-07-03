@@ -70,15 +70,15 @@ public partial class ValidatorFieldStateSubstate : IEntityOwner, IEntityAddressP
 {
     public IEnumerable<EntityReference> GetOwnedEntities()
     {
-        yield return StakeXrdVault;
-        yield return PendingXrdWithdrawVault;
-        yield return LockedOwnerStakeUnitVault;
-        yield return PendingOwnerStakeUnitUnlockVault;
+        yield return Value.StakeXrdVault;
+        yield return Value.PendingXrdWithdrawVault;
+        yield return Value.LockedOwnerStakeUnitVault;
+        yield return Value.PendingOwnerStakeUnitUnlockVault;
     }
 
     public IEnumerable<string> GetEntityAddresses()
     {
-        yield return StakeUnitResourceAddress;
-        yield return UnstakeClaimTokenResourceAddress;
+        yield return Value.StakeUnitResourceAddress;
+        yield return Value.UnstakeClaimTokenResourceAddress;
     }
 }

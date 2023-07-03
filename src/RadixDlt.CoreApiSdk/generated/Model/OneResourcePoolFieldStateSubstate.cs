@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -150,38 +152,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="OneResourcePoolFieldStateSubstate" /> class.
         /// </summary>
-        /// <param name="vault">vault (required).</param>
-        /// <param name="poolUnitResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.OneResourcePoolFieldState).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public OneResourcePoolFieldStateSubstate(EntityReference vault = default(EntityReference), string poolUnitResourceAddress = default(string), SubstateType substateType = SubstateType.OneResourcePoolFieldState, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public OneResourcePoolFieldStateSubstate(OneResourcePoolFieldStateValue value = default(OneResourcePoolFieldStateValue), SubstateType substateType = SubstateType.OneResourcePoolFieldState, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            // to ensure "vault" is required (not null)
-            if (vault == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("vault is a required property for OneResourcePoolFieldStateSubstate and cannot be null");
+                throw new ArgumentNullException("value is a required property for OneResourcePoolFieldStateSubstate and cannot be null");
             }
-            this.Vault = vault;
-            // to ensure "poolUnitResourceAddress" is required (not null)
-            if (poolUnitResourceAddress == null)
-            {
-                throw new ArgumentNullException("poolUnitResourceAddress is a required property for OneResourcePoolFieldStateSubstate and cannot be null");
-            }
-            this.PoolUnitResourceAddress = poolUnitResourceAddress;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets Vault
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "vault", IsRequired = true, EmitDefaultValue = true)]
-        public EntityReference Vault { get; set; }
-
-        /// <summary>
-        /// The Bech32m-encoded human readable version of the resource address
-        /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the resource address</value>
-        [DataMember(Name = "pool_unit_resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string PoolUnitResourceAddress { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public OneResourcePoolFieldStateValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -192,8 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class OneResourcePoolFieldStateSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Vault: ").Append(Vault).Append("\n");
-            sb.Append("  PoolUnitResourceAddress: ").Append(PoolUnitResourceAddress).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -230,14 +217,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Vault == input.Vault ||
-                    (this.Vault != null &&
-                    this.Vault.Equals(input.Vault))
-                ) && base.Equals(input) && 
-                (
-                    this.PoolUnitResourceAddress == input.PoolUnitResourceAddress ||
-                    (this.PoolUnitResourceAddress != null &&
-                    this.PoolUnitResourceAddress.Equals(input.PoolUnitResourceAddress))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -250,13 +232,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Vault != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.Vault.GetHashCode();
-                }
-                if (this.PoolUnitResourceAddress != null)
-                {
-                    hashCode = (hashCode * 59) + this.PoolUnitResourceAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -150,24 +152,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsensusManagerFieldCurrentValidatorSetSubstate" /> class.
         /// </summary>
-        /// <param name="validatorSet">validatorSet (required).</param>
+        /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.ConsensusManagerFieldCurrentValidatorSet).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public ConsensusManagerFieldCurrentValidatorSetSubstate(List<ActiveValidator> validatorSet = default(List<ActiveValidator>), SubstateType substateType = SubstateType.ConsensusManagerFieldCurrentValidatorSet, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public ConsensusManagerFieldCurrentValidatorSetSubstate(ConsensusManagerFieldCurrentValidatorSetValue value = default(ConsensusManagerFieldCurrentValidatorSetValue), SubstateType substateType = SubstateType.ConsensusManagerFieldCurrentValidatorSet, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            // to ensure "validatorSet" is required (not null)
-            if (validatorSet == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("validatorSet is a required property for ConsensusManagerFieldCurrentValidatorSetSubstate and cannot be null");
+                throw new ArgumentNullException("value is a required property for ConsensusManagerFieldCurrentValidatorSetSubstate and cannot be null");
             }
-            this.ValidatorSet = validatorSet;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets ValidatorSet
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "validator_set", IsRequired = true, EmitDefaultValue = true)]
-        public List<ActiveValidator> ValidatorSet { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public ConsensusManagerFieldCurrentValidatorSetValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -178,7 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ConsensusManagerFieldCurrentValidatorSetSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  ValidatorSet: ").Append(ValidatorSet).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -215,10 +217,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.ValidatorSet == input.ValidatorSet ||
-                    this.ValidatorSet != null &&
-                    input.ValidatorSet != null &&
-                    this.ValidatorSet.SequenceEqual(input.ValidatorSet)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -231,9 +232,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.ValidatorSet != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.ValidatorSet.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

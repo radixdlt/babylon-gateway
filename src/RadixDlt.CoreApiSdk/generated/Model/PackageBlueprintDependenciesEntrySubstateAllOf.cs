@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="PackageBlueprintDependenciesEntrySubstateAllOf" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        /// <param name="dependencies">dependencies (required).</param>
-        public PackageBlueprintDependenciesEntrySubstateAllOf(BlueprintVersionKey key = default(BlueprintVersionKey), BlueprintDependencies dependencies = default(BlueprintDependencies))
+        /// <param name="value">value (required).</param>
+        public PackageBlueprintDependenciesEntrySubstateAllOf(BlueprintVersionKey key = default(BlueprintVersionKey), PackageBlueprintDependenciesEntryValue value = default(PackageBlueprintDependenciesEntryValue))
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -113,12 +113,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for PackageBlueprintDependenciesEntrySubstateAllOf and cannot be null");
             }
             this.Key = key;
-            // to ensure "dependencies" is required (not null)
-            if (dependencies == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("dependencies is a required property for PackageBlueprintDependenciesEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for PackageBlueprintDependenciesEntrySubstateAllOf and cannot be null");
             }
-            this.Dependencies = dependencies;
+            this.Value = value;
         }
 
         /// <summary>
@@ -128,10 +128,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public BlueprintVersionKey Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets Dependencies
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "dependencies", IsRequired = true, EmitDefaultValue = true)]
-        public BlueprintDependencies Dependencies { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public PackageBlueprintDependenciesEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,7 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class PackageBlueprintDependenciesEntrySubstateAllOf {\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  Dependencies: ").Append(Dependencies).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -184,9 +184,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key.Equals(input.Key))
                 ) && 
                 (
-                    this.Dependencies == input.Dependencies ||
-                    (this.Dependencies != null &&
-                    this.Dependencies.Equals(input.Dependencies))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -203,9 +203,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                if (this.Dependencies != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.Dependencies.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

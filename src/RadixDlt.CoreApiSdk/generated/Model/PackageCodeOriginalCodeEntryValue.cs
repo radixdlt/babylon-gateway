@@ -84,105 +84,35 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// PackageCodeEntrySubstate
+    /// PackageCodeOriginalCodeEntryValue
     /// </summary>
-    [DataContract(Name = "PackageCodeEntrySubstate")]
-    [JsonConverter(typeof(JsonSubtypes), "substate_type")]
-    [JsonSubtypes.KnownSubType(typeof(AccessControllerFieldStateSubstate), "AccessControllerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesModuleFieldOwnerRoleSubstate), "AccessRulesModuleFieldOwnerRole")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesModuleRuleEntrySubstate), "AccessRulesModuleRuleEntry")]
-    [JsonSubtypes.KnownSubType(typeof(AccountDepositRuleIndexEntrySubstate), "AccountDepositRuleIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(AccountFieldStateSubstate), "AccountFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(AccountVaultIndexEntrySubstate), "AccountVaultIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldConfigSubstate), "ConsensusManagerFieldConfig")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentProposalStatisticSubstate), "ConsensusManagerFieldCurrentProposalStatistic")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeSubstate), "ConsensusManagerFieldCurrentTime")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentValidatorSetSubstate), "ConsensusManagerFieldCurrentValidatorSet")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldStateSubstate), "ConsensusManagerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldValidatorRewardsSubstate), "ConsensusManagerFieldValidatorRewards")]
-    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate), "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldDivisibilitySubstate), "FungibleResourceManagerFieldDivisibility")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldTotalSupplySubstate), "FungibleResourceManagerFieldTotalSupply")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleVaultFieldBalanceSubstate), "FungibleVaultFieldBalance")]
-    [JsonSubtypes.KnownSubType(typeof(FungibleVaultFieldFrozenStatusSubstate), "FungibleVaultFieldFrozenStatus")]
-    [JsonSubtypes.KnownSubType(typeof(GenericKeyValueStoreEntrySubstate), "GenericKeyValueStoreEntry")]
-    [JsonSubtypes.KnownSubType(typeof(GenericScryptoComponentFieldStateSubstate), "GenericScryptoComponentFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataModuleEntrySubstate), "MetadataModuleEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MultiResourcePoolFieldStateSubstate), "MultiResourcePoolFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerDataEntrySubstate), "NonFungibleResourceManagerDataEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldIdTypeSubstate), "NonFungibleResourceManagerFieldIdType")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldMutableFieldsSubstate), "NonFungibleResourceManagerFieldMutableFields")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldTotalSupplySubstate), "NonFungibleResourceManagerFieldTotalSupply")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultContentsIndexEntrySubstate), "NonFungibleVaultContentsIndexEntry")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldBalanceSubstate), "NonFungibleVaultFieldBalance")]
-    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldFrozenStatusSubstate), "NonFungibleVaultFieldFrozenStatus")]
-    [JsonSubtypes.KnownSubType(typeof(OneResourcePoolFieldStateSubstate), "OneResourcePoolFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintAuthTemplateEntrySubstate), "PackageBlueprintAuthTemplateEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(TypeInfoModuleFieldTypeInfoSubstate), "TypeInfoModuleFieldTypeInfo")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorFieldProtocolUpdateReadinessSignalSubstate), "ValidatorFieldProtocolUpdateReadinessSignal")]
-    [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
-    public partial class PackageCodeEntrySubstate : Substate, IEquatable<PackageCodeEntrySubstate>
+    [DataContract(Name = "PackageCodeOriginalCodeEntryValue")]
+    public partial class PackageCodeOriginalCodeEntryValue : IEquatable<PackageCodeOriginalCodeEntryValue>
     {
-
         /// <summary>
-        /// Gets or Sets VmType
-        /// </summary>
-        [DataMember(Name = "vm_type", IsRequired = true, EmitDefaultValue = true)]
-        public VmType VmType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PackageCodeEntrySubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageCodeOriginalCodeEntryValue" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected PackageCodeEntrySubstate() { }
+        protected PackageCodeOriginalCodeEntryValue() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="PackageCodeEntrySubstate" /> class.
+        /// Initializes a new instance of the <see cref="PackageCodeOriginalCodeEntryValue" /> class.
         /// </summary>
-        /// <param name="key">key (required).</param>
-        /// <param name="vmType">vmType (required).</param>
         /// <param name="codeHex">Either the hex-encoded WASM package code (if Scrypto), or the native package identifier.  (required).</param>
-        /// <param name="substateType">substateType (required) (default to SubstateType.PackageCodeEntry).</param>
-        /// <param name="isLocked">isLocked (required).</param>
-        public PackageCodeEntrySubstate(PackageCodeKey key = default(PackageCodeKey), VmType vmType = default(VmType), string codeHex = default(string), SubstateType substateType = SubstateType.PackageCodeEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public PackageCodeOriginalCodeEntryValue(string codeHex = default(string))
         {
-            // to ensure "key" is required (not null)
-            if (key == null)
-            {
-                throw new ArgumentNullException("key is a required property for PackageCodeEntrySubstate and cannot be null");
-            }
-            this.Key = key;
-            this.VmType = vmType;
             // to ensure "codeHex" is required (not null)
             if (codeHex == null)
             {
-                throw new ArgumentNullException("codeHex is a required property for PackageCodeEntrySubstate and cannot be null");
+                throw new ArgumentNullException("codeHex is a required property for PackageCodeOriginalCodeEntryValue and cannot be null");
             }
             this.CodeHex = codeHex;
         }
-
-        /// <summary>
-        /// Gets or Sets Key
-        /// </summary>
-        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
-        public PackageCodeKey Key { get; set; }
 
         /// <summary>
         /// Either the hex-encoded WASM package code (if Scrypto), or the native package identifier. 
@@ -198,10 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PackageCodeEntrySubstate {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  VmType: ").Append(VmType).Append("\n");
+            sb.Append("class PackageCodeOriginalCodeEntryValue {\n");
             sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -211,7 +138,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -223,30 +150,21 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PackageCodeEntrySubstate);
+            return this.Equals(input as PackageCodeOriginalCodeEntryValue);
         }
 
         /// <summary>
-        /// Returns true if PackageCodeEntrySubstate instances are equal
+        /// Returns true if PackageCodeOriginalCodeEntryValue instances are equal
         /// </summary>
-        /// <param name="input">Instance of PackageCodeEntrySubstate to be compared</param>
+        /// <param name="input">Instance of PackageCodeOriginalCodeEntryValue to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PackageCodeEntrySubstate input)
+        public bool Equals(PackageCodeOriginalCodeEntryValue input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
-                (
-                    this.Key == input.Key ||
-                    (this.Key != null &&
-                    this.Key.Equals(input.Key))
-                ) && base.Equals(input) && 
-                (
-                    this.VmType == input.VmType ||
-                    this.VmType.Equals(input.VmType)
-                ) && base.Equals(input) && 
+            return 
                 (
                     this.CodeHex == input.CodeHex ||
                     (this.CodeHex != null &&
@@ -262,12 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.Key != null)
-                {
-                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.VmType.GetHashCode();
+                int hashCode = 41;
                 if (this.CodeHex != null)
                 {
                     hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();

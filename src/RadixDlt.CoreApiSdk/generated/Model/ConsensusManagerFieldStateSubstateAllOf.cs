@@ -103,69 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsensusManagerFieldStateSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch (required).</param>
-        /// <param name="round">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch (required).</param>
-        /// <param name="isStarted">isStarted (required).</param>
-        /// <param name="effectiveEpochStart">effectiveEpochStart (required).</param>
-        /// <param name="actualEpochStart">actualEpochStart (required).</param>
-        /// <param name="currentLeader">currentLeader.</param>
-        public ConsensusManagerFieldStateSubstateAllOf(long epoch = default(long), long round = default(long), bool isStarted = default(bool), Instant effectiveEpochStart = default(Instant), Instant actualEpochStart = default(Instant), ActiveValidatorIndex currentLeader = default(ActiveValidatorIndex))
+        /// <param name="value">value (required).</param>
+        public ConsensusManagerFieldStateSubstateAllOf(ConsensusManagerFieldStateValue value = default(ConsensusManagerFieldStateValue))
         {
-            this.Epoch = epoch;
-            this.Round = round;
-            this.IsStarted = isStarted;
-            // to ensure "effectiveEpochStart" is required (not null)
-            if (effectiveEpochStart == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("effectiveEpochStart is a required property for ConsensusManagerFieldStateSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for ConsensusManagerFieldStateSubstateAllOf and cannot be null");
             }
-            this.EffectiveEpochStart = effectiveEpochStart;
-            // to ensure "actualEpochStart" is required (not null)
-            if (actualEpochStart == null)
-            {
-                throw new ArgumentNullException("actualEpochStart is a required property for ConsensusManagerFieldStateSubstateAllOf and cannot be null");
-            }
-            this.ActualEpochStart = actualEpochStart;
-            this.CurrentLeader = currentLeader;
+            this.Value = value;
         }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch
+        /// Gets or Sets Value
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch</value>
-        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long Epoch { get; set; }
-
-        /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch
-        /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch</value>
-        [DataMember(Name = "round", IsRequired = true, EmitDefaultValue = true)]
-        public long Round { get; set; }
-
-        /// <summary>
-        /// Gets or Sets IsStarted
-        /// </summary>
-        [DataMember(Name = "is_started", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsStarted { get; set; }
-
-        /// <summary>
-        /// Gets or Sets EffectiveEpochStart
-        /// </summary>
-        [DataMember(Name = "effective_epoch_start", IsRequired = true, EmitDefaultValue = true)]
-        public Instant EffectiveEpochStart { get; set; }
-
-        /// <summary>
-        /// Gets or Sets ActualEpochStart
-        /// </summary>
-        [DataMember(Name = "actual_epoch_start", IsRequired = true, EmitDefaultValue = true)]
-        public Instant ActualEpochStart { get; set; }
-
-        /// <summary>
-        /// Gets or Sets CurrentLeader
-        /// </summary>
-        [DataMember(Name = "current_leader", EmitDefaultValue = true)]
-        public ActiveValidatorIndex CurrentLeader { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public ConsensusManagerFieldStateValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -175,12 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ConsensusManagerFieldStateSubstateAllOf {\n");
-            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
-            sb.Append("  Round: ").Append(Round).Append("\n");
-            sb.Append("  IsStarted: ").Append(IsStarted).Append("\n");
-            sb.Append("  EffectiveEpochStart: ").Append(EffectiveEpochStart).Append("\n");
-            sb.Append("  ActualEpochStart: ").Append(ActualEpochStart).Append("\n");
-            sb.Append("  CurrentLeader: ").Append(CurrentLeader).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -217,31 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Epoch == input.Epoch ||
-                    this.Epoch.Equals(input.Epoch)
-                ) && 
-                (
-                    this.Round == input.Round ||
-                    this.Round.Equals(input.Round)
-                ) && 
-                (
-                    this.IsStarted == input.IsStarted ||
-                    this.IsStarted.Equals(input.IsStarted)
-                ) && 
-                (
-                    this.EffectiveEpochStart == input.EffectiveEpochStart ||
-                    (this.EffectiveEpochStart != null &&
-                    this.EffectiveEpochStart.Equals(input.EffectiveEpochStart))
-                ) && 
-                (
-                    this.ActualEpochStart == input.ActualEpochStart ||
-                    (this.ActualEpochStart != null &&
-                    this.ActualEpochStart.Equals(input.ActualEpochStart))
-                ) && 
-                (
-                    this.CurrentLeader == input.CurrentLeader ||
-                    (this.CurrentLeader != null &&
-                    this.CurrentLeader.Equals(input.CurrentLeader))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -254,20 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
-                hashCode = (hashCode * 59) + this.Round.GetHashCode();
-                hashCode = (hashCode * 59) + this.IsStarted.GetHashCode();
-                if (this.EffectiveEpochStart != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.EffectiveEpochStart.GetHashCode();
-                }
-                if (this.ActualEpochStart != null)
-                {
-                    hashCode = (hashCode * 59) + this.ActualEpochStart.GetHashCode();
-                }
-                if (this.CurrentLeader != null)
-                {
-                    hashCode = (hashCode * 59) + this.CurrentLeader.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

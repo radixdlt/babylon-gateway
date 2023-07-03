@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -150,24 +152,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccessRulesModuleFieldOwnerRoleSubstate" /> class.
         /// </summary>
-        /// <param name="ownerRole">ownerRole (required).</param>
+        /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.AccessRulesModuleFieldOwnerRole).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public AccessRulesModuleFieldOwnerRoleSubstate(OwnerRole ownerRole = default(OwnerRole), SubstateType substateType = SubstateType.AccessRulesModuleFieldOwnerRole, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public AccessRulesModuleFieldOwnerRoleSubstate(AccessRulesModuleFieldOwnerRoleValue value = default(AccessRulesModuleFieldOwnerRoleValue), SubstateType substateType = SubstateType.AccessRulesModuleFieldOwnerRole, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            // to ensure "ownerRole" is required (not null)
-            if (ownerRole == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("ownerRole is a required property for AccessRulesModuleFieldOwnerRoleSubstate and cannot be null");
+                throw new ArgumentNullException("value is a required property for AccessRulesModuleFieldOwnerRoleSubstate and cannot be null");
             }
-            this.OwnerRole = ownerRole;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets OwnerRole
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "owner_role", IsRequired = true, EmitDefaultValue = true)]
-        public OwnerRole OwnerRole { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public AccessRulesModuleFieldOwnerRoleValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -178,7 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccessRulesModuleFieldOwnerRoleSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  OwnerRole: ").Append(OwnerRole).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -215,9 +217,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.OwnerRole == input.OwnerRole ||
-                    (this.OwnerRole != null &&
-                    this.OwnerRole.Equals(input.OwnerRole))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -230,9 +232,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.OwnerRole != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.OwnerRole.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

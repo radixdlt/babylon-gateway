@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -151,10 +153,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="PackageBlueprintAuthTemplateEntrySubstate" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        /// <param name="authConfig">authConfig (required).</param>
+        /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.PackageBlueprintAuthTemplateEntry).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public PackageBlueprintAuthTemplateEntrySubstate(BlueprintVersionKey key = default(BlueprintVersionKey), AuthConfig authConfig = default(AuthConfig), SubstateType substateType = SubstateType.PackageBlueprintAuthTemplateEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public PackageBlueprintAuthTemplateEntrySubstate(BlueprintVersionKey key = default(BlueprintVersionKey), PackageBlueprintAuthTemplateEntryValue value = default(PackageBlueprintAuthTemplateEntryValue), SubstateType substateType = SubstateType.PackageBlueprintAuthTemplateEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -162,12 +164,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for PackageBlueprintAuthTemplateEntrySubstate and cannot be null");
             }
             this.Key = key;
-            // to ensure "authConfig" is required (not null)
-            if (authConfig == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("authConfig is a required property for PackageBlueprintAuthTemplateEntrySubstate and cannot be null");
+                throw new ArgumentNullException("value is a required property for PackageBlueprintAuthTemplateEntrySubstate and cannot be null");
             }
-            this.AuthConfig = authConfig;
+            this.Value = value;
         }
 
         /// <summary>
@@ -177,10 +179,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public BlueprintVersionKey Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets AuthConfig
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "auth_config", IsRequired = true, EmitDefaultValue = true)]
-        public AuthConfig AuthConfig { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public PackageBlueprintAuthTemplateEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -192,7 +194,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class PackageBlueprintAuthTemplateEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  AuthConfig: ").Append(AuthConfig).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -234,9 +236,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key.Equals(input.Key))
                 ) && base.Equals(input) && 
                 (
-                    this.AuthConfig == input.AuthConfig ||
-                    (this.AuthConfig != null &&
-                    this.AuthConfig.Equals(input.AuthConfig))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -253,9 +255,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                if (this.AuthConfig != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.AuthConfig.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

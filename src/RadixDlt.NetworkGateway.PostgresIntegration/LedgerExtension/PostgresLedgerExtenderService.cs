@@ -396,12 +396,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.FungibleResourceManagerFieldDivisibilitySubstate fungibleResourceManager)
                         {
-                            referencedEntity.PostResolveConfigure((GlobalFungibleResourceEntity e) => e.Divisibility = fungibleResourceManager.Divisibility);
+                            referencedEntity.PostResolveConfigure((GlobalFungibleResourceEntity e) => e.Divisibility = fungibleResourceManager.Value.Divisibility);
                         }
 
                         if (substateData is CoreModel.NonFungibleResourceManagerFieldIdTypeSubstate nonFungibleResourceManagerFieldIdTypeSubstate)
                         {
-                            referencedEntity.PostResolveConfigure((GlobalNonFungibleResourceEntity e) => e.NonFungibleIdType = nonFungibleResourceManagerFieldIdTypeSubstate.NonFungibleIdType switch
+                            referencedEntity.PostResolveConfigure((GlobalNonFungibleResourceEntity e) => e.NonFungibleIdType = nonFungibleResourceManagerFieldIdTypeSubstate.Value.NonFungibleIdType switch
                             {
                                 CoreModel.NonFungibleIdType.String => NonFungibleIdType.String,
                                 CoreModel.NonFungibleIdType.Integer => NonFungibleIdType.Integer,
@@ -413,7 +413,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate typeInfoSubstate)
                         {
-                            switch (typeInfoSubstate.Details)
+                            switch (typeInfoSubstate.Value.Details)
                             {
                                 case CoreModel.ObjectTypeInfoDetails objectDetails:
                                     referencedEntity.PostResolveConfigure((ComponentEntity e) =>
@@ -435,7 +435,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                     // TODO not supported yet
                                     break;
                                 default:
-                                    throw new UnreachableException($"Didn't expect '{typeInfoSubstate.Details.Type}' value");
+                                    throw new UnreachableException($"Didn't expect '{typeInfoSubstate.Value.Details.Type}' value");
                             }
                         }
 
@@ -444,8 +444,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             referencedEntity.PostResolveConfigure((GlobalValidatorEntity e) =>
                             {
                                 // TODO this is complete garbage
-                                e.StakeVaultEntityId = referencedEntities.Get((EntityAddress)validator.StakeXrdVault.EntityAddress).DatabaseId;
-                                e.UnstakeVaultEntityId = referencedEntities.Get((EntityAddress)validator.StakeXrdVault.EntityAddress).DatabaseId;
+                                e.StakeVaultEntityId = referencedEntities.Get((EntityAddress)validator.Value.StakeXrdVault.EntityAddress).DatabaseId;
+                                e.UnstakeVaultEntityId = referencedEntities.Get((EntityAddress)validator.Value.StakeXrdVault.EntityAddress).DatabaseId;
                             });
                         }
                     }
@@ -746,9 +746,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.MetadataModuleEntrySubstate metadata)
                         {
+                            var isDeleted = metadata.Value == null;
                             var key = metadata.Key.Name;
-                            var value = metadata.DataStruct?.StructData.Hex.ConvertFromHex();
-                            var isDeleted = metadata.DataStruct == null;
+                            var value = metadata.Value?.DataStruct.StructData.Hex.ConvertFromHex();
 
                             metadataChanges.Add(new MetadataChange(referencedEntity, key, value, isDeleted, metadata.IsLocked, stateVersion));
                         }
@@ -758,7 +758,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             resourceSupplyChanges.Add(new ResourceSupplyChange(
                                 referencedEntity.DatabaseId,
                                 stateVersion,
-                                TotalSupply: TokenAmount.FromDecimalString(fungibleResourceManagerFieldTotalSupplySubstate.TotalSupply)
+                                TotalSupply: TokenAmount.FromDecimalString(fungibleResourceManagerFieldTotalSupplySubstate.Value.TotalSupply)
                             ));
                         }
 
@@ -767,13 +767,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             resourceSupplyChanges.Add(new ResourceSupplyChange(
                                 referencedEntity.DatabaseId,
                                 stateVersion,
-                                TotalSupply: TokenAmount.FromDecimalString(nonFungibleResourceManagerFieldTotalSupplySubstate.TotalSupply)
+                                TotalSupply: TokenAmount.FromDecimalString(nonFungibleResourceManagerFieldTotalSupplySubstate.Value.TotalSupply)
                             ));
                         }
 
                         if (substateData is CoreModel.FungibleVaultFieldBalanceSubstate fungibleVaultFieldBalanceSubstate)
                         {
-                            var amount = TokenAmount.FromDecimalString(fungibleVaultFieldBalanceSubstate.Amount);
+                            var amount = TokenAmount.FromDecimalString(fungibleVaultFieldBalanceSubstate.Value.Amount);
                             var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId);
 
                             fungibleVaultChanges.Add(new FungibleVaultChange(referencedEntity, resourceEntity, amount, stateVersion));
@@ -793,17 +793,17 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.NonFungibleResourceManagerDataEntrySubstate nonFungibleResourceManagerDataEntrySubstate)
                         {
+                            var isDeleted = nonFungibleResourceManagerDataEntrySubstate.Value == null;
                             var resourceManagerEntityId = substateId.EntityAddress;
                             var resourceManagerEntity = referencedEntities.Get((EntityAddress)resourceManagerEntityId);
                             var nonFungibleId = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex, _networkConfigurationProvider.GetNetworkId());
-                            var isDeleted = nonFungibleResourceManagerDataEntrySubstate.DataStruct == null;
 
                             nonFungibleIdChanges.Add(new NonFungibleIdChange(
                                 resourceManagerEntity,
                                 nonFungibleId,
                                 isDeleted,
                                 nonFungibleResourceManagerDataEntrySubstate.IsLocked,
-                                nonFungibleResourceManagerDataEntrySubstate.DataStruct?.StructData.GetDataBytes(),
+                                nonFungibleResourceManagerDataEntrySubstate.Value?.DataStruct.StructData.GetDataBytes(),
                                 stateVersion));
                         }
 
@@ -831,14 +831,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 Id = sequences.EntityStateHistorySequence++,
                                 FromStateVersion = stateVersion,
                                 EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
-                                State = componentState.DataStruct.StructData.ToJson(),
+                                State = componentState.Value.DataStruct.StructData.ToJson(),
                             });
                         }
 
                         if (substateData is CoreModel.ValidatorFieldStateSubstate validator)
                         {
-                            var lookup = new ValidatorKeyLookup(referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId, validator.PublicKey.KeyType.ToModel(),
-                                validator.PublicKey.GetKeyBytes());
+                            var lookup = new ValidatorKeyLookup(referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId, validator.Value.PublicKey.KeyType.ToModel(),
+                                validator.Value.PublicKey.GetKeyBytes());
 
                             validatorKeyHistoryToAdd[lookup] = new ValidatorPublicKeyHistory
                             {
@@ -860,12 +860,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.ConsensusManagerFieldStateSubstate consensusManagerFieldStateSubstate)
                         {
-                            currentEpoch = consensusManagerFieldStateSubstate.Epoch;
+                            currentEpoch = consensusManagerFieldStateSubstate.Value.Epoch;
                         }
 
                         if (substateData is CoreModel.ConsensusManagerFieldCurrentValidatorSetSubstate validatorSet)
                         {
-                            var change = validatorSet.ValidatorSet
+                            var change = validatorSet.Value.ValidatorSet
                                 .ToDictionary(
                                     v =>
                                     {
@@ -885,41 +885,57 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 Id = sequences.AccountDefaultDepositRuleHistorySequence++,
                                 FromStateVersion = stateVersion,
                                 AccountEntityId = referencedEntity.DatabaseId,
-                                DefaultDepositRule = accountFieldState.DefaultDepositRule.ToModel(),
+                                DefaultDepositRule = accountFieldState.Value.DefaultDepositRule.ToModel(),
                             });
                         }
 
-                        if (substateData is CoreModel.AccountDepositRuleIndexEntrySubstate accountDepositRule && accountDepositRule.DepositRule.HasValue)
+                        if (substateData is CoreModel.AccountDepositRuleIndexEntrySubstate accountDepositRule)
                         {
+                            // TODO support deleted values with var isDeleted = accountDepositRule.Value == null;
+
                             accountResourceDepositRuleHistoryToAdd.Add(new AccountResourceDepositRuleHistory
                             {
                                 Id = sequences.AccountResourceDepositRuleHistorySequence++,
                                 FromStateVersion = stateVersion,
                                 AccountEntityId = referencedEntity.DatabaseId,
                                 ResourceEntityId = referencedEntities.Get((EntityAddress)accountDepositRule.Key.ResourceAddress).DatabaseId,
-                                ResourceDepositRule = accountDepositRule.DepositRule.Value.ToModel(),
+                                ResourceDepositRule = accountDepositRule.Value?.DepositRule?.ToModel() ?? throw new NotSupportedException("add support for isDeleted of AccountDepositRuleEntrySubstate"),
                             });
                         }
 
-                        if (substateData is CoreModel.PackageCodeEntrySubstate packageCode)
+                        if (substateData is CoreModel.PackageCodeVmTypeEntrySubstate packageCodeVmType)
                         {
                             packageChangeBuilders
                                 .GetOrAdd(new PackageChangeLookup(referencedEntity.DatabaseId, stateVersion), l => new PackageChangeBuilder(l.PackageEntityId, l.StateVersion))
-                                .WithCode(packageCode.GetCodeHashBytes(), packageCode.GetCodeBytes(), packageCode.VmType.ToModel());
+                                .WithVmType(packageCodeVmType.Value.VmType.ToModel());
+                        }
+
+                        if (substateData is CoreModel.PackageCodeOriginalCodeEntrySubstate packageCodeOriginalCode)
+                        {
+                            packageChangeBuilders
+                                .GetOrAdd(new PackageChangeLookup(referencedEntity.DatabaseId, stateVersion), l => new PackageChangeBuilder(l.PackageEntityId, l.StateVersion))
+                                .WithCode(packageCodeOriginalCode.GetCodeHashBytes(), packageCodeOriginalCode.GetCodeBytes());
+                        }
+
+                        if (substateData is CoreModel.PackageCodeInstrumentedCodeEntrySubstate packageCodeInstrumentedCode)
+                        {
+                            packageChangeBuilders
+                                .GetOrAdd(new PackageChangeLookup(referencedEntity.DatabaseId, stateVersion), l => new PackageChangeBuilder(l.PackageEntityId, l.StateVersion))
+                                .WithCode(packageCodeInstrumentedCode.GetCodeHashBytes(), packageCodeInstrumentedCode.GetCodeBytes());
                         }
 
                         if (substateData is CoreModel.PackageSchemaEntrySubstate packageSchema)
                         {
                             packageChangeBuilders
                                 .GetOrAdd(new PackageChangeLookup(referencedEntity.DatabaseId, stateVersion), l => new PackageChangeBuilder(l.PackageEntityId, l.StateVersion))
-                                .WithSchema(packageSchema.GetSchemaHashBytes(), packageSchema.Schema.SborData.GetDataBytes());
+                                .WithSchema(packageSchema.GetSchemaHashBytes(), packageSchema.Value.Schema.SborData.GetDataBytes());
                         }
 
                         if (substateData is CoreModel.PackageBlueprintDefinitionEntrySubstate packageBlueprintDefinition)
                         {
                             packageChangeBuilders
                                 .GetOrAdd(new PackageChangeLookup(referencedEntity.DatabaseId, stateVersion), l => new PackageChangeBuilder(l.PackageEntityId, l.StateVersion))
-                                .WithBlueprint(packageBlueprintDefinition.Key.BlueprintName, packageBlueprintDefinition.Key.BlueprintVersion, packageBlueprintDefinition.Definition.ToJson());
+                                .WithBlueprint(packageBlueprintDefinition.Key.BlueprintName, packageBlueprintDefinition.Key.BlueprintVersion, packageBlueprintDefinition.Value.Definition.ToJson());
                         }
 
                         if (substateData is CoreModel.PackageBlueprintDependenciesEntrySubstate)

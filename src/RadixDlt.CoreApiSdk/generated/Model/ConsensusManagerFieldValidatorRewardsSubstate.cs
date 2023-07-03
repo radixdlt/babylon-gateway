@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -150,37 +152,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsensusManagerFieldValidatorRewardsSubstate" /> class.
         /// </summary>
-        /// <param name="proposerRewards">proposerRewards (required).</param>
-        /// <param name="rewardsVault">rewardsVault (required).</param>
+        /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.ConsensusManagerFieldValidatorRewards).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public ConsensusManagerFieldValidatorRewardsSubstate(List<ProposerReward> proposerRewards = default(List<ProposerReward>), EntityReference rewardsVault = default(EntityReference), SubstateType substateType = SubstateType.ConsensusManagerFieldValidatorRewards, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public ConsensusManagerFieldValidatorRewardsSubstate(ConsensusManagerFieldValidatorRewardsValue value = default(ConsensusManagerFieldValidatorRewardsValue), SubstateType substateType = SubstateType.ConsensusManagerFieldValidatorRewards, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            // to ensure "proposerRewards" is required (not null)
-            if (proposerRewards == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("proposerRewards is a required property for ConsensusManagerFieldValidatorRewardsSubstate and cannot be null");
+                throw new ArgumentNullException("value is a required property for ConsensusManagerFieldValidatorRewardsSubstate and cannot be null");
             }
-            this.ProposerRewards = proposerRewards;
-            // to ensure "rewardsVault" is required (not null)
-            if (rewardsVault == null)
-            {
-                throw new ArgumentNullException("rewardsVault is a required property for ConsensusManagerFieldValidatorRewardsSubstate and cannot be null");
-            }
-            this.RewardsVault = rewardsVault;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets ProposerRewards
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "proposer_rewards", IsRequired = true, EmitDefaultValue = true)]
-        public List<ProposerReward> ProposerRewards { get; set; }
-
-        /// <summary>
-        /// Gets or Sets RewardsVault
-        /// </summary>
-        [DataMember(Name = "rewards_vault", IsRequired = true, EmitDefaultValue = true)]
-        public EntityReference RewardsVault { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public ConsensusManagerFieldValidatorRewardsValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -191,8 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ConsensusManagerFieldValidatorRewardsSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  ProposerRewards: ").Append(ProposerRewards).Append("\n");
-            sb.Append("  RewardsVault: ").Append(RewardsVault).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -229,15 +217,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.ProposerRewards == input.ProposerRewards ||
-                    this.ProposerRewards != null &&
-                    input.ProposerRewards != null &&
-                    this.ProposerRewards.SequenceEqual(input.ProposerRewards)
-                ) && base.Equals(input) && 
-                (
-                    this.RewardsVault == input.RewardsVault ||
-                    (this.RewardsVault != null &&
-                    this.RewardsVault.Equals(input.RewardsVault))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -250,13 +232,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.ProposerRewards != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.ProposerRewards.GetHashCode();
-                }
-                if (this.RewardsVault != null)
-                {
-                    hashCode = (hashCode * 59) + this.RewardsVault.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

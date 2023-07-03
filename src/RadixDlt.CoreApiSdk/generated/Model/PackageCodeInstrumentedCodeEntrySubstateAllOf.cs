@@ -90,43 +90,35 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// PackageCodeEntrySubstateAllOf
+    /// PackageCodeInstrumentedCodeEntrySubstateAllOf
     /// </summary>
-    [DataContract(Name = "PackageCodeEntrySubstate_allOf")]
-    public partial class PackageCodeEntrySubstateAllOf : IEquatable<PackageCodeEntrySubstateAllOf>
+    [DataContract(Name = "PackageCodeInstrumentedCodeEntrySubstate_allOf")]
+    public partial class PackageCodeInstrumentedCodeEntrySubstateAllOf : IEquatable<PackageCodeInstrumentedCodeEntrySubstateAllOf>
     {
-
         /// <summary>
-        /// Gets or Sets VmType
-        /// </summary>
-        [DataMember(Name = "vm_type", IsRequired = true, EmitDefaultValue = true)]
-        public VmType VmType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PackageCodeEntrySubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageCodeInstrumentedCodeEntrySubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected PackageCodeEntrySubstateAllOf() { }
+        protected PackageCodeInstrumentedCodeEntrySubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="PackageCodeEntrySubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageCodeInstrumentedCodeEntrySubstateAllOf" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        /// <param name="vmType">vmType (required).</param>
-        /// <param name="codeHex">Either the hex-encoded WASM package code (if Scrypto), or the native package identifier.  (required).</param>
-        public PackageCodeEntrySubstateAllOf(PackageCodeKey key = default(PackageCodeKey), VmType vmType = default(VmType), string codeHex = default(string))
+        /// <param name="value">value (required).</param>
+        public PackageCodeInstrumentedCodeEntrySubstateAllOf(PackageCodeKey key = default(PackageCodeKey), PackageCodeInstrumentedCodeEntryValue value = default(PackageCodeInstrumentedCodeEntryValue))
         {
             // to ensure "key" is required (not null)
             if (key == null)
             {
-                throw new ArgumentNullException("key is a required property for PackageCodeEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("key is a required property for PackageCodeInstrumentedCodeEntrySubstateAllOf and cannot be null");
             }
             this.Key = key;
-            this.VmType = vmType;
-            // to ensure "codeHex" is required (not null)
-            if (codeHex == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("codeHex is a required property for PackageCodeEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for PackageCodeInstrumentedCodeEntrySubstateAllOf and cannot be null");
             }
-            this.CodeHex = codeHex;
+            this.Value = value;
         }
 
         /// <summary>
@@ -136,11 +128,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public PackageCodeKey Key { get; set; }
 
         /// <summary>
-        /// Either the hex-encoded WASM package code (if Scrypto), or the native package identifier. 
+        /// Gets or Sets Value
         /// </summary>
-        /// <value>Either the hex-encoded WASM package code (if Scrypto), or the native package identifier. </value>
-        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string CodeHex { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public PackageCodeInstrumentedCodeEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -149,10 +140,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PackageCodeEntrySubstateAllOf {\n");
+            sb.Append("class PackageCodeInstrumentedCodeEntrySubstateAllOf {\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  VmType: ").Append(VmType).Append("\n");
-            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -173,15 +163,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PackageCodeEntrySubstateAllOf);
+            return this.Equals(input as PackageCodeInstrumentedCodeEntrySubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if PackageCodeEntrySubstateAllOf instances are equal
+        /// Returns true if PackageCodeInstrumentedCodeEntrySubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of PackageCodeEntrySubstateAllOf to be compared</param>
+        /// <param name="input">Instance of PackageCodeInstrumentedCodeEntrySubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PackageCodeEntrySubstateAllOf input)
+        public bool Equals(PackageCodeInstrumentedCodeEntrySubstateAllOf input)
         {
             if (input == null)
             {
@@ -194,13 +184,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key.Equals(input.Key))
                 ) && 
                 (
-                    this.VmType == input.VmType ||
-                    this.VmType.Equals(input.VmType)
-                ) && 
-                (
-                    this.CodeHex == input.CodeHex ||
-                    (this.CodeHex != null &&
-                    this.CodeHex.Equals(input.CodeHex))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -217,10 +203,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.VmType.GetHashCode();
-                if (this.CodeHex != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

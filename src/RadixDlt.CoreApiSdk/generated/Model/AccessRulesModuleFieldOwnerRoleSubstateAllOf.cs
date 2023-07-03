@@ -103,22 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccessRulesModuleFieldOwnerRoleSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="ownerRole">ownerRole (required).</param>
-        public AccessRulesModuleFieldOwnerRoleSubstateAllOf(OwnerRole ownerRole = default(OwnerRole))
+        /// <param name="value">value (required).</param>
+        public AccessRulesModuleFieldOwnerRoleSubstateAllOf(AccessRulesModuleFieldOwnerRoleValue value = default(AccessRulesModuleFieldOwnerRoleValue))
         {
-            // to ensure "ownerRole" is required (not null)
-            if (ownerRole == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("ownerRole is a required property for AccessRulesModuleFieldOwnerRoleSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for AccessRulesModuleFieldOwnerRoleSubstateAllOf and cannot be null");
             }
-            this.OwnerRole = ownerRole;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets OwnerRole
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "owner_role", IsRequired = true, EmitDefaultValue = true)]
-        public OwnerRole OwnerRole { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public AccessRulesModuleFieldOwnerRoleValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccessRulesModuleFieldOwnerRoleSubstateAllOf {\n");
-            sb.Append("  OwnerRole: ").Append(OwnerRole).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,9 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.OwnerRole == input.OwnerRole ||
-                    (this.OwnerRole != null &&
-                    this.OwnerRole.Equals(input.OwnerRole))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -180,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.OwnerRole != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.OwnerRole.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

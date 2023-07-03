@@ -95,12 +95,6 @@ namespace RadixDlt.CoreApiSdk.Model
     [DataContract(Name = "TransactionTrackerCollectionEntrySubstate_allOf")]
     public partial class TransactionTrackerCollectionEntrySubstateAllOf : IEquatable<TransactionTrackerCollectionEntrySubstateAllOf>
     {
-
-        /// <summary>
-        /// Gets or Sets Status
-        /// </summary>
-        [DataMember(Name = "status", EmitDefaultValue = true)]
-        public TransactionTrackerTransactionStatus? Status { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionTrackerCollectionEntrySubstateAllOf" /> class.
         /// </summary>
@@ -110,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionTrackerCollectionEntrySubstateAllOf" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        /// <param name="status">status.</param>
-        public TransactionTrackerCollectionEntrySubstateAllOf(TransactionIdKey key = default(TransactionIdKey), TransactionTrackerTransactionStatus? status = default(TransactionTrackerTransactionStatus?))
+        /// <param name="value">value (required).</param>
+        public TransactionTrackerCollectionEntrySubstateAllOf(TransactionIdKey key = default(TransactionIdKey), TransactionTrackerCollectionEntryValue value = default(TransactionTrackerCollectionEntryValue))
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -119,7 +113,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for TransactionTrackerCollectionEntrySubstateAllOf and cannot be null");
             }
             this.Key = key;
-            this.Status = status;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for TransactionTrackerCollectionEntrySubstateAllOf and cannot be null");
+            }
+            this.Value = value;
         }
 
         /// <summary>
@@ -127,6 +126,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
         public TransactionIdKey Key { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Value
+        /// </summary>
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionTrackerCollectionEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,7 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionTrackerCollectionEntrySubstateAllOf {\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  Status: ").Append(Status).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,8 +184,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key.Equals(input.Key))
                 ) && 
                 (
-                    this.Status == input.Status ||
-                    this.Status.Equals(input.Status)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -197,7 +203,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.Status.GetHashCode();
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                }
                 return hashCode;
             }
         }

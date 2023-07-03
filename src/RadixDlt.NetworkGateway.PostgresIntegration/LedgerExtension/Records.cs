@@ -96,11 +96,15 @@ internal record PackageChangeBuilder(long PackageEntityId, long StateVersion)
     private string? _blueprintVersion;
     private string? _blueprint;
 
-    public void WithCode(byte[] codeHash, byte[] code, PackageVmType vmType)
+    public void WithVmType(PackageVmType vmType)
+    {
+        _vmType = vmType;
+    }
+
+    public void WithCode(byte[] codeHash, byte[] code)
     {
         _codeHash = codeHash;
         _code = code;
-        _vmType = vmType;
     }
 
     public void WithSchema(byte[] schemaHash, byte[] schema)

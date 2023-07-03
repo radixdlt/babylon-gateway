@@ -71,7 +71,7 @@ public partial class TypeInfoModuleFieldTypeInfoSubstate : IEntityAddressPointer
 {
     public IEnumerable<string> GetEntityAddresses()
     {
-        if (Details is ObjectTypeInfoDetails otid)
+        if (Value.Details is ObjectTypeInfoDetails otid)
         {
             return otid.GetEntityAddresses();
         }

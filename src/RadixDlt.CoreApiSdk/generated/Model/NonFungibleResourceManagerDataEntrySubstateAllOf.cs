@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="NonFungibleResourceManagerDataEntrySubstateAllOf" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        /// <param name="dataStruct">dataStruct.</param>
-        public NonFungibleResourceManagerDataEntrySubstateAllOf(LocalNonFungibleKey key = default(LocalNonFungibleKey), DataStruct dataStruct = default(DataStruct))
+        /// <param name="value">value.</param>
+        public NonFungibleResourceManagerDataEntrySubstateAllOf(LocalNonFungibleKey key = default(LocalNonFungibleKey), NonFungibleResourceManagerDataEntryValue value = default(NonFungibleResourceManagerDataEntryValue))
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -113,7 +113,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for NonFungibleResourceManagerDataEntrySubstateAllOf and cannot be null");
             }
             this.Key = key;
-            this.DataStruct = dataStruct;
+            this.Value = value;
         }
 
         /// <summary>
@@ -123,10 +123,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public LocalNonFungibleKey Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets DataStruct
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "data_struct", EmitDefaultValue = true)]
-        public DataStruct DataStruct { get; set; }
+        [DataMember(Name = "value", EmitDefaultValue = true)]
+        public NonFungibleResourceManagerDataEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,7 +137,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleResourceManagerDataEntrySubstateAllOf {\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,9 +179,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key.Equals(input.Key))
                 ) && 
                 (
-                    this.DataStruct == input.DataStruct ||
-                    (this.DataStruct != null &&
-                    this.DataStruct.Equals(input.DataStruct))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -198,9 +198,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                if (this.DataStruct != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        /// <param name="activeValidator">activeValidator (required).</param>
-        public ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf(ActiveValidatorKey key = default(ActiveValidatorKey), ActiveValidator activeValidator = default(ActiveValidator))
+        /// <param name="value">value (required).</param>
+        public ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf(ActiveValidatorKey key = default(ActiveValidatorKey), ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue value = default(ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue))
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -113,12 +113,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf and cannot be null");
             }
             this.Key = key;
-            // to ensure "activeValidator" is required (not null)
-            if (activeValidator == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("activeValidator is a required property for ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf and cannot be null");
             }
-            this.ActiveValidator = activeValidator;
+            this.Value = value;
         }
 
         /// <summary>
@@ -128,10 +128,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public ActiveValidatorKey Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets ActiveValidator
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "active_validator", IsRequired = true, EmitDefaultValue = true)]
-        public ActiveValidator ActiveValidator { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,7 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf {\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  ActiveValidator: ").Append(ActiveValidator).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -184,9 +184,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key.Equals(input.Key))
                 ) && 
                 (
-                    this.ActiveValidator == input.ActiveValidator ||
-                    (this.ActiveValidator != null &&
-                    this.ActiveValidator.Equals(input.ActiveValidator))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -203,9 +203,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                if (this.ActiveValidator != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.ActiveValidator.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

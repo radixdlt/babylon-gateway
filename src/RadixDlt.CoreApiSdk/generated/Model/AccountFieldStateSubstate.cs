@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -142,12 +144,6 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
     public partial class AccountFieldStateSubstate : Substate, IEquatable<AccountFieldStateSubstate>
     {
-
-        /// <summary>
-        /// Gets or Sets DefaultDepositRule
-        /// </summary>
-        [DataMember(Name = "default_deposit_rule", IsRequired = true, EmitDefaultValue = true)]
-        public DefaultDepositRule DefaultDepositRule { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountFieldStateSubstate" /> class.
         /// </summary>
@@ -156,13 +152,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountFieldStateSubstate" /> class.
         /// </summary>
-        /// <param name="defaultDepositRule">defaultDepositRule (required).</param>
+        /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.AccountFieldState).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public AccountFieldStateSubstate(DefaultDepositRule defaultDepositRule = default(DefaultDepositRule), SubstateType substateType = SubstateType.AccountFieldState, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public AccountFieldStateSubstate(AccountFieldStateValue value = default(AccountFieldStateValue), SubstateType substateType = SubstateType.AccountFieldState, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            this.DefaultDepositRule = defaultDepositRule;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for AccountFieldStateSubstate and cannot be null");
+            }
+            this.Value = value;
         }
+
+        /// <summary>
+        /// Gets or Sets Value
+        /// </summary>
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public AccountFieldStateValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -173,7 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccountFieldStateSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  DefaultDepositRule: ").Append(DefaultDepositRule).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -210,8 +217,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.DefaultDepositRule == input.DefaultDepositRule ||
-                    this.DefaultDepositRule.Equals(input.DefaultDepositRule)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -224,7 +232,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.DefaultDepositRule.GetHashCode();
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                }
                 return hashCode;
             }
         }

@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -151,9 +153,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="NonFungibleVaultContentsIndexEntrySubstate" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
+        /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.NonFungibleVaultContentsIndexEntry).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public NonFungibleVaultContentsIndexEntrySubstate(LocalNonFungibleKey key = default(LocalNonFungibleKey), SubstateType substateType = SubstateType.NonFungibleVaultContentsIndexEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public NonFungibleVaultContentsIndexEntrySubstate(LocalNonFungibleKey key = default(LocalNonFungibleKey), NonFungibleVaultContentsIndexEntryValue value = default(NonFungibleVaultContentsIndexEntryValue), SubstateType substateType = SubstateType.NonFungibleVaultContentsIndexEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -161,6 +164,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for NonFungibleVaultContentsIndexEntrySubstate and cannot be null");
             }
             this.Key = key;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for NonFungibleVaultContentsIndexEntrySubstate and cannot be null");
+            }
+            this.Value = value;
         }
 
         /// <summary>
@@ -168,6 +177,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
         public LocalNonFungibleKey Key { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Value
+        /// </summary>
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public NonFungibleVaultContentsIndexEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -179,6 +194,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class NonFungibleVaultContentsIndexEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -218,6 +234,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key == input.Key ||
                     (this.Key != null &&
                     this.Key.Equals(input.Key))
+                ) && base.Equals(input) && 
+                (
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -233,6 +254,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Key != null)
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                }
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

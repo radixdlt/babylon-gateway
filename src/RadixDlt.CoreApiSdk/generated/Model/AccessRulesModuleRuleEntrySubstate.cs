@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -151,10 +153,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="AccessRulesModuleRuleEntrySubstate" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        /// <param name="accessRule">accessRule.</param>
+        /// <param name="value">value.</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.AccessRulesModuleRuleEntry).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public AccessRulesModuleRuleEntrySubstate(ObjectRoleKey key = default(ObjectRoleKey), AccessRule accessRule = default(AccessRule), SubstateType substateType = SubstateType.AccessRulesModuleRuleEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public AccessRulesModuleRuleEntrySubstate(ObjectRoleKey key = default(ObjectRoleKey), AccessRulesModuleRuleEntryValue value = default(AccessRulesModuleRuleEntryValue), SubstateType substateType = SubstateType.AccessRulesModuleRuleEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -162,7 +164,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for AccessRulesModuleRuleEntrySubstate and cannot be null");
             }
             this.Key = key;
-            this.AccessRule = accessRule;
+            this.Value = value;
         }
 
         /// <summary>
@@ -172,10 +174,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public ObjectRoleKey Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccessRule
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "access_rule", EmitDefaultValue = true)]
-        public AccessRule AccessRule { get; set; }
+        [DataMember(Name = "value", EmitDefaultValue = true)]
+        public AccessRulesModuleRuleEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -187,7 +189,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class AccessRulesModuleRuleEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  AccessRule: ").Append(AccessRule).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -229,9 +231,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key.Equals(input.Key))
                 ) && base.Equals(input) && 
                 (
-                    this.AccessRule == input.AccessRule ||
-                    (this.AccessRule != null &&
-                    this.AccessRule.Equals(input.AccessRule))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -248,9 +250,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                if (this.AccessRule != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRule.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

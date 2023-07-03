@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -150,24 +152,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeInfoModuleFieldTypeInfoSubstate" /> class.
         /// </summary>
-        /// <param name="details">details (required).</param>
+        /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.TypeInfoModuleFieldTypeInfo).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public TypeInfoModuleFieldTypeInfoSubstate(TypeInfoDetails details = default(TypeInfoDetails), SubstateType substateType = SubstateType.TypeInfoModuleFieldTypeInfo, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public TypeInfoModuleFieldTypeInfoSubstate(TypeInfoModuleFieldTypeInfoValue value = default(TypeInfoModuleFieldTypeInfoValue), SubstateType substateType = SubstateType.TypeInfoModuleFieldTypeInfo, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            // to ensure "details" is required (not null)
-            if (details == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("details is a required property for TypeInfoModuleFieldTypeInfoSubstate and cannot be null");
+                throw new ArgumentNullException("value is a required property for TypeInfoModuleFieldTypeInfoSubstate and cannot be null");
             }
-            this.Details = details;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets Details
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
-        public TypeInfoDetails Details { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public TypeInfoModuleFieldTypeInfoValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -178,7 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TypeInfoModuleFieldTypeInfoSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Details: ").Append(Details).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -215,9 +217,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.Details == input.Details ||
-                    (this.Details != null &&
-                    this.Details.Equals(input.Details))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -230,9 +232,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.Details != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

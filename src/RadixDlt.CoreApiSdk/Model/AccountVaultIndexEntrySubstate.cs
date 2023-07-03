@@ -75,7 +75,7 @@ public partial class AccountVaultIndexEntrySubstate : IEntityAddressPointer, IEn
 
     public IEnumerable<EntityReference> GetOwnedEntities()
     {
-        yield return Vault;
+        yield return Value.Vault;
     }
 }
 

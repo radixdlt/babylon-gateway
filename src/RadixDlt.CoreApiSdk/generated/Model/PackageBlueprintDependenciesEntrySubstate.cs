@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -151,10 +153,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="PackageBlueprintDependenciesEntrySubstate" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        /// <param name="dependencies">dependencies (required).</param>
+        /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.PackageBlueprintDependenciesEntry).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public PackageBlueprintDependenciesEntrySubstate(BlueprintVersionKey key = default(BlueprintVersionKey), BlueprintDependencies dependencies = default(BlueprintDependencies), SubstateType substateType = SubstateType.PackageBlueprintDependenciesEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public PackageBlueprintDependenciesEntrySubstate(BlueprintVersionKey key = default(BlueprintVersionKey), PackageBlueprintDependenciesEntryValue value = default(PackageBlueprintDependenciesEntryValue), SubstateType substateType = SubstateType.PackageBlueprintDependenciesEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -162,12 +164,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for PackageBlueprintDependenciesEntrySubstate and cannot be null");
             }
             this.Key = key;
-            // to ensure "dependencies" is required (not null)
-            if (dependencies == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("dependencies is a required property for PackageBlueprintDependenciesEntrySubstate and cannot be null");
+                throw new ArgumentNullException("value is a required property for PackageBlueprintDependenciesEntrySubstate and cannot be null");
             }
-            this.Dependencies = dependencies;
+            this.Value = value;
         }
 
         /// <summary>
@@ -177,10 +179,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public BlueprintVersionKey Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets Dependencies
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "dependencies", IsRequired = true, EmitDefaultValue = true)]
-        public BlueprintDependencies Dependencies { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public PackageBlueprintDependenciesEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -192,7 +194,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class PackageBlueprintDependenciesEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  Dependencies: ").Append(Dependencies).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -234,9 +236,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key.Equals(input.Key))
                 ) && base.Equals(input) && 
                 (
-                    this.Dependencies == input.Dependencies ||
-                    (this.Dependencies != null &&
-                    this.Dependencies.Equals(input.Dependencies))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -253,9 +255,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                if (this.Dependencies != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.Dependencies.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

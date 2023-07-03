@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="PackageSchemaEntrySubstateAllOf" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        /// <param name="schema">schema (required).</param>
-        public PackageSchemaEntrySubstateAllOf(SchemaKey key = default(SchemaKey), ScryptoSchema schema = default(ScryptoSchema))
+        /// <param name="value">value (required).</param>
+        public PackageSchemaEntrySubstateAllOf(SchemaKey key = default(SchemaKey), PackageSchemaEntryValue value = default(PackageSchemaEntryValue))
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -113,12 +113,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for PackageSchemaEntrySubstateAllOf and cannot be null");
             }
             this.Key = key;
-            // to ensure "schema" is required (not null)
-            if (schema == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("schema is a required property for PackageSchemaEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for PackageSchemaEntrySubstateAllOf and cannot be null");
             }
-            this.Schema = schema;
+            this.Value = value;
         }
 
         /// <summary>
@@ -128,10 +128,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public SchemaKey Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets Schema
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "schema", IsRequired = true, EmitDefaultValue = true)]
-        public ScryptoSchema Schema { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public PackageSchemaEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,7 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class PackageSchemaEntrySubstateAllOf {\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  Schema: ").Append(Schema).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -184,9 +184,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key.Equals(input.Key))
                 ) && 
                 (
-                    this.Schema == input.Schema ||
-                    (this.Schema != null &&
-                    this.Schema.Equals(input.Schema))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -203,9 +203,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                if (this.Schema != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.Schema.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

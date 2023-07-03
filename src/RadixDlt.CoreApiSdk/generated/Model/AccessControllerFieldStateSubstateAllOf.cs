@@ -103,22 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccessControllerFieldStateSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="dataStruct">dataStruct (required).</param>
-        public AccessControllerFieldStateSubstateAllOf(DataStruct dataStruct = default(DataStruct))
+        /// <param name="value">value (required).</param>
+        public AccessControllerFieldStateSubstateAllOf(AccessControllerFieldStateValue value = default(AccessControllerFieldStateValue))
         {
-            // to ensure "dataStruct" is required (not null)
-            if (dataStruct == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("dataStruct is a required property for AccessControllerFieldStateSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for AccessControllerFieldStateSubstateAllOf and cannot be null");
             }
-            this.DataStruct = dataStruct;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets DataStruct
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "data_struct", IsRequired = true, EmitDefaultValue = true)]
-        public DataStruct DataStruct { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public AccessControllerFieldStateValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccessControllerFieldStateSubstateAllOf {\n");
-            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,9 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.DataStruct == input.DataStruct ||
-                    (this.DataStruct != null &&
-                    this.DataStruct.Equals(input.DataStruct))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -180,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.DataStruct != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

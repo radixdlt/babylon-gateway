@@ -104,7 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="NonFungibleVaultContentsIndexEntrySubstateAllOf" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        public NonFungibleVaultContentsIndexEntrySubstateAllOf(LocalNonFungibleKey key = default(LocalNonFungibleKey))
+        /// <param name="value">value (required).</param>
+        public NonFungibleVaultContentsIndexEntrySubstateAllOf(LocalNonFungibleKey key = default(LocalNonFungibleKey), NonFungibleVaultContentsIndexEntryValue value = default(NonFungibleVaultContentsIndexEntryValue))
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -112,6 +113,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for NonFungibleVaultContentsIndexEntrySubstateAllOf and cannot be null");
             }
             this.Key = key;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for NonFungibleVaultContentsIndexEntrySubstateAllOf and cannot be null");
+            }
+            this.Value = value;
         }
 
         /// <summary>
@@ -119,6 +126,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
         public LocalNonFungibleKey Key { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Value
+        /// </summary>
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public NonFungibleVaultContentsIndexEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,6 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleVaultContentsIndexEntrySubstateAllOf {\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -168,6 +182,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key == input.Key ||
                     (this.Key != null &&
                     this.Key.Equals(input.Key))
+                ) && 
+                (
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -183,6 +202,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Key != null)
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                }
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

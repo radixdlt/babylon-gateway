@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// GenericKeyValueStoreEntryValue
+    /// If not present, the entry has been deleted.
     /// </summary>
     [DataContract(Name = "GenericKeyValueStoreEntryValue")]
     public partial class GenericKeyValueStoreEntryValue : IEquatable<GenericKeyValueStoreEntryValue>

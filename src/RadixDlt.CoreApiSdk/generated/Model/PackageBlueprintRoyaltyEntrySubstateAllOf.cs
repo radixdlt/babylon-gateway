@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="PackageBlueprintRoyaltyEntrySubstateAllOf" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        /// <param name="royaltyConfig">royaltyConfig (required).</param>
-        public PackageBlueprintRoyaltyEntrySubstateAllOf(BlueprintVersionKey key = default(BlueprintVersionKey), RoyaltyConfig royaltyConfig = default(RoyaltyConfig))
+        /// <param name="value">value (required).</param>
+        public PackageBlueprintRoyaltyEntrySubstateAllOf(BlueprintVersionKey key = default(BlueprintVersionKey), PackageBlueprintRoyaltyEntryValue value = default(PackageBlueprintRoyaltyEntryValue))
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -113,12 +113,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for PackageBlueprintRoyaltyEntrySubstateAllOf and cannot be null");
             }
             this.Key = key;
-            // to ensure "royaltyConfig" is required (not null)
-            if (royaltyConfig == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("royaltyConfig is a required property for PackageBlueprintRoyaltyEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for PackageBlueprintRoyaltyEntrySubstateAllOf and cannot be null");
             }
-            this.RoyaltyConfig = royaltyConfig;
+            this.Value = value;
         }
 
         /// <summary>
@@ -128,10 +128,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public BlueprintVersionKey Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets RoyaltyConfig
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "royalty_config", IsRequired = true, EmitDefaultValue = true)]
-        public RoyaltyConfig RoyaltyConfig { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public PackageBlueprintRoyaltyEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,7 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class PackageBlueprintRoyaltyEntrySubstateAllOf {\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -184,9 +184,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key.Equals(input.Key))
                 ) && 
                 (
-                    this.RoyaltyConfig == input.RoyaltyConfig ||
-                    (this.RoyaltyConfig != null &&
-                    this.RoyaltyConfig.Equals(input.RoyaltyConfig))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -203,9 +203,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                if (this.RoyaltyConfig != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoyaltyConfig.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

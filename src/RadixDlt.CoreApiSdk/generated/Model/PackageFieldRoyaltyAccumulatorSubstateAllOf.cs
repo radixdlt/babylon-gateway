@@ -103,22 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageFieldRoyaltyAccumulatorSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="vaultEntity">vaultEntity (required).</param>
-        public PackageFieldRoyaltyAccumulatorSubstateAllOf(EntityReference vaultEntity = default(EntityReference))
+        /// <param name="value">value (required).</param>
+        public PackageFieldRoyaltyAccumulatorSubstateAllOf(PackageFieldRoyaltyAccumulatorValue value = default(PackageFieldRoyaltyAccumulatorValue))
         {
-            // to ensure "vaultEntity" is required (not null)
-            if (vaultEntity == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("vaultEntity is a required property for PackageFieldRoyaltyAccumulatorSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for PackageFieldRoyaltyAccumulatorSubstateAllOf and cannot be null");
             }
-            this.VaultEntity = vaultEntity;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets VaultEntity
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "vault_entity", IsRequired = true, EmitDefaultValue = true)]
-        public EntityReference VaultEntity { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public PackageFieldRoyaltyAccumulatorValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class PackageFieldRoyaltyAccumulatorSubstateAllOf {\n");
-            sb.Append("  VaultEntity: ").Append(VaultEntity).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,9 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.VaultEntity == input.VaultEntity ||
-                    (this.VaultEntity != null &&
-                    this.VaultEntity.Equals(input.VaultEntity))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -180,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.VaultEntity != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.VaultEntity.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

@@ -103,23 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="FungibleResourceManagerFieldTotalSupplySubstateAllOf" /> class.
         /// </summary>
-        /// <param name="totalSupply">The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
-        public FungibleResourceManagerFieldTotalSupplySubstateAllOf(string totalSupply = default(string))
+        /// <param name="value">value (required).</param>
+        public FungibleResourceManagerFieldTotalSupplySubstateAllOf(FungibleResourceManagerFieldTotalSupplyValue value = default(FungibleResourceManagerFieldTotalSupplyValue))
         {
-            // to ensure "totalSupply" is required (not null)
-            if (totalSupply == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("totalSupply is a required property for FungibleResourceManagerFieldTotalSupplySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for FungibleResourceManagerFieldTotalSupplySubstateAllOf and cannot be null");
             }
-            this.TotalSupply = totalSupply;
+            this.Value = value;
         }
 
         /// <summary>
-        /// The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// Gets or Sets Value
         /// </summary>
-        /// <value>The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
-        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
-        public string TotalSupply { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public FungibleResourceManagerFieldTotalSupplyValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class FungibleResourceManagerFieldTotalSupplySubstateAllOf {\n");
-            sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,9 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.TotalSupply == input.TotalSupply ||
-                    (this.TotalSupply != null &&
-                    this.TotalSupply.Equals(input.TotalSupply))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -181,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TotalSupply != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

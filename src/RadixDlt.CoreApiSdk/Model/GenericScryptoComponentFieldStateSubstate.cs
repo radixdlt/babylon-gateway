@@ -69,7 +69,7 @@ namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class GenericScryptoComponentFieldStateSubstate : IEntityOwner, IEntityAddressPointer
 {
-    public IEnumerable<EntityReference> GetOwnedEntities() => DataStruct.OwnedEntities;
+    public IEnumerable<EntityReference> GetOwnedEntities() => Value.DataStruct.OwnedEntities;
 
-    public IEnumerable<string> GetEntityAddresses() => DataStruct.ReferencedEntities.Select(re => re.EntityAddress);
+    public IEnumerable<string> GetEntityAddresses() => Value.DataStruct.ReferencedEntities.Select(re => re.EntityAddress);
 }

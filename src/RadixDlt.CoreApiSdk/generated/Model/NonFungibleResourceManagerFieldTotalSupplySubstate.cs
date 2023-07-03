@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -150,25 +152,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourceManagerFieldTotalSupplySubstate" /> class.
         /// </summary>
-        /// <param name="totalSupply">The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.NonFungibleResourceManagerFieldTotalSupply).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public NonFungibleResourceManagerFieldTotalSupplySubstate(string totalSupply = default(string), SubstateType substateType = SubstateType.NonFungibleResourceManagerFieldTotalSupply, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public NonFungibleResourceManagerFieldTotalSupplySubstate(NonFungibleResourceManagerFieldTotalSupplyValue value = default(NonFungibleResourceManagerFieldTotalSupplyValue), SubstateType substateType = SubstateType.NonFungibleResourceManagerFieldTotalSupply, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            // to ensure "totalSupply" is required (not null)
-            if (totalSupply == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("totalSupply is a required property for NonFungibleResourceManagerFieldTotalSupplySubstate and cannot be null");
+                throw new ArgumentNullException("value is a required property for NonFungibleResourceManagerFieldTotalSupplySubstate and cannot be null");
             }
-            this.TotalSupply = totalSupply;
+            this.Value = value;
         }
 
         /// <summary>
-        /// The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// Gets or Sets Value
         /// </summary>
-        /// <value>The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
-        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
-        public string TotalSupply { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public NonFungibleResourceManagerFieldTotalSupplyValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -179,7 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleResourceManagerFieldTotalSupplySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -216,9 +217,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.TotalSupply == input.TotalSupply ||
-                    (this.TotalSupply != null &&
-                    this.TotalSupply.Equals(input.TotalSupply))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -231,9 +232,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.TotalSupply != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

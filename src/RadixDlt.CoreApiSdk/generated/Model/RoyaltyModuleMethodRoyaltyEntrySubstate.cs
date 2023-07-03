@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -151,10 +153,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="RoyaltyModuleMethodRoyaltyEntrySubstate" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        /// <param name="royaltyAmount">royaltyAmount.</param>
+        /// <param name="value">value.</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.RoyaltyModuleMethodRoyaltyEntry).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public RoyaltyModuleMethodRoyaltyEntrySubstate(MainMethodKey key = default(MainMethodKey), RoyaltyAmount royaltyAmount = default(RoyaltyAmount), SubstateType substateType = SubstateType.RoyaltyModuleMethodRoyaltyEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public RoyaltyModuleMethodRoyaltyEntrySubstate(MainMethodKey key = default(MainMethodKey), RoyaltyModuleMethodRoyaltyEntryValue value = default(RoyaltyModuleMethodRoyaltyEntryValue), SubstateType substateType = SubstateType.RoyaltyModuleMethodRoyaltyEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -162,7 +164,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for RoyaltyModuleMethodRoyaltyEntrySubstate and cannot be null");
             }
             this.Key = key;
-            this.RoyaltyAmount = royaltyAmount;
+            this.Value = value;
         }
 
         /// <summary>
@@ -172,10 +174,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public MainMethodKey Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets RoyaltyAmount
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "royalty_amount", EmitDefaultValue = true)]
-        public RoyaltyAmount RoyaltyAmount { get; set; }
+        [DataMember(Name = "value", EmitDefaultValue = true)]
+        public RoyaltyModuleMethodRoyaltyEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -187,7 +189,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class RoyaltyModuleMethodRoyaltyEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  RoyaltyAmount: ").Append(RoyaltyAmount).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -229,9 +231,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key.Equals(input.Key))
                 ) && base.Equals(input) && 
                 (
-                    this.RoyaltyAmount == input.RoyaltyAmount ||
-                    (this.RoyaltyAmount != null &&
-                    this.RoyaltyAmount.Equals(input.RoyaltyAmount))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -248,9 +250,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                if (this.RoyaltyAmount != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoyaltyAmount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

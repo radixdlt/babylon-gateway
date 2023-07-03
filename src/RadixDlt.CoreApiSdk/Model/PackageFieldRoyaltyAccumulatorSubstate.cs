@@ -70,9 +70,9 @@ public partial class PackageFieldRoyaltyAccumulatorSubstate : IRoyaltyVaultHolde
     {
         royaltyVault = default;
 
-        if (VaultEntity != null)
+        if (Value != null)
         {
-            royaltyVault = VaultEntity;
+            royaltyVault = Value.VaultEntity;
 
             return true;
         }

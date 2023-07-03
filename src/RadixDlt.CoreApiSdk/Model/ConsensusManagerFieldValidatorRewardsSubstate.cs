@@ -70,6 +70,6 @@ public partial class ConsensusManagerFieldValidatorRewardsSubstate : IEntityOwne
 {
     public IEnumerable<EntityReference> GetOwnedEntities()
     {
-        yield return RewardsVault;
+        yield return Value.RewardsVault;
     }
 }

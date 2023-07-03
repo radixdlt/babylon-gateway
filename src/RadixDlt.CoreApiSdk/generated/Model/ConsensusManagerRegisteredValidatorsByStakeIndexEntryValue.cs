@@ -90,51 +90,35 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// MethodRoyalty
+    /// ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue
     /// </summary>
-    [DataContract(Name = "MethodRoyalty")]
-    public partial class MethodRoyalty : IEquatable<MethodRoyalty>
+    [DataContract(Name = "ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue")]
+    public partial class ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue : IEquatable<ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MethodRoyalty" /> class.
+        /// Initializes a new instance of the <see cref="ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MethodRoyalty() { }
+        protected ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MethodRoyalty" /> class.
+        /// Initializes a new instance of the <see cref="ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue" /> class.
         /// </summary>
-        /// <param name="methodName">methodName (required).</param>
-        /// <param name="isLocked">isLocked (required).</param>
-        /// <param name="royaltyAmount">royaltyAmount.</param>
-        public MethodRoyalty(string methodName = default(string), bool isLocked = default(bool), RoyaltyAmount royaltyAmount = default(RoyaltyAmount))
+        /// <param name="activeValidator">activeValidator (required).</param>
+        public ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue(ActiveValidator activeValidator = default(ActiveValidator))
         {
-            // to ensure "methodName" is required (not null)
-            if (methodName == null)
+            // to ensure "activeValidator" is required (not null)
+            if (activeValidator == null)
             {
-                throw new ArgumentNullException("methodName is a required property for MethodRoyalty and cannot be null");
+                throw new ArgumentNullException("activeValidator is a required property for ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue and cannot be null");
             }
-            this.MethodName = methodName;
-            this.IsLocked = isLocked;
-            this.RoyaltyAmount = royaltyAmount;
+            this.ActiveValidator = activeValidator;
         }
 
         /// <summary>
-        /// Gets or Sets MethodName
+        /// Gets or Sets ActiveValidator
         /// </summary>
-        [DataMember(Name = "method_name", IsRequired = true, EmitDefaultValue = true)]
-        public string MethodName { get; set; }
-
-        /// <summary>
-        /// Gets or Sets IsLocked
-        /// </summary>
-        [DataMember(Name = "is_locked", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsLocked { get; set; }
-
-        /// <summary>
-        /// Gets or Sets RoyaltyAmount
-        /// </summary>
-        [DataMember(Name = "royalty_amount", EmitDefaultValue = true)]
-        public RoyaltyAmount RoyaltyAmount { get; set; }
+        [DataMember(Name = "active_validator", IsRequired = true, EmitDefaultValue = true)]
+        public ActiveValidator ActiveValidator { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,10 +127,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MethodRoyalty {\n");
-            sb.Append("  MethodName: ").Append(MethodName).Append("\n");
-            sb.Append("  IsLocked: ").Append(IsLocked).Append("\n");
-            sb.Append("  RoyaltyAmount: ").Append(RoyaltyAmount).Append("\n");
+            sb.Append("class ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue {\n");
+            sb.Append("  ActiveValidator: ").Append(ActiveValidator).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -167,15 +149,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MethodRoyalty);
+            return this.Equals(input as ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue);
         }
 
         /// <summary>
-        /// Returns true if MethodRoyalty instances are equal
+        /// Returns true if ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue instances are equal
         /// </summary>
-        /// <param name="input">Instance of MethodRoyalty to be compared</param>
+        /// <param name="input">Instance of ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MethodRoyalty input)
+        public bool Equals(ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue input)
         {
             if (input == null)
             {
@@ -183,18 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.MethodName == input.MethodName ||
-                    (this.MethodName != null &&
-                    this.MethodName.Equals(input.MethodName))
-                ) && 
-                (
-                    this.IsLocked == input.IsLocked ||
-                    this.IsLocked.Equals(input.IsLocked)
-                ) && 
-                (
-                    this.RoyaltyAmount == input.RoyaltyAmount ||
-                    (this.RoyaltyAmount != null &&
-                    this.RoyaltyAmount.Equals(input.RoyaltyAmount))
+                    this.ActiveValidator == input.ActiveValidator ||
+                    (this.ActiveValidator != null &&
+                    this.ActiveValidator.Equals(input.ActiveValidator))
                 );
         }
 
@@ -207,14 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.MethodName != null)
+                if (this.ActiveValidator != null)
                 {
-                    hashCode = (hashCode * 59) + this.MethodName.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.IsLocked.GetHashCode();
-                if (this.RoyaltyAmount != null)
-                {
-                    hashCode = (hashCode * 59) + this.RoyaltyAmount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ActiveValidator.GetHashCode();
                 }
                 return hashCode;
             }

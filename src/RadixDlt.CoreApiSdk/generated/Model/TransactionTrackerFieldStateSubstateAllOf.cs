@@ -103,49 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionTrackerFieldStateSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="startEpoch">startEpoch (required).</param>
-        /// <param name="startPartition">startPartition (required).</param>
-        /// <param name="partitionRangeStartInclusive">partitionRangeStartInclusive (required).</param>
-        /// <param name="partitionRangeEndInclusive">partitionRangeEndInclusive (required).</param>
-        /// <param name="epochsPerPartition">epochsPerPartition (required).</param>
-        public TransactionTrackerFieldStateSubstateAllOf(long startEpoch = default(long), int startPartition = default(int), int partitionRangeStartInclusive = default(int), int partitionRangeEndInclusive = default(int), long epochsPerPartition = default(long))
+        /// <param name="value">value (required).</param>
+        public TransactionTrackerFieldStateSubstateAllOf(TransactionTrackerFieldStateValue value = default(TransactionTrackerFieldStateValue))
         {
-            this.StartEpoch = startEpoch;
-            this.StartPartition = startPartition;
-            this.PartitionRangeStartInclusive = partitionRangeStartInclusive;
-            this.PartitionRangeEndInclusive = partitionRangeEndInclusive;
-            this.EpochsPerPartition = epochsPerPartition;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for TransactionTrackerFieldStateSubstateAllOf and cannot be null");
+            }
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets StartEpoch
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "start_epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long StartEpoch { get; set; }
-
-        /// <summary>
-        /// Gets or Sets StartPartition
-        /// </summary>
-        [DataMember(Name = "start_partition", IsRequired = true, EmitDefaultValue = true)]
-        public int StartPartition { get; set; }
-
-        /// <summary>
-        /// Gets or Sets PartitionRangeStartInclusive
-        /// </summary>
-        [DataMember(Name = "partition_range_start_inclusive", IsRequired = true, EmitDefaultValue = true)]
-        public int PartitionRangeStartInclusive { get; set; }
-
-        /// <summary>
-        /// Gets or Sets PartitionRangeEndInclusive
-        /// </summary>
-        [DataMember(Name = "partition_range_end_inclusive", IsRequired = true, EmitDefaultValue = true)]
-        public int PartitionRangeEndInclusive { get; set; }
-
-        /// <summary>
-        /// Gets or Sets EpochsPerPartition
-        /// </summary>
-        [DataMember(Name = "epochs_per_partition", IsRequired = true, EmitDefaultValue = true)]
-        public long EpochsPerPartition { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionTrackerFieldStateValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -155,11 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionTrackerFieldStateSubstateAllOf {\n");
-            sb.Append("  StartEpoch: ").Append(StartEpoch).Append("\n");
-            sb.Append("  StartPartition: ").Append(StartPartition).Append("\n");
-            sb.Append("  PartitionRangeStartInclusive: ").Append(PartitionRangeStartInclusive).Append("\n");
-            sb.Append("  PartitionRangeEndInclusive: ").Append(PartitionRangeEndInclusive).Append("\n");
-            sb.Append("  EpochsPerPartition: ").Append(EpochsPerPartition).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -196,24 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StartEpoch == input.StartEpoch ||
-                    this.StartEpoch.Equals(input.StartEpoch)
-                ) && 
-                (
-                    this.StartPartition == input.StartPartition ||
-                    this.StartPartition.Equals(input.StartPartition)
-                ) && 
-                (
-                    this.PartitionRangeStartInclusive == input.PartitionRangeStartInclusive ||
-                    this.PartitionRangeStartInclusive.Equals(input.PartitionRangeStartInclusive)
-                ) && 
-                (
-                    this.PartitionRangeEndInclusive == input.PartitionRangeEndInclusive ||
-                    this.PartitionRangeEndInclusive.Equals(input.PartitionRangeEndInclusive)
-                ) && 
-                (
-                    this.EpochsPerPartition == input.EpochsPerPartition ||
-                    this.EpochsPerPartition.Equals(input.EpochsPerPartition)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -226,11 +180,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.StartEpoch.GetHashCode();
-                hashCode = (hashCode * 59) + this.StartPartition.GetHashCode();
-                hashCode = (hashCode * 59) + this.PartitionRangeStartInclusive.GetHashCode();
-                hashCode = (hashCode * 59) + this.PartitionRangeEndInclusive.GetHashCode();
-                hashCode = (hashCode * 59) + this.EpochsPerPartition.GetHashCode();
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                }
                 return hashCode;
             }
         }

@@ -98,18 +98,27 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorFieldProtocolUpdateReadinessSignalSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="protocolVersionName">If present, indicates the validator is currently signalling readiness for the given protocl version. Is validated to be exactly 32 chars long (if it exists). .</param>
-        public ValidatorFieldProtocolUpdateReadinessSignalSubstateAllOf(string protocolVersionName = default(string))
+        [JsonConstructorAttribute]
+        protected ValidatorFieldProtocolUpdateReadinessSignalSubstateAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ValidatorFieldProtocolUpdateReadinessSignalSubstateAllOf" /> class.
+        /// </summary>
+        /// <param name="value">value (required).</param>
+        public ValidatorFieldProtocolUpdateReadinessSignalSubstateAllOf(ValidatorFieldProtocolUpdateReadinessSignalValue value = default(ValidatorFieldProtocolUpdateReadinessSignalValue))
         {
-            this.ProtocolVersionName = protocolVersionName;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for ValidatorFieldProtocolUpdateReadinessSignalSubstateAllOf and cannot be null");
+            }
+            this.Value = value;
         }
 
         /// <summary>
-        /// If present, indicates the validator is currently signalling readiness for the given protocl version. Is validated to be exactly 32 chars long (if it exists). 
+        /// Gets or Sets Value
         /// </summary>
-        /// <value>If present, indicates the validator is currently signalling readiness for the given protocl version. Is validated to be exactly 32 chars long (if it exists). </value>
-        [DataMember(Name = "protocol_version_name", EmitDefaultValue = true)]
-        public string ProtocolVersionName { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public ValidatorFieldProtocolUpdateReadinessSignalValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -119,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ValidatorFieldProtocolUpdateReadinessSignalSubstateAllOf {\n");
-            sb.Append("  ProtocolVersionName: ").Append(ProtocolVersionName).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -156,9 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ProtocolVersionName == input.ProtocolVersionName ||
-                    (this.ProtocolVersionName != null &&
-                    this.ProtocolVersionName.Equals(input.ProtocolVersionName))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -171,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ProtocolVersionName != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.ProtocolVersionName.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

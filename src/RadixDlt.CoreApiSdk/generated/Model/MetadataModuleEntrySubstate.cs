@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -151,10 +153,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="MetadataModuleEntrySubstate" /> class.
         /// </summary>
         /// <param name="key">key (required).</param>
-        /// <param name="dataStruct">dataStruct.</param>
+        /// <param name="value">value.</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.MetadataModuleEntry).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public MetadataModuleEntrySubstate(MetadataKey key = default(MetadataKey), DataStruct dataStruct = default(DataStruct), SubstateType substateType = SubstateType.MetadataModuleEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public MetadataModuleEntrySubstate(MetadataKey key = default(MetadataKey), MetadataModuleEntryValue value = default(MetadataModuleEntryValue), SubstateType substateType = SubstateType.MetadataModuleEntry, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -162,7 +164,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("key is a required property for MetadataModuleEntrySubstate and cannot be null");
             }
             this.Key = key;
-            this.DataStruct = dataStruct;
+            this.Value = value;
         }
 
         /// <summary>
@@ -172,10 +174,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public MetadataKey Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets DataStruct
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "data_struct", EmitDefaultValue = true)]
-        public DataStruct DataStruct { get; set; }
+        [DataMember(Name = "value", EmitDefaultValue = true)]
+        public MetadataModuleEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -187,7 +189,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class MetadataModuleEntrySubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -229,9 +231,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Key.Equals(input.Key))
                 ) && base.Equals(input) && 
                 (
-                    this.DataStruct == input.DataStruct ||
-                    (this.DataStruct != null &&
-                    this.DataStruct.Equals(input.DataStruct))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -248,9 +250,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                if (this.DataStruct != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

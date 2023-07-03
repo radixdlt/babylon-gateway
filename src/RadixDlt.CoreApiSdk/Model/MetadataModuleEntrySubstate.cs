@@ -71,15 +71,15 @@ public partial class MetadataModuleEntrySubstate : IEntityOwner, IEntityAddressP
 {
     public IEnumerable<EntityReference> GetOwnedEntities()
     {
-        return DataStruct != null
-            ? DataStruct.OwnedEntities
+        return Value != null
+            ? Value.DataStruct.OwnedEntities
             : Enumerable.Empty<EntityReference>();
     }
 
     public IEnumerable<string> GetEntityAddresses()
     {
-        return DataStruct != null
-            ? DataStruct.ReferencedEntities.Select(re => re.EntityAddress)
+        return Value != null
+            ? Value.DataStruct.ReferencedEntities.Select(re => re.EntityAddress)
             : Enumerable.Empty<string>();
     }
 }

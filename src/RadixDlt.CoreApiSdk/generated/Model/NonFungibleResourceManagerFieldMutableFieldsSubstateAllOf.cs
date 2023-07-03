@@ -103,23 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourceManagerFieldMutableFieldsSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="mutableFields">The field names of the NF Metadata which are mutable.  (required).</param>
-        public NonFungibleResourceManagerFieldMutableFieldsSubstateAllOf(List<string> mutableFields = default(List<string>))
+        /// <param name="value">value (required).</param>
+        public NonFungibleResourceManagerFieldMutableFieldsSubstateAllOf(NonFungibleResourceManagerFieldMutableFieldsValue value = default(NonFungibleResourceManagerFieldMutableFieldsValue))
         {
-            // to ensure "mutableFields" is required (not null)
-            if (mutableFields == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("mutableFields is a required property for NonFungibleResourceManagerFieldMutableFieldsSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for NonFungibleResourceManagerFieldMutableFieldsSubstateAllOf and cannot be null");
             }
-            this.MutableFields = mutableFields;
+            this.Value = value;
         }
 
         /// <summary>
-        /// The field names of the NF Metadata which are mutable. 
+        /// Gets or Sets Value
         /// </summary>
-        /// <value>The field names of the NF Metadata which are mutable. </value>
-        [DataMember(Name = "mutable_fields", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> MutableFields { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public NonFungibleResourceManagerFieldMutableFieldsValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleResourceManagerFieldMutableFieldsSubstateAllOf {\n");
-            sb.Append("  MutableFields: ").Append(MutableFields).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,10 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.MutableFields == input.MutableFields ||
-                    this.MutableFields != null &&
-                    input.MutableFields != null &&
-                    this.MutableFields.SequenceEqual(input.MutableFields)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -182,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.MutableFields != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.MutableFields.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

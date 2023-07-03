@@ -129,7 +129,9 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
-    [JsonSubtypes.KnownSubType(typeof(PackageCodeEntrySubstate), "PackageCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
     [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
     [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
     [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
@@ -150,20 +152,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorFieldProtocolUpdateReadinessSignalSubstate" /> class.
         /// </summary>
-        /// <param name="protocolVersionName">If present, indicates the validator is currently signalling readiness for the given protocl version. Is validated to be exactly 32 chars long (if it exists). .</param>
+        /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.ValidatorFieldProtocolUpdateReadinessSignal).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public ValidatorFieldProtocolUpdateReadinessSignalSubstate(string protocolVersionName = default(string), SubstateType substateType = SubstateType.ValidatorFieldProtocolUpdateReadinessSignal, bool isLocked = default(bool)) : base(substateType, isLocked)
+        public ValidatorFieldProtocolUpdateReadinessSignalSubstate(ValidatorFieldProtocolUpdateReadinessSignalValue value = default(ValidatorFieldProtocolUpdateReadinessSignalValue), SubstateType substateType = SubstateType.ValidatorFieldProtocolUpdateReadinessSignal, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            this.ProtocolVersionName = protocolVersionName;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for ValidatorFieldProtocolUpdateReadinessSignalSubstate and cannot be null");
+            }
+            this.Value = value;
         }
 
         /// <summary>
-        /// If present, indicates the validator is currently signalling readiness for the given protocl version. Is validated to be exactly 32 chars long (if it exists). 
+        /// Gets or Sets Value
         /// </summary>
-        /// <value>If present, indicates the validator is currently signalling readiness for the given protocl version. Is validated to be exactly 32 chars long (if it exists). </value>
-        [DataMember(Name = "protocol_version_name", EmitDefaultValue = true)]
-        public string ProtocolVersionName { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public ValidatorFieldProtocolUpdateReadinessSignalValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -174,7 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ValidatorFieldProtocolUpdateReadinessSignalSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  ProtocolVersionName: ").Append(ProtocolVersionName).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -211,9 +217,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.ProtocolVersionName == input.ProtocolVersionName ||
-                    (this.ProtocolVersionName != null &&
-                    this.ProtocolVersionName.Equals(input.ProtocolVersionName))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -226,9 +232,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.ProtocolVersionName != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.ProtocolVersionName.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

@@ -68,7 +68,7 @@ public partial class RoyaltyModuleFieldStateSubstate : IRoyaltyVaultHolder
 {
     public bool TryGetRoyaltyVault(out EntityReference royaltyVault)
     {
-        royaltyVault = VaultEntity;
+        royaltyVault = Value.VaultEntity;
 
         return true;
     }
