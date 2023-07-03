@@ -72,12 +72,14 @@ public class EventTypeIdentifiers
         FungibleVaultEventTypeIdentifiers fungibleVault,
         NonFungibleVaultEventTypeIdentifiers nonFungibleVault,
         FungibleResourceEventTypeIdentifiers fungibleResource,
-        NonFungibleResourceEventTypeIdentifiers nonFungibleResource)
+        NonFungibleResourceEventTypeIdentifiers nonFungibleResource,
+        GlobalValidatorEventTypeIdentifiers globalValidator)
     {
         FungibleVault = fungibleVault;
         NonFungibleVault = nonFungibleVault;
         FungibleResource = fungibleResource;
         NonFungibleResource = nonFungibleResource;
+        GlobalValidator = globalValidator;
     }
 
     public FungibleVaultEventTypeIdentifiers FungibleVault { get; }
@@ -88,6 +90,8 @@ public class EventTypeIdentifiers
 
     public NonFungibleResourceEventTypeIdentifiers NonFungibleResource { get; }
 
+    public GlobalValidatorEventTypeIdentifiers GlobalValidator { get; }
+
     public sealed record FungibleVaultEventTypeIdentifiers(int Withdrawal, int Deposit);
 
     public sealed record NonFungibleVaultEventTypeIdentifiers(int Withdrawal, int Deposit);
@@ -95,4 +99,6 @@ public class EventTypeIdentifiers
     public sealed record FungibleResourceEventTypeIdentifiers(int Minted, int Burned);
 
     public sealed record NonFungibleResourceEventTypeIdentifiers(int Minted, int Burned);
+
+    public sealed record GlobalValidatorEventTypeIdentifiers(int ValidatorEmissionApplied);
 }

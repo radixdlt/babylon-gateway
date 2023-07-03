@@ -1115,9 +1115,21 @@ components:
         - address
         - metadata
         - current_stake
+        - epochs_active_in
       properties:
         address:
           $ref: "#/components/schemas/Address"
+        proposals_made:
+          type: integer
+          format: int64
+          nullable: true
+        proposals_missed:
+          type: integer
+          format: int64
+          nullable: true
+        epochs_active_in:
+          type: integer
+          format: int64
         state:
           type: object
           nullable: true
@@ -2033,6 +2045,16 @@ components:
               description: This cursor allows forward pagination, by providing the cursor from the previous request.
               type: string
               nullable: true
+            uptime_range:
+              description: Allows specifying range for which uptime data will be returned (defaults to 14 days).
+              type: string
+              enum:
+                - 12_hours
+                - 24_hours
+                - 7_days
+                - 14_days
+                - 30_days
+                - 90_days
       example:
         at_ledger_state: null
     StateValidatorsListResponse:

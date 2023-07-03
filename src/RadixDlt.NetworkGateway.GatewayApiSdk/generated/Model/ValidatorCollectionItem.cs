@@ -104,11 +104,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="ValidatorCollectionItem" /> class.
         /// </summary>
         /// <param name="address">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="proposalsMade">proposalsMade.</param>
+        /// <param name="proposalsMissed">proposalsMissed.</param>
+        /// <param name="epochsActiveIn">epochsActiveIn (required).</param>
         /// <param name="state">state.</param>
         /// <param name="currentStake">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="activeInEpoch">activeInEpoch.</param>
         /// <param name="metadata">metadata (required).</param>
-        public ValidatorCollectionItem(string address = default(string), Object state = default(Object), string currentStake = default(string), ValidatorCollectionItemActiveInEpoch activeInEpoch = default(ValidatorCollectionItemActiveInEpoch), EntityMetadataCollection metadata = default(EntityMetadataCollection))
+        public ValidatorCollectionItem(string address = default(string), long? proposalsMade = default(long?), long? proposalsMissed = default(long?), long epochsActiveIn = default(long), Object state = default(Object), string currentStake = default(string), ValidatorCollectionItemActiveInEpoch activeInEpoch = default(ValidatorCollectionItemActiveInEpoch), EntityMetadataCollection metadata = default(EntityMetadataCollection))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -116,6 +119,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("address is a required property for ValidatorCollectionItem and cannot be null");
             }
             this.Address = address;
+            this.EpochsActiveIn = epochsActiveIn;
             // to ensure "currentStake" is required (not null)
             if (currentStake == null)
             {
@@ -128,6 +132,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("metadata is a required property for ValidatorCollectionItem and cannot be null");
             }
             this.Metadata = metadata;
+            this.ProposalsMade = proposalsMade;
+            this.ProposalsMissed = proposalsMissed;
             this.State = state;
             this.ActiveInEpoch = activeInEpoch;
         }
@@ -138,6 +144,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <value>Bech32m-encoded human readable version of the address.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ProposalsMade
+        /// </summary>
+        [DataMember(Name = "proposals_made", EmitDefaultValue = true)]
+        public long? ProposalsMade { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ProposalsMissed
+        /// </summary>
+        [DataMember(Name = "proposals_missed", EmitDefaultValue = true)]
+        public long? ProposalsMissed { get; set; }
+
+        /// <summary>
+        /// Gets or Sets EpochsActiveIn
+        /// </summary>
+        [DataMember(Name = "epochs_active_in", IsRequired = true, EmitDefaultValue = true)]
+        public long EpochsActiveIn { get; set; }
 
         /// <summary>
         /// Gets or Sets State
@@ -173,6 +197,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ValidatorCollectionItem {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  ProposalsMade: ").Append(ProposalsMade).Append("\n");
+            sb.Append("  ProposalsMissed: ").Append(ProposalsMissed).Append("\n");
+            sb.Append("  EpochsActiveIn: ").Append(EpochsActiveIn).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
             sb.Append("  CurrentStake: ").Append(CurrentStake).Append("\n");
             sb.Append("  ActiveInEpoch: ").Append(ActiveInEpoch).Append("\n");
@@ -218,6 +245,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
+                    this.ProposalsMade == input.ProposalsMade ||
+                    (this.ProposalsMade != null &&
+                    this.ProposalsMade.Equals(input.ProposalsMade))
+                ) && 
+                (
+                    this.ProposalsMissed == input.ProposalsMissed ||
+                    (this.ProposalsMissed != null &&
+                    this.ProposalsMissed.Equals(input.ProposalsMissed))
+                ) && 
+                (
+                    this.EpochsActiveIn == input.EpochsActiveIn ||
+                    this.EpochsActiveIn.Equals(input.EpochsActiveIn)
+                ) && 
+                (
                     this.State == input.State ||
                     (this.State != null &&
                     this.State.Equals(input.State))
@@ -252,6 +293,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
+                if (this.ProposalsMade != null)
+                {
+                    hashCode = (hashCode * 59) + this.ProposalsMade.GetHashCode();
+                }
+                if (this.ProposalsMissed != null)
+                {
+                    hashCode = (hashCode * 59) + this.ProposalsMissed.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.EpochsActiveIn.GetHashCode();
                 if (this.State != null)
                 {
                     hashCode = (hashCode * 59) + this.State.GetHashCode();

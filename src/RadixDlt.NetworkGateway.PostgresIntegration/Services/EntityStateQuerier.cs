@@ -90,7 +90,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 {
     private record MetadataViewModel(long FromStateVersion, long EntityId, string Key, byte[] Value, int TotalCount);
 
-    private record ValidatorCurrentStakeViewModel(long ValidatorId, string Balance, string State, long BalanceLastUpdatedAtStateVersion, long StateLastUpdatedAtStateVersion);
+    private record ValidatorCurrentStakeViewModel(long ValidatorId, string Balance, string State, long BalanceLastUpdatedAtStateVersion, long StateLastUpdatedAtStateVersion, long? ProposalsMade, long? ProposalsMissed, long? EpochsActiveIn);
 
     private record FungibleViewModel(EntityAddress ResourceEntityAddress, string Balance, int ResourcesTotalCount, long LastUpdatedAtStateVersion);
 
@@ -124,19 +124,21 @@ internal class EntityStateQuerier : IEntityStateQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly IVirtualEntityMetadataProvider _virtualEntityMetadataProvider;
     private readonly ILogger<EntityStateQuerier> _logger;
+    private readonly IClock _clock;
     private readonly byte _ecdsaSecp256k1VirtualAccountAddressPrefix;
     private readonly byte _eddsaEd25519VirtualAccountAddressPrefix;
     private readonly byte _ecdsaSecp256k1VirtualIdentityAddressPrefix;
     private readonly byte _eddsaEd25519VirtualIdentityAddressPrefix;
 
     public EntityStateQuerier(INetworkConfigurationProvider networkConfigurationProvider, ReadOnlyDbContext dbContext,
-        IOptionsSnapshot<EndpointOptions> endpointConfiguration, ILogger<EntityStateQuerier> logger, IVirtualEntityMetadataProvider virtualEntityMetadataProvider)
+        IOptionsSnapshot<EndpointOptions> endpointConfiguration, ILogger<EntityStateQuerier> logger, IVirtualEntityMetadataProvider virtualEntityMetadataProvider, IClock clock)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _dbContext = dbContext;
         _endpointConfiguration = endpointConfiguration;
         _logger = logger;
         _virtualEntityMetadataProvider = virtualEntityMetadataProvider;
+        _clock = clock;
 
         _ecdsaSecp256k1VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Account).AddressBytePrefix;
         _eddsaEd25519VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Account).AddressBytePrefix;
@@ -578,11 +580,23 @@ ORDER BY nfid.from_state_version DESC
             nonFungibleIds: items);
     }
 
-    public async Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState,
-        CancellationToken token = default)
+    public async Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListRequest.UptimeRangeEnum uptimeRange, GatewayModel.StateValidatorsListCursor? cursor,
+        GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var validatorsPageSize = _endpointConfiguration.Value.ValidatorsPageSize;
         var fromStateVersion = cursor?.StateVersionBoundary ?? 0;
+
+        var now = _clock.UtcNow;
+        var uptimeStartTime = uptimeRange switch
+        {
+            GatewayModel.StateValidatorsListRequest.UptimeRangeEnum._12Hours => now.AddHours(-12),
+            GatewayModel.StateValidatorsListRequest.UptimeRangeEnum._24Hours => now.AddHours(-24),
+            GatewayModel.StateValidatorsListRequest.UptimeRangeEnum._7Days => now.AddDays(-7),
+            GatewayModel.StateValidatorsListRequest.UptimeRangeEnum._14Days => now.AddDays(-14),
+            GatewayModel.StateValidatorsListRequest.UptimeRangeEnum._30Days => now.AddDays(-30),
+            GatewayModel.StateValidatorsListRequest.UptimeRangeEnum._90Days => now.AddDays(-90),
+            _ => throw new ArgumentOutOfRangeException(nameof(uptimeRange), uptimeRange, null),
+        };
 
         var validatorsAndOneMore = await _dbContext.Entities
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.GetType() == typeof(GlobalValidatorEntity))
@@ -612,8 +626,27 @@ ORDER BY nfid.from_state_version DESC
 
         var cd = new CommandDefinition(
             commandText: @"
-WITH variables (validator_entity_id) AS (SELECT UNNEST(@validatorIds))
-SELECT e.id AS ValidatorId, CAST(evh.balance AS text) AS Balance, esh.state AS State, evh.from_state_version AS BalanceLastUpdatedAtStateVersion, esh.from_state_version AS StateLastUpdatedAtStateVersion
+WITH
+variables (validator_entity_id) AS (SELECT UNNEST(@validatorIds)),
+validator_uptime_aggregated (validator_entity_id, proposals_made, proposals_missed, epochs_active_in) AS (
+    SELECT
+        validator_entity_id,
+        SUM(proposals_made),
+        SUM(proposals_missed),
+        COUNT(*)
+    FROM validator_uptime
+    WHERE epoch_end > @timeFrom AND from_state_version <= @stateVersion
+    GROUP BY validator_entity_id
+)
+SELECT
+    e.id AS ValidatorId,
+    CAST(evh.balance AS text) AS Balance,
+    esh.state AS State,
+    evh.from_state_version AS BalanceLastUpdatedAtStateVersion,
+    esh.from_state_version AS StateLastUpdatedAtStateVersion,
+    vua.proposals_made as ProposalsMade,
+    vua.proposals_missed as ProposalsMissed,
+    vua.epochs_active_in as EpochsActiveIn
 FROM variables
 INNER JOIN entities e ON e.id = variables.validator_entity_id AND from_state_version <= @stateVersion
 INNER JOIN LATERAL (
@@ -630,10 +663,11 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) esh ON true
+LEFT JOIN validator_uptime_aggregated vua on vua.validator_entity_id = e.id
 ;",
             parameters: new
             {
-                validatorIds = validatorIds, stateVersion = ledgerState.StateVersion,
+                validatorIds = validatorIds, stateVersion = ledgerState.StateVersion, timeFrom = uptimeStartTime,
             },
             cancellationToken: token);
 
@@ -659,6 +693,9 @@ INNER JOIN LATERAL (
 
                 return new GatewayModel.ValidatorCollectionItem(
                     v.Address,
+                    details.ProposalsMade,
+                    details.ProposalsMissed,
+                    details.EpochsActiveIn ?? 0,
                     new JRaw(details.State),
                     TokenAmount.FromSubUnitsString(details.Balance).ToString(),
                     activeInEpoch,

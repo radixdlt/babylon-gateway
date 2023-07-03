@@ -112,6 +112,7 @@ internal class TransactionStreamReader : ITransactionStreamReader
                         Hash = false,
                         Raw = false,
                         Typed = true,
+                        Previous = true,
                     },
                     sborFormatOptions: new CoreModel.SborFormatOptions
                     {

@@ -66,6 +66,7 @@ using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -99,6 +100,12 @@ internal class ComponentSchemaProvider : IComponentSchemaProvider
     {
         EnsureComponentSchemaCaptured(componentSchema);
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
+
+        if (await dbContext.ComponentSchema.AnyAsync(token))
+        {
+            return;
+        }
+
         dbContext.ComponentSchema.Add(await GetCapturedComponentSchema());
         await dbContext.SaveChangesAsync(token);
     }

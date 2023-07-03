@@ -93,6 +93,11 @@ public static class EventNames
         public const string Withdraw = "WithdrawResourceEvent";
         public const string Deposit = "DepositResourceEvent";
     }
+
+    public static class GlobalValidator
+    {
+        public const string ValidatorEmissionApplied = "ValidatorEmissionAppliedEvent";
+    }
 }
 
 public static class SchemaNames
@@ -101,6 +106,7 @@ public static class SchemaNames
     public const string NonFungibleVault = "NonFungibleVault";
     public const string FungibleResourceManager = "FungibleResourceManager";
     public const string NonFungibleResourceManager = "NonFungibleResourceManager";
+    public const string Validator = "Validator";
 }
 
 public static class SchemaExtractor
@@ -111,6 +117,9 @@ public static class SchemaExtractor
             .Where(x => x.Value.SubstateData is CoreModel.PackageFieldInfoSubstate)
             .SelectMany(x => ((CoreModel.PackageFieldInfoSubstate)x.Value.SubstateData).PackageSchema.BlueprintDefinitions)
             .ToList();
+
+        var validatorSchema = schemas.First(x => x.Key == SchemaNames.Validator).Value.Schema;
+        var validatorEmissionAppliedEventId = validatorSchema.EventSchemas.First(x => x.Key == EventNames.GlobalValidator.ValidatorEmissionApplied).Value.Index;
 
         var fungibleVaultSchema = schemas.First(x => x.Key == SchemaNames.FungibleVault).Value.Schema;
         var fungibleVaultWithdrawEventId = fungibleVaultSchema.EventSchemas.First(x => x.Key == EventNames.FungibleVault.Withdraw).Value.Index;
@@ -132,7 +141,8 @@ public static class SchemaExtractor
             new EventTypeIdentifiers.FungibleVaultEventTypeIdentifiers(fungibleVaultWithdrawEventId, fungibleVaultDepositEventId),
             new EventTypeIdentifiers.NonFungibleVaultEventTypeIdentifiers(nonFungibleVaultWithdrawEventId, nonFungibleVaultDepositEventId),
             new EventTypeIdentifiers.FungibleResourceEventTypeIdentifiers(mintFungibleResourceEventId, burnFungibleResourceEventId),
-            new EventTypeIdentifiers.NonFungibleResourceEventTypeIdentifiers(mintNonFungibleResourceEventId, burnNonFungibleResourceEventId)
+            new EventTypeIdentifiers.NonFungibleResourceEventTypeIdentifiers(mintNonFungibleResourceEventId, burnNonFungibleResourceEventId),
+            new EventTypeIdentifiers.GlobalValidatorEventTypeIdentifiers(validatorEmissionAppliedEventId)
         );
     }
 }

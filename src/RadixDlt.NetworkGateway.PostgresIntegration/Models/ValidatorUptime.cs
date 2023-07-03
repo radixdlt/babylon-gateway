@@ -62,45 +62,38 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using RadixDlt.NetworkGateway.Abstractions;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+
+[Table("validator_uptime")]
+internal class ValidatorUptime
 {
-    public long AccountDefaultDepositRuleHistorySequence { get; set; }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public long AccountResourceDepositRuleHistorySequence { get; set; }
+    [Column("validator_entity_id")]
+    public long ValidatorEntityId { get; set; }
 
-    public long EntityStateHistorySequence { get; set; }
+    [Column("epoch_number")]
+    public long EpochNumber { get; set; }
 
-    public long EntitySequence { get; set; }
+    [Column("epoch_start")]
+    public DateTime EpochStart { get; set; }
 
-    public long EntityAccessRulesChainHistorySequence { get; set; }
+    [Column("epoch_end")]
+    public DateTime EpochEnd { get; set; }
 
-    public long EntityMetadataHistorySequence { get; set; }
+    [Column("proposals_made")]
+    public int ProposalsMade { get; set; }
 
-    public long EntityMetadataAggregateHistorySequence { get; set; }
+    [Column("proposals_missed")]
+    public int ProposalsMissed { get; set; }
 
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionMarkerSequence { get; set; }
-
-    public long ValidatorUptimeSequence { get; set; }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 }

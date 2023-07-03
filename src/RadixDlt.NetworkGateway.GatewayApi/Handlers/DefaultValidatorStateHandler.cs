@@ -84,7 +84,8 @@ internal class DefaultValidatorStateHandler : IValidatorStateHandler
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
         var cursor = GatewayModel.StateValidatorsListCursor.FromCursorString(request.Cursor);
+        var uptimeRange = request.UptimeRange ?? GatewayModel.StateValidatorsListRequest.UptimeRangeEnum._14Days;
 
-        return await _entityStateQuerier.StateValidatorsList(cursor, ledgerState, token);
+        return await _entityStateQuerier.StateValidatorsList(uptimeRange, cursor, ledgerState, token);
     }
 }

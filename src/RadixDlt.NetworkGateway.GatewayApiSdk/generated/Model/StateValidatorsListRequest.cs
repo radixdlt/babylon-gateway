@@ -96,14 +96,68 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     public partial class StateValidatorsListRequest : IEquatable<StateValidatorsListRequest>
     {
         /// <summary>
+        /// Allows specifying range for which uptime data will be returned (defaults to 14 days).
+        /// </summary>
+        /// <value>Allows specifying range for which uptime data will be returned (defaults to 14 days).</value>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum UptimeRangeEnum
+        {
+            /// <summary>
+            /// Enum _12Hours for value: 12_hours
+            /// </summary>
+            [EnumMember(Value = "12_hours")]
+            _12Hours = 1,
+
+            /// <summary>
+            /// Enum _24Hours for value: 24_hours
+            /// </summary>
+            [EnumMember(Value = "24_hours")]
+            _24Hours = 2,
+
+            /// <summary>
+            /// Enum _7Days for value: 7_days
+            /// </summary>
+            [EnumMember(Value = "7_days")]
+            _7Days = 3,
+
+            /// <summary>
+            /// Enum _14Days for value: 14_days
+            /// </summary>
+            [EnumMember(Value = "14_days")]
+            _14Days = 4,
+
+            /// <summary>
+            /// Enum _30Days for value: 30_days
+            /// </summary>
+            [EnumMember(Value = "30_days")]
+            _30Days = 5,
+
+            /// <summary>
+            /// Enum _90Days for value: 90_days
+            /// </summary>
+            [EnumMember(Value = "90_days")]
+            _90Days = 6
+
+        }
+
+
+        /// <summary>
+        /// Allows specifying range for which uptime data will be returned (defaults to 14 days).
+        /// </summary>
+        /// <value>Allows specifying range for which uptime data will be returned (defaults to 14 days).</value>
+        [DataMember(Name = "uptime_range", EmitDefaultValue = true)]
+        public UptimeRangeEnum? UptimeRange { get; set; }
+        /// <summary>
         /// Initializes a new instance of the <see cref="StateValidatorsListRequest" /> class.
         /// </summary>
         /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
-        public StateValidatorsListRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string))
+        /// <param name="uptimeRange">Allows specifying range for which uptime data will be returned (defaults to 14 days)..</param>
+        public StateValidatorsListRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string cursor = default(string), UptimeRangeEnum? uptimeRange = default(UptimeRangeEnum?))
         {
             this.AtLedgerState = atLedgerState;
             this.Cursor = cursor;
+            this.UptimeRange = uptimeRange;
         }
 
         /// <summary>
@@ -129,6 +183,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class StateValidatorsListRequest {\n");
             sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
+            sb.Append("  UptimeRange: ").Append(UptimeRange).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -173,6 +228,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Cursor == input.Cursor ||
                     (this.Cursor != null &&
                     this.Cursor.Equals(input.Cursor))
+                ) && 
+                (
+                    this.UptimeRange == input.UptimeRange ||
+                    this.UptimeRange.Equals(input.UptimeRange)
                 );
         }
 
@@ -193,6 +252,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.UptimeRange.GetHashCode();
                 return hashCode;
             }
         }

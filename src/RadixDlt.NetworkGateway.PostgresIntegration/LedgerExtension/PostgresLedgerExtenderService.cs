@@ -522,7 +522,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         RoundInEpoch: roundInEpochUpdate ?? lastTransactionSummary.RoundInEpoch,
                         IndexInEpoch: isStartOfEpoch ? 0 : lastTransactionSummary.IndexInEpoch + 1,
                         IndexInRound: isStartOfRound ? 0 : lastTransactionSummary.IndexInRound + 1,
-                        IsEndOfEpoch: epochUpdate != null);
+                        IsEndOfEpoch: committedTransaction.Receipt.NextEpoch != null);
 
                     LedgerTransaction ledgerTransaction = committedTransaction.LedgerTransaction switch
                     {
@@ -737,6 +737,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>();
         var accountDefaultDepositRuleHistoryToAdd = new List<AccountDefaultDepositRuleHistory>();
         var accountResourceDepositRuleHistoryToAdd = new List<AccountResourceDepositRuleHistory>();
+        var validatorUptimeToAdd = new List<ValidatorUptime>();
 
         // step: scan all substates to figure out changes
         {
@@ -744,12 +745,22 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             {
                 var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
                 var stateUpdates = committedTransaction.Receipt.StateUpdates;
-                var currentEpoch = ledgerExtension.LatestTransactionSummary.Epoch;
+
+                var currentEpochNumber = ledgerExtension.LatestTransactionSummary.Epoch;
+                DateTime? currentEpochStartTime = null;
+
+                long? finishedEpochNumber = null;
+                DateTime? finishedEpochStartTime = null;
+
                 var affectedGlobalEntities = new HashSet<long>();
 
                 try
                 {
-                    foreach (var substate in stateUpdates.CreatedSubstates.Select(x => new { x.SubstateId, x.Value }).Concat(stateUpdates.UpdatedSubstates.Select(x => new { x.SubstateId, Value = x.NewValue })))
+                    foreach (var substate in
+                             stateUpdates
+                                 .CreatedSubstates.Select(x => new { x.SubstateId, x.Value, PreviousValue = (CoreModel.SubstateValue?)null })
+                                 .Concat(stateUpdates.UpdatedSubstates.Select(x => new { x.SubstateId, Value = x.NewValue, PreviousValue = (CoreModel.SubstateValue?)x.PreviousValue }))
+                             )
                     {
                         var substateId = substate.SubstateId;
                         var substateData = substate.Value.SubstateData;
@@ -869,7 +880,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.ConsensusManagerFieldStateSubstate consensusManagerFieldStateSubstate)
                         {
-                            currentEpoch = consensusManagerFieldStateSubstate.Epoch;
+                            currentEpochNumber = consensusManagerFieldStateSubstate.Epoch;
+                            currentEpochStartTime = DateTimeOffset.FromUnixTimeMilliseconds(consensusManagerFieldStateSubstate.EpochStart.UnixTimestampMs).UtcDateTime;
+
+                            if (substate.PreviousValue?.SubstateData is CoreModel.ConsensusManagerFieldStateSubstate previousConsensusManagerFieldStateSubstate)
+                            {
+                                finishedEpochNumber = previousConsensusManagerFieldStateSubstate.Epoch;
+                                finishedEpochStartTime = DateTimeOffset.FromUnixTimeMilliseconds(previousConsensusManagerFieldStateSubstate.EpochStart.UnixTimestampMs).UtcDateTime;
+                            }
                         }
 
                         if (substateData is CoreModel.ConsensusManagerFieldCurrentValidatorSetSubstate validatorSet)
@@ -884,7 +902,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                     },
                                     v => TokenAmount.FromDecimalString(v.Stake));
 
-                            validatorSetChanges.Add(new ValidatorSetChange(currentEpoch, change, stateVersion));
+                            validatorSetChanges.Add(new ValidatorSetChange(currentEpochNumber, change, stateVersion));
                         }
 
                         if (substateData is CoreModel.AccountFieldStateSubstate accountFieldState)
@@ -947,12 +965,46 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     // TODO we'd love to see schemed JSON payload here and/or support for SBOR to schemed JSON in RET but this is not available yet; consider this entire section heavy WIP
                     foreach (var @event in committedTransaction.Receipt.Events)
                     {
-                        if (@event.Type.Emitter is not CoreModel.MethodEventEmitterIdentifier methodEventEmitter)
+                        if (@event.Type.Emitter is not CoreModel.MethodEventEmitterIdentifier methodEventEmitter ||
+                            methodEventEmitter.ObjectModuleId != CoreModel.ObjectModuleId.Main)
                         {
                             continue;
                         }
 
                         var eventEmitterEntity = referencedEntities.Get((EntityAddress)methodEventEmitter.Entity.EntityAddress);
+
+                        if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.GlobalValidator)
+                        {
+                            if (@event.Type.LocalTypeIndex.Index == eventTypeIdentifiers.GlobalValidator.ValidatorEmissionApplied)
+                            {
+                                var data = (JObject)@event.Data.ProgrammaticJson;
+                                var proposalsMade = data["fields"]?[5]?["value"]?.ToString();
+                                var proposalsMissed = data["fields"]?[6]?["value"]?.ToString();
+
+                                if (proposalsMade == null || proposalsMissed == null)
+                                {
+                                    throw new InvalidOperationException("Unable to process data_json structure, couldn't resolve proposals made and proposals missed for validator.");
+                                }
+
+                                if (finishedEpochNumber == null || finishedEpochStartTime == null || currentEpochStartTime == null)
+                                {
+                                    throw new InvalidOperationException($"Missing epoch data, finished epoch number:{finishedEpochNumber}, finished epoch start time: {finishedEpochStartTime}");
+                                }
+
+                                var uptime = new ValidatorUptime
+                                {
+                                    Id = sequences.ValidatorUptimeSequence++,
+                                    FromStateVersion = stateVersion,
+                                    ValidatorEntityId = eventEmitterEntity.DatabaseId,
+                                    EpochNumber = finishedEpochNumber.Value,
+                                    ProposalsMade = int.Parse(proposalsMade),
+                                    ProposalsMissed = int.Parse(proposalsMissed),
+                                    EpochStart = finishedEpochStartTime.Value,
+                                    EpochEnd = currentEpochStartTime.Value,
+                                };
+                                validatorUptimeToAdd.Add(uptime);
+                            }
+                        }
 
                         // TODO "deposit" and "withdrawal" events should be used to alter entity_resource_aggregated_vaults_history table (drop tmp_tmp_remove_me_once_tx_events_become_available column)
                         if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalFungibleVault)
@@ -1618,6 +1670,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorKeyHistory(validatorKeyHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyValidatorUptime(validatorUptimeToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);
 
             dbWriteDuration += sw.Elapsed;

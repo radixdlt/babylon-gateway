@@ -125,6 +125,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ComponentSchema> ComponentSchema => Set<ComponentSchema>();
 
+    public DbSet<ValidatorUptime> ValidatorUptime => Set<ValidatorUptime>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -336,5 +338,8 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<EntityAccessRulesChainHistory>()
             .HasIndex(e => new { e.EntityId, e.ChildBlueprintName, e.FromStateVersion });
+
+        modelBuilder.Entity<ValidatorUptime>()
+            .HasIndex(e => new { e.ValidatorEntityId, e.FromStateVersion, e.EpochEnd });
     }
 }

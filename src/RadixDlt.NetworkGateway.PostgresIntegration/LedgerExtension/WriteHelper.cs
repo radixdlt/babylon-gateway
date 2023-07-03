@@ -440,6 +440,33 @@ internal class WriteHelper
         return entities.Count;
     }
 
+    public async Task<int> CopyValidatorUptime(ICollection<ValidatorUptime> entries, CancellationToken token)
+    {
+        if (!entries.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY validator_uptime (id, validator_entity_id, from_state_version, epoch_number, epoch_start, epoch_end, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entries)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ValidatorEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EpochNumber, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EpochStart, NpgsqlDbType.TimestampTz, token);
+            await writer.WriteAsync(e.EpochEnd, NpgsqlDbType.TimestampTz, token);
+            await writer.WriteAsync(e.ProposalsMade, NpgsqlDbType.Integer, token);
+            await writer.WriteAsync(e.ProposalsMissed, NpgsqlDbType.Integer, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entries.Count;
+    }
+
     public async Task<int> CopyResourceEntitySupplyHistory(ICollection<ResourceEntitySupplyHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -687,7 +714,8 @@ SELECT
     setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence),
     setval('validator_public_key_history_id_seq', @validatorPublicKeyHistorySequence),
     setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence),
-    setval('ledger_transaction_markers_id_seq', @ledgerTransactionMarkerSequence)",
+    setval('ledger_transaction_markers_id_seq', @ledgerTransactionMarkerSequence),
+    setval('validator_uptime_id_seq', @validatorUptimeSequence)",
             parameters: new
             {
                 accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
@@ -708,6 +736,7 @@ SELECT
                 validatorPublicKeyHistorySequence = sequences.ValidatorPublicKeyHistorySequence,
                 validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,
                 ledgerTransactionMarkerSequence = sequences.LedgerTransactionMarkerSequence,
+                validatorUptimeSequence = sequences.ValidatorUptimeSequence,
             },
             cancellationToken: token);
 

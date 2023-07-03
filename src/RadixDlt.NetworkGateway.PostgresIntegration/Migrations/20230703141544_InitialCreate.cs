@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -487,6 +487,25 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "validator_uptime",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    validator_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    epoch_number = table.Column<long>(type: "bigint", nullable: false),
+                    epoch_start = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    epoch_end = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    proposals_made = table.Column<int>(type: "integer", nullable: false),
+                    proposals_missed = table.Column<int>(type: "integer", nullable: false),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_validator_uptime", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "validator_active_set_history",
                 columns: table => new
                 {
@@ -677,6 +696,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_validator_public_key_history_validator_entity_id_key_type_k~",
                 table: "validator_public_key_history",
                 columns: new[] { "validator_entity_id", "key_type", "key" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_validator_uptime_validator_entity_id_from_state_version_epo~",
+                table: "validator_uptime",
+                columns: new[] { "validator_entity_id", "from_state_version", "epoch_end" });
         }
 
         /// <inheritdoc />
@@ -744,6 +768,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "validator_active_set_history");
+
+            migrationBuilder.DropTable(
+                name: "validator_uptime");
 
             migrationBuilder.DropTable(
                 name: "validator_public_key_history");
