@@ -21,6 +21,7 @@ _Release Date: Unreleased_
 - Added `affected_global_entities` to `/transaction/committed-details` and `/stream/transactions` endpoints. To include them in response make sure to include `affected_global_entities` optin.
 - New `affected_global_entities_filter` filter in `/stream/transactions`.
 - Use strongly-typed metadata models.
+- Started returning uptime related data from `/state/validators/list`. By default it returns data for last 14 days but it can be configured with `uptime_range` parameter. Endpoint returns 3 additional (`proposals_made` - number of proposals made in given range, `proposals_missed` - number of proposals missed in given range, `epochs_active_in` - epochs in which validator was active in given range) properties which can be used to calculate uptime.
 
 ### 0.3.1
 
