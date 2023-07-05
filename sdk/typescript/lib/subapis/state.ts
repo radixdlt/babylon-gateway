@@ -1,5 +1,5 @@
-import { chunk } from '../chunk'
-import { MAX_ADDRESSES_COUNT, MAX_NFT_IDS_COUNT } from '../constants'
+import { chunk } from '../helpers/chunk'
+import { exhaustPagination } from '../helpers/exhaust-pagination'
 import {
   EntityMetadataItem,
   FungibleResourcesCollection,
@@ -15,6 +15,7 @@ import {
   ValidatorCollection,
   ValidatorCollectionItem,
 } from '../generated'
+import { RuntimeConfiguration } from '../runtime'
 
 export type ReplaceProperty<
   ObjectType,
@@ -40,7 +41,10 @@ export type StateEntityDetailsVaultResponseItem =
   }
 
 export class State {
-  constructor(public innerClient: StateApi) {}
+  constructor(
+    public innerClient: StateApi,
+    public configuration: RuntimeConfiguration
+  ) {}
 
   /**
    * Get detailed information about entities together with vault aggregated fungible and non-fungible resources.
@@ -69,8 +73,8 @@ export class State {
   > {
     const isArray = Array.isArray(addresses)
     if (isArray && addresses.length === 0) return Promise.resolve([])
-    if (isArray && addresses.length > MAX_ADDRESSES_COUNT) {
-      const chunks = chunk(addresses, MAX_ADDRESSES_COUNT)
+    if (isArray && addresses.length > this.configuration.maxAddressesCount) {
+      const chunks = chunk(addresses, this.configuration.maxAddressesCount)
       return Promise.all(
         chunks.map((chunk) => this.getEntityDetailsVaultAggregated(chunk))
       ).then((results) => results.flat())
@@ -88,6 +92,23 @@ export class State {
   }
 
   /**
+   * Get paged list of entity metadata
+   * @param address
+   * @param cursor
+   */
+  async getEntityMetadata(
+    address: string,
+    cursor?: string
+  ): Promise<StateEntityMetadataPageResponse> {
+    return this.innerClient.entityMetadataPage({
+      stateEntityMetadataPageRequest: {
+        address,
+        cursor,
+      },
+    })
+  }
+
+  /**
    * Get list of all metadata items for given entity. This will iterate over returned cursors and aggregate all responses,
    * which is why multiple API requests can be made.
    *
@@ -98,17 +119,10 @@ export class State {
     address: string,
     startCursor?: string
   ): Promise<EntityMetadataItem[]> {
-    let next_cursor: string | null | undefined = startCursor
-    const allMetadata: EntityMetadataItem[] = []
-
-    do {
-      const metadataResponse: StateEntityMetadataPageResponse =
-        await this.getEntityMetadata(address, next_cursor)
-      allMetadata.push(...metadataResponse.items)
-      next_cursor = metadataResponse.next_cursor
-    } while (next_cursor)
-
-    return allMetadata
+    return exhaustPagination(
+      this.getEntityMetadata.bind(this, address),
+      startCursor
+    )
   }
 
   /**
@@ -129,35 +143,7 @@ export class State {
    * Get list of all validators. This will iterate over returned cursors and aggregate all responses.
    */
   async getAllValidators(start?: string): Promise<ValidatorCollectionItem[]> {
-    let next_cursor: string | null | undefined = start
-    const allValidators: ValidatorCollectionItem[] = []
-
-    do {
-      const validatorsResponse: ValidatorCollection = await this.getValidators(
-        next_cursor
-      )
-      allValidators.push(...validatorsResponse.items)
-      next_cursor = validatorsResponse.next_cursor
-    } while (next_cursor)
-
-    return allValidators
-  }
-
-  /**
-   * Get paged list of entity metadata
-   * @param address
-   * @param cursor
-   */
-  async getEntityMetadata(
-    address: string,
-    cursor?: string
-  ): Promise<StateEntityMetadataPageResponse> {
-    return this.innerClient.entityMetadataPage({
-      stateEntityMetadataPageRequest: {
-        address,
-        cursor,
-      },
-    })
+    return exhaustPagination(this.getValidators.bind(this), start)
   }
 
   /**
@@ -189,17 +175,10 @@ export class State {
     address: string,
     startCursor?: string
   ): Promise<string[]> {
-    let next_cursor: string | null | undefined = startCursor
-    const allIds: string[] = []
-
-    do {
-      const idsResponse: NonFungibleIdsCollection =
-        await this.getNonFungibleIds(address, next_cursor)
-      allIds.push(...idsResponse.items)
-      next_cursor = idsResponse.next_cursor
-    } while (next_cursor)
-
-    return allIds
+    return exhaustPagination(
+      this.getNonFungibleIds.bind(this, address),
+      startCursor
+    )
   }
 
   async getNonFungibleData(
@@ -218,8 +197,8 @@ export class State {
   > {
     const isArray = Array.isArray(ids)
     if (isArray && ids.length === 0) return Promise.resolve([])
-    if (isArray && ids.length > MAX_NFT_IDS_COUNT) {
-      const chunks = chunk(ids, MAX_NFT_IDS_COUNT)
+    if (isArray && ids.length > this.configuration.maxNftIdsCount) {
+      const chunks = chunk(ids, this.configuration.maxNftIdsCount)
       return Promise.all(
         chunks.map((chunk) => this.getNonFungibleData(address, chunk))
       ).then((results) => results.flat())
