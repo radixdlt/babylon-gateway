@@ -121,7 +121,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ValidatorActiveSetHistory> ValidatorActiveSetHistory => Set<ValidatorActiveSetHistory>();
 
-    public DbSet<EntityAccessRulesChainHistory> EntityAccessRulesChainHistory => Set<EntityAccessRulesChainHistory>();
+    public DbSet<EntityAccessRulesHistory> EntityAccessRulesHistory => Set<EntityAccessRulesHistory>();
 
     public DbSet<PackageDefinitionHistory> PackageDefinitionHistory => Set<PackageDefinitionHistory>();
 
@@ -337,8 +337,5 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<ValidatorActiveSetHistory>()
             .HasIndex(e => e.Epoch);
-
-        modelBuilder.Entity<EntityAccessRulesChainHistory>()
-            .HasIndex(e => new { e.EntityId, e.ChildBlueprintName, e.FromStateVersion });
     }
 }

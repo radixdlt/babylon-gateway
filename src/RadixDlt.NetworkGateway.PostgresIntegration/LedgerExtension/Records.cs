@@ -83,6 +83,15 @@ internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, T
 
 internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
 
+internal record AccessRuleGroup(AccessRuleGroupLookup Lookup)
+{
+    public string? OwnerAccessRules { get; set; }
+
+    public IList<AccessRuleModuleRuleEntryChange> Entries { get; set; } = new List<AccessRuleModuleRuleEntryChange>();
+}
+
+internal record AccessRuleModuleRuleEntryChange(string Key, string? AccessRules, bool IsDeleted);
+
 internal record PackageChange(long PackageEntityId, byte[] CodeHash, byte[] Code, PackageVmType VmType, byte[] SchemaHash, byte[] Schema, string BlueprintName, string BlueprintVersion, string Blueprint, long StateVersion);
 
 internal record PackageChangeBuilder(long PackageEntityId, long StateVersion)
@@ -154,3 +163,5 @@ internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFung
 internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);
 
 internal record struct PackageChangeLookup(long PackageEntityId, long StateVersion);
+
+internal record struct AccessRuleGroupLookup(long EntityId, long StateVersion);

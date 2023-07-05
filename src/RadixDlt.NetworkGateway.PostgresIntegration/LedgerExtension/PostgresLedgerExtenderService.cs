@@ -719,12 +719,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var metadataChanges = new List<MetadataChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
+        var accessRuleChanges = new Dictionary<AccessRuleGroupLookup, AccessRuleGroup>();
+        var accessRuleChangePointers = new List<AccessRuleGroupLookup>();
         var packageChangeBuilders = new Dictionary<PackageChangeLookup, PackageChangeBuilder>();
-        var entityAccessRulesChainHistoryToAdd = new List<EntityAccessRulesChainHistory>();
         var entityStateToAdd = new List<EntityStateHistory>();
         var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>();
         var accountDefaultDepositRuleHistoryToAdd = new List<AccountDefaultDepositRuleHistory>();
         var accountResourceDepositRuleHistoryToAdd = new List<AccountResourceDepositRuleHistory>();
+        var entityAccessRulesHistoryToAdd = new List<EntityAccessRulesHistory>();
 
         // step: scan all substates to figure out changes
         {
@@ -806,23 +808,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 nonFungibleResourceManagerDataEntrySubstate.Value?.DataStruct.StructData.GetDataBytes(),
                                 stateVersion));
                         }
-
-                        // TODO restore
-                        // if (substateData is CoreModel.AccessRulesModuleFieldAccessRulesSubstate accessRulesModuleFieldAccessRulesSubstate)
-                        // {
-                        //     entityAccessRulesChainHistoryToAdd.Add(new EntityAccessRulesChainHistory
-                        //     {
-                        //         Id = sequences.EntityAccessRulesChainHistorySequence++,
-                        //         FromStateVersion = stateVersion,
-                        //         EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
-                        //         ChildBlueprintName = null,
-                        //         AccessRulesChain = JsonConvert.SerializeObject(new
-                        //         {
-                        //             accessRulesModuleFieldAccessRulesSubstate.Roles,
-                        //             accessRulesModuleFieldAccessRulesSubstate.RoleMutability,
-                        //         }),
-                        //     });
-                        // }
 
                         if (substateData is CoreModel.GenericScryptoComponentFieldStateSubstate componentState)
                         {
@@ -951,6 +936,34 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         if (substateData is CoreModel.PackageBlueprintAuthTemplateEntrySubstate)
                         {
                             // no-op so far but we should most likely store this information separately from package itself
+                        }
+
+                        if (substateData is CoreModel.AccessRulesModuleFieldOwnerRoleSubstate accessRulesFieldOwnerRole)
+                        {
+                            accessRuleChanges
+                                .GetOrAdd(new AccessRuleGroupLookup(referencedEntity.DatabaseId, stateVersion), l =>
+                                {
+                                    accessRuleChangePointers.Add(l);
+
+                                    return new AccessRuleGroup(l);
+                                })
+                                .OwnerAccessRules = accessRulesFieldOwnerRole.Value.OwnerRole.ToJson();
+                        }
+
+                        if (substateData is CoreModel.AccessRulesModuleRuleEntrySubstate accessRulesEntry)
+                        {
+                            var isDeleted = accessRulesEntry.Value == null;
+                            var key = $"{accessRulesEntry.Key.ObjectModuleId}:{accessRulesEntry.Key.RoleKey}";
+
+                            accessRuleChanges
+                                .GetOrAdd(new AccessRuleGroupLookup(referencedEntity.DatabaseId, stateVersion), l =>
+                                {
+                                    accessRuleChangePointers.Add(l);
+
+                                    return new AccessRuleGroup(l);
+                                })
+                                .Entries
+                                .Add(new AccessRuleModuleRuleEntryChange(key, accessRulesEntry.Value?.AccessRule.ToJson(), isDeleted));
                         }
                     }
 
@@ -1188,6 +1201,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var mostRecentNonFungibleIdStoreHistory = await readHelper.MostRecentNonFungibleIdStoreHistoryFor(nonFungibleIdChanges, token);
             var mostRecentResourceEntitySupplyHistory = await readHelper.MostRecentResourceEntitySupplyHistoryFor(resourceSupplyChanges, token);
             var mostRecentEntityNonFungibleVaultHistory = await readHelper.MostRecentEntityNonFungibleVaultHistory(nonFungibleVaultChanges, token);
+            var mostRecentAccessRulesHistory = await readHelper.MostRecentAccessRulesHistory(accessRuleChangePointers, token);
             // var mostRecentPackageDefinitionHistory = await readHelper.MostRecentPackageDefinitionHistory(packageChanges, token);
             var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, nonFungibleVaultChanges, token);
             var existingValidatorKeys = await readHelper.ExistingValidatorKeysFor(validatorSetChanges, token);
@@ -1641,6 +1655,42 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 })
                 .ToList();
 
+            foreach (var accessRuleChangePointer in accessRuleChangePointers)
+            {
+                var change = accessRuleChanges[accessRuleChangePointer];
+
+                if (!mostRecentAccessRulesHistory.TryGetValue(accessRuleChangePointer.EntityId, out var previous) || previous.FromStateVersion != accessRuleChangePointer.StateVersion)
+                {
+                    previous = new EntityAccessRulesHistory
+                    {
+                        Id = sequences.EntityAccessRulesHistorySequence++,
+                        FromStateVersion = accessRuleChangePointer.StateVersion,
+                        EntityId = accessRuleChangePointer.EntityId,
+                        AccessRules = previous?.AccessRules ?? new EntityAccessRulesHistory.AccessRulesDump(),
+                    };
+
+                    entityAccessRulesHistoryToAdd.Add(previous);
+                    mostRecentAccessRulesHistory[accessRuleChangePointer.EntityId] = previous;
+                }
+
+                if (change.OwnerAccessRules != null)
+                {
+                    previous.AccessRules.OwnerRole = change.OwnerAccessRules;
+                }
+
+                foreach (var entry in change.Entries)
+                {
+                    if (entry.IsDeleted && previous.AccessRules.Rules.ContainsKey(entry.Key))
+                    {
+                        previous.AccessRules.Rules.Remove(entry.Key);
+                    }
+                    else
+                    {
+                        previous.AccessRules.Rules[entry.Key] = entry.AccessRules ?? string.Empty;
+                    }
+                }
+            }
+
             var packageDefinitionHistoryToAdd = packageChangeBuilders
                 .Select(kvp => kvp.Value.Build())
                 .Select(pc => new PackageDefinitionHistory
@@ -1667,7 +1717,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyLedgerTransaction(ledgerTransactionsToAdd, token);
             rowsInserted += await writeHelper.CopyLedgerTransactionMarkers(ledgerTransactionMarkersToAdd, token);
             rowsInserted += await writeHelper.CopyEntityStateHistory(entityStateToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityAccessRulesChainHistory(entityAccessRulesChainHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityAccessRulesHistory(entityAccessRulesHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityMetadataHistory(entityMetadataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityMetadataAggregateHistory(entityMetadataAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceAggregatedVaultsHistory(entityResourceAggregatedVaultsHistoryToAdd, token);

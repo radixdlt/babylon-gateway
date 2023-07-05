@@ -185,7 +185,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                         totalSupply: fungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: fungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: fungibleResourceSupplyData.TotalBurned.ToString(),
-                        accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(frme.Id, null)].AccessRulesChain),
+                        accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(frme.Id, null)].AccessRules),
                         vaultAccessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(frme.Id, NativeBlueprintNames.FungibleVault)].AccessRulesChain),
                         divisibility: frme.Divisibility);
 
@@ -1565,7 +1565,7 @@ order by ord
         return entities;
     }
 
-    private async Task<Dictionary<AccessRuleChainLookup, EntityAccessRulesChainHistory>> GetAccessRulesChainHistory(ICollection<ResourceEntity> resourceEntities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    private async Task<Dictionary<AccessRuleChainLookup, EntityAccessRulesHistory>> GetAccessRulesChainHistory(ICollection<ResourceEntity> resourceEntities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var lookup = new HashSet<AccessRuleChainLookup>();
 
@@ -1590,7 +1590,7 @@ order by ord
 
         if (!lookup.Any())
         {
-            return new Dictionary<AccessRuleChainLookup, EntityAccessRulesChainHistory>();
+            return new Dictionary<AccessRuleChainLookup, EntityAccessRulesHistory>();
         }
 
         var entityIds = new List<long>();
@@ -1602,7 +1602,7 @@ order by ord
             childBlueprintNames.Add(l.ChildBlueprintName);
         }
 
-        return await _dbContext.EntityAccessRulesChainHistory
+        return await _dbContext.EntityAccessRulesHistory
             .FromSqlInterpolated($@"
 WITH variables (entity_id, child_blueprint_name) AS (SELECT UNNEST({entityIds}), UNNEST({childBlueprintNames}))
 SELECT earch.*

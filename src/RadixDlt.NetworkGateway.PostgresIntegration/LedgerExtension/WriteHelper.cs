@@ -334,14 +334,14 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyEntityAccessRulesChainHistory(ICollection<EntityAccessRulesChainHistory> entities, CancellationToken token)
+    public async Task<int> CopyEntityAccessRulesHistory(ICollection<EntityAccessRulesHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_access_rules_chain_history (id, from_state_version, entity_id, child_blueprint_name, access_rules_chain) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_access_rules_chain_history (id, from_state_version, entity_id, access_rules) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -349,8 +349,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ChildBlueprintName, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(e.AccessRulesChain, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.AccessRules, NpgsqlDbType.Jsonb, token);
         }
 
         await writer.CompleteAsync(token);
@@ -714,7 +713,7 @@ SELECT
                 accountResourceDepositRuleHistorySequence = sequences.AccountResourceDepositRuleHistorySequence,
                 entityStateHistorySequence = sequences.EntityStateHistorySequence,
                 entitySequence = sequences.EntitySequence,
-                entityAccessRulesChainHistorySequence = sequences.EntityAccessRulesChainHistorySequence,
+                entityAccessRulesChainHistorySequence = sequences.EntityAccessRulesHistorySequence,
                 entityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,
                 entityMetadataAggregateHistorySequence = sequences.EntityMetadataAggregateHistorySequence,
                 entityResourceAggregatedVaultsHistorySequence = sequences.EntityResourceAggregatedVaultsHistorySequence,

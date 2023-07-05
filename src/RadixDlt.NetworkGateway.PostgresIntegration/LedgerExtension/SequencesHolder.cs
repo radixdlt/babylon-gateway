@@ -74,7 +74,7 @@ internal class SequencesHolder
 
     public long EntitySequence { get; set; }
 
-    public long EntityAccessRulesChainHistorySequence { get; set; }
+    public long EntityAccessRulesHistorySequence { get; set; }
 
     public long EntityMetadataHistorySequence { get; set; }
 

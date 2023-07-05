@@ -340,6 +340,28 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.ResourceEntityId, token);
     }
 
+    public async Task<Dictionary<long, EntityAccessRulesHistory>> MostRecentAccessRulesHistory(List<AccessRuleGroupLookup> accessRuleChangePointers, CancellationToken token)
+    {
+        var ids = accessRuleChangePointers.Select(x => x.EntityId).Distinct().ToList();
+
+        return await _dbContext.EntityAccessRulesHistory
+            .FromSqlInterpolated(@$"
+WITH variables (entity_id) AS (
+    SELECT UNNEST({ids})
+)
+SELECT earh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_access_rules_history
+    WHERE entity_id = variables.resource_entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) earh ON true;")
+            .AsNoTracking()
+            .ToDictionaryAsync(e => e.EntityId, token);
+    }
+
     public async Task<Dictionary<EntityAddress, Entity>> ExistingEntitiesFor(ReferencedEntityDictionary referencedEntities, CancellationToken token)
     {
         var entityAddressesToLoad = referencedEntities.Addresses.Select(x => (string)x).ToList();
