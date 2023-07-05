@@ -334,14 +334,14 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyEntityAccessRulesHistory(ICollection<EntityAccessRulesHistory> entities, CancellationToken token)
+    public async Task<int> CopyEntityAccessRulesOwnerRoleHistory(List<EntityAccessRulesOwnerRoleHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_access_rules_chain_history (id, from_state_version, entity_id, access_rules) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_access_rules_owner_role_history (id, from_state_version, entity_id, access_rules) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -350,6 +350,55 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.AccessRules, NpgsqlDbType.Jsonb, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
+    public async Task<int> CopyEntityAccessRulesEntryHistory(List<EntityAccessRulesEntryHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_access_rules_entry_history (id, from_state_version, entity_id, key, access_rules, is_deleted) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.Key, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.AccessRules, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
+    public async Task<int> CopyEntityAccessRulesAggregateHistory(List<EntityAccessRulesAggregateHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_access_rules_aggregate_history (id, from_state_version, entity_id, owner_role_id, entry_ids) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.OwnerRoleId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntryIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
         }
 
         await writer.CompleteAsync(token);
@@ -583,6 +632,54 @@ internal class WriteHelper
         return fungibleEntities.Count + nonFungibleEntities.Count;
     }
 
+    public async Task<int> CopyAccountDefaultDepositRuleHistory(List<AccountDefaultDepositRuleHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY account_default_deposit_rule_history (id, from_state_version, account_entity_id, default_deposit_rule) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.AccountEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.DefaultDepositRule, "account_default_deposit_rule", token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
+    public async Task<int> CopyAccountResourceDepositRuleHistory(List<AccountResourceDepositRuleHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY account_resource_deposit_rule_history (id, from_state_version, account_entity_id, resource_entity_id, deposit_rule, is_deleted) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.AccountEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteNullableAsync(e.ResourceDepositRule, "account_resource_deposit_rule", token);
+            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
     public async Task<int> CopyNonFungibleIdData(ICollection<NonFungibleIdData> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -692,13 +789,15 @@ SELECT
     setval('account_resource_deposit_rule_history_id_seq', @accountResourceDepositRuleHistorySequence),
     setval('entity_state_history_id_seq', @entityStateHistorySequence),
     setval('entities_id_seq', @entitySequence),
-    setval('entity_access_rules_chain_history_id_seq', @entityAccessRulesChainHistorySequence),
     setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
     setval('entity_metadata_aggregate_history_id_seq', @entityMetadataAggregateHistorySequence),
     setval('entity_resource_aggregated_vaults_history_id_seq', @entityResourceAggregatedVaultsHistorySequence),
     setval('entity_resource_aggregate_history_id_seq', @entityResourceAggregateHistorySequence),
     setval('entity_resource_vault_aggregate_history_id_seq', @entityResourceVaultAggregateHistorySequence),
     setval('entity_vault_history_id_seq', @entityVaultHistorySequence),
+    setval('entity_access_rules_aggregate_history_id_seq', @entityAccessRulesAggregateHistorySequence),
+    setval('entity_access_rules_entry_history_id_seq', @EntityAccessRulesEntryHistorySequence),
+    setval('entity_access_rules_owner_role_history_id_seq', @entityAccessRulesOwnerRoleHistorySequence),
     setval('resource_entity_supply_history_id_seq', @resourceEntitySupplyHistorySequence),
     setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
     setval('non_fungible_id_data_history_id_seq', @nonFungibleIdDataHistorySequence),
@@ -713,13 +812,15 @@ SELECT
                 accountResourceDepositRuleHistorySequence = sequences.AccountResourceDepositRuleHistorySequence,
                 entityStateHistorySequence = sequences.EntityStateHistorySequence,
                 entitySequence = sequences.EntitySequence,
-                entityAccessRulesChainHistorySequence = sequences.EntityAccessRulesHistorySequence,
                 entityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,
                 entityMetadataAggregateHistorySequence = sequences.EntityMetadataAggregateHistorySequence,
                 entityResourceAggregatedVaultsHistorySequence = sequences.EntityResourceAggregatedVaultsHistorySequence,
                 entityResourceAggregateHistorySequence = sequences.EntityResourceAggregateHistorySequence,
                 entityResourceVaultAggregateHistorySequence = sequences.EntityResourceVaultAggregateHistorySequence,
                 entityVaultHistorySequence = sequences.EntityVaultHistorySequence,
+                entityAccessRulesAggregateHistorySequence = sequences.EntityAccessRulesAggregateHistorySequence,
+                entityAccessRulesEntryHistorySequence = sequences.EntityAccessRulesEntryHistorySequence,
+                entityAccessRulesOwnerRoleHistorySequence = sequences.EntityAccessRulesOwnerRoleHistorySequence,
                 resourceEntitySupplyHistorySequence = sequences.ResourceEntitySupplyHistorySequence,
                 nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
                 nonFungibleIdDataHistorySequence = sequences.NonFungibleIdDataHistorySequence,

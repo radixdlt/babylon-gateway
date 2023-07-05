@@ -114,8 +114,6 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record struct NonFungibleIdOwnerLookup(long EntityId, long ResourceEntityId, long VaultEntityId);
 
-    private record struct AccessRuleChainLookup(long EntityId, string? ChildBlueprintName);
-
     private record struct ExplicitMetadataLookup(long EntityId, string MetadataKey);
 
     private readonly TokenAmount _tokenAmount100 = TokenAmount.FromDecimalString("100");
@@ -153,7 +151,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         // TODO ideally we'd like to run those in parallel
         var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
-        var accessRulesChainHistory = await GetAccessRulesChainHistory(resourceEntities, componentEntities, ledgerState, token);
+        var accessRulesHistory = await GetAccessRulesHistory(resourceEntities, componentEntities, ledgerState, token);
         var stateHistory = await GetStateHistory(componentEntities, ledgerState, token);
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, componentEntities, ledgerState, token);
         var resourcesSupplyData = await GetResourcesSupplyData(resourceEntities.Select(x => x.Id).ToArray(), ledgerState, token);
@@ -185,8 +183,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
                         totalSupply: fungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: fungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: fungibleResourceSupplyData.TotalBurned.ToString(),
-                        accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(frme.Id, null)].AccessRules),
-                        vaultAccessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(frme.Id, NativeBlueprintNames.FungibleVault)].AccessRulesChain),
+                        accessRulesChain: new JRaw(accessRulesHistory[frme.Id]),
+                        vaultAccessRulesChain: new JRaw("{}"), // TODO restore?
                         divisibility: frme.Divisibility);
 
                     break;
@@ -202,8 +200,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
                         totalSupply: nonFungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: nonFungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: nonFungibleResourceSupplyData.TotalBurned.ToString(),
-                        accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(nfrme.Id, null)].AccessRulesChain),
-                        vaultAccessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(nfrme.Id, NativeBlueprintNames.NonFungibleVault)].AccessRulesChain),
+                        accessRulesChain: new JRaw(accessRulesHistory[nfrme.Id]),
+                        vaultAccessRulesChain: new JRaw("{}"), // TODO restore?
                         nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel());
                     break;
 
@@ -242,7 +240,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
                 case ComponentEntity ce:
                     stateHistory.TryGetValue(ce.Id, out var state);
-                    accessRulesChainHistory.TryGetValue(new AccessRuleChainLookup(ce.Id, null), out var accessRulesChain);
+                    accessRulesHistory.TryGetValue(ce.Id, out var accessRules);
 
                     var componentRoyaltyVaultBalance = royaltyVaultsBalance?.SingleOrDefault(x => x.OwnerEntityId == ce.Id)?.Balance;
 
@@ -250,7 +248,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                         packageAddress: correlatedAddresses[ce.PackageId],
                         blueprintName: ce.BlueprintName,
                         state: state != null ? new JRaw(state.State) : null,
-                        accessRulesChain: accessRulesChain != null ? new JRaw(accessRulesChain.AccessRulesChain) : null,
+                        accessRulesChain: accessRules != null ? new JRaw(accessRules) : null,
                         royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null
                     );
                     break;
@@ -1565,46 +1563,31 @@ order by ord
         return entities;
     }
 
-    private async Task<Dictionary<AccessRuleChainLookup, EntityAccessRulesHistory>> GetAccessRulesChainHistory(ICollection<ResourceEntity> resourceEntities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    private async Task<Dictionary<long, string>> GetAccessRulesHistory(ICollection<ResourceEntity> resourceEntities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
-        var lookup = new HashSet<AccessRuleChainLookup>();
+        var lookup = new HashSet<long>();
 
         foreach (var resourceEntity in resourceEntities)
         {
-            lookup.Add(new AccessRuleChainLookup(resourceEntity.Id, null));
-
-            if (resourceEntity is GlobalFungibleResourceEntity)
-            {
-                lookup.Add(new AccessRuleChainLookup(resourceEntity.Id, NativeBlueprintNames.FungibleVault));
-            }
-            else if (resourceEntity is GlobalNonFungibleResourceEntity)
-            {
-                lookup.Add(new AccessRuleChainLookup(resourceEntity.Id, NativeBlueprintNames.NonFungibleVault));
-            }
+            lookup.Add(resourceEntity.Id);
         }
 
         foreach (var componentEntity in componentEntities)
         {
-            lookup.Add(new AccessRuleChainLookup(componentEntity.Id, null));
+            lookup.Add(componentEntity.Id);
         }
 
         if (!lookup.Any())
         {
-            return new Dictionary<AccessRuleChainLookup, EntityAccessRulesHistory>();
+            return new Dictionary<long, string>();
         }
 
-        var entityIds = new List<long>();
-        var childBlueprintNames = new List<string?>();
+        var entityIds = lookup.ToList();
 
-        foreach (var l in lookup)
-        {
-            entityIds.Add(l.EntityId);
-            childBlueprintNames.Add(l.ChildBlueprintName);
-        }
-
-        return await _dbContext.EntityAccessRulesHistory
+        // TODO just a prototype
+        return await _dbContext.EntityAccessRulesAggregateHistory
             .FromSqlInterpolated($@"
-WITH variables (entity_id, child_blueprint_name) AS (SELECT UNNEST({entityIds}), UNNEST({childBlueprintNames}))
+WITH variables (entity_id) AS (SELECT UNNEST({entityIds})
 SELECT earch.*
 FROM variables v
 INNER JOIN LATERAL (
@@ -1614,7 +1597,7 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) earch ON TRUE;")
-            .ToDictionaryAsync(e => new AccessRuleChainLookup(e.EntityId, e.ChildBlueprintName), token);
+            .ToDictionaryAsync(e => e.EntityId, e => $$"""{"_todo_":"just a prototype","owner_role_id":{{e.OwnerRoleId}},"entry_ids":[{{string.Join(",", e.EntryIds)}}]}""", token);
     }
 
     private async Task<Dictionary<long, EntityStateHistory>> GetStateHistory(ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)

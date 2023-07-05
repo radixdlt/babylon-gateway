@@ -67,7 +67,7 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -82,15 +82,6 @@ internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, by
 internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, TokenAmount? TotalSupply = null, TokenAmount? Minted = null, TokenAmount? Burned = null);
 
 internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
-
-internal record AccessRuleGroup(AccessRuleGroupLookup Lookup)
-{
-    public string? OwnerAccessRules { get; set; }
-
-    public IList<AccessRuleModuleRuleEntryChange> Entries { get; set; } = new List<AccessRuleModuleRuleEntryChange>();
-}
-
-internal record AccessRuleModuleRuleEntryChange(string Key, string? AccessRules, bool IsDeleted);
 
 internal record PackageChange(long PackageEntityId, byte[] CodeHash, byte[] Code, PackageVmType VmType, byte[] SchemaHash, byte[] Schema, string BlueprintName, string BlueprintVersion, string Blueprint, long StateVersion);
 
@@ -164,4 +155,13 @@ internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType 
 
 internal record struct PackageChangeLookup(long PackageEntityId, long StateVersion);
 
-internal record struct AccessRuleGroupLookup(long EntityId, long StateVersion);
+internal record struct AccessRulesChangePointerLookup(long EntityId, long StateVersion);
+
+internal record struct AccessRuleEntryLookup(long EntityId, string Key);
+
+internal record AccessRulesChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
+{
+    public CoreModel.AccessRulesModuleFieldOwnerRoleSubstate? OwnerRole { get; set; }
+
+    public IList<CoreModel.AccessRulesModuleRuleEntrySubstate> Entries { get; } = new List<CoreModel.AccessRulesModuleRuleEntrySubstate>();
+}

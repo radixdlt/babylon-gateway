@@ -151,7 +151,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
 
-                    b.Property<AccountResourceDepositRule>("ResourceDepositRule")
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<AccountResourceDepositRule?>("ResourceDepositRule")
                         .HasColumnType("account_resource_deposit_rule")
                         .HasColumnName("deposit_rule");
 
@@ -239,7 +243,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityAccessRulesChainHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityAccessRulesAggregateHistory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -248,14 +252,80 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("AccessRulesChain")
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<List<long>>("EntryIds")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("entry_ids");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("OwnerRoleId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("owner_role_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "FromStateVersion");
+
+                    b.ToTable("entity_access_rules_aggregate_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityAccessRulesEntryHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AccessRules")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("access_rules");
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("key");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "Key", "FromStateVersion");
+
+                    b.ToTable("entity_access_rules_entry_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityAccessRulesOwnerRoleHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AccessRules")
                         .IsRequired()
                         .HasColumnType("jsonb")
-                        .HasColumnName("access_rules_chain");
-
-                    b.Property<string>("ChildBlueprintName")
-                        .HasColumnType("text")
-                        .HasColumnName("child_blueprint_name");
+                        .HasColumnName("access_rules");
 
                     b.Property<long>("EntityId")
                         .HasColumnType("bigint")
@@ -267,9 +337,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EntityId", "ChildBlueprintName", "FromStateVersion");
+                    b.HasIndex("EntityId", "FromStateVersion");
 
-                    b.ToTable("entity_access_rules_chain_history");
+                    b.ToTable("entity_access_rules_owner_role_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityMetadataAggregateHistory", b =>

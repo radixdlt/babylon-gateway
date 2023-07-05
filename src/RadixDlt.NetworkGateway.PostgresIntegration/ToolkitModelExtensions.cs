@@ -75,11 +75,13 @@ internal static class ToolkitModelExtensions
         return response.PackageAddresses
             .Concat(response.ComponentAddresses)
             .Concat(response.ResourceAddresses)
-            .Concat(response.AccountAddresses)
-            .Concat(response.AccountsRequiringAuth)
-            .Concat(response.AccountsWithdrawnFrom)
-            .Concat(response.AccountsDepositedInto)
-            .Concat(response.IdentityAddresses)
-            .Concat(response.IdentitiesRequiringAuth);
+            // TODO restore when possible (RET[.NET] no longer supports them?)
+            // .Concat(response.AccountAddresses)
+            // .Concat(response.AccountsRequiringAuth)
+            // .Concat(response.AccountsWithdrawnFrom)
+            // .Concat(response.AccountsDepositedInto)
+            // .Concat(response.IdentityAddresses)
+            // .Concat(response.IdentitiesRequiringAuth)
+            ;
     }
 }

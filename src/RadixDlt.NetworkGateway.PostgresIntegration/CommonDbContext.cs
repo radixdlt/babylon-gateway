@@ -121,7 +121,11 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ValidatorActiveSetHistory> ValidatorActiveSetHistory => Set<ValidatorActiveSetHistory>();
 
-    public DbSet<EntityAccessRulesHistory> EntityAccessRulesHistory => Set<EntityAccessRulesHistory>();
+    public DbSet<EntityAccessRulesOwnerRoleHistory> EntityAccessRulesOwnerHistory => Set<EntityAccessRulesOwnerRoleHistory>();
+
+    public DbSet<EntityAccessRulesEntryHistory> EntityAccessRulesEntryHistory => Set<EntityAccessRulesEntryHistory>();
+
+    public DbSet<EntityAccessRulesAggregateHistory> EntityAccessRulesAggregateHistory => Set<EntityAccessRulesAggregateHistory>();
 
     public DbSet<PackageDefinitionHistory> PackageDefinitionHistory => Set<PackageDefinitionHistory>();
 
@@ -306,6 +310,15 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<EntityVaultHistory>()
             .HasIndex(e => new { e.GlobalEntityId, e.VaultEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityAccessRulesOwnerRoleHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityAccessRulesEntryHistory>()
+            .HasIndex(e => new { e.EntityId, e.Key, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityAccessRulesAggregateHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<ResourceEntitySupplyHistory>()
             .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });

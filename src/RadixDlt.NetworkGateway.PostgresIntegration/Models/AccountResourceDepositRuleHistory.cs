@@ -65,6 +65,7 @@
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
@@ -85,5 +86,9 @@ public class AccountResourceDepositRuleHistory
     public long ResourceEntityId { get; set; }
 
     [Column("deposit_rule")]
-    public AccountResourceDepositRule ResourceDepositRule { get; set; }
+    public AccountResourceDepositRule? ResourceDepositRule { get; set; }
+
+    [MemberNotNullWhen(false, nameof(ResourceDepositRule))]
+    [Column("is_deleted")]
+    public bool IsDeleted { get; set; }
 }

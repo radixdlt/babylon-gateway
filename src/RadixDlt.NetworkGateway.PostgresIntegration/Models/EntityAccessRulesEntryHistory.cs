@@ -62,22 +62,15 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entity_access_rules_history")]
-internal class EntityAccessRulesHistory
+[Table("entity_access_rules_entry_history")]
+internal class EntityAccessRulesEntryHistory
 {
-    internal class AccessRulesDump
-    {
-        public string OwnerRole { get; set; }
-
-        public Dictionary<string, string> Rules { get; set; }
-    }
-
     [Key]
     [Column("id")]
     public long Id { get; set; }
@@ -88,6 +81,13 @@ internal class EntityAccessRulesHistory
     [Column("entity_id")]
     public long EntityId { get; set; }
 
+    [Column("key")]
+    public string Key { get; set; }
+
     [Column("access_rules", TypeName = "jsonb")]
-    public AccessRulesDump AccessRules { get; set; }
+    public string? AccessRules { get; set; }
+
+    [MemberNotNullWhen(false, nameof(AccessRules))]
+    [Column("is_deleted")]
+    public bool IsDeleted { get; set; }
 }
