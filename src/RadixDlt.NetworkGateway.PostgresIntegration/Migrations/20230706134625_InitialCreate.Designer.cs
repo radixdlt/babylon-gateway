@@ -82,7 +82,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230705120358_InitialCreate")]
+    [Migration("20230706134625_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -835,7 +835,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("non_fungible_id_store_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageDefinitionHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageBlueprint", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -844,56 +844,42 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Blueprint")
+                    b.Property<string>("AuthTemplate")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("auth_template");
+
+                    b.Property<string>("Definition")
                         .IsRequired()
                         .HasColumnType("jsonb")
-                        .HasColumnName("blueprint");
+                        .HasColumnName("definition");
 
-                    b.Property<string>("BlueprintName")
+                    b.Property<List<long>>("DependantEntityIds")
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("dependant_entity_ids");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("blueprint_name");
-
-                    b.Property<string>("BlueprintVersion")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("blueprint_version");
-
-                    b.Property<byte[]>("Code")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("code");
-
-                    b.Property<byte[]>("CodeHash")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("code_hash");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
+                        .HasColumnName("name");
 
                     b.Property<long>("PackageEntityId")
                         .HasColumnType("bigint")
                         .HasColumnName("package_entity_id");
 
-                    b.Property<byte[]>("Schema")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("schema");
+                    b.Property<string>("RoyaltyConfig")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("royalty_config");
 
-                    b.Property<byte[]>("SchemaHash")
+                    b.Property<string>("Version")
                         .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("schema_hash");
-
-                    b.Property<PackageVmType>("VmType")
-                        .HasColumnType("package_vm_type")
-                        .HasColumnName("vm_type");
+                        .HasColumnType("text")
+                        .HasColumnName("version");
 
                     b.HasKey("Id");
 
-                    b.ToTable("package_definition_history");
+                    b.HasIndex("PackageEntityId");
+
+                    b.ToTable("package_blueprints");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransaction", b =>
@@ -1295,10 +1281,34 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
 
+                    b.Property<byte[]>("Code")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("code");
+
+                    b.Property<byte[]>("CodeHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("code_hash");
+
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
                         .HasColumnName("package_id");
+
+                    b.Property<string>("Schema")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("schema");
+
+                    b.Property<byte[]>("SchemaHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("schema_hash");
+
+                    b.Property<PackageVmType>("VmType")
+                        .HasColumnType("package_vm_type")
+                        .HasColumnName("vm_type");
 
                     b.ToTable("entities");
 

@@ -161,6 +161,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     blueprint_name = table.Column<string>(type: "text", nullable: true),
                     divisibility = table.Column<int>(type: "integer", nullable: true),
                     non_fungible_id_type = table.Column<NonFungibleIdType>(type: "non_fungible_id_type", nullable: true),
+                    code_hash = table.Column<byte[]>(type: "bytea", nullable: true),
+                    code = table.Column<byte[]>(type: "bytea", nullable: true),
+                    vm_type = table.Column<PackageVmType>(type: "package_vm_type", nullable: true),
+                    schema_hash = table.Column<byte[]>(type: "bytea", nullable: true),
+                    schema = table.Column<string>(type: "jsonb", nullable: true),
                     stake_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     unstake_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     royalty_vault_of_entity_id = table.Column<long>(type: "bigint", nullable: true),
@@ -458,25 +463,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "package_definition_history",
+                name: "package_blueprints",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     package_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    code_hash = table.Column<byte[]>(type: "bytea", nullable: false),
-                    code = table.Column<byte[]>(type: "bytea", nullable: false),
-                    vm_type = table.Column<PackageVmType>(type: "package_vm_type", nullable: false),
-                    schema_hash = table.Column<byte[]>(type: "bytea", nullable: false),
-                    schema = table.Column<byte[]>(type: "bytea", nullable: false),
-                    blueprint_name = table.Column<string>(type: "text", nullable: false),
-                    blueprint_version = table.Column<string>(type: "text", nullable: false),
-                    blueprint = table.Column<string>(type: "jsonb", nullable: false)
+                    name = table.Column<string>(type: "text", nullable: false),
+                    version = table.Column<string>(type: "text", nullable: false),
+                    definition = table.Column<string>(type: "jsonb", nullable: false),
+                    dependant_entity_ids = table.Column<List<long>>(type: "bigint[]", nullable: true),
+                    auth_template = table.Column<string>(type: "jsonb", nullable: true),
+                    royalty_config = table.Column<string>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_package_definition_history", x => x.id);
+                    table.PrimaryKey("PK_package_blueprints", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -697,6 +699,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "non_fungible_resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_package_blueprints_package_entity_id",
+                table: "package_blueprints",
+                column: "package_entity_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_intent_hash",
                 table: "pending_transactions",
                 column: "intent_hash");
@@ -807,7 +814,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "non_fungible_id_store_history");
 
             migrationBuilder.DropTable(
-                name: "package_definition_history");
+                name: "package_blueprints");
 
             migrationBuilder.DropTable(
                 name: "pending_transactions");

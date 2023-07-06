@@ -62,46 +62,37 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("package_definition_history")]
-public class PackageDefinitionHistory
+[Table("package_blueprints")]
+public class PackageBlueprint
 {
     [Key]
     [Column("id")]
     public long Id { get; set; }
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
     [Column("package_entity_id")]
     public long PackageEntityId { get; set; }
 
-    [Column("code_hash")]
-    public byte[] CodeHash { get; set; }
+    [Column("name")]
+    public string Name { get; set; }
 
-    [Column("code")]
-    public byte[] Code { get; set; }
+    [Column("version")]
+    public string Version { get; set; }
 
-    [Column("vm_type")]
-    public PackageVmType VmType { get; set; }
+    [Column("definition", TypeName = "jsonb")]
+    public string Definition { get; set; }
 
-    [Column("schema_hash")]
-    public byte[] SchemaHash { get; set; }
+    [Column("dependant_entity_ids")]
+    public List<long>? DependantEntityIds { get; set; }
 
-    [Column("schema")]
-    public byte[] Schema { get; set; }
+    [Column("auth_template", TypeName = "jsonb")]
+    public string? AuthTemplate { get; set; }
 
-    [Column("blueprint_name")]
-    public string BlueprintName { get; set; }
-
-    [Column("blueprint_version")]
-    public string BlueprintVersion { get; set; }
-
-    [Column("blueprint", TypeName = "jsonb")]
-    public string Blueprint { get; set; }
+    [Column("royalty_config", TypeName = "jsonb")]
+    public string? RoyaltyConfig { get; set; }
 }

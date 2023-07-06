@@ -96,7 +96,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, divisibility, non_fungible_id_type, stake_vault_entity_id, unstake_vault_entity_id, resource_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, divisibility, non_fungible_id_type, code_hash, code, vm_type, schema_hash, schema, stake_vault_entity_id, unstake_vault_entity_id, resource_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -126,10 +126,27 @@ internal class WriteHelper
                 await writer.WriteNullAsync(token);
             }
 
+            if (e is GlobalPackageEntity packageEntity)
+            {
+                await writer.WriteAsync(packageEntity.CodeHash, NpgsqlDbType.Bytea, token);
+                await writer.WriteAsync(packageEntity.Code, NpgsqlDbType.Bytea, token);
+                await writer.WriteAsync(packageEntity.VmType, "package_vm_type", token);
+                await writer.WriteAsync(packageEntity.SchemaHash, NpgsqlDbType.Bytea, token);
+                await writer.WriteAsync(packageEntity.Schema, NpgsqlDbType.Jsonb, token);
+            }
+            else
+            {
+                await writer.WriteNullAsync(token);
+                await writer.WriteNullAsync(token);
+                await writer.WriteNullAsync(token);
+                await writer.WriteNullAsync(token);
+                await writer.WriteNullAsync(token);
+            }
+
             if (e is GlobalValidatorEntity validatorEntity)
             {
-                await writer.WriteAsync(validatorEntity.StakeVaultEntityId, token);
-                await writer.WriteAsync(validatorEntity.UnstakeVaultEntityId, token);
+                await writer.WriteAsync(validatorEntity.StakeVaultEntityId, NpgsqlDbType.Bigint, token);
+                await writer.WriteAsync(validatorEntity.UnstakeVaultEntityId, NpgsqlDbType.Bigint, token);
             }
             else
             {
@@ -606,7 +623,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.GlobalEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(GetDiscriminator<Abstractions.Model.ResourceType>(e.GetType()), "resource_type", token);
+            await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
             await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
             await writer.WriteAsync(e.IsRoyaltyVault, NpgsqlDbType.Boolean, token);
             await writer.WriteNullAsync(token);
@@ -621,7 +638,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.GlobalEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(GetDiscriminator<Abstractions.Model.ResourceType>(e.GetType()), "resource_type", token);
+            await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
             await writer.WriteNullAsync(token);
             await writer.WriteNullAsync(token);
             await writer.WriteAsync(e.NonFungibleIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
@@ -750,29 +767,26 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyPackageDefinitionHistory(ICollection<PackageDefinitionHistory> entities, CancellationToken token)
+    public async Task<int> CopyPackageBlueprints(ICollection<PackageBlueprint> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY package_definition_history (id, from_state_version, package_entity_id, code_hash, code, vm_type, schema_hash, schema, blueprint_name, blueprint_version, blueprint) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY package_blueprints (id, package_entity_id, name, version, definition, dependant_entity_ids, auth_template, royalty_config) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.PackageEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.CodeHash, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.Code, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.VmType, "package_vm_type", token);
-            await writer.WriteAsync(e.SchemaHash, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.Schema, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.BlueprintName, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(e.BlueprintVersion, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(e.Blueprint, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.Name, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.Version, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.Definition, NpgsqlDbType.Jsonb, token);
+            await writer.WriteNullableAsync(e.DependantEntityIds?.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.AuthTemplate, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.RoyaltyConfig, NpgsqlDbType.Jsonb, token);
         }
 
         await writer.CompleteAsync(token);
@@ -805,7 +819,7 @@ SELECT
     setval('validator_public_key_history_id_seq', @validatorPublicKeyHistorySequence),
     setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence),
     setval('ledger_transaction_markers_id_seq', @ledgerTransactionMarkerSequence),
-    setval('package_definition_history_id_seq', @packageDefinitionHistorySequence)",
+    setval('package_blueprints_id_seq', @packageBlueprintsSequence)",
             parameters: new
             {
                 accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
@@ -828,7 +842,7 @@ SELECT
                 validatorPublicKeyHistorySequence = sequences.ValidatorPublicKeyHistorySequence,
                 validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,
                 ledgerTransactionMarkerSequence = sequences.LedgerTransactionMarkerSequence,
-                packageDefinitionHistorySequence = sequences.PackageDefinitionHistorySequence,
+                packageBlueprintsSequence = sequences.PackageBlueprintsSequence,
             },
             cancellationToken: token);
 

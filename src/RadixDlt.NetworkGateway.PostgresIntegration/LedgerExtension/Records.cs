@@ -65,7 +65,6 @@
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using System;
 using System.Collections.Generic;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
@@ -83,65 +82,9 @@ internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, T
 
 internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
 
-internal record PackageChange(long PackageEntityId, byte[] CodeHash, byte[] Code, PackageVmType VmType, byte[] SchemaHash, byte[] Schema, string BlueprintName, string BlueprintVersion, string Blueprint, long StateVersion);
-
-internal record PackageChangeBuilder(long PackageEntityId, long StateVersion)
-{
-    private byte[]? _codeHash;
-    private byte[]? _code;
-    private PackageVmType? _vmType;
-    private byte[]? _schemaHash;
-    private byte[]? _schema;
-    private string? _blueprintName;
-    private string? _blueprintVersion;
-    private string? _blueprint;
-
-    public void WithVmType(PackageVmType vmType)
-    {
-        _vmType = vmType;
-    }
-
-    public void WithCode(byte[] codeHash, byte[] code)
-    {
-        _codeHash = codeHash;
-        _code = code;
-    }
-
-    public void WithSchema(byte[] schemaHash, byte[] schema)
-    {
-        _schemaHash = schemaHash;
-        _schema = schema;
-    }
-
-    public void WithBlueprint(string name, string version, string blueprintJson)
-    {
-        _blueprintName = name;
-        _blueprintVersion = version;
-        _blueprint = blueprintJson;
-    }
-
-    public PackageChange Build()
-    {
-        return new PackageChange(
-            PackageEntityId,
-            _codeHash ?? throw CreateMissingPropertyException(nameof(_codeHash)),
-            _code ?? throw CreateMissingPropertyException(nameof(_code)),
-            _vmType ?? throw CreateMissingPropertyException(nameof(_vmType)),
-            _schemaHash ?? throw CreateMissingPropertyException(nameof(_schemaHash)),
-            _schema ?? throw CreateMissingPropertyException(nameof(_schema)),
-            _blueprintName ?? throw CreateMissingPropertyException(nameof(_blueprintName)),
-            _blueprintVersion ?? throw CreateMissingPropertyException(nameof(_blueprintVersion)),
-            _blueprint ?? throw CreateMissingPropertyException(nameof(_blueprint)),
-            StateVersion);
-    }
-
-    private InvalidOperationException CreateMissingPropertyException(string propertyName)
-    {
-        return new InvalidOperationException($"Incomplete PackageChange definition of PackageEntityId={PackageEntityId} at StateVersion={StateVersion}, missing {propertyName}.");
-    }
-}
-
 internal record struct MetadataLookup(long EntityId, string Key);
+
+internal record struct PackageBlueprintLookup(long PackageEntityId, string Name, string BlueprintVersion);
 
 internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
 
@@ -152,8 +95,6 @@ internal record struct NonFungibleStoreLookup(long NonFungibleEntityId, long Sta
 internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFungibleId);
 
 internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);
-
-internal record struct PackageChangeLookup(long PackageEntityId, long StateVersion);
 
 internal record struct AccessRulesChangePointerLookup(long EntityId, long StateVersion);
 

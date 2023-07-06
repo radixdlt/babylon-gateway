@@ -452,6 +452,32 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 e.UnstakeVaultEntityId = referencedEntities.Get((EntityAddress)validator.Value.StakeXrdVault.EntityAddress).DatabaseId;
                             });
                         }
+
+                        if (substateData is CoreModel.PackageCodeVmTypeEntrySubstate packageCodeVmType)
+                        {
+                            referencedEntity.PostResolveConfigure((GlobalPackageEntity e) =>
+                            {
+                                e.VmType = packageCodeVmType.Value.VmType.ToModel();
+                            });
+                        }
+
+                        if (substateData is CoreModel.PackageCodeOriginalCodeEntrySubstate packageCodeOriginalCode)
+                        {
+                            referencedEntity.PostResolveConfigure((GlobalPackageEntity e) =>
+                            {
+                                e.CodeHash = packageCodeOriginalCode.Key.CodeHash.ConvertFromHex();
+                                e.Code = packageCodeOriginalCode.Value.CodeHex.ConvertFromHex();
+                            });
+                        }
+
+                        if (substateData is CoreModel.PackageSchemaEntrySubstate packageSchema)
+                        {
+                            referencedEntity.PostResolveConfigure((GlobalPackageEntity e) =>
+                            {
+                                e.SchemaHash = packageSchema.Key.SchemaHash.ConvertFromHex();
+                                e.Schema = packageSchema.Value.Schema.SborData.ToJson();
+                            });
+                        }
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -723,8 +749,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var metadataChanges = new List<MetadataChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
-        var packageChangeBuilders = new Dictionary<PackageChangeLookup, PackageChangeBuilder>();
         var entityStateToAdd = new List<EntityStateHistory>();
+        var packageBlueprintsToAdd = new Dictionary<PackageBlueprintLookup, PackageBlueprint>();
         var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>(); // TODO follow Pointer+ordered List pattern
         var accountDefaultDepositRuleHistoryToAdd = new List<AccountDefaultDepositRuleHistory>();
         var accountResourceDepositRuleHistoryToAdd = new List<AccountResourceDepositRuleHistory>();
@@ -892,56 +918,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             });
                         }
 
-                        if (substateData is CoreModel.PackageCodeVmTypeEntrySubstate packageCodeVmType)
-                        {
-                            packageChangeBuilders
-                                .GetOrAdd(new PackageChangeLookup(referencedEntity.DatabaseId, stateVersion), l => new PackageChangeBuilder(l.PackageEntityId, l.StateVersion))
-                                .WithVmType(packageCodeVmType.Value.VmType.ToModel());
-                        }
-
-                        if (substateData is CoreModel.PackageCodeOriginalCodeEntrySubstate packageCodeOriginalCode)
-                        {
-                            packageChangeBuilders
-                                .GetOrAdd(new PackageChangeLookup(referencedEntity.DatabaseId, stateVersion), l => new PackageChangeBuilder(l.PackageEntityId, l.StateVersion))
-                                .WithCode(packageCodeOriginalCode.GetCodeHashBytes(), packageCodeOriginalCode.GetCodeBytes());
-                        }
-
-                        if (substateData is CoreModel.PackageCodeInstrumentedCodeEntrySubstate packageCodeInstrumentedCode)
-                        {
-                            packageChangeBuilders
-                                .GetOrAdd(new PackageChangeLookup(referencedEntity.DatabaseId, stateVersion), l => new PackageChangeBuilder(l.PackageEntityId, l.StateVersion))
-                                .WithCode(packageCodeInstrumentedCode.GetCodeHashBytes(), packageCodeInstrumentedCode.GetCodeBytes());
-                        }
-
-                        if (substateData is CoreModel.PackageSchemaEntrySubstate packageSchema)
-                        {
-                            packageChangeBuilders
-                                .GetOrAdd(new PackageChangeLookup(referencedEntity.DatabaseId, stateVersion), l => new PackageChangeBuilder(l.PackageEntityId, l.StateVersion))
-                                .WithSchema(packageSchema.GetSchemaHashBytes(), packageSchema.Value.Schema.SborData.GetDataBytes());
-                        }
-
-                        if (substateData is CoreModel.PackageBlueprintDefinitionEntrySubstate packageBlueprintDefinition)
-                        {
-                            packageChangeBuilders
-                                .GetOrAdd(new PackageChangeLookup(referencedEntity.DatabaseId, stateVersion), l => new PackageChangeBuilder(l.PackageEntityId, l.StateVersion))
-                                .WithBlueprint(packageBlueprintDefinition.Key.BlueprintName, packageBlueprintDefinition.Key.BlueprintVersion, packageBlueprintDefinition.Value.Definition.ToJson());
-                        }
-
-                        if (substateData is CoreModel.PackageBlueprintDependenciesEntrySubstate)
-                        {
-                            // no-op so far
-                        }
-
-                        if (substateData is CoreModel.PackageBlueprintRoyaltyEntrySubstate)
-                        {
-                            // no-op so far but we should most likely store this information separately from package itself
-                        }
-
-                        if (substateData is CoreModel.PackageBlueprintAuthTemplateEntrySubstate)
-                        {
-                            // no-op so far but we should most likely store this information separately from package itself
-                        }
-
                         if (substateData is CoreModel.AccessRulesModuleFieldOwnerRoleSubstate accessRulesFieldOwnerRole)
                         {
                             accessRulesChangePointers
@@ -965,6 +941,66 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 })
                                 .Entries
                                 .Add(accessRulesEntry);
+                        }
+
+                        if (substateData is CoreModel.PackageBlueprintDefinitionEntrySubstate packageBlueprintDefinition)
+                        {
+                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDefinition.Key.BlueprintName, packageBlueprintDefinition.Key.BlueprintVersion);
+
+                            packageBlueprintsToAdd
+                                .GetOrAdd(lookup, _ => new PackageBlueprint
+                                {
+                                    Id = sequences.PackageBlueprintsSequence++,
+                                    PackageEntityId = referencedEntity.DatabaseId,
+                                    Name = lookup.Name,
+                                    Version = lookup.BlueprintVersion,
+                                })
+                                .Definition = packageBlueprintDefinition.Value.Definition.ToJson();
+                        }
+
+                        if (substateData is CoreModel.PackageBlueprintDependenciesEntrySubstate packageBlueprintDependencies)
+                        {
+                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDependencies.Key.BlueprintName, packageBlueprintDependencies.Key.BlueprintVersion);
+
+                            packageBlueprintsToAdd
+                                .GetOrAdd(lookup, _ => new PackageBlueprint
+                                {
+                                    Id = sequences.PackageBlueprintsSequence++,
+                                    PackageEntityId = referencedEntity.DatabaseId,
+                                    Name = lookup.Name,
+                                    Version = lookup.BlueprintVersion,
+                                })
+                                .DependantEntityIds = packageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
+                        }
+
+                        if (substateData is CoreModel.PackageBlueprintRoyaltyEntrySubstate packageBlueprintRoyalty)
+                        {
+                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintRoyalty.Key.BlueprintName, packageBlueprintRoyalty.Key.BlueprintVersion);
+
+                            packageBlueprintsToAdd
+                                .GetOrAdd(lookup, _ => new PackageBlueprint
+                                {
+                                    Id = sequences.PackageBlueprintsSequence++,
+                                    PackageEntityId = referencedEntity.DatabaseId,
+                                    Name = lookup.Name,
+                                    Version = lookup.BlueprintVersion,
+                                })
+                                .RoyaltyConfig = packageBlueprintRoyalty.Value.RoyaltyConfig.ToJson();
+                        }
+
+                        if (substateData is CoreModel.PackageBlueprintAuthTemplateEntrySubstate packageBlueprintAuthTemplate)
+                        {
+                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintAuthTemplate.Key.BlueprintName, packageBlueprintAuthTemplate.Key.BlueprintVersion);
+
+                            packageBlueprintsToAdd
+                                .GetOrAdd(lookup, _ => new PackageBlueprint
+                                {
+                                    Id = sequences.PackageBlueprintsSequence++,
+                                    PackageEntityId = referencedEntity.DatabaseId,
+                                    Name = lookup.Name,
+                                    Version = lookup.BlueprintVersion,
+                                })
+                                .AuthTemplate = packageBlueprintAuthTemplate.Value.AuthConfig.ToJson();
                         }
                     }
 
@@ -1011,67 +1047,68 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         var eventEmitterEntity = referencedEntities.Get((EntityAddress)methodEventEmitter.Entity.EntityAddress);
 
-                        // TODO "deposit" and "withdrawal" events should be used to alter entity_resource_aggregated_vaults_history table (drop tmp_tmp_remove_me_once_tx_events_become_available column)
-                        if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalFungibleVault)
-                        {
-                            if (((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal || ((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Deposit)
-                            {
-                                var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
-                                var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId;
-                                var data = (JObject)@event.Data.ProgrammaticJson;
-                                var fungibleAmount = data["fields"]?[0]?["value"]?.ToString();
-                                var eventType = ((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
-                                    ? LedgerTransactionMarkerEventType.Withdrawal
-                                    : LedgerTransactionMarkerEventType.Deposit;
-
-                                if (fungibleAmount == null)
-                                {
-                                    throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].value to be present");
-                                }
-
-                                var quantity = TokenAmount.FromDecimalString(fungibleAmount);
-
-                                ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
-                                {
-                                    Id = sequences.LedgerTransactionMarkerSequence++,
-                                    StateVersion = stateVersion,
-                                    EventType = eventType,
-                                    EntityId = globalAncestorId,
-                                    ResourceEntityId = resourceEntityId,
-                                    Quantity = quantity,
-                                });
-                            }
-                        }
-
-                        if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalNonFungibleVault)
-                        {
-                            if (((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleVault.Withdrawal || ((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleVault.Deposit)
-                            {
-                                var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
-                                var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId;
-                                var data = (JObject)@event.Data.ProgrammaticJson;
-                                var nonFungibleIds = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).ToList();
-                                var eventType = ((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
-                                    ? LedgerTransactionMarkerEventType.Withdrawal
-                                    : LedgerTransactionMarkerEventType.Deposit;
-
-                                if (nonFungibleIds?.Any() != true)
-                                {
-                                    throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].elements to be present");
-                                }
-
-                                var quantity = TokenAmount.FromDecimalString(nonFungibleIds.Count.ToString());
-                                ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
-                                {
-                                    Id = sequences.LedgerTransactionMarkerSequence++,
-                                    StateVersion = stateVersion,
-                                    EventType = eventType,
-                                    EntityId = globalAncestorId,
-                                    ResourceEntityId = resourceEntityId,
-                                    Quantity = quantity,
-                                });
-                            }
-                        }
+                        // TODO restore
+                        // // TODO "deposit" and "withdrawal" events should be used to alter entity_resource_aggregated_vaults_history table (drop tmp_tmp_remove_me_once_tx_events_become_available column)
+                        // if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalFungibleVault)
+                        // {
+                        //     if (((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal || ((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Deposit)
+                        //     {
+                        //         var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
+                        //         var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId;
+                        //         var data = (JObject)@event.Data.ProgrammaticJson;
+                        //         var fungibleAmount = data["fields"]?[0]?["value"]?.ToString();
+                        //         var eventType = ((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
+                        //             ? LedgerTransactionMarkerEventType.Withdrawal
+                        //             : LedgerTransactionMarkerEventType.Deposit;
+                        //
+                        //         if (fungibleAmount == null)
+                        //         {
+                        //             throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].value to be present");
+                        //         }
+                        //
+                        //         var quantity = TokenAmount.FromDecimalString(fungibleAmount);
+                        //
+                        //         ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
+                        //         {
+                        //             Id = sequences.LedgerTransactionMarkerSequence++,
+                        //             StateVersion = stateVersion,
+                        //             EventType = eventType,
+                        //             EntityId = globalAncestorId,
+                        //             ResourceEntityId = resourceEntityId,
+                        //             Quantity = quantity,
+                        //         });
+                        //     }
+                        // }
+                        //
+                        // if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalNonFungibleVault)
+                        // {
+                        //     if (((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleVault.Withdrawal || ((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleVault.Deposit)
+                        //     {
+                        //         var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
+                        //         var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId;
+                        //         var data = (JObject)@event.Data.ProgrammaticJson;
+                        //         var nonFungibleIds = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).ToList();
+                        //         var eventType = ((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
+                        //             ? LedgerTransactionMarkerEventType.Withdrawal
+                        //             : LedgerTransactionMarkerEventType.Deposit;
+                        //
+                        //         if (nonFungibleIds?.Any() != true)
+                        //         {
+                        //             throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].elements to be present");
+                        //         }
+                        //
+                        //         var quantity = TokenAmount.FromDecimalString(nonFungibleIds.Count.ToString());
+                        //         ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
+                        //         {
+                        //             Id = sequences.LedgerTransactionMarkerSequence++,
+                        //             StateVersion = stateVersion,
+                        //             EventType = eventType,
+                        //             EntityId = globalAncestorId,
+                        //             ResourceEntityId = resourceEntityId,
+                        //             Quantity = quantity,
+                        //         });
+                        //     }
+                        // }
 
                         if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.GlobalFungibleResource)
                         {
@@ -1740,24 +1777,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 })
                 .ToList();
 
-            var packageDefinitionHistoryToAdd = packageChangeBuilders
-                .Select(kvp => kvp.Value.Build())
-                .Select(pc => new PackageDefinitionHistory
-                {
-                    Id = sequences.PackageDefinitionHistorySequence++,
-                    FromStateVersion = pc.StateVersion,
-                    PackageEntityId = pc.PackageEntityId,
-                    CodeHash = pc.CodeHash,
-                    Code = pc.Code,
-                    VmType = pc.VmType,
-                    SchemaHash = pc.SchemaHash,
-                    Schema = pc.Schema,
-                    BlueprintName = pc.BlueprintName,
-                    BlueprintVersion = pc.BlueprintVersion,
-                    Blueprint = pc.Blueprint,
-                })
-                .ToList();
-
             var entityResourceAggregateHistoryToAdd = entityResourceAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()).ToList();
 
             sw = Stopwatch.StartNew();
@@ -1781,7 +1800,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorKeyHistory(validatorKeyHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyPackageDefinitionHistory(packageDefinitionHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyPackageBlueprints(packageBlueprintsToAdd.Values, token);
             rowsInserted += await writeHelper.CopyAccountDefaultDepositRuleHistory(accountDefaultDepositRuleHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountResourceDepositRuleHistory(accountResourceDepositRuleHistoryToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);

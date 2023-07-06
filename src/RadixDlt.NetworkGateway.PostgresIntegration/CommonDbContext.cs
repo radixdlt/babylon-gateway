@@ -127,7 +127,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityAccessRulesAggregateHistory> EntityAccessRulesAggregateHistory => Set<EntityAccessRulesAggregateHistory>();
 
-    public DbSet<PackageDefinitionHistory> PackageDefinitionHistory => Set<PackageDefinitionHistory>();
+    public DbSet<PackageBlueprint> PackageBlueprints => Set<PackageBlueprint>();
 
     public DbSet<ComponentSchema> ComponentSchema => Set<ComponentSchema>();
 
@@ -270,6 +270,9 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<GlobalTwoResourcePoolEntity>(EntityType.GlobalTwoResourcePool)
             .HasValue<GlobalMultiResourcePoolEntity>(EntityType.GlobalMultiResourcePool)
             .HasValue<GlobalTransactionTrackerEntity>(EntityType.GlobalTransactionTracker);
+
+        modelBuilder.Entity<PackageBlueprint>()
+            .HasIndex(e => e.PackageEntityId);
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)

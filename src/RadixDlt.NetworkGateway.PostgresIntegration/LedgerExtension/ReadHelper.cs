@@ -577,7 +577,7 @@ SELECT
     nextval('validator_public_key_history_id_seq') AS ValidatorPublicKeyHistorySequence,
     nextval('validator_active_set_history_id_seq') AS ValidatorActiveSetHistorySequence,
     nextval('ledger_transaction_markers_id_seq') AS LedgerTransactionMarkerSequence,
-    nextval('package_definition_history_id_seq') AS PackageDefinitionHistorySequence",
+    nextval('package_blueprints_id_seq') AS PackageBlueprintsSequence",
             cancellationToken: token);
 
         return await _connection.QueryFirstAsync<SequencesHolder>(cd);
