@@ -1586,16 +1586,16 @@ order by ord
         // TODO just a prototype
         return await _dbContext.EntityAccessRulesAggregateHistory
             .FromSqlInterpolated($@"
-WITH variables (entity_id) AS (SELECT UNNEST({entityIds})
-SELECT earch.*
+WITH variables (entity_id) AS (SELECT UNNEST({entityIds}))
+SELECT earah.*
 FROM variables v
 INNER JOIN LATERAL (
     SELECT *
-    FROM entity_access_rules_chain_history
-    WHERE entity_id = v.entity_id AND ((v.child_blueprint_name is NULL and child_blueprint_name is NULL) OR child_blueprint_name = v.child_blueprint_name) AND from_state_version <= {ledgerState.StateVersion}
+    FROM entity_access_rules_aggregate_history
+    WHERE entity_id = v.entity_id AND from_state_version <= {ledgerState.StateVersion}
     ORDER BY from_state_version DESC
     LIMIT 1
-) earch ON TRUE;")
+) earah ON TRUE;")
             .ToDictionaryAsync(e => e.EntityId, e => $$"""{"_todo_":"just a prototype","owner_role_id":{{e.OwnerRoleId}},"entry_ids":[{{string.Join(",", e.EntryIds)}}]}""", token);
     }
 
