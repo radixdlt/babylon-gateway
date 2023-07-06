@@ -96,10 +96,10 @@ namespace RadixDlt.CoreApiSdk.Model
     public enum LtsTransactionSubmitErrorDetailsType
     {
         /// <summary>
-        /// Enum MempoolFull for value: MempoolFull
+        /// Enum PriorityThresholdNotMet for value: PriorityThresholdNotMet
         /// </summary>
-        [EnumMember(Value = "MempoolFull")]
-        MempoolFull = 1,
+        [EnumMember(Value = "PriorityThresholdNotMet")]
+        PriorityThresholdNotMet = 1,
 
         /// <summary>
         /// Enum Rejected for value: Rejected

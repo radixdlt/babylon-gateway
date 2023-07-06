@@ -84,35 +84,42 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// PublicMethodAccessibility
+    /// ScenariosResponse
     /// </summary>
-    [DataContract(Name = "PublicMethodAccessibility")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(OuterObjectOnlyMethodAccessibility), "OuterObjectOnly")]
-    [JsonSubtypes.KnownSubType(typeof(OwnPackageOnlyMethodAccessibility), "OwnPackageOnly")]
-    [JsonSubtypes.KnownSubType(typeof(PublicMethodAccessibility), "Public")]
-    [JsonSubtypes.KnownSubType(typeof(RoleProtectedMethodAccessibility), "RoleProtected")]
-    public partial class PublicMethodAccessibility : MethodAccessibility, IEquatable<PublicMethodAccessibility>
+    [DataContract(Name = "ScenariosResponse")]
+    public partial class ScenariosResponse : IEquatable<ScenariosResponse>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PublicMethodAccessibility" /> class.
+        /// Initializes a new instance of the <see cref="ScenariosResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected PublicMethodAccessibility() { }
+        protected ScenariosResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="PublicMethodAccessibility" /> class.
+        /// Initializes a new instance of the <see cref="ScenariosResponse" /> class.
         /// </summary>
-        /// <param name="type">type (required) (default to MethodAccessibilityType.Public).</param>
-        public PublicMethodAccessibility(MethodAccessibilityType type = MethodAccessibilityType.Public) : base(type)
+        /// <param name="executedScenarios">Scenarios executed as part of Genesis (in their execution order). (required).</param>
+        public ScenariosResponse(List<ExecutedGenesisScenario> executedScenarios = default(List<ExecutedGenesisScenario>))
         {
+            // to ensure "executedScenarios" is required (not null)
+            if (executedScenarios == null)
+            {
+                throw new ArgumentNullException("executedScenarios is a required property for ScenariosResponse and cannot be null");
+            }
+            this.ExecutedScenarios = executedScenarios;
         }
+
+        /// <summary>
+        /// Scenarios executed as part of Genesis (in their execution order).
+        /// </summary>
+        /// <value>Scenarios executed as part of Genesis (in their execution order).</value>
+        [DataMember(Name = "executed_scenarios", IsRequired = true, EmitDefaultValue = true)]
+        public List<ExecutedGenesisScenario> ExecutedScenarios { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -121,8 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PublicMethodAccessibility {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("class ScenariosResponse {\n");
+            sb.Append("  ExecutedScenarios: ").Append(ExecutedScenarios).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -131,7 +138,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -143,21 +150,27 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PublicMethodAccessibility);
+            return this.Equals(input as ScenariosResponse);
         }
 
         /// <summary>
-        /// Returns true if PublicMethodAccessibility instances are equal
+        /// Returns true if ScenariosResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of PublicMethodAccessibility to be compared</param>
+        /// <param name="input">Instance of ScenariosResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PublicMethodAccessibility input)
+        public bool Equals(ScenariosResponse input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input);
+            return 
+                (
+                    this.ExecutedScenarios == input.ExecutedScenarios ||
+                    this.ExecutedScenarios != null &&
+                    input.ExecutedScenarios != null &&
+                    this.ExecutedScenarios.SequenceEqual(input.ExecutedScenarios)
+                );
         }
 
         /// <summary>
@@ -168,7 +181,11 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
+                int hashCode = 41;
+                if (this.ExecutedScenarios != null)
+                {
+                    hashCode = (hashCode * 59) + this.ExecutedScenarios.GetHashCode();
+                }
                 return hashCode;
             }
         }

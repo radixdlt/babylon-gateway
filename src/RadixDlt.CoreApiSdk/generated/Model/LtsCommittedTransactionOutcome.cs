@@ -109,7 +109,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="LtsCommittedTransactionOutcome" /> class.
         /// </summary>
-        /// <param name="stateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the resultant state version after the transaction has been committed (required).</param>
+        /// <param name="stateVersion">stateVersion (required).</param>
         /// <param name="accumulatorHash">The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger. This hash is &#x60;ACC_{N+1} &#x3D; combine(ACC_N, LEDGER_HASH_{N}))&#x60; (where &#x60;combine()&#x60; is an arbitrary deterministic function we use).  (required).</param>
         /// <param name="userTransactionIdentifiers">userTransactionIdentifiers.</param>
         /// <param name="status">status (required).</param>
@@ -148,9 +148,8 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the resultant state version after the transaction has been committed
+        /// Gets or Sets StateVersion
         /// </summary>
-        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the resultant state version after the transaction has been committed</value>
         [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
         public long StateVersion { get; set; }
 

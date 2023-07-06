@@ -84,35 +84,78 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// PublicMethodAccessibility
+    /// ExecutedGenesisScenario
     /// </summary>
-    [DataContract(Name = "PublicMethodAccessibility")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(OuterObjectOnlyMethodAccessibility), "OuterObjectOnly")]
-    [JsonSubtypes.KnownSubType(typeof(OwnPackageOnlyMethodAccessibility), "OwnPackageOnly")]
-    [JsonSubtypes.KnownSubType(typeof(PublicMethodAccessibility), "Public")]
-    [JsonSubtypes.KnownSubType(typeof(RoleProtectedMethodAccessibility), "RoleProtected")]
-    public partial class PublicMethodAccessibility : MethodAccessibility, IEquatable<PublicMethodAccessibility>
+    [DataContract(Name = "ExecutedGenesisScenario")]
+    public partial class ExecutedGenesisScenario : IEquatable<ExecutedGenesisScenario>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PublicMethodAccessibility" /> class.
+        /// Initializes a new instance of the <see cref="ExecutedGenesisScenario" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected PublicMethodAccessibility() { }
+        protected ExecutedGenesisScenario() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="PublicMethodAccessibility" /> class.
+        /// Initializes a new instance of the <see cref="ExecutedGenesisScenario" /> class.
         /// </summary>
-        /// <param name="type">type (required) (default to MethodAccessibilityType.Public).</param>
-        public PublicMethodAccessibility(MethodAccessibilityType type = MethodAccessibilityType.Public) : base(type)
+        /// <param name="sequenceNumber">An index of the Scenario on the list of all Scenarios that were executed. Note: the stored sequence numbers do not necessarily have to be consecutive (e.g. in a case where some configured Scenario failed to execute or failed to write results to the database).  (required).</param>
+        /// <param name="logicalName">logicalName (required).</param>
+        /// <param name="committedTransactions">Transactions successfully committed by the Scenario. (required).</param>
+        /// <param name="addresses">Well-named addresses touched/created by the Scenario, keyed by their name.  (required).</param>
+        public ExecutedGenesisScenario(int sequenceNumber = default(int), string logicalName = default(string), List<ExecutedScenarioTransaction> committedTransactions = default(List<ExecutedScenarioTransaction>), Dictionary<string, string> addresses = default(Dictionary<string, string>))
         {
+            this.SequenceNumber = sequenceNumber;
+            // to ensure "logicalName" is required (not null)
+            if (logicalName == null)
+            {
+                throw new ArgumentNullException("logicalName is a required property for ExecutedGenesisScenario and cannot be null");
+            }
+            this.LogicalName = logicalName;
+            // to ensure "committedTransactions" is required (not null)
+            if (committedTransactions == null)
+            {
+                throw new ArgumentNullException("committedTransactions is a required property for ExecutedGenesisScenario and cannot be null");
+            }
+            this.CommittedTransactions = committedTransactions;
+            // to ensure "addresses" is required (not null)
+            if (addresses == null)
+            {
+                throw new ArgumentNullException("addresses is a required property for ExecutedGenesisScenario and cannot be null");
+            }
+            this.Addresses = addresses;
         }
+
+        /// <summary>
+        /// An index of the Scenario on the list of all Scenarios that were executed. Note: the stored sequence numbers do not necessarily have to be consecutive (e.g. in a case where some configured Scenario failed to execute or failed to write results to the database). 
+        /// </summary>
+        /// <value>An index of the Scenario on the list of all Scenarios that were executed. Note: the stored sequence numbers do not necessarily have to be consecutive (e.g. in a case where some configured Scenario failed to execute or failed to write results to the database). </value>
+        [DataMember(Name = "sequence_number", IsRequired = true, EmitDefaultValue = true)]
+        public int SequenceNumber { get; set; }
+
+        /// <summary>
+        /// Gets or Sets LogicalName
+        /// </summary>
+        [DataMember(Name = "logical_name", IsRequired = true, EmitDefaultValue = true)]
+        public string LogicalName { get; set; }
+
+        /// <summary>
+        /// Transactions successfully committed by the Scenario.
+        /// </summary>
+        /// <value>Transactions successfully committed by the Scenario.</value>
+        [DataMember(Name = "committed_transactions", IsRequired = true, EmitDefaultValue = true)]
+        public List<ExecutedScenarioTransaction> CommittedTransactions { get; set; }
+
+        /// <summary>
+        /// Well-named addresses touched/created by the Scenario, keyed by their name. 
+        /// </summary>
+        /// <value>Well-named addresses touched/created by the Scenario, keyed by their name. </value>
+        [DataMember(Name = "addresses", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, string> Addresses { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -121,8 +164,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PublicMethodAccessibility {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("class ExecutedGenesisScenario {\n");
+            sb.Append("  SequenceNumber: ").Append(SequenceNumber).Append("\n");
+            sb.Append("  LogicalName: ").Append(LogicalName).Append("\n");
+            sb.Append("  CommittedTransactions: ").Append(CommittedTransactions).Append("\n");
+            sb.Append("  Addresses: ").Append(Addresses).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -131,7 +177,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -143,21 +189,42 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PublicMethodAccessibility);
+            return this.Equals(input as ExecutedGenesisScenario);
         }
 
         /// <summary>
-        /// Returns true if PublicMethodAccessibility instances are equal
+        /// Returns true if ExecutedGenesisScenario instances are equal
         /// </summary>
-        /// <param name="input">Instance of PublicMethodAccessibility to be compared</param>
+        /// <param name="input">Instance of ExecutedGenesisScenario to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PublicMethodAccessibility input)
+        public bool Equals(ExecutedGenesisScenario input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input);
+            return 
+                (
+                    this.SequenceNumber == input.SequenceNumber ||
+                    this.SequenceNumber.Equals(input.SequenceNumber)
+                ) && 
+                (
+                    this.LogicalName == input.LogicalName ||
+                    (this.LogicalName != null &&
+                    this.LogicalName.Equals(input.LogicalName))
+                ) && 
+                (
+                    this.CommittedTransactions == input.CommittedTransactions ||
+                    this.CommittedTransactions != null &&
+                    input.CommittedTransactions != null &&
+                    this.CommittedTransactions.SequenceEqual(input.CommittedTransactions)
+                ) && 
+                (
+                    this.Addresses == input.Addresses ||
+                    this.Addresses != null &&
+                    input.Addresses != null &&
+                    this.Addresses.SequenceEqual(input.Addresses)
+                );
         }
 
         /// <summary>
@@ -168,7 +235,20 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.SequenceNumber.GetHashCode();
+                if (this.LogicalName != null)
+                {
+                    hashCode = (hashCode * 59) + this.LogicalName.GetHashCode();
+                }
+                if (this.CommittedTransactions != null)
+                {
+                    hashCode = (hashCode * 59) + this.CommittedTransactions.GetHashCode();
+                }
+                if (this.Addresses != null)
+                {
+                    hashCode = (hashCode * 59) + this.Addresses.GetHashCode();
+                }
                 return hashCode;
             }
         }

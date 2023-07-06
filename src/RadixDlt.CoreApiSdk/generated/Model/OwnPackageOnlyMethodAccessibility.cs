@@ -84,36 +84,35 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// LtsTransactionSubmitMempoolFullErrorDetailsAllOf
+    /// OwnPackageOnlyMethodAccessibility
     /// </summary>
-    [DataContract(Name = "LtsTransactionSubmitMempoolFullErrorDetails_allOf")]
-    public partial class LtsTransactionSubmitMempoolFullErrorDetailsAllOf : IEquatable<LtsTransactionSubmitMempoolFullErrorDetailsAllOf>
+    [DataContract(Name = "OwnPackageOnlyMethodAccessibility")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(OuterObjectOnlyMethodAccessibility), "OuterObjectOnly")]
+    [JsonSubtypes.KnownSubType(typeof(OwnPackageOnlyMethodAccessibility), "OwnPackageOnly")]
+    [JsonSubtypes.KnownSubType(typeof(PublicMethodAccessibility), "Public")]
+    [JsonSubtypes.KnownSubType(typeof(RoleProtectedMethodAccessibility), "RoleProtected")]
+    public partial class OwnPackageOnlyMethodAccessibility : MethodAccessibility, IEquatable<OwnPackageOnlyMethodAccessibility>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LtsTransactionSubmitMempoolFullErrorDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="OwnPackageOnlyMethodAccessibility" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected LtsTransactionSubmitMempoolFullErrorDetailsAllOf() { }
+        protected OwnPackageOnlyMethodAccessibility() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="LtsTransactionSubmitMempoolFullErrorDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="OwnPackageOnlyMethodAccessibility" /> class.
         /// </summary>
-        /// <param name="mempoolCapacity">mempoolCapacity (required).</param>
-        public LtsTransactionSubmitMempoolFullErrorDetailsAllOf(int mempoolCapacity = default(int))
+        /// <param name="type">type (required) (default to MethodAccessibilityType.OwnPackageOnly).</param>
+        public OwnPackageOnlyMethodAccessibility(MethodAccessibilityType type = MethodAccessibilityType.OwnPackageOnly) : base(type)
         {
-            this.MempoolCapacity = mempoolCapacity;
         }
-
-        /// <summary>
-        /// Gets or Sets MempoolCapacity
-        /// </summary>
-        [DataMember(Name = "mempool_capacity", IsRequired = true, EmitDefaultValue = true)]
-        public int MempoolCapacity { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -122,8 +121,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class LtsTransactionSubmitMempoolFullErrorDetailsAllOf {\n");
-            sb.Append("  MempoolCapacity: ").Append(MempoolCapacity).Append("\n");
+            sb.Append("class OwnPackageOnlyMethodAccessibility {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -132,7 +131,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -144,25 +143,21 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as LtsTransactionSubmitMempoolFullErrorDetailsAllOf);
+            return this.Equals(input as OwnPackageOnlyMethodAccessibility);
         }
 
         /// <summary>
-        /// Returns true if LtsTransactionSubmitMempoolFullErrorDetailsAllOf instances are equal
+        /// Returns true if OwnPackageOnlyMethodAccessibility instances are equal
         /// </summary>
-        /// <param name="input">Instance of LtsTransactionSubmitMempoolFullErrorDetailsAllOf to be compared</param>
+        /// <param name="input">Instance of OwnPackageOnlyMethodAccessibility to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(LtsTransactionSubmitMempoolFullErrorDetailsAllOf input)
+        public bool Equals(OwnPackageOnlyMethodAccessibility input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
-                (
-                    this.MempoolCapacity == input.MempoolCapacity ||
-                    this.MempoolCapacity.Equals(input.MempoolCapacity)
-                );
+            return base.Equals(input);
         }
 
         /// <summary>
@@ -173,8 +168,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.MempoolCapacity.GetHashCode();
+                int hashCode = base.GetHashCode();
                 return hashCode;
             }
         }

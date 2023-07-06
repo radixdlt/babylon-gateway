@@ -103,7 +103,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedStateIdentifier" /> class.
         /// </summary>
-        /// <param name="stateVersion">An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, representing the state version. The state version increments with each transaction, starting at &#x60;0&#x60; pre-genesis. (required).</param>
+        /// <param name="stateVersion">stateVersion (required).</param>
         /// <param name="stateTreeHash">The hex-encoded root hash of the state tree. This captures the current state of the state on the ledger.  (required).</param>
         /// <param name="transactionTreeHash">The hex-encoded root hash of the transaction tree. This captures the ledger transactions committed to the ledger.  (required).</param>
         /// <param name="receiptTreeHash">The hex-encoded root hash of the receipt tree. This captures the consensus-agreed output of each transaction on the ledger.  (required).</param>
@@ -131,9 +131,8 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, representing the state version. The state version increments with each transaction, starting at &#x60;0&#x60; pre-genesis.
+        /// Gets or Sets StateVersion
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, representing the state version. The state version increments with each transaction, starting at &#x60;0&#x60; pre-genesis.</value>
         [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
         public long StateVersion { get; set; }
 

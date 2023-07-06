@@ -91,28 +91,44 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// PublicMethodAccessibility
+    /// TransactionSubmitPriorityThresholdNotMetErrorDetails
     /// </summary>
-    [DataContract(Name = "PublicMethodAccessibility")]
+    [DataContract(Name = "TransactionSubmitPriorityThresholdNotMetErrorDetails")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(OuterObjectOnlyMethodAccessibility), "OuterObjectOnly")]
-    [JsonSubtypes.KnownSubType(typeof(OwnPackageOnlyMethodAccessibility), "OwnPackageOnly")]
-    [JsonSubtypes.KnownSubType(typeof(PublicMethodAccessibility), "Public")]
-    [JsonSubtypes.KnownSubType(typeof(RoleProtectedMethodAccessibility), "RoleProtected")]
-    public partial class PublicMethodAccessibility : MethodAccessibility, IEquatable<PublicMethodAccessibility>
+    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitPriorityThresholdNotMetErrorDetails), "PriorityThresholdNotMet")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitRejectedErrorDetails), "Rejected")]
+    public partial class TransactionSubmitPriorityThresholdNotMetErrorDetails : TransactionSubmitErrorDetails, IEquatable<TransactionSubmitPriorityThresholdNotMetErrorDetails>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PublicMethodAccessibility" /> class.
+        /// Initializes a new instance of the <see cref="TransactionSubmitPriorityThresholdNotMetErrorDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected PublicMethodAccessibility() { }
+        protected TransactionSubmitPriorityThresholdNotMetErrorDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="PublicMethodAccessibility" /> class.
+        /// Initializes a new instance of the <see cref="TransactionSubmitPriorityThresholdNotMetErrorDetails" /> class.
         /// </summary>
-        /// <param name="type">type (required) (default to MethodAccessibilityType.Public).</param>
-        public PublicMethodAccessibility(MethodAccessibilityType type = MethodAccessibilityType.Public) : base(type)
+        /// <param name="tipPercentage">Tip percentage of the submitted (and rejected) transaction.  (required).</param>
+        /// <param name="minTipPercentageRequired">A lower bound for tip percentage at current mempool state. Anything lower than this will very likely result in a mempool rejection. A missing value means there is no tip that can guarantee submission. .</param>
+        /// <param name="type">type (required) (default to TransactionSubmitErrorDetailsType.PriorityThresholdNotMet).</param>
+        public TransactionSubmitPriorityThresholdNotMetErrorDetails(int tipPercentage = default(int), int minTipPercentageRequired = default(int), TransactionSubmitErrorDetailsType type = TransactionSubmitErrorDetailsType.PriorityThresholdNotMet) : base(type)
         {
+            this.TipPercentage = tipPercentage;
+            this.MinTipPercentageRequired = minTipPercentageRequired;
         }
+
+        /// <summary>
+        /// Tip percentage of the submitted (and rejected) transaction. 
+        /// </summary>
+        /// <value>Tip percentage of the submitted (and rejected) transaction. </value>
+        [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
+        public int TipPercentage { get; set; }
+
+        /// <summary>
+        /// A lower bound for tip percentage at current mempool state. Anything lower than this will very likely result in a mempool rejection. A missing value means there is no tip that can guarantee submission. 
+        /// </summary>
+        /// <value>A lower bound for tip percentage at current mempool state. Anything lower than this will very likely result in a mempool rejection. A missing value means there is no tip that can guarantee submission. </value>
+        [DataMember(Name = "min_tip_percentage_required", EmitDefaultValue = true)]
+        public int MinTipPercentageRequired { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -121,8 +137,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PublicMethodAccessibility {\n");
+            sb.Append("class TransactionSubmitPriorityThresholdNotMetErrorDetails {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  TipPercentage: ").Append(TipPercentage).Append("\n");
+            sb.Append("  MinTipPercentageRequired: ").Append(MinTipPercentageRequired).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -143,21 +161,29 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PublicMethodAccessibility);
+            return this.Equals(input as TransactionSubmitPriorityThresholdNotMetErrorDetails);
         }
 
         /// <summary>
-        /// Returns true if PublicMethodAccessibility instances are equal
+        /// Returns true if TransactionSubmitPriorityThresholdNotMetErrorDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of PublicMethodAccessibility to be compared</param>
+        /// <param name="input">Instance of TransactionSubmitPriorityThresholdNotMetErrorDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PublicMethodAccessibility input)
+        public bool Equals(TransactionSubmitPriorityThresholdNotMetErrorDetails input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input);
+            return base.Equals(input) && 
+                (
+                    this.TipPercentage == input.TipPercentage ||
+                    this.TipPercentage.Equals(input.TipPercentage)
+                ) && base.Equals(input) && 
+                (
+                    this.MinTipPercentageRequired == input.MinTipPercentageRequired ||
+                    this.MinTipPercentageRequired.Equals(input.MinTipPercentageRequired)
+                );
         }
 
         /// <summary>
@@ -169,6 +195,8 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
+                hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
+                hashCode = (hashCode * 59) + this.MinTipPercentageRequired.GetHashCode();
                 return hashCode;
             }
         }

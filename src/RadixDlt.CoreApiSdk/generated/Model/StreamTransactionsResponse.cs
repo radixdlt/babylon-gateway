@@ -103,9 +103,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamTransactionsResponse" /> class.
         /// </summary>
-        /// <param name="fromStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version in the returned response (if any). This matches the &#x60;from_state_version&#x60; in the request.  (required).</param>
+        /// <param name="fromStateVersion">fromStateVersion (required).</param>
         /// <param name="count">An integer between &#x60;0&#x60; and &#x60;10000&#x60;, giving the total count of transactions in the returned response (required).</param>
-        /// <param name="maxLedgerStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the maximum state version currently committed on this node&#39;s ledger. (required).</param>
+        /// <param name="maxLedgerStateVersion">maxLedgerStateVersion (required).</param>
         /// <param name="transactions">A committed transactions list starting from the &#x60;from_state_version&#x60; (inclusive). (required).</param>
         public StreamTransactionsResponse(long fromStateVersion = default(long), int count = default(int), long maxLedgerStateVersion = default(long), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
         {
@@ -121,9 +121,8 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version in the returned response (if any). This matches the &#x60;from_state_version&#x60; in the request. 
+        /// Gets or Sets FromStateVersion
         /// </summary>
-        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version in the returned response (if any). This matches the &#x60;from_state_version&#x60; in the request. </value>
         [DataMember(Name = "from_state_version", IsRequired = true, EmitDefaultValue = true)]
         public long FromStateVersion { get; set; }
 
@@ -135,9 +134,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public int Count { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the maximum state version currently committed on this node&#39;s ledger.
+        /// Gets or Sets MaxLedgerStateVersion
         /// </summary>
-        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the maximum state version currently committed on this node&#39;s ledger.</value>
         [DataMember(Name = "max_ledger_state_version", IsRequired = true, EmitDefaultValue = true)]
         public long MaxLedgerStateVersion { get; set; }
 

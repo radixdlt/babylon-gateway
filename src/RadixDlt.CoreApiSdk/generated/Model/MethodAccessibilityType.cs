@@ -111,7 +111,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum RoleProtected for value: RoleProtected
         /// </summary>
         [EnumMember(Value = "RoleProtected")]
-        RoleProtected = 3
+        RoleProtected = 3,
+
+        /// <summary>
+        /// Enum OwnPackageOnly for value: OwnPackageOnly
+        /// </summary>
+        [EnumMember(Value = "OwnPackageOnly")]
+        OwnPackageOnly = 4
 
     }
 

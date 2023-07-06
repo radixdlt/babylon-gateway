@@ -96,6 +96,7 @@ namespace RadixDlt.CoreApiSdk.Model
     [DataContract(Name = "OuterObjectOnlyMethodAccessibility")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
     [JsonSubtypes.KnownSubType(typeof(OuterObjectOnlyMethodAccessibility), "OuterObjectOnly")]
+    [JsonSubtypes.KnownSubType(typeof(OwnPackageOnlyMethodAccessibility), "OwnPackageOnly")]
     [JsonSubtypes.KnownSubType(typeof(PublicMethodAccessibility), "Public")]
     [JsonSubtypes.KnownSubType(typeof(RoleProtectedMethodAccessibility), "RoleProtected")]
     public partial class OuterObjectOnlyMethodAccessibility : MethodAccessibility, IEquatable<OuterObjectOnlyMethodAccessibility>

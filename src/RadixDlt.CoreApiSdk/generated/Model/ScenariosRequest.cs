@@ -84,41 +84,42 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionSubmitMempoolFullErrorDetails
+    /// ScenariosRequest
     /// </summary>
-    [DataContract(Name = "TransactionSubmitMempoolFullErrorDetails")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitMempoolFullErrorDetails), "MempoolFull")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionSubmitRejectedErrorDetails), "Rejected")]
-    public partial class TransactionSubmitMempoolFullErrorDetails : TransactionSubmitErrorDetails, IEquatable<TransactionSubmitMempoolFullErrorDetails>
+    [DataContract(Name = "ScenariosRequest")]
+    public partial class ScenariosRequest : IEquatable<ScenariosRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitMempoolFullErrorDetails" /> class.
+        /// Initializes a new instance of the <see cref="ScenariosRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionSubmitMempoolFullErrorDetails() { }
+        protected ScenariosRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitMempoolFullErrorDetails" /> class.
+        /// Initializes a new instance of the <see cref="ScenariosRequest" /> class.
         /// </summary>
-        /// <param name="mempoolCapacity">mempoolCapacity (required).</param>
-        /// <param name="type">type (required) (default to TransactionSubmitErrorDetailsType.MempoolFull).</param>
-        public TransactionSubmitMempoolFullErrorDetails(int mempoolCapacity = default(int), TransactionSubmitErrorDetailsType type = TransactionSubmitErrorDetailsType.MempoolFull) : base(type)
+        /// <param name="network">The logical name of the network (required).</param>
+        public ScenariosRequest(string network = default(string))
         {
-            this.MempoolCapacity = mempoolCapacity;
+            // to ensure "network" is required (not null)
+            if (network == null)
+            {
+                throw new ArgumentNullException("network is a required property for ScenariosRequest and cannot be null");
+            }
+            this.Network = network;
         }
 
         /// <summary>
-        /// Gets or Sets MempoolCapacity
+        /// The logical name of the network
         /// </summary>
-        [DataMember(Name = "mempool_capacity", IsRequired = true, EmitDefaultValue = true)]
-        public int MempoolCapacity { get; set; }
+        /// <value>The logical name of the network</value>
+        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
+        public string Network { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,9 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionSubmitMempoolFullErrorDetails {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  MempoolCapacity: ").Append(MempoolCapacity).Append("\n");
+            sb.Append("class ScenariosRequest {\n");
+            sb.Append("  Network: ").Append(Network).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -138,7 +138,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -150,24 +150,25 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionSubmitMempoolFullErrorDetails);
+            return this.Equals(input as ScenariosRequest);
         }
 
         /// <summary>
-        /// Returns true if TransactionSubmitMempoolFullErrorDetails instances are equal
+        /// Returns true if ScenariosRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionSubmitMempoolFullErrorDetails to be compared</param>
+        /// <param name="input">Instance of ScenariosRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionSubmitMempoolFullErrorDetails input)
+        public bool Equals(ScenariosRequest input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.MempoolCapacity == input.MempoolCapacity ||
-                    this.MempoolCapacity.Equals(input.MempoolCapacity)
+                    this.Network == input.Network ||
+                    (this.Network != null &&
+                    this.Network.Equals(input.Network))
                 );
         }
 
@@ -179,8 +180,11 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.MempoolCapacity.GetHashCode();
+                int hashCode = 41;
+                if (this.Network != null)
+                {
+                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
+                }
                 return hashCode;
             }
         }

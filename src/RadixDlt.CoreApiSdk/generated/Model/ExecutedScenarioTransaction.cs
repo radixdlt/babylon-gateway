@@ -84,41 +84,63 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// LtsTransactionSubmitMempoolFullErrorDetails
+    /// ExecutedScenarioTransaction
     /// </summary>
-    [DataContract(Name = "LtsTransactionSubmitMempoolFullErrorDetails")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitMempoolFullErrorDetails), "MempoolFull")]
-    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitRejectedErrorDetails), "Rejected")]
-    public partial class LtsTransactionSubmitMempoolFullErrorDetails : LtsTransactionSubmitErrorDetails, IEquatable<LtsTransactionSubmitMempoolFullErrorDetails>
+    [DataContract(Name = "ExecutedScenarioTransaction")]
+    public partial class ExecutedScenarioTransaction : IEquatable<ExecutedScenarioTransaction>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LtsTransactionSubmitMempoolFullErrorDetails" /> class.
+        /// Initializes a new instance of the <see cref="ExecutedScenarioTransaction" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected LtsTransactionSubmitMempoolFullErrorDetails() { }
+        protected ExecutedScenarioTransaction() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="LtsTransactionSubmitMempoolFullErrorDetails" /> class.
+        /// Initializes a new instance of the <see cref="ExecutedScenarioTransaction" /> class.
         /// </summary>
-        /// <param name="mempoolCapacity">mempoolCapacity (required).</param>
-        /// <param name="type">type (required) (default to LtsTransactionSubmitErrorDetailsType.MempoolFull).</param>
-        public LtsTransactionSubmitMempoolFullErrorDetails(int mempoolCapacity = default(int), LtsTransactionSubmitErrorDetailsType type = LtsTransactionSubmitErrorDetailsType.MempoolFull) : base(type)
+        /// <param name="logicalName">logicalName (required).</param>
+        /// <param name="stateVersion">stateVersion (required).</param>
+        /// <param name="intentHash">The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent.  (required).</param>
+        public ExecutedScenarioTransaction(string logicalName = default(string), long stateVersion = default(long), string intentHash = default(string))
         {
-            this.MempoolCapacity = mempoolCapacity;
+            // to ensure "logicalName" is required (not null)
+            if (logicalName == null)
+            {
+                throw new ArgumentNullException("logicalName is a required property for ExecutedScenarioTransaction and cannot be null");
+            }
+            this.LogicalName = logicalName;
+            this.StateVersion = stateVersion;
+            // to ensure "intentHash" is required (not null)
+            if (intentHash == null)
+            {
+                throw new ArgumentNullException("intentHash is a required property for ExecutedScenarioTransaction and cannot be null");
+            }
+            this.IntentHash = intentHash;
         }
 
         /// <summary>
-        /// Gets or Sets MempoolCapacity
+        /// Gets or Sets LogicalName
         /// </summary>
-        [DataMember(Name = "mempool_capacity", IsRequired = true, EmitDefaultValue = true)]
-        public int MempoolCapacity { get; set; }
+        [DataMember(Name = "logical_name", IsRequired = true, EmitDefaultValue = true)]
+        public string LogicalName { get; set; }
+
+        /// <summary>
+        /// Gets or Sets StateVersion
+        /// </summary>
+        [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long StateVersion { get; set; }
+
+        /// <summary>
+        /// The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. 
+        /// </summary>
+        /// <value>The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. </value>
+        [DataMember(Name = "intent_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string IntentHash { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,9 +149,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class LtsTransactionSubmitMempoolFullErrorDetails {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  MempoolCapacity: ").Append(MempoolCapacity).Append("\n");
+            sb.Append("class ExecutedScenarioTransaction {\n");
+            sb.Append("  LogicalName: ").Append(LogicalName).Append("\n");
+            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
+            sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -138,7 +161,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -150,24 +173,34 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as LtsTransactionSubmitMempoolFullErrorDetails);
+            return this.Equals(input as ExecutedScenarioTransaction);
         }
 
         /// <summary>
-        /// Returns true if LtsTransactionSubmitMempoolFullErrorDetails instances are equal
+        /// Returns true if ExecutedScenarioTransaction instances are equal
         /// </summary>
-        /// <param name="input">Instance of LtsTransactionSubmitMempoolFullErrorDetails to be compared</param>
+        /// <param name="input">Instance of ExecutedScenarioTransaction to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(LtsTransactionSubmitMempoolFullErrorDetails input)
+        public bool Equals(ExecutedScenarioTransaction input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.MempoolCapacity == input.MempoolCapacity ||
-                    this.MempoolCapacity.Equals(input.MempoolCapacity)
+                    this.LogicalName == input.LogicalName ||
+                    (this.LogicalName != null &&
+                    this.LogicalName.Equals(input.LogicalName))
+                ) && 
+                (
+                    this.StateVersion == input.StateVersion ||
+                    this.StateVersion.Equals(input.StateVersion)
+                ) && 
+                (
+                    this.IntentHash == input.IntentHash ||
+                    (this.IntentHash != null &&
+                    this.IntentHash.Equals(input.IntentHash))
                 );
         }
 
@@ -179,8 +212,16 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.MempoolCapacity.GetHashCode();
+                int hashCode = 41;
+                if (this.LogicalName != null)
+                {
+                    hashCode = (hashCode * 59) + this.LogicalName.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
+                if (this.IntentHash != null)
+                {
+                    hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
+                }
                 return hashCode;
             }
         }

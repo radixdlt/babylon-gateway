@@ -97,6 +97,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "type")]
     [JsonSubtypes.KnownSubType(typeof(OuterObjectOnlyMethodAccessibility), "OuterObjectOnly")]
     [JsonSubtypes.KnownSubType(typeof(OuterObjectOnlyMethodAccessibility), "OuterObjectOnlyMethodAccessibility")]
+    [JsonSubtypes.KnownSubType(typeof(OwnPackageOnlyMethodAccessibility), "OwnPackageOnly")]
+    [JsonSubtypes.KnownSubType(typeof(OwnPackageOnlyMethodAccessibility), "OwnPackageOnlyMethodAccessibility")]
     [JsonSubtypes.KnownSubType(typeof(PublicMethodAccessibility), "Public")]
     [JsonSubtypes.KnownSubType(typeof(PublicMethodAccessibility), "PublicMethodAccessibility")]
     [JsonSubtypes.KnownSubType(typeof(RoleProtectedMethodAccessibility), "RoleProtected")]
