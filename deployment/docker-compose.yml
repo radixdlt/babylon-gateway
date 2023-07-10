@@ -28,6 +28,7 @@ services:
   postgres_db:
     # See https://hub.docker.com/_/postgres for details about configuration
     image: "postgres:15.2-alpine"
+    shm_size: 256m
     profiles: ["network-gateway-built", "network-gateway-image", "network-gateway-resources"]
     ports:
       - "127.0.0.1:5432:5432"
