@@ -810,6 +810,7 @@ components:
       required:
         - key
         - value
+        - is_locked
         - last_updated_at_state_version
       properties:
         key:
@@ -817,6 +818,8 @@ components:
           type: string
         value:
           $ref: "#/components/schemas/EntityMetadataItemValue"
+        is_locked:
+          type: boolean
         last_updated_at_state_version:
           $ref: "#/components/schemas/LastUpdatedAtStateVersion"
     EntityMetadataItemValue:

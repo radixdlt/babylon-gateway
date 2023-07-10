@@ -105,8 +105,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="key">Entity metadata key. (required).</param>
         /// <param name="value">value (required).</param>
+        /// <param name="isLocked">isLocked (required).</param>
         /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
-        public EntityMetadataItem(string key = default(string), EntityMetadataItemValue value = default(EntityMetadataItemValue), long lastUpdatedAtStateVersion = default(long))
+        public EntityMetadataItem(string key = default(string), EntityMetadataItemValue value = default(EntityMetadataItemValue), bool isLocked = default(bool), long lastUpdatedAtStateVersion = default(long))
         {
             // to ensure "key" is required (not null)
             if (key == null)
@@ -120,6 +121,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("value is a required property for EntityMetadataItem and cannot be null");
             }
             this.Value = value;
+            this.IsLocked = isLocked;
             this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
         }
 
@@ -135,6 +137,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
         public EntityMetadataItemValue Value { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IsLocked
+        /// </summary>
+        [DataMember(Name = "is_locked", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsLocked { get; set; }
 
         /// <summary>
         /// TBD
@@ -153,6 +161,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class EntityMetadataItem {\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
             sb.Append("  Value: ").Append(Value).Append("\n");
+            sb.Append("  IsLocked: ").Append(IsLocked).Append("\n");
             sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -200,6 +209,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Value.Equals(input.Value))
                 ) && 
                 (
+                    this.IsLocked == input.IsLocked ||
+                    this.IsLocked.Equals(input.IsLocked)
+                ) && 
+                (
                     this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
                     this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
                 );
@@ -222,6 +235,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.IsLocked.GetHashCode();
                 hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }

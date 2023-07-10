@@ -170,6 +170,45 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("account_resource_deposit_rule_history");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentMethodRoyaltyEntryHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_locked");
+
+                    b.Property<string>("MethodName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("method_name");
+
+                    b.Property<string>("RoyaltyAmount")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("royalty_amount");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "FromStateVersion");
+
+                    b.HasIndex("EntityId", "MethodName", "FromStateVersion");
+
+                    b.ToTable("component_method_royalty_entry_history");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentSchema", b =>
                 {
                     b.Property<int>("Id")
@@ -391,6 +430,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_locked");
 
                     b.Property<string>("Key")
                         .IsRequired()
@@ -845,6 +888,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("auth_template");
 
+                    b.Property<bool?>("AuthTemplateIsLocked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("auth_template_is_locked");
+
                     b.Property<string>("Definition")
                         .IsRequired()
                         .HasColumnType("jsonb")
@@ -866,6 +913,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<string>("RoyaltyConfig")
                         .HasColumnType("jsonb")
                         .HasColumnName("royalty_config");
+
+                    b.Property<bool?>("RoyaltyConfigIsLocked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("royalty_config_is_locked");
 
                     b.Property<string>("Version")
                         .IsRequired()

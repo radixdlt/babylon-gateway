@@ -93,6 +93,12 @@ public class PackageBlueprint
     [Column("auth_template", TypeName = "jsonb")]
     public string? AuthTemplate { get; set; }
 
+    [Column("auth_template_is_locked")]
+    public bool? AuthTemplateIsLocked { get; set; }
+
     [Column("royalty_config", TypeName = "jsonb")]
     public string? RoyaltyConfig { get; set; }
+
+    [Column("royalty_config_is_locked")]
+    public bool? RoyaltyConfigIsLocked { get; set; }
 }

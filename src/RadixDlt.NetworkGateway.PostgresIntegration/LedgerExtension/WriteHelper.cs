@@ -310,7 +310,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_metadata_history (id, from_state_version, entity_id, key, value, is_deleted) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_metadata_history (id, from_state_version, entity_id, key, value, is_deleted, is_locked) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -321,6 +321,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.Key, NpgsqlDbType.Text, token);
             await writer.WriteNullableAsync(e.Value, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
+            await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
         }
 
         await writer.CompleteAsync(token);
@@ -649,6 +650,31 @@ internal class WriteHelper
         return fungibleEntities.Count + nonFungibleEntities.Count;
     }
 
+    public async Task<int> CopyComponentMethodRoyalties(List<ComponentMethodRoyaltyEntryHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY component_method_royalty_entry_history (id, from_state_version, entity_id, method_name, royalty_amount, is_locked) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.MethodName, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.RoyaltyAmount, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
     public async Task<int> CopyAccountDefaultDepositRuleHistory(List<AccountDefaultDepositRuleHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -774,7 +800,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY package_blueprints (id, package_entity_id, name, version, definition, dependant_entity_ids, auth_template, royalty_config) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY package_blueprints (id, package_entity_id, name, version, definition, dependant_entity_ids, auth_template, auth_template_is_locked, royalty_config, royalty_config_is_locked) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -786,7 +812,9 @@ internal class WriteHelper
             await writer.WriteAsync(e.Definition, NpgsqlDbType.Jsonb, token);
             await writer.WriteNullableAsync(e.DependantEntityIds?.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.AuthTemplate, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.AuthTemplateIsLocked, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(e.RoyaltyConfig, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.RoyaltyConfigIsLocked, NpgsqlDbType.Boolean, token);
         }
 
         await writer.CompleteAsync(token);
@@ -812,6 +840,7 @@ SELECT
     setval('entity_access_rules_aggregate_history_id_seq', @entityAccessRulesAggregateHistorySequence),
     setval('entity_access_rules_entry_history_id_seq', @EntityAccessRulesEntryHistorySequence),
     setval('entity_access_rules_owner_role_history_id_seq', @entityAccessRulesOwnerRoleHistorySequence),
+    setval('component_method_royalty_entry_history_id_seq', @componentMethodRoyaltyEntryHistorySequence),
     setval('resource_entity_supply_history_id_seq', @resourceEntitySupplyHistorySequence),
     setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
     setval('non_fungible_id_data_history_id_seq', @nonFungibleIdDataHistorySequence),
@@ -835,6 +864,7 @@ SELECT
                 entityAccessRulesAggregateHistorySequence = sequences.EntityAccessRulesAggregateHistorySequence,
                 entityAccessRulesEntryHistorySequence = sequences.EntityAccessRulesEntryHistorySequence,
                 entityAccessRulesOwnerRoleHistorySequence = sequences.EntityAccessRulesOwnerRoleHistorySequence,
+                componentMethodRoyaltyEntryHistorySequenceSequence = sequences.ComponentMethodRoyaltyEntryHistorySequence,
                 resourceEntitySupplyHistorySequence = sequences.ResourceEntitySupplyHistorySequence,
                 nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
                 nonFungibleIdDataHistorySequence = sequences.NonFungibleIdDataHistorySequence,

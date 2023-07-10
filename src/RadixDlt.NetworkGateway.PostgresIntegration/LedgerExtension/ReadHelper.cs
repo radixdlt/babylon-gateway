@@ -570,6 +570,7 @@ SELECT
     nextval('entity_access_rules_aggregate_history_id_seq') AS EntityAccessRulesAggregateHistorySequence,
     nextval('entity_access_rules_entry_history_id_seq') AS EntityAccessRulesEntryHistorySequence,
     nextval('entity_access_rules_owner_role_history_id_seq') AS EntityAccessRulesOwnerRoleHistorySequence,
+    nextval('component_method_royalty_entry_history_id_seq') AS ComponentMethodRoyaltyEntryHistorySequence,
     nextval('resource_entity_supply_history_id_seq') AS ResourceEntitySupplyHistorySequence,
     nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
     nextval('non_fungible_id_data_history_id_seq') AS NonFungibleIdDataHistorySequence,

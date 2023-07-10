@@ -127,6 +127,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityAccessRulesAggregateHistory> EntityAccessRulesAggregateHistory => Set<EntityAccessRulesAggregateHistory>();
 
+    public DbSet<ComponentMethodRoyaltyEntryHistory> ComponentMethodRoyaltyEntryHistory => Set<ComponentMethodRoyaltyEntryHistory>();
+
     public DbSet<PackageBlueprint> PackageBlueprints => Set<PackageBlueprint>();
 
     public DbSet<ComponentSchema> ComponentSchema => Set<ComponentSchema>();
@@ -322,6 +324,12 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<EntityAccessRulesAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<ComponentMethodRoyaltyEntryHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<ComponentMethodRoyaltyEntryHistory>()
+            .HasIndex(e => new { e.EntityId, e.MethodName, e.FromStateVersion });
 
         modelBuilder.Entity<ResourceEntitySupplyHistory>()
             .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });

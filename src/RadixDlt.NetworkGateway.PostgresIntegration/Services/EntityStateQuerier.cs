@@ -87,7 +87,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class EntityStateQuerier : IEntityStateQuerier
 {
-    private record MetadataViewModel(long FromStateVersion, long EntityId, string Key, byte[] Value, int TotalCount);
+    private record MetadataViewModel(long FromStateVersion, long EntityId, string Key, byte[] Value, bool IsLocked, int TotalCount);
 
     private record ValidatorCurrentStakeViewModel(long ValidatorId, string Balance, string State, long BalanceLastUpdatedAtStateVersion, long StateLastUpdatedAtStateVersion);
 
@@ -809,7 +809,7 @@ metadata_slices AS (
         LIMIT 1
     ) emah ON TRUE
 )
-SELECT emh.from_state_version AS FromStateVersion, emh.entity_id AS EntityId, emh.key AS Key, emh.value AS Value, ms.metadata_total_count AS TotalCount
+SELECT emh.from_state_version AS FromStateVersion, emh.entity_id AS EntityId, emh.key AS Key, emh.value AS Value, emh.is_locked AS IsLocked, ms.metadata_total_count AS TotalCount
 FROM metadata_slices AS ms
 INNER JOIN LATERAL UNNEST(metadata_slice) WITH ORDINALITY AS metadata_join(id, ordinality) ON TRUE
 INNER JOIN entity_metadata_history emh ON emh.id = metadata_join.id AND emh.is_deleted = FALSE
@@ -839,7 +839,7 @@ ORDER BY metadata_join.ordinality ASC;",
             }
 
             var value = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(vm.Value, _networkConfigurationProvider.GetNetworkId(), _logger);
-            result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, value, vm.FromStateVersion));
+            result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, value, vm.IsLocked, vm.FromStateVersion));
         }
 
         foreach (var missing in entityIds.Except(result.Keys))
@@ -901,7 +901,7 @@ INNER JOIN LATERAL (
             }
 
             var value = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(mh.Value, _networkConfigurationProvider.GetNetworkId(), _logger);
-            result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, value, mh.FromStateVersion));
+            result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, value, mh.IsLocked, mh.FromStateVersion));
         }
 
         foreach (var missing in entityIds.Except(result.Keys))

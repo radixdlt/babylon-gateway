@@ -131,6 +131,23 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "component_method_royalty_entry_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    method_name = table.Column<string>(type: "text", nullable: false),
+                    royalty_amount = table.Column<string>(type: "jsonb", nullable: true),
+                    is_locked = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_component_method_royalty_entry_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "component_schema",
                 columns: table => new
                 {
@@ -249,7 +266,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
                     key = table.Column<string>(type: "text", nullable: false),
                     value = table.Column<byte[]>(type: "bytea", nullable: true),
-                    is_deleted = table.Column<bool>(type: "boolean", nullable: false)
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
+                    is_locked = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -474,7 +492,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     definition = table.Column<string>(type: "jsonb", nullable: false),
                     dependant_entity_ids = table.Column<List<long>>(type: "bigint[]", nullable: true),
                     auth_template = table.Column<string>(type: "jsonb", nullable: true),
-                    royalty_config = table.Column<string>(type: "jsonb", nullable: true)
+                    auth_template_is_locked = table.Column<bool>(type: "boolean", nullable: true),
+                    royalty_config = table.Column<string>(type: "jsonb", nullable: true),
+                    royalty_config_is_locked = table.Column<bool>(type: "boolean", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -573,6 +593,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_account_resource_deposit_rule_history_account_entity_id_res~",
                 table: "account_resource_deposit_rule_history",
                 columns: new[] { "account_entity_id", "resource_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_component_method_royalty_entry_history_entity_id_from_state~",
+                table: "component_method_royalty_entry_history",
+                columns: new[] { "entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_component_method_royalty_entry_history_entity_id_method_nam~",
+                table: "component_method_royalty_entry_history",
+                columns: new[] { "entity_id", "method_name", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_entities_address",
@@ -758,6 +788,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "account_resource_deposit_rule_history");
+
+            migrationBuilder.DropTable(
+                name: "component_method_royalty_entry_history");
 
             migrationBuilder.DropTable(
                 name: "component_schema");

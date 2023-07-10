@@ -92,6 +92,8 @@ internal class SequencesHolder
 
     public long EntityAccessRulesOwnerRoleHistorySequence { get; set; }
 
+    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
+
     public long ResourceEntitySupplyHistorySequence { get; set; }
 
     public long NonFungibleIdDataSequence { get; set; }

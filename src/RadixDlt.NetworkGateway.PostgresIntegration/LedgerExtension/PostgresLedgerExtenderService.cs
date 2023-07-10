@@ -750,6 +750,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
         var entityStateToAdd = new List<EntityStateHistory>();
+        var componentMethodRoyaltiesToAdd = new List<ComponentMethodRoyaltyEntryHistory>();
         var packageBlueprintsToAdd = new Dictionary<PackageBlueprintLookup, PackageBlueprint>();
         var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>(); // TODO follow Pointer+ordered List pattern
         var accountDefaultDepositRuleHistoryToAdd = new List<AccountDefaultDepositRuleHistory>();
@@ -976,31 +977,44 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         if (substateData is CoreModel.PackageBlueprintRoyaltyEntrySubstate packageBlueprintRoyalty)
                         {
                             var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintRoyalty.Key.BlueprintName, packageBlueprintRoyalty.Key.BlueprintVersion);
+                            var pb = packageBlueprintsToAdd.GetOrAdd(lookup, _ => new PackageBlueprint
+                            {
+                                Id = sequences.PackageBlueprintsSequence++,
+                                PackageEntityId = referencedEntity.DatabaseId,
+                                Name = lookup.Name,
+                                Version = lookup.BlueprintVersion,
+                            });
 
-                            packageBlueprintsToAdd
-                                .GetOrAdd(lookup, _ => new PackageBlueprint
-                                {
-                                    Id = sequences.PackageBlueprintsSequence++,
-                                    PackageEntityId = referencedEntity.DatabaseId,
-                                    Name = lookup.Name,
-                                    Version = lookup.BlueprintVersion,
-                                })
-                                .RoyaltyConfig = packageBlueprintRoyalty.Value.RoyaltyConfig.ToJson();
+                            pb.RoyaltyConfig = packageBlueprintRoyalty.Value.RoyaltyConfig.ToJson();
+                            pb.RoyaltyConfigIsLocked = packageBlueprintRoyalty.IsLocked;
                         }
 
                         if (substateData is CoreModel.PackageBlueprintAuthTemplateEntrySubstate packageBlueprintAuthTemplate)
                         {
                             var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintAuthTemplate.Key.BlueprintName, packageBlueprintAuthTemplate.Key.BlueprintVersion);
+                            var pb = packageBlueprintsToAdd.GetOrAdd(lookup, _ => new PackageBlueprint
+                            {
+                                Id = sequences.PackageBlueprintsSequence++,
+                                PackageEntityId = referencedEntity.DatabaseId,
+                                Name = lookup.Name,
+                                Version = lookup.BlueprintVersion,
+                            });
 
-                            packageBlueprintsToAdd
-                                .GetOrAdd(lookup, _ => new PackageBlueprint
-                                {
-                                    Id = sequences.PackageBlueprintsSequence++,
-                                    PackageEntityId = referencedEntity.DatabaseId,
-                                    Name = lookup.Name,
-                                    Version = lookup.BlueprintVersion,
-                                })
-                                .AuthTemplate = packageBlueprintAuthTemplate.Value.AuthConfig.ToJson();
+                            pb.AuthTemplate = packageBlueprintAuthTemplate.Value.AuthConfig.ToJson();
+                            pb.AuthTemplateIsLocked = packageBlueprintAuthTemplate.IsLocked;
+                        }
+
+                        if (substateData is CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate methodRoyaltyEntry)
+                        {
+                            componentMethodRoyaltiesToAdd.Add(new ComponentMethodRoyaltyEntryHistory
+                            {
+                                Id = sequences.ComponentMethodRoyaltyEntryHistorySequence,
+                                FromStateVersion = stateVersion,
+                                EntityId = referencedEntity.DatabaseId,
+                                MethodName = methodRoyaltyEntry.Key.MethodName,
+                                RoyaltyAmount = methodRoyaltyEntry.Value?.RoyaltyAmount.ToJson(),
+                                IsLocked = methodRoyaltyEntry.IsLocked,
+                            });
                         }
                     }
 
@@ -1270,14 +1284,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     Key = metadataChange.Key,
                     Value = metadataChange.Value,
                     IsDeleted = metadataChange.IsDeleted,
+                    IsLocked = metadataChange.IsLocked,
                 };
 
                 entityMetadataHistoryToAdd.Add(metadataHistory);
 
                 EntityMetadataAggregateHistory aggregate;
 
-                if (!mostRecentAggregatedMetadataHistory.TryGetValue(metadataChange.ReferencedEntity.DatabaseId, out var previousAggregate) ||
-                    previousAggregate.FromStateVersion != metadataChange.StateVersion)
+                if (!mostRecentAggregatedMetadataHistory.TryGetValue(metadataChange.ReferencedEntity.DatabaseId, out var previousAggregate) || previousAggregate.FromStateVersion != metadataChange.StateVersion)
                 {
                     aggregate = new EntityMetadataAggregateHistory
                     {
@@ -1794,6 +1808,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyEntityResourceAggregateHistory(entityResourceAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceVaultAggregateHistory(entityResourceVaultAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityVaultHistory(entityFungibleVaultHistoryToAdd, entityNonFungibleVaultHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyComponentMethodRoyalties(componentMethodRoyaltiesToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdData(nonFungibleIdDataToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(nonFungibleIdsMutableDataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(nonFungibleIdStoreHistoryToAdd.Values, token);
