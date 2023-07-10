@@ -73,6 +73,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal static class NpgsqlBinaryImporterExtensions
 {
+    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, bool? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
+    {
+        return value.HasValue
+            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
+            : writer.WriteNullAsync(cancellationToken);
+    }
+
     public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, int? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
     {
         return value.HasValue

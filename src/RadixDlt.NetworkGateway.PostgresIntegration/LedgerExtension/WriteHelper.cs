@@ -812,9 +812,9 @@ internal class WriteHelper
             await writer.WriteAsync(e.Definition, NpgsqlDbType.Jsonb, token);
             await writer.WriteNullableAsync(e.DependantEntityIds?.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.AuthTemplate, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(e.AuthTemplateIsLocked, NpgsqlDbType.Boolean, token);
+            await writer.WriteNullableAsync(e.AuthTemplateIsLocked, NpgsqlDbType.Boolean, token);
             await writer.WriteAsync(e.RoyaltyConfig, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(e.RoyaltyConfigIsLocked, NpgsqlDbType.Boolean, token);
+            await writer.WriteNullableAsync(e.RoyaltyConfigIsLocked, NpgsqlDbType.Boolean, token);
         }
 
         await writer.CompleteAsync(token);
@@ -864,7 +864,7 @@ SELECT
                 entityAccessRulesAggregateHistorySequence = sequences.EntityAccessRulesAggregateHistorySequence,
                 entityAccessRulesEntryHistorySequence = sequences.EntityAccessRulesEntryHistorySequence,
                 entityAccessRulesOwnerRoleHistorySequence = sequences.EntityAccessRulesOwnerRoleHistorySequence,
-                componentMethodRoyaltyEntryHistorySequenceSequence = sequences.ComponentMethodRoyaltyEntryHistorySequence,
+                componentMethodRoyaltyEntryHistorySequence = sequences.ComponentMethodRoyaltyEntryHistorySequence,
                 resourceEntitySupplyHistorySequence = sequences.ResourceEntitySupplyHistorySequence,
                 nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
                 nonFungibleIdDataHistorySequence = sequences.NonFungibleIdDataHistorySequence,
