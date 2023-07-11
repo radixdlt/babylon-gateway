@@ -70,7 +70,6 @@ using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
@@ -83,12 +82,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class EntityStateQuerier : IEntityStateQuerier
 {
-    private record MetadataViewModel(long FromStateVersion, long EntityId, string Key, byte[] Value, int TotalCount);
+    private record MetadataViewModel(long FromStateVersion, long EntityId, string Key, byte[] Value, bool IsLocked, int TotalCount);
 
     private record ValidatorCurrentStakeViewModel(long ValidatorId, string Balance, string State, long BalanceLastUpdatedAtStateVersion, long StateLastUpdatedAtStateVersion);
 
@@ -113,8 +113,6 @@ internal class EntityStateQuerier : IEntityStateQuerier
     private record NonFungibleIdDataViewModel(string NonFungibleId, bool IsDeleted, byte[] Data, long DataLastUpdatedAtStateVersion);
 
     private record struct NonFungibleIdOwnerLookup(long EntityId, long ResourceEntityId, long VaultEntityId);
-
-    private record struct AccessRuleChainLookup(long EntityId, string? ChildBlueprintName);
 
     private record struct ExplicitMetadataLookup(long EntityId, string MetadataKey);
 
@@ -149,13 +147,15 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var entities = await GetEntities(addresses, ledgerState, token);
         var componentEntities = entities.OfType<ComponentEntity>().ToList();
         var resourceEntities = entities.OfType<ResourceEntity>().ToList();
+        var packageEntities = entities.OfType<GlobalPackageEntity>().ToList();
 
         // TODO ideally we'd like to run those in parallel
         var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
-        var accessRulesChainHistory = await GetAccessRulesChainHistory(resourceEntities, componentEntities, ledgerState, token);
+        var accessRulesHistory = await GetAccessRulesHistory(resourceEntities, componentEntities, ledgerState, token);
         var stateHistory = await GetStateHistory(componentEntities, ledgerState, token);
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, componentEntities, ledgerState, token);
         var resourcesSupplyData = await GetResourcesSupplyData(resourceEntities.Select(x => x.Id).ToArray(), ledgerState, token);
+        var packageBlueprints = await GetPackageBlueprints(packageEntities.Select(e => e.Id).ToArray(), ledgerState, token);
 
         var royaltyVaultsBalance = componentEntities.Any() && (optIns.ComponentRoyaltyVaultBalance || optIns.PackageRoyaltyVaultBalance)
             ? await RoyaltyVaultBalance(componentEntities.Select(x => x.Id).ToArray(), ledgerState, token)
@@ -183,8 +183,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
                         totalSupply: fungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: fungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: fungibleResourceSupplyData.TotalBurned.ToString(),
-                        accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(frme.Id, null)].AccessRulesChain),
-                        vaultAccessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(frme.Id, NativeBlueprintNames.FungibleVault)].AccessRulesChain),
+                        accessRulesChain: new JRaw(accessRulesHistory[frme.Id]),
+                        vaultAccessRulesChain: new JRaw("{}"), // TODO restore?
                         divisibility: frme.Divisibility);
 
                     break;
@@ -200,8 +200,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
                         totalSupply: nonFungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: nonFungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: nonFungibleResourceSupplyData.TotalBurned.ToString(),
-                        accessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(nfrme.Id, null)].AccessRulesChain),
-                        vaultAccessRulesChain: new JRaw(accessRulesChainHistory[new AccessRuleChainLookup(nfrme.Id, NativeBlueprintNames.NonFungibleVault)].AccessRulesChain),
+                        accessRulesChain: new JRaw(accessRulesHistory[nfrme.Id]),
+                        vaultAccessRulesChain: new JRaw("{}"), // TODO restore?
                         nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel());
                     break;
 
@@ -209,7 +209,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     var packageRoyaltyVaultBalance = royaltyVaultsBalance?.SingleOrDefault(x => x.OwnerEntityId == pe.Id)?.Balance;
 
                     details = new GatewayModel.StateEntityDetailsResponsePackageDetails(
-                        codeHex: pe.Code?.ToHex(),
+                        codeHex: pe.Code.ToHex(),
                         royaltyVaultBalance: packageRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(packageRoyaltyVaultBalance).ToString() : null
                         );
                     break;
@@ -240,7 +240,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
                 case ComponentEntity ce:
                     stateHistory.TryGetValue(ce.Id, out var state);
-                    accessRulesChainHistory.TryGetValue(new AccessRuleChainLookup(ce.Id, null), out var accessRulesChain);
+                    accessRulesHistory.TryGetValue(ce.Id, out var accessRules);
 
                     var componentRoyaltyVaultBalance = royaltyVaultsBalance?.SingleOrDefault(x => x.OwnerEntityId == ce.Id)?.Balance;
 
@@ -248,7 +248,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                         packageAddress: correlatedAddresses[ce.PackageId],
                         blueprintName: ce.BlueprintName,
                         state: state != null ? new JRaw(state.State) : null,
-                        accessRulesChain: accessRulesChain != null ? new JRaw(accessRulesChain.AccessRulesChain) : null,
+                        accessRulesChain: accessRules != null ? new JRaw(accessRules) : null,
                         royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null
                     );
                     break;
@@ -810,7 +810,7 @@ metadata_slices AS (
         LIMIT 1
     ) emah ON TRUE
 )
-SELECT emh.from_state_version AS FromStateVersion, emh.entity_id AS EntityId, emh.key AS Key, emh.value AS Value, ms.metadata_total_count AS TotalCount
+SELECT emh.from_state_version AS FromStateVersion, emh.entity_id AS EntityId, emh.key AS Key, emh.value AS Value, emh.is_locked AS IsLocked, ms.metadata_total_count AS TotalCount
 FROM metadata_slices AS ms
 INNER JOIN LATERAL UNNEST(metadata_slice) WITH ORDINALITY AS metadata_join(id, ordinality) ON TRUE
 INNER JOIN entity_metadata_history emh ON emh.id = metadata_join.id AND emh.is_deleted = FALSE
@@ -839,8 +839,11 @@ ORDER BY metadata_join.ordinality ASC;",
                 result[vm.EntityId] = new GatewayModel.EntityMetadataCollection(vm.TotalCount, previousCursor, nextCursor, new List<GatewayModel.EntityMetadataItem>());
             }
 
-            var value = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(vm.Value, _networkConfigurationProvider.GetNetworkId(), _logger);
-            result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, value, vm.FromStateVersion));
+            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(vm.Value, _networkConfigurationProvider.GetNetworkId());
+            var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(vm.Value.ToList(), ToolkitModel.SerializationMode.PROGRAMMATIC, _networkConfigurationProvider.GetNetworkId(), null);
+            var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(vm.Value.ToHex(), JObject.Parse(stringRepresentation), value);
+
+            result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, entityMetadataItemValue, vm.IsLocked, vm.FromStateVersion));
         }
 
         foreach (var missing in entityIds.Except(result.Keys))
@@ -901,8 +904,11 @@ INNER JOIN LATERAL (
                 result[mh.EntityId] = new GatewayModel.EntityMetadataCollection(items: new List<GatewayModel.EntityMetadataItem>());
             }
 
-            var value = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(mh.Value, _networkConfigurationProvider.GetNetworkId(), _logger);
-            result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, value, mh.FromStateVersion));
+            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(mh.Value, _networkConfigurationProvider.GetNetworkId());
+            var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(mh.Value.ToList(), ToolkitModel.SerializationMode.PROGRAMMATIC, _networkConfigurationProvider.GetNetworkId(), null);
+            var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(mh.Value.ToHex(), JObject.Parse(stringRepresentation), value);
+
+            result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, entityMetadataItemValue, mh.IsLocked, mh.FromStateVersion));
         }
 
         foreach (var missing in entityIds.Except(result.Keys))
@@ -1563,56 +1569,41 @@ order by ord
         return entities;
     }
 
-    private async Task<Dictionary<AccessRuleChainLookup, EntityAccessRulesChainHistory>> GetAccessRulesChainHistory(ICollection<ResourceEntity> resourceEntities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    private async Task<Dictionary<long, string>> GetAccessRulesHistory(ICollection<ResourceEntity> resourceEntities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
-        var lookup = new HashSet<AccessRuleChainLookup>();
+        var lookup = new HashSet<long>();
 
         foreach (var resourceEntity in resourceEntities)
         {
-            lookup.Add(new AccessRuleChainLookup(resourceEntity.Id, null));
-
-            if (resourceEntity is GlobalFungibleResourceEntity)
-            {
-                lookup.Add(new AccessRuleChainLookup(resourceEntity.Id, NativeBlueprintNames.FungibleVault));
-            }
-            else if (resourceEntity is GlobalNonFungibleResourceEntity)
-            {
-                lookup.Add(new AccessRuleChainLookup(resourceEntity.Id, NativeBlueprintNames.NonFungibleVault));
-            }
+            lookup.Add(resourceEntity.Id);
         }
 
         foreach (var componentEntity in componentEntities)
         {
-            lookup.Add(new AccessRuleChainLookup(componentEntity.Id, null));
+            lookup.Add(componentEntity.Id);
         }
 
         if (!lookup.Any())
         {
-            return new Dictionary<AccessRuleChainLookup, EntityAccessRulesChainHistory>();
+            return new Dictionary<long, string>();
         }
 
-        var entityIds = new List<long>();
-        var childBlueprintNames = new List<string?>();
+        var entityIds = lookup.ToList();
 
-        foreach (var l in lookup)
-        {
-            entityIds.Add(l.EntityId);
-            childBlueprintNames.Add(l.ChildBlueprintName);
-        }
-
-        return await _dbContext.EntityAccessRulesChainHistory
+        // TODO just a prototype
+        return await _dbContext.EntityAccessRulesAggregateHistory
             .FromSqlInterpolated($@"
-WITH variables (entity_id, child_blueprint_name) AS (SELECT UNNEST({entityIds}), UNNEST({childBlueprintNames}))
-SELECT earch.*
+WITH variables (entity_id) AS (SELECT UNNEST({entityIds}))
+SELECT earah.*
 FROM variables v
 INNER JOIN LATERAL (
     SELECT *
-    FROM entity_access_rules_chain_history
-    WHERE entity_id = v.entity_id AND ((v.child_blueprint_name is NULL and child_blueprint_name is NULL) OR child_blueprint_name = v.child_blueprint_name) AND from_state_version <= {ledgerState.StateVersion}
+    FROM entity_access_rules_aggregate_history
+    WHERE entity_id = v.entity_id AND from_state_version <= {ledgerState.StateVersion}
     ORDER BY from_state_version DESC
     LIMIT 1
-) earch ON TRUE;")
-            .ToDictionaryAsync(e => new AccessRuleChainLookup(e.EntityId, e.ChildBlueprintName), token);
+) earah ON TRUE;")
+            .ToDictionaryAsync(e => e.EntityId, e => $$"""{"_todo_":"just a prototype","owner_role_id":{{e.OwnerRoleId}},"entry_ids":[{{string.Join(",", e.EntryIds)}}]}""", token);
     }
 
     private async Task<Dictionary<long, EntityStateHistory>> GetStateHistory(ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
@@ -1644,6 +1635,30 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) esh ON TRUE;")
             .ToDictionaryAsync(e => e.EntityId, token);
+    }
+
+    private async Task<Dictionary<long, PackageBlueprint>> GetPackageBlueprints(long[] entityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    {
+        if (!entityIds.Any())
+        {
+            return new Dictionary<long, PackageBlueprint>();
+        }
+
+        // TODO we do not want to select package's code unless explicitly requested as it may be a truly massive payload
+        var result = await _dbContext.PackageBlueprints.FromSqlInterpolated($@"
+WITH variables (entity_id) AS (SELECT UNNEST({entityIds}))
+SELECT pb.*
+FROM variables
+INNER JOIN LATERAL(
+    SELECT *
+    FROM package_blueprints
+    WHERE package_entity_id = variables.entity_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) pb ON true")
+            .ToDictionaryAsync(e => e.PackageEntityId, token);
+
+        return result;
     }
 
     private async Task<Dictionary<long, EntityAddress>> GetCorrelatedEntityAddresses(ICollection<Entity> entities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)

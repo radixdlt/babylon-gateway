@@ -103,22 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsensusManagerFieldCurrentTimeSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="proposerTimestamp">proposerTimestamp (required).</param>
-        public ConsensusManagerFieldCurrentTimeSubstateAllOf(Instant proposerTimestamp = default(Instant))
+        /// <param name="value">value (required).</param>
+        public ConsensusManagerFieldCurrentTimeSubstateAllOf(ConsensusManagerFieldCurrentTimeValue value = default(ConsensusManagerFieldCurrentTimeValue))
         {
-            // to ensure "proposerTimestamp" is required (not null)
-            if (proposerTimestamp == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("proposerTimestamp is a required property for ConsensusManagerFieldCurrentTimeSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for ConsensusManagerFieldCurrentTimeSubstateAllOf and cannot be null");
             }
-            this.ProposerTimestamp = proposerTimestamp;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets ProposerTimestamp
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "proposer_timestamp", IsRequired = true, EmitDefaultValue = true)]
-        public Instant ProposerTimestamp { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public ConsensusManagerFieldCurrentTimeValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ConsensusManagerFieldCurrentTimeSubstateAllOf {\n");
-            sb.Append("  ProposerTimestamp: ").Append(ProposerTimestamp).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,9 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ProposerTimestamp == input.ProposerTimestamp ||
-                    (this.ProposerTimestamp != null &&
-                    this.ProposerTimestamp.Equals(input.ProposerTimestamp))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -180,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ProposerTimestamp != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.ProposerTimestamp.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

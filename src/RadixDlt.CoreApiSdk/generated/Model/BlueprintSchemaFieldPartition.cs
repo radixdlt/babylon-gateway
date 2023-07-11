@@ -105,7 +105,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="partitionOffset">The partition&#39;s offset from the Main module base (64) (required).</param>
         /// <param name="fields">The field substates for this blueprint. (required).</param>
-        public BlueprintSchemaFieldPartition(int partitionOffset = default(int), List<BlueprintFieldSchema> fields = default(List<BlueprintFieldSchema>))
+        public BlueprintSchemaFieldPartition(int partitionOffset = default(int), List<FieldSchema> fields = default(List<FieldSchema>))
         {
             this.PartitionOffset = partitionOffset;
             // to ensure "fields" is required (not null)
@@ -128,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <value>The field substates for this blueprint.</value>
         [DataMember(Name = "fields", IsRequired = true, EmitDefaultValue = true)]
-        public List<BlueprintFieldSchema> Fields { get; set; }
+        public List<FieldSchema> Fields { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

@@ -105,8 +105,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="entityAddress">The Bech32m-encoded human readable version of the entity&#39;s address (required).</param>
         /// <param name="feeBalanceChange">feeBalanceChange.</param>
+        /// <param name="feeBalanceChanges">If present, this field indicates fee-related balance changes, for example:  - Payment of the fee (including tip and royalty) - Distribution of royalties - Distribution of the fee and tip to the consensus-manager, for distributing to the relevant   validator/s at end of epoch  See https://www.radixdlt.com/blog/how-fees-work-in-babylon for further information on how fee payment works at Babylon.  (required).</param>
         /// <param name="nonFeeBalanceChanges">nonFeeBalanceChanges (required).</param>
-        public LtsEntityFungibleBalanceChanges(string entityAddress = default(string), LtsFungibleResourceBalanceChange feeBalanceChange = default(LtsFungibleResourceBalanceChange), List<LtsFungibleResourceBalanceChange> nonFeeBalanceChanges = default(List<LtsFungibleResourceBalanceChange>))
+        public LtsEntityFungibleBalanceChanges(string entityAddress = default(string), LtsFungibleResourceBalanceChange feeBalanceChange = default(LtsFungibleResourceBalanceChange), List<LtsFeeFungibleResourceBalanceChange> feeBalanceChanges = default(List<LtsFeeFungibleResourceBalanceChange>), List<LtsFungibleResourceBalanceChange> nonFeeBalanceChanges = default(List<LtsFungibleResourceBalanceChange>))
         {
             // to ensure "entityAddress" is required (not null)
             if (entityAddress == null)
@@ -114,6 +115,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("entityAddress is a required property for LtsEntityFungibleBalanceChanges and cannot be null");
             }
             this.EntityAddress = entityAddress;
+            // to ensure "feeBalanceChanges" is required (not null)
+            if (feeBalanceChanges == null)
+            {
+                throw new ArgumentNullException("feeBalanceChanges is a required property for LtsEntityFungibleBalanceChanges and cannot be null");
+            }
+            this.FeeBalanceChanges = feeBalanceChanges;
             // to ensure "nonFeeBalanceChanges" is required (not null)
             if (nonFeeBalanceChanges == null)
             {
@@ -137,6 +144,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public LtsFungibleResourceBalanceChange FeeBalanceChange { get; set; }
 
         /// <summary>
+        /// If present, this field indicates fee-related balance changes, for example:  - Payment of the fee (including tip and royalty) - Distribution of royalties - Distribution of the fee and tip to the consensus-manager, for distributing to the relevant   validator/s at end of epoch  See https://www.radixdlt.com/blog/how-fees-work-in-babylon for further information on how fee payment works at Babylon. 
+        /// </summary>
+        /// <value>If present, this field indicates fee-related balance changes, for example:  - Payment of the fee (including tip and royalty) - Distribution of royalties - Distribution of the fee and tip to the consensus-manager, for distributing to the relevant   validator/s at end of epoch  See https://www.radixdlt.com/blog/how-fees-work-in-babylon for further information on how fee payment works at Babylon. </value>
+        [DataMember(Name = "fee_balance_changes", IsRequired = true, EmitDefaultValue = true)]
+        public List<LtsFeeFungibleResourceBalanceChange> FeeBalanceChanges { get; set; }
+
+        /// <summary>
         /// Gets or Sets NonFeeBalanceChanges
         /// </summary>
         [DataMember(Name = "non_fee_balance_changes", IsRequired = true, EmitDefaultValue = true)]
@@ -152,6 +166,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class LtsEntityFungibleBalanceChanges {\n");
             sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
             sb.Append("  FeeBalanceChange: ").Append(FeeBalanceChange).Append("\n");
+            sb.Append("  FeeBalanceChanges: ").Append(FeeBalanceChanges).Append("\n");
             sb.Append("  NonFeeBalanceChanges: ").Append(NonFeeBalanceChanges).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -199,6 +214,12 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.FeeBalanceChange.Equals(input.FeeBalanceChange))
                 ) && 
                 (
+                    this.FeeBalanceChanges == input.FeeBalanceChanges ||
+                    this.FeeBalanceChanges != null &&
+                    input.FeeBalanceChanges != null &&
+                    this.FeeBalanceChanges.SequenceEqual(input.FeeBalanceChanges)
+                ) && 
+                (
                     this.NonFeeBalanceChanges == input.NonFeeBalanceChanges ||
                     this.NonFeeBalanceChanges != null &&
                     input.NonFeeBalanceChanges != null &&
@@ -222,6 +243,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.FeeBalanceChange != null)
                 {
                     hashCode = (hashCode * 59) + this.FeeBalanceChange.GetHashCode();
+                }
+                if (this.FeeBalanceChanges != null)
+                {
+                    hashCode = (hashCode * 59) + this.FeeBalanceChanges.GetHashCode();
                 }
                 if (this.NonFeeBalanceChanges != null)
                 {

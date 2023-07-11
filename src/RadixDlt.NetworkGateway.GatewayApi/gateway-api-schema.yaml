@@ -810,6 +810,7 @@ components:
       required:
         - key
         - value
+        - is_locked
         - last_updated_at_state_version
       properties:
         key:
@@ -817,6 +818,8 @@ components:
           type: string
         value:
           $ref: "#/components/schemas/EntityMetadataItemValue"
+        is_locked:
+          type: boolean
         last_updated_at_state_version:
           $ref: "#/components/schemas/LastUpdatedAtStateVersion"
     EntityMetadataItemValue:
@@ -1096,7 +1099,7 @@ components:
         - String
         - Integer
         - Bytes
-        - Uuid
+        - Ruid
 
     ValidatorCollection:
       allOf:
@@ -1339,16 +1342,13 @@ components:
           required:
             - use_free_credit
             - assume_all_signature_proofs
-            - permit_duplicate_intent_hash
-            - permit_invalid_header_epoch
+            - skip_epoch_check
           properties:
             use_free_credit:
               type: boolean
             assume_all_signature_proofs:
               type: boolean
-            permit_duplicate_intent_hash:
-              type: boolean
-            permit_invalid_header_epoch:
+            skip_epoch_check:
               type: boolean
     TransactionPreviewResponse:
       type: object

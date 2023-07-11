@@ -104,10 +104,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="StateAccessControllerResponse" /> class.
         /// </summary>
         /// <param name="state">state (required).</param>
-        /// <param name="accessRules">accessRules (required).</param>
+        /// <param name="ownerRole">ownerRole (required).</param>
         /// <param name="vaults">Any vaults owned directly or indirectly by the component (required).</param>
         /// <param name="descendentNodes">Any descendent nodes owned directly or indirectly by the component (required).</param>
-        public StateAccessControllerResponse(Substate state = default(Substate), Substate accessRules = default(Substate), List<VaultBalance> vaults = default(List<VaultBalance>), List<StateComponentDescendentNode> descendentNodes = default(List<StateComponentDescendentNode>))
+        public StateAccessControllerResponse(Substate state = default(Substate), Substate ownerRole = default(Substate), List<VaultBalance> vaults = default(List<VaultBalance>), List<StateComponentDescendentNode> descendentNodes = default(List<StateComponentDescendentNode>))
         {
             // to ensure "state" is required (not null)
             if (state == null)
@@ -115,12 +115,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("state is a required property for StateAccessControllerResponse and cannot be null");
             }
             this.State = state;
-            // to ensure "accessRules" is required (not null)
-            if (accessRules == null)
+            // to ensure "ownerRole" is required (not null)
+            if (ownerRole == null)
             {
-                throw new ArgumentNullException("accessRules is a required property for StateAccessControllerResponse and cannot be null");
+                throw new ArgumentNullException("ownerRole is a required property for StateAccessControllerResponse and cannot be null");
             }
-            this.AccessRules = accessRules;
+            this.OwnerRole = ownerRole;
             // to ensure "vaults" is required (not null)
             if (vaults == null)
             {
@@ -142,10 +142,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public Substate State { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccessRules
+        /// Gets or Sets OwnerRole
         /// </summary>
-        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public Substate AccessRules { get; set; }
+        [DataMember(Name = "owner_role", IsRequired = true, EmitDefaultValue = true)]
+        public Substate OwnerRole { get; set; }
 
         /// <summary>
         /// Any vaults owned directly or indirectly by the component
@@ -170,7 +170,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateAccessControllerResponse {\n");
             sb.Append("  State: ").Append(State).Append("\n");
-            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
+            sb.Append("  OwnerRole: ").Append(OwnerRole).Append("\n");
             sb.Append("  Vaults: ").Append(Vaults).Append("\n");
             sb.Append("  DescendentNodes: ").Append(DescendentNodes).Append("\n");
             sb.Append("}\n");
@@ -214,9 +214,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.State.Equals(input.State))
                 ) && 
                 (
-                    this.AccessRules == input.AccessRules ||
-                    (this.AccessRules != null &&
-                    this.AccessRules.Equals(input.AccessRules))
+                    this.OwnerRole == input.OwnerRole ||
+                    (this.OwnerRole != null &&
+                    this.OwnerRole.Equals(input.OwnerRole))
                 ) && 
                 (
                     this.Vaults == input.Vaults ||
@@ -245,9 +245,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.State.GetHashCode();
                 }
-                if (this.AccessRules != null)
+                if (this.OwnerRole != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
+                    hashCode = (hashCode * 59) + this.OwnerRole.GetHashCode();
                 }
                 if (this.Vaults != null)
                 {

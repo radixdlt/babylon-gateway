@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="StateResourceResponse" /> class.
         /// </summary>
         /// <param name="manager">manager (required).</param>
-        /// <param name="accessRules">accessRules (required).</param>
-        public StateResourceResponse(StateResourceManager manager = default(StateResourceManager), Substate accessRules = default(Substate))
+        /// <param name="ownerRole">ownerRole (required).</param>
+        public StateResourceResponse(StateResourceManager manager = default(StateResourceManager), Substate ownerRole = default(Substate))
         {
             // to ensure "manager" is required (not null)
             if (manager == null)
@@ -113,12 +113,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("manager is a required property for StateResourceResponse and cannot be null");
             }
             this.Manager = manager;
-            // to ensure "accessRules" is required (not null)
-            if (accessRules == null)
+            // to ensure "ownerRole" is required (not null)
+            if (ownerRole == null)
             {
-                throw new ArgumentNullException("accessRules is a required property for StateResourceResponse and cannot be null");
+                throw new ArgumentNullException("ownerRole is a required property for StateResourceResponse and cannot be null");
             }
-            this.AccessRules = accessRules;
+            this.OwnerRole = ownerRole;
         }
 
         /// <summary>
@@ -128,10 +128,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public StateResourceManager Manager { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccessRules
+        /// Gets or Sets OwnerRole
         /// </summary>
-        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public Substate AccessRules { get; set; }
+        [DataMember(Name = "owner_role", IsRequired = true, EmitDefaultValue = true)]
+        public Substate OwnerRole { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,7 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateResourceResponse {\n");
             sb.Append("  Manager: ").Append(Manager).Append("\n");
-            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
+            sb.Append("  OwnerRole: ").Append(OwnerRole).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -184,9 +184,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Manager.Equals(input.Manager))
                 ) && 
                 (
-                    this.AccessRules == input.AccessRules ||
-                    (this.AccessRules != null &&
-                    this.AccessRules.Equals(input.AccessRules))
+                    this.OwnerRole == input.OwnerRole ||
+                    (this.OwnerRole != null &&
+                    this.OwnerRole.Equals(input.OwnerRole))
                 );
         }
 
@@ -203,9 +203,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Manager.GetHashCode();
                 }
-                if (this.AccessRules != null)
+                if (this.OwnerRole != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
+                    hashCode = (hashCode * 59) + this.OwnerRole.GetHashCode();
                 }
                 return hashCode;
             }

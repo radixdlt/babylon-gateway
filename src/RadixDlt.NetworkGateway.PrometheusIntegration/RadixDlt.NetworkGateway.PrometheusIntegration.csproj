@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="prometheus-net" />
+    <PackageReference Include="RadixDlt.RadixEngineToolkit.Native" />
   </ItemGroup>
 
   <ItemGroup>

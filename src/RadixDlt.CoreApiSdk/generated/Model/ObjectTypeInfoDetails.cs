@@ -95,8 +95,6 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [DataContract(Name = "ObjectTypeInfoDetails")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(GlobalAddressPhantomTypeInfoDetails), "GlobalAddressPhantom")]
-    [JsonSubtypes.KnownSubType(typeof(GlobalAddressReservationTypeInfoDetails), "GlobalAddressReservation")]
     [JsonSubtypes.KnownSubType(typeof(KeyValueStoreTypeInfoDetails), "KeyValueStore")]
     [JsonSubtypes.KnownSubType(typeof(ObjectTypeInfoDetails), "Object")]
     public partial class ObjectTypeInfoDetails : TypeInfoDetails, IEquatable<ObjectTypeInfoDetails>
@@ -111,12 +109,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
         /// <param name="blueprintName">blueprintName (required).</param>
+        /// <param name="blueprintVersion">blueprintVersion (required).</param>
         /// <param name="global">global (required).</param>
         /// <param name="outerObject">The Bech32m-encoded human readable version of any global address.</param>
         /// <param name="instanceSchema">instanceSchema.</param>
         /// <param name="features">features (required).</param>
         /// <param name="type">type (required) (default to TypeInfoType.Object).</param>
-        public ObjectTypeInfoDetails(string packageAddress = default(string), string blueprintName = default(string), bool global = default(bool), string outerObject = default(string), InstanceSchema instanceSchema = default(InstanceSchema), List<string> features = default(List<string>), TypeInfoType type = TypeInfoType.Object) : base(type)
+        public ObjectTypeInfoDetails(string packageAddress = default(string), string blueprintName = default(string), string blueprintVersion = default(string), bool global = default(bool), string outerObject = default(string), InstanceSchema instanceSchema = default(InstanceSchema), List<string> features = default(List<string>), TypeInfoType type = TypeInfoType.Object) : base(type)
         {
             // to ensure "packageAddress" is required (not null)
             if (packageAddress == null)
@@ -130,6 +129,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("blueprintName is a required property for ObjectTypeInfoDetails and cannot be null");
             }
             this.BlueprintName = blueprintName;
+            // to ensure "blueprintVersion" is required (not null)
+            if (blueprintVersion == null)
+            {
+                throw new ArgumentNullException("blueprintVersion is a required property for ObjectTypeInfoDetails and cannot be null");
+            }
+            this.BlueprintVersion = blueprintVersion;
             this.Global = global;
             // to ensure "features" is required (not null)
             if (features == null)
@@ -153,6 +158,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
         public string BlueprintName { get; set; }
+
+        /// <summary>
+        /// Gets or Sets BlueprintVersion
+        /// </summary>
+        [DataMember(Name = "blueprint_version", IsRequired = true, EmitDefaultValue = true)]
+        public string BlueprintVersion { get; set; }
 
         /// <summary>
         /// Gets or Sets Global
@@ -190,6 +201,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
+            sb.Append("  BlueprintVersion: ").Append(BlueprintVersion).Append("\n");
             sb.Append("  Global: ").Append(Global).Append("\n");
             sb.Append("  OuterObject: ").Append(OuterObject).Append("\n");
             sb.Append("  InstanceSchema: ").Append(InstanceSchema).Append("\n");
@@ -240,6 +252,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.BlueprintName.Equals(input.BlueprintName))
                 ) && base.Equals(input) && 
                 (
+                    this.BlueprintVersion == input.BlueprintVersion ||
+                    (this.BlueprintVersion != null &&
+                    this.BlueprintVersion.Equals(input.BlueprintVersion))
+                ) && base.Equals(input) && 
+                (
                     this.Global == input.Global ||
                     this.Global.Equals(input.Global)
                 ) && base.Equals(input) && 
@@ -277,6 +294,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.BlueprintName != null)
                 {
                     hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                }
+                if (this.BlueprintVersion != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintVersion.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.Global.GetHashCode();
                 if (this.OuterObject != null)

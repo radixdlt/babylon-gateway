@@ -108,23 +108,27 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="GenesisLedgerTransaction" /> class.
         /// </summary>
-        /// <param name="systemTransaction">systemTransaction (required).</param>
+        /// <param name="isFlash">The first genesis \&quot;transaction\&quot; flashes state into the database to prepare for the bootstrap transaction. Such a transaction does not have an associated &#x60;system_transaction&#x60;  (required).</param>
+        /// <param name="systemTransaction">systemTransaction.</param>
         /// <param name="type">type (required) (default to LedgerTransactionType.Genesis).</param>
         /// <param name="payloadHex">The hex-encoded full ledger transaction payload. Only returned if enabled in TransactionFormatOptions on your request..</param>
-        public GenesisLedgerTransaction(SystemTransaction systemTransaction = default(SystemTransaction), LedgerTransactionType type = LedgerTransactionType.Genesis, string payloadHex = default(string)) : base(type, payloadHex)
+        public GenesisLedgerTransaction(bool isFlash = default(bool), SystemTransaction systemTransaction = default(SystemTransaction), LedgerTransactionType type = LedgerTransactionType.Genesis, string payloadHex = default(string)) : base(type, payloadHex)
         {
-            // to ensure "systemTransaction" is required (not null)
-            if (systemTransaction == null)
-            {
-                throw new ArgumentNullException("systemTransaction is a required property for GenesisLedgerTransaction and cannot be null");
-            }
+            this.IsFlash = isFlash;
             this.SystemTransaction = systemTransaction;
         }
 
         /// <summary>
+        /// The first genesis \&quot;transaction\&quot; flashes state into the database to prepare for the bootstrap transaction. Such a transaction does not have an associated &#x60;system_transaction&#x60; 
+        /// </summary>
+        /// <value>The first genesis \&quot;transaction\&quot; flashes state into the database to prepare for the bootstrap transaction. Such a transaction does not have an associated &#x60;system_transaction&#x60; </value>
+        [DataMember(Name = "is_flash", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsFlash { get; set; }
+
+        /// <summary>
         /// Gets or Sets SystemTransaction
         /// </summary>
-        [DataMember(Name = "system_transaction", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "system_transaction", EmitDefaultValue = true)]
         public SystemTransaction SystemTransaction { get; set; }
 
         /// <summary>
@@ -136,6 +140,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class GenesisLedgerTransaction {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  IsFlash: ").Append(IsFlash).Append("\n");
             sb.Append("  SystemTransaction: ").Append(SystemTransaction).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -173,6 +178,10 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
+                    this.IsFlash == input.IsFlash ||
+                    this.IsFlash.Equals(input.IsFlash)
+                ) && base.Equals(input) && 
+                (
                     this.SystemTransaction == input.SystemTransaction ||
                     (this.SystemTransaction != null &&
                     this.SystemTransaction.Equals(input.SystemTransaction))
@@ -188,6 +197,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
+                hashCode = (hashCode * 59) + this.IsFlash.GetHashCode();
                 if (this.SystemTransaction != null)
                 {
                     hashCode = (hashCode * 59) + this.SystemTransaction.GetHashCode();

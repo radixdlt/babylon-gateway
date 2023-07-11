@@ -114,10 +114,10 @@ namespace RadixDlt.CoreApiSdk.Model
         Bytes = 3,
 
         /// <summary>
-        /// Enum UUID for value: UUID
+        /// Enum RUID for value: RUID
         /// </summary>
-        [EnumMember(Value = "UUID")]
-        UUID = 4
+        [EnumMember(Value = "RUID")]
+        RUID = 4
 
     }
 

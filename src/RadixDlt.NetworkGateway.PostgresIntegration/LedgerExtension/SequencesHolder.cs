@@ -74,8 +74,6 @@ internal class SequencesHolder
 
     public long EntitySequence { get; set; }
 
-    public long EntityAccessRulesChainHistorySequence { get; set; }
-
     public long EntityMetadataHistorySequence { get; set; }
 
     public long EntityMetadataAggregateHistorySequence { get; set; }
@@ -87,6 +85,14 @@ internal class SequencesHolder
     public long EntityResourceVaultAggregateHistorySequence { get; set; }
 
     public long EntityVaultHistorySequence { get; set; }
+
+    public long EntityAccessRulesAggregateHistorySequence { get; set; }
+
+    public long EntityAccessRulesEntryHistorySequence { get; set; }
+
+    public long EntityAccessRulesOwnerRoleHistorySequence { get; set; }
+
+    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
 
     public long ResourceEntitySupplyHistorySequence { get; set; }
 
@@ -101,4 +107,6 @@ internal class SequencesHolder
     public long ValidatorActiveSetHistorySequence { get; set; }
 
     public long LedgerTransactionMarkerSequence { get; set; }
+
+    public long PackageBlueprintsSequence { get; set; }
 }

@@ -106,10 +106,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="preGenesisStateIdentifier">preGenesisStateIdentifier (required).</param>
         /// <param name="genesisEpochRound">genesisEpochRound.</param>
         /// <param name="postGenesisStateIdentifier">postGenesisStateIdentifier.</param>
+        /// <param name="postGenesisEpochRound">postGenesisEpochRound.</param>
         /// <param name="currentStateIdentifier">currentStateIdentifier.</param>
         /// <param name="currentEpochRound">currentEpochRound.</param>
         /// <param name="currentProtocolVersion">A descriptor for the current protocol version that the node is running.  (required).</param>
-        public NetworkStatusResponse(CommittedStateIdentifier preGenesisStateIdentifier = default(CommittedStateIdentifier), EpochRound genesisEpochRound = default(EpochRound), CommittedStateIdentifier postGenesisStateIdentifier = default(CommittedStateIdentifier), CommittedStateIdentifier currentStateIdentifier = default(CommittedStateIdentifier), EpochRound currentEpochRound = default(EpochRound), string currentProtocolVersion = default(string))
+        public NetworkStatusResponse(CommittedStateIdentifier preGenesisStateIdentifier = default(CommittedStateIdentifier), EpochRound genesisEpochRound = default(EpochRound), CommittedStateIdentifier postGenesisStateIdentifier = default(CommittedStateIdentifier), EpochRound postGenesisEpochRound = default(EpochRound), CommittedStateIdentifier currentStateIdentifier = default(CommittedStateIdentifier), EpochRound currentEpochRound = default(EpochRound), string currentProtocolVersion = default(string))
         {
             // to ensure "preGenesisStateIdentifier" is required (not null)
             if (preGenesisStateIdentifier == null)
@@ -125,6 +126,7 @@ namespace RadixDlt.CoreApiSdk.Model
             this.CurrentProtocolVersion = currentProtocolVersion;
             this.GenesisEpochRound = genesisEpochRound;
             this.PostGenesisStateIdentifier = postGenesisStateIdentifier;
+            this.PostGenesisEpochRound = postGenesisEpochRound;
             this.CurrentStateIdentifier = currentStateIdentifier;
             this.CurrentEpochRound = currentEpochRound;
         }
@@ -146,6 +148,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "post_genesis_state_identifier", EmitDefaultValue = true)]
         public CommittedStateIdentifier PostGenesisStateIdentifier { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PostGenesisEpochRound
+        /// </summary>
+        [DataMember(Name = "post_genesis_epoch_round", EmitDefaultValue = true)]
+        public EpochRound PostGenesisEpochRound { get; set; }
 
         /// <summary>
         /// Gets or Sets CurrentStateIdentifier
@@ -177,6 +185,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  PreGenesisStateIdentifier: ").Append(PreGenesisStateIdentifier).Append("\n");
             sb.Append("  GenesisEpochRound: ").Append(GenesisEpochRound).Append("\n");
             sb.Append("  PostGenesisStateIdentifier: ").Append(PostGenesisStateIdentifier).Append("\n");
+            sb.Append("  PostGenesisEpochRound: ").Append(PostGenesisEpochRound).Append("\n");
             sb.Append("  CurrentStateIdentifier: ").Append(CurrentStateIdentifier).Append("\n");
             sb.Append("  CurrentEpochRound: ").Append(CurrentEpochRound).Append("\n");
             sb.Append("  CurrentProtocolVersion: ").Append(CurrentProtocolVersion).Append("\n");
@@ -231,6 +240,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.PostGenesisStateIdentifier.Equals(input.PostGenesisStateIdentifier))
                 ) && 
                 (
+                    this.PostGenesisEpochRound == input.PostGenesisEpochRound ||
+                    (this.PostGenesisEpochRound != null &&
+                    this.PostGenesisEpochRound.Equals(input.PostGenesisEpochRound))
+                ) && 
+                (
                     this.CurrentStateIdentifier == input.CurrentStateIdentifier ||
                     (this.CurrentStateIdentifier != null &&
                     this.CurrentStateIdentifier.Equals(input.CurrentStateIdentifier))
@@ -267,6 +281,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.PostGenesisStateIdentifier != null)
                 {
                     hashCode = (hashCode * 59) + this.PostGenesisStateIdentifier.GetHashCode();
+                }
+                if (this.PostGenesisEpochRound != null)
+                {
+                    hashCode = (hashCode * 59) + this.PostGenesisEpochRound.GetHashCode();
                 }
                 if (this.CurrentStateIdentifier != null)
                 {

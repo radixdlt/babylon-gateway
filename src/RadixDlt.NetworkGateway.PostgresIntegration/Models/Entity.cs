@@ -159,8 +159,14 @@ internal class GlobalValidatorEntity : ComponentEntity
     [Column("stake_vault_entity_id")]
     public long StakeVaultEntityId { get; set; }
 
-    [Column("unstake_vault_entity_id")]
-    public long UnstakeVaultEntityId { get; set; }
+    [Column("pending_xrd_withdraw_vault_entity_id")]
+    public long PendingXrdWithdrawVault { get; set; }
+
+    [Column("locked_owner_stake_unit_vault_entity_id")]
+    public long LockedOwnerStakeUnitVault { get; set; }
+
+    [Column("pending_owner_stake_unit_unlock_vault_entity_id")]
+    public long PendingOwnerStakeUnitUnlockVault { get; set; }
 
     public override List<long> CorrelatedEntities
     {
@@ -168,7 +174,9 @@ internal class GlobalValidatorEntity : ComponentEntity
         {
             var ce = base.CorrelatedEntities;
             ce.Add(StakeVaultEntityId);
-            ce.Add(UnstakeVaultEntityId);
+            ce.Add(PendingXrdWithdrawVault);
+            ce.Add(LockedOwnerStakeUnitVault);
+            ce.Add(PendingOwnerStakeUnitUnlockVault);
             return ce;
         }
     }
@@ -243,11 +251,20 @@ internal class GlobalIdentityEntity : ComponentEntity
 
 internal class GlobalPackageEntity : ComponentEntity
 {
+    [Column("code_hash")]
+    public byte[] CodeHash { get; set; }
+
     [Column("code")]
     public byte[] Code { get; set; }
 
-    [Column("code_type")]
-    public string CodeType { get; set; }
+    [Column("vm_type")]
+    public PackageVmType VmType { get; set; }
+
+    [Column("schema_hash")]
+    public byte[] SchemaHash { get; set; }
+
+    [Column("schema", TypeName = "jsonb")]
+    public string Schema { get; set; }
 }
 
 // This is transient model, not stored in database
@@ -289,5 +306,9 @@ internal class GlobalTwoResourcePoolEntity : ResourcePoolEntity
 }
 
 internal class GlobalMultiResourcePoolEntity : ResourcePoolEntity
+{
+}
+
+internal class GlobalTransactionTrackerEntity : ComponentEntity
 {
 }

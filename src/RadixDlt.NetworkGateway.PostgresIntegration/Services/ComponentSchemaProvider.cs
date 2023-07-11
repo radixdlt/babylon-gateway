@@ -99,7 +99,12 @@ internal class ComponentSchemaProvider : IComponentSchemaProvider
     {
         EnsureComponentSchemaCaptured(componentSchema);
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
-        dbContext.ComponentSchema.Add(await GetCapturedComponentSchema());
+
+        if (!await dbContext.ComponentSchema.AnyAsync(token))
+        {
+            dbContext.ComponentSchema.Add(await GetCapturedComponentSchema());
+        }
+
         await dbContext.SaveChangesAsync(token);
     }
 

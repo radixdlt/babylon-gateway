@@ -75,7 +75,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
-using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -97,12 +97,12 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
 
     public async Task<TackingGuidance> TrackInitialSubmission(
         DateTime submittedTimestamp,
-        ToolkitModel.Transaction.NotarizedTransaction notarizedTransaction,
+        ToolkitModel.NotarizedTransaction notarizedTransaction,
         string submittedToNodeName,
         CancellationToken token = default
     )
     {
-        var existingPendingTransaction = await GetPendingTransaction(notarizedTransaction.Hash(), token);
+        var existingPendingTransaction = await GetPendingTransaction(notarizedTransaction.Hash().Bytes().ToArray(), token);
 
         if (existingPendingTransaction != null)
         {
@@ -120,9 +120,9 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         }
 
         var pendingTransaction = PendingTransaction.NewAsSubmittedForFirstTimeByGateway(
-            notarizedTransaction.Hash(),
-            notarizedTransaction.TransactionHash(),
-            notarizedTransaction.Compile(),
+            notarizedTransaction.Hash().Bytes().ToArray(),
+            notarizedTransaction.IntentHash().Bytes().ToArray(),
+            notarizedTransaction.Compile().ToArray(),
             submittedToNodeName,
             submittedTimestamp
         );
@@ -170,7 +170,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
     private async Task<PendingTransaction?> GetPendingTransaction(byte[] payloadHash, CancellationToken token = default)
     {
         return await _dbContext.PendingTransactions
-            .Where(t => t.PayloadHash == payloadHash)
+            .Where(t => t.PayloadHash == payloadHash.ToArray())
             .SingleOrDefaultAsync(token);
     }
 }

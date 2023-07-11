@@ -103,35 +103,50 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="BlueprintDefinition" /> class.
         /// </summary>
-        /// <param name="schema">schema (required).</param>
-        /// <param name="template">template (required).</param>
-        public BlueprintDefinition(BlueprintSchema schema = default(BlueprintSchema), BlueprintTemplate template = default(BlueprintTemplate))
+        /// <param name="_interface">_interface (required).</param>
+        /// <param name="functionExports">A map from the function name to its export (required).</param>
+        /// <param name="virtualLazyLoadFunctions">A map from the engine system&#39;s virtualization module&#39;s function identifier to the package export of the function. (required).</param>
+        public BlueprintDefinition(BlueprintInterface _interface = default(BlueprintInterface), Dictionary<string, PackageExport> functionExports = default(Dictionary<string, PackageExport>), Dictionary<string, PackageExport> virtualLazyLoadFunctions = default(Dictionary<string, PackageExport>))
         {
-            // to ensure "schema" is required (not null)
-            if (schema == null)
+            // to ensure "_interface" is required (not null)
+            if (_interface == null)
             {
-                throw new ArgumentNullException("schema is a required property for BlueprintDefinition and cannot be null");
+                throw new ArgumentNullException("_interface is a required property for BlueprintDefinition and cannot be null");
             }
-            this.Schema = schema;
-            // to ensure "template" is required (not null)
-            if (template == null)
+            this.Interface = _interface;
+            // to ensure "functionExports" is required (not null)
+            if (functionExports == null)
             {
-                throw new ArgumentNullException("template is a required property for BlueprintDefinition and cannot be null");
+                throw new ArgumentNullException("functionExports is a required property for BlueprintDefinition and cannot be null");
             }
-            this.Template = template;
+            this.FunctionExports = functionExports;
+            // to ensure "virtualLazyLoadFunctions" is required (not null)
+            if (virtualLazyLoadFunctions == null)
+            {
+                throw new ArgumentNullException("virtualLazyLoadFunctions is a required property for BlueprintDefinition and cannot be null");
+            }
+            this.VirtualLazyLoadFunctions = virtualLazyLoadFunctions;
         }
 
         /// <summary>
-        /// Gets or Sets Schema
+        /// Gets or Sets Interface
         /// </summary>
-        [DataMember(Name = "schema", IsRequired = true, EmitDefaultValue = true)]
-        public BlueprintSchema Schema { get; set; }
+        [DataMember(Name = "interface", IsRequired = true, EmitDefaultValue = true)]
+        public BlueprintInterface Interface { get; set; }
 
         /// <summary>
-        /// Gets or Sets Template
+        /// A map from the function name to its export
         /// </summary>
-        [DataMember(Name = "template", IsRequired = true, EmitDefaultValue = true)]
-        public BlueprintTemplate Template { get; set; }
+        /// <value>A map from the function name to its export</value>
+        [DataMember(Name = "function_exports", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, PackageExport> FunctionExports { get; set; }
+
+        /// <summary>
+        /// A map from the engine system&#39;s virtualization module&#39;s function identifier to the package export of the function.
+        /// </summary>
+        /// <value>A map from the engine system&#39;s virtualization module&#39;s function identifier to the package export of the function.</value>
+        [DataMember(Name = "virtual_lazy_load_functions", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, PackageExport> VirtualLazyLoadFunctions { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,8 +156,9 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class BlueprintDefinition {\n");
-            sb.Append("  Schema: ").Append(Schema).Append("\n");
-            sb.Append("  Template: ").Append(Template).Append("\n");
+            sb.Append("  Interface: ").Append(Interface).Append("\n");
+            sb.Append("  FunctionExports: ").Append(FunctionExports).Append("\n");
+            sb.Append("  VirtualLazyLoadFunctions: ").Append(VirtualLazyLoadFunctions).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,14 +195,21 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Schema == input.Schema ||
-                    (this.Schema != null &&
-                    this.Schema.Equals(input.Schema))
+                    this.Interface == input.Interface ||
+                    (this.Interface != null &&
+                    this.Interface.Equals(input.Interface))
                 ) && 
                 (
-                    this.Template == input.Template ||
-                    (this.Template != null &&
-                    this.Template.Equals(input.Template))
+                    this.FunctionExports == input.FunctionExports ||
+                    this.FunctionExports != null &&
+                    input.FunctionExports != null &&
+                    this.FunctionExports.SequenceEqual(input.FunctionExports)
+                ) && 
+                (
+                    this.VirtualLazyLoadFunctions == input.VirtualLazyLoadFunctions ||
+                    this.VirtualLazyLoadFunctions != null &&
+                    input.VirtualLazyLoadFunctions != null &&
+                    this.VirtualLazyLoadFunctions.SequenceEqual(input.VirtualLazyLoadFunctions)
                 );
         }
 
@@ -199,13 +222,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Schema != null)
+                if (this.Interface != null)
                 {
-                    hashCode = (hashCode * 59) + this.Schema.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Interface.GetHashCode();
                 }
-                if (this.Template != null)
+                if (this.FunctionExports != null)
                 {
-                    hashCode = (hashCode * 59) + this.Template.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FunctionExports.GetHashCode();
+                }
+                if (this.VirtualLazyLoadFunctions != null)
+                {
+                    hashCode = (hashCode * 59) + this.VirtualLazyLoadFunctions.GetHashCode();
                 }
                 return hashCode;
             }

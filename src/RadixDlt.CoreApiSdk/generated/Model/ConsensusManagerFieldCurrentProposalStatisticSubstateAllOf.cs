@@ -103,37 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsensusManagerFieldCurrentProposalStatisticSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="completed">The number of successfully completed proposals this epoch for each validator, indexed by the validator order in the active set. (required).</param>
-        /// <param name="missed">The number of missed proposals this epoch for each validator, indexed by the validator order in the active set. (required).</param>
-        public ConsensusManagerFieldCurrentProposalStatisticSubstateAllOf(List<long> completed = default(List<long>), List<long> missed = default(List<long>))
+        /// <param name="value">value (required).</param>
+        public ConsensusManagerFieldCurrentProposalStatisticSubstateAllOf(ConsensusManagerFieldCurrentProposalStatisticValue value = default(ConsensusManagerFieldCurrentProposalStatisticValue))
         {
-            // to ensure "completed" is required (not null)
-            if (completed == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("completed is a required property for ConsensusManagerFieldCurrentProposalStatisticSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for ConsensusManagerFieldCurrentProposalStatisticSubstateAllOf and cannot be null");
             }
-            this.Completed = completed;
-            // to ensure "missed" is required (not null)
-            if (missed == null)
-            {
-                throw new ArgumentNullException("missed is a required property for ConsensusManagerFieldCurrentProposalStatisticSubstateAllOf and cannot be null");
-            }
-            this.Missed = missed;
+            this.Value = value;
         }
 
         /// <summary>
-        /// The number of successfully completed proposals this epoch for each validator, indexed by the validator order in the active set.
+        /// Gets or Sets Value
         /// </summary>
-        /// <value>The number of successfully completed proposals this epoch for each validator, indexed by the validator order in the active set.</value>
-        [DataMember(Name = "completed", IsRequired = true, EmitDefaultValue = true)]
-        public List<long> Completed { get; set; }
-
-        /// <summary>
-        /// The number of missed proposals this epoch for each validator, indexed by the validator order in the active set.
-        /// </summary>
-        /// <value>The number of missed proposals this epoch for each validator, indexed by the validator order in the active set.</value>
-        [DataMember(Name = "missed", IsRequired = true, EmitDefaultValue = true)]
-        public List<long> Missed { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public ConsensusManagerFieldCurrentProposalStatisticValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,8 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ConsensusManagerFieldCurrentProposalStatisticSubstateAllOf {\n");
-            sb.Append("  Completed: ").Append(Completed).Append("\n");
-            sb.Append("  Missed: ").Append(Missed).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -181,16 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Completed == input.Completed ||
-                    this.Completed != null &&
-                    input.Completed != null &&
-                    this.Completed.SequenceEqual(input.Completed)
-                ) && 
-                (
-                    this.Missed == input.Missed ||
-                    this.Missed != null &&
-                    input.Missed != null &&
-                    this.Missed.SequenceEqual(input.Missed)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -203,13 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Completed != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.Completed.GetHashCode();
-                }
-                if (this.Missed != null)
-                {
-                    hashCode = (hashCode * 59) + this.Missed.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

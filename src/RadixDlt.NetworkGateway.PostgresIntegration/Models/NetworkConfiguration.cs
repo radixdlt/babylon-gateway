@@ -63,14 +63,25 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("network_configuration")]
-internal class NetworkConfiguration : SingleEntryBase
+internal class NetworkConfiguration
 {
+    [Key]
+    [Column(name: "id")]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    public int Id
+    {
+        get { return 1; }
+        // ReSharper disable once ValueParameterNotUsed
+        set { }
+    }
+
     [Column("network_id")]
     public byte NetworkId { get; set; }
 

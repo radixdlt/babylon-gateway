@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleResourceManagerDataEntrySubstateAllOf
+    /// If the NF has been burned, the value is deleted and empty. 
     /// </summary>
     [DataContract(Name = "NonFungibleResourceManagerDataEntrySubstate_allOf")]
     public partial class NonFungibleResourceManagerDataEntrySubstateAllOf : IEquatable<NonFungibleResourceManagerDataEntrySubstateAllOf>
@@ -103,33 +103,30 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourceManagerDataEntrySubstateAllOf" /> class.
         /// </summary>
-        /// <param name="isDeleted">isDeleted (required).</param>
-        /// <param name="dataStruct">dataStruct.</param>
-        /// <param name="isMutable">isMutable (required).</param>
-        public NonFungibleResourceManagerDataEntrySubstateAllOf(bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct), bool isMutable = default(bool))
+        /// <param name="key">key (required).</param>
+        /// <param name="value">value.</param>
+        public NonFungibleResourceManagerDataEntrySubstateAllOf(LocalNonFungibleKey key = default(LocalNonFungibleKey), NonFungibleResourceManagerDataEntryValue value = default(NonFungibleResourceManagerDataEntryValue))
         {
-            this.IsDeleted = isDeleted;
-            this.IsMutable = isMutable;
-            this.DataStruct = dataStruct;
+            // to ensure "key" is required (not null)
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is a required property for NonFungibleResourceManagerDataEntrySubstateAllOf and cannot be null");
+            }
+            this.Key = key;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets IsDeleted
+        /// Gets or Sets Key
         /// </summary>
-        [DataMember(Name = "is_deleted", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsDeleted { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public LocalNonFungibleKey Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets DataStruct
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "data_struct", EmitDefaultValue = true)]
-        public DataStruct DataStruct { get; set; }
-
-        /// <summary>
-        /// Gets or Sets IsMutable
-        /// </summary>
-        [DataMember(Name = "is_mutable", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsMutable { get; set; }
+        [DataMember(Name = "value", EmitDefaultValue = true)]
+        public NonFungibleResourceManagerDataEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -139,9 +136,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleResourceManagerDataEntrySubstateAllOf {\n");
-            sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
-            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
-            sb.Append("  IsMutable: ").Append(IsMutable).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -178,17 +174,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.IsDeleted == input.IsDeleted ||
-                    this.IsDeleted.Equals(input.IsDeleted)
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && 
                 (
-                    this.DataStruct == input.DataStruct ||
-                    (this.DataStruct != null &&
-                    this.DataStruct.Equals(input.DataStruct))
-                ) && 
-                (
-                    this.IsMutable == input.IsMutable ||
-                    this.IsMutable.Equals(input.IsMutable)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -201,12 +194,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
-                if (this.DataStruct != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.IsMutable.GetHashCode();
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                }
                 return hashCode;
             }
         }

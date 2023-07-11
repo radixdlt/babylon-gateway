@@ -103,35 +103,26 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="BlueprintRoyaltyConfig" /> class.
         /// </summary>
-        /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="royaltyConfig">royaltyConfig (required).</param>
-        public BlueprintRoyaltyConfig(string blueprintName = default(string), RoyaltyConfig royaltyConfig = default(RoyaltyConfig))
+        /// <param name="isEnabled">isEnabled (required).</param>
+        /// <param name="methodRules">The royalty rules by method. The array is only present if royalties are enabled..</param>
+        public BlueprintRoyaltyConfig(bool isEnabled = default(bool), List<BlueprintMethodRoyalty> methodRules = default(List<BlueprintMethodRoyalty>))
         {
-            // to ensure "blueprintName" is required (not null)
-            if (blueprintName == null)
-            {
-                throw new ArgumentNullException("blueprintName is a required property for BlueprintRoyaltyConfig and cannot be null");
-            }
-            this.BlueprintName = blueprintName;
-            // to ensure "royaltyConfig" is required (not null)
-            if (royaltyConfig == null)
-            {
-                throw new ArgumentNullException("royaltyConfig is a required property for BlueprintRoyaltyConfig and cannot be null");
-            }
-            this.RoyaltyConfig = royaltyConfig;
+            this.IsEnabled = isEnabled;
+            this.MethodRules = methodRules;
         }
 
         /// <summary>
-        /// Gets or Sets BlueprintName
+        /// Gets or Sets IsEnabled
         /// </summary>
-        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
-        public string BlueprintName { get; set; }
+        [DataMember(Name = "is_enabled", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsEnabled { get; set; }
 
         /// <summary>
-        /// Gets or Sets RoyaltyConfig
+        /// The royalty rules by method. The array is only present if royalties are enabled.
         /// </summary>
-        [DataMember(Name = "royalty_config", IsRequired = true, EmitDefaultValue = true)]
-        public RoyaltyConfig RoyaltyConfig { get; set; }
+        /// <value>The royalty rules by method. The array is only present if royalties are enabled.</value>
+        [DataMember(Name = "method_rules", EmitDefaultValue = true)]
+        public List<BlueprintMethodRoyalty> MethodRules { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,8 +132,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class BlueprintRoyaltyConfig {\n");
-            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
-            sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
+            sb.Append("  IsEnabled: ").Append(IsEnabled).Append("\n");
+            sb.Append("  MethodRules: ").Append(MethodRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,14 +170,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.BlueprintName == input.BlueprintName ||
-                    (this.BlueprintName != null &&
-                    this.BlueprintName.Equals(input.BlueprintName))
+                    this.IsEnabled == input.IsEnabled ||
+                    this.IsEnabled.Equals(input.IsEnabled)
                 ) && 
                 (
-                    this.RoyaltyConfig == input.RoyaltyConfig ||
-                    (this.RoyaltyConfig != null &&
-                    this.RoyaltyConfig.Equals(input.RoyaltyConfig))
+                    this.MethodRules == input.MethodRules ||
+                    this.MethodRules != null &&
+                    input.MethodRules != null &&
+                    this.MethodRules.SequenceEqual(input.MethodRules)
                 );
         }
 
@@ -199,13 +190,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.BlueprintName != null)
+                hashCode = (hashCode * 59) + this.IsEnabled.GetHashCode();
+                if (this.MethodRules != null)
                 {
-                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
-                }
-                if (this.RoyaltyConfig != null)
-                {
-                    hashCode = (hashCode * 59) + this.RoyaltyConfig.GetHashCode();
+                    hashCode = (hashCode * 59) + this.MethodRules.GetHashCode();
                 }
                 return hashCode;
             }

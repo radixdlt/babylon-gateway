@@ -95,12 +95,6 @@ namespace RadixDlt.CoreApiSdk.Model
     [DataContract(Name = "NonFungibleResourceManagerFieldIdTypeSubstate_allOf")]
     public partial class NonFungibleResourceManagerFieldIdTypeSubstateAllOf : IEquatable<NonFungibleResourceManagerFieldIdTypeSubstateAllOf>
     {
-
-        /// <summary>
-        /// Gets or Sets NonFungibleIdType
-        /// </summary>
-        [DataMember(Name = "non_fungible_id_type", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleIdType NonFungibleIdType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourceManagerFieldIdTypeSubstateAllOf" /> class.
         /// </summary>
@@ -109,11 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourceManagerFieldIdTypeSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="nonFungibleIdType">nonFungibleIdType (required).</param>
-        public NonFungibleResourceManagerFieldIdTypeSubstateAllOf(NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType))
+        /// <param name="value">value (required).</param>
+        public NonFungibleResourceManagerFieldIdTypeSubstateAllOf(NonFungibleResourceManagerFieldIdTypeValue value = default(NonFungibleResourceManagerFieldIdTypeValue))
         {
-            this.NonFungibleIdType = nonFungibleIdType;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for NonFungibleResourceManagerFieldIdTypeSubstateAllOf and cannot be null");
+            }
+            this.Value = value;
         }
+
+        /// <summary>
+        /// Gets or Sets Value
+        /// </summary>
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public NonFungibleResourceManagerFieldIdTypeValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -123,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleResourceManagerFieldIdTypeSubstateAllOf {\n");
-            sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -160,8 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.NonFungibleIdType == input.NonFungibleIdType ||
-                    this.NonFungibleIdType.Equals(input.NonFungibleIdType)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -174,7 +180,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                }
                 return hashCode;
             }
         }

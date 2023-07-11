@@ -103,31 +103,35 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountVaultIndexEntrySubstateAllOf" /> class.
         /// </summary>
-        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
-        /// <param name="vault">vault.</param>
-        public AccountVaultIndexEntrySubstateAllOf(string resourceAddress = default(string), EntityReference vault = default(EntityReference))
+        /// <param name="key">key (required).</param>
+        /// <param name="value">value (required).</param>
+        public AccountVaultIndexEntrySubstateAllOf(ResourceKey key = default(ResourceKey), AccountVaultIndexEntryValue value = default(AccountVaultIndexEntryValue))
         {
-            // to ensure "resourceAddress" is required (not null)
-            if (resourceAddress == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("resourceAddress is a required property for AccountVaultIndexEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("key is a required property for AccountVaultIndexEntrySubstateAllOf and cannot be null");
             }
-            this.ResourceAddress = resourceAddress;
-            this.Vault = vault;
+            this.Key = key;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for AccountVaultIndexEntrySubstateAllOf and cannot be null");
+            }
+            this.Value = value;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the resource address
+        /// Gets or Sets Key
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the resource address</value>
-        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string ResourceAddress { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public ResourceKey Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets Vault
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "vault", EmitDefaultValue = true)]
-        public EntityReference Vault { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public AccountVaultIndexEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,8 +141,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class AccountVaultIndexEntrySubstateAllOf {\n");
-            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("  Vault: ").Append(Vault).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -175,14 +179,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ResourceAddress == input.ResourceAddress ||
-                    (this.ResourceAddress != null &&
-                    this.ResourceAddress.Equals(input.ResourceAddress))
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && 
                 (
-                    this.Vault == input.Vault ||
-                    (this.Vault != null &&
-                    this.Vault.Equals(input.Vault))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -195,13 +199,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ResourceAddress != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                if (this.Vault != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.Vault.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

@@ -219,7 +219,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum GlobalMultiResourcePool for value: GlobalMultiResourcePool
         /// </summary>
         [EnumMember(Value = "GlobalMultiResourcePool")]
-        GlobalMultiResourcePool = 21
+        GlobalMultiResourcePool = 21,
+
+        /// <summary>
+        /// Enum GlobalTransactionTracker for value: GlobalTransactionTracker
+        /// </summary>
+        [EnumMember(Value = "GlobalTransactionTracker")]
+        GlobalTransactionTracker = 22
 
     }
 

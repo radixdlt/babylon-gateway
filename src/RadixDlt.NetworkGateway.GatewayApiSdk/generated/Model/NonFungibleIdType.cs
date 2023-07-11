@@ -114,10 +114,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         Bytes = 3,
 
         /// <summary>
-        /// Enum Uuid for value: Uuid
+        /// Enum Ruid for value: Ruid
         /// </summary>
-        [EnumMember(Value = "Uuid")]
-        Uuid = 4
+        [EnumMember(Value = "Ruid")]
+        Ruid = 4
 
     }
 

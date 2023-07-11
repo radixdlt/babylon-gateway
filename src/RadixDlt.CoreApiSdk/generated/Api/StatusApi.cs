@@ -131,6 +131,27 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <param name="networkStatusRequest"></param>
         /// <returns>ApiResponse of NetworkStatusResponse</returns>
         ApiResponse<NetworkStatusResponse> StatusNetworkStatusPostWithHttpInfo(NetworkStatusRequest networkStatusRequest);
+        /// <summary>
+        /// Get Scenarios&#39; results.
+        /// </summary>
+        /// <remarks>
+        /// Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="scenariosRequest"></param>
+        /// <returns>ScenariosResponse</returns>
+        ScenariosResponse StatusScenariosPost(ScenariosRequest scenariosRequest);
+
+        /// <summary>
+        /// Get Scenarios&#39; results.
+        /// </summary>
+        /// <remarks>
+        /// Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="scenariosRequest"></param>
+        /// <returns>ApiResponse of ScenariosResponse</returns>
+        ApiResponse<ScenariosResponse> StatusScenariosPostWithHttpInfo(ScenariosRequest scenariosRequest);
         #endregion Synchronous Operations
     }
 
@@ -184,6 +205,29 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (NetworkStatusResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<NetworkStatusResponse>> StatusNetworkStatusPostWithHttpInfoAsync(NetworkStatusRequest networkStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Scenarios&#39; results.
+        /// </summary>
+        /// <remarks>
+        /// Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="scenariosRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ScenariosResponse</returns>
+        System.Threading.Tasks.Task<ScenariosResponse> StatusScenariosPostAsync(ScenariosRequest scenariosRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Scenarios&#39; results.
+        /// </summary>
+        /// <remarks>
+        /// Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="scenariosRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (ScenariosResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<ScenariosResponse>> StatusScenariosPostWithHttpInfoAsync(ScenariosRequest scenariosRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -609,6 +653,123 @@ namespace RadixDlt.CoreApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("StatusNetworkStatusPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Scenarios&#39; results. Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="scenariosRequest"></param>
+        /// <returns>ScenariosResponse</returns>
+        public ScenariosResponse StatusScenariosPost(ScenariosRequest scenariosRequest)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<ScenariosResponse> localVarResponse = StatusScenariosPostWithHttpInfo(scenariosRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Scenarios&#39; results. Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="scenariosRequest"></param>
+        /// <returns>ApiResponse of ScenariosResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<ScenariosResponse> StatusScenariosPostWithHttpInfo(ScenariosRequest scenariosRequest)
+        {
+            // verify the required parameter 'scenariosRequest' is set
+            if (scenariosRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'scenariosRequest' when calling StatusApi->StatusScenariosPost");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = scenariosRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<ScenariosResponse>("/status/scenarios", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("StatusScenariosPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Scenarios&#39; results. Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="scenariosRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ScenariosResponse</returns>
+        public async System.Threading.Tasks.Task<ScenariosResponse> StatusScenariosPostAsync(ScenariosRequest scenariosRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<ScenariosResponse> localVarResponse = await StatusScenariosPostWithHttpInfoAsync(scenariosRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Scenarios&#39; results. Get results of test-oriented \&quot;Genesis Scenarios\&quot; executed on this Network.
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="scenariosRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (ScenariosResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<ScenariosResponse>> StatusScenariosPostWithHttpInfoAsync(ScenariosRequest scenariosRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'scenariosRequest' is set
+            if (scenariosRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'scenariosRequest' when calling StatusApi->StatusScenariosPost");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = scenariosRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<ScenariosResponse>("/status/scenarios", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("StatusScenariosPost", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

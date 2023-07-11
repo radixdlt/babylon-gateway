@@ -90,11 +90,11 @@ internal class TransactionStreamReader : ITransactionStreamReader
         _streamApi = coreApiProvider.StreamApi;
     }
 
-    public async Task<CoreModel.StreamTransactionsResponse> GetTransactionStream(long fromStateVersion, int count, CancellationToken token)
+    public async Task<CoreClient.ApiResponse<CoreModel.StreamTransactionsResponse>> GetTransactionStream(long fromStateVersion, int count, CancellationToken token)
     {
         try
         {
-            return await _streamApi.StreamTransactionsPostAsync(
+            return await _streamApi.StreamTransactionsPostWithHttpInfoAsync(
                 new CoreModel.StreamTransactionsRequest(
                     network: _networkConfigurationProvider.GetNetworkName(),
                     fromStateVersion: fromStateVersion,

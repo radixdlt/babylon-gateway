@@ -105,7 +105,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="signedIntent">signedIntent.</param>
         /// <param name="identifiers">identifiers (required).</param>
-        public ParsedSignedTransactionIntentAllOf(SignedTransactionIntent signedIntent = default(SignedTransactionIntent), ParsedSignedTransactionIntentAllOfIdentifiers identifiers = default(ParsedSignedTransactionIntentAllOfIdentifiers))
+        public ParsedSignedTransactionIntentAllOf(SignedTransactionIntent signedIntent = default(SignedTransactionIntent), ParsedSignedTransactionIntentIdentifiers identifiers = default(ParsedSignedTransactionIntentIdentifiers))
         {
             // to ensure "identifiers" is required (not null)
             if (identifiers == null)
@@ -126,7 +126,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Identifiers
         /// </summary>
         [DataMember(Name = "identifiers", IsRequired = true, EmitDefaultValue = true)]
-        public ParsedSignedTransactionIntentAllOfIdentifiers Identifiers { get; set; }
+        public ParsedSignedTransactionIntentIdentifiers Identifiers { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

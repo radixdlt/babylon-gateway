@@ -70,6 +70,6 @@ public partial class AccountDepositRuleIndexEntrySubstate : IEntityAddressPointe
 {
     public IEnumerable<string> GetEntityAddresses()
     {
-        yield return ResourceAddress;
+        yield return Key.ResourceAddress;
     }
 }

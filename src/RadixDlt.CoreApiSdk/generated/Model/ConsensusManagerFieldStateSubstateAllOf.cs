@@ -103,40 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsensusManagerFieldStateSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch (required).</param>
-        /// <param name="round">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch (required).</param>
-        /// <param name="epochStart">epochStart (required).</param>
-        public ConsensusManagerFieldStateSubstateAllOf(long epoch = default(long), long round = default(long), Instant epochStart = default(Instant))
+        /// <param name="value">value (required).</param>
+        public ConsensusManagerFieldStateSubstateAllOf(ConsensusManagerFieldStateValue value = default(ConsensusManagerFieldStateValue))
         {
-            this.Epoch = epoch;
-            this.Round = round;
-            // to ensure "epochStart" is required (not null)
-            if (epochStart == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("epochStart is a required property for ConsensusManagerFieldStateSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for ConsensusManagerFieldStateSubstateAllOf and cannot be null");
             }
-            this.EpochStart = epochStart;
+            this.Value = value;
         }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch
+        /// Gets or Sets Value
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch</value>
-        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long Epoch { get; set; }
-
-        /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch
-        /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current round in an epoch</value>
-        [DataMember(Name = "round", IsRequired = true, EmitDefaultValue = true)]
-        public long Round { get; set; }
-
-        /// <summary>
-        /// Gets or Sets EpochStart
-        /// </summary>
-        [DataMember(Name = "epoch_start", IsRequired = true, EmitDefaultValue = true)]
-        public Instant EpochStart { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public ConsensusManagerFieldStateValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -146,9 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ConsensusManagerFieldStateSubstateAllOf {\n");
-            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
-            sb.Append("  Round: ").Append(Round).Append("\n");
-            sb.Append("  EpochStart: ").Append(EpochStart).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -185,17 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Epoch == input.Epoch ||
-                    this.Epoch.Equals(input.Epoch)
-                ) && 
-                (
-                    this.Round == input.Round ||
-                    this.Round.Equals(input.Round)
-                ) && 
-                (
-                    this.EpochStart == input.EpochStart ||
-                    (this.EpochStart != null &&
-                    this.EpochStart.Equals(input.EpochStart))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -208,11 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
-                hashCode = (hashCode * 59) + this.Round.GetHashCode();
-                if (this.EpochStart != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.EpochStart.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

@@ -83,7 +83,7 @@ internal static class GatewayModelExtensions
             NonFungibleIdType.String => GatewayModel.NonFungibleIdType.String,
             NonFungibleIdType.Integer => GatewayModel.NonFungibleIdType.Integer,
             NonFungibleIdType.Bytes => GatewayModel.NonFungibleIdType.Bytes,
-            NonFungibleIdType.UUID => GatewayModel.NonFungibleIdType.Uuid,
+            NonFungibleIdType.RUID => GatewayModel.NonFungibleIdType.Ruid,
             _ => throw new ArgumentOutOfRangeException(nameof(nonFungibleIdType), nonFungibleIdType, null),
         };
     }

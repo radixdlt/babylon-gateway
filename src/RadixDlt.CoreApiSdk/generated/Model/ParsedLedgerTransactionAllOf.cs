@@ -105,7 +105,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="ledgerTransaction">ledgerTransaction.</param>
         /// <param name="identifiers">identifiers (required).</param>
-        public ParsedLedgerTransactionAllOf(LedgerTransaction ledgerTransaction = default(LedgerTransaction), ParsedLedgerTransactionAllOfIdentifiers identifiers = default(ParsedLedgerTransactionAllOfIdentifiers))
+        public ParsedLedgerTransactionAllOf(LedgerTransaction ledgerTransaction = default(LedgerTransaction), ParsedLedgerTransactionIdentifiers identifiers = default(ParsedLedgerTransactionIdentifiers))
         {
             // to ensure "identifiers" is required (not null)
             if (identifiers == null)
@@ -126,7 +126,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Identifiers
         /// </summary>
         [DataMember(Name = "identifiers", IsRequired = true, EmitDefaultValue = true)]
-        public ParsedLedgerTransactionAllOfIdentifiers Identifiers { get; set; }
+        public ParsedLedgerTransactionIdentifiers Identifiers { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

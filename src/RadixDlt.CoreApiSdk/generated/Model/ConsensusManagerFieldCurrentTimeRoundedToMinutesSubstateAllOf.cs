@@ -103,22 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="proposerTimestampRoundedDownToMinute">proposerTimestampRoundedDownToMinute (required).</param>
-        public ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstateAllOf(Instant proposerTimestampRoundedDownToMinute = default(Instant))
+        /// <param name="value">value (required).</param>
+        public ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstateAllOf(ConsensusManagerFieldCurrentTimeRoundedToMinutesValue value = default(ConsensusManagerFieldCurrentTimeRoundedToMinutesValue))
         {
-            // to ensure "proposerTimestampRoundedDownToMinute" is required (not null)
-            if (proposerTimestampRoundedDownToMinute == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("proposerTimestampRoundedDownToMinute is a required property for ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstateAllOf and cannot be null");
             }
-            this.ProposerTimestampRoundedDownToMinute = proposerTimestampRoundedDownToMinute;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets ProposerTimestampRoundedDownToMinute
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "proposer_timestamp_rounded_down_to_minute", IsRequired = true, EmitDefaultValue = true)]
-        public Instant ProposerTimestampRoundedDownToMinute { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public ConsensusManagerFieldCurrentTimeRoundedToMinutesValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstateAllOf {\n");
-            sb.Append("  ProposerTimestampRoundedDownToMinute: ").Append(ProposerTimestampRoundedDownToMinute).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,9 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ProposerTimestampRoundedDownToMinute == input.ProposerTimestampRoundedDownToMinute ||
-                    (this.ProposerTimestampRoundedDownToMinute != null &&
-                    this.ProposerTimestampRoundedDownToMinute.Equals(input.ProposerTimestampRoundedDownToMinute))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -180,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ProposerTimestampRoundedDownToMinute != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.ProposerTimestampRoundedDownToMinute.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

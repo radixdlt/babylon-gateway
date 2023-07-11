@@ -103,22 +103,35 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf" /> class.
         /// </summary>
-        /// <param name="activeValidator">activeValidator (required).</param>
-        public ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf(ActiveValidator activeValidator = default(ActiveValidator))
+        /// <param name="key">key (required).</param>
+        /// <param name="value">value (required).</param>
+        public ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf(ActiveValidatorKey key = default(ActiveValidatorKey), ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue value = default(ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue))
         {
-            // to ensure "activeValidator" is required (not null)
-            if (activeValidator == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("activeValidator is a required property for ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("key is a required property for ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf and cannot be null");
             }
-            this.ActiveValidator = activeValidator;
+            this.Key = key;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf and cannot be null");
+            }
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets ActiveValidator
+        /// Gets or Sets Key
         /// </summary>
-        [DataMember(Name = "active_validator", IsRequired = true, EmitDefaultValue = true)]
-        public ActiveValidator ActiveValidator { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public ActiveValidatorKey Key { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Value
+        /// </summary>
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public ConsensusManagerRegisteredValidatorsByStakeIndexEntryValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +141,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstateAllOf {\n");
-            sb.Append("  ActiveValidator: ").Append(ActiveValidator).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,9 +179,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ActiveValidator == input.ActiveValidator ||
-                    (this.ActiveValidator != null &&
-                    this.ActiveValidator.Equals(input.ActiveValidator))
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
+                ) && 
+                (
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -180,9 +199,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ActiveValidator != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.ActiveValidator.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                }
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

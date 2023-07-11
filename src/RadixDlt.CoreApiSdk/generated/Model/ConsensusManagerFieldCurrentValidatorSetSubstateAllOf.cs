@@ -103,22 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsensusManagerFieldCurrentValidatorSetSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="validatorSet">validatorSet (required).</param>
-        public ConsensusManagerFieldCurrentValidatorSetSubstateAllOf(List<ActiveValidator> validatorSet = default(List<ActiveValidator>))
+        /// <param name="value">value (required).</param>
+        public ConsensusManagerFieldCurrentValidatorSetSubstateAllOf(ConsensusManagerFieldCurrentValidatorSetValue value = default(ConsensusManagerFieldCurrentValidatorSetValue))
         {
-            // to ensure "validatorSet" is required (not null)
-            if (validatorSet == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("validatorSet is a required property for ConsensusManagerFieldCurrentValidatorSetSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for ConsensusManagerFieldCurrentValidatorSetSubstateAllOf and cannot be null");
             }
-            this.ValidatorSet = validatorSet;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets ValidatorSet
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "validator_set", IsRequired = true, EmitDefaultValue = true)]
-        public List<ActiveValidator> ValidatorSet { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public ConsensusManagerFieldCurrentValidatorSetValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ConsensusManagerFieldCurrentValidatorSetSubstateAllOf {\n");
-            sb.Append("  ValidatorSet: ").Append(ValidatorSet).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,10 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.ValidatorSet == input.ValidatorSet ||
-                    this.ValidatorSet != null &&
-                    input.ValidatorSet != null &&
-                    this.ValidatorSet.SequenceEqual(input.ValidatorSet)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -181,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.ValidatorSet != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.ValidatorSet.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

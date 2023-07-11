@@ -338,8 +338,8 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
             switch (details)
             {
-                case CoreModel.TransactionSubmitMempoolFullErrorDetails mempoolFull:
-                    detailedMessage = $"max mempool capacity of {mempoolFull.MempoolCapacity} exceeded";
+                case CoreModel.TransactionSubmitPriorityThresholdNotMetErrorDetails priorityThresholdNotMet:
+                    detailedMessage = $"insufficient tip percentage of {priorityThresholdNotMet.TipPercentage}; min tip percentage {priorityThresholdNotMet.MinTipPercentageRequired}";
                     break;
                 case CoreModel.TransactionSubmitRejectedErrorDetails rejected:
                     isPermanent = rejected.IsIntentRejectionPermanent || rejected.IsPayloadRejectionPermanent;

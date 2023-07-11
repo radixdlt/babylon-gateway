@@ -95,9 +95,9 @@ namespace RadixDlt.CoreApiSdk.Model
     /// </summary>
     [DataContract(Name = "LtsTransactionSubmitErrorDetails")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitMempoolFullErrorDetails), "LtsTransactionSubmitMempoolFullErrorDetails")]
+    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitPriorityThresholdNotMetErrorDetails), "LtsTransactionSubmitPriorityThresholdNotMetErrorDetails")]
     [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitRejectedErrorDetails), "LtsTransactionSubmitRejectedErrorDetails")]
-    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitMempoolFullErrorDetails), "MempoolFull")]
+    [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitPriorityThresholdNotMetErrorDetails), "PriorityThresholdNotMet")]
     [JsonSubtypes.KnownSubType(typeof(LtsTransactionSubmitRejectedErrorDetails), "Rejected")]
     public partial class LtsTransactionSubmitErrorDetails : IEquatable<LtsTransactionSubmitErrorDetails>
     {

@@ -112,7 +112,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="ledgerTransaction">ledgerTransaction.</param>
         /// <param name="identifiers">identifiers (required).</param>
         /// <param name="type">type (required) (default to ParsedTransactionType.LedgerTransaction).</param>
-        public ParsedLedgerTransaction(LedgerTransaction ledgerTransaction = default(LedgerTransaction), ParsedLedgerTransactionAllOfIdentifiers identifiers = default(ParsedLedgerTransactionAllOfIdentifiers), ParsedTransactionType type = ParsedTransactionType.LedgerTransaction) : base(type)
+        public ParsedLedgerTransaction(LedgerTransaction ledgerTransaction = default(LedgerTransaction), ParsedLedgerTransactionIdentifiers identifiers = default(ParsedLedgerTransactionIdentifiers), ParsedTransactionType type = ParsedTransactionType.LedgerTransaction) : base(type)
         {
             // to ensure "identifiers" is required (not null)
             if (identifiers == null)
@@ -133,7 +133,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Identifiers
         /// </summary>
         [DataMember(Name = "identifiers", IsRequired = true, EmitDefaultValue = true)]
-        public ParsedLedgerTransactionAllOfIdentifiers Identifiers { get; set; }
+        public ParsedLedgerTransactionIdentifiers Identifiers { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

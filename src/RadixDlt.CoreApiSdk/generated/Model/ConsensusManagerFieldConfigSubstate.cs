@@ -96,7 +96,8 @@ namespace RadixDlt.CoreApiSdk.Model
     [DataContract(Name = "ConsensusManagerFieldConfigSubstate")]
     [JsonConverter(typeof(JsonSubtypes), "substate_type")]
     [JsonSubtypes.KnownSubType(typeof(AccessControllerFieldStateSubstate), "AccessControllerFieldState")]
-    [JsonSubtypes.KnownSubType(typeof(AccessRulesModuleFieldAccessRulesSubstate), "AccessRulesModuleFieldAccessRules")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesModuleFieldOwnerRoleSubstate), "AccessRulesModuleFieldOwnerRole")]
+    [JsonSubtypes.KnownSubType(typeof(AccessRulesModuleRuleEntrySubstate), "AccessRulesModuleRuleEntry")]
     [JsonSubtypes.KnownSubType(typeof(AccountDepositRuleIndexEntrySubstate), "AccountDepositRuleIndexEntry")]
     [JsonSubtypes.KnownSubType(typeof(AccountFieldStateSubstate), "AccountFieldState")]
     [JsonSubtypes.KnownSubType(typeof(AccountVaultIndexEntrySubstate), "AccountVaultIndexEntry")]
@@ -106,30 +107,40 @@ namespace RadixDlt.CoreApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentTimeRoundedToMinutesSubstate), "ConsensusManagerFieldCurrentTimeRoundedToMinutes")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldCurrentValidatorSetSubstate), "ConsensusManagerFieldCurrentValidatorSet")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldStateSubstate), "ConsensusManagerFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(ConsensusManagerFieldValidatorRewardsSubstate), "ConsensusManagerFieldValidatorRewards")]
     [JsonSubtypes.KnownSubType(typeof(ConsensusManagerRegisteredValidatorsByStakeIndexEntrySubstate), "ConsensusManagerRegisteredValidatorsByStakeIndexEntry")]
     [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldDivisibilitySubstate), "FungibleResourceManagerFieldDivisibility")]
     [JsonSubtypes.KnownSubType(typeof(FungibleResourceManagerFieldTotalSupplySubstate), "FungibleResourceManagerFieldTotalSupply")]
     [JsonSubtypes.KnownSubType(typeof(FungibleVaultFieldBalanceSubstate), "FungibleVaultFieldBalance")]
+    [JsonSubtypes.KnownSubType(typeof(FungibleVaultFieldFrozenStatusSubstate), "FungibleVaultFieldFrozenStatus")]
     [JsonSubtypes.KnownSubType(typeof(GenericKeyValueStoreEntrySubstate), "GenericKeyValueStoreEntry")]
     [JsonSubtypes.KnownSubType(typeof(GenericScryptoComponentFieldStateSubstate), "GenericScryptoComponentFieldState")]
     [JsonSubtypes.KnownSubType(typeof(MetadataModuleEntrySubstate), "MetadataModuleEntry")]
-    [JsonSubtypes.KnownSubType(typeof(MultiResourcePoolSubstate), "MultiResourcePool")]
+    [JsonSubtypes.KnownSubType(typeof(MultiResourcePoolFieldStateSubstate), "MultiResourcePoolFieldState")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerDataEntrySubstate), "NonFungibleResourceManagerDataEntry")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldIdTypeSubstate), "NonFungibleResourceManagerFieldIdType")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldMutableFieldsSubstate), "NonFungibleResourceManagerFieldMutableFields")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourceManagerFieldTotalSupplySubstate), "NonFungibleResourceManagerFieldTotalSupply")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultContentsIndexEntrySubstate), "NonFungibleVaultContentsIndexEntry")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldBalanceSubstate), "NonFungibleVaultFieldBalance")]
-    [JsonSubtypes.KnownSubType(typeof(OneResourcePoolSubstate), "OneResourcePool")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFieldCodeSubstate), "PackageFieldCode")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFieldCodeTypeSubstate), "PackageFieldCodeType")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFieldFunctionAccessRulesSubstate), "PackageFieldFunctionAccessRules")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFieldInfoSubstate), "PackageFieldInfo")]
-    [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltySubstate), "PackageFieldRoyalty")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldAccumulatorSubstate), "RoyaltyModuleFieldAccumulator")]
-    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldConfigSubstate), "RoyaltyModuleFieldConfig")]
-    [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolSubstate), "TwoResourcePool")]
+    [JsonSubtypes.KnownSubType(typeof(NonFungibleVaultFieldFrozenStatusSubstate), "NonFungibleVaultFieldFrozenStatus")]
+    [JsonSubtypes.KnownSubType(typeof(OneResourcePoolFieldStateSubstate), "OneResourcePoolFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintAuthTemplateEntrySubstate), "PackageBlueprintAuthTemplateEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDefinitionEntrySubstate), "PackageBlueprintDefinitionEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintDependenciesEntrySubstate), "PackageBlueprintDependenciesEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageBlueprintRoyaltyEntrySubstate), "PackageBlueprintRoyaltyEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeInstrumentedCodeEntrySubstate), "PackageCodeInstrumentedCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeOriginalCodeEntrySubstate), "PackageCodeOriginalCodeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageCodeVmTypeEntrySubstate), "PackageCodeVmTypeEntry")]
+    [JsonSubtypes.KnownSubType(typeof(PackageFieldRoyaltyAccumulatorSubstate), "PackageFieldRoyaltyAccumulator")]
+    [JsonSubtypes.KnownSubType(typeof(PackageSchemaEntrySubstate), "PackageSchemaEntry")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleFieldStateSubstate), "RoyaltyModuleFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(RoyaltyModuleMethodRoyaltyEntrySubstate), "RoyaltyModuleMethodRoyaltyEntry")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionTrackerCollectionEntrySubstate), "TransactionTrackerCollectionEntry")]
+    [JsonSubtypes.KnownSubType(typeof(TransactionTrackerFieldStateSubstate), "TransactionTrackerFieldState")]
+    [JsonSubtypes.KnownSubType(typeof(TwoResourcePoolFieldStateSubstate), "TwoResourcePoolFieldState")]
     [JsonSubtypes.KnownSubType(typeof(TypeInfoModuleFieldTypeInfoSubstate), "TypeInfoModuleFieldTypeInfo")]
+    [JsonSubtypes.KnownSubType(typeof(ValidatorFieldProtocolUpdateReadinessSignalSubstate), "ValidatorFieldProtocolUpdateReadinessSignal")]
     [JsonSubtypes.KnownSubType(typeof(ValidatorFieldStateSubstate), "ValidatorFieldState")]
     public partial class ConsensusManagerFieldConfigSubstate : Substate, IEquatable<ConsensusManagerFieldConfigSubstate>
     {
@@ -141,87 +152,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsensusManagerFieldConfigSubstate" /> class.
         /// </summary>
-        /// <param name="maxValidators">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the maximum number of validators in the active validator set.  (required).</param>
-        /// <param name="epochChangeCondition">epochChangeCondition (required).</param>
-        /// <param name="numUnstakeEpochs">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the minimum number of epochs before an unstaker can withdraw their XRD.  (required).</param>
-        /// <param name="totalEmissionXrdPerEpoch">A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
-        /// <param name="minValidatorReliability">A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
-        /// <param name="numOwnerStakeUnitsUnlockEpochs">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the minimum number of epochs before an owner can take their stake units after attempting to withdraw them.  (required).</param>
-        /// <param name="numFeeIncreaseDelayEpochs">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the minimum number of epochs before a fee increase takes effect.  (required).</param>
+        /// <param name="value">value (required).</param>
         /// <param name="substateType">substateType (required) (default to SubstateType.ConsensusManagerFieldConfig).</param>
-        public ConsensusManagerFieldConfigSubstate(long maxValidators = default(long), EpochChangeCondition epochChangeCondition = default(EpochChangeCondition), long numUnstakeEpochs = default(long), string totalEmissionXrdPerEpoch = default(string), string minValidatorReliability = default(string), long numOwnerStakeUnitsUnlockEpochs = default(long), long numFeeIncreaseDelayEpochs = default(long), SubstateType substateType = SubstateType.ConsensusManagerFieldConfig) : base(substateType)
+        /// <param name="isLocked">isLocked (required).</param>
+        public ConsensusManagerFieldConfigSubstate(ConsensusManagerFieldConfigValue value = default(ConsensusManagerFieldConfigValue), SubstateType substateType = SubstateType.ConsensusManagerFieldConfig, bool isLocked = default(bool)) : base(substateType, isLocked)
         {
-            this.MaxValidators = maxValidators;
-            // to ensure "epochChangeCondition" is required (not null)
-            if (epochChangeCondition == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("epochChangeCondition is a required property for ConsensusManagerFieldConfigSubstate and cannot be null");
+                throw new ArgumentNullException("value is a required property for ConsensusManagerFieldConfigSubstate and cannot be null");
             }
-            this.EpochChangeCondition = epochChangeCondition;
-            this.NumUnstakeEpochs = numUnstakeEpochs;
-            // to ensure "totalEmissionXrdPerEpoch" is required (not null)
-            if (totalEmissionXrdPerEpoch == null)
-            {
-                throw new ArgumentNullException("totalEmissionXrdPerEpoch is a required property for ConsensusManagerFieldConfigSubstate and cannot be null");
-            }
-            this.TotalEmissionXrdPerEpoch = totalEmissionXrdPerEpoch;
-            // to ensure "minValidatorReliability" is required (not null)
-            if (minValidatorReliability == null)
-            {
-                throw new ArgumentNullException("minValidatorReliability is a required property for ConsensusManagerFieldConfigSubstate and cannot be null");
-            }
-            this.MinValidatorReliability = minValidatorReliability;
-            this.NumOwnerStakeUnitsUnlockEpochs = numOwnerStakeUnitsUnlockEpochs;
-            this.NumFeeIncreaseDelayEpochs = numFeeIncreaseDelayEpochs;
+            this.Value = value;
         }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the maximum number of validators in the active validator set. 
+        /// Gets or Sets Value
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the maximum number of validators in the active validator set. </value>
-        [DataMember(Name = "max_validators", IsRequired = true, EmitDefaultValue = true)]
-        public long MaxValidators { get; set; }
-
-        /// <summary>
-        /// Gets or Sets EpochChangeCondition
-        /// </summary>
-        [DataMember(Name = "epoch_change_condition", IsRequired = true, EmitDefaultValue = true)]
-        public EpochChangeCondition EpochChangeCondition { get; set; }
-
-        /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the minimum number of epochs before an unstaker can withdraw their XRD. 
-        /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the minimum number of epochs before an unstaker can withdraw their XRD. </value>
-        [DataMember(Name = "num_unstake_epochs", IsRequired = true, EmitDefaultValue = true)]
-        public long NumUnstakeEpochs { get; set; }
-
-        /// <summary>
-        /// A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
-        /// </summary>
-        /// <value>A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
-        [DataMember(Name = "total_emission_xrd_per_epoch", IsRequired = true, EmitDefaultValue = true)]
-        public string TotalEmissionXrdPerEpoch { get; set; }
-
-        /// <summary>
-        /// A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
-        /// </summary>
-        /// <value>A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
-        [DataMember(Name = "min_validator_reliability", IsRequired = true, EmitDefaultValue = true)]
-        public string MinValidatorReliability { get; set; }
-
-        /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the minimum number of epochs before an owner can take their stake units after attempting to withdraw them. 
-        /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the minimum number of epochs before an owner can take their stake units after attempting to withdraw them. </value>
-        [DataMember(Name = "num_owner_stake_units_unlock_epochs", IsRequired = true, EmitDefaultValue = true)]
-        public long NumOwnerStakeUnitsUnlockEpochs { get; set; }
-
-        /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the minimum number of epochs before a fee increase takes effect. 
-        /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, specifying the minimum number of epochs before a fee increase takes effect. </value>
-        [DataMember(Name = "num_fee_increase_delay_epochs", IsRequired = true, EmitDefaultValue = true)]
-        public long NumFeeIncreaseDelayEpochs { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public ConsensusManagerFieldConfigValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -232,13 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ConsensusManagerFieldConfigSubstate {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  MaxValidators: ").Append(MaxValidators).Append("\n");
-            sb.Append("  EpochChangeCondition: ").Append(EpochChangeCondition).Append("\n");
-            sb.Append("  NumUnstakeEpochs: ").Append(NumUnstakeEpochs).Append("\n");
-            sb.Append("  TotalEmissionXrdPerEpoch: ").Append(TotalEmissionXrdPerEpoch).Append("\n");
-            sb.Append("  MinValidatorReliability: ").Append(MinValidatorReliability).Append("\n");
-            sb.Append("  NumOwnerStakeUnitsUnlockEpochs: ").Append(NumOwnerStakeUnitsUnlockEpochs).Append("\n");
-            sb.Append("  NumFeeIncreaseDelayEpochs: ").Append(NumFeeIncreaseDelayEpochs).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -275,35 +217,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.MaxValidators == input.MaxValidators ||
-                    this.MaxValidators.Equals(input.MaxValidators)
-                ) && base.Equals(input) && 
-                (
-                    this.EpochChangeCondition == input.EpochChangeCondition ||
-                    (this.EpochChangeCondition != null &&
-                    this.EpochChangeCondition.Equals(input.EpochChangeCondition))
-                ) && base.Equals(input) && 
-                (
-                    this.NumUnstakeEpochs == input.NumUnstakeEpochs ||
-                    this.NumUnstakeEpochs.Equals(input.NumUnstakeEpochs)
-                ) && base.Equals(input) && 
-                (
-                    this.TotalEmissionXrdPerEpoch == input.TotalEmissionXrdPerEpoch ||
-                    (this.TotalEmissionXrdPerEpoch != null &&
-                    this.TotalEmissionXrdPerEpoch.Equals(input.TotalEmissionXrdPerEpoch))
-                ) && base.Equals(input) && 
-                (
-                    this.MinValidatorReliability == input.MinValidatorReliability ||
-                    (this.MinValidatorReliability != null &&
-                    this.MinValidatorReliability.Equals(input.MinValidatorReliability))
-                ) && base.Equals(input) && 
-                (
-                    this.NumOwnerStakeUnitsUnlockEpochs == input.NumOwnerStakeUnitsUnlockEpochs ||
-                    this.NumOwnerStakeUnitsUnlockEpochs.Equals(input.NumOwnerStakeUnitsUnlockEpochs)
-                ) && base.Equals(input) && 
-                (
-                    this.NumFeeIncreaseDelayEpochs == input.NumFeeIncreaseDelayEpochs ||
-                    this.NumFeeIncreaseDelayEpochs.Equals(input.NumFeeIncreaseDelayEpochs)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -316,22 +232,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.MaxValidators.GetHashCode();
-                if (this.EpochChangeCondition != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.EpochChangeCondition.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.NumUnstakeEpochs.GetHashCode();
-                if (this.TotalEmissionXrdPerEpoch != null)
-                {
-                    hashCode = (hashCode * 59) + this.TotalEmissionXrdPerEpoch.GetHashCode();
-                }
-                if (this.MinValidatorReliability != null)
-                {
-                    hashCode = (hashCode * 59) + this.MinValidatorReliability.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.NumOwnerStakeUnitsUnlockEpochs.GetHashCode();
-                hashCode = (hashCode * 59) + this.NumFeeIncreaseDelayEpochs.GetHashCode();
                 return hashCode;
             }
         }

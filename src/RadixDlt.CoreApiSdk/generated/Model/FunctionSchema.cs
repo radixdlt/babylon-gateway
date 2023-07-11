@@ -106,8 +106,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="receiverInfo">receiverInfo.</param>
         /// <param name="input">input (required).</param>
         /// <param name="output">output (required).</param>
-        /// <param name="export">Name used for export (required).</param>
-        public FunctionSchema(ReceiverInfo receiverInfo = default(ReceiverInfo), LocalTypeIndex input = default(LocalTypeIndex), LocalTypeIndex output = default(LocalTypeIndex), string export = default(string))
+        public FunctionSchema(ReceiverInfo receiverInfo = default(ReceiverInfo), TypePointer input = default(TypePointer), TypePointer output = default(TypePointer))
         {
             // to ensure "input" is required (not null)
             if (input == null)
@@ -121,12 +120,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("output is a required property for FunctionSchema and cannot be null");
             }
             this.Output = output;
-            // to ensure "export" is required (not null)
-            if (export == null)
-            {
-                throw new ArgumentNullException("export is a required property for FunctionSchema and cannot be null");
-            }
-            this.Export = export;
             this.ReceiverInfo = receiverInfo;
         }
 
@@ -140,20 +133,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Input
         /// </summary>
         [DataMember(Name = "input", IsRequired = true, EmitDefaultValue = true)]
-        public LocalTypeIndex Input { get; set; }
+        public TypePointer Input { get; set; }
 
         /// <summary>
         /// Gets or Sets Output
         /// </summary>
         [DataMember(Name = "output", IsRequired = true, EmitDefaultValue = true)]
-        public LocalTypeIndex Output { get; set; }
-
-        /// <summary>
-        /// Name used for export
-        /// </summary>
-        /// <value>Name used for export</value>
-        [DataMember(Name = "export", IsRequired = true, EmitDefaultValue = true)]
-        public string Export { get; set; }
+        public TypePointer Output { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -166,7 +152,6 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  ReceiverInfo: ").Append(ReceiverInfo).Append("\n");
             sb.Append("  Input: ").Append(Input).Append("\n");
             sb.Append("  Output: ").Append(Output).Append("\n");
-            sb.Append("  Export: ").Append(Export).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -216,11 +201,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Output == input.Output ||
                     (this.Output != null &&
                     this.Output.Equals(input.Output))
-                ) && 
-                (
-                    this.Export == input.Export ||
-                    (this.Export != null &&
-                    this.Export.Equals(input.Export))
                 );
         }
 
@@ -244,10 +224,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Output != null)
                 {
                     hashCode = (hashCode * 59) + this.Output.GetHashCode();
-                }
-                if (this.Export != null)
-                {
-                    hashCode = (hashCode * 59) + this.Export.GetHashCode();
                 }
                 return hashCode;
             }

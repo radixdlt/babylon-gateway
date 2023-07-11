@@ -90,4 +90,7 @@ internal class EntityMetadataHistory
     [MemberNotNullWhen(false, nameof(Value))]
     [Column("is_deleted")]
     public bool IsDeleted { get; set; }
+
+    [Column("is_locked")]
+    public bool IsLocked { get; set; }
 }

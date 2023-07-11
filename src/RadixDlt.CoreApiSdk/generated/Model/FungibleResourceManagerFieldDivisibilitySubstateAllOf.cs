@@ -103,17 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="FungibleResourceManagerFieldDivisibilitySubstateAllOf" /> class.
         /// </summary>
-        /// <param name="divisibility">divisibility (required).</param>
-        public FungibleResourceManagerFieldDivisibilitySubstateAllOf(int divisibility = default(int))
+        /// <param name="value">value (required).</param>
+        public FungibleResourceManagerFieldDivisibilitySubstateAllOf(FungibleResourceManagerFieldDivisibilityValue value = default(FungibleResourceManagerFieldDivisibilityValue))
         {
-            this.Divisibility = divisibility;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for FungibleResourceManagerFieldDivisibilitySubstateAllOf and cannot be null");
+            }
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets or Sets Divisibility
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "divisibility", IsRequired = true, EmitDefaultValue = true)]
-        public int Divisibility { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public FungibleResourceManagerFieldDivisibilityValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -123,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class FungibleResourceManagerFieldDivisibilitySubstateAllOf {\n");
-            sb.Append("  Divisibility: ").Append(Divisibility).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -160,8 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Divisibility == input.Divisibility ||
-                    this.Divisibility.Equals(input.Divisibility)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -174,7 +180,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Divisibility.GetHashCode();
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                }
                 return hashCode;
             }
         }

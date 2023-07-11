@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="LtsStreamTransactionOutcomesRequest" /> class.
         /// </summary>
         /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="fromStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version to be returned (required).</param>
+        /// <param name="fromStateVersion">fromStateVersion (required).</param>
         /// <param name="limit">The maximum number of transactions that will be returned. (required).</param>
         public LtsStreamTransactionOutcomesRequest(string network = default(string), long fromStateVersion = default(long), int limit = default(int))
         {
@@ -126,9 +126,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public string Network { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version to be returned
+        /// Gets or Sets FromStateVersion
         /// </summary>
-        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version to be returned</value>
         [DataMember(Name = "from_state_version", IsRequired = true, EmitDefaultValue = true)]
         public long FromStateVersion { get; set; }
 

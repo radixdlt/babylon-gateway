@@ -125,8 +125,7 @@ internal class PreviewService : IPreviewService
         var coreRequestFlags = new CoreModel.TransactionPreviewRequestFlags(
             useFreeCredit: request.Flags.UseFreeCredit,
             assumeAllSignatureProofs: request.Flags.AssumeAllSignatureProofs,
-            permitDuplicateIntentHash: request.Flags.PermitDuplicateIntentHash,
-            permitInvalidHeaderEpoch: request.Flags.PermitInvalidHeaderEpoch);
+            skipEpochCheck: request.Flags.SkipEpochCheck);
 
         var coreRequest = new CoreModel.TransactionPreviewRequest(
             network: _coreApiHandler.GetNetworkName(),

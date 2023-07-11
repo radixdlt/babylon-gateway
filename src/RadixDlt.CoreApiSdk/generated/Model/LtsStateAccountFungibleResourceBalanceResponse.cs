@@ -103,7 +103,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="LtsStateAccountFungibleResourceBalanceResponse" /> class.
         /// </summary>
-        /// <param name="stateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the state version at which the query was performed.  (required).</param>
+        /// <param name="stateVersion">stateVersion (required).</param>
         /// <param name="accountAddress">The Bech32m-encoded human readable version of the account&#39;s address (required).</param>
         /// <param name="fungibleResourceBalance">fungibleResourceBalance (required).</param>
         public LtsStateAccountFungibleResourceBalanceResponse(long stateVersion = default(long), string accountAddress = default(string), LtsFungibleResourceBalance fungibleResourceBalance = default(LtsFungibleResourceBalance))
@@ -124,9 +124,8 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the state version at which the query was performed. 
+        /// Gets or Sets StateVersion
         /// </summary>
-        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the state version at which the query was performed. </value>
         [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
         public long StateVersion { get; set; }
 

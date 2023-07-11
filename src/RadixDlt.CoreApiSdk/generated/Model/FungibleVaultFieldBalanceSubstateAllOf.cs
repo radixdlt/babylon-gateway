@@ -103,23 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="FungibleVaultFieldBalanceSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="amount">The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
-        public FungibleVaultFieldBalanceSubstateAllOf(string amount = default(string))
+        /// <param name="value">value (required).</param>
+        public FungibleVaultFieldBalanceSubstateAllOf(FungibleVaultFieldBalanceValue value = default(FungibleVaultFieldBalanceValue))
         {
-            // to ensure "amount" is required (not null)
-            if (amount == null)
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("amount is a required property for FungibleVaultFieldBalanceSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("value is a required property for FungibleVaultFieldBalanceSubstateAllOf and cannot be null");
             }
-            this.Amount = amount;
+            this.Value = value;
         }
 
         /// <summary>
-        /// The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// Gets or Sets Value
         /// </summary>
-        /// <value>The string-encoded decimal representing the token amount in the vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public string Amount { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public FungibleVaultFieldBalanceValue Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class FungibleVaultFieldBalanceSubstateAllOf {\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,9 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Amount == input.Amount ||
-                    (this.Amount != null &&
-                    this.Amount.Equals(input.Amount))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -181,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Amount != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 return hashCode;
             }

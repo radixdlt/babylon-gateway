@@ -110,10 +110,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="costUnitExecutionBreakdown">A breakdown of where the execution cost went.  (required).</param>
         /// <param name="xrdTotalExecutionCost">The string-encoded decimal representing the total amount of XRD burned in the transaction as part of execution costs. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
         /// <param name="xrdTotalRoyaltyCost">The string-encoded decimal representing the total amount of XRD paid in royalties as part of the transaction. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        /// <param name="xrdTotalStateExpansionCost">The string-encoded decimal representing the total amount of XRD paid in state expansion costs as part of the transaction. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
         /// <param name="xrdTotalTipped">The string-encoded decimal representing the total amount of XRD tipped to validators in the transaction. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
         /// <param name="xrdVaultPayments">A breakdown of which vaults were used to pay the fee.  (required).</param>
         /// <param name="xrdRoyaltyReceivers">A breakdown of where the royalties were paid to.  (required).</param>
-        public FeeSummary(string costUnitPrice = default(string), int tipPercentage = default(int), long costUnitLimit = default(long), long costUnitsConsumed = default(long), Dictionary<string, long> costUnitExecutionBreakdown = default(Dictionary<string, long>), string xrdTotalExecutionCost = default(string), string xrdTotalRoyaltyCost = default(string), string xrdTotalTipped = default(string), List<VaultPayment> xrdVaultPayments = default(List<VaultPayment>), List<RoyaltyPayment> xrdRoyaltyReceivers = default(List<RoyaltyPayment>))
+        public FeeSummary(string costUnitPrice = default(string), int tipPercentage = default(int), long costUnitLimit = default(long), long costUnitsConsumed = default(long), Dictionary<string, long> costUnitExecutionBreakdown = default(Dictionary<string, long>), string xrdTotalExecutionCost = default(string), string xrdTotalRoyaltyCost = default(string), string xrdTotalStateExpansionCost = default(string), string xrdTotalTipped = default(string), List<VaultPayment> xrdVaultPayments = default(List<VaultPayment>), List<RoyaltyPayment> xrdRoyaltyReceivers = default(List<RoyaltyPayment>))
         {
             // to ensure "costUnitPrice" is required (not null)
             if (costUnitPrice == null)
@@ -142,6 +143,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("xrdTotalRoyaltyCost is a required property for FeeSummary and cannot be null");
             }
             this.XrdTotalRoyaltyCost = xrdTotalRoyaltyCost;
+            // to ensure "xrdTotalStateExpansionCost" is required (not null)
+            if (xrdTotalStateExpansionCost == null)
+            {
+                throw new ArgumentNullException("xrdTotalStateExpansionCost is a required property for FeeSummary and cannot be null");
+            }
+            this.XrdTotalStateExpansionCost = xrdTotalStateExpansionCost;
             // to ensure "xrdTotalTipped" is required (not null)
             if (xrdTotalTipped == null)
             {
@@ -212,6 +219,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public string XrdTotalRoyaltyCost { get; set; }
 
         /// <summary>
+        /// The string-encoded decimal representing the total amount of XRD paid in state expansion costs as part of the transaction. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// </summary>
+        /// <value>The string-encoded decimal representing the total amount of XRD paid in state expansion costs as part of the transaction. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        [DataMember(Name = "xrd_total_state_expansion_cost", IsRequired = true, EmitDefaultValue = true)]
+        public string XrdTotalStateExpansionCost { get; set; }
+
+        /// <summary>
         /// The string-encoded decimal representing the total amount of XRD tipped to validators in the transaction. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
         /// </summary>
         /// <value>The string-encoded decimal representing the total amount of XRD tipped to validators in the transaction. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
@@ -247,6 +261,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  CostUnitExecutionBreakdown: ").Append(CostUnitExecutionBreakdown).Append("\n");
             sb.Append("  XrdTotalExecutionCost: ").Append(XrdTotalExecutionCost).Append("\n");
             sb.Append("  XrdTotalRoyaltyCost: ").Append(XrdTotalRoyaltyCost).Append("\n");
+            sb.Append("  XrdTotalStateExpansionCost: ").Append(XrdTotalStateExpansionCost).Append("\n");
             sb.Append("  XrdTotalTipped: ").Append(XrdTotalTipped).Append("\n");
             sb.Append("  XrdVaultPayments: ").Append(XrdVaultPayments).Append("\n");
             sb.Append("  XrdRoyaltyReceivers: ").Append(XrdRoyaltyReceivers).Append("\n");
@@ -319,6 +334,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.XrdTotalRoyaltyCost.Equals(input.XrdTotalRoyaltyCost))
                 ) && 
                 (
+                    this.XrdTotalStateExpansionCost == input.XrdTotalStateExpansionCost ||
+                    (this.XrdTotalStateExpansionCost != null &&
+                    this.XrdTotalStateExpansionCost.Equals(input.XrdTotalStateExpansionCost))
+                ) && 
+                (
                     this.XrdTotalTipped == input.XrdTotalTipped ||
                     (this.XrdTotalTipped != null &&
                     this.XrdTotalTipped.Equals(input.XrdTotalTipped))
@@ -364,6 +384,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.XrdTotalRoyaltyCost != null)
                 {
                     hashCode = (hashCode * 59) + this.XrdTotalRoyaltyCost.GetHashCode();
+                }
+                if (this.XrdTotalStateExpansionCost != null)
+                {
+                    hashCode = (hashCode * 59) + this.XrdTotalStateExpansionCost.GetHashCode();
                 }
                 if (this.XrdTotalTipped != null)
                 {

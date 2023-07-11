@@ -121,7 +121,15 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ValidatorActiveSetHistory> ValidatorActiveSetHistory => Set<ValidatorActiveSetHistory>();
 
-    public DbSet<EntityAccessRulesChainHistory> EntityAccessRulesChainHistory => Set<EntityAccessRulesChainHistory>();
+    public DbSet<EntityAccessRulesOwnerRoleHistory> EntityAccessRulesOwnerHistory => Set<EntityAccessRulesOwnerRoleHistory>();
+
+    public DbSet<EntityAccessRulesEntryHistory> EntityAccessRulesEntryHistory => Set<EntityAccessRulesEntryHistory>();
+
+    public DbSet<EntityAccessRulesAggregateHistory> EntityAccessRulesAggregateHistory => Set<EntityAccessRulesAggregateHistory>();
+
+    public DbSet<ComponentMethodRoyaltyEntryHistory> ComponentMethodRoyaltyEntryHistory => Set<ComponentMethodRoyaltyEntryHistory>();
+
+    public DbSet<PackageBlueprint> PackageBlueprints => Set<PackageBlueprint>();
 
     public DbSet<ComponentSchema> ComponentSchema => Set<ComponentSchema>();
 
@@ -144,6 +152,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOperationType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOriginType>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
+        modelBuilder.HasPostgresEnum<PackageVmType>();
         modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();
         modelBuilder.HasPostgresEnum<ResourceType>();
@@ -261,7 +270,11 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<GlobalIdentityEntity>(EntityType.GlobalIdentity)
             .HasValue<GlobalOneResourcePoolEntity>(EntityType.GlobalOneResourcePool)
             .HasValue<GlobalTwoResourcePoolEntity>(EntityType.GlobalTwoResourcePool)
-            .HasValue<GlobalMultiResourcePoolEntity>(EntityType.GlobalMultiResourcePool);
+            .HasValue<GlobalMultiResourcePoolEntity>(EntityType.GlobalMultiResourcePool)
+            .HasValue<GlobalTransactionTrackerEntity>(EntityType.GlobalTransactionTracker);
+
+        modelBuilder.Entity<PackageBlueprint>()
+            .HasIndex(e => e.PackageEntityId);
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)
@@ -303,6 +316,21 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<EntityVaultHistory>()
             .HasIndex(e => new { e.GlobalEntityId, e.VaultEntityId, e.FromStateVersion });
 
+        modelBuilder.Entity<EntityAccessRulesOwnerRoleHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityAccessRulesEntryHistory>()
+            .HasIndex(e => new { e.EntityId, e.Key, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityAccessRulesAggregateHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<ComponentMethodRoyaltyEntryHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<ComponentMethodRoyaltyEntryHistory>()
+            .HasIndex(e => new { e.EntityId, e.MethodName, e.FromStateVersion });
+
         modelBuilder.Entity<ResourceEntitySupplyHistory>()
             .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
 
@@ -333,8 +361,5 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<ValidatorActiveSetHistory>()
             .HasIndex(e => e.Epoch);
-
-        modelBuilder.Entity<EntityAccessRulesChainHistory>()
-            .HasIndex(e => new { e.EntityId, e.ChildBlueprintName, e.FromStateVersion });
     }
 }
