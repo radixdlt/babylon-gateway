@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -184,7 +184,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     schema_hash = table.Column<byte[]>(type: "bytea", nullable: true),
                     schema = table.Column<string>(type: "jsonb", nullable: true),
                     stake_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
-                    unstake_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
+                    pending_xrd_withdraw_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
+                    locked_owner_stake_unit_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
+                    pending_owner_stake_unit_unlock_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     royalty_vault_of_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: true)
                 },

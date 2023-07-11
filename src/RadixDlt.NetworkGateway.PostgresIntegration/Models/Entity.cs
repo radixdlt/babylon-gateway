@@ -159,8 +159,14 @@ internal class GlobalValidatorEntity : ComponentEntity
     [Column("stake_vault_entity_id")]
     public long StakeVaultEntityId { get; set; }
 
-    [Column("unstake_vault_entity_id")]
-    public long UnstakeVaultEntityId { get; set; }
+    [Column("pending_xrd_withdraw_vault_entity_id")]
+    public long PendingXrdWithdrawVault { get; set; }
+
+    [Column("locked_owner_stake_unit_vault_entity_id")]
+    public long LockedOwnerStakeUnitVault { get; set; }
+
+    [Column("pending_owner_stake_unit_unlock_vault_entity_id")]
+    public long PendingOwnerStakeUnitUnlockVault { get; set; }
 
     public override List<long> CorrelatedEntities
     {
@@ -168,7 +174,9 @@ internal class GlobalValidatorEntity : ComponentEntity
         {
             var ce = base.CorrelatedEntities;
             ce.Add(StakeVaultEntityId);
-            ce.Add(UnstakeVaultEntityId);
+            ce.Add(PendingXrdWithdrawVault);
+            ce.Add(LockedOwnerStakeUnitVault);
+            ce.Add(PendingOwnerStakeUnitUnlockVault);
             return ce;
         }
     }
