@@ -69,13 +69,13 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixEngineToolkit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -97,7 +97,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
 
     public async Task<TackingGuidance> TrackInitialSubmission(
         DateTime submittedTimestamp,
-        NotarizedTransaction notarizedTransaction,
+        ToolkitModel.NotarizedTransaction notarizedTransaction,
         string submittedToNodeName,
         CancellationToken token = default
     )

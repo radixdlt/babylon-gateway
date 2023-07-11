@@ -67,10 +67,10 @@ using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixEngineToolkit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -110,16 +110,16 @@ public class VirtualEntityMetadataProvider : IVirtualEntityMetadataProvider
 
         var last29BytesOfAddress = decodedAddress.Data.Skip(1).Take(29).ToList();
 
-        PublicKeyHash publicKeyHash = isVirtualSecp256k1 ? new PublicKeyHash.Secp256k1(last29BytesOfAddress) : new PublicKeyHash.Ed25519(last29BytesOfAddress);
-        using MetadataValue ownedKeysItem = new MetadataValue.PublicKeyHashArrayValue(new List<PublicKeyHash> { publicKeyHash });
-        var ownerKeysBytes = RadixEngineToolkitUniffiMethods.MetadataSborEncode(ownedKeysItem);
+        ToolkitModel.PublicKeyHash publicKeyHash = isVirtualSecp256k1 ? new ToolkitModel.PublicKeyHash.Secp256k1(last29BytesOfAddress) : new ToolkitModel.PublicKeyHash.Ed25519(last29BytesOfAddress);
+        using ToolkitModel.MetadataValue ownedKeysItem = new ToolkitModel.MetadataValue.PublicKeyHashArrayValue(new List<ToolkitModel.PublicKeyHash> { publicKeyHash });
+        var ownerKeysBytes = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborEncode(ownedKeysItem);
         var ownerKeysRawHex = Convert.ToHexString(ownerKeysBytes.ToArray());
-        var ownerKeysJson = RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerKeysBytes, SerializationMode.PROGRAMMATIC, _networkConfigurationProvider.GetNetworkId(), null);
+        var ownerKeysJson = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerKeysBytes, ToolkitModel.SerializationMode.PROGRAMMATIC, _networkConfigurationProvider.GetNetworkId(), null);
 
-        using MetadataValue ownerBadgeItem = new MetadataValue.NonFungibleLocalIdValue(new NonFungibleLocalId.Bytes(decodedAddress.Data.ToList()));
-        var ownerBadgeBytes = RadixEngineToolkitUniffiMethods.MetadataSborEncode(ownerBadgeItem);
+        using ToolkitModel.MetadataValue ownerBadgeItem = new ToolkitModel.MetadataValue.NonFungibleLocalIdValue(new ToolkitModel.NonFungibleLocalId.Bytes(decodedAddress.Data.ToList()));
+        var ownerBadgeBytes = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborEncode(ownerBadgeItem);
         var ownerBadgeRawHex = Convert.ToHexString(ownerBadgeBytes.ToArray());
-        var ownerBadgeJson = RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerBadgeBytes, SerializationMode.PROGRAMMATIC, _networkConfigurationProvider.GetNetworkId(), null);
+        var ownerBadgeJson = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerBadgeBytes, ToolkitModel.SerializationMode.PROGRAMMATIC, _networkConfigurationProvider.GetNetworkId(), null);
 
         return new EntityMetadataCollection(2, null, null,
             new List<EntityMetadataItem>

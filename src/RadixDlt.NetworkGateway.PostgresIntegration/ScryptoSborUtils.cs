@@ -64,10 +64,10 @@
 
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixEngineToolkit;
 using System;
 using System.Linq;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
@@ -75,14 +75,14 @@ internal static class ScryptoSborUtils
 {
      public static string GetNonFungibleId(string input)
      {
-         var decodedNfid = RadixEngineToolkitUniffiMethods.NonFungibleLocalIdSborDecode(Convert.FromHexString(input).ToList());
-         var stringNfid = RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(decodedNfid);
+         var decodedNfid = ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdSborDecode(Convert.FromHexString(input).ToList());
+         var stringNfid = ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(decodedNfid);
          return stringNfid;
      }
 
      public static GatewayModel.ScryptoSborValue NonFungibleDataToGatewayScryptoSbor(byte[] rawScryptoSbor, byte networkId)
      {
-         var stringRepresentation = RadixEngineToolkitUniffiMethods.SborDecodeToStringRepresentation(rawScryptoSbor.ToList(), SerializationMode.PROGRAMMATIC, networkId, null);
+         var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.SborDecodeToStringRepresentation(rawScryptoSbor.ToList(), ToolkitModel.SerializationMode.PROGRAMMATIC, networkId, null);
 
          return new GatewayModel.ScryptoSborValue(
              rawHex: rawScryptoSbor.ToHex(),
@@ -92,108 +92,108 @@ internal static class ScryptoSborUtils
 
      public static GatewayModel.MetadataTypedValue DecodeToGatewayMetadataItemValue(byte[] rawScryptoSbor, byte networkId)
      {
-         using var metadataValue = RadixEngineToolkitUniffiMethods.MetadataSborDecode(rawScryptoSbor.ToList(), networkId);
+         using var metadataValue = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborDecode(rawScryptoSbor.ToList(), networkId);
          return ConvertToolkitMetadataToGateway(metadataValue);
      }
 
-     public static GatewayModel.MetadataTypedValue ConvertToolkitMetadataToGateway(MetadataValue metadataValue)
+     public static GatewayModel.MetadataTypedValue ConvertToolkitMetadataToGateway(ToolkitModel.MetadataValue metadataValue)
     {
         switch (metadataValue)
         {
-            case MetadataValue.BoolArrayValue boolArrayValue:
+            case ToolkitModel.MetadataValue.BoolArrayValue boolArrayValue:
                 return new GatewayModel.MetadataScalarArrayValue(boolArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.BoolArray);
-            case MetadataValue.BoolValue boolValue:
+            case ToolkitModel.MetadataValue.BoolValue boolValue:
                 return new GatewayModel.MetadataScalarValue(boolValue.value.ToString(), GatewayModel.MetadataValueType.Bool);
-            case MetadataValue.DecimalArrayValue decimalArrayValue:
+            case ToolkitModel.MetadataValue.DecimalArrayValue decimalArrayValue:
                 return new GatewayModel.MetadataScalarArrayValue(decimalArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.DecimalArray);
-            case MetadataValue.DecimalValue decimalValue:
+            case ToolkitModel.MetadataValue.DecimalValue decimalValue:
                 return new GatewayModel.MetadataScalarValue(decimalValue.value.ToString(), GatewayModel.MetadataValueType.Decimal);
-            case MetadataValue.GlobalAddressArrayValue globalAddressArrayValue:
+            case ToolkitModel.MetadataValue.GlobalAddressArrayValue globalAddressArrayValue:
                 return new GatewayModel.MetadataScalarArrayValue(globalAddressArrayValue.value.Select(x => x.AddressString()).ToList(), GatewayModel.MetadataValueType.GlobalAddressArray);
-            case MetadataValue.GlobalAddressValue globalAddressValue:
+            case ToolkitModel.MetadataValue.GlobalAddressValue globalAddressValue:
                 return new GatewayModel.MetadataScalarValue(globalAddressValue.value.AddressString(), GatewayModel.MetadataValueType.GlobalAddress);
-            case MetadataValue.I32ArrayValue i32ArrayValue:
+            case ToolkitModel.MetadataValue.I32ArrayValue i32ArrayValue:
                 return new GatewayModel.MetadataScalarArrayValue(i32ArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.I32Array);
-            case MetadataValue.I32Value i32Value:
+            case ToolkitModel.MetadataValue.I32Value i32Value:
                 return new GatewayModel.MetadataScalarValue(i32Value.value.ToString(), GatewayModel.MetadataValueType.I32);
-            case MetadataValue.I64ArrayValue i64ArrayValue:
+            case ToolkitModel.MetadataValue.I64ArrayValue i64ArrayValue:
                 return new GatewayModel.MetadataScalarArrayValue(i64ArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.I64Array);
-            case MetadataValue.I64Value i64Value:
+            case ToolkitModel.MetadataValue.I64Value i64Value:
                 return new GatewayModel.MetadataScalarValue(i64Value.value.ToString(), GatewayModel.MetadataValueType.I64);
-            case MetadataValue.InstantArrayValue instantArrayValue:
+            case ToolkitModel.MetadataValue.InstantArrayValue instantArrayValue:
                 return new GatewayModel.MetadataScalarArrayValue(instantArrayValue.value.Select(x => DateTimeOffset.FromUnixTimeSeconds(x).AsUtcIsoDateAtSecondsPrecisionString()).ToList(), GatewayModel.MetadataValueType.InstantArray);
-            case MetadataValue.InstantValue instantValue:
+            case ToolkitModel.MetadataValue.InstantValue instantValue:
                 return new GatewayModel.MetadataScalarValue(DateTimeOffset.FromUnixTimeSeconds(instantValue.value).AsUtcIsoDateAtSecondsPrecisionString(), GatewayModel.MetadataValueType.Instant);
-            case MetadataValue.NonFungibleGlobalIdArrayValue nonFungibleGlobalIdArrayValue:
+            case ToolkitModel.MetadataValue.NonFungibleGlobalIdArrayValue nonFungibleGlobalIdArrayValue:
                 return new GatewayModel.MetadataNonFungibleGlobalIdArrayValue(nonFungibleGlobalIdArrayValue.value.Select(x => new GatewayModel.MetadataNonFungibleGlobalIdValueAllOf(x.ResourceAddress().AddressString(), x.LocalId().ToString())).ToList());
-            case MetadataValue.NonFungibleGlobalIdValue nonFungibleGlobalIdValue:
+            case ToolkitModel.MetadataValue.NonFungibleGlobalIdValue nonFungibleGlobalIdValue:
                 return new GatewayModel.MetadataNonFungibleGlobalIdValue(nonFungibleGlobalIdValue.value.ResourceAddress().AddressString(), nonFungibleGlobalIdValue.value.LocalId().ToString());
-            case MetadataValue.NonFungibleLocalIdArrayValue nonFungibleLocalIdArrayValue:
-                return new GatewayModel.MetadataScalarArrayValue(nonFungibleLocalIdArrayValue.value.Select(x => RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(x)).ToList(), GatewayModel.MetadataValueType.NonFungibleLocalIdArray);
-            case MetadataValue.NonFungibleLocalIdValue nonFungibleLocalIdValue:
-                var stringRepresentation = RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(nonFungibleLocalIdValue.value);
+            case ToolkitModel.MetadataValue.NonFungibleLocalIdArrayValue nonFungibleLocalIdArrayValue:
+                return new GatewayModel.MetadataScalarArrayValue(nonFungibleLocalIdArrayValue.value.Select(x => ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(x)).ToList(), GatewayModel.MetadataValueType.NonFungibleLocalIdArray);
+            case ToolkitModel.MetadataValue.NonFungibleLocalIdValue nonFungibleLocalIdValue:
+                var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(nonFungibleLocalIdValue.value);
                 return new GatewayModel.MetadataScalarValue(stringRepresentation, GatewayModel.MetadataValueType.NonFungibleLocalId);
-            case MetadataValue.OriginArrayValue originArrayValue:
+            case ToolkitModel.MetadataValue.OriginArrayValue originArrayValue:
                 return new GatewayModel.MetadataScalarArrayValue(originArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.OriginArray);
-            case MetadataValue.OriginValue originValue:
+            case ToolkitModel.MetadataValue.OriginValue originValue:
                 return new GatewayModel.MetadataScalarValue(originValue.value, GatewayModel.MetadataValueType.Origin);
-            case MetadataValue.PublicKeyArrayValue publicKeyArrayValue:
+            case ToolkitModel.MetadataValue.PublicKeyArrayValue publicKeyArrayValue:
                 var publicKeyArrayCasted = publicKeyArrayValue.value.Select(x =>
                 {
                     return x switch
                     {
-                        PublicKey.Secp256k1 secp256k1 => secp256k1.value.ToArray().ToHex(),
-                        PublicKey.Ed25519 ed25519 => ed25519.value.ToArray().ToHex(),
+                        ToolkitModel.PublicKey.Secp256k1 secp256k1 => secp256k1.value.ToArray().ToHex(),
+                        ToolkitModel.PublicKey.Ed25519 ed25519 => ed25519.value.ToArray().ToHex(),
                         _ => throw new NotSupportedException($"Not expected public key type {x.GetType()}"),
                     };
                 }).ToList();
 
                 return new GatewayModel.MetadataScalarArrayValue(publicKeyArrayCasted, GatewayModel.MetadataValueType.PublicKeyArray);
-            case MetadataValue.PublicKeyValue publicKeyValue:
+            case ToolkitModel.MetadataValue.PublicKeyValue publicKeyValue:
                 return publicKeyValue.value switch
                 {
-                    PublicKey.Secp256k1 secp256K1 => new GatewayModel.MetadataScalarValue(secp256K1.value.ToArray().ToHex(), GatewayModel.MetadataValueType.PublicKey),
-                    PublicKey.Ed25519 ed25519 => new GatewayModel.MetadataScalarValue(ed25519.value.ToArray().ToHex(), GatewayModel.MetadataValueType.PublicKey),
+                    ToolkitModel.PublicKey.Secp256k1 secp256K1 => new GatewayModel.MetadataScalarValue(secp256K1.value.ToArray().ToHex(), GatewayModel.MetadataValueType.PublicKey),
+                    ToolkitModel.PublicKey.Ed25519 ed25519 => new GatewayModel.MetadataScalarValue(ed25519.value.ToArray().ToHex(), GatewayModel.MetadataValueType.PublicKey),
                     _ => throw new NotSupportedException($"Not expected public key type {publicKeyValue.GetType()}"),
                 };
-            case MetadataValue.PublicKeyHashArrayValue publicKeyHashArray:
+            case ToolkitModel.MetadataValue.PublicKeyHashArrayValue publicKeyHashArray:
                 var publicKeyHashArrayCasted = publicKeyHashArray.value.Select(x =>
                 {
                     return x switch
                     {
-                        PublicKeyHash.Secp256k1 secp256k1Hash => secp256k1Hash.value.ToArray().ToHex(),
-                        PublicKeyHash.Ed25519 ed25519Hash => ed25519Hash.value.ToArray().ToHex(),
+                        ToolkitModel.PublicKeyHash.Secp256k1 secp256k1Hash => secp256k1Hash.value.ToArray().ToHex(),
+                        ToolkitModel.PublicKeyHash.Ed25519 ed25519Hash => ed25519Hash.value.ToArray().ToHex(),
                         _ => throw new NotSupportedException($"Not expected public key type {x.GetType()}"),
                     };
                 }).ToList();
 
                 return new GatewayModel.MetadataScalarArrayValue(publicKeyHashArrayCasted, GatewayModel.MetadataValueType.PublicKeyHashArray);
-            case MetadataValue.PublicKeyHashValue publicKeyHashValue:
+            case ToolkitModel.MetadataValue.PublicKeyHashValue publicKeyHashValue:
                 return publicKeyHashValue.value switch
                 {
-                    PublicKeyHash.Secp256k1 secp256k1Hash => new GatewayModel.MetadataScalarValue(secp256k1Hash.value.ToArray().ToHex(), GatewayModel.MetadataValueType.PublicKey),
-                    PublicKeyHash.Ed25519 ed25519Hash => new GatewayModel.MetadataScalarValue(ed25519Hash.value.ToArray().ToHex(), GatewayModel.MetadataValueType.PublicKey),
+                    ToolkitModel.PublicKeyHash.Secp256k1 secp256k1Hash => new GatewayModel.MetadataScalarValue(secp256k1Hash.value.ToArray().ToHex(), GatewayModel.MetadataValueType.PublicKey),
+                    ToolkitModel.PublicKeyHash.Ed25519 ed25519Hash => new GatewayModel.MetadataScalarValue(ed25519Hash.value.ToArray().ToHex(), GatewayModel.MetadataValueType.PublicKey),
                     _ => throw new NotSupportedException($"Not expected public key type {publicKeyHashValue.GetType()}"),
                 };
-            case MetadataValue.StringArrayValue stringArrayValue:
+            case ToolkitModel.MetadataValue.StringArrayValue stringArrayValue:
                 return new GatewayModel.MetadataScalarArrayValue(stringArrayValue.value, GatewayModel.MetadataValueType.StringArray);
-            case MetadataValue.StringValue stringValue:
+            case ToolkitModel.MetadataValue.StringValue stringValue:
                 return new GatewayModel.MetadataScalarValue(stringValue.value, GatewayModel.MetadataValueType.String);
-            case MetadataValue.U32ArrayValue u32ArrayValue:
+            case ToolkitModel.MetadataValue.U32ArrayValue u32ArrayValue:
                 return new GatewayModel.MetadataScalarArrayValue(u32ArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.U32Array);
-            case MetadataValue.U32Value u32Value:
+            case ToolkitModel.MetadataValue.U32Value u32Value:
                 return new GatewayModel.MetadataScalarValue(u32Value.value.ToString(), GatewayModel.MetadataValueType.U32);
-            case MetadataValue.U64ArrayValue u64ArrayValue:
+            case ToolkitModel.MetadataValue.U64ArrayValue u64ArrayValue:
                 return new GatewayModel.MetadataScalarArrayValue(u64ArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.U64Array);
-            case MetadataValue.U64Value u64Value:
+            case ToolkitModel.MetadataValue.U64Value u64Value:
                 return new GatewayModel.MetadataScalarValue(u64Value.value.ToString(), GatewayModel.MetadataValueType.U64);
-            case MetadataValue.U8ArrayValue u8ArrayValue:
+            case ToolkitModel.MetadataValue.U8ArrayValue u8ArrayValue:
                 return new GatewayModel.MetadataScalarArrayValue(u8ArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.U8Array);
-            case MetadataValue.U8Value u8Value:
+            case ToolkitModel.MetadataValue.U8Value u8Value:
                 return new GatewayModel.MetadataScalarValue(u8Value.value.ToString(), GatewayModel.MetadataValueType.U8);
-            case MetadataValue.UrlArrayValue urlArrayValue:
+            case ToolkitModel.MetadataValue.UrlArrayValue urlArrayValue:
                 return new GatewayModel.MetadataScalarArrayValue(urlArrayValue.value, GatewayModel.MetadataValueType.UrlArray);
-            case MetadataValue.UrlValue urlValue:
+            case ToolkitModel.MetadataValue.UrlValue urlValue:
                 return new GatewayModel.MetadataScalarValue(urlValue.value, GatewayModel.MetadataValueType.Url);
             default:
                 throw new NotSupportedException($"Unexpected metadataValue type {metadataValue.GetType()}");

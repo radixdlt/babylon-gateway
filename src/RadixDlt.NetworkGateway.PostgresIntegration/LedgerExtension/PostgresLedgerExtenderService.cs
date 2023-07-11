@@ -74,7 +74,6 @@ using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
-using RadixEngineToolkit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -83,6 +82,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Array = System.Array;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -316,8 +316,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         var coreInstructions = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.Instructions;
                         var coreBlobs = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.BlobsHex;
-                        using var manifestInstructions = Instructions.FromString(coreInstructions, _networkConfigurationProvider.GetNetworkId());
-                        using var toolkitManifest = new TransactionManifest(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex().ToList()).ToList());
+                        using var manifestInstructions = ToolkitModel.Instructions.FromString(coreInstructions, _networkConfigurationProvider.GetNetworkId());
+                        using var toolkitManifest = new ToolkitModel.TransactionManifest(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex().ToList()).ToList());
                         var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest);
 
                         foreach (var address in extractedAddresses.All())
@@ -1052,55 +1052,59 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     // TODO we'd love to see schemed JSON payload here and/or support for SBOR to schemed JSON in RET but this is not available yet; consider this entire section heavy WIP
                     foreach (var @event in committedTransaction.Receipt.Events)
                     {
-                        if (@event.Type.Emitter is not CoreModel.MethodEventEmitterIdentifier methodEventEmitter || @event.Type.TypePointer is not CoreModel.PackageTypePointer)
+                        if (@event.Type.Emitter is not CoreModel.MethodEventEmitterIdentifier methodEventEmitter
+                            || @event.Type.TypePointer is not CoreModel.PackageTypePointer packageTypePointer
+                            || methodEventEmitter.ObjectModuleId != CoreModel.ObjectModuleId.Main)
                         {
                             continue;
                         }
 
                         var eventEmitterEntity = referencedEntities.Get((EntityAddress)methodEventEmitter.Entity.EntityAddress);
 
-                        // TODO restore
-                        // // TODO "deposit" and "withdrawal" events should be used to alter entity_resource_aggregated_vaults_history table (drop tmp_tmp_remove_me_once_tx_events_become_available column)
-                        // if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalFungibleVault)
-                        // {
-                        //     if (((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal || ((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Deposit)
-                        //     {
-                        //         var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
-                        //         var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId;
-                        //         var data = (JObject)@event.Data.ProgrammaticJson;
-                        //         var fungibleAmount = data["fields"]?[0]?["value"]?.ToString();
-                        //         var eventType = ((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
-                        //             ? LedgerTransactionMarkerEventType.Withdrawal
-                        //             : LedgerTransactionMarkerEventType.Deposit;
-                        //
-                        //         if (fungibleAmount == null)
-                        //         {
-                        //             throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].value to be present");
-                        //         }
-                        //
-                        //         var quantity = TokenAmount.FromDecimalString(fungibleAmount);
-                        //
-                        //         ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
-                        //         {
-                        //             Id = sequences.LedgerTransactionMarkerSequence++,
-                        //             StateVersion = stateVersion,
-                        //             EventType = eventType,
-                        //             EntityId = globalAncestorId,
-                        //             ResourceEntityId = resourceEntityId,
-                        //             Quantity = quantity,
-                        //         });
-                        //     }
-                        // }
-                        //
+                        // TODO "deposit" and "withdrawal" events should be used to alter entity_resource_aggregated_vaults_history table (drop tmp_tmp_remove_me_once_tx_events_become_available column)
+                        if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalFungibleVault)
+                        {
+                            if (packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
+                                 || packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Deposit)
+                            {
+                                var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
+                                var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId;
+                                var data = (JObject)@event.Data.ProgrammaticJson;
+                                var fungibleAmount = data["fields"]?[0]?["value"]?.ToString();
+                                var eventType = packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
+                                    ? LedgerTransactionMarkerEventType.Withdrawal
+                                    : LedgerTransactionMarkerEventType.Deposit;
+
+                                if (fungibleAmount == null)
+                                {
+                                    throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].value to be present");
+                                }
+
+                                var quantity = TokenAmount.FromDecimalString(fungibleAmount);
+
+                                ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    EventType = eventType,
+                                    EntityId = globalAncestorId,
+                                    ResourceEntityId = resourceEntityId,
+                                    Quantity = quantity,
+                                });
+                            }
+                        }
+
+                        // TODO PP: restore.
                         // if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalNonFungibleVault)
                         // {
-                        //     if (((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleVault.Withdrawal || ((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleVault.Deposit)
+                        //     if (packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleVault.Withdrawal
+                        //         || packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleVault.Deposit)
                         //     {
                         //         var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
                         //         var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId;
                         //         var data = (JObject)@event.Data.ProgrammaticJson;
-                        //         var nonFungibleIds = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).ToList();
-                        //         var eventType = ((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
+                        //         var nonFungibleIds = data["fields"]?[0]?["elements"]?.Select(x => x["value"]?.ToString()).ToList();
+                        //         var eventType = packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
                         //             ? LedgerTransactionMarkerEventType.Withdrawal
                         //             : LedgerTransactionMarkerEventType.Deposit;
                         //
@@ -1124,7 +1128,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.GlobalFungibleResource)
                         {
-                            if (((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.FungibleResource.Minted)
+                            if (packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleResource.Minted)
                             {
                                 var data = (JObject)@event.Data.ProgrammaticJson;
                                 var amount = data["fields"]?[0]?["value"]?.ToString();
@@ -1136,7 +1140,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                                 resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion, Minted: TokenAmount.FromDecimalString(amount)));
                             }
-                            else if (((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.FungibleResource.Burned)
+                            else if (packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleResource.Burned)
                             {
                                 var data = (JObject)@event.Data.ProgrammaticJson;
                                 var amount = data["fields"]?[0]?["value"]?.ToString();
@@ -1152,7 +1156,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.GlobalNonFungibleResource)
                         {
-                            if (((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleResource.Minted)
+                            if (packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleResource.Minted)
                             {
                                 var data = (JObject)@event.Data.ProgrammaticJson;
                                 var mintedCount = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).Count();
@@ -1167,7 +1171,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                         stateVersion,
                                         Minted: TokenAmount.FromDecimalString(mintedCount.Value.ToString())));
                             }
-                            else if (((CoreModel.PackageTypePointer)@event.Type.TypePointer).LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleResource.Burned)
+                            else if (packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleResource.Burned)
                             {
                                 var data = (JObject)@event.Data.ProgrammaticJson;
                                 var burnedCount = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).Count();
@@ -1202,34 +1206,33 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             }
                         }
 
-                        // TODO restore when possible (RET[.NET] no longer supports them?)
-                        // foreach (var address in extractedAddresses.AccountsDepositedInto)
-                        // {
-                        //     if (referencedEntities.TryGet((EntityAddress)address, out var re))
-                        //     {
-                        //         ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
-                        //         {
-                        //             Id = sequences.LedgerTransactionMarkerSequence++,
-                        //             StateVersion = stateVersion,
-                        //             OperationType = LedgerTransactionMarkerOperationType.AccountDepositedInto,
-                        //             EntityId = re.DatabaseId,
-                        //         });
-                        //     }
-                        // }
-                        //
-                        // foreach (var address in extractedAddresses.AccountsWithdrawnFrom)
-                        // {
-                        //     if (referencedEntities.TryGet((EntityAddress)address, out var re))
-                        //     {
-                        //         ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
-                        //         {
-                        //             Id = sequences.LedgerTransactionMarkerSequence++,
-                        //             StateVersion = stateVersion,
-                        //             OperationType = LedgerTransactionMarkerOperationType.AccountWithdrawnFrom,
-                        //             EntityId = re.DatabaseId,
-                        //         });
-                        //     }
-                        // }
+                        foreach (var address in extractedAddresses.AccountsDepositedInto)
+                        {
+                            if (referencedEntities.TryGet((EntityAddress)address, out var re))
+                            {
+                                ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    OperationType = LedgerTransactionMarkerOperationType.AccountDepositedInto,
+                                    EntityId = re.DatabaseId,
+                                });
+                            }
+                        }
+
+                        foreach (var address in extractedAddresses.AccountsWithdrawnFrom)
+                        {
+                            if (referencedEntities.TryGet((EntityAddress)address, out var re))
+                            {
+                                ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    OperationType = LedgerTransactionMarkerOperationType.AccountWithdrawnFrom,
+                                    EntityId = re.DatabaseId,
+                                });
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)

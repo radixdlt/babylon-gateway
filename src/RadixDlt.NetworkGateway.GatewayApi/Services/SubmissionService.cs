@@ -69,7 +69,6 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
-using RadixEngineToolkit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -77,6 +76,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -156,20 +156,20 @@ internal class SubmissionService : ISubmissionService
         }
     }
 
-    private async Task<NotarizedTransaction> HandlePreSubmissionParseTransaction(GatewayModel.TransactionSubmitRequest request)
+    private async Task<ToolkitModel.NotarizedTransaction> HandlePreSubmissionParseTransaction(GatewayModel.TransactionSubmitRequest request)
     {
         try
         {
-            var notarizedTransaction = NotarizedTransaction.Decompile(request.GetNotarizedTransactionBytes().ToList());
-            notarizedTransaction.StaticallyValidate(ValidationConfig.Default(_coreApiHandler.GetNetworkId()));
+            var notarizedTransaction = ToolkitModel.NotarizedTransaction.Decompile(request.GetNotarizedTransactionBytes().ToList());
+            notarizedTransaction.StaticallyValidate(ToolkitModel.ValidationConfig.Default(_coreApiHandler.GetNetworkId()));
             return notarizedTransaction;
         }
-        catch (RadixEngineToolkitException.TransactionValidationFailed ex)
+        catch (ToolkitModel.RadixEngineToolkitException.TransactionValidationFailed ex)
         {
             await _observers.ForEachAsync(x => x.ParsedTransactionStaticallyInvalid(request, ex.error));
             throw InvalidTransactionException.FromStaticallyInvalid(ex.error);
         }
-        catch (RadixEngineToolkitException ex)
+        catch (ToolkitModel.RadixEngineToolkitException ex)
         {
             await _observers.ForEachAsync(x => x.ParsedTransactionUnsupportedPayloadType(request, ex));
             throw InvalidTransactionException.FromUnsupportedPayloadType();
@@ -184,7 +184,7 @@ internal class SubmissionService : ISubmissionService
 
     private async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitAndCreateResponse(
         GatewayModel.TransactionSubmitRequest request,
-        NotarizedTransaction parsedTransaction,
+        ToolkitModel.NotarizedTransaction parsedTransaction,
         CancellationToken token)
     {
         using var timeoutTokenSource = new CancellationTokenSource(_coreApiIntegrationOptions.CurrentValue.SubmitTransactionTimeout);

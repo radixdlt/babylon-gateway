@@ -62,11 +62,11 @@
  * permissions under this License.
  */
 
-using RadixEngineToolkit;
 using System;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -82,7 +82,7 @@ public interface ISubmissionServiceObserver
 
     ValueTask ParseTransactionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception);
 
-    ValueTask ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, RadixEngineToolkitException exception);
+    ValueTask ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, ToolkitModel.RadixEngineToolkitException exception);
 
     ValueTask ParsedTransactionStaticallyInvalid(GatewayModel.TransactionSubmitRequest request, string error);
 

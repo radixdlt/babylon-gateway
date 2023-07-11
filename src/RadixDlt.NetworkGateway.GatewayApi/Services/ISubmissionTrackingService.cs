@@ -62,11 +62,11 @@
  * permissions under this License.
  */
 
-using RadixEngineToolkit;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -74,7 +74,7 @@ public interface ISubmissionTrackingService
 {
     Task<TackingGuidance> TrackInitialSubmission(
         DateTime submittedTimestamp,
-        NotarizedTransaction notarizedTransaction,
+        ToolkitModel.NotarizedTransaction notarizedTransaction,
         string submittedToNodeName,
         CancellationToken token = default
     );

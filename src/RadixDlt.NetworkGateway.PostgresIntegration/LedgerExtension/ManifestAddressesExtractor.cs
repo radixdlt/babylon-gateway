@@ -63,9 +63,9 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixEngineToolkit;
 using System.Collections.Generic;
 using System.Linq;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -96,7 +96,7 @@ internal static class ManifestAddressesExtractor
                 .ToList();
     }
 
-    public static ManifestAddresses ExtractAddresses(TransactionManifest manifest)
+    public static ManifestAddresses ExtractAddresses(ToolkitModel.TransactionManifest manifest)
     {
         var allAddresses = manifest.ExtractAddresses();
 
@@ -105,16 +105,16 @@ internal static class ManifestAddressesExtractor
         var accountsDepositedInto = manifest.AccountsDepositedInto().Select(x => (EntityAddress)x.AddressString()).ToList();
         var identitiesRequiringAuth = manifest.IdentitiesRequiringAuth().Select(x => (EntityAddress)x.AddressString()).ToList();
 
-        var packageAddresses = allAddresses.Where(x => x.Key == EntityType.GLOBAL_PACKAGE).SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
-        var componentAddresses = allAddresses.Where(x => x.Key is EntityType.GLOBAL_GENERIC_COMPONENT or EntityType.INTERNAL_GENERIC_COMPONENT)
+        var packageAddresses = allAddresses.Where(x => x.Key == ToolkitModel.EntityType.GLOBAL_PACKAGE).SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
+        var componentAddresses = allAddresses.Where(x => x.Key is ToolkitModel.EntityType.GLOBAL_GENERIC_COMPONENT or ToolkitModel.EntityType.INTERNAL_GENERIC_COMPONENT)
             .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
-        var resourceAddresses = allAddresses.Where(x => x.Key is EntityType.GLOBAL_FUNGIBLE_RESOURCE_MANAGER or EntityType.GLOBAL_NON_FUNGIBLE_RESOURCE_MANAGER)
+        var resourceAddresses = allAddresses.Where(x => x.Key is ToolkitModel.EntityType.GLOBAL_FUNGIBLE_RESOURCE_MANAGER or ToolkitModel.EntityType.GLOBAL_NON_FUNGIBLE_RESOURCE_MANAGER)
             .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
         var accountAddresses = allAddresses
-            .Where(x => x.Key is EntityType.GLOBAL_ACCOUNT or EntityType.INTERNAL_ACCOUNT or EntityType.GLOBAL_VIRTUAL_ED25519_ACCOUNT
-                or EntityType.GLOBAL_VIRTUAL_SECP256K1_ACCOUNT).SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
+            .Where(x => x.Key is ToolkitModel.EntityType.GLOBAL_ACCOUNT or ToolkitModel.EntityType.INTERNAL_ACCOUNT or ToolkitModel.EntityType.GLOBAL_VIRTUAL_ED25519_ACCOUNT
+                or ToolkitModel.EntityType.GLOBAL_VIRTUAL_SECP256K1_ACCOUNT).SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
         var identityAddresses = allAddresses
-            .Where(x => x.Key is EntityType.GLOBAL_IDENTITY or EntityType.GLOBAL_VIRTUAL_ED25519_IDENTITY or EntityType.GLOBAL_VIRTUAL_SECP256K1_IDENTITY)
+            .Where(x => x.Key is ToolkitModel.EntityType.GLOBAL_IDENTITY or ToolkitModel.EntityType.GLOBAL_VIRTUAL_ED25519_IDENTITY or ToolkitModel.EntityType.GLOBAL_VIRTUAL_SECP256K1_IDENTITY)
             .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
 
         return new ManifestAddresses(
