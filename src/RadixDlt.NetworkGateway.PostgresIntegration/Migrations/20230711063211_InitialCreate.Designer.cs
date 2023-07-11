@@ -82,7 +82,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230710181018_InitialCreate")]
+    [Migration("20230711063211_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -837,6 +837,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_locked");
 
                     b.Property<long>("NonFungibleIdDataId")
                         .HasColumnType("bigint")

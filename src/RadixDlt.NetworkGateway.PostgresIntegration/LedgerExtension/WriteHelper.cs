@@ -753,7 +753,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_id_data_history (id, from_state_version, non_fungible_id_data_id, is_deleted, data) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_id_data_history (id, from_state_version, non_fungible_id_data_id, data, is_deleted, is_locked) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -761,8 +761,9 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.NonFungibleIdDataId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
             await writer.WriteNullableAsync(e.Data, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
+            await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
         }
 
         await writer.CompleteAsync(token);

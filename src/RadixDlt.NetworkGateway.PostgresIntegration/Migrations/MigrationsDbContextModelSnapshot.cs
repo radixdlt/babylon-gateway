@@ -835,6 +835,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
 
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_locked");
+
                     b.Property<long>("NonFungibleIdDataId")
                         .HasColumnType("bigint")
                         .HasColumnName("non_fungible_id_data_id");

@@ -64,6 +64,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
@@ -80,9 +81,13 @@ internal class NonFungibleIdDataHistory
     [Column("non_fungible_id_data_id")]
     public long NonFungibleIdDataId { get; set; }
 
+    [Column("data")]
+    public byte[]? Data { get; set; }
+
+    [MemberNotNullWhen(false, nameof(Data))]
     [Column("is_deleted")]
     public bool IsDeleted { get; set; }
 
-    [Column("data")]
-    public byte[]? Data { get; set; }
+    [Column("is_locked")]
+    public bool IsLocked { get; set; }
 }

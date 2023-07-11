@@ -825,7 +825,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.NonFungibleResourceManagerDataEntrySubstate nonFungibleResourceManagerDataEntrySubstate)
                         {
-                            var isDeleted = nonFungibleResourceManagerDataEntrySubstate.Value == null;
                             var resourceManagerEntityId = substateId.EntityAddress;
                             var resourceManagerEntity = referencedEntities.Get((EntityAddress)resourceManagerEntityId);
                             var nonFungibleId = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex, _networkConfigurationProvider.GetNetworkId());
@@ -833,7 +832,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             nonFungibleIdChanges.Add(new NonFungibleIdChange(
                                 resourceManagerEntity,
                                 nonFungibleId,
-                                isDeleted,
+                                nonFungibleResourceManagerDataEntrySubstate.Value == null,
                                 nonFungibleResourceManagerDataEntrySubstate.IsLocked,
                                 nonFungibleResourceManagerDataEntrySubstate.Value?.DataStruct.StructData.GetDataBytes(),
                                 stateVersion));
@@ -1453,8 +1452,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     Id = sequences.NonFungibleIdDataHistorySequence++,
                     FromStateVersion = e.StateVersion,
                     NonFungibleIdDataId = nonFungibleIdData.Id,
-                    IsDeleted = e.IsDeleted,
                     Data = e.MutableData,
+                    IsDeleted = e.IsDeleted,
+                    IsLocked = e.IsLocked,
                 });
 
                 if (!nonFungibleIdStore.NonFungibleIdDataIds.Contains(nonFungibleIdData.Id))

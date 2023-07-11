@@ -76,7 +76,7 @@ internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, Referen
 
 internal record NonFungibleIdChange(ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
 
-internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, bool IsLocked, long StateVersion); // TODO use ScryptoSbor.String/ValueButes Key, ScryptoSbor.Enum/ValueBytes? Value
+internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, bool IsLocked, long StateVersion);
 
 internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, TokenAmount? TotalSupply = null, TokenAmount? Minted = null, TokenAmount? Burned = null);
 

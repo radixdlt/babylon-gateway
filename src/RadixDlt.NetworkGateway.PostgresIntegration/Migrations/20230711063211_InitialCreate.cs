@@ -457,8 +457,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     non_fungible_id_data_id = table.Column<long>(type: "bigint", nullable: false),
+                    data = table.Column<byte[]>(type: "bytea", nullable: true),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
-                    data = table.Column<byte[]>(type: "bytea", nullable: true)
+                    is_locked = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
