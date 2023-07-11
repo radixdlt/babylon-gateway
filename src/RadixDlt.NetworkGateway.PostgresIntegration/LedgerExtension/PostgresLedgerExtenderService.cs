@@ -1065,66 +1065,76 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalFungibleVault)
                         {
                             if (packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
-                                 || packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Deposit)
+                                || packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Deposit)
                             {
                                 var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
                                 var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId;
                                 var data = (JObject)@event.Data.ProgrammaticJson;
-                                var fungibleAmount = data["fields"]?[0]?["value"]?.ToString();
-                                var eventType = packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
-                                    ? LedgerTransactionMarkerEventType.Withdrawal
-                                    : LedgerTransactionMarkerEventType.Deposit;
-
-                                if (fungibleAmount == null)
+                                // TODO:
+                                // To be removed once toolkit allows us to read strongly typed event's schema.
+                                if (data["variant_id"]!.ToString() == "0")
                                 {
-                                    throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].value to be present");
+                                    var fungibleAmount = data["fields"]?[0]?["value"]?.ToString();
+                                    var eventType = packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
+                                        ? LedgerTransactionMarkerEventType.Withdrawal
+                                        : LedgerTransactionMarkerEventType.Deposit;
+
+                                    if (fungibleAmount == null)
+                                    {
+                                        throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].value to be present");
+                                    }
+
+                                    var quantity = TokenAmount.FromDecimalString(fungibleAmount);
+
+                                    ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
+                                    {
+                                        Id = sequences.LedgerTransactionMarkerSequence++,
+                                        StateVersion = stateVersion,
+                                        EventType = eventType,
+                                        EntityId = globalAncestorId,
+                                        ResourceEntityId = resourceEntityId,
+                                        Quantity = quantity,
+                                    });
                                 }
-
-                                var quantity = TokenAmount.FromDecimalString(fungibleAmount);
-
-                                ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
-                                {
-                                    Id = sequences.LedgerTransactionMarkerSequence++,
-                                    StateVersion = stateVersion,
-                                    EventType = eventType,
-                                    EntityId = globalAncestorId,
-                                    ResourceEntityId = resourceEntityId,
-                                    Quantity = quantity,
-                                });
-                            }
+                         }
                         }
 
-                        // TODO PP: restore.
-                        // if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalNonFungibleVault)
-                        // {
-                        //     if (packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleVault.Withdrawal
-                        //         || packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleVault.Deposit)
-                        //     {
-                        //         var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
-                        //         var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId;
-                        //         var data = (JObject)@event.Data.ProgrammaticJson;
-                        //         var nonFungibleIds = data["fields"]?[0]?["elements"]?.Select(x => x["value"]?.ToString()).ToList();
-                        //         var eventType = packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
-                        //             ? LedgerTransactionMarkerEventType.Withdrawal
-                        //             : LedgerTransactionMarkerEventType.Deposit;
-                        //
-                        //         if (nonFungibleIds?.Any() != true)
-                        //         {
-                        //             throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].elements to be present");
-                        //         }
-                        //
-                        //         var quantity = TokenAmount.FromDecimalString(nonFungibleIds.Count.ToString());
-                        //         ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
-                        //         {
-                        //             Id = sequences.LedgerTransactionMarkerSequence++,
-                        //             StateVersion = stateVersion,
-                        //             EventType = eventType,
-                        //             EntityId = globalAncestorId,
-                        //             ResourceEntityId = resourceEntityId,
-                        //             Quantity = quantity,
-                        //         });
-                        //     }
-                        // }
+                        if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalNonFungibleVault)
+                        {
+                            if (packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleVault.Withdrawal
+                                || packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleVault.Deposit)
+                            {
+                                var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
+                                var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId;
+                                var data = (JObject)@event.Data.ProgrammaticJson;
+
+                                // TODO:
+                                // To be removed once toolkit allows us to read strongly typed event's schema.
+                                if (data["variant_id"]!.ToString() == "1")
+                                {
+                                    var nonFungibleIds = data["fields"]?[0]?["elements"]?.Select(x => x["value"]?.ToString()).ToList();
+                                    var eventType = packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
+                                        ? LedgerTransactionMarkerEventType.Withdrawal
+                                        : LedgerTransactionMarkerEventType.Deposit;
+
+                                    if (nonFungibleIds?.Any() != true)
+                                    {
+                                        throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].elements to be present");
+                                    }
+
+                                    var quantity = TokenAmount.FromDecimalString(nonFungibleIds.Count.ToString());
+                                    ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
+                                    {
+                                        Id = sequences.LedgerTransactionMarkerSequence++,
+                                        StateVersion = stateVersion,
+                                        EventType = eventType,
+                                        EntityId = globalAncestorId,
+                                        ResourceEntityId = resourceEntityId,
+                                        Quantity = quantity,
+                                    });
+                                }
+                            }
+                        }
 
                         if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.GlobalFungibleResource)
                         {
@@ -1194,7 +1204,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         foreach (var address in extractedAddresses.ResourceAddresses)
                         {
-                            if (referencedEntities.TryGet((EntityAddress)address, out var re))
+                            if (referencedEntities.TryGet(address, out var re))
                             {
                                 ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
                                 {
@@ -1208,7 +1218,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         foreach (var address in extractedAddresses.AccountsDepositedInto)
                         {
-                            if (referencedEntities.TryGet((EntityAddress)address, out var re))
+                            if (referencedEntities.TryGet(address, out var re))
                             {
                                 ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
                                 {
@@ -1222,7 +1232,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         foreach (var address in extractedAddresses.AccountsWithdrawnFrom)
                         {
-                            if (referencedEntities.TryGet((EntityAddress)address, out var re))
+                            if (referencedEntities.TryGet(address, out var re))
                             {
                                 ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
                                 {
