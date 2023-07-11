@@ -62,283 +62,141 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.RadixEngineToolkit.Model.Exchange;
-using RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor;
+using RadixEngineToolkit;
 using System;
-using System.Diagnostics;
 using System.Linq;
-using Array = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Array;
-using Decimal = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Decimal;
-using Enum = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Enum;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using String = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.String;
-using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
-using Tuple = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Tuple;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class ScryptoSborUtils
 {
-    public static string GetNonFungibleId(string input, byte networkId)
+     public static string GetNonFungibleId(string input)
+     {
+         var decodedNfid = RadixEngineToolkitUniffiMethods.NonFungibleLocalIdSborDecode(Convert.FromHexString(input).ToList());
+         var stringNfid = RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(decodedNfid);
+         return stringNfid;
+     }
+
+     public static GatewayModel.ScryptoSborValue NonFungibleDataToGatewayScryptoSbor(byte[] rawScryptoSbor, byte networkId)
+     {
+         var stringRepresentation = RadixEngineToolkitUniffiMethods.SborDecodeToStringRepresentation(rawScryptoSbor.ToList(), SerializationMode.PROGRAMMATIC, networkId, null);
+
+         return new GatewayModel.ScryptoSborValue(
+             rawHex: rawScryptoSbor.ToHex(),
+             rawJson: JObject.Parse(stringRepresentation)
+             );
+     }
+
+     public static GatewayModel.MetadataTypedValue DecodeToGatewayMetadataItemValue(byte[] rawScryptoSbor, byte networkId)
+     {
+         using var metadataValue = RadixEngineToolkitUniffiMethods.MetadataSborDecode(rawScryptoSbor.ToList(), networkId);
+         return ConvertToolkitMetadataToGateway(metadataValue);
+     }
+
+     public static GatewayModel.MetadataTypedValue ConvertToolkitMetadataToGateway(MetadataValue metadataValue)
     {
-        var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(Convert.FromHexString(input), networkId);
-
-        if (result is not SborDecodeResponse.ScryptoSbor scryptoSbor)
+        switch (metadataValue)
         {
-            throw new UnreachableException("Expected ScryptoSbor response");
-        }
-
-        if (scryptoSbor.Value is not NonFungibleLocalId nonFungibleLocalId)
-        {
-            throw new UnreachableException("Expected ScryptoSbor.NonFungibleLocalId");
-        }
-
-        return nonFungibleLocalId.Value;
-    }
-
-    public static GatewayModel.ScryptoSborValue NonFungibleDataToGatewayScryptoSbor(byte[] rawScryptoSbor, byte networkId)
-    {
-        var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(rawScryptoSbor, networkId);
-
-        if (result is not SborDecodeResponse.ScryptoSbor scryptoSbor)
-        {
-            throw new UnreachableException("Expected ScryptoSbor response");
-        }
-
-        return new GatewayModel.ScryptoSborValue(
-            rawHex: rawScryptoSbor.ToHex(),
-            rawJson: new JRaw(RadixEngineToolkit.RadixEngineToolkit.ScryptoSborEncodeJson(scryptoSbor.Value)));
-    }
-
-    // See: https://github.com/radixdlt/radixdlt-scrypto/blob/release/birch/radix-engine-interface/src/api/node_modules/metadata/invocations.rs
-    public static GatewayModel.EntityMetadataItemValue MetadataValueToGatewayMetadataItemValue(byte[] rawScryptoSbor, byte networkId, ILogger logger)
-    {
-        var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(rawScryptoSbor, networkId);
-
-        if (result is not SborDecodeResponse.ScryptoSbor scryptoSbor)
-        {
-            throw new UnreachableException($"Expected ScryptoSbor response, rawBytes={rawScryptoSbor.ToHex()}");
-        }
-
-        if (scryptoSbor.Value is not Enum @enum)
-        {
-            throw new UnreachableException($"Expected ScryptoSbor.Enum, rawBytes={rawScryptoSbor.ToHex()}");
-        }
-
-        GatewayModel.MetadataTypedValue? typedValue = null;
-
-        switch (@enum.VariantId)
-        {
-            case 0 when @enum.Fields is [String value]:
-                typedValue = new GatewayModel.MetadataScalarValue(value, GatewayModel.MetadataValueType.String);
-                break;
-            case 1 when @enum.Fields is [Bool value]:
-                typedValue = new GatewayModel.MetadataScalarValue(value.Value.ToString(), GatewayModel.MetadataValueType.Bool);
-                break;
-            case 2 when @enum.Fields is [U8 value]:
-                typedValue = new GatewayModel.MetadataScalarValue(value.Value.ToString(), GatewayModel.MetadataValueType.U8);
-                break;
-            case 3 when @enum.Fields is [U32 value]:
-                typedValue = new GatewayModel.MetadataScalarValue(value.Value.ToString(), GatewayModel.MetadataValueType.U32);
-                break;
-            case 4 when @enum.Fields is [U64 value]:
-                typedValue = new GatewayModel.MetadataScalarValue(value.Value.ToString(), GatewayModel.MetadataValueType.U64);
-                break;
-            case 5 when @enum.Fields is [I32 value]:
-                typedValue = new GatewayModel.MetadataScalarValue(value.Value.ToString(), GatewayModel.MetadataValueType.I32);
-                break;
-            case 6 when @enum.Fields is [I64 value]:
-                typedValue = new GatewayModel.MetadataScalarValue(value.Value.ToString(), GatewayModel.MetadataValueType.I64);
-                break;
-            case 7 when @enum.Fields is [Decimal value]:
-                typedValue = new GatewayModel.MetadataScalarValue(value.Value, GatewayModel.MetadataValueType.Decimal);
-                break;
-            case 8 when @enum.Fields is [Reference reference]:
-                typedValue = new GatewayModel.MetadataScalarValue(reference.Value, GatewayModel.MetadataValueType.GlobalAddress);
-                break;
-            case 9 when @enum.Fields is [Enum publicKeyEnum]:
-                if (publicKeyEnum.Fields is [Bytes keyBytes])
+            case MetadataValue.BoolArrayValue boolArrayValue:
+                return new GatewayModel.MetadataScalarArrayValue(boolArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.BoolArray);
+            case MetadataValue.BoolValue boolValue:
+                return new GatewayModel.MetadataScalarValue(boolValue.value.ToString(), GatewayModel.MetadataValueType.Bool);
+            case MetadataValue.DecimalArrayValue decimalArrayValue:
+                return new GatewayModel.MetadataScalarArrayValue(decimalArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.DecimalArray);
+            case MetadataValue.DecimalValue decimalValue:
+                return new GatewayModel.MetadataScalarValue(decimalValue.value.ToString(), GatewayModel.MetadataValueType.Decimal);
+            case MetadataValue.GlobalAddressArrayValue globalAddressArrayValue:
+                return new GatewayModel.MetadataScalarArrayValue(globalAddressArrayValue.value.Select(x => x.AddressString()).ToList(), GatewayModel.MetadataValueType.GlobalAddressArray);
+            case MetadataValue.GlobalAddressValue globalAddressValue:
+                return new GatewayModel.MetadataScalarValue(globalAddressValue.value.AddressString(), GatewayModel.MetadataValueType.GlobalAddress);
+            case MetadataValue.I32ArrayValue i32ArrayValue:
+                return new GatewayModel.MetadataScalarArrayValue(i32ArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.I32Array);
+            case MetadataValue.I32Value i32Value:
+                return new GatewayModel.MetadataScalarValue(i32Value.value.ToString(), GatewayModel.MetadataValueType.I32);
+            case MetadataValue.I64ArrayValue i64ArrayValue:
+                return new GatewayModel.MetadataScalarArrayValue(i64ArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.I64Array);
+            case MetadataValue.I64Value i64Value:
+                return new GatewayModel.MetadataScalarValue(i64Value.value.ToString(), GatewayModel.MetadataValueType.I64);
+            case MetadataValue.InstantArrayValue instantArrayValue:
+                return new GatewayModel.MetadataScalarArrayValue(instantArrayValue.value.Select(x => DateTimeOffset.FromUnixTimeSeconds(x).AsUtcIsoDateAtSecondsPrecisionString()).ToList(), GatewayModel.MetadataValueType.InstantArray);
+            case MetadataValue.InstantValue instantValue:
+                return new GatewayModel.MetadataScalarValue(DateTimeOffset.FromUnixTimeSeconds(instantValue.value).AsUtcIsoDateAtSecondsPrecisionString(), GatewayModel.MetadataValueType.Instant);
+            case MetadataValue.NonFungibleGlobalIdArrayValue nonFungibleGlobalIdArrayValue:
+                return new GatewayModel.MetadataNonFungibleGlobalIdArrayValue(nonFungibleGlobalIdArrayValue.value.Select(x => new GatewayModel.MetadataNonFungibleGlobalIdValueAllOf(x.ResourceAddress().AddressString(), x.LocalId().ToString())).ToList());
+            case MetadataValue.NonFungibleGlobalIdValue nonFungibleGlobalIdValue:
+                return new GatewayModel.MetadataNonFungibleGlobalIdValue(nonFungibleGlobalIdValue.value.ResourceAddress().AddressString(), nonFungibleGlobalIdValue.value.LocalId().ToString());
+            case MetadataValue.NonFungibleLocalIdArrayValue nonFungibleLocalIdArrayValue:
+                return new GatewayModel.MetadataScalarArrayValue(nonFungibleLocalIdArrayValue.value.Select(x => RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(x)).ToList(), GatewayModel.MetadataValueType.NonFungibleLocalIdArray);
+            case MetadataValue.NonFungibleLocalIdValue nonFungibleLocalIdValue:
+                var stringRepresentation = RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(nonFungibleLocalIdValue.value);
+                return new GatewayModel.MetadataScalarValue(stringRepresentation, GatewayModel.MetadataValueType.NonFungibleLocalId);
+            case MetadataValue.OriginArrayValue originArrayValue:
+                return new GatewayModel.MetadataScalarArrayValue(originArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.OriginArray);
+            case MetadataValue.OriginValue originValue:
+                return new GatewayModel.MetadataScalarValue(originValue.value, GatewayModel.MetadataValueType.Origin);
+            case MetadataValue.PublicKeyArrayValue publicKeyArrayValue:
+                var publicKeyArrayCasted = publicKeyArrayValue.value.Select(x =>
                 {
-                    GatewayModel.PublicKey? pk = publicKeyEnum.VariantId switch
+                    return x switch
                     {
-                        0 => new GatewayModel.PublicKeyEcdsaSecp256k1(((byte[])keyBytes.Hex).ToHex()),
-                        1 => new GatewayModel.PublicKeyEddsaEd25519(((byte[])keyBytes.Hex).ToHex()),
-                        _ => null,
+                        PublicKey.Secp256k1 secp256k1 => secp256k1.value.ToArray().ToHex(),
+                        PublicKey.Ed25519 ed25519 => ed25519.value.ToArray().ToHex(),
+                        _ => throw new NotSupportedException($"Not expected public key type {x.GetType()}"),
                     };
+                }).ToList();
 
-                    if (pk != null)
+                return new GatewayModel.MetadataScalarArrayValue(publicKeyArrayCasted, GatewayModel.MetadataValueType.PublicKeyArray);
+            case MetadataValue.PublicKeyValue publicKeyValue:
+                return publicKeyValue.value switch
+                {
+                    PublicKey.Secp256k1 secp256K1 => new GatewayModel.MetadataScalarValue(secp256K1.value.ToArray().ToHex(), GatewayModel.MetadataValueType.PublicKey),
+                    PublicKey.Ed25519 ed25519 => new GatewayModel.MetadataScalarValue(ed25519.value.ToArray().ToHex(), GatewayModel.MetadataValueType.PublicKey),
+                    _ => throw new NotSupportedException($"Not expected public key type {publicKeyValue.GetType()}"),
+                };
+            case MetadataValue.PublicKeyHashArrayValue publicKeyHashArray:
+                var publicKeyHashArrayCasted = publicKeyHashArray.value.Select(x =>
+                {
+                    return x switch
                     {
-                        typedValue = new GatewayModel.MetadataPublicKeyValue(pk);
-                    }
-                }
+                        PublicKeyHash.Secp256k1 secp256k1Hash => secp256k1Hash.value.ToArray().ToHex(),
+                        PublicKeyHash.Ed25519 ed25519Hash => ed25519Hash.value.ToArray().ToHex(),
+                        _ => throw new NotSupportedException($"Not expected public key type {x.GetType()}"),
+                    };
+                }).ToList();
 
-                break;
-            case 10 when @enum.Fields is [Tuple nonFungibleGlobalId]:
-                if (nonFungibleGlobalId.Fields is [Reference nonFungibleResourceAddress, NonFungibleLocalId nonFungibleLocalId])
+                return new GatewayModel.MetadataScalarArrayValue(publicKeyHashArrayCasted, GatewayModel.MetadataValueType.PublicKeyHashArray);
+            case MetadataValue.PublicKeyHashValue publicKeyHashValue:
+                return publicKeyHashValue.value switch
                 {
-                    typedValue = new GatewayModel.MetadataNonFungibleGlobalIdValue(nonFungibleResourceAddress.Value, nonFungibleLocalId.Value);
-                }
-
-                break;
-            case 11 when @enum.Fields is [NonFungibleLocalId value]:
-                typedValue = new GatewayModel.MetadataScalarValue(value.Value, GatewayModel.MetadataValueType.NonFungibleLocalId);
-                break;
-            case 12 when @enum.Fields is [I64 instant]:
-                typedValue = new GatewayModel.MetadataScalarValue(DateTimeOffset.FromUnixTimeSeconds(instant.Value).AsUtcIsoDateAtSecondsPrecisionString(), GatewayModel.MetadataValueType.Instant);
-                break;
-            case 13 when @enum.Fields is [String url]:
-                typedValue = new GatewayModel.MetadataScalarValue(url.Value, GatewayModel.MetadataValueType.Url);
-                break;
-            case 14 when @enum.Fields is [String origin]:
-                typedValue = new GatewayModel.MetadataScalarValue(origin.Value, GatewayModel.MetadataValueType.Origin);
-                break;
-            case 15 when @enum.Fields is [Enum publicKeyHashEnum]:
-                if (publicKeyHashEnum.Fields is [Bytes hashKeyBytes])
-                {
-                    typedValue = new GatewayModel.MetadataScalarValue(((byte[])hashKeyBytes.Hex).ToHex(), GatewayModel.MetadataValueType.PublicKeyHash);
-                }
-
-                break;
+                    PublicKeyHash.Secp256k1 secp256k1Hash => new GatewayModel.MetadataScalarValue(secp256k1Hash.value.ToArray().ToHex(), GatewayModel.MetadataValueType.PublicKey),
+                    PublicKeyHash.Ed25519 ed25519Hash => new GatewayModel.MetadataScalarValue(ed25519Hash.value.ToArray().ToHex(), GatewayModel.MetadataValueType.PublicKey),
+                    _ => throw new NotSupportedException($"Not expected public key type {publicKeyHashValue.GetType()}"),
+                };
+            case MetadataValue.StringArrayValue stringArrayValue:
+                return new GatewayModel.MetadataScalarArrayValue(stringArrayValue.value, GatewayModel.MetadataValueType.StringArray);
+            case MetadataValue.StringValue stringValue:
+                return new GatewayModel.MetadataScalarValue(stringValue.value, GatewayModel.MetadataValueType.String);
+            case MetadataValue.U32ArrayValue u32ArrayValue:
+                return new GatewayModel.MetadataScalarArrayValue(u32ArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.U32Array);
+            case MetadataValue.U32Value u32Value:
+                return new GatewayModel.MetadataScalarValue(u32Value.value.ToString(), GatewayModel.MetadataValueType.U32);
+            case MetadataValue.U64ArrayValue u64ArrayValue:
+                return new GatewayModel.MetadataScalarArrayValue(u64ArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.U64Array);
+            case MetadataValue.U64Value u64Value:
+                return new GatewayModel.MetadataScalarValue(u64Value.value.ToString(), GatewayModel.MetadataValueType.U64);
+            case MetadataValue.U8ArrayValue u8ArrayValue:
+                return new GatewayModel.MetadataScalarArrayValue(u8ArrayValue.value.Select(x => x.ToString()).ToList(), GatewayModel.MetadataValueType.U8Array);
+            case MetadataValue.U8Value u8Value:
+                return new GatewayModel.MetadataScalarValue(u8Value.value.ToString(), GatewayModel.MetadataValueType.U8);
+            case MetadataValue.UrlArrayValue urlArrayValue:
+                return new GatewayModel.MetadataScalarArrayValue(urlArrayValue.value, GatewayModel.MetadataValueType.UrlArray);
+            case MetadataValue.UrlValue urlValue:
+                return new GatewayModel.MetadataScalarValue(urlValue.value, GatewayModel.MetadataValueType.Url);
+            default:
+                throw new NotSupportedException($"Unexpected metadataValue type {metadataValue.GetType()}");
         }
-
-        // arrays use same variants as their scalar counterparts with 0x80 being added to them
-        if ((@enum.VariantId & 0x80) != 0)
-        {
-            var scalarVariant = (byte)(@enum.VariantId & (~0x80));
-
-            if (@enum.Fields is [Array array])
-            {
-                switch (scalarVariant)
-                {
-                    case 0 when array.Elements.All(e => e is String):
-                        typedValue = new GatewayModel.MetadataScalarArrayValue(array.Elements.Cast<String>().Select(e => e.Value).ToList(), GatewayModel.MetadataValueType.StringArray);
-                        break;
-                    case 1 when array.Elements.All(e => e is Bool):
-                        typedValue = new GatewayModel.MetadataScalarArrayValue(array.Elements.Cast<Bool>().Select(e => e.Value.ToString()).ToList(), GatewayModel.MetadataValueType.BoolArray);
-                        break;
-                    case 2 when array.Elements.All(e => e is U8):
-                        typedValue = new GatewayModel.MetadataScalarValue(array.Elements.Cast<U8>().Select(e => e.Value).ToArray().ToHex(), GatewayModel.MetadataValueType.U8Array);
-                        break;
-                    case 3 when array.Elements.All(e => e is U32):
-                        typedValue = new GatewayModel.MetadataScalarArrayValue(array.Elements.Cast<U32>().Select(e => e.Value.ToString()).ToList(), GatewayModel.MetadataValueType.U32Array);
-                        break;
-                    case 4 when array.Elements.All(e => e is U64):
-                        typedValue = new GatewayModel.MetadataScalarArrayValue(array.Elements.Cast<U64>().Select(e => e.Value.ToString()).ToList(), GatewayModel.MetadataValueType.U64Array);
-                        break;
-                    case 5 when array.Elements.All(e => e is I32):
-                        typedValue = new GatewayModel.MetadataScalarArrayValue(array.Elements.Cast<I32>().Select(e => e.Value.ToString()).ToList(), GatewayModel.MetadataValueType.I32Array);
-                        break;
-                    case 6 when array.Elements.All(e => e is I64):
-                        typedValue = new GatewayModel.MetadataScalarArrayValue(array.Elements.Cast<I64>().Select(e => e.Value.ToString()).ToList(), GatewayModel.MetadataValueType.I64Array);
-                        break;
-                    case 7 when array.Elements.All(e => e is Decimal):
-                        typedValue = new GatewayModel.MetadataScalarArrayValue(array.Elements.Cast<Decimal>().Select(e => e.Value.ToString()).ToList(), GatewayModel.MetadataValueType.DecimalArray);
-                        break;
-                    case 8 when array.Elements.All(e => e is Reference):
-                        typedValue = new GatewayModel.MetadataScalarArrayValue(array.Elements.Cast<Reference>().Select(e => e.Value.ToString()).ToList(), GatewayModel.MetadataValueType.GlobalAddressArray);
-                        break;
-                    case 9 when array.Elements.All(e => e is Enum):
-                        var pks = array.Elements
-                            .Cast<Enum>()
-                            .Select(e =>
-                            {
-                                if (e.Fields is [Bytes keyBytes])
-                                {
-                                    GatewayModel.PublicKey? pk = e.VariantId switch
-                                    {
-                                        0 => new GatewayModel.PublicKeyEcdsaSecp256k1(((byte[])keyBytes.Hex).ToHex()),
-                                        1 => new GatewayModel.PublicKeyEddsaEd25519(((byte[])keyBytes.Hex).ToHex()),
-                                        _ => null,
-                                    };
-
-                                    return pk;
-                                }
-
-                                return null;
-                            })
-                            .ToList();
-
-                        if (pks.Any(pk => pk == null))
-                        {
-                            break;
-                        }
-
-                        typedValue = new GatewayModel.MetadataPublicKeyArrayValue(pks);
-                        break;
-                    case 10 when array.Elements.All(e => e is Tuple):
-                        var nfg = array.Elements
-                            .Cast<Tuple>()
-                            .Select(e =>
-                            {
-                                if (e.Fields is [Reference nonFungibleResourceAddress, NonFungibleLocalId nonFungibleLocalId])
-                                {
-                                    return new GatewayModel.MetadataNonFungibleGlobalIdValueAllOf(nonFungibleResourceAddress.Value, nonFungibleLocalId.Value);
-                                }
-
-                                return null;
-                            })
-                            .ToList();
-
-                        if (nfg.Any(e => e == null))
-                        {
-                            break;
-                        }
-
-                        typedValue = new GatewayModel.MetadataNonFungibleGlobalIdArrayValue(nfg);
-                        break;
-                    case 11 when array.Elements.All(e => e is NonFungibleLocalId):
-                        typedValue = new GatewayModel.MetadataScalarArrayValue(array.Elements.Cast<NonFungibleLocalId>().Select(e => e.Value.ToString()).ToList(), GatewayModel.MetadataValueType.NonFungibleLocalIdArray);
-                        break;
-                    case 12 when array.Elements.All(e => e is I64):
-                        typedValue = new GatewayModel.MetadataScalarArrayValue(array.Elements.Cast<I64>().Select(e => DateTimeOffset.FromUnixTimeSeconds(e.Value).AsUtcIsoDateAtSecondsPrecisionString()).ToList(), GatewayModel.MetadataValueType.InstantArray);
-                        break;
-                    case 13 when array.Elements.All(e => e is String):
-                        typedValue = new GatewayModel.MetadataScalarArrayValue(array.Elements.Cast<String>().Select(e => e.Value.ToString()).ToList(), GatewayModel.MetadataValueType.UrlArray);
-                        break;
-                    case 14 when array.Elements.All(e => e is String):
-                        typedValue = new GatewayModel.MetadataScalarArrayValue(array.Elements.Cast<String>().Select(e => e.Value.ToString()).ToList(), GatewayModel.MetadataValueType.OriginArray);
-                        break;
-                    case 15 when array.Elements.All(e => e is Enum):
-                        var h = array.Elements
-                            .Cast<Enum>()
-                            .Select(e =>
-                            {
-                                if (e.Fields is [Bytes hashKeyBytes])
-                                {
-                                    return ((byte[])hashKeyBytes.Hex).ToHex();
-                                }
-
-                                return null;
-                            })
-                            .ToList();
-
-                        if (h.Any(e => e == null))
-                        {
-                            break;
-                        }
-
-                        typedValue = new GatewayModel.MetadataScalarArrayValue(h, GatewayModel.MetadataValueType.PublicKeyHashArray);
-                        break;
-                }
-            }
-            else if (scalarVariant == 2 && @enum.Fields is [Bytes bytes])
-            {
-                // alternate encoding for array of u8s
-                typedValue = new GatewayModel.MetadataScalarValue(((byte[])bytes.Hex).ToHex(), GatewayModel.MetadataValueType.U8Array);
-            }
-        }
-
-        if (typedValue == null)
-        {
-            logger.LogWarning("Unknown MetadataEntry variantId={VariantId}, rawBytes={RawBytes}", @enum.VariantId, rawScryptoSbor.ToHex());
-        }
-
-        return new GatewayModel.EntityMetadataItemValue(
-            rawHex: rawScryptoSbor.ToHex(),
-            rawJson: new JRaw(RadixEngineToolkit.RadixEngineToolkit.ScryptoSborEncodeJson(@enum)),
-            typed: typedValue);
     }
 }

@@ -68,6 +68,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixEngineToolkit;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -244,7 +245,7 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, RadixEngineToolkit.Exceptions.EngineToolkitRequestError ex)
+    ValueTask ISubmissionServiceObserver.ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, RadixEngineToolkitException ex)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("parsed_unsupported_payload_type").Inc();
 

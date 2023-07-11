@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,36 +62,71 @@
  * permissions under this License.
  */
 
-using System;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixEngineToolkit;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace RadixDlt.NetworkGateway.Abstractions.StaticHelpers;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-public static class HashingHelper
+internal static class ManifestAddressesExtractor
 {
-    public static bool VerifyHash(ReadOnlySpan<byte> source, ReadOnlySpan<byte> hashToVerify)
+    internal record ManifestAddresses(
+        List<EntityAddress> PackageAddresses,
+        List<EntityAddress> ComponentAddresses,
+        List<EntityAddress> ResourceAddresses,
+        List<EntityAddress> AccountAddresses,
+        List<EntityAddress> AccountsRequiringAuth,
+        List<EntityAddress> AccountsWithdrawnFrom,
+        List<EntityAddress> AccountsDepositedInto,
+        List<EntityAddress> IdentityAddresses,
+        List<EntityAddress> IdentitiesRequiringAuth)
     {
-        var hash = RadixEngineToolkit.RadixEngineToolkit.Hash(source.ToArray());
-        return hashToVerify.SequenceEqual(hash);
+        public List<EntityAddress> All() =>
+            PackageAddresses
+                .Concat(ComponentAddresses)
+                .Concat(ResourceAddresses)
+                .Concat(AccountAddresses)
+                .Concat(AccountsRequiringAuth)
+                .Concat(AccountsWithdrawnFrom)
+                .Concat(AccountsDepositedInto)
+                .Concat(IdentityAddresses)
+                .Concat(IdentitiesRequiringAuth)
+                .Distinct()
+                .ToList();
     }
 
-    public static byte[] Hash(ReadOnlySpan<byte> source)
+    public static ManifestAddresses ExtractAddresses(TransactionManifest manifest)
     {
-        return RadixEngineToolkit.RadixEngineToolkit.Hash(source.ToArray()).ToArray();
-    }
+        var allAddresses = manifest.ExtractAddresses();
 
-    public static byte[] ComputeCombinedHash(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2)
-    {
-        Span<byte> aggregate = stackalloc byte[hash1.Length + hash2.Length];
-        hash1.CopyTo(aggregate);
-        hash2.CopyTo(aggregate[hash1.Length..]);
+        var accountsRequiringAuth = manifest.AccountsRequiringAuth().Select(x => (EntityAddress)x.AddressString()).ToList();
+        var accountsWithdrawnFrom = manifest.AccountsWithdrawnFrom().Select(x => (EntityAddress)x.AddressString()).ToList();
+        var accountsDepositedInto = manifest.AccountsDepositedInto().Select(x => (EntityAddress)x.AddressString()).ToList();
+        var identitiesRequiringAuth = manifest.IdentitiesRequiringAuth().Select(x => (EntityAddress)x.AddressString()).ToList();
 
-        return RadixEngineToolkit.RadixEngineToolkit.Hash(aggregate).ToArray();
-    }
+        var packageAddresses = allAddresses.Where(x => x.Key == EntityType.GLOBAL_PACKAGE).SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
+        var componentAddresses = allAddresses.Where(x => x.Key is EntityType.GLOBAL_GENERIC_COMPONENT or EntityType.INTERNAL_GENERIC_COMPONENT)
+            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
+        var resourceAddresses = allAddresses.Where(x => x.Key is EntityType.GLOBAL_FUNGIBLE_RESOURCE_MANAGER or EntityType.GLOBAL_NON_FUNGIBLE_RESOURCE_MANAGER)
+            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
+        var accountAddresses = allAddresses
+            .Where(x => x.Key is EntityType.GLOBAL_ACCOUNT or EntityType.INTERNAL_ACCOUNT or EntityType.GLOBAL_VIRTUAL_ED25519_ACCOUNT
+                or EntityType.GLOBAL_VIRTUAL_SECP256K1_ACCOUNT).SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
+        var identityAddresses = allAddresses
+            .Where(x => x.Key is EntityType.GLOBAL_IDENTITY or EntityType.GLOBAL_VIRTUAL_ED25519_IDENTITY or EntityType.GLOBAL_VIRTUAL_SECP256K1_IDENTITY)
+            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
 
-    public static bool ComputeAndVerifyCombinedHash(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, ReadOnlySpan<byte> hashToVerify)
-    {
-        Span<byte> combined = stackalloc byte[hash1.Length + hash2.Length];
-        var hash = ComputeCombinedHash(hash1, hash2);
-        return hashToVerify.SequenceEqual(hash);
+        return new ManifestAddresses(
+            packageAddresses,
+            componentAddresses,
+            resourceAddresses,
+            accountAddresses,
+            accountsRequiringAuth,
+            accountsWithdrawnFrom,
+            accountsDepositedInto,
+            identityAddresses,
+            identitiesRequiringAuth
+        );
     }
 }

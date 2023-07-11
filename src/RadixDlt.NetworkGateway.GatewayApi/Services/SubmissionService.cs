@@ -69,13 +69,14 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+using RadixEngineToolkit;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -111,7 +112,7 @@ internal class SubmissionService : ISubmissionService
 
     public async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
-        var parsedTransaction = await HandlePreSubmissionParseTransaction(request);
+        using var parsedTransaction = await HandlePreSubmissionParseTransaction(request);
         var submittedTimestamp = _clock.UtcNow;
 
         var trackingGuidance = await _submissionTrackingService.TrackInitialSubmission(
@@ -155,27 +156,22 @@ internal class SubmissionService : ISubmissionService
         }
     }
 
-    private async Task<ToolkitModel.Transaction.NotarizedTransaction> HandlePreSubmissionParseTransaction(GatewayModel.TransactionSubmitRequest request)
+    private async Task<NotarizedTransaction> HandlePreSubmissionParseTransaction(GatewayModel.TransactionSubmitRequest request)
     {
         try
         {
-            var notarizedTransaction = ToolkitModel.Transaction.NotarizedTransaction.Decompile(request.GetNotarizedTransactionBytes());
-            var validationConfig = new ToolkitModel.Exchange.ValidationConfig(_coreApiHandler.GetNetworkId());
-            var staticValidationResult = notarizedTransaction.StaticallyValidate(validationConfig);
-
-            if (staticValidationResult is ToolkitModel.Exchange.StaticallyValidateTransactionResponse.Invalid invalid)
-            {
-                await _observers.ForEachAsync(x => x.ParsedTransactionStaticallyInvalid(request, invalid.Error));
-
-                throw InvalidTransactionException.FromStaticallyInvalid(staticValidationResult.ToString());
-            }
-
+            var notarizedTransaction = NotarizedTransaction.Decompile(request.GetNotarizedTransactionBytes().ToList());
+            notarizedTransaction.StaticallyValidate(ValidationConfig.Default(_coreApiHandler.GetNetworkId()));
             return notarizedTransaction;
         }
-        catch (RadixEngineToolkit.Exceptions.EngineToolkitRequestError ex)
+        catch (RadixEngineToolkitException.TransactionValidationFailed ex)
+        {
+            await _observers.ForEachAsync(x => x.ParsedTransactionStaticallyInvalid(request, ex.error));
+            throw InvalidTransactionException.FromStaticallyInvalid(ex.error);
+        }
+        catch (RadixEngineToolkitException ex)
         {
             await _observers.ForEachAsync(x => x.ParsedTransactionUnsupportedPayloadType(request, ex));
-
             throw InvalidTransactionException.FromUnsupportedPayloadType();
         }
         catch (Exception ex)
@@ -188,7 +184,7 @@ internal class SubmissionService : ISubmissionService
 
     private async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitAndCreateResponse(
         GatewayModel.TransactionSubmitRequest request,
-        ToolkitModel.Transaction.NotarizedTransaction parsedTransaction,
+        NotarizedTransaction parsedTransaction,
         CancellationToken token)
     {
         using var timeoutTokenSource = new CancellationTokenSource(_coreApiIntegrationOptions.CurrentValue.SubmitTransactionTimeout);
@@ -249,7 +245,7 @@ internal class SubmissionService : ISubmissionService
 
             await _submissionTrackingService.MarkInitialFailure(
                 isPermanent,
-                parsedTransaction.Hash(),
+                parsedTransaction.Hash().Bytes().ToArray(),
                 message + (detailedMessage != null ? " (" + detailedMessage + ")" : string.Empty),
                 token
             );

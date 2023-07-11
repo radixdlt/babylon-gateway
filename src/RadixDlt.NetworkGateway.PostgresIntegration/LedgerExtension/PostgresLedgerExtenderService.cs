@@ -74,6 +74,7 @@ using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
+using RadixEngineToolkit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -82,7 +83,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Array = System.Array;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
-using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -251,7 +251,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var outerStopwatch = Stopwatch.StartNew();
         var referencedEntities = new ReferencedEntityDictionary();
         var childToParentEntities = new Dictionary<EntityAddress, EntityAddress>();
-        var manifestExtractedAddresses = new Dictionary<long, ToolkitModel.Exchange.ExtractAddressesFromManifestResponse>();
+        var manifestExtractedAddresses = new Dictionary<long, ManifestAddressesExtractor.ManifestAddresses>();
 
         var readHelper = new ReadHelper(dbContext);
         var writeHelper = new WriteHelper(dbContext);
@@ -316,16 +316,16 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         var coreInstructions = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.Instructions;
                         var coreBlobs = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.BlobsHex;
-                        var toolkitManifest = new ToolkitModel.Transaction.TransactionManifest(coreInstructions, coreBlobs.Values.Select(x => (ToolkitModel.ValueBytes)x.ConvertFromHex()).ToArray());
-                        // TODO restore, seems like RET[.NET] is broken?
-                        // var extractedAddresses = RadixEngineToolkit.RadixEngineToolkit.ExtractAddressesFromManifest(toolkitManifest, _networkConfigurationProvider.GetNetworkId());
-                        //
-                        // foreach (var address in extractedAddresses.All())
-                        // {
-                        //     referencedEntities.MarkSeenAddress((EntityAddress)address);
-                        // }
-                        //
-                        // manifestExtractedAddresses[stateVersion] = extractedAddresses;
+                        using var manifestInstructions = Instructions.FromString(coreInstructions, _networkConfigurationProvider.GetNetworkId());
+                        using var toolkitManifest = new TransactionManifest(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex().ToList()).ToList());
+                        var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest);
+
+                        foreach (var address in extractedAddresses.All())
+                        {
+                            referencedEntities.MarkSeenAddress(address);
+                        }
+
+                        manifestExtractedAddresses[stateVersion] = extractedAddresses;
                     }
 
                     if (committedTransaction.LedgerTransaction is CoreModel.RoundUpdateLedgerTransaction rult)
@@ -827,7 +827,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         {
                             var resourceManagerEntityId = substateId.EntityAddress;
                             var resourceManagerEntity = referencedEntities.Get((EntityAddress)resourceManagerEntityId);
-                            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex, _networkConfigurationProvider.GetNetworkId());
+
+                            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex);
 
                             nonFungibleIdChanges.Add(new NonFungibleIdChange(
                                 resourceManagerEntity,
@@ -1026,9 +1027,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         if (substateId.SubstateType == CoreModel.SubstateType.NonFungibleVaultContentsIndexEntry)
                         {
                             var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId);
-                            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId(
-                                (substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex,
-                                _networkConfigurationProvider.GetNetworkId());
+                            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex);
 
                             nonFungibleVaultChanges.Add(new NonFungibleVaultChange(
                                 referencedEntity,

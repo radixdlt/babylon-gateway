@@ -75,6 +75,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixEngineToolkit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -838,8 +839,11 @@ ORDER BY metadata_join.ordinality ASC;",
                 result[vm.EntityId] = new GatewayModel.EntityMetadataCollection(vm.TotalCount, previousCursor, nextCursor, new List<GatewayModel.EntityMetadataItem>());
             }
 
-            var value = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(vm.Value, _networkConfigurationProvider.GetNetworkId(), _logger);
-            result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, value, vm.IsLocked, vm.FromStateVersion));
+            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(vm.Value, _networkConfigurationProvider.GetNetworkId());
+            var stringRepresentation = RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(vm.Value.ToList(), SerializationMode.PROGRAMMATIC, _networkConfigurationProvider.GetNetworkId(), null);
+            var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(vm.Value.ToHex(), JObject.Parse(stringRepresentation), value);
+
+            result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, entityMetadataItemValue, vm.IsLocked, vm.FromStateVersion));
         }
 
         foreach (var missing in entityIds.Except(result.Keys))
@@ -900,8 +904,11 @@ INNER JOIN LATERAL (
                 result[mh.EntityId] = new GatewayModel.EntityMetadataCollection(items: new List<GatewayModel.EntityMetadataItem>());
             }
 
-            var value = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(mh.Value, _networkConfigurationProvider.GetNetworkId(), _logger);
-            result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, value, mh.IsLocked, mh.FromStateVersion));
+            var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(mh.Value, _networkConfigurationProvider.GetNetworkId());
+            var stringRepresentation = RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(mh.Value.ToList(), SerializationMode.PROGRAMMATIC, _networkConfigurationProvider.GetNetworkId(), null);
+            var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(mh.Value.ToHex(), JObject.Parse(stringRepresentation), value);
+
+            result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, entityMetadataItemValue, mh.IsLocked, mh.FromStateVersion));
         }
 
         foreach (var missing in entityIds.Except(result.Keys))

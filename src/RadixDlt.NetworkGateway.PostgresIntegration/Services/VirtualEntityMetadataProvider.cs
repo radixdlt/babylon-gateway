@@ -62,45 +62,33 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixEngineToolkit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Array = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Array;
-using Enum = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Enum;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 public interface IVirtualEntityMetadataProvider
 {
-    GatewayApiSdk.Model.EntityMetadataCollection GetVirtualEntityMetadata(EntityAddress virtualEntityAddress);
+    EntityMetadataCollection GetVirtualEntityMetadata(EntityAddress virtualEntityAddress);
 }
 
 public class VirtualEntityMetadataProvider : IVirtualEntityMetadataProvider
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly ILogger _logger;
 
-    public VirtualEntityMetadataProvider(INetworkConfigurationProvider networkConfigurationProvider, ILogger<VirtualEntityMetadataProvider> logger)
+    public VirtualEntityMetadataProvider(INetworkConfigurationProvider networkConfigurationProvider)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
-        _logger = logger;
     }
 
-    public GatewayApiSdk.Model.EntityMetadataCollection GetVirtualEntityMetadata(EntityAddress virtualEntityAddress)
-    {
-        var sbor = GetSbor(virtualEntityAddress);
-        var encodedSbor = RadixEngineToolkit.RadixEngineToolkit.ScryptoSborEncode(sbor);
-        var metadataItem = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(encodedSbor, _networkConfigurationProvider.GetNetworkId(), _logger);
-
-        return new GatewayApiSdk.Model.EntityMetadataCollection(1, null, null, new List<GatewayApiSdk.Model.EntityMetadataItem> { new("owner_keys", metadataItem) });
-    }
-
-    private static IValue GetSbor(EntityAddress virtualEntityAddress)
+    public EntityMetadataCollection GetVirtualEntityMetadata(EntityAddress virtualEntityAddress)
     {
         var decodedAddress = RadixAddressCodec.Decode(virtualEntityAddress);
 
@@ -120,29 +108,25 @@ public class VirtualEntityMetadataProvider : IVirtualEntityMetadataProvider
             throw new NotSupportedException("Failed to detect if it's virtualEd25519 or virtualSecp256k1");
         }
 
-        var last29BytesOfAddress = decodedAddress.Data.Skip(1).Take(29).ToArray();
-        var hexAddress = Convert.ToHexString(last29BytesOfAddress);
+        var last29BytesOfAddress = decodedAddress.Data.Skip(1).Take(29).ToList();
 
-        IValue scryptoSbor = new Enum(
-            1,
-            new IValue[]
+        PublicKeyHash publicKeyHash = isVirtualSecp256k1 ? new PublicKeyHash.Secp256k1(last29BytesOfAddress) : new PublicKeyHash.Ed25519(last29BytesOfAddress);
+        using MetadataValue ownedKeysItem = new MetadataValue.PublicKeyHashArrayValue(new List<PublicKeyHash> { publicKeyHash });
+        var ownerKeysBytes = RadixEngineToolkitUniffiMethods.MetadataSborEncode(ownedKeysItem);
+        var ownerKeysRawHex = Convert.ToHexString(ownerKeysBytes.ToArray());
+        var ownerKeysJson = RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerKeysBytes, SerializationMode.PROGRAMMATIC, _networkConfigurationProvider.GetNetworkId(), null);
+
+        using MetadataValue ownerBadgeItem = new MetadataValue.NonFungibleLocalIdValue(new NonFungibleLocalId.Bytes(decodedAddress.Data.ToList()));
+        var ownerBadgeBytes = RadixEngineToolkitUniffiMethods.MetadataSborEncode(ownerBadgeItem);
+        var ownerBadgeRawHex = Convert.ToHexString(ownerBadgeBytes.ToArray());
+        var ownerBadgeJson = RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerBadgeBytes, SerializationMode.PROGRAMMATIC, _networkConfigurationProvider.GetNetworkId(), null);
+
+        return new EntityMetadataCollection(2, null, null,
+            new List<EntityMetadataItem>
             {
-                new Array(
-                    ValueKind.Enum,
-                    new IValue[]
-                    {
-                        new Enum(
-                            15,
-                            new IValue[]
-                            {
-                                new Enum(
-                                    isVirtualSecp256k1 ? (byte)0 : (byte)1,
-                                    new IValue[] { new Bytes(ValueKind.U8, hexAddress), }),
-                            }),
-                    }),
+                new("owner_keys", new EntityMetadataItemValue(ownerKeysRawHex, JObject.Parse(ownerKeysJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownedKeysItem))),
+                new("owner_badge", new EntityMetadataItemValue(ownerBadgeRawHex, JObject.Parse(ownerBadgeJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownerBadgeItem))),
             }
         );
-
-        return scryptoSbor;
     }
 }
