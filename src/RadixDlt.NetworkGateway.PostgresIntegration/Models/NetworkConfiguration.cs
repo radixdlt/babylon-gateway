@@ -97,12 +97,20 @@ internal class NetworkConfiguration
     [Column("address_type_definitions", TypeName = "jsonb")]
     public AddressTypeDefinition[] AddressTypeDefinitions { get; set; }
 
+    [Column("genesis_epoch")]
+    public long GenesisEpoch { get; set; }
+
+    [Column("genesis_round")]
+    public long GenesisRound { get; set; }
+
     public bool HasEqualConfiguration(NetworkConfiguration other)
     {
         return NetworkId == other.NetworkId
                && NetworkName == other.NetworkName
                && HrpDefinition == other.HrpDefinition
                && WellKnownAddresses == other.WellKnownAddresses
-               && AddressTypeDefinitions.SequenceEqual(other.AddressTypeDefinitions);
+               && AddressTypeDefinitions.SequenceEqual(other.AddressTypeDefinitions)
+               && GenesisEpoch == other.GenesisEpoch
+               && GenesisRound == other.GenesisRound;
     }
 }

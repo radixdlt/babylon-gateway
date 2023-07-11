@@ -758,6 +758,14 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("address_type_definitions");
 
+                    b.Property<long>("GenesisEpoch")
+                        .HasColumnType("bigint")
+                        .HasColumnName("genesis_epoch");
+
+                    b.Property<long>("GenesisRound")
+                        .HasColumnType("bigint")
+                        .HasColumnName("genesis_round");
+
                     b.Property<HrpDefinition>("HrpDefinition")
                         .IsRequired()
                         .HasColumnType("jsonb")

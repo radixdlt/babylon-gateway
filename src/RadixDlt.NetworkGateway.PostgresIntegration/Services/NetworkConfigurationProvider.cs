@@ -69,7 +69,6 @@ using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -96,22 +95,22 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         _logger = logger;
     }
 
-    public async Task SetNetworkConfigurationOrAssertMatching(CoreModel.NetworkConfigurationResponse networkConfigurationResponse, CancellationToken token)
+    public async Task SetNetworkConfigurationOrAssertMatching(CoreModel.NetworkConfigurationResponse inputNetworkConfiguration, CoreModel.NetworkStatusResponse inputNetworkStatus, CancellationToken token)
     {
-        var inputNetworkConfiguration = MapNetworkConfigurationResponse(networkConfigurationResponse);
+        var networkConfiguration = Map(inputNetworkConfiguration, inputNetworkStatus);
         var existingNetworkConfiguration = await GetCurrentLedgerNetworkConfigurationFromDb(token);
 
-        EnsureNetworkConfigurationCaptured(inputNetworkConfiguration);
+        EnsureNetworkConfigurationCaptured(networkConfiguration);
 
         if (existingNetworkConfiguration != null)
         {
-            if (!existingNetworkConfiguration.HasEqualConfiguration(inputNetworkConfiguration))
+            if (!existingNetworkConfiguration.HasEqualConfiguration(networkConfiguration))
             {
                 throw new ConfigurationException("Network configuration does does not match those stored in the database.");
             }
         }
 
-        if (!GetCapturedConfig().HasEqualConfiguration(inputNetworkConfiguration))
+        if (!GetCapturedConfig().HasEqualConfiguration(networkConfiguration))
         {
             throw new ConfigurationException("Network configuration does does not match those stored from other nodes.");
         }
@@ -159,6 +158,16 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().NetworkName;
     }
 
+    public long GetGenesisEpoch()
+    {
+        return GetCapturedConfig().GenesisEpoch;
+    }
+
+    public long GetGenesisRound()
+    {
+        return GetCapturedConfig().GenesisRound;
+    }
+
     public HrpDefinition GetHrpDefinition()
     {
         return GetCapturedConfig().HrpDefinition;
@@ -174,7 +183,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().AddressTypeDefinitions.First(atd => atd.EntityType == entityType);
     }
 
-    private static NetworkConfiguration MapNetworkConfigurationResponse(CoreModel.NetworkConfigurationResponse networkConfiguration)
+    private static NetworkConfiguration Map(CoreModel.NetworkConfigurationResponse networkConfiguration, CoreModel.NetworkStatusResponse networkStatus)
     {
         var wka = networkConfiguration.WellKnownAddresses;
         var at = networkConfiguration.AddressTypes.Select(MapAddressTypeDefinition).ToArray();
@@ -231,6 +240,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 Faucet: wka.Faucet
                 ),
             AddressTypeDefinitions = at,
+            GenesisEpoch = networkStatus.GenesisEpochRound.Epoch,
         };
     }
 

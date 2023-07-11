@@ -427,7 +427,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     network_name = table.Column<string>(type: "text", nullable: false),
                     hrp_definition = table.Column<HrpDefinition>(type: "jsonb", nullable: false),
                     well_known_addresses = table.Column<WellKnownAddresses>(type: "jsonb", nullable: false),
-                    address_type_definitions = table.Column<AddressTypeDefinition[]>(type: "jsonb", nullable: false)
+                    address_type_definitions = table.Column<AddressTypeDefinition[]>(type: "jsonb", nullable: false),
+                    genesis_epoch = table.Column<long>(type: "bigint", nullable: false),
+                    genesis_round = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -84,7 +84,7 @@ public interface ICoreApiProvider
 
 public interface INetworkConfigurationReader
 {
-    Task<CoreModel.NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token);
+    Task<(CoreModel.NetworkConfigurationResponse Configuration, CoreModel.NetworkStatusResponse Status)> GetNetworkConfiguration(CancellationToken token);
 }
 
 public interface INetworkStatusReader
