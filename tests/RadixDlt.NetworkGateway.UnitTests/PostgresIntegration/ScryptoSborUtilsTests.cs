@@ -64,7 +64,6 @@
 
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using System;
 using System.Collections.Generic;
@@ -79,25 +78,23 @@ public class ScryptoSborUtilsTests
     public void ParseStringScalarMetadata()
     {
         const string Input = "5c2200010c124d79206d6574616461746120737472696e67";
-        var result = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(Convert.FromHexString(Input), 1, NullLogger.Instance);
+        var result = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(Convert.FromHexString(Input), 1);
 
         result.ShouldNotBeNull();
-        result.RawHex.Should().Be(Input);
-        result.RawJson.ShouldNotBeNull();
-        result.Typed.Should().BeEquivalentTo(new GatewayModel.MetadataScalarValue("My metadata string", GatewayModel.MetadataValueType.String));
+        result.Should().BeOfType<GatewayModel.MetadataScalarValue>();
+        (result as GatewayModel.MetadataScalarValue)!.Value.Should().BeEquivalentTo("My metadata string");
     }
 
     [Fact]
     public void ParseStringArrayMetadata()
     {
         const string Input = "5c228001200c021a4d79206d6574616461746120617272617920737472696e6720311a4d79206d6574616461746120617272617920737472696e672032";
-        var result = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(Convert.FromHexString(Input), 1, NullLogger.Instance);
+        var result = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(Convert.FromHexString(Input), 1);
         var expected = new List<string> { "My metadata array string 1", "My metadata array string 2" };
 
         result.ShouldNotBeNull();
-        result.RawHex.Should().Be(Input);
-        result.RawJson.ShouldNotBeNull();
-        result.Typed.Should().BeEquivalentTo(new GatewayModel.MetadataScalarArrayValue(expected, GatewayModel.MetadataValueType.StringArray));
+        result.Should().BeOfType<GatewayModel.MetadataScalarArrayValue>();
+        (result as GatewayModel.MetadataScalarArrayValue)!.Values.Should().BeEquivalentTo(expected);
     }
 
     [Theory]
@@ -135,11 +132,8 @@ public class ScryptoSborUtilsTests
     [InlineData("5c228f01202202010120071d6a8a691dae2cd15ed0369931ce0a949ecafa5c3f93f8121833646e15c3000120071d165dee785924e7421a0fd0418a19d5daeec395fd505a92a0fd3117e428")]
     public void ShouldNotFail(string input)
     {
-        var result = ScryptoSborUtils.MetadataValueToGatewayMetadataItemValue(Convert.FromHexString(input), 1, NullLogger.Instance);
+        var result = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(Convert.FromHexString(input), 1);
 
         result.ShouldNotBeNull();
-        result.RawHex.Should().Be(input);
-        result.RawJson.ShouldNotBeNull();
-        result.Typed.ShouldNotBeNull();
     }
 }

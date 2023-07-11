@@ -74,6 +74,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PrometheusIntegration;
 
@@ -244,7 +245,7 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, RadixEngineToolkit.Exceptions.EngineToolkitRequestError ex)
+    ValueTask ISubmissionServiceObserver.ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, ToolkitModel.RadixEngineToolkitException ex)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("parsed_unsupported_payload_type").Inc();
 
