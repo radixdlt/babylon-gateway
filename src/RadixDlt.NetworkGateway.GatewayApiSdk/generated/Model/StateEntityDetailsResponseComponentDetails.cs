@@ -114,10 +114,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="packageAddress">Bech32m-encoded human readable version of the address..</param>
         /// <param name="blueprintName">blueprintName (required).</param>
         /// <param name="state">state.</param>
-        /// <param name="accessRulesChain">accessRulesChain (required).</param>
+        /// <param name="accessRules">accessRules (required).</param>
         /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Component).</param>
-        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), Object accessRulesChain = default(Object), string royaltyVaultBalance = default(string), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
+        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), ComponentEntityAccessRules accessRules = default(ComponentEntityAccessRules), string royaltyVaultBalance = default(string), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
         {
             // to ensure "blueprintName" is required (not null)
             if (blueprintName == null)
@@ -125,12 +125,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("blueprintName is a required property for StateEntityDetailsResponseComponentDetails and cannot be null");
             }
             this.BlueprintName = blueprintName;
-            // to ensure "accessRulesChain" is required (not null)
-            if (accessRulesChain == null)
+            // to ensure "accessRules" is required (not null)
+            if (accessRules == null)
             {
-                throw new ArgumentNullException("accessRulesChain is a required property for StateEntityDetailsResponseComponentDetails and cannot be null");
+                throw new ArgumentNullException("accessRules is a required property for StateEntityDetailsResponseComponentDetails and cannot be null");
             }
-            this.AccessRulesChain = accessRulesChain;
+            this.AccessRules = accessRules;
             this.PackageAddress = packageAddress;
             this.State = state;
             this.RoyaltyVaultBalance = royaltyVaultBalance;
@@ -156,10 +156,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public Object State { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccessRulesChain
+        /// Gets or Sets AccessRules
         /// </summary>
-        [DataMember(Name = "access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
-        public Object AccessRulesChain { get; set; }
+        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
+        public ComponentEntityAccessRules AccessRules { get; set; }
 
         /// <summary>
         /// String-encoded decimal representing the amount of a related fungible resource.
@@ -180,7 +180,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
-            sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
+            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
             sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -233,9 +233,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.State.Equals(input.State))
                 ) && base.Equals(input) && 
                 (
-                    this.AccessRulesChain == input.AccessRulesChain ||
-                    (this.AccessRulesChain != null &&
-                    this.AccessRulesChain.Equals(input.AccessRulesChain))
+                    this.AccessRules == input.AccessRules ||
+                    (this.AccessRules != null &&
+                    this.AccessRules.Equals(input.AccessRules))
                 ) && base.Equals(input) && 
                 (
                     this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
@@ -265,9 +265,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.State.GetHashCode();
                 }
-                if (this.AccessRulesChain != null)
+                if (this.AccessRules != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRulesChain.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
                 }
                 if (this.RoyaltyVaultBalance != null)
                 {

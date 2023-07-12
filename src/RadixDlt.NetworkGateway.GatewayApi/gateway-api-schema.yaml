@@ -830,6 +830,17 @@ components:
             typed:
               $ref: "#/components/schemas/MetadataTypedValue"
 
+    ComponentEntityAccessRules:
+      type: object
+      required:
+        - owner
+        - entries
+      properties:
+        owner:
+          type: object
+        entries:
+          type: object
+
     FungibleResourcesCollection:
       description: Fungible resources collection.
       allOf:
@@ -1668,17 +1679,14 @@ components:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
-            - access_rules_chain
-            - vault_access_rules_chain
+            - access_rules
             - divisibility
             - total_supply
             - total_minted
             - total_burned
           properties:
-            access_rules_chain:
-              type: object
-            vault_access_rules_chain:
-              type: object
+            access_rules:
+              $ref: "#/components/schemas/ComponentEntityAccessRules"
             divisibility:
               type: integer
               minimum: 0
@@ -1693,17 +1701,14 @@ components:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
-            - access_rules_chain
-            - vault_access_rules_chain
+            - access_rules
             - non_fungible_id_type
             - total_supply
             - total_minted
             - total_burned
           properties:
-            access_rules_chain:
-              type: object
-            vault_access_rules_chain:
-              type: object
+            access_rules:
+              $ref: "#/components/schemas/ComponentEntityAccessRules"
             non_fungible_id_type:
               $ref: "#/components/schemas/NonFungibleIdType"
             total_supply:
@@ -1735,7 +1740,7 @@ components:
         - type: object
           required:
             - blueprint_name
-            - access_rules_chain
+            - access_rules
           properties:
             package_address:
               $ref: "#/components/schemas/Address"
@@ -1743,8 +1748,8 @@ components:
               type: string
             state:
               type: object
-            access_rules_chain:
-              type: object
+            access_rules:
+              $ref: "#/components/schemas/ComponentEntityAccessRules"
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
 

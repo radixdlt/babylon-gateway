@@ -74,6 +74,7 @@ using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
@@ -180,11 +181,10 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 case GlobalFungibleResourceEntity frme:
                     var fungibleResourceSupplyData = resourcesSupplyData[frme.Id];
                     details = new GatewayModel.StateEntityDetailsResponseFungibleResourceDetails(
+                        accessRules: accessRulesHistory[frme.Id],
                         totalSupply: fungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: fungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: fungibleResourceSupplyData.TotalBurned.ToString(),
-                        accessRulesChain: new JRaw(accessRulesHistory[frme.Id]),
-                        vaultAccessRulesChain: new JRaw("{}"), // TODO restore?
                         divisibility: frme.Divisibility);
 
                     break;
@@ -197,11 +197,10 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     }
 
                     details = new GatewayModel.StateEntityDetailsResponseNonFungibleResourceDetails(
+                        accessRules: accessRulesHistory[nfrme.Id],
                         totalSupply: nonFungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: nonFungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: nonFungibleResourceSupplyData.TotalBurned.ToString(),
-                        accessRulesChain: new JRaw(accessRulesHistory[nfrme.Id]),
-                        vaultAccessRulesChain: new JRaw("{}"), // TODO restore?
                         nonFungibleIdType: nfrme.NonFungibleIdType.ToGatewayModel());
                     break;
 
@@ -222,7 +221,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         blueprintName: "Account",
                         state: new JObject(),
-                        accessRulesChain: new JArray()
+                        accessRules: new GatewayModel.ComponentEntityAccessRules(new JObject(), new JObject())
                     );
                     break;
 
@@ -234,7 +233,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         blueprintName: "Account",
                         state: new JObject(),
-                        accessRulesChain: new JArray()
+                        accessRules: new GatewayModel.ComponentEntityAccessRules(new JObject(), new JObject())
                     );
                     break;
 
@@ -248,7 +247,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                         packageAddress: correlatedAddresses[ce.PackageId],
                         blueprintName: ce.BlueprintName,
                         state: state != null ? new JRaw(state.State) : null,
-                        accessRulesChain: accessRules != null ? new JRaw(accessRules) : null,
+                        accessRules: accessRules,
                         royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null
                     );
                     break;
@@ -1569,7 +1568,7 @@ order by ord
         return entities;
     }
 
-    private async Task<Dictionary<long, string>> GetAccessRulesHistory(ICollection<ResourceEntity> resourceEntities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    private async Task<Dictionary<long, GatewayModel.ComponentEntityAccessRules>> GetAccessRulesHistory(ICollection<ResourceEntity> resourceEntities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var lookup = new HashSet<long>();
 
@@ -1585,13 +1584,12 @@ order by ord
 
         if (!lookup.Any())
         {
-            return new Dictionary<long, string>();
+            return new Dictionary<long, GatewayModel.ComponentEntityAccessRules>();
         }
 
         var entityIds = lookup.ToList();
 
-        // TODO just a prototype
-        return await _dbContext.EntityAccessRulesAggregateHistory
+        var aggregates = await _dbContext.EntityAccessRulesAggregateHistory
             .FromSqlInterpolated($@"
 WITH variables (entity_id) AS (SELECT UNNEST({entityIds}))
 SELECT earah.*
@@ -1603,7 +1601,26 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) earah ON TRUE;")
-            .ToDictionaryAsync(e => e.EntityId, e => $$"""{"_todo_":"just a prototype","owner_role_id":{{e.OwnerRoleId}},"entry_ids":[{{string.Join(",", e.EntryIds)}}]}""", token);
+            .ToListAsync(token);
+
+        var ownerRoleIds = aggregates.Select(a => a.OwnerRoleId).Distinct().ToList();
+        var accessRuleEntryIds = aggregates.SelectMany(a => a.EntryIds).Distinct().ToList();
+
+        var ownerRoles = await _dbContext.EntityAccessRulesOwnerHistory
+            .Where(e => ownerRoleIds.Contains(e.Id))
+            .ToListAsync(token);
+
+        var entries = await _dbContext.EntityAccessRulesEntryHistory
+            .Where(e => accessRuleEntryIds.Contains(e.Id))
+            .Where(e => !e.IsDeleted)
+            .ToListAsync(token);
+
+        return ownerRoles.ToDictionary(or => or.EntityId, or =>
+        {
+            var ore = entries.Where(e => e.EntityId == or.EntityId).Select(e => new KeyValuePair<string, object>(e.Key, new JRaw(e.AccessRules)));
+
+            return new GatewayModel.ComponentEntityAccessRules(new JRaw(or.AccessRules), ore);
+        });
     }
 
     private async Task<Dictionary<long, EntityStateHistory>> GetStateHistory(ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)

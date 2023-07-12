@@ -907,8 +907,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.AccountDepositRuleIndexEntrySubstate accountDepositRule)
                         {
-                            // TODO support deleted values with var isDeleted = accountDepositRule.Value == null;
-
                             accountResourceDepositRuleHistoryToAdd.Add(new AccountResourceDepositRuleHistory
                             {
                                 Id = sequences.AccountResourceDepositRuleHistorySequence++,
