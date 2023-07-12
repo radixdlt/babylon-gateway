@@ -22,6 +22,7 @@ _Release Date: Unreleased_
 - New `affected_global_entities_filter` filter in `/stream/transactions`.
 - Use strongly-typed metadata models.
 - Changed `access_rule_chain` to partially strongly typed `access_rules`.
+- Added package details to `/satus/entity/details` endpoint.
 
 ### 0.3.1
 

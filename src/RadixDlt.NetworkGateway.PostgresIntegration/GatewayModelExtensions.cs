@@ -167,4 +167,14 @@ internal static class GatewayModelExtensions
             _ => throw new UnreachableException($"Didn't expect {status} value"),
         };
     }
+
+    public static GatewayModel.PackageVmType ToGatewayModel(this PackageVmType vmType)
+    {
+        return vmType switch
+        {
+            PackageVmType.Native => GatewayModel.PackageVmType.Native,
+            PackageVmType.ScryptoV1 => GatewayModel.PackageVmType.ScryptoV1,
+            _ => throw new UnreachableException($"Didn't expect {vmType} value"),
+        };
+    }
 }

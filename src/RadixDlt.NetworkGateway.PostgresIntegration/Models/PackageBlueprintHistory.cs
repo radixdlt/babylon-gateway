@@ -62,51 +62,46 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+
+[Table("package_blueprint_history")]
+public class PackageBlueprintHistory
 {
-    public long AccountDefaultDepositRuleHistorySequence { get; set; }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public long AccountResourceDepositRuleHistorySequence { get; set; }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-    public long EntityStateHistorySequence { get; set; }
+    [Column("package_entity_id")]
+    public long PackageEntityId { get; set; }
 
-    public long EntitySequence { get; set; }
+    [Column("name")]
+    public string Name { get; set; }
 
-    public long EntityMetadataHistorySequence { get; set; }
+    [Column("version")]
+    public string Version { get; set; }
 
-    public long EntityMetadataAggregateHistorySequence { get; set; }
+    [Column("definition", TypeName = "jsonb")]
+    public string Definition { get; set; }
 
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
+    [Column("dependant_entity_ids")]
+    public List<long>? DependantEntityIds { get; set; }
 
-    public long EntityResourceAggregateHistorySequence { get; set; }
+    [Column("auth_template", TypeName = "jsonb")]
+    public string? AuthTemplate { get; set; }
 
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
+    [Column("auth_template_is_locked")]
+    public bool? AuthTemplateIsLocked { get; set; }
 
-    public long EntityVaultHistorySequence { get; set; }
+    [Column("royalty_config", TypeName = "jsonb")]
+    public string? RoyaltyConfig { get; set; }
 
-    public long EntityAccessRulesAggregateHistorySequence { get; set; }
-
-    public long EntityAccessRulesEntryHistorySequence { get; set; }
-
-    public long EntityAccessRulesOwnerRoleHistorySequence { get; set; }
-
-    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
-
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionMarkerSequence { get; set; }
-
-    public long PackageBlueprintHistorySequence { get; set; }
+    [Column("royalty_config_is_locked")]
+    public bool? RoyaltyConfigIsLocked { get; set; }
 }

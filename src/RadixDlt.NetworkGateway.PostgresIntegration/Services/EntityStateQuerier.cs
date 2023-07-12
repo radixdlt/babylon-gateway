@@ -154,9 +154,9 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
         var accessRulesHistory = await GetAccessRulesHistory(resourceEntities, componentEntities, ledgerState, token);
         var stateHistory = await GetStateHistory(componentEntities, ledgerState, token);
-        var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, componentEntities, ledgerState, token);
         var resourcesSupplyData = await GetResourcesSupplyData(resourceEntities.Select(x => x.Id).ToArray(), ledgerState, token);
-        var packageBlueprints = await GetPackageBlueprints(packageEntities.Select(e => e.Id).ToArray(), ledgerState, token);
+        var packageBlueprintsByPackageId = await GetPackageBlueprints(packageEntities.Select(e => e.Id).ToArray(), ledgerState, token);
+        var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, componentEntities, packageBlueprintsByPackageId, ledgerState, token);
 
         var royaltyVaultsBalance = componentEntities.Any() && (optIns.ComponentRoyaltyVaultBalance || optIns.PackageRoyaltyVaultBalance)
             ? await RoyaltyVaultBalance(componentEntities.Select(x => x.Id).ToArray(), ledgerState, token)
@@ -206,11 +206,32 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
                 case GlobalPackageEntity pe:
                     var packageRoyaltyVaultBalance = royaltyVaultsBalance?.SingleOrDefault(x => x.OwnerEntityId == pe.Id)?.Balance;
+                    var blueprints = new List<GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintItem>();
+
+                    if (packageBlueprintsByPackageId.TryGetValue(pe.Id, out var packageBlueprints))
+                    {
+                        foreach (var pb in packageBlueprints)
+                        {
+                            blueprints.Add(new GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintItem(
+                                name: pb.Name,
+                                version: pb.Version,
+                                definition: new JRaw(pb.Definition),
+                                dependantEntities: pb.DependantEntityIds?.Select(de => correlatedAddresses[de].ToString()).ToList(),
+                                authTemplate: pb.AuthTemplate != null ? new JRaw(pb.AuthTemplate) : null,
+                                authTemplateIsLocked: pb.AuthTemplateIsLocked,
+                                royaltyConfig: pb.RoyaltyConfig != null ? new JRaw(pb.RoyaltyConfig) : null,
+                                royaltyConfigIsLocked: pb.RoyaltyConfigIsLocked));
+                        }
+                    }
 
                     details = new GatewayModel.StateEntityDetailsResponsePackageDetails(
+                        vmType: pe.VmType.ToGatewayModel(),
+                        codeHashHex: pe.CodeHash.ToHex(),
+                        schemaHashHex: pe.SchemaHash.ToHex(),
                         codeHex: pe.Code.ToHex(),
-                        royaltyVaultBalance: packageRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(packageRoyaltyVaultBalance).ToString() : null
-                        );
+                        schema: new JRaw(pe.Schema),
+                        royaltyVaultBalance: packageRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(packageRoyaltyVaultBalance).ToString() : null,
+                        blueprints: new GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintCollection(totalCount: blueprints.Count, items: blueprints));
                     break;
 
                 case VirtualIdentityEntity:
@@ -1654,31 +1675,34 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
-    private async Task<Dictionary<long, PackageBlueprint>> GetPackageBlueprints(long[] entityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<Dictionary<long, PackageBlueprintHistory[]>> GetPackageBlueprints(long[] entityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         if (!entityIds.Any())
         {
-            return new Dictionary<long, PackageBlueprint>();
+            return new Dictionary<long, PackageBlueprintHistory[]>();
         }
 
-        // TODO we do not want to select package's code unless explicitly requested as it may be a truly massive payload
-        var result = await _dbContext.PackageBlueprints.FromSqlInterpolated($@"
+        var blueprints = await _dbContext.PackageBlueprintHistory.FromSqlInterpolated($@"
 WITH variables (entity_id) AS (SELECT UNNEST({entityIds}))
-SELECT pb.*
+SELECT pbh.*
 FROM variables
 INNER JOIN LATERAL(
     SELECT *
-    FROM package_blueprints
-    WHERE package_entity_id = variables.entity_id
-    ORDER BY from_state_version DESC
+    FROM package_blueprint_history
+    WHERE package_entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
     LIMIT 1
-) pb ON true")
-            .ToDictionaryAsync(e => e.PackageEntityId, token);
+) pbh ON true")
+            .ToListAsync(token);
 
-        return result;
+        return blueprints.GroupBy(b => b.PackageEntityId).ToDictionary(g => g.Key, g => g.ToArray());
     }
 
-    private async Task<Dictionary<long, EntityAddress>> GetCorrelatedEntityAddresses(ICollection<Entity> entities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    private async Task<Dictionary<long, EntityAddress>> GetCorrelatedEntityAddresses(
+        ICollection<Entity> entities,
+        ICollection<ComponentEntity> componentEntities,
+        Dictionary<long, PackageBlueprintHistory[]> packageBlueprints,
+        GatewayModel.LedgerState ledgerState,
+        CancellationToken token = default)
     {
         var lookup = new HashSet<long>();
 
@@ -1697,10 +1721,15 @@ INNER JOIN LATERAL(
             lookup.Add(componentEntity.PackageId);
         }
 
+        foreach (var dependantEntityId in packageBlueprints.Values.SelectMany(x => x).SelectMany(x => x.DependantEntityIds?.ToArray() ?? Array.Empty<long>()))
+        {
+            lookup.Add(dependantEntityId);
+        }
+
         var ids = lookup.ToList();
 
         return await _dbContext.Entities
-            .Where(e => ids.Contains(e.Id))
+            .Where(e => ids.Contains(e.Id) && e.FromStateVersion <= ledgerState.StateVersion)
             .Select(e => new { e.Id, GlobalAddress = e.Address })
             .ToDictionaryAsync(e => e.Id, e => e.GlobalAddress, token);
     }

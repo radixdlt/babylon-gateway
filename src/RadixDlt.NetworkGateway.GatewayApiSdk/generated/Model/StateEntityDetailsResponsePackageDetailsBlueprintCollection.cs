@@ -90,92 +90,62 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponsePackageDetailsAllOf
+    /// Entity metadata collection.
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponsePackageDetails_allOf")]
-    public partial class StateEntityDetailsResponsePackageDetailsAllOf : IEquatable<StateEntityDetailsResponsePackageDetailsAllOf>
+    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsBlueprintCollection")]
+    public partial class StateEntityDetailsResponsePackageDetailsBlueprintCollection : IEquatable<StateEntityDetailsResponsePackageDetailsBlueprintCollection>
     {
-
         /// <summary>
-        /// Gets or Sets VmType
-        /// </summary>
-        [DataMember(Name = "vm_type", IsRequired = true, EmitDefaultValue = true)]
-        public PackageVmType VmType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintCollection" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponsePackageDetailsAllOf() { }
+        protected StateEntityDetailsResponsePackageDetailsBlueprintCollection() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintCollection" /> class.
         /// </summary>
-        /// <param name="vmType">vmType (required).</param>
-        /// <param name="codeHashHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="codeHex">Hex-encoded binary blob..</param>
-        /// <param name="schemaHashHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="schema">schema.</param>
-        /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
-        /// <param name="blueprints">blueprints.</param>
-        public StateEntityDetailsResponsePackageDetailsAllOf(PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string schemaHashHex = default(string), Object schema = default(Object), string royaltyVaultBalance = default(string), StateEntityDetailsResponsePackageDetailsBlueprintCollection blueprints = default(StateEntityDetailsResponsePackageDetailsBlueprintCollection))
+        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
+        /// <param name="previousCursor">If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection..</param>
+        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
+        /// <param name="items">items (required).</param>
+        public StateEntityDetailsResponsePackageDetailsBlueprintCollection(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<StateEntityDetailsResponsePackageDetailsBlueprintItem> items = default(List<StateEntityDetailsResponsePackageDetailsBlueprintItem>))
         {
-            this.VmType = vmType;
-            // to ensure "codeHashHex" is required (not null)
-            if (codeHashHex == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("codeHashHex is a required property for StateEntityDetailsResponsePackageDetailsAllOf and cannot be null");
+                throw new ArgumentNullException("items is a required property for StateEntityDetailsResponsePackageDetailsBlueprintCollection and cannot be null");
             }
-            this.CodeHashHex = codeHashHex;
-            // to ensure "schemaHashHex" is required (not null)
-            if (schemaHashHex == null)
-            {
-                throw new ArgumentNullException("schemaHashHex is a required property for StateEntityDetailsResponsePackageDetailsAllOf and cannot be null");
-            }
-            this.SchemaHashHex = schemaHashHex;
-            this.CodeHex = codeHex;
-            this.Schema = schema;
-            this.RoyaltyVaultBalance = royaltyVaultBalance;
-            this.Blueprints = blueprints;
+            this.Items = items;
+            this.TotalCount = totalCount;
+            this.PreviousCursor = previousCursor;
+            this.NextCursor = nextCursor;
         }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "code_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string CodeHashHex { get; set; }
+        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "total_count", EmitDefaultValue = true)]
+        public long? TotalCount { get; set; }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "code_hex", EmitDefaultValue = true)]
-        public string CodeHex { get; set; }
+        /// <value>If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
+        public string PreviousCursor { get; set; }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "schema_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string SchemaHashHex { get; set; }
+        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
 
         /// <summary>
-        /// Gets or Sets Schema
+        /// Gets or Sets Items
         /// </summary>
-        [DataMember(Name = "schema", EmitDefaultValue = true)]
-        public Object Schema { get; set; }
-
-        /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
-        /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "royalty_vault_balance", EmitDefaultValue = true)]
-        public string RoyaltyVaultBalance { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Blueprints
-        /// </summary>
-        [DataMember(Name = "blueprints", EmitDefaultValue = true)]
-        public StateEntityDetailsResponsePackageDetailsBlueprintCollection Blueprints { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<StateEntityDetailsResponsePackageDetailsBlueprintItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -184,14 +154,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponsePackageDetailsAllOf {\n");
-            sb.Append("  VmType: ").Append(VmType).Append("\n");
-            sb.Append("  CodeHashHex: ").Append(CodeHashHex).Append("\n");
-            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
-            sb.Append("  SchemaHashHex: ").Append(SchemaHashHex).Append("\n");
-            sb.Append("  Schema: ").Append(Schema).Append("\n");
-            sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
-            sb.Append("  Blueprints: ").Append(Blueprints).Append("\n");
+            sb.Append("class StateEntityDetailsResponsePackageDetailsBlueprintCollection {\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -212,15 +179,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponsePackageDetailsAllOf);
+            return this.Equals(input as StateEntityDetailsResponsePackageDetailsBlueprintCollection);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponsePackageDetailsAllOf instances are equal
+        /// Returns true if StateEntityDetailsResponsePackageDetailsBlueprintCollection instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsAllOf to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsBlueprintCollection to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponsePackageDetailsAllOf input)
+        public bool Equals(StateEntityDetailsResponsePackageDetailsBlueprintCollection input)
         {
             if (input == null)
             {
@@ -228,38 +195,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.VmType == input.VmType ||
-                    this.VmType.Equals(input.VmType)
+                    this.TotalCount == input.TotalCount ||
+                    (this.TotalCount != null &&
+                    this.TotalCount.Equals(input.TotalCount))
                 ) && 
                 (
-                    this.CodeHashHex == input.CodeHashHex ||
-                    (this.CodeHashHex != null &&
-                    this.CodeHashHex.Equals(input.CodeHashHex))
+                    this.PreviousCursor == input.PreviousCursor ||
+                    (this.PreviousCursor != null &&
+                    this.PreviousCursor.Equals(input.PreviousCursor))
                 ) && 
                 (
-                    this.CodeHex == input.CodeHex ||
-                    (this.CodeHex != null &&
-                    this.CodeHex.Equals(input.CodeHex))
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
                 ) && 
                 (
-                    this.SchemaHashHex == input.SchemaHashHex ||
-                    (this.SchemaHashHex != null &&
-                    this.SchemaHashHex.Equals(input.SchemaHashHex))
-                ) && 
-                (
-                    this.Schema == input.Schema ||
-                    (this.Schema != null &&
-                    this.Schema.Equals(input.Schema))
-                ) && 
-                (
-                    this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
-                    (this.RoyaltyVaultBalance != null &&
-                    this.RoyaltyVaultBalance.Equals(input.RoyaltyVaultBalance))
-                ) && 
-                (
-                    this.Blueprints == input.Blueprints ||
-                    (this.Blueprints != null &&
-                    this.Blueprints.Equals(input.Blueprints))
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -272,30 +226,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.VmType.GetHashCode();
-                if (this.CodeHashHex != null)
+                if (this.TotalCount != null)
                 {
-                    hashCode = (hashCode * 59) + this.CodeHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
                 }
-                if (this.CodeHex != null)
+                if (this.PreviousCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
                 }
-                if (this.SchemaHashHex != null)
+                if (this.NextCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.SchemaHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
                 }
-                if (this.Schema != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.Schema.GetHashCode();
-                }
-                if (this.RoyaltyVaultBalance != null)
-                {
-                    hashCode = (hashCode * 59) + this.RoyaltyVaultBalance.GetHashCode();
-                }
-                if (this.Blueprints != null)
-                {
-                    hashCode = (hashCode * 59) + this.Blueprints.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

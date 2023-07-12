@@ -752,8 +752,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var validatorSetChanges = new List<ValidatorSetChange>();
         var entityStateToAdd = new List<EntityStateHistory>();
         var componentMethodRoyaltiesToAdd = new List<ComponentMethodRoyaltyEntryHistory>();
-        var packageBlueprintsToAdd = new Dictionary<PackageBlueprintLookup, PackageBlueprint>();
-        var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>(); // TODO follow Pointer+ordered List pattern
+        var packageBlueprintHistoryToAdd = new Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>();
+        var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>(); // TODO follow Pointer+ordered List pattern to ensure proper order of ingestion
         var accountDefaultDepositRuleHistoryToAdd = new List<AccountDefaultDepositRuleHistory>();
         var accountResourceDepositRuleHistoryToAdd = new List<AccountResourceDepositRuleHistory>();
         var accessRulesChangePointers = new Dictionary<AccessRulesChangePointerLookup, AccessRulesChangePointer>();
@@ -947,10 +947,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         {
                             var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDefinition.Key.BlueprintName, packageBlueprintDefinition.Key.BlueprintVersion);
 
-                            packageBlueprintsToAdd
-                                .GetOrAdd(lookup, _ => new PackageBlueprint
+                            packageBlueprintHistoryToAdd
+                                .GetOrAdd(lookup, _ => new PackageBlueprintHistory
                                 {
-                                    Id = sequences.PackageBlueprintsSequence++,
+                                    Id = sequences.PackageBlueprintHistorySequence++,
+                                    FromStateVersion = stateVersion,
                                     PackageEntityId = referencedEntity.DatabaseId,
                                     Name = lookup.Name,
                                     Version = lookup.BlueprintVersion,
@@ -962,10 +963,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         {
                             var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDependencies.Key.BlueprintName, packageBlueprintDependencies.Key.BlueprintVersion);
 
-                            packageBlueprintsToAdd
-                                .GetOrAdd(lookup, _ => new PackageBlueprint
+                            packageBlueprintHistoryToAdd
+                                .GetOrAdd(lookup, _ => new PackageBlueprintHistory
                                 {
-                                    Id = sequences.PackageBlueprintsSequence++,
+                                    Id = sequences.PackageBlueprintHistorySequence++,
+                                    FromStateVersion = stateVersion,
                                     PackageEntityId = referencedEntity.DatabaseId,
                                     Name = lookup.Name,
                                     Version = lookup.BlueprintVersion,
@@ -976,9 +978,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         if (substateData is CoreModel.PackageBlueprintRoyaltyEntrySubstate packageBlueprintRoyalty)
                         {
                             var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintRoyalty.Key.BlueprintName, packageBlueprintRoyalty.Key.BlueprintVersion);
-                            var pb = packageBlueprintsToAdd.GetOrAdd(lookup, _ => new PackageBlueprint
+                            var pb = packageBlueprintHistoryToAdd.GetOrAdd(lookup, _ => new PackageBlueprintHistory
                             {
-                                Id = sequences.PackageBlueprintsSequence++,
+                                Id = sequences.PackageBlueprintHistorySequence++,
+                                FromStateVersion = stateVersion,
                                 PackageEntityId = referencedEntity.DatabaseId,
                                 Name = lookup.Name,
                                 Version = lookup.BlueprintVersion,
@@ -991,9 +994,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         if (substateData is CoreModel.PackageBlueprintAuthTemplateEntrySubstate packageBlueprintAuthTemplate)
                         {
                             var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintAuthTemplate.Key.BlueprintName, packageBlueprintAuthTemplate.Key.BlueprintVersion);
-                            var pb = packageBlueprintsToAdd.GetOrAdd(lookup, _ => new PackageBlueprint
+                            var pb = packageBlueprintHistoryToAdd.GetOrAdd(lookup, _ => new PackageBlueprintHistory
                             {
-                                Id = sequences.PackageBlueprintsSequence++,
+                                Id = sequences.PackageBlueprintHistorySequence++,
+                                FromStateVersion = stateVersion,
                                 PackageEntityId = referencedEntity.DatabaseId,
                                 Name = lookup.Name,
                                 Version = lookup.BlueprintVersion,
@@ -1826,7 +1830,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorKeyHistory(validatorKeyHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyPackageBlueprints(packageBlueprintsToAdd.Values, token);
+            rowsInserted += await writeHelper.CopyPackageBlueprintHistory(packageBlueprintHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyAccountDefaultDepositRuleHistory(accountDefaultDepositRuleHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountResourceDepositRuleHistory(accountResourceDepositRuleHistoryToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);
