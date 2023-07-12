@@ -83,7 +83,14 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
     string GetNetworkName();
 }
 
-public sealed record CapturedConfig(byte NetworkId, string NetworkName, HrpDefinition HrpDefinition, WellKnownAddresses WellKnownAddresses, AddressTypeDefinition[] AddressTypeDefinitions);
+public sealed record CapturedConfig(
+    byte NetworkId,
+    string NetworkName,
+    HrpDefinition HrpDefinition,
+    WellKnownAddresses WellKnownAddresses,
+    AddressTypeDefinition[] AddressTypeDefinitions,
+    long GenesisEpoch,
+    long GenesisRound);
 
 public interface ICapturedConfigProvider
 {

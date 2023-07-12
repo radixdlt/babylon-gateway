@@ -101,24 +101,24 @@ public sealed class NodeNetworkConfigurationInitializer : NodeInitializer
 
     protected override async Task Initialize(CancellationToken token)
     {
-        var networkConfiguration = await ReadNetworkConfigurationFromNode(token);
+        var network = await ReadNetworkConfigurationFromNode(token);
 
-        if (_networkGatewayDataAggregatorOptionsMonitor.CurrentValue.NetworkName != networkConfiguration.Network)
+        if (_networkGatewayDataAggregatorOptionsMonitor.CurrentValue.NetworkName != network.Configuration.Network)
         {
             throw new NodeInitializationException(
-            $"The node's network name is {networkConfiguration.Network}, not {_networkGatewayDataAggregatorOptionsMonitor.CurrentValue.NetworkName}"
+            $"The node's network name is {network.Configuration.Network}, not {_networkGatewayDataAggregatorOptionsMonitor.CurrentValue.NetworkName}"
             );
         }
 
-        await _networkConfigurationProvider.SetNetworkConfigurationOrAssertMatching(networkConfiguration, token);
+        await _networkConfigurationProvider.SetNetworkConfigurationOrAssertMatching(network.Configuration, network.Status, token);
 
         _logger.LogInformation(
             "The node has network name {NodeNetworkName}, with matching config to db ledger and/or any other nodes",
-            networkConfiguration.Network
+            network.Configuration.Network
         );
     }
 
-    private async Task<CoreModel.NetworkConfigurationResponse> ReadNetworkConfigurationFromNode(CancellationToken token)
+    private async Task<(CoreModel.NetworkConfigurationResponse Configuration, CoreModel.NetworkStatusResponse Status)> ReadNetworkConfigurationFromNode(CancellationToken token)
     {
         try
         {
@@ -128,7 +128,7 @@ public sealed class NodeNetworkConfigurationInitializer : NodeInitializer
         catch (Exception innerException)
         {
             throw new NodeInitializationException(
-                $"Failed to connect / read details from node",
+                $"Failed to connect / read network configuration and/or status from node",
                 innerException
             );
         }

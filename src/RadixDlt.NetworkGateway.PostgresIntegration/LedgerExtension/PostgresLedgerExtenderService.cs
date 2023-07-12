@@ -1856,11 +1856,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
     private async Task<TransactionSummary> GetTopOfLedger(ReadWriteDbContext dbContext, CancellationToken token)
     {
-        var lastTransaction = await dbContext.GetTopLedgerTransaction()
-            .FirstOrDefaultAsync(token);
+        var lastTransaction = await dbContext.GetTopLedgerTransaction().FirstOrDefaultAsync(token);
 
-        var lastOverview = lastTransaction == null
-            ? null
+        return lastTransaction == null
+            ? PreGenesisTransactionSummary()
             : new TransactionSummary(
                 StateVersion: lastTransaction.StateVersion,
                 RoundTimestamp: lastTransaction.RoundTimestamp,
@@ -1872,8 +1871,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 IndexInRound: lastTransaction.IndexInRound,
                 IsEndOfEpoch: lastTransaction.IsEndOfEpoch
             );
-
-        return lastOverview ?? PreGenesisTransactionSummary();
     }
 
     private TransactionSummary PreGenesisTransactionSummary()
@@ -1884,8 +1881,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             RoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
             NormalizedRoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
             CreatedTimestamp: _clock.UtcNow,
-            Epoch: 0,
-            RoundInEpoch: 0,
+            Epoch: _networkConfigurationProvider.GetGenesisEpoch(),
+            RoundInEpoch: _networkConfigurationProvider.GetGenesisRound(),
             IndexInEpoch: 0,
             IndexInRound: 0,
             IsEndOfEpoch: false
