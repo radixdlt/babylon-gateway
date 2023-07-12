@@ -91,7 +91,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 {
     private record MetadataViewModel(long FromStateVersion, long EntityId, string Key, byte[] Value, bool IsLocked, int TotalCount);
 
-    private record ValidatorCurrentStakeViewModel(long ValidatorId, string Balance, string State, long BalanceLastUpdatedAtStateVersion, long StateLastUpdatedAtStateVersion);
+    private record ValidatorCurrentStakeViewModel(long ValidatorId,  string State, long StateLastUpdatedAtStateVersion, string StakeVaultBalance, long StakeVaultLastUpdatedAtStateVersion, string PendingXrdWithdrawVaultBalance, long PendingXrdWithdrawVaultLastUpdatedAtStateVersion, string LockedOwnerStakeUnitVaultBalance, long LockedOwnerStakeUnitVaultLastUpdatedAtStateVersion, string PendingOwnerStakeUnitUnlockVaultBalance, long PendingOwnerStakeUnitUnlockVaultLastUpdatedAtStateVersion);
 
     private record FungibleViewModel(EntityAddress ResourceEntityAddress, string Balance, int ResourcesTotalCount, long LastUpdatedAtStateVersion);
 
@@ -605,7 +605,8 @@ ORDER BY nfid.from_state_version DESC
         var fromStateVersion = cursor?.StateVersionBoundary ?? 0;
 
         var validatorsAndOneMore = await _dbContext.Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.GetType() == typeof(GlobalValidatorEntity))
+            .OfType<GlobalValidatorEntity>()
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
             .Where(e => e.FromStateVersion > fromStateVersion)
             .OrderBy(e => e.FromStateVersion)
             .ThenBy(e => e.Id)
@@ -629,11 +630,32 @@ ORDER BY nfid.from_state_version DESC
             .Aggregate(TokenAmount.Zero, (current, x) => current + x);
 
         var validatorIds = validatorsAndOneMore.Take(validatorsPageSize).Select(e => e.Id).ToArray();
+        var validatorVaultIds = validatorsAndOneMore.Take(validatorsPageSize).Aggregate(new List<long>(), (aggregated, validator) =>
+        {
+            aggregated.Add(validator.StakeVaultEntityId);
+            aggregated.Add(validator.PendingXrdWithdrawVault);
+            aggregated.Add(validator.LockedOwnerStakeUnitVault);
+            aggregated.Add(validator.PendingOwnerStakeUnitUnlockVault);
+
+            return aggregated;
+        })
+        .ToList();
 
         var cd = new CommandDefinition(
             commandText: @"
 WITH variables (validator_entity_id) AS (SELECT UNNEST(@validatorIds))
-SELECT e.id AS ValidatorId, CAST(evh.balance AS text) AS Balance, esh.state AS State, evh.from_state_version AS BalanceLastUpdatedAtStateVersion, esh.from_state_version AS StateLastUpdatedAtStateVersion
+SELECT
+    e.id AS ValidatorId,
+    esh.state AS State,
+    esh.from_state_version AS StateLastUpdatedAtStateVersion,
+    CAST(evh.balance AS text) AS StakeVaultBalance,
+    evh.from_state_version AS StakeVaultLastUpdatedAtStateVersion,
+    CAST(pxrwv.balance AS text) AS PendingXrdWithdrawVaultBalance,
+    pxrwv.from_state_version AS PendingXrdWithdrawVaultLastUpdatedAtStateVersion,
+    CAST(losuv.balance AS text) AS LockedOwnerStakeUnitVaultBalance,
+    losuv.from_state_version AS LockedOwnerStakeUnitVaultLastUpdatedAtStateVersion,
+    CAST(posuuv.balance AS text) AS PendingOwnerStakeUnitUnlockVaultBalance,
+    posuuv.from_state_version AS PendingOwnerStakeUnitUnlockVaultLastUpdatedAtStateVersion
 FROM variables
 INNER JOIN entities e ON e.id = variables.validator_entity_id AND from_state_version <= @stateVersion
 INNER JOIN LATERAL (
@@ -650,6 +672,27 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) esh ON true
+INNER JOIN LATERAL (
+    SELECT balance, from_state_version
+    FROM entity_vault_history
+    WHERE vault_entity_id = e.pending_xrd_withdraw_vault_entity_id AND from_state_version <= @stateVersion
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) pxrwv ON true
+INNER JOIN LATERAL (
+    SELECT balance, from_state_version
+    FROM entity_vault_history
+    WHERE vault_entity_id = e.locked_owner_stake_unit_vault_entity_id AND from_state_version <= @stateVersion
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) losuv ON true
+INNER JOIN LATERAL (
+    SELECT balance, from_state_version
+    FROM entity_vault_history
+    WHERE vault_entity_id = e.pending_owner_stake_unit_unlock_vault_entity_id AND from_state_version <= @stateVersion
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) posuuv ON true
 ;",
             parameters: new
             {
@@ -658,6 +701,10 @@ INNER JOIN LATERAL (
             cancellationToken: token);
 
         var validatorsDetails = (await _dbContext.Database.GetDbConnection().QueryAsync<ValidatorCurrentStakeViewModel>(cd)).ToList();
+        var vaultAddresses = await _dbContext.Entities
+            .Where(e => validatorVaultIds.Contains(e.Id))
+            .Select(e => new { e.Id, GlobalAddress = e.Address })
+            .ToDictionaryAsync(e => e.Id, e => e.GlobalAddress, token);
 
         var metadataById = await GetMetadataSlices(validatorIds, 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
 
@@ -679,8 +726,23 @@ INNER JOIN LATERAL (
 
                 return new GatewayModel.ValidatorCollectionItem(
                     v.Address,
+                    new GatewayModel.ValidatorVaultItem(
+                        TokenAmount.FromSubUnitsString(details.StakeVaultBalance).ToString(),
+                        details.StakeVaultLastUpdatedAtStateVersion,
+                        vaultAddresses[v.StakeVaultEntityId]),
+                    new GatewayModel.ValidatorVaultItem(
+                        TokenAmount.FromSubUnitsString(details.PendingXrdWithdrawVaultBalance).ToString(),
+                        details.PendingXrdWithdrawVaultLastUpdatedAtStateVersion,
+                        vaultAddresses[v.PendingXrdWithdrawVault]),
+                    new GatewayModel.ValidatorVaultItem(
+                        TokenAmount.FromSubUnitsString(details.LockedOwnerStakeUnitVaultBalance).ToString(),
+                        details.LockedOwnerStakeUnitVaultLastUpdatedAtStateVersion,
+                        vaultAddresses[v.LockedOwnerStakeUnitVault]),
+                    new GatewayModel.ValidatorVaultItem(
+                        TokenAmount.FromSubUnitsString(details.PendingOwnerStakeUnitUnlockVaultBalance).ToString(),
+                        details.PendingOwnerStakeUnitUnlockVaultLastUpdatedAtStateVersion,
+                        vaultAddresses[v.PendingXrdWithdrawVault]),
                     new JRaw(details.State),
-                    TokenAmount.FromSubUnitsString(details.Balance).ToString(),
                     activeInEpoch,
                     metadataById[v.Id]);
             })
