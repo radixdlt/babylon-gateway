@@ -1097,7 +1097,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                         Quantity = quantity,
                                     });
                                 }
-                         }
+                            }
                         }
 
                         if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalNonFungibleVault)
