@@ -16,19 +16,19 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface MetadataScalarArrayValue
+ * @interface MetadataInstantArrayValue
  */
-export interface MetadataScalarArrayValue {
+export interface MetadataInstantArrayValue {
     /**
      * 
      * @type {string}
-     * @memberof MetadataScalarArrayValue
+     * @memberof MetadataInstantArrayValue
      */
-    type: MetadataScalarArrayValueTypeEnum;
+    type: MetadataInstantArrayValueTypeEnum;
     /**
      * 
      * @type {Array<string>}
-     * @memberof MetadataScalarArrayValue
+     * @memberof MetadataInstantArrayValue
      */
     values: Array<string>;
 }
@@ -37,16 +37,16 @@ export interface MetadataScalarArrayValue {
 /**
  * @export
  */
-export const MetadataScalarArrayValueTypeEnum = {
-    StringArray: 'StringArray'
+export const MetadataInstantArrayValueTypeEnum = {
+    InstantArray: 'InstantArray'
 } as const;
-export type MetadataScalarArrayValueTypeEnum = typeof MetadataScalarArrayValueTypeEnum[keyof typeof MetadataScalarArrayValueTypeEnum];
+export type MetadataInstantArrayValueTypeEnum = typeof MetadataInstantArrayValueTypeEnum[keyof typeof MetadataInstantArrayValueTypeEnum];
 
 
 /**
- * Check if a given object implements the MetadataScalarArrayValue interface.
+ * Check if a given object implements the MetadataInstantArrayValue interface.
  */
-export function instanceOfMetadataScalarArrayValue(value: object): boolean {
+export function instanceOfMetadataInstantArrayValue(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "type" in value;
     isInstance = isInstance && "values" in value;
@@ -54,11 +54,11 @@ export function instanceOfMetadataScalarArrayValue(value: object): boolean {
     return isInstance;
 }
 
-export function MetadataScalarArrayValueFromJSON(json: any): MetadataScalarArrayValue {
-    return MetadataScalarArrayValueFromJSONTyped(json, false);
+export function MetadataInstantArrayValueFromJSON(json: any): MetadataInstantArrayValue {
+    return MetadataInstantArrayValueFromJSONTyped(json, false);
 }
 
-export function MetadataScalarArrayValueFromJSONTyped(json: any, ignoreDiscriminator: boolean): MetadataScalarArrayValue {
+export function MetadataInstantArrayValueFromJSONTyped(json: any, ignoreDiscriminator: boolean): MetadataInstantArrayValue {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -69,7 +69,7 @@ export function MetadataScalarArrayValueFromJSONTyped(json: any, ignoreDiscrimin
     };
 }
 
-export function MetadataScalarArrayValueToJSON(value?: MetadataScalarArrayValue | null): any {
+export function MetadataInstantArrayValueToJSON(value?: MetadataInstantArrayValue | null): any {
     if (value === undefined) {
         return undefined;
     }

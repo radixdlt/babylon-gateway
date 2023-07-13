@@ -16,59 +16,59 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface MetadataScalarArrayValueAllOf
+ * @interface PublicKeyHashEcdsaSecp256k1AllOf
  */
-export interface MetadataScalarArrayValueAllOf {
+export interface PublicKeyHashEcdsaSecp256k1AllOf {
     /**
-     * 
-     * @type {Array<string>}
-     * @memberof MetadataScalarArrayValueAllOf
+     * Hex-encoded SHA-256 hash.
+     * @type {string}
+     * @memberof PublicKeyHashEcdsaSecp256k1AllOf
      */
-    values: Array<string>;
+    hash_hex: string;
     /**
      * 
      * @type {string}
-     * @memberof MetadataScalarArrayValueAllOf
+     * @memberof PublicKeyHashEcdsaSecp256k1AllOf
      */
-    type?: MetadataScalarArrayValueAllOfTypeEnum;
+    key_hash_type?: PublicKeyHashEcdsaSecp256k1AllOfKeyHashTypeEnum;
 }
 
 
 /**
  * @export
  */
-export const MetadataScalarArrayValueAllOfTypeEnum = {
-    StringArray: 'StringArray'
+export const PublicKeyHashEcdsaSecp256k1AllOfKeyHashTypeEnum = {
+    EcdsaSecp256k1: 'EcdsaSecp256k1'
 } as const;
-export type MetadataScalarArrayValueAllOfTypeEnum = typeof MetadataScalarArrayValueAllOfTypeEnum[keyof typeof MetadataScalarArrayValueAllOfTypeEnum];
+export type PublicKeyHashEcdsaSecp256k1AllOfKeyHashTypeEnum = typeof PublicKeyHashEcdsaSecp256k1AllOfKeyHashTypeEnum[keyof typeof PublicKeyHashEcdsaSecp256k1AllOfKeyHashTypeEnum];
 
 
 /**
- * Check if a given object implements the MetadataScalarArrayValueAllOf interface.
+ * Check if a given object implements the PublicKeyHashEcdsaSecp256k1AllOf interface.
  */
-export function instanceOfMetadataScalarArrayValueAllOf(value: object): boolean {
+export function instanceOfPublicKeyHashEcdsaSecp256k1AllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "values" in value;
+    isInstance = isInstance && "hash_hex" in value;
 
     return isInstance;
 }
 
-export function MetadataScalarArrayValueAllOfFromJSON(json: any): MetadataScalarArrayValueAllOf {
-    return MetadataScalarArrayValueAllOfFromJSONTyped(json, false);
+export function PublicKeyHashEcdsaSecp256k1AllOfFromJSON(json: any): PublicKeyHashEcdsaSecp256k1AllOf {
+    return PublicKeyHashEcdsaSecp256k1AllOfFromJSONTyped(json, false);
 }
 
-export function MetadataScalarArrayValueAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): MetadataScalarArrayValueAllOf {
+export function PublicKeyHashEcdsaSecp256k1AllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): PublicKeyHashEcdsaSecp256k1AllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'values': json['values'],
-        'type': !exists(json, 'type') ? undefined : json['type'],
+        'hash_hex': json['hash_hex'],
+        'key_hash_type': !exists(json, 'key_hash_type') ? undefined : json['key_hash_type'],
     };
 }
 
-export function MetadataScalarArrayValueAllOfToJSON(value?: MetadataScalarArrayValueAllOf | null): any {
+export function PublicKeyHashEcdsaSecp256k1AllOfToJSON(value?: PublicKeyHashEcdsaSecp256k1AllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -77,8 +77,8 @@ export function MetadataScalarArrayValueAllOfToJSON(value?: MetadataScalarArrayV
     }
     return {
         
-        'values': value.values,
-        'type': value.type,
+        'hash_hex': value.hash_hex,
+        'key_hash_type': value.key_hash_type,
     };
 }
 

@@ -84,33 +84,63 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// MetadataScalarValueAllOf
+    /// MetadataBoolValue
     /// </summary>
-    [DataContract(Name = "MetadataScalarValue_allOf")]
-    public partial class MetadataScalarValueAllOf : IEquatable<MetadataScalarValueAllOf>
+    [DataContract(Name = "MetadataBoolValue")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataBoolValue), "Bool")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataBoolArrayValue), "BoolArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataDecimalValue), "Decimal")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataDecimalArrayValue), "DecimalArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataGlobalAddressValue), "GlobalAddress")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataGlobalAddressArrayValue), "GlobalAddressArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataI32Value), "I32")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataI32ArrayValue), "I32Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataI64Value), "I64")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataI64ArrayValue), "I64Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataInstantValue), "Instant")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataInstantArrayValue), "InstantArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleGlobalIdValue), "NonFungibleGlobalId")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleGlobalIdArrayValue), "NonFungibleGlobalIdArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleLocalIdValue), "NonFungibleLocalId")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleLocalIdArrayValue), "NonFungibleLocalIdArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataOriginValue), "Origin")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataOriginArrayValue), "OriginArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyValue), "PublicKey")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyArrayValue), "PublicKeyArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyHashValue), "PublicKeyHash")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyHashArrayValue), "PublicKeyHashArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataStringValue), "String")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataStringArrayValue), "StringArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataU32Value), "U32")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataU32ArrayValue), "U32Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataU64Value), "U64")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataU64ArrayValue), "U64Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataU8Value), "U8")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataU8ArrayValue), "U8Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataUrlValue), "Url")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataUrlArrayValue), "UrlArray")]
+    public partial class MetadataBoolValue : MetadataTypedValue, IEquatable<MetadataBoolValue>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataScalarValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MetadataBoolValue" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MetadataScalarValueAllOf() { }
+        protected MetadataBoolValue() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataScalarValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="MetadataBoolValue" /> class.
         /// </summary>
         /// <param name="value">value (required).</param>
-        public MetadataScalarValueAllOf(string value = default(string))
+        /// <param name="type">type (required) (default to MetadataValueType.Bool).</param>
+        public MetadataBoolValue(bool value = default(bool), MetadataValueType type = MetadataValueType.Bool) : base(type)
         {
-            // to ensure "value" is required (not null)
-            if (value == null)
-            {
-                throw new ArgumentNullException("value is a required property for MetadataScalarValueAllOf and cannot be null");
-            }
             this.Value = value;
         }
 
@@ -118,7 +148,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Value
         /// </summary>
         [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public string Value { get; set; }
+        public bool Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,7 +157,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MetadataScalarValueAllOf {\n");
+            sb.Append("class MetadataBoolValue {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -137,7 +168,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -149,25 +180,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MetadataScalarValueAllOf);
+            return this.Equals(input as MetadataBoolValue);
         }
 
         /// <summary>
-        /// Returns true if MetadataScalarValueAllOf instances are equal
+        /// Returns true if MetadataBoolValue instances are equal
         /// </summary>
-        /// <param name="input">Instance of MetadataScalarValueAllOf to be compared</param>
+        /// <param name="input">Instance of MetadataBoolValue to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MetadataScalarValueAllOf input)
+        public bool Equals(MetadataBoolValue input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
                     this.Value == input.Value ||
-                    (this.Value != null &&
-                    this.Value.Equals(input.Value))
+                    this.Value.Equals(input.Value)
                 );
         }
 
@@ -179,11 +209,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.Value != null)
-                {
-                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
-                }
+                int hashCode = base.GetHashCode();
+                hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 return hashCode;
             }
         }
