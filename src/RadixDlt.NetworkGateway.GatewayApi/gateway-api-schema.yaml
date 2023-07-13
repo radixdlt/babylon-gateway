@@ -716,6 +716,21 @@ components:
     # Common Response Types
     #
 
+    ValidatorVaultItem:
+      type: object
+      required:
+        - balance
+        - last_changed_at_state_version
+        - address
+      properties:
+        balance:
+          $ref: "#/components/schemas/BigDecimal"
+        last_changed_at_state_version:
+          type: integer
+          format: int64
+        address:
+          $ref: "#/components/schemas/Address"
+
     LedgerStateMixin:
       type: object
       required:
@@ -1134,15 +1149,24 @@ components:
       required:
         - address
         - metadata
-        - current_stake
+        - stake_vault
+        - pending_xrd_withdraw_vault
+        - locked_owner_stake_unit_vault
+        - pending_owner_stake_unit_unlock_vault
       properties:
         address:
           $ref: "#/components/schemas/Address"
+        stake_vault:
+          $ref: "#/components/schemas/ValidatorVaultItem"
+        pending_xrd_withdraw_vault:
+          $ref: "#/components/schemas/ValidatorVaultItem"
+        locked_owner_stake_unit_vault:
+          $ref: "#/components/schemas/ValidatorVaultItem"
+        pending_owner_stake_unit_unlock_vault:
+          $ref: "#/components/schemas/ValidatorVaultItem"
         state:
           type: object
           nullable: true
-        current_stake:
-          $ref: "#/components/schemas/BigDecimal"
         active_in_epoch:
           $ref: "#/components/schemas/ValidatorCollectionItemActiveInEpoch"
         metadata:

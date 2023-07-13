@@ -104,11 +104,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="ValidatorCollectionItem" /> class.
         /// </summary>
         /// <param name="address">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="stakeVault">stakeVault (required).</param>
+        /// <param name="pendingXrdWithdrawVault">pendingXrdWithdrawVault (required).</param>
+        /// <param name="lockedOwnerStakeUnitVault">lockedOwnerStakeUnitVault (required).</param>
+        /// <param name="pendingOwnerStakeUnitUnlockVault">pendingOwnerStakeUnitUnlockVault (required).</param>
         /// <param name="state">state.</param>
-        /// <param name="currentStake">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="activeInEpoch">activeInEpoch.</param>
         /// <param name="metadata">metadata (required).</param>
-        public ValidatorCollectionItem(string address = default(string), Object state = default(Object), string currentStake = default(string), ValidatorCollectionItemActiveInEpoch activeInEpoch = default(ValidatorCollectionItemActiveInEpoch), EntityMetadataCollection metadata = default(EntityMetadataCollection))
+        public ValidatorCollectionItem(string address = default(string), ValidatorVaultItem stakeVault = default(ValidatorVaultItem), ValidatorVaultItem pendingXrdWithdrawVault = default(ValidatorVaultItem), ValidatorVaultItem lockedOwnerStakeUnitVault = default(ValidatorVaultItem), ValidatorVaultItem pendingOwnerStakeUnitUnlockVault = default(ValidatorVaultItem), Object state = default(Object), ValidatorCollectionItemActiveInEpoch activeInEpoch = default(ValidatorCollectionItemActiveInEpoch), EntityMetadataCollection metadata = default(EntityMetadataCollection))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -116,12 +119,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("address is a required property for ValidatorCollectionItem and cannot be null");
             }
             this.Address = address;
-            // to ensure "currentStake" is required (not null)
-            if (currentStake == null)
+            // to ensure "stakeVault" is required (not null)
+            if (stakeVault == null)
             {
-                throw new ArgumentNullException("currentStake is a required property for ValidatorCollectionItem and cannot be null");
+                throw new ArgumentNullException("stakeVault is a required property for ValidatorCollectionItem and cannot be null");
             }
-            this.CurrentStake = currentStake;
+            this.StakeVault = stakeVault;
+            // to ensure "pendingXrdWithdrawVault" is required (not null)
+            if (pendingXrdWithdrawVault == null)
+            {
+                throw new ArgumentNullException("pendingXrdWithdrawVault is a required property for ValidatorCollectionItem and cannot be null");
+            }
+            this.PendingXrdWithdrawVault = pendingXrdWithdrawVault;
+            // to ensure "lockedOwnerStakeUnitVault" is required (not null)
+            if (lockedOwnerStakeUnitVault == null)
+            {
+                throw new ArgumentNullException("lockedOwnerStakeUnitVault is a required property for ValidatorCollectionItem and cannot be null");
+            }
+            this.LockedOwnerStakeUnitVault = lockedOwnerStakeUnitVault;
+            // to ensure "pendingOwnerStakeUnitUnlockVault" is required (not null)
+            if (pendingOwnerStakeUnitUnlockVault == null)
+            {
+                throw new ArgumentNullException("pendingOwnerStakeUnitUnlockVault is a required property for ValidatorCollectionItem and cannot be null");
+            }
+            this.PendingOwnerStakeUnitUnlockVault = pendingOwnerStakeUnitUnlockVault;
             // to ensure "metadata" is required (not null)
             if (metadata == null)
             {
@@ -140,17 +161,34 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Address { get; set; }
 
         /// <summary>
+        /// Gets or Sets StakeVault
+        /// </summary>
+        [DataMember(Name = "stake_vault", IsRequired = true, EmitDefaultValue = true)]
+        public ValidatorVaultItem StakeVault { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PendingXrdWithdrawVault
+        /// </summary>
+        [DataMember(Name = "pending_xrd_withdraw_vault", IsRequired = true, EmitDefaultValue = true)]
+        public ValidatorVaultItem PendingXrdWithdrawVault { get; set; }
+
+        /// <summary>
+        /// Gets or Sets LockedOwnerStakeUnitVault
+        /// </summary>
+        [DataMember(Name = "locked_owner_stake_unit_vault", IsRequired = true, EmitDefaultValue = true)]
+        public ValidatorVaultItem LockedOwnerStakeUnitVault { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PendingOwnerStakeUnitUnlockVault
+        /// </summary>
+        [DataMember(Name = "pending_owner_stake_unit_unlock_vault", IsRequired = true, EmitDefaultValue = true)]
+        public ValidatorVaultItem PendingOwnerStakeUnitUnlockVault { get; set; }
+
+        /// <summary>
         /// Gets or Sets State
         /// </summary>
         [DataMember(Name = "state", EmitDefaultValue = true)]
         public Object State { get; set; }
-
-        /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
-        /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "current_stake", IsRequired = true, EmitDefaultValue = true)]
-        public string CurrentStake { get; set; }
 
         /// <summary>
         /// Gets or Sets ActiveInEpoch
@@ -173,8 +211,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ValidatorCollectionItem {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  StakeVault: ").Append(StakeVault).Append("\n");
+            sb.Append("  PendingXrdWithdrawVault: ").Append(PendingXrdWithdrawVault).Append("\n");
+            sb.Append("  LockedOwnerStakeUnitVault: ").Append(LockedOwnerStakeUnitVault).Append("\n");
+            sb.Append("  PendingOwnerStakeUnitUnlockVault: ").Append(PendingOwnerStakeUnitUnlockVault).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
-            sb.Append("  CurrentStake: ").Append(CurrentStake).Append("\n");
             sb.Append("  ActiveInEpoch: ").Append(ActiveInEpoch).Append("\n");
             sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("}\n");
@@ -218,14 +259,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
+                    this.StakeVault == input.StakeVault ||
+                    (this.StakeVault != null &&
+                    this.StakeVault.Equals(input.StakeVault))
+                ) && 
+                (
+                    this.PendingXrdWithdrawVault == input.PendingXrdWithdrawVault ||
+                    (this.PendingXrdWithdrawVault != null &&
+                    this.PendingXrdWithdrawVault.Equals(input.PendingXrdWithdrawVault))
+                ) && 
+                (
+                    this.LockedOwnerStakeUnitVault == input.LockedOwnerStakeUnitVault ||
+                    (this.LockedOwnerStakeUnitVault != null &&
+                    this.LockedOwnerStakeUnitVault.Equals(input.LockedOwnerStakeUnitVault))
+                ) && 
+                (
+                    this.PendingOwnerStakeUnitUnlockVault == input.PendingOwnerStakeUnitUnlockVault ||
+                    (this.PendingOwnerStakeUnitUnlockVault != null &&
+                    this.PendingOwnerStakeUnitUnlockVault.Equals(input.PendingOwnerStakeUnitUnlockVault))
+                ) && 
+                (
                     this.State == input.State ||
                     (this.State != null &&
                     this.State.Equals(input.State))
-                ) && 
-                (
-                    this.CurrentStake == input.CurrentStake ||
-                    (this.CurrentStake != null &&
-                    this.CurrentStake.Equals(input.CurrentStake))
                 ) && 
                 (
                     this.ActiveInEpoch == input.ActiveInEpoch ||
@@ -252,13 +308,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
+                if (this.StakeVault != null)
+                {
+                    hashCode = (hashCode * 59) + this.StakeVault.GetHashCode();
+                }
+                if (this.PendingXrdWithdrawVault != null)
+                {
+                    hashCode = (hashCode * 59) + this.PendingXrdWithdrawVault.GetHashCode();
+                }
+                if (this.LockedOwnerStakeUnitVault != null)
+                {
+                    hashCode = (hashCode * 59) + this.LockedOwnerStakeUnitVault.GetHashCode();
+                }
+                if (this.PendingOwnerStakeUnitUnlockVault != null)
+                {
+                    hashCode = (hashCode * 59) + this.PendingOwnerStakeUnitUnlockVault.GetHashCode();
+                }
                 if (this.State != null)
                 {
                     hashCode = (hashCode * 59) + this.State.GetHashCode();
-                }
-                if (this.CurrentStake != null)
-                {
-                    hashCode = (hashCode * 59) + this.CurrentStake.GetHashCode();
                 }
                 if (this.ActiveInEpoch != null)
                 {
