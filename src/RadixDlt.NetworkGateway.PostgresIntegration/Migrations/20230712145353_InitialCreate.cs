@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -486,11 +486,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "package_blueprints",
+                name: "package_blueprint_history",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     package_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     name = table.Column<string>(type: "text", nullable: false),
                     version = table.Column<string>(type: "text", nullable: false),
@@ -503,7 +504,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_package_blueprints", x => x.id);
+                    table.PrimaryKey("PK_package_blueprint_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -734,9 +735,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "non_fungible_resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_package_blueprints_package_entity_id",
-                table: "package_blueprints",
-                column: "package_entity_id");
+                name: "IX_package_blueprint_history_package_entity_id_from_state_vers~",
+                table: "package_blueprint_history",
+                columns: new[] { "package_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_intent_hash",
@@ -852,7 +853,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "non_fungible_id_store_history");
 
             migrationBuilder.DropTable(
-                name: "package_blueprints");
+                name: "package_blueprint_history");
 
             migrationBuilder.DropTable(
                 name: "pending_transactions");

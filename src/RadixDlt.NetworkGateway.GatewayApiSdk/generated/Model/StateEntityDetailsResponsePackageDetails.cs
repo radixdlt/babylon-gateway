@@ -103,6 +103,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponsePackageDetails), "Package")]
     public partial class StateEntityDetailsResponsePackageDetails : StateEntityDetailsResponseItemDetails, IEquatable<StateEntityDetailsResponsePackageDetails>
     {
+
+        /// <summary>
+        /// Gets or Sets VmType
+        /// </summary>
+        [DataMember(Name = "vm_type", IsRequired = true, EmitDefaultValue = true)]
+        public PackageVmType VmType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetails" /> class.
         /// </summary>
@@ -111,14 +117,41 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetails" /> class.
         /// </summary>
+        /// <param name="vmType">vmType (required).</param>
+        /// <param name="codeHashHex">Hex-encoded binary blob. (required).</param>
         /// <param name="codeHex">Hex-encoded binary blob..</param>
+        /// <param name="schemaHashHex">Hex-encoded binary blob. (required).</param>
+        /// <param name="schema">schema.</param>
         /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
+        /// <param name="blueprints">blueprints.</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Package).</param>
-        public StateEntityDetailsResponsePackageDetails(string codeHex = default(string), string royaltyVaultBalance = default(string), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Package) : base(type)
+        public StateEntityDetailsResponsePackageDetails(PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string schemaHashHex = default(string), Object schema = default(Object), string royaltyVaultBalance = default(string), StateEntityDetailsResponsePackageDetailsBlueprintCollection blueprints = default(StateEntityDetailsResponsePackageDetailsBlueprintCollection), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Package) : base(type)
         {
+            this.VmType = vmType;
+            // to ensure "codeHashHex" is required (not null)
+            if (codeHashHex == null)
+            {
+                throw new ArgumentNullException("codeHashHex is a required property for StateEntityDetailsResponsePackageDetails and cannot be null");
+            }
+            this.CodeHashHex = codeHashHex;
+            // to ensure "schemaHashHex" is required (not null)
+            if (schemaHashHex == null)
+            {
+                throw new ArgumentNullException("schemaHashHex is a required property for StateEntityDetailsResponsePackageDetails and cannot be null");
+            }
+            this.SchemaHashHex = schemaHashHex;
             this.CodeHex = codeHex;
+            this.Schema = schema;
             this.RoyaltyVaultBalance = royaltyVaultBalance;
+            this.Blueprints = blueprints;
         }
+
+        /// <summary>
+        /// Hex-encoded binary blob.
+        /// </summary>
+        /// <value>Hex-encoded binary blob.</value>
+        [DataMember(Name = "code_hash_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string CodeHashHex { get; set; }
 
         /// <summary>
         /// Hex-encoded binary blob.
@@ -128,11 +161,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string CodeHex { get; set; }
 
         /// <summary>
+        /// Hex-encoded binary blob.
+        /// </summary>
+        /// <value>Hex-encoded binary blob.</value>
+        [DataMember(Name = "schema_hash_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string SchemaHashHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Schema
+        /// </summary>
+        [DataMember(Name = "schema", EmitDefaultValue = true)]
+        public Object Schema { get; set; }
+
+        /// <summary>
         /// String-encoded decimal representing the amount of a related fungible resource.
         /// </summary>
         /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
         [DataMember(Name = "royalty_vault_balance", EmitDefaultValue = true)]
         public string RoyaltyVaultBalance { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Blueprints
+        /// </summary>
+        [DataMember(Name = "blueprints", EmitDefaultValue = true)]
+        public StateEntityDetailsResponsePackageDetailsBlueprintCollection Blueprints { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,8 +195,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityDetailsResponsePackageDetails {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  VmType: ").Append(VmType).Append("\n");
+            sb.Append("  CodeHashHex: ").Append(CodeHashHex).Append("\n");
             sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
+            sb.Append("  SchemaHashHex: ").Append(SchemaHashHex).Append("\n");
+            sb.Append("  Schema: ").Append(Schema).Append("\n");
             sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
+            sb.Append("  Blueprints: ").Append(Blueprints).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -181,14 +238,38 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return base.Equals(input) && 
                 (
+                    this.VmType == input.VmType ||
+                    this.VmType.Equals(input.VmType)
+                ) && base.Equals(input) && 
+                (
+                    this.CodeHashHex == input.CodeHashHex ||
+                    (this.CodeHashHex != null &&
+                    this.CodeHashHex.Equals(input.CodeHashHex))
+                ) && base.Equals(input) && 
+                (
                     this.CodeHex == input.CodeHex ||
                     (this.CodeHex != null &&
                     this.CodeHex.Equals(input.CodeHex))
                 ) && base.Equals(input) && 
                 (
+                    this.SchemaHashHex == input.SchemaHashHex ||
+                    (this.SchemaHashHex != null &&
+                    this.SchemaHashHex.Equals(input.SchemaHashHex))
+                ) && base.Equals(input) && 
+                (
+                    this.Schema == input.Schema ||
+                    (this.Schema != null &&
+                    this.Schema.Equals(input.Schema))
+                ) && base.Equals(input) && 
+                (
                     this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
                     (this.RoyaltyVaultBalance != null &&
                     this.RoyaltyVaultBalance.Equals(input.RoyaltyVaultBalance))
+                ) && base.Equals(input) && 
+                (
+                    this.Blueprints == input.Blueprints ||
+                    (this.Blueprints != null &&
+                    this.Blueprints.Equals(input.Blueprints))
                 );
         }
 
@@ -201,13 +282,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
+                hashCode = (hashCode * 59) + this.VmType.GetHashCode();
+                if (this.CodeHashHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.CodeHashHex.GetHashCode();
+                }
                 if (this.CodeHex != null)
                 {
                     hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
                 }
+                if (this.SchemaHashHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.SchemaHashHex.GetHashCode();
+                }
+                if (this.Schema != null)
+                {
+                    hashCode = (hashCode * 59) + this.Schema.GetHashCode();
+                }
                 if (this.RoyaltyVaultBalance != null)
                 {
                     hashCode = (hashCode * 59) + this.RoyaltyVaultBalance.GetHashCode();
+                }
+                if (this.Blueprints != null)
+                {
+                    hashCode = (hashCode * 59) + this.Blueprints.GetHashCode();
                 }
                 return hashCode;
             }

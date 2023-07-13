@@ -830,6 +830,17 @@ components:
             typed:
               $ref: "#/components/schemas/MetadataTypedValue"
 
+    ComponentEntityAccessRules:
+      type: object
+      required:
+        - owner
+        - entries
+      properties:
+        owner:
+          type: object
+        entries:
+          type: object
+
     FungibleResourcesCollection:
       description: Fungible resources collection.
       allOf:
@@ -1100,6 +1111,12 @@ components:
         - Integer
         - Bytes
         - Ruid
+
+    PackageVmType:
+      type: string
+      enum:
+        - Native
+        - ScryptoV1
 
     ValidatorCollection:
       allOf:
@@ -1668,17 +1685,14 @@ components:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
-            - access_rules_chain
-            - vault_access_rules_chain
+            - access_rules
             - divisibility
             - total_supply
             - total_minted
             - total_burned
           properties:
-            access_rules_chain:
-              type: object
-            vault_access_rules_chain:
-              type: object
+            access_rules:
+              $ref: "#/components/schemas/ComponentEntityAccessRules"
             divisibility:
               type: integer
               minimum: 0
@@ -1693,17 +1707,14 @@ components:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
-            - access_rules_chain
-            - vault_access_rules_chain
+            - access_rules
             - non_fungible_id_type
             - total_supply
             - total_minted
             - total_burned
           properties:
-            access_rules_chain:
-              type: object
-            vault_access_rules_chain:
-              type: object
+            access_rules:
+              $ref: "#/components/schemas/ComponentEntityAccessRules"
             non_fungible_id_type:
               $ref: "#/components/schemas/NonFungibleIdType"
             total_supply:
@@ -1724,18 +1735,71 @@ components:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
+          required:
+            - vm_type
+            - code_hash_hex
+            - schema_hash_hex
           properties:
+            vm_type:
+              $ref: "#/components/schemas/PackageVmType"
+            code_hash_hex:
+              $ref: "#/components/schemas/HexString"
             code_hex:
               $ref: "#/components/schemas/HexString"
+            schema_hash_hex:
+              $ref: "#/components/schemas/HexString"
+            schema:
+              type: object
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
+            blueprints:
+              $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsBlueprintCollection"
+    StateEntityDetailsResponsePackageDetailsBlueprintCollection:
+      description: Entity metadata collection.
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsBlueprintItem"
+    StateEntityDetailsResponsePackageDetailsBlueprintItem:
+      type: object
+      required:
+        - name
+        - version
+        - definition
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+        definition:
+          type: object
+        dependant_entities:
+          type: array
+          items:
+            $ref: "#/components/schemas/Address"
+        auth_template:
+          type: object
+        auth_template_is_locked:
+          type: boolean
+          nullable: true
+        royalty_config:
+          type: object
+        royalty_config_is_locked:
+          type: boolean
+          nullable: true
     StateEntityDetailsResponseComponentDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
             - blueprint_name
-            - access_rules_chain
+            - access_rules
           properties:
             package_address:
               $ref: "#/components/schemas/Address"
@@ -1743,8 +1807,8 @@ components:
               type: string
             state:
               type: object
-            access_rules_chain:
-              type: object
+            access_rules:
+              $ref: "#/components/schemas/ComponentEntityAccessRules"
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
 

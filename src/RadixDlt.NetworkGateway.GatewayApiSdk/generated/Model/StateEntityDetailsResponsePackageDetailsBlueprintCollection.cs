@@ -90,74 +90,62 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponseComponentDetailsAllOf
+    /// Entity metadata collection.
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponseComponentDetails_allOf")]
-    public partial class StateEntityDetailsResponseComponentDetailsAllOf : IEquatable<StateEntityDetailsResponseComponentDetailsAllOf>
+    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsBlueprintCollection")]
+    public partial class StateEntityDetailsResponsePackageDetailsBlueprintCollection : IEquatable<StateEntityDetailsResponsePackageDetailsBlueprintCollection>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintCollection" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponseComponentDetailsAllOf() { }
+        protected StateEntityDetailsResponsePackageDetailsBlueprintCollection() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintCollection" /> class.
         /// </summary>
-        /// <param name="packageAddress">Bech32m-encoded human readable version of the address..</param>
-        /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="state">state.</param>
-        /// <param name="accessRules">accessRules (required).</param>
-        /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
-        public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), ComponentEntityAccessRules accessRules = default(ComponentEntityAccessRules), string royaltyVaultBalance = default(string))
+        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
+        /// <param name="previousCursor">If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection..</param>
+        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
+        /// <param name="items">items (required).</param>
+        public StateEntityDetailsResponsePackageDetailsBlueprintCollection(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<StateEntityDetailsResponsePackageDetailsBlueprintItem> items = default(List<StateEntityDetailsResponsePackageDetailsBlueprintItem>))
         {
-            // to ensure "blueprintName" is required (not null)
-            if (blueprintName == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("blueprintName is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
+                throw new ArgumentNullException("items is a required property for StateEntityDetailsResponsePackageDetailsBlueprintCollection and cannot be null");
             }
-            this.BlueprintName = blueprintName;
-            // to ensure "accessRules" is required (not null)
-            if (accessRules == null)
-            {
-                throw new ArgumentNullException("accessRules is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
-            }
-            this.AccessRules = accessRules;
-            this.PackageAddress = packageAddress;
-            this.State = state;
-            this.RoyaltyVaultBalance = royaltyVaultBalance;
+            this.Items = items;
+            this.TotalCount = totalCount;
+            this.PreviousCursor = previousCursor;
+            this.NextCursor = nextCursor;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "package_address", EmitDefaultValue = true)]
-        public string PackageAddress { get; set; }
+        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "total_count", EmitDefaultValue = true)]
+        public long? TotalCount { get; set; }
 
         /// <summary>
-        /// Gets or Sets BlueprintName
+        /// If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.
         /// </summary>
-        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
-        public string BlueprintName { get; set; }
+        /// <value>If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
+        public string PreviousCursor { get; set; }
 
         /// <summary>
-        /// Gets or Sets State
+        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
         /// </summary>
-        [DataMember(Name = "state", EmitDefaultValue = true)]
-        public Object State { get; set; }
+        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccessRules
+        /// Gets or Sets Items
         /// </summary>
-        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public ComponentEntityAccessRules AccessRules { get; set; }
-
-        /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
-        /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "royalty_vault_balance", EmitDefaultValue = true)]
-        public string RoyaltyVaultBalance { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<StateEntityDetailsResponsePackageDetailsBlueprintItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -166,12 +154,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponseComponentDetailsAllOf {\n");
-            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
-            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
-            sb.Append("  State: ").Append(State).Append("\n");
-            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
-            sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
+            sb.Append("class StateEntityDetailsResponsePackageDetailsBlueprintCollection {\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -192,15 +179,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponseComponentDetailsAllOf);
+            return this.Equals(input as StateEntityDetailsResponsePackageDetailsBlueprintCollection);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponseComponentDetailsAllOf instances are equal
+        /// Returns true if StateEntityDetailsResponsePackageDetailsBlueprintCollection instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponseComponentDetailsAllOf to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsBlueprintCollection to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponseComponentDetailsAllOf input)
+        public bool Equals(StateEntityDetailsResponsePackageDetailsBlueprintCollection input)
         {
             if (input == null)
             {
@@ -208,29 +195,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.PackageAddress == input.PackageAddress ||
-                    (this.PackageAddress != null &&
-                    this.PackageAddress.Equals(input.PackageAddress))
+                    this.TotalCount == input.TotalCount ||
+                    (this.TotalCount != null &&
+                    this.TotalCount.Equals(input.TotalCount))
                 ) && 
                 (
-                    this.BlueprintName == input.BlueprintName ||
-                    (this.BlueprintName != null &&
-                    this.BlueprintName.Equals(input.BlueprintName))
+                    this.PreviousCursor == input.PreviousCursor ||
+                    (this.PreviousCursor != null &&
+                    this.PreviousCursor.Equals(input.PreviousCursor))
                 ) && 
                 (
-                    this.State == input.State ||
-                    (this.State != null &&
-                    this.State.Equals(input.State))
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
                 ) && 
                 (
-                    this.AccessRules == input.AccessRules ||
-                    (this.AccessRules != null &&
-                    this.AccessRules.Equals(input.AccessRules))
-                ) && 
-                (
-                    this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
-                    (this.RoyaltyVaultBalance != null &&
-                    this.RoyaltyVaultBalance.Equals(input.RoyaltyVaultBalance))
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -243,25 +226,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.PackageAddress != null)
+                if (this.TotalCount != null)
                 {
-                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
                 }
-                if (this.BlueprintName != null)
+                if (this.PreviousCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
                 }
-                if (this.State != null)
+                if (this.NextCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.State.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
                 }
-                if (this.AccessRules != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
-                }
-                if (this.RoyaltyVaultBalance != null)
-                {
-                    hashCode = (hashCode * 59) + this.RoyaltyVaultBalance.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

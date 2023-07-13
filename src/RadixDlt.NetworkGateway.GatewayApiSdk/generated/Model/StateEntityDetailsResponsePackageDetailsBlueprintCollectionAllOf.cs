@@ -90,74 +90,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponseComponentDetailsAllOf
+    /// StateEntityDetailsResponsePackageDetailsBlueprintCollectionAllOf
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponseComponentDetails_allOf")]
-    public partial class StateEntityDetailsResponseComponentDetailsAllOf : IEquatable<StateEntityDetailsResponseComponentDetailsAllOf>
+    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsBlueprintCollection_allOf")]
+    public partial class StateEntityDetailsResponsePackageDetailsBlueprintCollectionAllOf : IEquatable<StateEntityDetailsResponsePackageDetailsBlueprintCollectionAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintCollectionAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponseComponentDetailsAllOf() { }
+        protected StateEntityDetailsResponsePackageDetailsBlueprintCollectionAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintCollectionAllOf" /> class.
         /// </summary>
-        /// <param name="packageAddress">Bech32m-encoded human readable version of the address..</param>
-        /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="state">state.</param>
-        /// <param name="accessRules">accessRules (required).</param>
-        /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
-        public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), ComponentEntityAccessRules accessRules = default(ComponentEntityAccessRules), string royaltyVaultBalance = default(string))
+        /// <param name="items">items (required).</param>
+        public StateEntityDetailsResponsePackageDetailsBlueprintCollectionAllOf(List<StateEntityDetailsResponsePackageDetailsBlueprintItem> items = default(List<StateEntityDetailsResponsePackageDetailsBlueprintItem>))
         {
-            // to ensure "blueprintName" is required (not null)
-            if (blueprintName == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("blueprintName is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
+                throw new ArgumentNullException("items is a required property for StateEntityDetailsResponsePackageDetailsBlueprintCollectionAllOf and cannot be null");
             }
-            this.BlueprintName = blueprintName;
-            // to ensure "accessRules" is required (not null)
-            if (accessRules == null)
-            {
-                throw new ArgumentNullException("accessRules is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
-            }
-            this.AccessRules = accessRules;
-            this.PackageAddress = packageAddress;
-            this.State = state;
-            this.RoyaltyVaultBalance = royaltyVaultBalance;
+            this.Items = items;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// Gets or Sets Items
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "package_address", EmitDefaultValue = true)]
-        public string PackageAddress { get; set; }
-
-        /// <summary>
-        /// Gets or Sets BlueprintName
-        /// </summary>
-        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
-        public string BlueprintName { get; set; }
-
-        /// <summary>
-        /// Gets or Sets State
-        /// </summary>
-        [DataMember(Name = "state", EmitDefaultValue = true)]
-        public Object State { get; set; }
-
-        /// <summary>
-        /// Gets or Sets AccessRules
-        /// </summary>
-        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public ComponentEntityAccessRules AccessRules { get; set; }
-
-        /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
-        /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "royalty_vault_balance", EmitDefaultValue = true)]
-        public string RoyaltyVaultBalance { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<StateEntityDetailsResponsePackageDetailsBlueprintItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -166,12 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponseComponentDetailsAllOf {\n");
-            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
-            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
-            sb.Append("  State: ").Append(State).Append("\n");
-            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
-            sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
+            sb.Append("class StateEntityDetailsResponsePackageDetailsBlueprintCollectionAllOf {\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -192,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponseComponentDetailsAllOf);
+            return this.Equals(input as StateEntityDetailsResponsePackageDetailsBlueprintCollectionAllOf);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponseComponentDetailsAllOf instances are equal
+        /// Returns true if StateEntityDetailsResponsePackageDetailsBlueprintCollectionAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponseComponentDetailsAllOf to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsBlueprintCollectionAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponseComponentDetailsAllOf input)
+        public bool Equals(StateEntityDetailsResponsePackageDetailsBlueprintCollectionAllOf input)
         {
             if (input == null)
             {
@@ -208,29 +165,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.PackageAddress == input.PackageAddress ||
-                    (this.PackageAddress != null &&
-                    this.PackageAddress.Equals(input.PackageAddress))
-                ) && 
-                (
-                    this.BlueprintName == input.BlueprintName ||
-                    (this.BlueprintName != null &&
-                    this.BlueprintName.Equals(input.BlueprintName))
-                ) && 
-                (
-                    this.State == input.State ||
-                    (this.State != null &&
-                    this.State.Equals(input.State))
-                ) && 
-                (
-                    this.AccessRules == input.AccessRules ||
-                    (this.AccessRules != null &&
-                    this.AccessRules.Equals(input.AccessRules))
-                ) && 
-                (
-                    this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
-                    (this.RoyaltyVaultBalance != null &&
-                    this.RoyaltyVaultBalance.Equals(input.RoyaltyVaultBalance))
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -243,25 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.PackageAddress != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
-                }
-                if (this.BlueprintName != null)
-                {
-                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
-                }
-                if (this.State != null)
-                {
-                    hashCode = (hashCode * 59) + this.State.GetHashCode();
-                }
-                if (this.AccessRules != null)
-                {
-                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
-                }
-                if (this.RoyaltyVaultBalance != null)
-                {
-                    hashCode = (hashCode * 59) + this.RoyaltyVaultBalance.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

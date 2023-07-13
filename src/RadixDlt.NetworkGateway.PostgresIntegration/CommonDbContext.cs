@@ -129,7 +129,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ComponentMethodRoyaltyEntryHistory> ComponentMethodRoyaltyEntryHistory => Set<ComponentMethodRoyaltyEntryHistory>();
 
-    public DbSet<PackageBlueprint> PackageBlueprints => Set<PackageBlueprint>();
+    public DbSet<PackageBlueprintHistory> PackageBlueprintHistory => Set<PackageBlueprintHistory>();
 
     public DbSet<ComponentSchema> ComponentSchema => Set<ComponentSchema>();
 
@@ -272,9 +272,6 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<GlobalTwoResourcePoolEntity>(EntityType.GlobalTwoResourcePool)
             .HasValue<GlobalMultiResourcePoolEntity>(EntityType.GlobalMultiResourcePool)
             .HasValue<GlobalTransactionTrackerEntity>(EntityType.GlobalTransactionTracker);
-
-        modelBuilder.Entity<PackageBlueprint>()
-            .HasIndex(e => e.PackageEntityId);
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)
@@ -349,6 +346,9 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<EntityStateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<PackageBlueprintHistory>()
+            .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<ValidatorPublicKeyHistory>()
             .HasIndex(e => new { e.ValidatorEntityId, e.FromStateVersion });

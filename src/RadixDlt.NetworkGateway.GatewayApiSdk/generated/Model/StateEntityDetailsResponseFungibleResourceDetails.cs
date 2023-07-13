@@ -111,27 +111,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseFungibleResourceDetails" /> class.
         /// </summary>
-        /// <param name="accessRulesChain">accessRulesChain (required).</param>
-        /// <param name="vaultAccessRulesChain">vaultAccessRulesChain (required).</param>
+        /// <param name="accessRules">accessRules (required).</param>
         /// <param name="divisibility">divisibility (required).</param>
         /// <param name="totalSupply">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="totalMinted">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="totalBurned">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.FungibleResource).</param>
-        public StateEntityDetailsResponseFungibleResourceDetails(Object accessRulesChain = default(Object), Object vaultAccessRulesChain = default(Object), int divisibility = default(int), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.FungibleResource) : base(type)
+        public StateEntityDetailsResponseFungibleResourceDetails(ComponentEntityAccessRules accessRules = default(ComponentEntityAccessRules), int divisibility = default(int), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.FungibleResource) : base(type)
         {
-            // to ensure "accessRulesChain" is required (not null)
-            if (accessRulesChain == null)
+            // to ensure "accessRules" is required (not null)
+            if (accessRules == null)
             {
-                throw new ArgumentNullException("accessRulesChain is a required property for StateEntityDetailsResponseFungibleResourceDetails and cannot be null");
+                throw new ArgumentNullException("accessRules is a required property for StateEntityDetailsResponseFungibleResourceDetails and cannot be null");
             }
-            this.AccessRulesChain = accessRulesChain;
-            // to ensure "vaultAccessRulesChain" is required (not null)
-            if (vaultAccessRulesChain == null)
-            {
-                throw new ArgumentNullException("vaultAccessRulesChain is a required property for StateEntityDetailsResponseFungibleResourceDetails and cannot be null");
-            }
-            this.VaultAccessRulesChain = vaultAccessRulesChain;
+            this.AccessRules = accessRules;
             this.Divisibility = divisibility;
             // to ensure "totalSupply" is required (not null)
             if (totalSupply == null)
@@ -154,16 +147,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets AccessRulesChain
+        /// Gets or Sets AccessRules
         /// </summary>
-        [DataMember(Name = "access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
-        public Object AccessRulesChain { get; set; }
-
-        /// <summary>
-        /// Gets or Sets VaultAccessRulesChain
-        /// </summary>
-        [DataMember(Name = "vault_access_rules_chain", IsRequired = true, EmitDefaultValue = true)]
-        public Object VaultAccessRulesChain { get; set; }
+        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
+        public ComponentEntityAccessRules AccessRules { get; set; }
 
         /// <summary>
         /// Gets or Sets Divisibility
@@ -201,8 +188,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityDetailsResponseFungibleResourceDetails {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
-            sb.Append("  VaultAccessRulesChain: ").Append(VaultAccessRulesChain).Append("\n");
+            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
             sb.Append("  Divisibility: ").Append(Divisibility).Append("\n");
             sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
             sb.Append("  TotalMinted: ").Append(TotalMinted).Append("\n");
@@ -243,14 +229,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.AccessRulesChain == input.AccessRulesChain ||
-                    (this.AccessRulesChain != null &&
-                    this.AccessRulesChain.Equals(input.AccessRulesChain))
-                ) && base.Equals(input) && 
-                (
-                    this.VaultAccessRulesChain == input.VaultAccessRulesChain ||
-                    (this.VaultAccessRulesChain != null &&
-                    this.VaultAccessRulesChain.Equals(input.VaultAccessRulesChain))
+                    this.AccessRules == input.AccessRules ||
+                    (this.AccessRules != null &&
+                    this.AccessRules.Equals(input.AccessRules))
                 ) && base.Equals(input) && 
                 (
                     this.Divisibility == input.Divisibility ||
@@ -282,13 +263,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.AccessRulesChain != null)
+                if (this.AccessRules != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRulesChain.GetHashCode();
-                }
-                if (this.VaultAccessRulesChain != null)
-                {
-                    hashCode = (hashCode * 59) + this.VaultAccessRulesChain.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.Divisibility.GetHashCode();
                 if (this.TotalSupply != null)

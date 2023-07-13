@@ -90,92 +90,101 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponsePackageDetailsAllOf
+    /// StateEntityDetailsResponsePackageDetailsBlueprintItem
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponsePackageDetails_allOf")]
-    public partial class StateEntityDetailsResponsePackageDetailsAllOf : IEquatable<StateEntityDetailsResponsePackageDetailsAllOf>
+    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsBlueprintItem")]
+    public partial class StateEntityDetailsResponsePackageDetailsBlueprintItem : IEquatable<StateEntityDetailsResponsePackageDetailsBlueprintItem>
     {
-
         /// <summary>
-        /// Gets or Sets VmType
-        /// </summary>
-        [DataMember(Name = "vm_type", IsRequired = true, EmitDefaultValue = true)]
-        public PackageVmType VmType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponsePackageDetailsAllOf() { }
+        protected StateEntityDetailsResponsePackageDetailsBlueprintItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintItem" /> class.
         /// </summary>
-        /// <param name="vmType">vmType (required).</param>
-        /// <param name="codeHashHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="codeHex">Hex-encoded binary blob..</param>
-        /// <param name="schemaHashHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="schema">schema.</param>
-        /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
-        /// <param name="blueprints">blueprints.</param>
-        public StateEntityDetailsResponsePackageDetailsAllOf(PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string schemaHashHex = default(string), Object schema = default(Object), string royaltyVaultBalance = default(string), StateEntityDetailsResponsePackageDetailsBlueprintCollection blueprints = default(StateEntityDetailsResponsePackageDetailsBlueprintCollection))
+        /// <param name="name">name (required).</param>
+        /// <param name="version">version (required).</param>
+        /// <param name="definition">definition (required).</param>
+        /// <param name="dependantEntities">dependantEntities.</param>
+        /// <param name="authTemplate">authTemplate.</param>
+        /// <param name="authTemplateIsLocked">authTemplateIsLocked.</param>
+        /// <param name="royaltyConfig">royaltyConfig.</param>
+        /// <param name="royaltyConfigIsLocked">royaltyConfigIsLocked.</param>
+        public StateEntityDetailsResponsePackageDetailsBlueprintItem(string name = default(string), string version = default(string), Object definition = default(Object), List<string> dependantEntities = default(List<string>), Object authTemplate = default(Object), bool? authTemplateIsLocked = default(bool?), Object royaltyConfig = default(Object), bool? royaltyConfigIsLocked = default(bool?))
         {
-            this.VmType = vmType;
-            // to ensure "codeHashHex" is required (not null)
-            if (codeHashHex == null)
+            // to ensure "name" is required (not null)
+            if (name == null)
             {
-                throw new ArgumentNullException("codeHashHex is a required property for StateEntityDetailsResponsePackageDetailsAllOf and cannot be null");
+                throw new ArgumentNullException("name is a required property for StateEntityDetailsResponsePackageDetailsBlueprintItem and cannot be null");
             }
-            this.CodeHashHex = codeHashHex;
-            // to ensure "schemaHashHex" is required (not null)
-            if (schemaHashHex == null)
+            this.Name = name;
+            // to ensure "version" is required (not null)
+            if (version == null)
             {
-                throw new ArgumentNullException("schemaHashHex is a required property for StateEntityDetailsResponsePackageDetailsAllOf and cannot be null");
+                throw new ArgumentNullException("version is a required property for StateEntityDetailsResponsePackageDetailsBlueprintItem and cannot be null");
             }
-            this.SchemaHashHex = schemaHashHex;
-            this.CodeHex = codeHex;
-            this.Schema = schema;
-            this.RoyaltyVaultBalance = royaltyVaultBalance;
-            this.Blueprints = blueprints;
+            this._Version = version;
+            // to ensure "definition" is required (not null)
+            if (definition == null)
+            {
+                throw new ArgumentNullException("definition is a required property for StateEntityDetailsResponsePackageDetailsBlueprintItem and cannot be null");
+            }
+            this.Definition = definition;
+            this.DependantEntities = dependantEntities;
+            this.AuthTemplate = authTemplate;
+            this.AuthTemplateIsLocked = authTemplateIsLocked;
+            this.RoyaltyConfig = royaltyConfig;
+            this.RoyaltyConfigIsLocked = royaltyConfigIsLocked;
         }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Gets or Sets Name
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "code_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string CodeHashHex { get; set; }
+        [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
+        public string Name { get; set; }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Gets or Sets _Version
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "code_hex", EmitDefaultValue = true)]
-        public string CodeHex { get; set; }
+        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
+        public string _Version { get; set; }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Gets or Sets Definition
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "schema_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string SchemaHashHex { get; set; }
+        [DataMember(Name = "definition", IsRequired = true, EmitDefaultValue = true)]
+        public Object Definition { get; set; }
 
         /// <summary>
-        /// Gets or Sets Schema
+        /// Gets or Sets DependantEntities
         /// </summary>
-        [DataMember(Name = "schema", EmitDefaultValue = true)]
-        public Object Schema { get; set; }
+        [DataMember(Name = "dependant_entities", EmitDefaultValue = true)]
+        public List<string> DependantEntities { get; set; }
 
         /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
+        /// Gets or Sets AuthTemplate
         /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "royalty_vault_balance", EmitDefaultValue = true)]
-        public string RoyaltyVaultBalance { get; set; }
+        [DataMember(Name = "auth_template", EmitDefaultValue = true)]
+        public Object AuthTemplate { get; set; }
 
         /// <summary>
-        /// Gets or Sets Blueprints
+        /// Gets or Sets AuthTemplateIsLocked
         /// </summary>
-        [DataMember(Name = "blueprints", EmitDefaultValue = true)]
-        public StateEntityDetailsResponsePackageDetailsBlueprintCollection Blueprints { get; set; }
+        [DataMember(Name = "auth_template_is_locked", EmitDefaultValue = true)]
+        public bool? AuthTemplateIsLocked { get; set; }
+
+        /// <summary>
+        /// Gets or Sets RoyaltyConfig
+        /// </summary>
+        [DataMember(Name = "royalty_config", EmitDefaultValue = true)]
+        public Object RoyaltyConfig { get; set; }
+
+        /// <summary>
+        /// Gets or Sets RoyaltyConfigIsLocked
+        /// </summary>
+        [DataMember(Name = "royalty_config_is_locked", EmitDefaultValue = true)]
+        public bool? RoyaltyConfigIsLocked { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -184,14 +193,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponsePackageDetailsAllOf {\n");
-            sb.Append("  VmType: ").Append(VmType).Append("\n");
-            sb.Append("  CodeHashHex: ").Append(CodeHashHex).Append("\n");
-            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
-            sb.Append("  SchemaHashHex: ").Append(SchemaHashHex).Append("\n");
-            sb.Append("  Schema: ").Append(Schema).Append("\n");
-            sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
-            sb.Append("  Blueprints: ").Append(Blueprints).Append("\n");
+            sb.Append("class StateEntityDetailsResponsePackageDetailsBlueprintItem {\n");
+            sb.Append("  Name: ").Append(Name).Append("\n");
+            sb.Append("  _Version: ").Append(_Version).Append("\n");
+            sb.Append("  Definition: ").Append(Definition).Append("\n");
+            sb.Append("  DependantEntities: ").Append(DependantEntities).Append("\n");
+            sb.Append("  AuthTemplate: ").Append(AuthTemplate).Append("\n");
+            sb.Append("  AuthTemplateIsLocked: ").Append(AuthTemplateIsLocked).Append("\n");
+            sb.Append("  RoyaltyConfig: ").Append(RoyaltyConfig).Append("\n");
+            sb.Append("  RoyaltyConfigIsLocked: ").Append(RoyaltyConfigIsLocked).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -212,15 +222,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponsePackageDetailsAllOf);
+            return this.Equals(input as StateEntityDetailsResponsePackageDetailsBlueprintItem);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponsePackageDetailsAllOf instances are equal
+        /// Returns true if StateEntityDetailsResponsePackageDetailsBlueprintItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsAllOf to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsBlueprintItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponsePackageDetailsAllOf input)
+        public bool Equals(StateEntityDetailsResponsePackageDetailsBlueprintItem input)
         {
             if (input == null)
             {
@@ -228,38 +238,45 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.VmType == input.VmType ||
-                    this.VmType.Equals(input.VmType)
+                    this.Name == input.Name ||
+                    (this.Name != null &&
+                    this.Name.Equals(input.Name))
                 ) && 
                 (
-                    this.CodeHashHex == input.CodeHashHex ||
-                    (this.CodeHashHex != null &&
-                    this.CodeHashHex.Equals(input.CodeHashHex))
+                    this._Version == input._Version ||
+                    (this._Version != null &&
+                    this._Version.Equals(input._Version))
                 ) && 
                 (
-                    this.CodeHex == input.CodeHex ||
-                    (this.CodeHex != null &&
-                    this.CodeHex.Equals(input.CodeHex))
+                    this.Definition == input.Definition ||
+                    (this.Definition != null &&
+                    this.Definition.Equals(input.Definition))
                 ) && 
                 (
-                    this.SchemaHashHex == input.SchemaHashHex ||
-                    (this.SchemaHashHex != null &&
-                    this.SchemaHashHex.Equals(input.SchemaHashHex))
+                    this.DependantEntities == input.DependantEntities ||
+                    this.DependantEntities != null &&
+                    input.DependantEntities != null &&
+                    this.DependantEntities.SequenceEqual(input.DependantEntities)
                 ) && 
                 (
-                    this.Schema == input.Schema ||
-                    (this.Schema != null &&
-                    this.Schema.Equals(input.Schema))
+                    this.AuthTemplate == input.AuthTemplate ||
+                    (this.AuthTemplate != null &&
+                    this.AuthTemplate.Equals(input.AuthTemplate))
                 ) && 
                 (
-                    this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
-                    (this.RoyaltyVaultBalance != null &&
-                    this.RoyaltyVaultBalance.Equals(input.RoyaltyVaultBalance))
+                    this.AuthTemplateIsLocked == input.AuthTemplateIsLocked ||
+                    (this.AuthTemplateIsLocked != null &&
+                    this.AuthTemplateIsLocked.Equals(input.AuthTemplateIsLocked))
                 ) && 
                 (
-                    this.Blueprints == input.Blueprints ||
-                    (this.Blueprints != null &&
-                    this.Blueprints.Equals(input.Blueprints))
+                    this.RoyaltyConfig == input.RoyaltyConfig ||
+                    (this.RoyaltyConfig != null &&
+                    this.RoyaltyConfig.Equals(input.RoyaltyConfig))
+                ) && 
+                (
+                    this.RoyaltyConfigIsLocked == input.RoyaltyConfigIsLocked ||
+                    (this.RoyaltyConfigIsLocked != null &&
+                    this.RoyaltyConfigIsLocked.Equals(input.RoyaltyConfigIsLocked))
                 );
         }
 
@@ -272,30 +289,37 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.VmType.GetHashCode();
-                if (this.CodeHashHex != null)
+                if (this.Name != null)
                 {
-                    hashCode = (hashCode * 59) + this.CodeHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Name.GetHashCode();
                 }
-                if (this.CodeHex != null)
+                if (this._Version != null)
                 {
-                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this._Version.GetHashCode();
                 }
-                if (this.SchemaHashHex != null)
+                if (this.Definition != null)
                 {
-                    hashCode = (hashCode * 59) + this.SchemaHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Definition.GetHashCode();
                 }
-                if (this.Schema != null)
+                if (this.DependantEntities != null)
                 {
-                    hashCode = (hashCode * 59) + this.Schema.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DependantEntities.GetHashCode();
                 }
-                if (this.RoyaltyVaultBalance != null)
+                if (this.AuthTemplate != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoyaltyVaultBalance.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AuthTemplate.GetHashCode();
                 }
-                if (this.Blueprints != null)
+                if (this.AuthTemplateIsLocked != null)
                 {
-                    hashCode = (hashCode * 59) + this.Blueprints.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AuthTemplateIsLocked.GetHashCode();
+                }
+                if (this.RoyaltyConfig != null)
+                {
+                    hashCode = (hashCode * 59) + this.RoyaltyConfig.GetHashCode();
+                }
+                if (this.RoyaltyConfigIsLocked != null)
+                {
+                    hashCode = (hashCode * 59) + this.RoyaltyConfigIsLocked.GetHashCode();
                 }
                 return hashCode;
             }
