@@ -16,58 +16,58 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TransactionPreviewRequestFlags
+ * @interface ValidatorVaultItem
  */
-export interface TransactionPreviewRequestFlags {
+export interface ValidatorVaultItem {
+    /**
+     * String-encoded decimal representing the amount of a related fungible resource.
+     * @type {string}
+     * @memberof ValidatorVaultItem
+     */
+    balance: string;
     /**
      * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
+     * @type {number}
+     * @memberof ValidatorVaultItem
      */
-    use_free_credit: boolean;
+    last_changed_at_state_version: number;
     /**
-     * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof ValidatorVaultItem
      */
-    assume_all_signature_proofs: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
-     */
-    skip_epoch_check: boolean;
+    address: string;
 }
 
 /**
- * Check if a given object implements the TransactionPreviewRequestFlags interface.
+ * Check if a given object implements the ValidatorVaultItem interface.
  */
-export function instanceOfTransactionPreviewRequestFlags(value: object): boolean {
+export function instanceOfValidatorVaultItem(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "use_free_credit" in value;
-    isInstance = isInstance && "assume_all_signature_proofs" in value;
-    isInstance = isInstance && "skip_epoch_check" in value;
+    isInstance = isInstance && "balance" in value;
+    isInstance = isInstance && "last_changed_at_state_version" in value;
+    isInstance = isInstance && "address" in value;
 
     return isInstance;
 }
 
-export function TransactionPreviewRequestFlagsFromJSON(json: any): TransactionPreviewRequestFlags {
-    return TransactionPreviewRequestFlagsFromJSONTyped(json, false);
+export function ValidatorVaultItemFromJSON(json: any): ValidatorVaultItem {
+    return ValidatorVaultItemFromJSONTyped(json, false);
 }
 
-export function TransactionPreviewRequestFlagsFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionPreviewRequestFlags {
+export function ValidatorVaultItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): ValidatorVaultItem {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'use_free_credit': json['use_free_credit'],
-        'assume_all_signature_proofs': json['assume_all_signature_proofs'],
-        'skip_epoch_check': json['skip_epoch_check'],
+        'balance': json['balance'],
+        'last_changed_at_state_version': json['last_changed_at_state_version'],
+        'address': json['address'],
     };
 }
 
-export function TransactionPreviewRequestFlagsToJSON(value?: TransactionPreviewRequestFlags | null): any {
+export function ValidatorVaultItemToJSON(value?: ValidatorVaultItem | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -76,9 +76,9 @@ export function TransactionPreviewRequestFlagsToJSON(value?: TransactionPreviewR
     }
     return {
         
-        'use_free_credit': value.use_free_credit,
-        'assume_all_signature_proofs': value.assume_all_signature_proofs,
-        'skip_epoch_check': value.skip_epoch_check,
+        'balance': value.balance,
+        'last_changed_at_state_version': value.last_changed_at_state_version,
+        'address': value.address,
     };
 }
 

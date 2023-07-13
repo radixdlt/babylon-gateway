@@ -13,6 +13,19 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { PackageVmType } from './PackageVmType';
+import {
+    PackageVmTypeFromJSON,
+    PackageVmTypeFromJSONTyped,
+    PackageVmTypeToJSON,
+} from './PackageVmType';
+import type { StateEntityDetailsResponsePackageDetailsBlueprintCollection } from './StateEntityDetailsResponsePackageDetailsBlueprintCollection';
+import {
+    StateEntityDetailsResponsePackageDetailsBlueprintCollectionFromJSON,
+    StateEntityDetailsResponsePackageDetailsBlueprintCollectionFromJSONTyped,
+    StateEntityDetailsResponsePackageDetailsBlueprintCollectionToJSON,
+} from './StateEntityDetailsResponsePackageDetailsBlueprintCollection';
+
 /**
  * 
  * @export
@@ -20,17 +33,47 @@ import { exists, mapValues } from '../runtime';
  */
 export interface StateEntityDetailsResponsePackageDetailsAllOf {
     /**
+     * 
+     * @type {PackageVmType}
+     * @memberof StateEntityDetailsResponsePackageDetailsAllOf
+     */
+    vm_type: PackageVmType;
+    /**
+     * Hex-encoded binary blob.
+     * @type {string}
+     * @memberof StateEntityDetailsResponsePackageDetailsAllOf
+     */
+    code_hash_hex: string;
+    /**
      * Hex-encoded binary blob.
      * @type {string}
      * @memberof StateEntityDetailsResponsePackageDetailsAllOf
      */
     code_hex?: string;
     /**
+     * Hex-encoded binary blob.
+     * @type {string}
+     * @memberof StateEntityDetailsResponsePackageDetailsAllOf
+     */
+    schema_hash_hex: string;
+    /**
+     * 
+     * @type {object}
+     * @memberof StateEntityDetailsResponsePackageDetailsAllOf
+     */
+    schema?: object;
+    /**
      * String-encoded decimal representing the amount of a related fungible resource.
      * @type {string}
      * @memberof StateEntityDetailsResponsePackageDetailsAllOf
      */
     royalty_vault_balance?: string;
+    /**
+     * 
+     * @type {StateEntityDetailsResponsePackageDetailsBlueprintCollection}
+     * @memberof StateEntityDetailsResponsePackageDetailsAllOf
+     */
+    blueprints?: StateEntityDetailsResponsePackageDetailsBlueprintCollection;
     /**
      * 
      * @type {string}
@@ -54,6 +97,9 @@ export type StateEntityDetailsResponsePackageDetailsAllOfTypeEnum = typeof State
  */
 export function instanceOfStateEntityDetailsResponsePackageDetailsAllOf(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "vm_type" in value;
+    isInstance = isInstance && "code_hash_hex" in value;
+    isInstance = isInstance && "schema_hash_hex" in value;
 
     return isInstance;
 }
@@ -68,8 +114,13 @@ export function StateEntityDetailsResponsePackageDetailsAllOfFromJSONTyped(json:
     }
     return {
         
+        'vm_type': PackageVmTypeFromJSON(json['vm_type']),
+        'code_hash_hex': json['code_hash_hex'],
         'code_hex': !exists(json, 'code_hex') ? undefined : json['code_hex'],
+        'schema_hash_hex': json['schema_hash_hex'],
+        'schema': !exists(json, 'schema') ? undefined : json['schema'],
         'royalty_vault_balance': !exists(json, 'royalty_vault_balance') ? undefined : json['royalty_vault_balance'],
+        'blueprints': !exists(json, 'blueprints') ? undefined : StateEntityDetailsResponsePackageDetailsBlueprintCollectionFromJSON(json['blueprints']),
         'type': !exists(json, 'type') ? undefined : json['type'],
     };
 }
@@ -83,8 +134,13 @@ export function StateEntityDetailsResponsePackageDetailsAllOfToJSON(value?: Stat
     }
     return {
         
+        'vm_type': PackageVmTypeToJSON(value.vm_type),
+        'code_hash_hex': value.code_hash_hex,
         'code_hex': value.code_hex,
+        'schema_hash_hex': value.schema_hash_hex,
+        'schema': value.schema,
         'royalty_vault_balance': value.royalty_vault_balance,
+        'blueprints': StateEntityDetailsResponsePackageDetailsBlueprintCollectionToJSON(value.blueprints),
         'type': value.type,
     };
 }

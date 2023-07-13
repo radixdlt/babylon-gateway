@@ -13,6 +13,13 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { MetadataTypedValue } from './MetadataTypedValue';
+import {
+    MetadataTypedValueFromJSON,
+    MetadataTypedValueFromJSONTyped,
+    MetadataTypedValueToJSON,
+} from './MetadataTypedValue';
+
 /**
  * 
  * @export
@@ -21,16 +28,10 @@ import { exists, mapValues } from '../runtime';
 export interface EntityMetadataItemValueAllOf {
     /**
      * 
-     * @type {string}
+     * @type {MetadataTypedValue}
      * @memberof EntityMetadataItemValueAllOf
      */
-    as_string?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof EntityMetadataItemValueAllOf
-     */
-    as_string_collection?: Array<string>;
+    typed?: MetadataTypedValue;
 }
 
 /**
@@ -52,8 +53,7 @@ export function EntityMetadataItemValueAllOfFromJSONTyped(json: any, ignoreDiscr
     }
     return {
         
-        'as_string': !exists(json, 'as_string') ? undefined : json['as_string'],
-        'as_string_collection': !exists(json, 'as_string_collection') ? undefined : json['as_string_collection'],
+        'typed': !exists(json, 'typed') ? undefined : MetadataTypedValueFromJSON(json['typed']),
     };
 }
 
@@ -66,8 +66,7 @@ export function EntityMetadataItemValueAllOfToJSON(value?: EntityMetadataItemVal
     }
     return {
         
-        'as_string': value.as_string,
-        'as_string_collection': value.as_string_collection,
+        'typed': MetadataTypedValueToJSON(value.typed),
     };
 }
 

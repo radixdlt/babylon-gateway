@@ -16,58 +16,50 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TransactionPreviewRequestFlags
+ * @interface ComponentEntityAccessRules
  */
-export interface TransactionPreviewRequestFlags {
+export interface ComponentEntityAccessRules {
     /**
      * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
+     * @type {object}
+     * @memberof ComponentEntityAccessRules
      */
-    use_free_credit: boolean;
+    owner: object;
     /**
      * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
+     * @type {object}
+     * @memberof ComponentEntityAccessRules
      */
-    assume_all_signature_proofs: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
-     */
-    skip_epoch_check: boolean;
+    entries: object;
 }
 
 /**
- * Check if a given object implements the TransactionPreviewRequestFlags interface.
+ * Check if a given object implements the ComponentEntityAccessRules interface.
  */
-export function instanceOfTransactionPreviewRequestFlags(value: object): boolean {
+export function instanceOfComponentEntityAccessRules(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "use_free_credit" in value;
-    isInstance = isInstance && "assume_all_signature_proofs" in value;
-    isInstance = isInstance && "skip_epoch_check" in value;
+    isInstance = isInstance && "owner" in value;
+    isInstance = isInstance && "entries" in value;
 
     return isInstance;
 }
 
-export function TransactionPreviewRequestFlagsFromJSON(json: any): TransactionPreviewRequestFlags {
-    return TransactionPreviewRequestFlagsFromJSONTyped(json, false);
+export function ComponentEntityAccessRulesFromJSON(json: any): ComponentEntityAccessRules {
+    return ComponentEntityAccessRulesFromJSONTyped(json, false);
 }
 
-export function TransactionPreviewRequestFlagsFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionPreviewRequestFlags {
+export function ComponentEntityAccessRulesFromJSONTyped(json: any, ignoreDiscriminator: boolean): ComponentEntityAccessRules {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'use_free_credit': json['use_free_credit'],
-        'assume_all_signature_proofs': json['assume_all_signature_proofs'],
-        'skip_epoch_check': json['skip_epoch_check'],
+        'owner': json['owner'],
+        'entries': json['entries'],
     };
 }
 
-export function TransactionPreviewRequestFlagsToJSON(value?: TransactionPreviewRequestFlags | null): any {
+export function ComponentEntityAccessRulesToJSON(value?: ComponentEntityAccessRules | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -76,9 +68,8 @@ export function TransactionPreviewRequestFlagsToJSON(value?: TransactionPreviewR
     }
     return {
         
-        'use_free_credit': value.use_free_credit,
-        'assume_all_signature_proofs': value.assume_all_signature_proofs,
-        'skip_epoch_check': value.skip_epoch_check,
+        'owner': value.owner,
+        'entries': value.entries,
     };
 }
 

@@ -13,6 +13,13 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { MetadataTypedValue } from './MetadataTypedValue';
+import {
+    MetadataTypedValueFromJSON,
+    MetadataTypedValueFromJSONTyped,
+    MetadataTypedValueToJSON,
+} from './MetadataTypedValue';
+
 /**
  * 
  * @export
@@ -33,16 +40,10 @@ export interface EntityMetadataItemValue {
     raw_json: object;
     /**
      * 
-     * @type {string}
+     * @type {MetadataTypedValue}
      * @memberof EntityMetadataItemValue
      */
-    as_string?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof EntityMetadataItemValue
-     */
-    as_string_collection?: Array<string>;
+    typed?: MetadataTypedValue;
 }
 
 /**
@@ -68,8 +69,7 @@ export function EntityMetadataItemValueFromJSONTyped(json: any, ignoreDiscrimina
         
         'raw_hex': json['raw_hex'],
         'raw_json': json['raw_json'],
-        'as_string': !exists(json, 'as_string') ? undefined : json['as_string'],
-        'as_string_collection': !exists(json, 'as_string_collection') ? undefined : json['as_string_collection'],
+        'typed': !exists(json, 'typed') ? undefined : MetadataTypedValueFromJSON(json['typed']),
     };
 }
 
@@ -84,8 +84,7 @@ export function EntityMetadataItemValueToJSON(value?: EntityMetadataItemValue | 
         
         'raw_hex': value.raw_hex,
         'raw_json': value.raw_json,
-        'as_string': value.as_string,
-        'as_string_collection': value.as_string_collection,
+        'typed': MetadataTypedValueToJSON(value.typed),
     };
 }
 

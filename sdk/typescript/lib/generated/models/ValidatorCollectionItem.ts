@@ -25,6 +25,12 @@ import {
     ValidatorCollectionItemActiveInEpochFromJSONTyped,
     ValidatorCollectionItemActiveInEpochToJSON,
 } from './ValidatorCollectionItemActiveInEpoch';
+import type { ValidatorVaultItem } from './ValidatorVaultItem';
+import {
+    ValidatorVaultItemFromJSON,
+    ValidatorVaultItemFromJSONTyped,
+    ValidatorVaultItemToJSON,
+} from './ValidatorVaultItem';
 
 /**
  * 
@@ -40,16 +46,34 @@ export interface ValidatorCollectionItem {
     address: string;
     /**
      * 
+     * @type {ValidatorVaultItem}
+     * @memberof ValidatorCollectionItem
+     */
+    stake_vault: ValidatorVaultItem;
+    /**
+     * 
+     * @type {ValidatorVaultItem}
+     * @memberof ValidatorCollectionItem
+     */
+    pending_xrd_withdraw_vault: ValidatorVaultItem;
+    /**
+     * 
+     * @type {ValidatorVaultItem}
+     * @memberof ValidatorCollectionItem
+     */
+    locked_owner_stake_unit_vault: ValidatorVaultItem;
+    /**
+     * 
+     * @type {ValidatorVaultItem}
+     * @memberof ValidatorCollectionItem
+     */
+    pending_owner_stake_unit_unlock_vault: ValidatorVaultItem;
+    /**
+     * 
      * @type {object}
      * @memberof ValidatorCollectionItem
      */
     state?: object | null;
-    /**
-     * String-encoded decimal representing the amount of a related fungible resource.
-     * @type {string}
-     * @memberof ValidatorCollectionItem
-     */
-    current_stake: string;
     /**
      * 
      * @type {ValidatorCollectionItemActiveInEpoch}
@@ -70,7 +94,10 @@ export interface ValidatorCollectionItem {
 export function instanceOfValidatorCollectionItem(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "address" in value;
-    isInstance = isInstance && "current_stake" in value;
+    isInstance = isInstance && "stake_vault" in value;
+    isInstance = isInstance && "pending_xrd_withdraw_vault" in value;
+    isInstance = isInstance && "locked_owner_stake_unit_vault" in value;
+    isInstance = isInstance && "pending_owner_stake_unit_unlock_vault" in value;
     isInstance = isInstance && "metadata" in value;
 
     return isInstance;
@@ -87,8 +114,11 @@ export function ValidatorCollectionItemFromJSONTyped(json: any, ignoreDiscrimina
     return {
         
         'address': json['address'],
+        'stake_vault': ValidatorVaultItemFromJSON(json['stake_vault']),
+        'pending_xrd_withdraw_vault': ValidatorVaultItemFromJSON(json['pending_xrd_withdraw_vault']),
+        'locked_owner_stake_unit_vault': ValidatorVaultItemFromJSON(json['locked_owner_stake_unit_vault']),
+        'pending_owner_stake_unit_unlock_vault': ValidatorVaultItemFromJSON(json['pending_owner_stake_unit_unlock_vault']),
         'state': !exists(json, 'state') ? undefined : json['state'],
-        'current_stake': json['current_stake'],
         'active_in_epoch': !exists(json, 'active_in_epoch') ? undefined : ValidatorCollectionItemActiveInEpochFromJSON(json['active_in_epoch']),
         'metadata': EntityMetadataCollectionFromJSON(json['metadata']),
     };
@@ -104,8 +134,11 @@ export function ValidatorCollectionItemToJSON(value?: ValidatorCollectionItem | 
     return {
         
         'address': value.address,
+        'stake_vault': ValidatorVaultItemToJSON(value.stake_vault),
+        'pending_xrd_withdraw_vault': ValidatorVaultItemToJSON(value.pending_xrd_withdraw_vault),
+        'locked_owner_stake_unit_vault': ValidatorVaultItemToJSON(value.locked_owner_stake_unit_vault),
+        'pending_owner_stake_unit_unlock_vault': ValidatorVaultItemToJSON(value.pending_owner_stake_unit_unlock_vault),
         'state': value.state,
-        'current_stake': value.current_stake,
         'active_in_epoch': ValidatorCollectionItemActiveInEpochToJSON(value.active_in_epoch),
         'metadata': EntityMetadataCollectionToJSON(value.metadata),
     };

@@ -7,6 +7,7 @@ apis/index.ts
 index.ts
 models/AtLedgerStateMixin.ts
 models/CommittedTransactionInfo.ts
+models/ComponentEntityAccessRules.ts
 models/CursorLimitMixin.ts
 models/EntityMetadataCollection.ts
 models/EntityMetadataCollectionAllOf.ts
@@ -44,6 +45,22 @@ models/InvalidTransactionErrorAllOf.ts
 models/LedgerState.ts
 models/LedgerStateMixin.ts
 models/LedgerStateSelector.ts
+models/MetadataNonFungibleGlobalIdArrayValue.ts
+models/MetadataNonFungibleGlobalIdArrayValueAllOf.ts
+models/MetadataNonFungibleGlobalIdArrayValueAllOfValues.ts
+models/MetadataNonFungibleGlobalIdValue.ts
+models/MetadataNonFungibleGlobalIdValueAllOf.ts
+models/MetadataPublicKeyArrayValue.ts
+models/MetadataPublicKeyArrayValueAllOf.ts
+models/MetadataPublicKeyValue.ts
+models/MetadataPublicKeyValueAllOf.ts
+models/MetadataScalarArrayValue.ts
+models/MetadataScalarArrayValueAllOf.ts
+models/MetadataScalarValue.ts
+models/MetadataScalarValueAllOf.ts
+models/MetadataTypedValue.ts
+models/MetadataTypedValueBase.ts
+models/MetadataValueType.ts
 models/NetworkConfigurationResponse.ts
 models/NetworkConfigurationResponseWellKnownAddresses.ts
 models/NonFungibleIdType.ts
@@ -65,6 +82,7 @@ models/NotSyncedUpError.ts
 models/NotSyncedUpErrorAllOf.ts
 models/OptionalNonFungibleIdsCollection.ts
 models/OptionalNonFungibleIdsCollectionAllOf.ts
+models/PackageVmType.ts
 models/PublicKey.ts
 models/PublicKeyBase.ts
 models/PublicKeyEcdsaSecp256k1.ts
@@ -97,6 +115,9 @@ models/StateEntityDetailsResponseNonFungibleVaultDetails.ts
 models/StateEntityDetailsResponseNonFungibleVaultDetailsAllOf.ts
 models/StateEntityDetailsResponsePackageDetails.ts
 models/StateEntityDetailsResponsePackageDetailsAllOf.ts
+models/StateEntityDetailsResponsePackageDetailsBlueprintCollection.ts
+models/StateEntityDetailsResponsePackageDetailsBlueprintCollectionAllOf.ts
+models/StateEntityDetailsResponsePackageDetailsBlueprintItem.ts
 models/StateEntityFungibleResourceVaultsPageRequest.ts
 models/StateEntityFungibleResourceVaultsPageRequestAllOf.ts
 models/StateEntityFungibleResourceVaultsPageResponse.ts
@@ -162,5 +183,6 @@ models/ValidatorCollection.ts
 models/ValidatorCollectionAllOf.ts
 models/ValidatorCollectionItem.ts
 models/ValidatorCollectionItemActiveInEpoch.ts
+models/ValidatorVaultItem.ts
 models/index.ts
 runtime.ts

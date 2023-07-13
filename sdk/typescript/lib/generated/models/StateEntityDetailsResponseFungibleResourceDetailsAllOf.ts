@@ -13,6 +13,13 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { ComponentEntityAccessRules } from './ComponentEntityAccessRules';
+import {
+    ComponentEntityAccessRulesFromJSON,
+    ComponentEntityAccessRulesFromJSONTyped,
+    ComponentEntityAccessRulesToJSON,
+} from './ComponentEntityAccessRules';
+
 /**
  * 
  * @export
@@ -21,16 +28,10 @@ import { exists, mapValues } from '../runtime';
 export interface StateEntityDetailsResponseFungibleResourceDetailsAllOf {
     /**
      * 
-     * @type {object}
+     * @type {ComponentEntityAccessRules}
      * @memberof StateEntityDetailsResponseFungibleResourceDetailsAllOf
      */
-    access_rules_chain: object;
-    /**
-     * 
-     * @type {object}
-     * @memberof StateEntityDetailsResponseFungibleResourceDetailsAllOf
-     */
-    vault_access_rules_chain: object;
+    access_rules: ComponentEntityAccessRules;
     /**
      * 
      * @type {number}
@@ -78,8 +79,7 @@ export type StateEntityDetailsResponseFungibleResourceDetailsAllOfTypeEnum = typ
  */
 export function instanceOfStateEntityDetailsResponseFungibleResourceDetailsAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "access_rules_chain" in value;
-    isInstance = isInstance && "vault_access_rules_chain" in value;
+    isInstance = isInstance && "access_rules" in value;
     isInstance = isInstance && "divisibility" in value;
     isInstance = isInstance && "total_supply" in value;
     isInstance = isInstance && "total_minted" in value;
@@ -98,8 +98,7 @@ export function StateEntityDetailsResponseFungibleResourceDetailsAllOfFromJSONTy
     }
     return {
         
-        'access_rules_chain': json['access_rules_chain'],
-        'vault_access_rules_chain': json['vault_access_rules_chain'],
+        'access_rules': ComponentEntityAccessRulesFromJSON(json['access_rules']),
         'divisibility': json['divisibility'],
         'total_supply': json['total_supply'],
         'total_minted': json['total_minted'],
@@ -117,8 +116,7 @@ export function StateEntityDetailsResponseFungibleResourceDetailsAllOfToJSON(val
     }
     return {
         
-        'access_rules_chain': value.access_rules_chain,
-        'vault_access_rules_chain': value.vault_access_rules_chain,
+        'access_rules': ComponentEntityAccessRulesToJSON(value.access_rules),
         'divisibility': value.divisibility,
         'total_supply': value.total_supply,
         'total_minted': value.total_minted,

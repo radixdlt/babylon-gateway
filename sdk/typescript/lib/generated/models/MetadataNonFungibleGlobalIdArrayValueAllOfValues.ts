@@ -16,58 +16,50 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TransactionPreviewRequestFlags
+ * @interface MetadataNonFungibleGlobalIdArrayValueAllOfValues
  */
-export interface TransactionPreviewRequestFlags {
+export interface MetadataNonFungibleGlobalIdArrayValueAllOfValues {
     /**
-     * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof MetadataNonFungibleGlobalIdArrayValueAllOfValues
      */
-    use_free_credit: boolean;
+    resource_address: string;
     /**
-     * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
+     * String-encoded non-fungible ID.
+     * @type {string}
+     * @memberof MetadataNonFungibleGlobalIdArrayValueAllOfValues
      */
-    assume_all_signature_proofs: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
-     */
-    skip_epoch_check: boolean;
+    non_fungible_id: string;
 }
 
 /**
- * Check if a given object implements the TransactionPreviewRequestFlags interface.
+ * Check if a given object implements the MetadataNonFungibleGlobalIdArrayValueAllOfValues interface.
  */
-export function instanceOfTransactionPreviewRequestFlags(value: object): boolean {
+export function instanceOfMetadataNonFungibleGlobalIdArrayValueAllOfValues(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "use_free_credit" in value;
-    isInstance = isInstance && "assume_all_signature_proofs" in value;
-    isInstance = isInstance && "skip_epoch_check" in value;
+    isInstance = isInstance && "resource_address" in value;
+    isInstance = isInstance && "non_fungible_id" in value;
 
     return isInstance;
 }
 
-export function TransactionPreviewRequestFlagsFromJSON(json: any): TransactionPreviewRequestFlags {
-    return TransactionPreviewRequestFlagsFromJSONTyped(json, false);
+export function MetadataNonFungibleGlobalIdArrayValueAllOfValuesFromJSON(json: any): MetadataNonFungibleGlobalIdArrayValueAllOfValues {
+    return MetadataNonFungibleGlobalIdArrayValueAllOfValuesFromJSONTyped(json, false);
 }
 
-export function TransactionPreviewRequestFlagsFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionPreviewRequestFlags {
+export function MetadataNonFungibleGlobalIdArrayValueAllOfValuesFromJSONTyped(json: any, ignoreDiscriminator: boolean): MetadataNonFungibleGlobalIdArrayValueAllOfValues {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'use_free_credit': json['use_free_credit'],
-        'assume_all_signature_proofs': json['assume_all_signature_proofs'],
-        'skip_epoch_check': json['skip_epoch_check'],
+        'resource_address': json['resource_address'],
+        'non_fungible_id': json['non_fungible_id'],
     };
 }
 
-export function TransactionPreviewRequestFlagsToJSON(value?: TransactionPreviewRequestFlags | null): any {
+export function MetadataNonFungibleGlobalIdArrayValueAllOfValuesToJSON(value?: MetadataNonFungibleGlobalIdArrayValueAllOfValues | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -76,9 +68,8 @@ export function TransactionPreviewRequestFlagsToJSON(value?: TransactionPreviewR
     }
     return {
         
-        'use_free_credit': value.use_free_credit,
-        'assume_all_signature_proofs': value.assume_all_signature_proofs,
-        'skip_epoch_check': value.skip_epoch_check,
+        'resource_address': value.resource_address,
+        'non_fungible_id': value.non_fungible_id,
     };
 }
 

@@ -16,58 +16,60 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TransactionPreviewRequestFlags
+ * @interface MetadataScalarValue
  */
-export interface TransactionPreviewRequestFlags {
+export interface MetadataScalarValue {
     /**
      * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
+     * @type {string}
+     * @memberof MetadataScalarValue
      */
-    use_free_credit: boolean;
+    type: MetadataScalarValueTypeEnum;
     /**
      * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
+     * @type {string}
+     * @memberof MetadataScalarValue
      */
-    assume_all_signature_proofs: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
-     */
-    skip_epoch_check: boolean;
+    value: string;
 }
 
+
 /**
- * Check if a given object implements the TransactionPreviewRequestFlags interface.
+ * @export
  */
-export function instanceOfTransactionPreviewRequestFlags(value: object): boolean {
+export const MetadataScalarValueTypeEnum = {
+    String: 'String'
+} as const;
+export type MetadataScalarValueTypeEnum = typeof MetadataScalarValueTypeEnum[keyof typeof MetadataScalarValueTypeEnum];
+
+
+/**
+ * Check if a given object implements the MetadataScalarValue interface.
+ */
+export function instanceOfMetadataScalarValue(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "use_free_credit" in value;
-    isInstance = isInstance && "assume_all_signature_proofs" in value;
-    isInstance = isInstance && "skip_epoch_check" in value;
+    isInstance = isInstance && "type" in value;
+    isInstance = isInstance && "value" in value;
 
     return isInstance;
 }
 
-export function TransactionPreviewRequestFlagsFromJSON(json: any): TransactionPreviewRequestFlags {
-    return TransactionPreviewRequestFlagsFromJSONTyped(json, false);
+export function MetadataScalarValueFromJSON(json: any): MetadataScalarValue {
+    return MetadataScalarValueFromJSONTyped(json, false);
 }
 
-export function TransactionPreviewRequestFlagsFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionPreviewRequestFlags {
+export function MetadataScalarValueFromJSONTyped(json: any, ignoreDiscriminator: boolean): MetadataScalarValue {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'use_free_credit': json['use_free_credit'],
-        'assume_all_signature_proofs': json['assume_all_signature_proofs'],
-        'skip_epoch_check': json['skip_epoch_check'],
+        'type': json['type'],
+        'value': json['value'],
     };
 }
 
-export function TransactionPreviewRequestFlagsToJSON(value?: TransactionPreviewRequestFlags | null): any {
+export function MetadataScalarValueToJSON(value?: MetadataScalarValue | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -76,9 +78,8 @@ export function TransactionPreviewRequestFlagsToJSON(value?: TransactionPreviewR
     }
     return {
         
-        'use_free_credit': value.use_free_credit,
-        'assume_all_signature_proofs': value.assume_all_signature_proofs,
-        'skip_epoch_check': value.skip_epoch_check,
+        'type': value.type,
+        'value': value.value,
     };
 }
 
