@@ -13,6 +13,19 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { PackageVmType } from './PackageVmType';
+import {
+    PackageVmTypeFromJSON,
+    PackageVmTypeFromJSONTyped,
+    PackageVmTypeToJSON,
+} from './PackageVmType';
+import type { StateEntityDetailsResponsePackageDetailsBlueprintCollection } from './StateEntityDetailsResponsePackageDetailsBlueprintCollection';
+import {
+    StateEntityDetailsResponsePackageDetailsBlueprintCollectionFromJSON,
+    StateEntityDetailsResponsePackageDetailsBlueprintCollectionFromJSONTyped,
+    StateEntityDetailsResponsePackageDetailsBlueprintCollectionToJSON,
+} from './StateEntityDetailsResponsePackageDetailsBlueprintCollection';
+
 /**
  * 
  * @export
@@ -26,17 +39,47 @@ export interface StateEntityDetailsResponsePackageDetails {
      */
     type: StateEntityDetailsResponsePackageDetailsTypeEnum;
     /**
+     * 
+     * @type {PackageVmType}
+     * @memberof StateEntityDetailsResponsePackageDetails
+     */
+    vm_type: PackageVmType;
+    /**
+     * Hex-encoded binary blob.
+     * @type {string}
+     * @memberof StateEntityDetailsResponsePackageDetails
+     */
+    code_hash_hex: string;
+    /**
      * Hex-encoded binary blob.
      * @type {string}
      * @memberof StateEntityDetailsResponsePackageDetails
      */
     code_hex?: string;
     /**
+     * Hex-encoded binary blob.
+     * @type {string}
+     * @memberof StateEntityDetailsResponsePackageDetails
+     */
+    schema_hash_hex: string;
+    /**
+     * 
+     * @type {object}
+     * @memberof StateEntityDetailsResponsePackageDetails
+     */
+    schema?: object;
+    /**
      * String-encoded decimal representing the amount of a related fungible resource.
      * @type {string}
      * @memberof StateEntityDetailsResponsePackageDetails
      */
     royalty_vault_balance?: string;
+    /**
+     * 
+     * @type {StateEntityDetailsResponsePackageDetailsBlueprintCollection}
+     * @memberof StateEntityDetailsResponsePackageDetails
+     */
+    blueprints?: StateEntityDetailsResponsePackageDetailsBlueprintCollection;
 }
 
 
@@ -55,6 +98,9 @@ export type StateEntityDetailsResponsePackageDetailsTypeEnum = typeof StateEntit
 export function instanceOfStateEntityDetailsResponsePackageDetails(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "type" in value;
+    isInstance = isInstance && "vm_type" in value;
+    isInstance = isInstance && "code_hash_hex" in value;
+    isInstance = isInstance && "schema_hash_hex" in value;
 
     return isInstance;
 }
@@ -70,8 +116,13 @@ export function StateEntityDetailsResponsePackageDetailsFromJSONTyped(json: any,
     return {
         
         'type': json['type'],
+        'vm_type': PackageVmTypeFromJSON(json['vm_type']),
+        'code_hash_hex': json['code_hash_hex'],
         'code_hex': !exists(json, 'code_hex') ? undefined : json['code_hex'],
+        'schema_hash_hex': json['schema_hash_hex'],
+        'schema': !exists(json, 'schema') ? undefined : json['schema'],
         'royalty_vault_balance': !exists(json, 'royalty_vault_balance') ? undefined : json['royalty_vault_balance'],
+        'blueprints': !exists(json, 'blueprints') ? undefined : StateEntityDetailsResponsePackageDetailsBlueprintCollectionFromJSON(json['blueprints']),
     };
 }
 
@@ -85,8 +136,13 @@ export function StateEntityDetailsResponsePackageDetailsToJSON(value?: StateEnti
     return {
         
         'type': value.type,
+        'vm_type': PackageVmTypeToJSON(value.vm_type),
+        'code_hash_hex': value.code_hash_hex,
         'code_hex': value.code_hex,
+        'schema_hash_hex': value.schema_hash_hex,
+        'schema': value.schema,
         'royalty_vault_balance': value.royalty_vault_balance,
+        'blueprints': StateEntityDetailsResponsePackageDetailsBlueprintCollectionToJSON(value.blueprints),
     };
 }
 

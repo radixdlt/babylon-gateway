@@ -13,6 +13,13 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { ComponentEntityAccessRules } from './ComponentEntityAccessRules';
+import {
+    ComponentEntityAccessRulesFromJSON,
+    ComponentEntityAccessRulesFromJSONTyped,
+    ComponentEntityAccessRulesToJSON,
+} from './ComponentEntityAccessRules';
+
 /**
  * 
  * @export
@@ -45,10 +52,10 @@ export interface StateEntityDetailsResponseComponentDetails {
     state?: object;
     /**
      * 
-     * @type {object}
+     * @type {ComponentEntityAccessRules}
      * @memberof StateEntityDetailsResponseComponentDetails
      */
-    access_rules_chain: object;
+    access_rules: ComponentEntityAccessRules;
     /**
      * String-encoded decimal representing the amount of a related fungible resource.
      * @type {string}
@@ -74,7 +81,7 @@ export function instanceOfStateEntityDetailsResponseComponentDetails(value: obje
     let isInstance = true;
     isInstance = isInstance && "type" in value;
     isInstance = isInstance && "blueprint_name" in value;
-    isInstance = isInstance && "access_rules_chain" in value;
+    isInstance = isInstance && "access_rules" in value;
 
     return isInstance;
 }
@@ -93,7 +100,7 @@ export function StateEntityDetailsResponseComponentDetailsFromJSONTyped(json: an
         'package_address': !exists(json, 'package_address') ? undefined : json['package_address'],
         'blueprint_name': json['blueprint_name'],
         'state': !exists(json, 'state') ? undefined : json['state'],
-        'access_rules_chain': json['access_rules_chain'],
+        'access_rules': ComponentEntityAccessRulesFromJSON(json['access_rules']),
         'royalty_vault_balance': !exists(json, 'royalty_vault_balance') ? undefined : json['royalty_vault_balance'],
     };
 }
@@ -111,7 +118,7 @@ export function StateEntityDetailsResponseComponentDetailsToJSON(value?: StateEn
         'package_address': value.package_address,
         'blueprint_name': value.blueprint_name,
         'state': value.state,
-        'access_rules_chain': value.access_rules_chain,
+        'access_rules': ComponentEntityAccessRulesToJSON(value.access_rules),
         'royalty_vault_balance': value.royalty_vault_balance,
     };
 }

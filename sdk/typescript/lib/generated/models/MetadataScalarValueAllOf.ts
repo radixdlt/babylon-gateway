@@ -16,58 +16,59 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TransactionPreviewRequestFlags
+ * @interface MetadataScalarValueAllOf
  */
-export interface TransactionPreviewRequestFlags {
+export interface MetadataScalarValueAllOf {
     /**
      * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
+     * @type {string}
+     * @memberof MetadataScalarValueAllOf
      */
-    use_free_credit: boolean;
+    value: string;
     /**
      * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
+     * @type {string}
+     * @memberof MetadataScalarValueAllOf
      */
-    assume_all_signature_proofs: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
-     */
-    skip_epoch_check: boolean;
+    type?: MetadataScalarValueAllOfTypeEnum;
 }
 
+
 /**
- * Check if a given object implements the TransactionPreviewRequestFlags interface.
+ * @export
  */
-export function instanceOfTransactionPreviewRequestFlags(value: object): boolean {
+export const MetadataScalarValueAllOfTypeEnum = {
+    String: 'String'
+} as const;
+export type MetadataScalarValueAllOfTypeEnum = typeof MetadataScalarValueAllOfTypeEnum[keyof typeof MetadataScalarValueAllOfTypeEnum];
+
+
+/**
+ * Check if a given object implements the MetadataScalarValueAllOf interface.
+ */
+export function instanceOfMetadataScalarValueAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "use_free_credit" in value;
-    isInstance = isInstance && "assume_all_signature_proofs" in value;
-    isInstance = isInstance && "skip_epoch_check" in value;
+    isInstance = isInstance && "value" in value;
 
     return isInstance;
 }
 
-export function TransactionPreviewRequestFlagsFromJSON(json: any): TransactionPreviewRequestFlags {
-    return TransactionPreviewRequestFlagsFromJSONTyped(json, false);
+export function MetadataScalarValueAllOfFromJSON(json: any): MetadataScalarValueAllOf {
+    return MetadataScalarValueAllOfFromJSONTyped(json, false);
 }
 
-export function TransactionPreviewRequestFlagsFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionPreviewRequestFlags {
+export function MetadataScalarValueAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): MetadataScalarValueAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'use_free_credit': json['use_free_credit'],
-        'assume_all_signature_proofs': json['assume_all_signature_proofs'],
-        'skip_epoch_check': json['skip_epoch_check'],
+        'value': json['value'],
+        'type': !exists(json, 'type') ? undefined : json['type'],
     };
 }
 
-export function TransactionPreviewRequestFlagsToJSON(value?: TransactionPreviewRequestFlags | null): any {
+export function MetadataScalarValueAllOfToJSON(value?: MetadataScalarValueAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -76,9 +77,8 @@ export function TransactionPreviewRequestFlagsToJSON(value?: TransactionPreviewR
     }
     return {
         
-        'use_free_credit': value.use_free_credit,
-        'assume_all_signature_proofs': value.assume_all_signature_proofs,
-        'skip_epoch_check': value.skip_epoch_check,
+        'value': value.value,
+        'type': value.type,
     };
 }
 

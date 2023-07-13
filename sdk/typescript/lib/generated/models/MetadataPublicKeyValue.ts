@@ -13,61 +13,70 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { PublicKey } from './PublicKey';
+import {
+    PublicKeyFromJSON,
+    PublicKeyFromJSONTyped,
+    PublicKeyToJSON,
+} from './PublicKey';
+
 /**
  * 
  * @export
- * @interface TransactionPreviewRequestFlags
+ * @interface MetadataPublicKeyValue
  */
-export interface TransactionPreviewRequestFlags {
+export interface MetadataPublicKeyValue {
     /**
      * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
+     * @type {string}
+     * @memberof MetadataPublicKeyValue
      */
-    use_free_credit: boolean;
+    type: MetadataPublicKeyValueTypeEnum;
     /**
      * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
+     * @type {PublicKey}
+     * @memberof MetadataPublicKeyValue
      */
-    assume_all_signature_proofs: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof TransactionPreviewRequestFlags
-     */
-    skip_epoch_check: boolean;
+    value: PublicKey;
 }
 
+
 /**
- * Check if a given object implements the TransactionPreviewRequestFlags interface.
+ * @export
  */
-export function instanceOfTransactionPreviewRequestFlags(value: object): boolean {
+export const MetadataPublicKeyValueTypeEnum = {
+    PublicKey: 'PublicKey'
+} as const;
+export type MetadataPublicKeyValueTypeEnum = typeof MetadataPublicKeyValueTypeEnum[keyof typeof MetadataPublicKeyValueTypeEnum];
+
+
+/**
+ * Check if a given object implements the MetadataPublicKeyValue interface.
+ */
+export function instanceOfMetadataPublicKeyValue(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "use_free_credit" in value;
-    isInstance = isInstance && "assume_all_signature_proofs" in value;
-    isInstance = isInstance && "skip_epoch_check" in value;
+    isInstance = isInstance && "type" in value;
+    isInstance = isInstance && "value" in value;
 
     return isInstance;
 }
 
-export function TransactionPreviewRequestFlagsFromJSON(json: any): TransactionPreviewRequestFlags {
-    return TransactionPreviewRequestFlagsFromJSONTyped(json, false);
+export function MetadataPublicKeyValueFromJSON(json: any): MetadataPublicKeyValue {
+    return MetadataPublicKeyValueFromJSONTyped(json, false);
 }
 
-export function TransactionPreviewRequestFlagsFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionPreviewRequestFlags {
+export function MetadataPublicKeyValueFromJSONTyped(json: any, ignoreDiscriminator: boolean): MetadataPublicKeyValue {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'use_free_credit': json['use_free_credit'],
-        'assume_all_signature_proofs': json['assume_all_signature_proofs'],
-        'skip_epoch_check': json['skip_epoch_check'],
+        'type': json['type'],
+        'value': PublicKeyFromJSON(json['value']),
     };
 }
 
-export function TransactionPreviewRequestFlagsToJSON(value?: TransactionPreviewRequestFlags | null): any {
+export function MetadataPublicKeyValueToJSON(value?: MetadataPublicKeyValue | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -76,9 +85,8 @@ export function TransactionPreviewRequestFlagsToJSON(value?: TransactionPreviewR
     }
     return {
         
-        'use_free_credit': value.use_free_credit,
-        'assume_all_signature_proofs': value.assume_all_signature_proofs,
-        'skip_epoch_check': value.skip_epoch_check,
+        'type': value.type,
+        'value': PublicKeyToJSON(value.value),
     };
 }
 

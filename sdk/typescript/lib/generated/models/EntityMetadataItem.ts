@@ -39,6 +39,12 @@ export interface EntityMetadataItem {
      */
     value: EntityMetadataItemValue;
     /**
+     * 
+     * @type {boolean}
+     * @memberof EntityMetadataItem
+     */
+    is_locked: boolean;
+    /**
      * TBD
      * @type {number}
      * @memberof EntityMetadataItem
@@ -53,6 +59,7 @@ export function instanceOfEntityMetadataItem(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "key" in value;
     isInstance = isInstance && "value" in value;
+    isInstance = isInstance && "is_locked" in value;
     isInstance = isInstance && "last_updated_at_state_version" in value;
 
     return isInstance;
@@ -70,6 +77,7 @@ export function EntityMetadataItemFromJSONTyped(json: any, ignoreDiscriminator: 
         
         'key': json['key'],
         'value': EntityMetadataItemValueFromJSON(json['value']),
+        'is_locked': json['is_locked'],
         'last_updated_at_state_version': json['last_updated_at_state_version'],
     };
 }
@@ -85,6 +93,7 @@ export function EntityMetadataItemToJSON(value?: EntityMetadataItem | null): any
         
         'key': value.key,
         'value': EntityMetadataItemValueToJSON(value.value),
+        'is_locked': value.is_locked,
         'last_updated_at_state_version': value.last_updated_at_state_version,
     };
 }

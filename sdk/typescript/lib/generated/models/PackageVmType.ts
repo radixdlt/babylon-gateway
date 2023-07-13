@@ -17,24 +17,22 @@
  * 
  * @export
  */
-export const NonFungibleIdType = {
-    String: 'String',
-    Integer: 'Integer',
-    Bytes: 'Bytes',
-    Ruid: 'Ruid'
+export const PackageVmType = {
+    Native: 'Native',
+    ScryptoV1: 'ScryptoV1'
 } as const;
-export type NonFungibleIdType = typeof NonFungibleIdType[keyof typeof NonFungibleIdType];
+export type PackageVmType = typeof PackageVmType[keyof typeof PackageVmType];
 
 
-export function NonFungibleIdTypeFromJSON(json: any): NonFungibleIdType {
-    return NonFungibleIdTypeFromJSONTyped(json, false);
+export function PackageVmTypeFromJSON(json: any): PackageVmType {
+    return PackageVmTypeFromJSONTyped(json, false);
 }
 
-export function NonFungibleIdTypeFromJSONTyped(json: any, ignoreDiscriminator: boolean): NonFungibleIdType {
-    return json as NonFungibleIdType;
+export function PackageVmTypeFromJSONTyped(json: any, ignoreDiscriminator: boolean): PackageVmType {
+    return json as PackageVmType;
 }
 
-export function NonFungibleIdTypeToJSON(value?: NonFungibleIdType | null): any {
+export function PackageVmTypeToJSON(value?: PackageVmType | null): any {
     return value as any;
 }
 
