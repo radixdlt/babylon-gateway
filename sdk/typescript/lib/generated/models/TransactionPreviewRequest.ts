@@ -75,7 +75,7 @@ export interface TransactionPreviewRequest {
      */
     tip_percentage: number;
     /**
-     * A decimal-string-encoded integer between `0` and `2^64 - 1`, used to ensure the transaction intent is unique.
+     * A decimal-string-encoded integer between `0` and `2^32 - 1`, used to ensure the transaction intent is unique.
      * @type {number}
      * @memberof TransactionPreviewRequest
      */

@@ -91,60 +91,60 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// MetadataScalarValue
+    /// MetadataDecimalValue
     /// </summary>
-    [DataContract(Name = "MetadataScalarValue")]
+    [DataContract(Name = "MetadataDecimalValue")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Bool")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "BoolArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Decimal")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "DecimalArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "GlobalAddress")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "GlobalAddressArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "I32")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "I32Array")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "I64")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "I64Array")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Instant")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "InstantArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataBoolValue), "Bool")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataBoolArrayValue), "BoolArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataDecimalValue), "Decimal")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataDecimalArrayValue), "DecimalArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataGlobalAddressValue), "GlobalAddress")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataGlobalAddressArrayValue), "GlobalAddressArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataI32Value), "I32")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataI32ArrayValue), "I32Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataI64Value), "I64")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataI64ArrayValue), "I64Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataInstantValue), "Instant")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataInstantArrayValue), "InstantArray")]
     [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleGlobalIdValue), "NonFungibleGlobalId")]
     [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleGlobalIdArrayValue), "NonFungibleGlobalIdArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "NonFungibleLocalId")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "NonFungibleLocalIdArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "OrigiArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Origin")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleLocalIdValue), "NonFungibleLocalId")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataNonFungibleLocalIdArrayValue), "NonFungibleLocalIdArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataOriginValue), "Origin")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataOriginArrayValue), "OriginArray")]
     [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyValue), "PublicKey")]
     [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyArrayValue), "PublicKeyArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "PublicKeyHash")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "PublicKeyHashArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "String")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "StringArray")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U32")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "U32Array")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U64")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "U64Array")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U8")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "U8Array")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarValue), "Url")]
-    [JsonSubtypes.KnownSubType(typeof(MetadataScalarArrayValue), "UrlArray")]
-    public partial class MetadataScalarValue : MetadataTypedValue, IEquatable<MetadataScalarValue>
+    [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyHashValue), "PublicKeyHash")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataPublicKeyHashArrayValue), "PublicKeyHashArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataStringValue), "String")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataStringArrayValue), "StringArray")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataU32Value), "U32")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataU32ArrayValue), "U32Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataU64Value), "U64")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataU64ArrayValue), "U64Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataU8Value), "U8")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataU8ArrayValue), "U8Array")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataUrlValue), "Url")]
+    [JsonSubtypes.KnownSubType(typeof(MetadataUrlArrayValue), "UrlArray")]
+    public partial class MetadataDecimalValue : MetadataTypedValue, IEquatable<MetadataDecimalValue>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataScalarValue" /> class.
+        /// Initializes a new instance of the <see cref="MetadataDecimalValue" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MetadataScalarValue() { }
+        protected MetadataDecimalValue() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataScalarValue" /> class.
+        /// Initializes a new instance of the <see cref="MetadataDecimalValue" /> class.
         /// </summary>
         /// <param name="value">value (required).</param>
-        /// <param name="type">type (required) (default to MetadataValueType.U8Array).</param>
-        public MetadataScalarValue(string value = default(string), MetadataValueType type = MetadataValueType.U8Array) : base(type)
+        /// <param name="type">type (required) (default to MetadataValueType.Decimal).</param>
+        public MetadataDecimalValue(string value = default(string), MetadataValueType type = MetadataValueType.Decimal) : base(type)
         {
             // to ensure "value" is required (not null)
             if (value == null)
             {
-                throw new ArgumentNullException("value is a required property for MetadataScalarValue and cannot be null");
+                throw new ArgumentNullException("value is a required property for MetadataDecimalValue and cannot be null");
             }
             this.Value = value;
         }
@@ -162,7 +162,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MetadataScalarValue {\n");
+            sb.Append("class MetadataDecimalValue {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
             sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
@@ -185,15 +185,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MetadataScalarValue);
+            return this.Equals(input as MetadataDecimalValue);
         }
 
         /// <summary>
-        /// Returns true if MetadataScalarValue instances are equal
+        /// Returns true if MetadataDecimalValue instances are equal
         /// </summary>
-        /// <param name="input">Instance of MetadataScalarValue to be compared</param>
+        /// <param name="input">Instance of MetadataDecimalValue to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MetadataScalarValue input)
+        public bool Equals(MetadataDecimalValue input)
         {
             if (input == null)
             {

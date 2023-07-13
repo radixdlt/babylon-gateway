@@ -90,104 +90,22 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// MetadataScalarArrayValueAllOf
+    /// Defines PublicKeyHashType
     /// </summary>
-    [DataContract(Name = "MetadataScalarArrayValue_allOf")]
-    public partial class MetadataScalarArrayValueAllOf : IEquatable<MetadataScalarArrayValueAllOf>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum PublicKeyHashType
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataScalarArrayValueAllOf" /> class.
+        /// Enum EcdsaSecp256k1 for value: EcdsaSecp256k1
         /// </summary>
-        [JsonConstructorAttribute]
-        protected MetadataScalarArrayValueAllOf() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataScalarArrayValueAllOf" /> class.
-        /// </summary>
-        /// <param name="values">values (required).</param>
-        public MetadataScalarArrayValueAllOf(List<string> values = default(List<string>))
-        {
-            // to ensure "values" is required (not null)
-            if (values == null)
-            {
-                throw new ArgumentNullException("values is a required property for MetadataScalarArrayValueAllOf and cannot be null");
-            }
-            this.Values = values;
-        }
+        [EnumMember(Value = "EcdsaSecp256k1")]
+        EcdsaSecp256k1 = 1,
 
         /// <summary>
-        /// Gets or Sets Values
+        /// Enum EddsaEd25519 for value: EddsaEd25519
         /// </summary>
-        [DataMember(Name = "values", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> Values { get; set; }
-
-        /// <summary>
-        /// Returns the string presentation of the object
-        /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class MetadataScalarArrayValueAllOf {\n");
-            sb.Append("  Values: ").Append(Values).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Returns the JSON string presentation of the object
-        /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Returns true if objects are equal
-        /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as MetadataScalarArrayValueAllOf);
-        }
-
-        /// <summary>
-        /// Returns true if MetadataScalarArrayValueAllOf instances are equal
-        /// </summary>
-        /// <param name="input">Instance of MetadataScalarArrayValueAllOf to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(MetadataScalarArrayValueAllOf input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.Values == input.Values ||
-                    this.Values != null &&
-                    input.Values != null &&
-                    this.Values.SequenceEqual(input.Values)
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                if (this.Values != null)
-                {
-                    hashCode = (hashCode * 59) + this.Values.GetHashCode();
-                }
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "EddsaEd25519")]
+        EddsaEd25519 = 2
 
     }
 

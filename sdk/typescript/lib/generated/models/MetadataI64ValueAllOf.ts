@@ -16,48 +16,48 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface MetadataScalarValueAllOf
+ * @interface MetadataI64ValueAllOf
  */
-export interface MetadataScalarValueAllOf {
+export interface MetadataI64ValueAllOf {
     /**
      * 
      * @type {string}
-     * @memberof MetadataScalarValueAllOf
+     * @memberof MetadataI64ValueAllOf
      */
     value: string;
     /**
      * 
      * @type {string}
-     * @memberof MetadataScalarValueAllOf
+     * @memberof MetadataI64ValueAllOf
      */
-    type?: MetadataScalarValueAllOfTypeEnum;
+    type?: MetadataI64ValueAllOfTypeEnum;
 }
 
 
 /**
  * @export
  */
-export const MetadataScalarValueAllOfTypeEnum = {
-    String: 'String'
+export const MetadataI64ValueAllOfTypeEnum = {
+    I64: 'I64'
 } as const;
-export type MetadataScalarValueAllOfTypeEnum = typeof MetadataScalarValueAllOfTypeEnum[keyof typeof MetadataScalarValueAllOfTypeEnum];
+export type MetadataI64ValueAllOfTypeEnum = typeof MetadataI64ValueAllOfTypeEnum[keyof typeof MetadataI64ValueAllOfTypeEnum];
 
 
 /**
- * Check if a given object implements the MetadataScalarValueAllOf interface.
+ * Check if a given object implements the MetadataI64ValueAllOf interface.
  */
-export function instanceOfMetadataScalarValueAllOf(value: object): boolean {
+export function instanceOfMetadataI64ValueAllOf(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "value" in value;
 
     return isInstance;
 }
 
-export function MetadataScalarValueAllOfFromJSON(json: any): MetadataScalarValueAllOf {
-    return MetadataScalarValueAllOfFromJSONTyped(json, false);
+export function MetadataI64ValueAllOfFromJSON(json: any): MetadataI64ValueAllOf {
+    return MetadataI64ValueAllOfFromJSONTyped(json, false);
 }
 
-export function MetadataScalarValueAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): MetadataScalarValueAllOf {
+export function MetadataI64ValueAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): MetadataI64ValueAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -68,7 +68,7 @@ export function MetadataScalarValueAllOfFromJSONTyped(json: any, ignoreDiscrimin
     };
 }
 
-export function MetadataScalarValueAllOfToJSON(value?: MetadataScalarValueAllOf | null): any {
+export function MetadataI64ValueAllOfToJSON(value?: MetadataI64ValueAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }

@@ -16,19 +16,19 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface MetadataScalarValue
+ * @interface MetadataU32Value
  */
-export interface MetadataScalarValue {
+export interface MetadataU32Value {
     /**
      * 
      * @type {string}
-     * @memberof MetadataScalarValue
+     * @memberof MetadataU32Value
      */
-    type: MetadataScalarValueTypeEnum;
+    type: MetadataU32ValueTypeEnum;
     /**
      * 
      * @type {string}
-     * @memberof MetadataScalarValue
+     * @memberof MetadataU32Value
      */
     value: string;
 }
@@ -37,16 +37,16 @@ export interface MetadataScalarValue {
 /**
  * @export
  */
-export const MetadataScalarValueTypeEnum = {
-    String: 'String'
+export const MetadataU32ValueTypeEnum = {
+    U32: 'U32'
 } as const;
-export type MetadataScalarValueTypeEnum = typeof MetadataScalarValueTypeEnum[keyof typeof MetadataScalarValueTypeEnum];
+export type MetadataU32ValueTypeEnum = typeof MetadataU32ValueTypeEnum[keyof typeof MetadataU32ValueTypeEnum];
 
 
 /**
- * Check if a given object implements the MetadataScalarValue interface.
+ * Check if a given object implements the MetadataU32Value interface.
  */
-export function instanceOfMetadataScalarValue(value: object): boolean {
+export function instanceOfMetadataU32Value(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "type" in value;
     isInstance = isInstance && "value" in value;
@@ -54,11 +54,11 @@ export function instanceOfMetadataScalarValue(value: object): boolean {
     return isInstance;
 }
 
-export function MetadataScalarValueFromJSON(json: any): MetadataScalarValue {
-    return MetadataScalarValueFromJSONTyped(json, false);
+export function MetadataU32ValueFromJSON(json: any): MetadataU32Value {
+    return MetadataU32ValueFromJSONTyped(json, false);
 }
 
-export function MetadataScalarValueFromJSONTyped(json: any, ignoreDiscriminator: boolean): MetadataScalarValue {
+export function MetadataU32ValueFromJSONTyped(json: any, ignoreDiscriminator: boolean): MetadataU32Value {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -69,7 +69,7 @@ export function MetadataScalarValueFromJSONTyped(json: any, ignoreDiscriminator:
     };
 }
 
-export function MetadataScalarValueToJSON(value?: MetadataScalarValue | null): any {
+export function MetadataU32ValueToJSON(value?: MetadataU32Value | null): any {
     if (value === undefined) {
         return undefined;
     }

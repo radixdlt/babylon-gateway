@@ -110,7 +110,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="notaryPublicKey">notaryPublicKey.</param>
         /// <param name="notaryIsSignatory">Whether the notary should count as a signatory (optional, default false).</param>
         /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;255&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
-        /// <param name="nonce">A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, used to ensure the transaction intent is unique. (required).</param>
+        /// <param name="nonce">A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, used to ensure the transaction intent is unique. (required).</param>
         /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers (required).</param>
         /// <param name="flags">flags (required).</param>
         public TransactionPreviewRequest(string manifest = default(string), List<string> blobsHex = default(List<string>), long startEpochInclusive = default(long), long endEpochExclusive = default(long), PublicKey notaryPublicKey = default(PublicKey), bool notaryIsSignatory = default(bool), int tipPercentage = default(int), long nonce = default(long), List<PublicKey> signerPublicKeys = default(List<PublicKey>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
@@ -191,9 +191,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public int TipPercentage { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, used to ensure the transaction intent is unique.
+        /// A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, used to ensure the transaction intent is unique.
         /// </summary>
-        /// <value>A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, used to ensure the transaction intent is unique.</value>
+        /// <value>A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, used to ensure the transaction intent is unique.</value>
         [DataMember(Name = "nonce", IsRequired = true, EmitDefaultValue = true)]
         public long Nonce { get; set; }
 
