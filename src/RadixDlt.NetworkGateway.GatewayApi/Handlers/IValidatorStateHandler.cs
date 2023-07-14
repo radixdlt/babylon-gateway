@@ -71,4 +71,6 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 public interface IValidatorStateHandler
 {
     Task<GatewayModel.StateValidatorsListResponse> List(GatewayModel.StateValidatorsListRequest request, CancellationToken token);
+
+    Task<GatewayModel.StateValidatorsUptimeResponse> Uptime(GatewayModel.StateValidatorsUptimeRequest request, CancellationToken token);
 }

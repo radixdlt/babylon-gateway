@@ -62,25 +62,23 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-[Table("component_schema")]
-internal class ComponentSchema
+[DataContract]
+public sealed record StateValidatorsUptimeCursor(long? StateVersionBoundary)
 {
-    [Key]
-    [Column(name: "id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public int Id
+    [DataMember(Name = "v", EmitDefaultValue = false)]
+    public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
+
+    public static StateValidatorsUptimeCursor FromCursorString(string cursorString)
     {
-        get { return 1; }
-        // ReSharper disable once ValueParameterNotUsed
-        set { }
+        return Serializations.FromBase64JsonOrDefault<StateValidatorsUptimeCursor>(cursorString);
     }
 
-    [Column("event_type_identifiers", TypeName = "jsonb")]
-    public EventTypeIdentifiers EventTypeIdentifiers { get; set; }
+    public string ToCursorString()
+    {
+        return Serializations.AsBase64Json(this);
+    }
 }

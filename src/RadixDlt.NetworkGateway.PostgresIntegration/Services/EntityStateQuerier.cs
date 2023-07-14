@@ -93,6 +93,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record ValidatorCurrentStakeViewModel(long ValidatorId,  string State, long StateLastUpdatedAtStateVersion, string StakeVaultBalance, long StakeVaultLastUpdatedAtStateVersion, string PendingXrdWithdrawVaultBalance, long PendingXrdWithdrawVaultLastUpdatedAtStateVersion, string LockedOwnerStakeUnitVaultBalance, long LockedOwnerStakeUnitVaultLastUpdatedAtStateVersion, string PendingOwnerStakeUnitUnlockVaultBalance, long PendingOwnerStakeUnitUnlockVaultLastUpdatedAtStateVersion);
 
+    private record ValidatorUptimeViewModel(long ValidatorId,  EntityAddress ValidatorAddress, long? ProposalsMade, long? ProposalsMissed, long EpochsActiveIn);
+
     private record FungibleViewModel(EntityAddress ResourceEntityAddress, string Balance, int ResourcesTotalCount, long LastUpdatedAtStateVersion);
 
     private record RoyaltyVaultBalanceViewModel(long RoyaltyVaultEntityId, string Balance, long OwnerEntityId, long LastUpdatedAtStateVersion);
@@ -753,6 +755,66 @@ INNER JOIN LATERAL (
             : null;
 
         return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(null, null, nextCursor, items));
+    }
+
+    public async Task<GatewayModel.StateValidatorsUptimeResponse> StateValidatorsUptime(GatewayModel.StateValidatorsUptimeCursor? cursor, GatewayModel.LedgerState ledgerState,
+        GatewayModel.LedgerState? fromLedgerState, CancellationToken token = default)
+    {
+        var validatorsPageSize = _endpointConfiguration.Value.ValidatorsPageSize;
+        var fromStateVersion = cursor?.StateVersionBoundary ?? 0;
+
+        var validatorsAndOneMore = await _dbContext.Entities
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.GetType() == typeof(GlobalValidatorEntity))
+            .Where(e => e.FromStateVersion > fromStateVersion)
+            .OrderBy(e => e.FromStateVersion)
+            .ThenBy(e => e.Id)
+            .Take(validatorsPageSize + 1)
+            .Select(x => x.Id)
+            .ToListAsync(token);
+
+        var validatorIds = validatorsAndOneMore.Take(validatorsPageSize).ToArray();
+
+        var cd = new CommandDefinition(
+            commandText: @"
+WITH
+variables (validator_entity_id) AS (SELECT UNNEST(@validatorIds)),
+validator_uptime_aggregated (validator_entity_id, proposals_made_sum, proposals_missed_sum, epochs_active_in) AS (
+    SELECT
+        validator_entity_id,
+        SUM(proposals_made) AS proposals_made_sum,
+        SUM(proposals_missed) AS proposals_missed_sum,
+        COUNT(*) AS epochs_active_in
+    FROM validator_uptime
+    WHERE epoch_number >= @epochFrom AND from_state_version <= @stateVersion
+    GROUP BY validator_entity_id
+)
+SELECT
+    e.id AS ValidatorId,
+    e.address AS ValidatorAddress,
+    CAST (vua.proposals_made_sum AS bigint) AS ProposalsMade,
+    CAST (vua.proposals_missed_sum AS bigint) AS ProposalsMissed,
+    vua.epochs_active_in AS EpochsActiveIn
+FROM variables
+INNER JOIN entities e ON e.id = variables.validator_entity_id AND from_state_version <= @stateVersion
+LEFT JOIN validator_uptime_aggregated vua on vua.validator_entity_id = e.id
+;",
+            parameters: new
+            {
+                validatorIds = validatorIds, stateVersion = ledgerState.StateVersion, epochFrom = fromLedgerState?.Epoch ?? 0,
+            },
+            cancellationToken: token);
+
+        var validatorUptime = (await _dbContext.Database.GetDbConnection().QueryAsync<ValidatorUptimeViewModel>(cd)).ToList();
+
+        var items = validatorUptime
+            .Select(x => new GatewayModel.ValidatorUptimeCollectionItem(x.ValidatorAddress, x.ProposalsMade, x.ProposalsMissed, x.EpochsActiveIn))
+            .ToList();
+
+        var nextCursor = validatorsAndOneMore.Count == validatorsPageSize + 1
+            ? new GatewayModel.StateValidatorsUptimeCursor(validatorsAndOneMore.Last()).ToCursorString()
+            : null;
+
+        return new GatewayModel.StateValidatorsUptimeResponse(ledgerState, new GatewayModel.ValidatorUptimeCollection(null, null, nextCursor, items));
     }
 
     private static GatewayModel.NonFungibleResourcesCollection MapToNonFungibleResourcesCollection(

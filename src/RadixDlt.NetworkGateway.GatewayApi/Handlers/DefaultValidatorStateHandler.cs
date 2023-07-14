@@ -87,4 +87,13 @@ internal class DefaultValidatorStateHandler : IValidatorStateHandler
 
         return await _entityStateQuerier.StateValidatorsList(cursor, ledgerState, token);
     }
+
+    public async Task<GatewayModel.StateValidatorsUptimeResponse> Uptime(GatewayModel.StateValidatorsUptimeRequest request, CancellationToken token)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        var cursor = GatewayModel.StateValidatorsUptimeCursor.FromCursorString(request.Cursor);
+        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromLedgerState, token);
+
+        return await _entityStateQuerier.StateValidatorsUptime(cursor, ledgerState, fromLedgerState, token);
+    }
 }

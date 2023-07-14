@@ -62,12 +62,11 @@
  * permissions under this License.
  */
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -145,18 +144,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_component_method_royalty_entry_history", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "component_schema",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false),
-                    event_type_identifiers = table.Column<EventTypeIdentifiers>(type: "jsonb", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_component_schema", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -569,6 +556,23 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "validator_uptime",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    validator_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    epoch_number = table.Column<long>(type: "bigint", nullable: false),
+                    proposals_made = table.Column<long>(type: "bigint", nullable: false),
+                    proposals_missed = table.Column<long>(type: "bigint", nullable: false),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_validator_uptime", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "validator_active_set_history",
                 columns: table => new
                 {
@@ -784,6 +788,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_validator_public_key_history_validator_entity_id_key_type_k~",
                 table: "validator_public_key_history",
                 columns: new[] { "validator_entity_id", "key_type", "key" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_validator_uptime_validator_entity_id_from_state_version_epo~",
+                table: "validator_uptime",
+                columns: new[] { "validator_entity_id", "from_state_version", "epoch_number" });
         }
 
         /// <inheritdoc />
@@ -797,9 +806,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "component_method_royalty_entry_history");
-
-            migrationBuilder.DropTable(
-                name: "component_schema");
 
             migrationBuilder.DropTable(
                 name: "entities");
@@ -863,6 +869,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "validator_active_set_history");
+
+            migrationBuilder.DropTable(
+                name: "validator_uptime");
 
             migrationBuilder.DropTable(
                 name: "validator_public_key_history");
