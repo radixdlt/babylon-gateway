@@ -38,8 +38,9 @@ jobs:
       - run: cat $NPM_CONFIG_USERCONFIG
       - name: Build alphanet-gateway-sdk
         run: |
-          yarn
-          yarn build
+          npm ci
+          npm run build
+          npm run test
 
       - name: Setup tags for npm
         id: setup_tags

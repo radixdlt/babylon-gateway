@@ -1,14 +1,21 @@
-import { chunk } from '../chunk'
-import { MAX_ADDRESSES_COUNT } from '../constants'
+import { chunk } from '../helpers/chunk'
+import { exhaustPagination } from '../helpers/exhaust-pagination'
 import {
+  EntityMetadataItem,
   FungibleResourcesCollection,
   FungibleResourcesCollectionItemVaultAggregated,
+  NonFungibleIdsCollection,
   NonFungibleResourcesCollection,
   NonFungibleResourcesCollectionItemVaultAggregated,
   ResourceAggregationLevel,
   StateApi,
   StateEntityDetailsResponseItem,
+  StateEntityMetadataPageResponse,
+  StateNonFungibleDetailsResponseItem,
+  ValidatorCollection,
+  ValidatorCollectionItem,
 } from '../generated'
+import { RuntimeConfiguration } from '../runtime'
 
 export type ReplaceProperty<
   ObjectType,
@@ -34,7 +41,10 @@ export type StateEntityDetailsVaultResponseItem =
   }
 
 export class State {
-  constructor(public innerClient: StateApi) {}
+  constructor(
+    public innerClient: StateApi,
+    public configuration: RuntimeConfiguration
+  ) {}
 
   /**
    * Get detailed information about entities together with vault aggregated fungible and non-fungible resources.
@@ -63,8 +73,8 @@ export class State {
   > {
     const isArray = Array.isArray(addresses)
     if (isArray && addresses.length === 0) return Promise.resolve([])
-    if (isArray && addresses.length > MAX_ADDRESSES_COUNT) {
-      const chunks = chunk(addresses, MAX_ADDRESSES_COUNT)
+    if (isArray && addresses.length > this.configuration.maxAddressesCount) {
+      const chunks = chunk(addresses, this.configuration.maxAddressesCount)
       return Promise.all(
         chunks.map((chunk) => this.getEntityDetailsVaultAggregated(chunk))
       ).then((results) => results.flat())
@@ -79,5 +89,129 @@ export class State {
     return isArray
       ? (items as StateEntityDetailsVaultResponseItem[])
       : (items[0] as StateEntityDetailsVaultResponseItem)
+  }
+
+  /**
+   * Get paged list of entity metadata
+   * @param address
+   * @param cursor
+   */
+  async getEntityMetadata(
+    address: string,
+    cursor?: string
+  ): Promise<StateEntityMetadataPageResponse> {
+    return this.innerClient.entityMetadataPage({
+      stateEntityMetadataPageRequest: {
+        address,
+        cursor,
+      },
+    })
+  }
+
+  /**
+   * Get list of all metadata items for given entity. This will iterate over returned cursors and aggregate all responses,
+   * which is why multiple API requests can be made.
+   *
+   * @param address - entity address
+   * @param startCursor - optional cursor to start iteration from
+   */
+  async getAllEntityMetadata(
+    address: string,
+    startCursor?: string
+  ): Promise<EntityMetadataItem[]> {
+    return exhaustPagination(
+      this.getEntityMetadata.bind(this, address),
+      startCursor
+    )
+  }
+
+  /**
+   * Get paged list of validators
+   * @param cursor
+   */
+  async getValidators(cursor?: string): Promise<ValidatorCollection> {
+    return this.innerClient
+      .stateValidatorsList({
+        stateValidatorsListRequest: {
+          cursor: cursor || null,
+        },
+      })
+      .then(({ validators }) => validators)
+  }
+
+  /**
+   * Get list of all validators. This will iterate over returned cursors and aggregate all responses.
+   */
+  async getAllValidators(start?: string): Promise<ValidatorCollectionItem[]> {
+    return exhaustPagination(this.getValidators.bind(this), start)
+  }
+
+  /**
+   *  Get paged list of non fungible ids for given non fungible resource address
+   * @params address - non fungible resource address
+   * @params cursor - optional cursor used for pagination
+   */
+  async getNonFungibleIds(
+    address: string,
+    cursor?: string
+  ): Promise<NonFungibleIdsCollection> {
+    return this.innerClient
+      .nonFungibleIds({
+        stateNonFungibleIdsRequest: {
+          resource_address: address,
+          cursor,
+        },
+      })
+      .then(({ non_fungible_ids }) => non_fungible_ids)
+  }
+
+  /**
+   * Get list of non fungible ids for given non fungible resource address. This will iterate over returned cursors and aggregate all responses.
+   *
+   * @params address - non fungible resource address
+   * @params startCursor - optional cursor to start paging from
+   */
+  async getAllNonFungibleIds(
+    address: string,
+    startCursor?: string
+  ): Promise<string[]> {
+    return exhaustPagination(
+      this.getNonFungibleIds.bind(this, address),
+      startCursor
+    )
+  }
+
+  async getNonFungibleData(
+    address: string,
+    ids: string
+  ): Promise<StateNonFungibleDetailsResponseItem>
+  async getNonFungibleData(
+    address: string,
+    ids: string[]
+  ): Promise<StateNonFungibleDetailsResponseItem[]>
+  async getNonFungibleData(
+    address: string,
+    ids: string | string[]
+  ): Promise<
+    StateNonFungibleDetailsResponseItem | StateNonFungibleDetailsResponseItem[]
+  > {
+    const isArray = Array.isArray(ids)
+    if (isArray && ids.length === 0) return Promise.resolve([])
+    if (isArray && ids.length > this.configuration.maxNftIdsCount) {
+      const chunks = chunk(ids, this.configuration.maxNftIdsCount)
+      return Promise.all(
+        chunks.map((chunk) => this.getNonFungibleData(address, chunk))
+      ).then((results) => results.flat())
+    }
+
+    const { non_fungible_ids } = await this.innerClient.nonFungibleData({
+      stateNonFungibleDataRequest: {
+        resource_address: address,
+        non_fungible_ids: isArray ? ids : [ids],
+      },
+    })
+    return isArray
+      ? (non_fungible_ids as StateNonFungibleDetailsResponseItem[])
+      : (non_fungible_ids[0] as StateNonFungibleDetailsResponseItem)
   }
 }

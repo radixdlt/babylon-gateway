@@ -40,6 +40,7 @@ export class Transaction {
       receiptEvents: false
       receiptFeeSummary: false
       receiptStateChanges: false
+      affectedGlobalEntities: false
     }
   ): Promise<TransactionCommittedDetailsResponse> {
     return this.innerClient.transactionCommittedDetails({
@@ -50,6 +51,7 @@ export class Transaction {
           receipt_events: options?.receiptEvents ?? true,
           receipt_fee_summary: options?.receiptFeeSummary ?? true,
           receipt_state_changes: options?.receiptStateChanges ?? true,
+          affected_global_entities: options?.affectedGlobalEntities ?? true,
         },
       },
     })
