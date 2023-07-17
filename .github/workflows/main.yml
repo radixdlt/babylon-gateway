@@ -54,7 +54,7 @@ jobs:
     name: AMD Migration
     needs:
       - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@merge-image-workflow
     with:
       runs_on: ubuntu-22.04
       image_registry: "docker.io"
@@ -73,7 +73,7 @@ jobs:
     name: ARM Migration
     needs:
       - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@merge-image-workflow
     with:
       runs_on: babylon-gateway-arm
       image_registry: "docker.io"
@@ -92,7 +92,7 @@ jobs:
     name: AMD Aggregator
     needs:
       - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@merge-image-workflow
     with:
       runs_on: ubuntu-22.04
       image_registry: "docker.io"
@@ -111,7 +111,7 @@ jobs:
     name: ARM Aggregator
     needs:
       - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@merge-image-workflow
     with:
       runs_on: babylon-gateway-arm
       image_registry: "docker.io"
@@ -130,7 +130,7 @@ jobs:
     name: AMD Gateway
     needs:
       - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@merge-image-workflow
     with:
       runs_on: ubuntu-22.04
       image_registry: "docker.io"
@@ -149,7 +149,7 @@ jobs:
     name: ARM Gateway
     needs:
       - setup-tags
-    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@merge-image-workflow
     with:
       runs_on: babylon-gateway-arm
       image_registry: "docker.io"
