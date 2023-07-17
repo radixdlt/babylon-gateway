@@ -26,6 +26,7 @@ describe('State Subapi', () => {
       )
       const gatewayApi = GatewayApiClient.initialize({
         fetchApi: spy,
+        basePath: 'https://just-for-test.com',
         maxAddressesCount: 1,
       })
 
@@ -35,15 +36,29 @@ describe('State Subapi', () => {
       // Assert
       expect(spy).toHaveBeenCalledTimes(2)
       expect(spy).toHaveBeenCalledWith(
-        'https://rcnet.radixdlt.com/state/entity/details',
+        'https://just-for-test.com/state/entity/details',
         fetchRequestFactory({
+          opt_ins: {
+            ancestor_identities: false,
+            component_royalty_vault_balance: false,
+            package_royalty_vault_balance: false,
+            non_fungible_include_nfids: true,
+            explicit_metadata: [],
+          },
           addresses: ['a'],
           aggregation_level: 'Vault',
         })
       )
       expect(spy).toHaveBeenCalledWith(
-        'https://rcnet.radixdlt.com/state/entity/details',
+        'https://just-for-test.com/state/entity/details',
         fetchRequestFactory({
+          opt_ins: {
+            ancestor_identities: false,
+            component_royalty_vault_balance: false,
+            package_royalty_vault_balance: false,
+            non_fungible_include_nfids: true,
+            explicit_metadata: [],
+          },
           addresses: ['b'],
           aggregation_level: 'Vault',
         })
@@ -61,6 +76,7 @@ describe('State Subapi', () => {
       )
       const gatewayApi = GatewayApiClient.initialize({
         fetchApi: spy,
+        basePath: 'https://just-for-test.com',
         maxNftIdsCount: 2,
       })
 
@@ -70,14 +86,14 @@ describe('State Subapi', () => {
       // Assert
       expect(spy).toHaveBeenCalledTimes(2)
       expect(spy).toHaveBeenCalledWith(
-        'https://rcnet.radixdlt.com/state/non-fungible/data',
+        'https://just-for-test.com/state/non-fungible/data',
         fetchRequestFactory({
           resource_address: 'addr',
           non_fungible_ids: ['a', 'b'],
         })
       )
       expect(spy).toHaveBeenCalledWith(
-        'https://rcnet.radixdlt.com/state/non-fungible/data',
+        'https://just-for-test.com/state/non-fungible/data',
         fetchRequestFactory({
           resource_address: 'addr',
           non_fungible_ids: ['c'],
@@ -93,10 +109,9 @@ describe('State Subapi', () => {
         key,
         last_updated_at_state_version: 1,
         value: {
-          as_string: '',
-          as_string_collection: undefined,
           raw_hex: '',
           raw_json: {},
+          typed: undefined,
         },
       })
       const spy = jest
@@ -127,6 +142,7 @@ describe('State Subapi', () => {
 
       const gatewayApi = GatewayApiClient.initialize({
         fetchApi: spy,
+        basePath: 'https://just-for-test.com',
       })
 
       // Act
@@ -142,20 +158,20 @@ describe('State Subapi', () => {
       ])
       expect(spy).toHaveBeenCalledTimes(3)
       expect(spy).toHaveBeenCalledWith(
-        'https://rcnet.radixdlt.com/state/entity/page/metadata',
+        'https://just-for-test.com/state/entity/page/metadata',
         fetchRequestFactory({
           address: 'addr',
         })
       )
       expect(spy).toHaveBeenCalledWith(
-        'https://rcnet.radixdlt.com/state/entity/page/metadata',
+        'https://just-for-test.com/state/entity/page/metadata',
         fetchRequestFactory({
           cursor: 'pointer',
           address: 'addr',
         })
       )
       expect(spy).toHaveBeenCalledWith(
-        'https://rcnet.radixdlt.com/state/entity/page/metadata',
+        'https://just-for-test.com/state/entity/page/metadata',
         fetchRequestFactory({
           cursor: 'pointer2',
           address: 'addr',
