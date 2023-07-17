@@ -1011,11 +1011,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         {
                             componentMethodRoyaltiesToAdd.Add(new ComponentMethodRoyaltyEntryHistory
                             {
-                                Id = sequences.ComponentMethodRoyaltyEntryHistorySequence,
+                                Id = sequences.ComponentMethodRoyaltyEntryHistorySequence++,
                                 FromStateVersion = stateVersion,
                                 EntityId = referencedEntity.DatabaseId,
                                 MethodName = methodRoyaltyEntry.Key.MethodName,
-                                RoyaltyAmount = methodRoyaltyEntry.Value?.RoyaltyAmount.ToJson(),
+                                RoyaltyAmount = methodRoyaltyEntry.Value?.ToJson(),
                                 IsLocked = methodRoyaltyEntry.IsLocked,
                             });
                         }
