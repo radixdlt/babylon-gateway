@@ -67,6 +67,7 @@ jobs:
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
+      provenance: "false"
   
   docker-database-migrations-private-arm:
     name: ARM Migration
@@ -85,6 +86,7 @@ jobs:
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
+      provenance: "false"
 
   docker-data-aggregator-private:
     name: AMD Aggregator
@@ -103,6 +105,7 @@ jobs:
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
+      provenance: "false"
 
   docker-data-aggregator-private-arm:
     name: ARM Aggregator
@@ -121,6 +124,7 @@ jobs:
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
+      provenance: "false"
 
   docker-gateway-api-private:
     name: AMD Gateway
@@ -139,6 +143,7 @@ jobs:
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
+      provenance: "false"
 
   docker-gateway-api-private-arm:
     name: ARM Gateway
@@ -157,9 +162,10 @@ jobs:
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
+      provenance: "false"
 
   join-gateway-images:
-    name: Join Gateway
+    name: Gateway
     needs:
       - setup-tags
       - docker-gateway-api-private
@@ -175,7 +181,7 @@ jobs:
       role-to-assume: arn:aws:iam::308190735829:role/gh-common-secrets-read-access
 
   join-aggregator-images:
-    name: Join Aggregator
+    name: Aggregator
     needs:
       - setup-tags
       - docker-data-aggregator-private
@@ -191,7 +197,7 @@ jobs:
       role-to-assume: arn:aws:iam::308190735829:role/gh-common-secrets-read-access
   
   join-migrations-images:
-    name: Join Migration
+    name: Migration
     needs:
       - setup-tags
       - docker-database-migrations-private
