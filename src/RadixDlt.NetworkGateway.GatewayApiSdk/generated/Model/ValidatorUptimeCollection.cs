@@ -103,11 +103,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorUptimeCollection" /> class.
         /// </summary>
-        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
-        /// <param name="previousCursor">If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection..</param>
-        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
         /// <param name="items">items (required).</param>
-        public ValidatorUptimeCollection(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<ValidatorUptimeCollectionItem> items = default(List<ValidatorUptimeCollectionItem>))
+        public ValidatorUptimeCollection(List<ValidatorUptimeCollectionItem> items = default(List<ValidatorUptimeCollectionItem>))
         {
             // to ensure "items" is required (not null)
             if (items == null)
@@ -115,31 +112,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("items is a required property for ValidatorUptimeCollection and cannot be null");
             }
             this.Items = items;
-            this.TotalCount = totalCount;
-            this.PreviousCursor = previousCursor;
-            this.NextCursor = nextCursor;
         }
-
-        /// <summary>
-        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
-        /// </summary>
-        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public long? TotalCount { get; set; }
-
-        /// <summary>
-        /// If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.
-        /// </summary>
-        /// <value>If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
-        public string PreviousCursor { get; set; }
-
-        /// <summary>
-        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
-        /// </summary>
-        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
 
         /// <summary>
         /// Gets or Sets Items
@@ -155,9 +128,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ValidatorUptimeCollection {\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -195,21 +165,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TotalCount == input.TotalCount ||
-                    (this.TotalCount != null &&
-                    this.TotalCount.Equals(input.TotalCount))
-                ) && 
-                (
-                    this.PreviousCursor == input.PreviousCursor ||
-                    (this.PreviousCursor != null &&
-                    this.PreviousCursor.Equals(input.PreviousCursor))
-                ) && 
-                (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
-                ) && 
-                (
                     this.Items == input.Items ||
                     this.Items != null &&
                     input.Items != null &&
@@ -226,18 +181,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TotalCount != null)
-                {
-                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
-                }
-                if (this.PreviousCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
-                }
-                if (this.NextCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
-                }
                 if (this.Items != null)
                 {
                     hashCode = (hashCode * 59) + this.Items.GetHashCode();

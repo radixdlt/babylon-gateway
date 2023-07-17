@@ -702,14 +702,14 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyValidatorUptime(ICollection<ValidatorUptime> entries, CancellationToken token)
+    public async Task<int> CopyValidatorEmissions(ICollection<ValidatorEmissions> entries, CancellationToken token)
     {
         if (!entries.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY validator_uptime (id, validator_entity_id,  epoch_number, proposals_made, proposals_missed, from_state_version) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY validator_emissions (id, validator_entity_id,  epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entries)
         {
@@ -719,7 +719,6 @@ internal class WriteHelper
             await writer.WriteAsync(e.EpochNumber, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ProposalsMade, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ProposalsMissed, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
         }
 
         await writer.CompleteAsync(token);
@@ -880,7 +879,7 @@ SELECT
     setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence),
     setval('ledger_transaction_markers_id_seq', @ledgerTransactionMarkerSequence),
     setval('package_blueprint_history_id_seq', @packageBlueprintHistorySequence),
-    setval('validator_uptime_id_seq', @validatorUptimeSequence)",
+    setval('validator_emissions_id_seq', @validatorEmissionsSequence)",
             parameters: new
             {
                 accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
@@ -905,7 +904,7 @@ SELECT
                 validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,
                 ledgerTransactionMarkerSequence = sequences.LedgerTransactionMarkerSequence,
                 packageBlueprintHistorySequence = sequences.PackageBlueprintHistorySequence,
-                validatorUptimeSequence = sequences.ValidatorUptimeSequence,
+                validatorEmissionsSequence = sequences.ValidatorEmissionsSequence,
             },
             cancellationToken: token);
 

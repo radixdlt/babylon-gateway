@@ -89,10 +89,4 @@ public class ValidatorController : ControllerBase
     {
         return await _validatorStateHandler.List(request, token);
     }
-
-    [HttpPost("uptime")]
-    public async Task<GatewayModel.StateValidatorsUptimeResponse> Uptime(GatewayModel.StateValidatorsUptimeRequest request, CancellationToken token)
-    {
-        return await _validatorStateHandler.Uptime(request, token);
-    }
 }

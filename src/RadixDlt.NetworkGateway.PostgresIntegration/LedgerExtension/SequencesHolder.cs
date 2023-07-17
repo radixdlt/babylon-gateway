@@ -110,5 +110,5 @@ internal class SequencesHolder
 
     public long PackageBlueprintHistorySequence { get; set; }
 
-    public long ValidatorUptimeSequence { get; set; }
+    public long ValidatorEmissionsSequence { get; set; }
 }

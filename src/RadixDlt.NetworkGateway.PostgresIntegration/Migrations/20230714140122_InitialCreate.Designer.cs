@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230714094222_InitialCreate")]
+    [Migration("20230714140122_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1098,6 +1098,38 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("validator_active_set_history");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorEmissions", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EpochNumber")
+                        .HasColumnType("bigint")
+                        .HasColumnName("epoch_number");
+
+                    b.Property<long>("ProposalsMade")
+                        .HasColumnType("bigint")
+                        .HasColumnName("proposals_made");
+
+                    b.Property<long>("ProposalsMissed")
+                        .HasColumnType("bigint")
+                        .HasColumnName("proposals_missed");
+
+                    b.Property<long>("ValidatorEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("validator_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ValidatorEntityId", "EpochNumber");
+
+                    b.ToTable("validator_emissions");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorPublicKeyHistory", b =>
                 {
                     b.Property<long>("Id")
@@ -1131,42 +1163,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("ValidatorEntityId", "KeyType", "Key");
 
                     b.ToTable("validator_public_key_history");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorUptime", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("EpochNumber")
-                        .HasColumnType("bigint")
-                        .HasColumnName("epoch_number");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<long>("ProposalsMade")
-                        .HasColumnType("bigint")
-                        .HasColumnName("proposals_made");
-
-                    b.Property<long>("ProposalsMissed")
-                        .HasColumnType("bigint")
-                        .HasColumnName("proposals_missed");
-
-                    b.Property<long>("ValidatorEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("validator_entity_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ValidatorEntityId", "FromStateVersion", "EpochNumber");
-
-                    b.ToTable("validator_uptime");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalAccessControllerEntity", b =>

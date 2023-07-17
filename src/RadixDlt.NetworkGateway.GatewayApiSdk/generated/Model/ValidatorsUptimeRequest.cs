@@ -90,48 +90,41 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateValidatorsUptimeResponse
+    /// ValidatorsUptimeRequest
     /// </summary>
-    [DataContract(Name = "StateValidatorsUptimeResponse")]
-    public partial class StateValidatorsUptimeResponse : IEquatable<StateValidatorsUptimeResponse>
+    [DataContract(Name = "ValidatorsUptimeRequest")]
+    public partial class ValidatorsUptimeRequest : IEquatable<ValidatorsUptimeRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateValidatorsUptimeResponse" /> class.
+        /// Initializes a new instance of the <see cref="ValidatorsUptimeRequest" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected StateValidatorsUptimeResponse() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StateValidatorsUptimeResponse" /> class.
-        /// </summary>
-        /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="validators">validators (required).</param>
-        public StateValidatorsUptimeResponse(LedgerState ledgerState = default(LedgerState), ValidatorUptimeCollection validators = default(ValidatorUptimeCollection))
+        /// <param name="atLedgerState">atLedgerState.</param>
+        /// <param name="fromLedgerState">fromLedgerState.</param>
+        /// <param name="validatorAddresses">validatorAddresses.</param>
+        public ValidatorsUptimeRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), LedgerStateSelector fromLedgerState = default(LedgerStateSelector), List<string> validatorAddresses = default(List<string>))
         {
-            // to ensure "ledgerState" is required (not null)
-            if (ledgerState == null)
-            {
-                throw new ArgumentNullException("ledgerState is a required property for StateValidatorsUptimeResponse and cannot be null");
-            }
-            this.LedgerState = ledgerState;
-            // to ensure "validators" is required (not null)
-            if (validators == null)
-            {
-                throw new ArgumentNullException("validators is a required property for StateValidatorsUptimeResponse and cannot be null");
-            }
-            this.Validators = validators;
+            this.AtLedgerState = atLedgerState;
+            this.FromLedgerState = fromLedgerState;
+            this.ValidatorAddresses = validatorAddresses;
         }
 
         /// <summary>
-        /// Gets or Sets LedgerState
+        /// Gets or Sets AtLedgerState
         /// </summary>
-        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
-        public LedgerState LedgerState { get; set; }
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
-        /// Gets or Sets Validators
+        /// Gets or Sets FromLedgerState
         /// </summary>
-        [DataMember(Name = "validators", IsRequired = true, EmitDefaultValue = true)]
-        public ValidatorUptimeCollection Validators { get; set; }
+        [DataMember(Name = "from_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector FromLedgerState { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ValidatorAddresses
+        /// </summary>
+        [DataMember(Name = "validator_addresses", EmitDefaultValue = true)]
+        public List<string> ValidatorAddresses { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -140,9 +133,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateValidatorsUptimeResponse {\n");
-            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
-            sb.Append("  Validators: ").Append(Validators).Append("\n");
+            sb.Append("class ValidatorsUptimeRequest {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
+            sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
+            sb.Append("  ValidatorAddresses: ").Append(ValidatorAddresses).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -163,15 +157,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateValidatorsUptimeResponse);
+            return this.Equals(input as ValidatorsUptimeRequest);
         }
 
         /// <summary>
-        /// Returns true if StateValidatorsUptimeResponse instances are equal
+        /// Returns true if ValidatorsUptimeRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateValidatorsUptimeResponse to be compared</param>
+        /// <param name="input">Instance of ValidatorsUptimeRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateValidatorsUptimeResponse input)
+        public bool Equals(ValidatorsUptimeRequest input)
         {
             if (input == null)
             {
@@ -179,14 +173,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.LedgerState == input.LedgerState ||
-                    (this.LedgerState != null &&
-                    this.LedgerState.Equals(input.LedgerState))
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
                 ) && 
                 (
-                    this.Validators == input.Validators ||
-                    (this.Validators != null &&
-                    this.Validators.Equals(input.Validators))
+                    this.FromLedgerState == input.FromLedgerState ||
+                    (this.FromLedgerState != null &&
+                    this.FromLedgerState.Equals(input.FromLedgerState))
+                ) && 
+                (
+                    this.ValidatorAddresses == input.ValidatorAddresses ||
+                    this.ValidatorAddresses != null &&
+                    input.ValidatorAddresses != null &&
+                    this.ValidatorAddresses.SequenceEqual(input.ValidatorAddresses)
                 );
         }
 
@@ -199,13 +199,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.LedgerState != null)
+                if (this.AtLedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
                 }
-                if (this.Validators != null)
+                if (this.FromLedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.Validators.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
+                }
+                if (this.ValidatorAddresses != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValidatorAddresses.GetHashCode();
                 }
                 return hashCode;
             }

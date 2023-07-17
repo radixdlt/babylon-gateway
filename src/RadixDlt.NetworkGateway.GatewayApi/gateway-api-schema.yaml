@@ -555,25 +555,25 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
-  /state/validators/uptime:
+  /statistics/validators/uptime:
     post:
-      operationId: StateValidatorsUptime
+      operationId: ValidatorsUptime
       summary: Get Validators Uptime
       tags:
-        - State
+        - Statistics
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/StateValidatorsUptimeRequest"
+              $ref: "#/components/schemas/ValidatorsUptimeRequest"
       responses:
         "200":
           description: Validators Uptime
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StateValidatorsUptimeResponse"
+                $ref: "#/components/schemas/ValidatorsUptimeResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
@@ -1156,16 +1156,14 @@ components:
         - ScryptoV1
 
     ValidatorUptimeCollection:
-      allOf:
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              type: array
-              items:
-                $ref: "#/components/schemas/ValidatorUptimeCollectionItem"
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidatorUptimeCollectionItem"
     ValidatorUptimeCollectionItem:
       type: object
       required:
@@ -2186,20 +2184,18 @@ components:
             validators:
               $ref: "#/components/schemas/ValidatorCollection"
 
-    StateValidatorsUptimeRequest:
+    ValidatorsUptimeRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
         - type: object
           properties:
             from_ledger_state:
               $ref: "#/components/schemas/LedgerStateSelector"
-            cursor:
-              description: This cursor allows forward pagination, by providing the cursor from the previous request.
-              type: string
-              nullable: true
-      example:
-        at_ledger_state: null
-    StateValidatorsUptimeResponse:
+            validator_addresses:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+    ValidatorsUptimeResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
         - type: object

@@ -95,6 +95,4 @@ public interface IEntityStateQuerier
     Task<GatewayModel.StateNonFungibleDataResponse> NonFungibleIdData(EntityAddress resourceAddress, IList<string> nonFungibleIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
     Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<GatewayModel.StateValidatorsUptimeResponse> StateValidatorsUptime(GatewayModel.StateValidatorsUptimeCursor? cursor, GatewayModel.LedgerState ledgerState, GatewayModel.LedgerState? fromLedgerStateIdentifier, CancellationToken token = default);
 }

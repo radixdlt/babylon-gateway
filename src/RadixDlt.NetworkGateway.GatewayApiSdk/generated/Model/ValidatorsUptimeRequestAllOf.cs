@@ -90,20 +90,20 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateValidatorsUptimeRequestAllOf
+    /// ValidatorsUptimeRequestAllOf
     /// </summary>
-    [DataContract(Name = "StateValidatorsUptimeRequest_allOf")]
-    public partial class StateValidatorsUptimeRequestAllOf : IEquatable<StateValidatorsUptimeRequestAllOf>
+    [DataContract(Name = "ValidatorsUptimeRequest_allOf")]
+    public partial class ValidatorsUptimeRequestAllOf : IEquatable<ValidatorsUptimeRequestAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateValidatorsUptimeRequestAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ValidatorsUptimeRequestAllOf" /> class.
         /// </summary>
         /// <param name="fromLedgerState">fromLedgerState.</param>
-        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
-        public StateValidatorsUptimeRequestAllOf(LedgerStateSelector fromLedgerState = default(LedgerStateSelector), string cursor = default(string))
+        /// <param name="validatorAddresses">validatorAddresses.</param>
+        public ValidatorsUptimeRequestAllOf(LedgerStateSelector fromLedgerState = default(LedgerStateSelector), List<string> validatorAddresses = default(List<string>))
         {
             this.FromLedgerState = fromLedgerState;
-            this.Cursor = cursor;
+            this.ValidatorAddresses = validatorAddresses;
         }
 
         /// <summary>
@@ -113,11 +113,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerStateSelector FromLedgerState { get; set; }
 
         /// <summary>
-        /// This cursor allows forward pagination, by providing the cursor from the previous request.
+        /// Gets or Sets ValidatorAddresses
         /// </summary>
-        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
-        [DataMember(Name = "cursor", EmitDefaultValue = true)]
-        public string Cursor { get; set; }
+        [DataMember(Name = "validator_addresses", EmitDefaultValue = true)]
+        public List<string> ValidatorAddresses { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -126,9 +125,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateValidatorsUptimeRequestAllOf {\n");
+            sb.Append("class ValidatorsUptimeRequestAllOf {\n");
             sb.Append("  FromLedgerState: ").Append(FromLedgerState).Append("\n");
-            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
+            sb.Append("  ValidatorAddresses: ").Append(ValidatorAddresses).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +148,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateValidatorsUptimeRequestAllOf);
+            return this.Equals(input as ValidatorsUptimeRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if StateValidatorsUptimeRequestAllOf instances are equal
+        /// Returns true if ValidatorsUptimeRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateValidatorsUptimeRequestAllOf to be compared</param>
+        /// <param name="input">Instance of ValidatorsUptimeRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateValidatorsUptimeRequestAllOf input)
+        public bool Equals(ValidatorsUptimeRequestAllOf input)
         {
             if (input == null)
             {
@@ -170,9 +169,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.FromLedgerState.Equals(input.FromLedgerState))
                 ) && 
                 (
-                    this.Cursor == input.Cursor ||
-                    (this.Cursor != null &&
-                    this.Cursor.Equals(input.Cursor))
+                    this.ValidatorAddresses == input.ValidatorAddresses ||
+                    this.ValidatorAddresses != null &&
+                    input.ValidatorAddresses != null &&
+                    this.ValidatorAddresses.SequenceEqual(input.ValidatorAddresses)
                 );
         }
 
@@ -189,9 +189,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.FromLedgerState.GetHashCode();
                 }
-                if (this.Cursor != null)
+                if (this.ValidatorAddresses != null)
                 {
-                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ValidatorAddresses.GetHashCode();
                 }
                 return hashCode;
             }

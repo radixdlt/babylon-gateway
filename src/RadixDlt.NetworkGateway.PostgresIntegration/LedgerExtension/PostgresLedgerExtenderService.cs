@@ -747,7 +747,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var accountResourceDepositRuleHistoryToAdd = new List<AccountResourceDepositRuleHistory>();
         var accessRulesChangePointers = new Dictionary<AccessRulesChangePointerLookup, AccessRulesChangePointer>();
         var accessRulesChanges = new List<AccessRulesChangePointerLookup>();
-        var validatorUptimeToAdd = new List<ValidatorUptime>();
+        var validatorUptimeToAdd = new List<ValidatorEmissions>();
 
         // step: scan all substates to figure out changes
         {
@@ -1057,12 +1057,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         var eventEmitterEntity = referencedEntities.Get((EntityAddress)methodEventEmitter.Entity.EntityAddress);
                         using var decodedEvent = EventDecoder.DecodeEvent(@event, _networkConfigurationProvider.GetNetworkId());
 
-                        if (EventDecoder.TryGetValidatorUptimeEvent(decodedEvent, out var validatorUptimeEvent))
+                        if (EventDecoder.TryGetValidatorEmissionsAppliedEvent(decodedEvent, out var validatorUptimeEvent))
                         {
-                            var uptime = new ValidatorUptime
+                            var uptime = new ValidatorEmissions
                             {
-                                Id = sequences.ValidatorUptimeSequence++,
-                                FromStateVersion = stateVersion,
+                                Id = sequences.ValidatorEmissionsSequence++,
                                 ValidatorEntityId = eventEmitterEntity.DatabaseId,
                                 EpochNumber = (long)validatorUptimeEvent.epoch,
                                 ProposalsMade = (long)validatorUptimeEvent.proposalsMade,
@@ -1770,7 +1769,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyPackageBlueprintHistory(packageBlueprintHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyAccountDefaultDepositRuleHistory(accountDefaultDepositRuleHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountResourceDepositRuleHistory(accountResourceDepositRuleHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyValidatorUptime(validatorUptimeToAdd, token);
+            rowsInserted += await writeHelper.CopyValidatorEmissions(validatorUptimeToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);
 
             dbWriteDuration += sw.Elapsed;

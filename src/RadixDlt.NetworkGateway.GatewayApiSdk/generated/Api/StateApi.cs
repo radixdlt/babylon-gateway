@@ -298,24 +298,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="stateValidatorsListRequest"></param>
         /// <returns>ApiResponse of StateValidatorsListResponse</returns>
         ApiResponse<StateValidatorsListResponse> StateValidatorsListWithHttpInfo(StateValidatorsListRequest stateValidatorsListRequest);
-        /// <summary>
-        /// Get Validators Uptime
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateValidatorsUptimeRequest"></param>
-        /// <returns>StateValidatorsUptimeResponse</returns>
-        StateValidatorsUptimeResponse StateValidatorsUptime(StateValidatorsUptimeRequest stateValidatorsUptimeRequest);
-
-        /// <summary>
-        /// Get Validators Uptime
-        /// </summary>
-        /// <remarks>
-        /// 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateValidatorsUptimeRequest"></param>
-        /// <returns>ApiResponse of StateValidatorsUptimeResponse</returns>
-        ApiResponse<StateValidatorsUptimeResponse> StateValidatorsUptimeWithHttpInfo(StateValidatorsUptimeRequest stateValidatorsUptimeRequest);
         #endregion Synchronous Operations
     }
 
@@ -555,29 +537,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (StateValidatorsListResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<StateValidatorsListResponse>> StateValidatorsListWithHttpInfoAsync(StateValidatorsListRequest stateValidatorsListRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-        /// <summary>
-        /// Get Validators Uptime
-        /// </summary>
-        /// <remarks>
-        /// 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateValidatorsUptimeRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of StateValidatorsUptimeResponse</returns>
-        System.Threading.Tasks.Task<StateValidatorsUptimeResponse> StateValidatorsUptimeAsync(StateValidatorsUptimeRequest stateValidatorsUptimeRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-        /// <summary>
-        /// Get Validators Uptime
-        /// </summary>
-        /// <remarks>
-        /// 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateValidatorsUptimeRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (StateValidatorsUptimeResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<StateValidatorsUptimeResponse>> StateValidatorsUptimeWithHttpInfoAsync(StateValidatorsUptimeRequest stateValidatorsUptimeRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -1955,123 +1914,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("StateValidatorsList", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Get Validators Uptime 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateValidatorsUptimeRequest"></param>
-        /// <returns>StateValidatorsUptimeResponse</returns>
-        public StateValidatorsUptimeResponse StateValidatorsUptime(StateValidatorsUptimeRequest stateValidatorsUptimeRequest)
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateValidatorsUptimeResponse> localVarResponse = StateValidatorsUptimeWithHttpInfo(stateValidatorsUptimeRequest);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get Validators Uptime 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateValidatorsUptimeRequest"></param>
-        /// <returns>ApiResponse of StateValidatorsUptimeResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateValidatorsUptimeResponse> StateValidatorsUptimeWithHttpInfo(StateValidatorsUptimeRequest stateValidatorsUptimeRequest)
-        {
-            // verify the required parameter 'stateValidatorsUptimeRequest' is set
-            if (stateValidatorsUptimeRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateValidatorsUptimeRequest' when calling StateApi->StateValidatorsUptime");
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = stateValidatorsUptimeRequest;
-
-
-            // make the HTTP request
-            var localVarResponse = this.Client.Post<StateValidatorsUptimeResponse>("/state/validators/uptime", localVarRequestOptions, this.Configuration);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("StateValidatorsUptime", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Get Validators Uptime 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateValidatorsUptimeRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of StateValidatorsUptimeResponse</returns>
-        public async System.Threading.Tasks.Task<StateValidatorsUptimeResponse> StateValidatorsUptimeAsync(StateValidatorsUptimeRequest stateValidatorsUptimeRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateValidatorsUptimeResponse> localVarResponse = await StateValidatorsUptimeWithHttpInfoAsync(stateValidatorsUptimeRequest, cancellationToken).ConfigureAwait(false);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get Validators Uptime 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="stateValidatorsUptimeRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (StateValidatorsUptimeResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateValidatorsUptimeResponse>> StateValidatorsUptimeWithHttpInfoAsync(StateValidatorsUptimeRequest stateValidatorsUptimeRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            // verify the required parameter 'stateValidatorsUptimeRequest' is set
-            if (stateValidatorsUptimeRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateValidatorsUptimeRequest' when calling StateApi->StateValidatorsUptime");
-
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = stateValidatorsUptimeRequest;
-
-
-            // make the HTTP request
-
-            var localVarResponse = await this.AsynchronousClient.PostAsync<StateValidatorsUptimeResponse>("/state/validators/uptime", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("StateValidatorsUptime", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

@@ -62,30 +62,75 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Dapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-[Table("validator_uptime")]
-internal class ValidatorUptime
+internal class ValidatorQuerier : IValidatorQuerier
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    private record ValidatorUptimeViewModel(long ValidatorId,  EntityAddress ValidatorAddress, long? ProposalsMadeSum, long? ProposalsMissedSum, long EpochsActiveIn);
 
-    [Column("validator_entity_id")]
-    public long ValidatorEntityId { get; set; }
+    private readonly ReadOnlyDbContext _dbContext;
 
-    [Column("epoch_number")]
-    public long EpochNumber { get; set; }
+    public ValidatorQuerier(ReadOnlyDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
-    [Column("proposals_made")]
-    public long ProposalsMade { get; set; }
+    public async Task<GatewayModel.ValidatorsUptimeResponse> ValidatorsUptimeStatistics(IList<EntityAddress> validatorAddresses, GatewayModel.LedgerState ledgerState,
+        GatewayModel.LedgerState? fromLedgerState, CancellationToken token = default)
+    {
+        var cd = new CommandDefinition(
+            commandText: @"
+WITH
+    variables (validator_address) AS (SELECT UNNEST(@validatorAddresses))
+SELECT
+    e.id AS ValidatorId,
+    e.address AS ValidatorAddress,
+    SUM(proposals_made)::bigint AS proposalsMadeSum,
+    SUM(proposals_missed)::bigint AS proposalsMissedSum,
+    COUNT(*) AS epochsActiveIn
+FROM variables
+INNER JOIN entities e ON e.address = variables.validator_address AND e.from_state_version <= @stateVersion
+LEFT JOIN validator_emissions ve on ve.validator_entity_id = e.id AND ve.epoch_number BETWEEN @epochFrom AND @epochTo
+GROUP BY (e.id, e.address)
+;",
+            parameters: new
+            {
+                validatorAddresses = validatorAddresses.Select(x => x.ToString()).ToList(),
+                stateVersion = ledgerState.StateVersion,
+                epochTo = ledgerState.Epoch,
+                epochFrom = fromLedgerState?.Epoch ?? 0,
+            },
+            cancellationToken: token);
 
-    [Column("proposals_missed")]
-    public long ProposalsMissed { get; set; }
+        var validatorUptime = (await _dbContext.Database.GetDbConnection().QueryAsync<ValidatorUptimeViewModel>(cd)).ToList();
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+        var items = validatorUptime
+            .Select(x => new GatewayModel.ValidatorUptimeCollectionItem(x.ValidatorAddress, x.ProposalsMadeSum, x.ProposalsMissedSum, x.EpochsActiveIn))
+            .ToList();
+
+        return new GatewayModel.ValidatorsUptimeResponse(ledgerState, new GatewayModel.ValidatorUptimeCollection(items));
+    }
 }

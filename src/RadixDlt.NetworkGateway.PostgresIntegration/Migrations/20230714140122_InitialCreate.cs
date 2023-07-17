@@ -540,6 +540,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "validator_emissions",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    validator_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    epoch_number = table.Column<long>(type: "bigint", nullable: false),
+                    proposals_made = table.Column<long>(type: "bigint", nullable: false),
+                    proposals_missed = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_validator_emissions", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "validator_public_key_history",
                 columns: table => new
                 {
@@ -553,23 +569,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_validator_public_key_history", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "validator_uptime",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    validator_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    epoch_number = table.Column<long>(type: "bigint", nullable: false),
-                    proposals_made = table.Column<long>(type: "bigint", nullable: false),
-                    proposals_missed = table.Column<long>(type: "bigint", nullable: false),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_validator_uptime", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -780,6 +779,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 column: "validator_public_key_history_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_validator_emissions_validator_entity_id_epoch_number",
+                table: "validator_emissions",
+                columns: new[] { "validator_entity_id", "epoch_number" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_validator_public_key_history_validator_entity_id_from_state~",
                 table: "validator_public_key_history",
                 columns: new[] { "validator_entity_id", "from_state_version" });
@@ -788,11 +792,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_validator_public_key_history_validator_entity_id_key_type_k~",
                 table: "validator_public_key_history",
                 columns: new[] { "validator_entity_id", "key_type", "key" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_validator_uptime_validator_entity_id_from_state_version_epo~",
-                table: "validator_uptime",
-                columns: new[] { "validator_entity_id", "from_state_version", "epoch_number" });
         }
 
         /// <inheritdoc />
@@ -871,7 +870,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "validator_active_set_history");
 
             migrationBuilder.DropTable(
-                name: "validator_uptime");
+                name: "validator_emissions");
 
             migrationBuilder.DropTable(
                 name: "validator_public_key_history");

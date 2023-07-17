@@ -72,7 +72,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 public static class EventDecoder
 {
-    public static bool TryGetValidatorUptimeEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out ToolkitModel.ValidatorEmissionAppliedEvent? unwrappedEvent)
+    public static bool TryGetValidatorEmissionsAppliedEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out ToolkitModel.ValidatorEmissionAppliedEvent? unwrappedEvent)
     {
         unwrappedEvent = (((typedNativeEvent as ToolkitModel.TypedNativeEvent.ConsensusManager)?.value as ToolkitModel.TypedConsensusManagerPackageEvent.Validator)?.value as
             ToolkitModel.TypedValidatorBlueprintEvent.ValidatorEmissionAppliedEventValue)?.value;

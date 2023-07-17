@@ -90,35 +90,48 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ValidatorUptimeCollectionAllOf
+    /// ValidatorsUptimeResponse
     /// </summary>
-    [DataContract(Name = "ValidatorUptimeCollection_allOf")]
-    public partial class ValidatorUptimeCollectionAllOf : IEquatable<ValidatorUptimeCollectionAllOf>
+    [DataContract(Name = "ValidatorsUptimeResponse")]
+    public partial class ValidatorsUptimeResponse : IEquatable<ValidatorsUptimeResponse>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ValidatorUptimeCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ValidatorsUptimeResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ValidatorUptimeCollectionAllOf() { }
+        protected ValidatorsUptimeResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ValidatorUptimeCollectionAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ValidatorsUptimeResponse" /> class.
         /// </summary>
-        /// <param name="items">items (required).</param>
-        public ValidatorUptimeCollectionAllOf(List<ValidatorUptimeCollectionItem> items = default(List<ValidatorUptimeCollectionItem>))
+        /// <param name="ledgerState">ledgerState (required).</param>
+        /// <param name="validators">validators (required).</param>
+        public ValidatorsUptimeResponse(LedgerState ledgerState = default(LedgerState), ValidatorUptimeCollection validators = default(ValidatorUptimeCollection))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
             {
-                throw new ArgumentNullException("items is a required property for ValidatorUptimeCollectionAllOf and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for ValidatorsUptimeResponse and cannot be null");
             }
-            this.Items = items;
+            this.LedgerState = ledgerState;
+            // to ensure "validators" is required (not null)
+            if (validators == null)
+            {
+                throw new ArgumentNullException("validators is a required property for ValidatorsUptimeResponse and cannot be null");
+            }
+            this.Validators = validators;
         }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// Gets or Sets LedgerState
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<ValidatorUptimeCollectionItem> Items { get; set; }
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Validators
+        /// </summary>
+        [DataMember(Name = "validators", IsRequired = true, EmitDefaultValue = true)]
+        public ValidatorUptimeCollection Validators { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +140,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ValidatorUptimeCollectionAllOf {\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class ValidatorsUptimeResponse {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
+            sb.Append("  Validators: ").Append(Validators).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +163,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ValidatorUptimeCollectionAllOf);
+            return this.Equals(input as ValidatorsUptimeResponse);
         }
 
         /// <summary>
-        /// Returns true if ValidatorUptimeCollectionAllOf instances are equal
+        /// Returns true if ValidatorsUptimeResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of ValidatorUptimeCollectionAllOf to be compared</param>
+        /// <param name="input">Instance of ValidatorsUptimeResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ValidatorUptimeCollectionAllOf input)
+        public bool Equals(ValidatorsUptimeResponse input)
         {
             if (input == null)
             {
@@ -165,10 +179,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
+                ) && 
+                (
+                    this.Validators == input.Validators ||
+                    (this.Validators != null &&
+                    this.Validators.Equals(input.Validators))
                 );
         }
 
@@ -181,9 +199,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Items != null)
+                if (this.LedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                }
+                if (this.Validators != null)
+                {
+                    hashCode = (hashCode * 59) + this.Validators.GetHashCode();
                 }
                 return hashCode;
             }

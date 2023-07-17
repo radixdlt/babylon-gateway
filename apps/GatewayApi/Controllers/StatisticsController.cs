@@ -62,23 +62,31 @@
  * permissions under this License.
  */
 
-using System.Runtime.Serialization;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+namespace GatewayApi.Controllers;
 
-[DataContract]
-public sealed record StateValidatorsUptimeCursor(long? StateVersionBoundary)
+[ApiController]
+[Route("statistics")]
+[ServiceFilter(typeof(ExceptionFilter))]
+[ServiceFilter(typeof(InvalidModelStateFilter))]
+public class StatisticsController : ControllerBase
 {
-    [DataMember(Name = "v", EmitDefaultValue = false)]
-    public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
+    private readonly IValidatorHandler _validatorStateHandler;
 
-    public static StateValidatorsUptimeCursor FromCursorString(string cursorString)
+    public StatisticsController(IValidatorHandler validatorStateHandler)
     {
-        return Serializations.FromBase64JsonOrDefault<StateValidatorsUptimeCursor>(cursorString);
+        _validatorStateHandler = validatorStateHandler;
     }
 
-    public string ToCursorString()
+    [HttpPost("validators/uptime")]
+    public async Task<GatewayModel.ValidatorsUptimeResponse> Uptime(GatewayModel.ValidatorsUptimeRequest request, CancellationToken token)
     {
-        return Serializations.AsBase64Json(this);
+        return await _validatorStateHandler.Uptime(request, token);
     }
 }
