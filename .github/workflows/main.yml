@@ -60,7 +60,7 @@ jobs:
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "private-babylon-ng-database-migrations"
-      tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}
+      tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}-amd64
       context: "."
       dockerfile: "./apps/DatabaseMigrations/Dockerfile"
       platforms: "linux/amd64"
@@ -74,11 +74,11 @@ jobs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
-      runs_on: babylon-node-arm
+      runs_on: babylon-gateway-arm
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "private-babylon-ng-database-migrations"
-      tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}
+      tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}-arm64
       context: "."
       dockerfile: "./apps/DatabaseMigrations/Dockerfile"
       platforms: "linux/arm64"
@@ -96,16 +96,31 @@ jobs:
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "private-babylon-ng-data-aggregator"
-      tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}
+      tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}-amd64
       context: "."
       dockerfile: "./apps/DataAggregator/Dockerfile"
       platforms: "linux/amd64"
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
-    secrets:
-      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
-      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+  docker-data-aggregator-arm:
+    name: (DataAggregator) Docker
+    needs:
+      - setup-tags
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    with:
+      runs_on: babylon-gateway-arm
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "private-babylon-ng-data-aggregator"
+      tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}-arm64
+      context: "."
+      dockerfile: "./apps/DataAggregator/Dockerfile"
+      platforms: "linux/amd64"
+      restore_artifact: "true"
+      artifact_location: "./"
+      artifact_name: build_props
 
   docker-gateway-api-private:
     name: (GatewayApi) Docker
@@ -117,16 +132,77 @@ jobs:
       image_registry: "docker.io"
       image_organization: "radixdlt"
       image_name: "private-babylon-ng-gateway-api"
-      tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}
+      tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}-amd64
       context: "."
       dockerfile: "./apps/GatewayApi/Dockerfile"
       platforms: "linux/amd64"
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
+
+  docker-gateway-api-private-arm:
+    name: (GatewayApi) Docker
+    needs:
+      - setup-tags
+    uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
+    with:
+      runs_on: babylon-gateway-arm
+      image_registry: "docker.io"
+      image_organization: "radixdlt"
+      image_name: "private-babylon-ng-gateway-api"
+      tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}-arm64
+      context: "."
+      dockerfile: "./apps/GatewayApi/Dockerfile"
+      platforms: "linux/amd64"
+      restore_artifact: "true"
+      artifact_location: "./"
+      artifact_name: build_props
+
+  join-gateway-images:
+    needs:
+      - setup-tags
+      - docker-gateway-api-private
+      - docker-gateway-api-private-arm
+    uses: radixdlt/public-iac-resuable-artifacts/merge-docker-images@merge-image-workflow
+    with: 
+      image_name: private-babylon-ng-gateway-api
+      image_tag: ${{ needs.setup-tags.outputs.gateway-api-tag }}
+      tag_suffix_1: amd64
+      tag_suffix_2: arm64
+      aws_dockerhub_secret: github-actions/common/dockerhub-credentials
     secrets:
-      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
-      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      role-to-assume: arn:aws:iam::308190735829:role/gh-common-secrets-read-access
+
+  join-aggregator-images:
+    needs:
+      - setup-tags
+      - docker-data-aggregator
+      - docker-data-aggregator-arm
+    uses: radixdlt/public-iac-resuable-artifacts/merge-docker-images@merge-image-workflow
+    with: 
+      image_name: private-babylon-ng-data-aggregator
+      image_tag: ${{ needs.setup-tags.outputs.data-aggregator-tag }}
+      tag_suffix_1: amd64
+      tag_suffix_2: arm64
+      aws_dockerhub_secret: github-actions/common/dockerhub-credentials
+    secrets:
+      role-to-assume: arn:aws:iam::308190735829:role/gh-common-secrets-read-access
+  
+    join-aggregator-images:
+      needs:
+        - setup-tags
+        - docker-database-migrations-private
+        - docker-database-migrations-private-arm
+      uses: radixdlt/public-iac-resuable-artifacts/merge-docker-images@merge-image-workflow
+      with: 
+        image_name: private-babylon-ng-database-migrations
+        image_tag: ${{ needs.setup-tags.outputs.database-migrations-tag }}
+        tag_suffix_1: amd64
+        tag_suffix_2: arm64
+        aws_dockerhub_secret: github-actions/common/dockerhub-credentials
+      secrets:
+        role-to-assume: arn:aws:iam::308190735829:role/gh-common-secrets-read-access
+
 
   deploy-on-mardunet:
     runs-on: ubuntu-22.04
