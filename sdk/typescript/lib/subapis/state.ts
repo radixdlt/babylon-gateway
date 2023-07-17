@@ -34,6 +34,14 @@ export type NonFungibleResourcesVaultCollection = ReplaceProperty<
   NonFungibleResourcesCollectionItemVaultAggregated[]
 >
 
+export type StateEntityDetailsOptions = {
+  explicitMetadata?: string[]
+  ancestorIdentities?: true
+  nonFungibleIncludeNfids?: false
+  packageRoyaltyVaultBalance?: true
+  componentRoyaltyVaultBalance?: true
+}
+
 export type StateEntityDetailsVaultResponseItem =
   StateEntityDetailsResponseItem & {
     fungible_resources: FungibleResourcesVaultCollection
@@ -61,13 +69,16 @@ export class State {
    * console.log(entities[0].fungible_resources.items, entities[0].non_fungible_resources.items)
    */
   async getEntityDetailsVaultAggregated(
-    addresses: string
+    addresses: string,
+    options?: StateEntityDetailsOptions
   ): Promise<StateEntityDetailsVaultResponseItem>
   async getEntityDetailsVaultAggregated(
-    addresses: string[]
+    addresses: string[],
+    options?: StateEntityDetailsOptions
   ): Promise<StateEntityDetailsVaultResponseItem[]>
   async getEntityDetailsVaultAggregated(
-    addresses: string[] | string
+    addresses: string[] | string,
+    options?: StateEntityDetailsOptions
   ): Promise<
     StateEntityDetailsVaultResponseItem[] | StateEntityDetailsVaultResponseItem
   > {
@@ -84,6 +95,15 @@ export class State {
       stateEntityDetailsRequest: {
         addresses: isArray ? addresses : [addresses],
         aggregation_level: ResourceAggregationLevel.Vault,
+        opt_ins: {
+          ancestor_identities: options?.ancestorIdentities ?? false,
+          component_royalty_vault_balance:
+            options?.componentRoyaltyVaultBalance ?? false,
+          package_royalty_vault_balance:
+            options?.packageRoyaltyVaultBalance ?? false,
+          non_fungible_include_nfids: options?.nonFungibleIncludeNfids ?? true,
+          explicit_metadata: options?.explicitMetadata ?? [],
+        },
       },
     })
     return isArray
