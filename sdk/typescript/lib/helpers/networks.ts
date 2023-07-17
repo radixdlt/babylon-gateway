@@ -20,7 +20,13 @@ export const RadixNetwork = {
 
 export const RadixNetworkConfig: Partial<
   Record<
-    'RCnetV1' | 'RCnetV2' | 'Kisharnet' | 'Ansharnet' | 'Gilganet' | 'Enkinet' | 'Hammunet' | ,
+    | 'RCnetV1'
+    | 'RCnetV2'
+    | 'Kisharnet'
+    | 'Ansharnet'
+    | 'Gilganet'
+    | 'Enkinet'
+    | 'Hammunet',
     {
       networkId: (typeof RadixNetwork)[keyof typeof RadixNetwork]
       gatewayUrl: string
@@ -36,20 +42,17 @@ export const RadixNetworkConfig: Partial<
   RCnetV2: {
     networkId: RadixNetwork.RCnetV2,
     gatewayUrl: 'https://ansharnet-gateway.radixdlt.com',
-    dashboardUrl:
-      'https://rcnet-v2-dashboard.radixdlt.com/',
+    dashboardUrl: 'https://rcnet-v2-dashboard.radixdlt.com/',
   },
   Kisharnet: {
     networkId: RadixNetwork.Kisharnet,
     gatewayUrl: 'https://kisharnet-gateway.radixdlt.com/',
-    dashboardUrl:
-      'https://kisharnet-dashboard.radixdlt.com/',
+    dashboardUrl: 'https://kisharnet-dashboard.radixdlt.com/',
   },
   Ansharnet: {
     networkId: RadixNetwork.Ansharnet,
     gatewayUrl: 'https://ansharnet-gateway.radixdlt.com/',
-    dashboardUrl:
-      'https://ansharnet-dashboard.radixdlt.com/',
+    dashboardUrl: 'https://ansharnet-dashboard.radixdlt.com/',
   },
   Gilganet: {
     networkId: RadixNetwork.Gilganet,
