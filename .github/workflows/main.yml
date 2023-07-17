@@ -51,7 +51,7 @@ jobs:
           retention-days: 1
 
   docker-database-migrations-private:
-    name: (DatabaseMigrations) Docker
+    name: AMD Migration
     needs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
@@ -69,7 +69,7 @@ jobs:
       artifact_name: build_props
   
   docker-database-migrations-private-arm:
-    name: (DatabaseMigrations) Docker
+    name: ARM Migration
     needs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
@@ -87,7 +87,7 @@ jobs:
       artifact_name: build_props
 
   docker-data-aggregator-private:
-    name: (DataAggregator) Docker
+    name: AMD Aggregator
     needs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
@@ -105,7 +105,7 @@ jobs:
       artifact_name: build_props
 
   docker-data-aggregator-private-arm:
-    name: (DataAggregator) Docker
+    name: ARM Aggregator
     needs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
@@ -123,7 +123,7 @@ jobs:
       artifact_name: build_props
 
   docker-gateway-api-private:
-    name: (GatewayApi) Docker
+    name: AMD Gateway
     needs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
@@ -141,7 +141,7 @@ jobs:
       artifact_name: build_props
 
   docker-gateway-api-private-arm:
-    name: (GatewayApi) Docker
+    name: ARM Gateway
     needs:
       - setup-tags
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
@@ -159,6 +159,7 @@ jobs:
       artifact_name: build_props
 
   join-gateway-images:
+    name: Join Gateway
     needs:
       - setup-tags
       - docker-gateway-api-private
@@ -174,6 +175,7 @@ jobs:
       role-to-assume: arn:aws:iam::308190735829:role/gh-common-secrets-read-access
 
   join-aggregator-images:
+    name: Join Aggregator
     needs:
       - setup-tags
       - docker-data-aggregator-private
@@ -189,6 +191,7 @@ jobs:
       role-to-assume: arn:aws:iam::308190735829:role/gh-common-secrets-read-access
   
   join-migrations-images:
+    name: Join Migration
     needs:
       - setup-tags
       - docker-database-migrations-private
