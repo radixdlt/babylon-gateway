@@ -104,7 +104,7 @@ jobs:
       artifact_location: "./"
       artifact_name: build_props
 
-  docker-data-aggregator-arm:
+  docker-data-aggregator-private-arm:
     name: (DataAggregator) Docker
     needs:
       - setup-tags
@@ -176,8 +176,8 @@ jobs:
   join-aggregator-images:
     needs:
       - setup-tags
-      - docker-data-aggregator
-      - docker-data-aggregator-arm
+      - docker-data-aggregator-private
+      - docker-data-aggregator-private-arm
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/merge-docker-images.yml@merge-image-workflow
     with: 
       image_name: private-babylon-ng-data-aggregator
