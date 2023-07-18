@@ -62,83 +62,75 @@
  * permissions under this License.
  */
 
+using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Configuration;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-internal interface IComponentSchemaProvider
+internal class ValidatorQuerier : IValidatorQuerier
 {
-    ValueTask<EventTypeIdentifiers> GetEventTypeIdentifiers();
+    private record ValidatorUptimeViewModel(long ValidatorId,  EntityAddress ValidatorAddress, long? ProposalsMadeSum, long? ProposalsMissedSum, long EpochsActiveIn);
 
-    Task SaveComponentSchema(ComponentSchema componentSchema, CancellationToken token);
-}
+    private readonly ReadOnlyDbContext _dbContext;
 
-internal class ComponentSchemaProvider : IComponentSchemaProvider
-{
-    private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
-
-    private readonly object _writeLock = new();
-    private ComponentSchema? _capturedComponentSchema;
-
-    public ComponentSchemaProvider(IDbContextFactory<ReadWriteDbContext> dbContextFactory)
+    public ValidatorQuerier(ReadOnlyDbContext dbContext)
     {
-        _dbContextFactory = dbContextFactory;
+        _dbContext = dbContext;
     }
 
-    public async ValueTask<EventTypeIdentifiers> GetEventTypeIdentifiers()
+    public async Task<GatewayModel.ValidatorsUptimeResponse> ValidatorsUptimeStatistics(IList<EntityAddress> validatorAddresses, GatewayModel.LedgerState ledgerState,
+        GatewayModel.LedgerState? fromLedgerState, CancellationToken token = default)
     {
-        return (await GetCapturedComponentSchema()).EventTypeIdentifiers;
-    }
-
-    public async Task SaveComponentSchema(ComponentSchema componentSchema, CancellationToken token)
-    {
-        EnsureComponentSchemaCaptured(componentSchema);
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
-
-        if (!await dbContext.ComponentSchema.AnyAsync(token))
-        {
-            dbContext.ComponentSchema.Add(await GetCapturedComponentSchema());
-        }
-
-        await dbContext.SaveChangesAsync(token);
-    }
-
-    private async ValueTask<ComponentSchema> GetCapturedComponentSchema()
-    {
-        if (_capturedComponentSchema != null)
-        {
-            return _capturedComponentSchema;
-        }
-
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        var componentSchema = await dbContext.ComponentSchema.FirstOrDefaultAsync();
-
-        if (componentSchema == null)
-        {
-            throw new ConfigurationException("Config hasn't been captured from genesis transaction yet and/or is not stored in our database.");
-        }
-
-        EnsureComponentSchemaCaptured(componentSchema);
-
-        return componentSchema;
-    }
-
-    private void EnsureComponentSchemaCaptured(ComponentSchema componentSchema)
-    {
-        lock (_writeLock)
-        {
-            if (_capturedComponentSchema != null)
+        var cd = new CommandDefinition(
+            commandText: @"
+WITH
+    variables (validator_address) AS (SELECT UNNEST(@validatorAddresses))
+SELECT
+    e.id AS ValidatorId,
+    e.address AS ValidatorAddress,
+    SUM(proposals_made)::bigint AS proposalsMadeSum,
+    SUM(proposals_missed)::bigint AS proposalsMissedSum,
+    COUNT(*) AS epochsActiveIn
+FROM variables
+INNER JOIN entities e ON e.address = variables.validator_address AND e.from_state_version <= @stateVersion
+LEFT JOIN validator_emissions ve on ve.validator_entity_id = e.id AND ve.epoch_number BETWEEN @epochFrom AND @epochTo
+GROUP BY (e.id, e.address)
+;",
+            parameters: new
             {
-                return;
-            }
+                validatorAddresses = validatorAddresses.Select(x => x.ToString()).ToList(),
+                stateVersion = ledgerState.StateVersion,
+                epochTo = ledgerState.Epoch,
+                epochFrom = fromLedgerState?.Epoch ?? 0,
+            },
+            cancellationToken: token);
 
-            _capturedComponentSchema = componentSchema;
-        }
+        var validatorUptime = (await _dbContext.Database.GetDbConnection().QueryAsync<ValidatorUptimeViewModel>(cd)).ToList();
+
+        var items = validatorUptime
+            .Select(x => new GatewayModel.ValidatorUptimeCollectionItem(x.ValidatorAddress, x.ProposalsMadeSum, x.ProposalsMissedSum, x.EpochsActiveIn))
+            .ToList();
+
+        return new GatewayModel.ValidatorsUptimeResponse(ledgerState, new GatewayModel.ValidatorUptimeCollection(items));
     }
 }

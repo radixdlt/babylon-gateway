@@ -580,7 +580,8 @@ SELECT
     nextval('ledger_transaction_markers_id_seq') AS LedgerTransactionMarkerSequence,
     nextval('package_blueprint_history_id_seq') AS PackageBlueprintHistorySequence,
     nextval('package_code_history_id_seq') AS PackageCodeHistorySequence,
-    nextval('package_schema_history_id_seq') AS PackageSchemaHistorySequence",
+    nextval('package_schema_history_id_seq') AS PackageSchemaHistorySequence,
+    nextval('validator_emissions_id_seq') AS ValidatorEmissionsSequence",
             cancellationToken: token);
 
         return await _connection.QueryFirstAsync<SequencesHolder>(cd);

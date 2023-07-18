@@ -694,6 +694,30 @@ internal class WriteHelper
         return entities.Count;
     }
 
+    public async Task<int> CopyValidatorEmissions(ICollection<ValidatorEmissions> entries, CancellationToken token)
+    {
+        if (!entries.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY validator_emissions (id, validator_entity_id,  epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entries)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ValidatorEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EpochNumber, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ProposalsMade, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ProposalsMissed, NpgsqlDbType.Bigint, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entries.Count;
+    }
+
     public async Task<int> CopyAccountResourceDepositRuleHistory(List<AccountResourceDepositRuleHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
@@ -896,7 +920,8 @@ SELECT
     setval('ledger_transaction_markers_id_seq', @ledgerTransactionMarkerSequence),
     setval('package_blueprint_history_id_seq', @packageBlueprintHistorySequence),
     setval('package_code_history_id_seq', @packageCodeHistorySequence),
-    setval('package_schema_history_id_seq', @packageSchemaHistorySequence)",
+    setval('package_schema_history_id_seq', @packageSchemaHistorySequence),
+    setval('validator_emissions_id_seq', @validatorEmissionsSequence)",
             parameters: new
             {
                 accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
@@ -923,6 +948,7 @@ SELECT
                 packageBlueprintHistorySequence = sequences.PackageBlueprintHistorySequence,
                 packageCodeHistorySequence = sequences.PackageCodeHistorySequence,
                 packageSchemaHistorySequence = sequences.PackageSchemaHistorySequence,
+                validatorEmissionsSequence = sequences.ValidatorEmissionsSequence,
             },
             cancellationToken: token);
 

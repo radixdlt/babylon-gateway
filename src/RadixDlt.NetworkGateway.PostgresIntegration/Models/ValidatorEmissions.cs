@@ -62,67 +62,27 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.Services;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public static class GatewayApiBuilderExtensions
+[Table("validator_emissions")]
+internal class ValidatorEmissions
 {
-    public static GatewayApiBuilder AddPostgresPersistence(this GatewayApiBuilder builder)
-    {
-        return builder
-            .AddPostgresPersistenceCore()
-            .AddPostgresPersistenceInitializers()
-            .AddPostgresPersistenceHealthChecks();
-    }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public static GatewayApiBuilder AddPostgresPersistenceCore(this GatewayApiBuilder builder)
-    {
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<IEntityStateQuerier, EntityStateQuerier>()
-            .AddScoped<IValidatorQuerier, ValidatorQuerier>()
-            .AddScoped<IVirtualEntityMetadataProvider, VirtualEntityMetadataProvider>()
-            .AddScoped<ISubmissionTrackingService, SubmissionTrackingService>()
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
+    [Column("validator_entity_id")]
+    public long ValidatorEntityId { get; set; }
 
-        CustomTypes.EnsureConfigured();
+    [Column("epoch_number")]
+    public long EpochNumber { get; set; }
 
-        builder.Services
-            .AddNpgsqlDataSourceHolder<ReadOnlyDbContext>(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName)
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadOnlyDbContext>>().NpgsqlDataSource);
-            })
-            .AddNpgsqlDataSourceHolder<ReadWriteDbContext>(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName)
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadWriteDbContext>>().NpgsqlDataSource);
-            });
+    [Column("proposals_made")]
+    public long ProposalsMade { get; set; }
 
-        return builder;
-    }
-
-    public static GatewayApiBuilder AddPostgresPersistenceInitializers(this GatewayApiBuilder builder)
-    {
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
-
-        return builder;
-    }
-
-    public static GatewayApiBuilder AddPostgresPersistenceHealthChecks(this GatewayApiBuilder builder)
-    {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("readonly_database_connection_check")
-            .AddDbContextCheck<ReadWriteDbContext>("readwrite_database_connection_check");
-
-        return builder;
-    }
+    [Column("proposals_missed")]
+    public long ProposalsMissed { get; set; }
 }

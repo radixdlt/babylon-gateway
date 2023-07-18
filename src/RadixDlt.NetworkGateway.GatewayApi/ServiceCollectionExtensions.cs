@@ -143,6 +143,7 @@ public static class ServiceCollectionExtensions
             .AddScoped<InvalidModelStateFilter>();
 
         services.TryAddScoped<IEntityHandler, DefaultEntityHandler>();
+        services.TryAddScoped<IValidatorHandler, DefaultValidatorHandler>();
         services.TryAddScoped<IStatusHandler, DefaultStatusHandler>();
         services.TryAddScoped<ITransactionHandler, DefaultTransactionHandler>();
         services.TryAddScoped<IValidatorStateHandler, DefaultValidatorStateHandler>();

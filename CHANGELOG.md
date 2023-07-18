@@ -24,7 +24,7 @@ _Release Date: Unreleased_
 - return `pending_xrd_withdraw_vault`, `locked_owner_stake_unit_vault`, `pending_owner_stake_unit_unlock_vault`, `stake_vault` from `/state/validators/list` endpoint.
 - Changed `access_rule_chain` to partially strongly typed `access_rules`.
 - Added package details to `/satus/entity/details` endpoint.
-
+- new endpoint `/statistics/validators/uptime` returns validator uptime data. 
 ### 0.3.1
 
 - Fix `/state/non-fungible/data` to return data for all NFIDs
