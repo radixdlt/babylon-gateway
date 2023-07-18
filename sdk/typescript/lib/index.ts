@@ -9,6 +9,7 @@ import { State } from './subapis/state'
 import { Status, Stream } from './subapis'
 import { Transaction } from './subapis/transaction'
 import { RuntimeConfiguration } from './runtime'
+import { normalizeBasePath } from './helpers/normalize-base-path'
 
 export * from './generated'
 export * from './subapis'
@@ -23,6 +24,10 @@ export type GatewayApiClientSettings = ConfigurationParameters & {
    * Maximum number of NFT IDs that can be queried at once when using /state/non-fungible/data endpoint
    */
   maxNftIdsCount?: number
+  /**
+   * This is only used for statistics purposes. It is not required for any functionality.
+   */
+  dAppDefinitionAddress?: string
 }
 
 export class GatewayApiClient {
@@ -32,8 +37,16 @@ export class GatewayApiClient {
   }
 
   private static constructConfiguration(settings?: GatewayApiClientSettings) {
+    const basePath = normalizeBasePath(settings?.basePath)
     return new RuntimeConfiguration({
       ...settings,
+      basePath,
+      headers: {
+        ...(settings?.headers ?? {}),
+        ...(settings?.dAppDefinitionAddress
+          ? { 'dapp-definition-address': settings.dAppDefinitionAddress }
+          : {}),
+      },
     })
   }
 
