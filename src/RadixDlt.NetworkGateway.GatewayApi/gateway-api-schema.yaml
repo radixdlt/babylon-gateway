@@ -555,6 +555,28 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+  /statistics/validators/uptime:
+    post:
+      operationId: ValidatorsUptime
+      summary: Get Validators Uptime
+      tags:
+        - Statistics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidatorsUptimeRequest"
+      responses:
+        "200":
+          description: Validators Uptime
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidatorsUptimeResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
 components:
   responses:
     ErrorResponse:
@@ -1132,6 +1154,35 @@ components:
       enum:
         - Native
         - ScryptoV1
+
+    ValidatorUptimeCollection:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidatorUptimeCollectionItem"
+    ValidatorUptimeCollectionItem:
+      type: object
+      required:
+        - address
+        - epochs_active_in
+      properties:
+        address:
+          $ref: "#/components/schemas/Address"
+        proposals_made:
+          type: integer
+          format: int64
+          nullable: true
+        proposals_missed:
+          type: integer
+          format: int64
+          nullable: true
+        epochs_active_in:
+          type: integer
+          format: int64
 
     ValidatorCollection:
       allOf:
@@ -2132,6 +2183,27 @@ components:
           properties:
             validators:
               $ref: "#/components/schemas/ValidatorCollection"
+
+    ValidatorsUptimeRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - type: object
+          properties:
+            from_ledger_state:
+              $ref: "#/components/schemas/LedgerStateSelector"
+            validator_addresses:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+    ValidatorsUptimeResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - validators
+          properties:
+            validators:
+              $ref: "#/components/schemas/ValidatorUptimeCollection"
 
     #
     # Errors

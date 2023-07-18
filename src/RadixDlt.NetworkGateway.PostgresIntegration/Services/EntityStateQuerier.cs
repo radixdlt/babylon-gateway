@@ -93,6 +93,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record ValidatorCurrentStakeViewModel(long ValidatorId,  string State, long StateLastUpdatedAtStateVersion, string StakeVaultBalance, long StakeVaultLastUpdatedAtStateVersion, string PendingXrdWithdrawVaultBalance, long PendingXrdWithdrawVaultLastUpdatedAtStateVersion, string LockedOwnerStakeUnitVaultBalance, long LockedOwnerStakeUnitVaultLastUpdatedAtStateVersion, string PendingOwnerStakeUnitUnlockVaultBalance, long PendingOwnerStakeUnitUnlockVaultLastUpdatedAtStateVersion);
 
+    private record ValidatorUptimeViewModel(long ValidatorId,  EntityAddress ValidatorAddress, long? ProposalsMade, long? ProposalsMissed, long EpochsActiveIn);
+
     private record FungibleViewModel(EntityAddress ResourceEntityAddress, string Balance, int ResourcesTotalCount, long LastUpdatedAtStateVersion);
 
     private record RoyaltyVaultBalanceViewModel(long RoyaltyVaultEntityId, string Balance, long OwnerEntityId, long LastUpdatedAtStateVersion);

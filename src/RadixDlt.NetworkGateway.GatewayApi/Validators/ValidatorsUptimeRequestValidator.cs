@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,67 +62,28 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.Services;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public static class GatewayApiBuilderExtensions
+internal class ValidatorsUptimeRequestValidator : AbstractValidator<ValidatorsUptimeRequest>
 {
-    public static GatewayApiBuilder AddPostgresPersistence(this GatewayApiBuilder builder)
+    public ValidatorsUptimeRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot)
     {
-        return builder
-            .AddPostgresPersistenceCore()
-            .AddPostgresPersistenceInitializers()
-            .AddPostgresPersistenceHealthChecks();
-    }
-
-    public static GatewayApiBuilder AddPostgresPersistenceCore(this GatewayApiBuilder builder)
-    {
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<IEntityStateQuerier, EntityStateQuerier>()
-            .AddScoped<IValidatorQuerier, ValidatorQuerier>()
-            .AddScoped<IVirtualEntityMetadataProvider, VirtualEntityMetadataProvider>()
-            .AddScoped<ISubmissionTrackingService, SubmissionTrackingService>()
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
-
-        CustomTypes.EnsureConfigured();
-
-        builder.Services
-            .AddNpgsqlDataSourceHolder<ReadOnlyDbContext>(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName)
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
+        RuleFor(x => x.ValidatorAddresses)
+            .NotEmpty()
+            .DependentRules(() =>
             {
-                options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadOnlyDbContext>>().NpgsqlDataSource);
-            })
-            .AddNpgsqlDataSourceHolder<ReadWriteDbContext>(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName)
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                options.UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSourceHolder<ReadWriteDbContext>>().NpgsqlDataSource);
+                RuleFor(x => x.ValidatorAddresses.Count)
+                    .GreaterThan(0)
+                    .LessThanOrEqualTo(endpointOptionsSnapshot.Value.ValidatorsUptimeMaxPageSize);
+
+                RuleForEach(x => x.ValidatorAddresses)
+                    .NotNull()
+                    .RadixAddress();
             });
-
-        return builder;
-    }
-
-    public static GatewayApiBuilder AddPostgresPersistenceInitializers(this GatewayApiBuilder builder)
-    {
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
-
-        return builder;
-    }
-
-    public static GatewayApiBuilder AddPostgresPersistenceHealthChecks(this GatewayApiBuilder builder)
-    {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("readonly_database_connection_check")
-            .AddDbContextCheck<ReadWriteDbContext>("readwrite_database_connection_check");
-
-        return builder;
     }
 }
