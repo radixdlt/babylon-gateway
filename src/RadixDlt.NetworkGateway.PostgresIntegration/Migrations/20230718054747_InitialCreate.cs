@@ -178,8 +178,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     blueprint_name = table.Column<string>(type: "text", nullable: true),
                     divisibility = table.Column<int>(type: "integer", nullable: true),
                     non_fungible_id_type = table.Column<NonFungibleIdType>(type: "non_fungible_id_type", nullable: true),
-                    code_hash = table.Column<byte[]>(type: "bytea", nullable: true),
-                    code = table.Column<byte[]>(type: "bytea", nullable: true),
                     vm_type = table.Column<PackageVmType>(type: "package_vm_type", nullable: true),
                     stake_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     pending_xrd_withdraw_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
@@ -506,6 +504,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "package_code_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    package_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    code_hash = table.Column<byte[]>(type: "bytea", nullable: false),
+                    code = table.Column<byte[]>(type: "bytea", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_package_code_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "package_schema_history",
                 columns: table => new
                 {
@@ -754,6 +768,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "package_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_package_code_history_package_entity_id_from_state_version",
+                table: "package_code_history",
+                columns: new[] { "package_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_package_schema_history_package_entity_id_from_state_version",
                 table: "package_schema_history",
                 columns: new[] { "package_entity_id", "from_state_version" });
@@ -873,6 +892,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "package_blueprint_history");
+
+            migrationBuilder.DropTable(
+                name: "package_code_history");
 
             migrationBuilder.DropTable(
                 name: "package_schema_history");

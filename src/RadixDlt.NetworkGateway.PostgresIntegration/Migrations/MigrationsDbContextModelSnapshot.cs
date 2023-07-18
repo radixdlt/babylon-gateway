@@ -946,6 +946,40 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("package_blueprint_history");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageCodeHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<byte[]>("Code")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("code");
+
+                    b.Property<byte[]>("CodeHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("code_hash");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("PackageEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("package_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PackageEntityId", "FromStateVersion");
+
+                    b.ToTable("package_code_history");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageSchemaHistory", b =>
                 {
                     b.Property<long>("Id")
@@ -1378,16 +1412,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
-
-                    b.Property<byte[]>("Code")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("code");
-
-                    b.Property<byte[]>("CodeHash")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("code_hash");
 
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()

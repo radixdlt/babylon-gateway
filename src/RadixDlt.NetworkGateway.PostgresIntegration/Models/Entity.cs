@@ -251,12 +251,6 @@ internal class GlobalIdentityEntity : ComponentEntity
 
 internal class GlobalPackageEntity : ComponentEntity
 {
-    [Column("code_hash")]
-    public byte[] CodeHash { get; set; }
-
-    [Column("code")]
-    public byte[] Code { get; set; }
-
     [Column("vm_type")]
     public PackageVmType VmType { get; set; }
 }

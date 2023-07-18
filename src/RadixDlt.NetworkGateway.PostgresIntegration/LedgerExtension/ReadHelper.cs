@@ -579,6 +579,7 @@ SELECT
     nextval('validator_active_set_history_id_seq') AS ValidatorActiveSetHistorySequence,
     nextval('ledger_transaction_markers_id_seq') AS LedgerTransactionMarkerSequence,
     nextval('package_blueprint_history_id_seq') AS PackageBlueprintHistorySequence,
+    nextval('package_code_history_id_seq') AS PackageCodeHistorySequence,
     nextval('package_schema_history_id_seq') AS PackageSchemaHistorySequence",
             cancellationToken: token);
 
