@@ -528,7 +528,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     package_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     schema_hash = table.Column<byte[]>(type: "bytea", nullable: false),
-                    schema = table.Column<string>(type: "jsonb", nullable: false)
+                    schema = table.Column<byte[]>(type: "bytea", nullable: false)
                 },
                 constraints: table =>
                 {

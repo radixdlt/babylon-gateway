@@ -83,6 +83,6 @@ internal class PackageSchemaHistory
     [Column("schema_hash")]
     public byte[] SchemaHash { get; set; }
 
-    [Column("schema", TypeName = "jsonb")]
-    public string Schema { get; set; }
+    [Column("schema")]
+    public byte[] Schema { get; set; }
 }

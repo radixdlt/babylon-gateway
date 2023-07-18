@@ -1011,7 +1011,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 FromStateVersion = stateVersion,
                                 PackageEntityId = referencedEntity.DatabaseId,
                                 SchemaHash = packageSchema.Key.SchemaHash.ConvertFromHex(),
-                                Schema = packageSchema.Value.Schema.SborData.ToJson(),
+                                Schema = packageSchema.Value.Schema.SborData.Hex.ConvertFromHex(),
                             });
                         }
 

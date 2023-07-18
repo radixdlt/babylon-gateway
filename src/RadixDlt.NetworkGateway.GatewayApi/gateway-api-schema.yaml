@@ -1762,7 +1762,7 @@ components:
           required:
             - vm_type
             - code_hash_hex
-            - schema_hash_hex
+            - code_hex
           properties:
             vm_type:
               $ref: "#/components/schemas/PackageVmType"
@@ -1770,10 +1770,6 @@ components:
               $ref: "#/components/schemas/HexString"
             code_hex:
               $ref: "#/components/schemas/HexString"
-            schema_hash_hex:
-              $ref: "#/components/schemas/HexString"
-            schema:
-              type: object
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
             blueprints:
@@ -1832,13 +1828,13 @@ components:
     StateEntityDetailsResponsePackageDetailsSchemaItem:
       type: object
       required:
-        - hash_hex
-        - schema
+        - schema_hash_hex
+        - schema_hex
       properties:
-        hash_hex:
+        schema_hash_hex:
           $ref: "#/components/schemas/HexString"
-        schema:
-          type: object
+        schema_hex:
+          $ref: "#/components/schemas/HexString"
     StateEntityDetailsResponseComponentDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"

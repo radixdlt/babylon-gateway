@@ -82,7 +82,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230718054747_InitialCreate")]
+    [Migration("20230718072005_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1000,9 +1000,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("package_entity_id");
 
-                    b.Property<string>("Schema")
+                    b.Property<byte[]>("Schema")
                         .IsRequired()
-                        .HasColumnType("jsonb")
+                        .HasColumnType("bytea")
                         .HasColumnName("schema");
 
                     b.Property<byte[]>("SchemaHash")

@@ -228,8 +228,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     if (packageSchemaHistory.TryGetValue(pe.Id, out var packageSchemas))
                     {
                         schemas.AddRange(packageSchemas.Select(ps => new GatewayModel.StateEntityDetailsResponsePackageDetailsSchemaItem(
-                            hashHex: ps.SchemaHash.ToHex(),
-                            schema: new JRaw(ps.Schema))));
+                            schemaHashHex: ps.SchemaHash.ToHex(),
+                            schemaHex: ps.Schema.ToHex())));
                     }
 
                     details = new GatewayModel.StateEntityDetailsResponsePackageDetails(
@@ -1759,8 +1759,6 @@ INNER JOIN LATERAL(
     SELECT *
     FROM package_blueprint_history
     WHERE package_entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
-    ORDER BY from_state_version DESC
-    LIMIT 1
 ) pbh ON true")
             .ToListAsync(token))
             .GroupBy(b => b.PackageEntityId)
@@ -1803,8 +1801,6 @@ INNER JOIN LATERAL(
     SELECT *
     FROM package_schema_history
     WHERE package_entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
-    ORDER BY from_state_version DESC
-    LIMIT 1
 ) psh ON true")
             .ToListAsync(token))
             .GroupBy(b => b.PackageEntityId)

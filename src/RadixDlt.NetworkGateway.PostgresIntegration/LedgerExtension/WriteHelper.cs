@@ -860,7 +860,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.PackageEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.SchemaHash, NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(e.Schema, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.Schema, NpgsqlDbType.Bytea, token);
         }
 
         await writer.CompleteAsync(token);

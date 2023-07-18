@@ -111,13 +111,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="vmType">vmType (required).</param>
         /// <param name="codeHashHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="codeHex">Hex-encoded binary blob..</param>
-        /// <param name="schemaHashHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="schema">schema.</param>
+        /// <param name="codeHex">Hex-encoded binary blob. (required).</param>
         /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
         /// <param name="blueprints">blueprints.</param>
         /// <param name="schemas">schemas.</param>
-        public StateEntityDetailsResponsePackageDetailsAllOf(PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string schemaHashHex = default(string), Object schema = default(Object), string royaltyVaultBalance = default(string), StateEntityDetailsResponsePackageDetailsBlueprintCollection blueprints = default(StateEntityDetailsResponsePackageDetailsBlueprintCollection), StateEntityDetailsResponsePackageDetailsSchemaCollection schemas = default(StateEntityDetailsResponsePackageDetailsSchemaCollection))
+        public StateEntityDetailsResponsePackageDetailsAllOf(PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string royaltyVaultBalance = default(string), StateEntityDetailsResponsePackageDetailsBlueprintCollection blueprints = default(StateEntityDetailsResponsePackageDetailsBlueprintCollection), StateEntityDetailsResponsePackageDetailsSchemaCollection schemas = default(StateEntityDetailsResponsePackageDetailsSchemaCollection))
         {
             this.VmType = vmType;
             // to ensure "codeHashHex" is required (not null)
@@ -126,14 +124,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("codeHashHex is a required property for StateEntityDetailsResponsePackageDetailsAllOf and cannot be null");
             }
             this.CodeHashHex = codeHashHex;
-            // to ensure "schemaHashHex" is required (not null)
-            if (schemaHashHex == null)
+            // to ensure "codeHex" is required (not null)
+            if (codeHex == null)
             {
-                throw new ArgumentNullException("schemaHashHex is a required property for StateEntityDetailsResponsePackageDetailsAllOf and cannot be null");
+                throw new ArgumentNullException("codeHex is a required property for StateEntityDetailsResponsePackageDetailsAllOf and cannot be null");
             }
-            this.SchemaHashHex = schemaHashHex;
             this.CodeHex = codeHex;
-            this.Schema = schema;
             this.RoyaltyVaultBalance = royaltyVaultBalance;
             this.Blueprints = blueprints;
             this.Schemas = schemas;
@@ -150,21 +146,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Hex-encoded binary blob.
         /// </summary>
         /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "code_hex", EmitDefaultValue = true)]
+        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
         public string CodeHex { get; set; }
-
-        /// <summary>
-        /// Hex-encoded binary blob.
-        /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "schema_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string SchemaHashHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Schema
-        /// </summary>
-        [DataMember(Name = "schema", EmitDefaultValue = true)]
-        public Object Schema { get; set; }
 
         /// <summary>
         /// String-encoded decimal representing the amount of a related fungible resource.
@@ -196,8 +179,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  VmType: ").Append(VmType).Append("\n");
             sb.Append("  CodeHashHex: ").Append(CodeHashHex).Append("\n");
             sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
-            sb.Append("  SchemaHashHex: ").Append(SchemaHashHex).Append("\n");
-            sb.Append("  Schema: ").Append(Schema).Append("\n");
             sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
             sb.Append("  Blueprints: ").Append(Blueprints).Append("\n");
             sb.Append("  Schemas: ").Append(Schemas).Append("\n");
@@ -251,16 +232,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.CodeHex.Equals(input.CodeHex))
                 ) && 
                 (
-                    this.SchemaHashHex == input.SchemaHashHex ||
-                    (this.SchemaHashHex != null &&
-                    this.SchemaHashHex.Equals(input.SchemaHashHex))
-                ) && 
-                (
-                    this.Schema == input.Schema ||
-                    (this.Schema != null &&
-                    this.Schema.Equals(input.Schema))
-                ) && 
-                (
                     this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
                     (this.RoyaltyVaultBalance != null &&
                     this.RoyaltyVaultBalance.Equals(input.RoyaltyVaultBalance))
@@ -294,14 +265,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.CodeHex != null)
                 {
                     hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
-                }
-                if (this.SchemaHashHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.SchemaHashHex.GetHashCode();
-                }
-                if (this.Schema != null)
-                {
-                    hashCode = (hashCode * 59) + this.Schema.GetHashCode();
                 }
                 if (this.RoyaltyVaultBalance != null)
                 {

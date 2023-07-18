@@ -103,36 +103,37 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsSchemaItem" /> class.
         /// </summary>
-        /// <param name="hashHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="schema">schema (required).</param>
-        public StateEntityDetailsResponsePackageDetailsSchemaItem(string hashHex = default(string), Object schema = default(Object))
+        /// <param name="schemaHashHex">Hex-encoded binary blob. (required).</param>
+        /// <param name="schemaHex">Hex-encoded binary blob. (required).</param>
+        public StateEntityDetailsResponsePackageDetailsSchemaItem(string schemaHashHex = default(string), string schemaHex = default(string))
         {
-            // to ensure "hashHex" is required (not null)
-            if (hashHex == null)
+            // to ensure "schemaHashHex" is required (not null)
+            if (schemaHashHex == null)
             {
-                throw new ArgumentNullException("hashHex is a required property for StateEntityDetailsResponsePackageDetailsSchemaItem and cannot be null");
+                throw new ArgumentNullException("schemaHashHex is a required property for StateEntityDetailsResponsePackageDetailsSchemaItem and cannot be null");
             }
-            this.HashHex = hashHex;
-            // to ensure "schema" is required (not null)
-            if (schema == null)
+            this.SchemaHashHex = schemaHashHex;
+            // to ensure "schemaHex" is required (not null)
+            if (schemaHex == null)
             {
-                throw new ArgumentNullException("schema is a required property for StateEntityDetailsResponsePackageDetailsSchemaItem and cannot be null");
+                throw new ArgumentNullException("schemaHex is a required property for StateEntityDetailsResponsePackageDetailsSchemaItem and cannot be null");
             }
-            this.Schema = schema;
+            this.SchemaHex = schemaHex;
         }
 
         /// <summary>
         /// Hex-encoded binary blob.
         /// </summary>
         /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string HashHex { get; set; }
+        [DataMember(Name = "schema_hash_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string SchemaHashHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets Schema
+        /// Hex-encoded binary blob.
         /// </summary>
-        [DataMember(Name = "schema", IsRequired = true, EmitDefaultValue = true)]
-        public Object Schema { get; set; }
+        /// <value>Hex-encoded binary blob.</value>
+        [DataMember(Name = "schema_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string SchemaHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,8 +143,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityDetailsResponsePackageDetailsSchemaItem {\n");
-            sb.Append("  HashHex: ").Append(HashHex).Append("\n");
-            sb.Append("  Schema: ").Append(Schema).Append("\n");
+            sb.Append("  SchemaHashHex: ").Append(SchemaHashHex).Append("\n");
+            sb.Append("  SchemaHex: ").Append(SchemaHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -180,14 +181,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.HashHex == input.HashHex ||
-                    (this.HashHex != null &&
-                    this.HashHex.Equals(input.HashHex))
+                    this.SchemaHashHex == input.SchemaHashHex ||
+                    (this.SchemaHashHex != null &&
+                    this.SchemaHashHex.Equals(input.SchemaHashHex))
                 ) && 
                 (
-                    this.Schema == input.Schema ||
-                    (this.Schema != null &&
-                    this.Schema.Equals(input.Schema))
+                    this.SchemaHex == input.SchemaHex ||
+                    (this.SchemaHex != null &&
+                    this.SchemaHex.Equals(input.SchemaHex))
                 );
         }
 
@@ -200,13 +201,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.HashHex != null)
+                if (this.SchemaHashHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.HashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SchemaHashHex.GetHashCode();
                 }
-                if (this.Schema != null)
+                if (this.SchemaHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Schema.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SchemaHex.GetHashCode();
                 }
                 return hashCode;
             }
