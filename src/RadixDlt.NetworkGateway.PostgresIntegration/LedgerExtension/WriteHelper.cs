@@ -96,7 +96,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, divisibility, non_fungible_id_type, code_hash, code, vm_type, schema_hash, schema, stake_vault_entity_id, pending_xrd_withdraw_vault_entity_id, locked_owner_stake_unit_vault_entity_id, pending_owner_stake_unit_unlock_vault_entity_id, resource_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entities, discriminator, package_id, blueprint_name, divisibility, non_fungible_id_type, code_hash, code, vm_type, stake_vault_entity_id, pending_xrd_withdraw_vault_entity_id, locked_owner_stake_unit_vault_entity_id, pending_owner_stake_unit_unlock_vault_entity_id, resource_entity_id, royalty_vault_of_entity_id) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -131,13 +131,9 @@ internal class WriteHelper
                 await writer.WriteAsync(packageEntity.CodeHash, NpgsqlDbType.Bytea, token);
                 await writer.WriteAsync(packageEntity.Code, NpgsqlDbType.Bytea, token);
                 await writer.WriteAsync(packageEntity.VmType, "package_vm_type", token);
-                await writer.WriteAsync(packageEntity.SchemaHash, NpgsqlDbType.Bytea, token);
-                await writer.WriteAsync(packageEntity.Schema, NpgsqlDbType.Jsonb, token);
             }
             else
             {
-                await writer.WriteNullAsync(token);
-                await writer.WriteNullAsync(token);
                 await writer.WriteNullAsync(token);
                 await writer.WriteNullAsync(token);
                 await writer.WriteNullAsync(token);
@@ -828,6 +824,30 @@ internal class WriteHelper
         return entities.Count;
     }
 
+    public async Task<int> CopyPackageSchemaHistory(ICollection<PackageSchemaHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY package_schema_history (id, from_state_version, package_entity_id, schema_hash, schema) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.PackageEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.SchemaHash, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.Schema, NpgsqlDbType.Jsonb, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
     public async Task UpdateSequences(SequencesHolder sequences, CancellationToken token)
     {
         var cd = new CommandDefinition(
@@ -854,7 +874,8 @@ SELECT
     setval('validator_public_key_history_id_seq', @validatorPublicKeyHistorySequence),
     setval('validator_active_set_history_id_seq', @validatorActiveSetHistorySequence),
     setval('ledger_transaction_markers_id_seq', @ledgerTransactionMarkerSequence),
-    setval('package_blueprint_history_id_seq', @packageBlueprintHistorySequence)",
+    setval('package_blueprint_history_id_seq', @packageBlueprintHistorySequence),
+    setval('package_schema_history_id_seq', @packageSchemaHistorySequence)",
             parameters: new
             {
                 accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
@@ -879,6 +900,7 @@ SELECT
                 validatorActiveSetHistorySequence = sequences.ValidatorActiveSetHistorySequence,
                 ledgerTransactionMarkerSequence = sequences.LedgerTransactionMarkerSequence,
                 packageBlueprintHistorySequence = sequences.PackageBlueprintHistorySequence,
+                packageSchemaHistorySequence = sequences.PackageSchemaHistorySequence,
             },
             cancellationToken: token);
 

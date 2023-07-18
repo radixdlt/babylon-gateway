@@ -109,4 +109,6 @@ internal class SequencesHolder
     public long LedgerTransactionMarkerSequence { get; set; }
 
     public long PackageBlueprintHistorySequence { get; set; }
+
+    public long PackageSchemaHistorySequence { get; set; }
 }

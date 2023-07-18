@@ -124,8 +124,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="schema">schema.</param>
         /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
         /// <param name="blueprints">blueprints.</param>
+        /// <param name="schemas">schemas.</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Package).</param>
-        public StateEntityDetailsResponsePackageDetails(PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string schemaHashHex = default(string), Object schema = default(Object), string royaltyVaultBalance = default(string), StateEntityDetailsResponsePackageDetailsBlueprintCollection blueprints = default(StateEntityDetailsResponsePackageDetailsBlueprintCollection), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Package) : base(type)
+        public StateEntityDetailsResponsePackageDetails(PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string schemaHashHex = default(string), Object schema = default(Object), string royaltyVaultBalance = default(string), StateEntityDetailsResponsePackageDetailsBlueprintCollection blueprints = default(StateEntityDetailsResponsePackageDetailsBlueprintCollection), StateEntityDetailsResponsePackageDetailsSchemaCollection schemas = default(StateEntityDetailsResponsePackageDetailsSchemaCollection), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Package) : base(type)
         {
             this.VmType = vmType;
             // to ensure "codeHashHex" is required (not null)
@@ -144,6 +145,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.Schema = schema;
             this.RoyaltyVaultBalance = royaltyVaultBalance;
             this.Blueprints = blueprints;
+            this.Schemas = schemas;
         }
 
         /// <summary>
@@ -187,6 +189,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public StateEntityDetailsResponsePackageDetailsBlueprintCollection Blueprints { get; set; }
 
         /// <summary>
+        /// Gets or Sets Schemas
+        /// </summary>
+        [DataMember(Name = "schemas", EmitDefaultValue = true)]
+        public StateEntityDetailsResponsePackageDetailsSchemaCollection Schemas { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -202,6 +210,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  Schema: ").Append(Schema).Append("\n");
             sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
             sb.Append("  Blueprints: ").Append(Blueprints).Append("\n");
+            sb.Append("  Schemas: ").Append(Schemas).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -270,6 +279,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Blueprints == input.Blueprints ||
                     (this.Blueprints != null &&
                     this.Blueprints.Equals(input.Blueprints))
+                ) && base.Equals(input) && 
+                (
+                    this.Schemas == input.Schemas ||
+                    (this.Schemas != null &&
+                    this.Schemas.Equals(input.Schemas))
                 );
         }
 
@@ -306,6 +320,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Blueprints != null)
                 {
                     hashCode = (hashCode * 59) + this.Blueprints.GetHashCode();
+                }
+                if (this.Schemas != null)
+                {
+                    hashCode = (hashCode * 59) + this.Schemas.GetHashCode();
                 }
                 return hashCode;
             }

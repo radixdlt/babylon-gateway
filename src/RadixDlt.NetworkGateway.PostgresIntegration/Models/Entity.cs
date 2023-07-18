@@ -259,12 +259,6 @@ internal class GlobalPackageEntity : ComponentEntity
 
     [Column("vm_type")]
     public PackageVmType VmType { get; set; }
-
-    [Column("schema_hash")]
-    public byte[] SchemaHash { get; set; }
-
-    [Column("schema", TypeName = "jsonb")]
-    public string Schema { get; set; }
 }
 
 // This is transient model, not stored in database

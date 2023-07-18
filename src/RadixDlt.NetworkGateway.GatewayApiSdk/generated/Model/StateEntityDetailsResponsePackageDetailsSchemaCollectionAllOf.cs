@@ -90,62 +90,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponsePackageDetailsBlueprintCollection
+    /// StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsBlueprintCollection")]
-    public partial class StateEntityDetailsResponsePackageDetailsBlueprintCollection : IEquatable<StateEntityDetailsResponsePackageDetailsBlueprintCollection>
+    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsSchemaCollection_allOf")]
+    public partial class StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf : IEquatable<StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintCollection" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponsePackageDetailsBlueprintCollection() { }
+        protected StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintCollection" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf" /> class.
         /// </summary>
-        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
-        /// <param name="previousCursor">If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection..</param>
-        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
         /// <param name="items">items (required).</param>
-        public StateEntityDetailsResponsePackageDetailsBlueprintCollection(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<StateEntityDetailsResponsePackageDetailsBlueprintItem> items = default(List<StateEntityDetailsResponsePackageDetailsBlueprintItem>))
+        public StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf(List<StateEntityDetailsResponsePackageDetailsSchemaItem> items = default(List<StateEntityDetailsResponsePackageDetailsSchemaItem>))
         {
             // to ensure "items" is required (not null)
             if (items == null)
             {
-                throw new ArgumentNullException("items is a required property for StateEntityDetailsResponsePackageDetailsBlueprintCollection and cannot be null");
+                throw new ArgumentNullException("items is a required property for StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf and cannot be null");
             }
             this.Items = items;
-            this.TotalCount = totalCount;
-            this.PreviousCursor = previousCursor;
-            this.NextCursor = nextCursor;
         }
-
-        /// <summary>
-        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
-        /// </summary>
-        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public long? TotalCount { get; set; }
-
-        /// <summary>
-        /// If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.
-        /// </summary>
-        /// <value>If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
-        public string PreviousCursor { get; set; }
-
-        /// <summary>
-        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
-        /// </summary>
-        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
 
         /// <summary>
         /// Gets or Sets Items
         /// </summary>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<StateEntityDetailsResponsePackageDetailsBlueprintItem> Items { get; set; }
+        public List<StateEntityDetailsResponsePackageDetailsSchemaItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -154,10 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponsePackageDetailsBlueprintCollection {\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("class StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf {\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -179,36 +149,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponsePackageDetailsBlueprintCollection);
+            return this.Equals(input as StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponsePackageDetailsBlueprintCollection instances are equal
+        /// Returns true if StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsBlueprintCollection to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponsePackageDetailsBlueprintCollection input)
+        public bool Equals(StateEntityDetailsResponsePackageDetailsSchemaCollectionAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
             return 
-                (
-                    this.TotalCount == input.TotalCount ||
-                    (this.TotalCount != null &&
-                    this.TotalCount.Equals(input.TotalCount))
-                ) && 
-                (
-                    this.PreviousCursor == input.PreviousCursor ||
-                    (this.PreviousCursor != null &&
-                    this.PreviousCursor.Equals(input.PreviousCursor))
-                ) && 
-                (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
-                ) && 
                 (
                     this.Items == input.Items ||
                     this.Items != null &&
@@ -226,18 +181,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TotalCount != null)
-                {
-                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
-                }
-                if (this.PreviousCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
-                }
-                if (this.NextCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
-                }
                 if (this.Items != null)
                 {
                     hashCode = (hashCode * 59) + this.Items.GetHashCode();

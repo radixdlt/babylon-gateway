@@ -1778,8 +1778,9 @@ components:
               $ref: "#/components/schemas/BigDecimal"
             blueprints:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsBlueprintCollection"
+            schemas:
+              $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsSchemaCollection"
     StateEntityDetailsResponsePackageDetailsBlueprintCollection:
-      description: Entity metadata collection.
       allOf:
         - $ref: "#/components/schemas/ResultSetCursorMixin"
         - type: object
@@ -1817,6 +1818,27 @@ components:
         royalty_config_is_locked:
           type: boolean
           nullable: true
+    StateEntityDetailsResponsePackageDetailsSchemaCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsSchemaItem"
+    StateEntityDetailsResponsePackageDetailsSchemaItem:
+      type: object
+      required:
+        - hash_hex
+        - schema
+      properties:
+        hash_hex:
+          $ref: "#/components/schemas/HexString"
+        schema:
+          type: object
     StateEntityDetailsResponseComponentDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"

@@ -470,15 +470,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 e.Code = packageCodeOriginalCode.Value.CodeHex.ConvertFromHex();
                             });
                         }
-
-                        if (substateData is CoreModel.PackageSchemaEntrySubstate packageSchema)
-                        {
-                            referencedEntity.PostResolveConfigure((GlobalPackageEntity e) =>
-                            {
-                                e.SchemaHash = packageSchema.Key.SchemaHash.ConvertFromHex();
-                                e.Schema = packageSchema.Value.Schema.SborData.ToJson();
-                            });
-                        }
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -753,6 +744,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var entityStateToAdd = new List<EntityStateHistory>();
         var componentMethodRoyaltiesToAdd = new List<ComponentMethodRoyaltyEntryHistory>();
         var packageBlueprintHistoryToAdd = new Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>();
+        var packageSchemaHistoryToAdd = new List<PackageSchemaHistory>();
         var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>(); // TODO follow Pointer+ordered List pattern to ensure proper order of ingestion
         var accountDefaultDepositRuleHistoryToAdd = new List<AccountDefaultDepositRuleHistory>();
         var accountResourceDepositRuleHistoryToAdd = new List<AccountResourceDepositRuleHistory>();
@@ -1005,6 +997,18 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                             pb.AuthTemplate = packageBlueprintAuthTemplate.Value.AuthConfig.ToJson();
                             pb.AuthTemplateIsLocked = packageBlueprintAuthTemplate.IsLocked;
+                        }
+
+                        if (substateData is CoreModel.PackageSchemaEntrySubstate packageSchema)
+                        {
+                            packageSchemaHistoryToAdd.Add(new PackageSchemaHistory
+                            {
+                                Id = sequences.PackageSchemaHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                PackageEntityId = referencedEntity.DatabaseId,
+                                SchemaHash = packageSchema.Key.SchemaHash.ConvertFromHex(),
+                                Schema = packageSchema.Value.Schema.SborData.ToJson(),
+                            });
                         }
 
                         if (substateData is CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate methodRoyaltyEntry)
@@ -1831,6 +1835,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyValidatorKeyHistory(validatorKeyHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyPackageBlueprintHistory(packageBlueprintHistoryToAdd.Values, token);
+            rowsInserted += await writeHelper.CopyPackageSchemaHistory(packageSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountDefaultDepositRuleHistory(accountDefaultDepositRuleHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountResourceDepositRuleHistory(accountResourceDepositRuleHistoryToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);

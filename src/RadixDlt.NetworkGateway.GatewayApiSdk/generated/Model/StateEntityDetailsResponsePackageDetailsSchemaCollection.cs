@@ -90,29 +90,29 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponsePackageDetailsBlueprintCollection
+    /// StateEntityDetailsResponsePackageDetailsSchemaCollection
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsBlueprintCollection")]
-    public partial class StateEntityDetailsResponsePackageDetailsBlueprintCollection : IEquatable<StateEntityDetailsResponsePackageDetailsBlueprintCollection>
+    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsSchemaCollection")]
+    public partial class StateEntityDetailsResponsePackageDetailsSchemaCollection : IEquatable<StateEntityDetailsResponsePackageDetailsSchemaCollection>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintCollection" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsSchemaCollection" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponsePackageDetailsBlueprintCollection() { }
+        protected StateEntityDetailsResponsePackageDetailsSchemaCollection() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsBlueprintCollection" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsSchemaCollection" /> class.
         /// </summary>
         /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
         /// <param name="previousCursor">If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection..</param>
         /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
         /// <param name="items">items (required).</param>
-        public StateEntityDetailsResponsePackageDetailsBlueprintCollection(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<StateEntityDetailsResponsePackageDetailsBlueprintItem> items = default(List<StateEntityDetailsResponsePackageDetailsBlueprintItem>))
+        public StateEntityDetailsResponsePackageDetailsSchemaCollection(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<StateEntityDetailsResponsePackageDetailsSchemaItem> items = default(List<StateEntityDetailsResponsePackageDetailsSchemaItem>))
         {
             // to ensure "items" is required (not null)
             if (items == null)
             {
-                throw new ArgumentNullException("items is a required property for StateEntityDetailsResponsePackageDetailsBlueprintCollection and cannot be null");
+                throw new ArgumentNullException("items is a required property for StateEntityDetailsResponsePackageDetailsSchemaCollection and cannot be null");
             }
             this.Items = items;
             this.TotalCount = totalCount;
@@ -145,7 +145,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Items
         /// </summary>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<StateEntityDetailsResponsePackageDetailsBlueprintItem> Items { get; set; }
+        public List<StateEntityDetailsResponsePackageDetailsSchemaItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -154,7 +154,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponsePackageDetailsBlueprintCollection {\n");
+            sb.Append("class StateEntityDetailsResponsePackageDetailsSchemaCollection {\n");
             sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
             sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
             sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
@@ -179,15 +179,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponsePackageDetailsBlueprintCollection);
+            return this.Equals(input as StateEntityDetailsResponsePackageDetailsSchemaCollection);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponsePackageDetailsBlueprintCollection instances are equal
+        /// Returns true if StateEntityDetailsResponsePackageDetailsSchemaCollection instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsBlueprintCollection to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsSchemaCollection to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponsePackageDetailsBlueprintCollection input)
+        public bool Equals(StateEntityDetailsResponsePackageDetailsSchemaCollection input)
         {
             if (input == null)
             {

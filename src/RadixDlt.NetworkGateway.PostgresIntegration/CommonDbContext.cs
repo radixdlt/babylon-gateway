@@ -131,6 +131,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<PackageBlueprintHistory> PackageBlueprintHistory => Set<PackageBlueprintHistory>();
 
+    public DbSet<PackageSchemaHistory> PackageSchemaHistory => Set<PackageSchemaHistory>();
+
     public DbSet<ComponentSchema> ComponentSchema => Set<ComponentSchema>();
 
     public CommonDbContext(DbContextOptions options)
@@ -348,6 +350,9 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<PackageBlueprintHistory>()
+            .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<PackageSchemaHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<ValidatorPublicKeyHistory>()

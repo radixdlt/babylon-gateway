@@ -156,6 +156,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var stateHistory = await GetStateHistory(componentEntities, ledgerState, token);
         var resourcesSupplyData = await GetResourcesSupplyData(resourceEntities.Select(x => x.Id).ToArray(), ledgerState, token);
         var packageBlueprintsByPackageId = await GetPackageBlueprints(packageEntities.Select(e => e.Id).ToArray(), ledgerState, token);
+        var packageSchemasByPackageId = await GetPackageSchemas(packageEntities.Select(e => e.Id).ToArray(), ledgerState, token);
         var correlatedAddresses = await GetCorrelatedEntityAddresses(entities, componentEntities, packageBlueprintsByPackageId, ledgerState, token);
 
         var royaltyVaultsBalance = componentEntities.Any() && (optIns.ComponentRoyaltyVaultBalance || optIns.PackageRoyaltyVaultBalance)
@@ -207,31 +208,35 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 case GlobalPackageEntity pe:
                     var packageRoyaltyVaultBalance = royaltyVaultsBalance?.SingleOrDefault(x => x.OwnerEntityId == pe.Id)?.Balance;
                     var blueprints = new List<GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintItem>();
+                    var schemas = new List<GatewayModel.StateEntityDetailsResponsePackageDetailsSchemaItem>();
 
                     if (packageBlueprintsByPackageId.TryGetValue(pe.Id, out var packageBlueprints))
                     {
-                        foreach (var pb in packageBlueprints)
-                        {
-                            blueprints.Add(new GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintItem(
-                                name: pb.Name,
-                                version: pb.Version,
-                                definition: new JRaw(pb.Definition),
-                                dependantEntities: pb.DependantEntityIds?.Select(de => correlatedAddresses[de].ToString()).ToList(),
-                                authTemplate: pb.AuthTemplate != null ? new JRaw(pb.AuthTemplate) : null,
-                                authTemplateIsLocked: pb.AuthTemplateIsLocked,
-                                royaltyConfig: pb.RoyaltyConfig != null ? new JRaw(pb.RoyaltyConfig) : null,
-                                royaltyConfigIsLocked: pb.RoyaltyConfigIsLocked));
-                        }
+                        blueprints.AddRange(packageBlueprints.Select(pb => new GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintItem(
+                            name: pb.Name,
+                            version: pb.Version,
+                            definition: new JRaw(pb.Definition),
+                            dependantEntities: pb.DependantEntityIds?.Select(de => correlatedAddresses[de].ToString()).ToList(),
+                            authTemplate: pb.AuthTemplate != null ? new JRaw(pb.AuthTemplate) : null,
+                            authTemplateIsLocked: pb.AuthTemplateIsLocked,
+                            royaltyConfig: pb.RoyaltyConfig != null ? new JRaw(pb.RoyaltyConfig) : null,
+                            royaltyConfigIsLocked: pb.RoyaltyConfigIsLocked)));
+                    }
+
+                    if (packageSchemasByPackageId.TryGetValue(pe.Id, out var packageSchemas))
+                    {
+                        schemas.AddRange(packageSchemas.Select(ps => new GatewayModel.StateEntityDetailsResponsePackageDetailsSchemaItem(
+                            hashHex: ps.SchemaHash.ToHex(),
+                            schema: new JRaw(ps.Schema))));
                     }
 
                     details = new GatewayModel.StateEntityDetailsResponsePackageDetails(
                         vmType: pe.VmType.ToGatewayModel(),
                         codeHashHex: pe.CodeHash.ToHex(),
-                        schemaHashHex: pe.SchemaHash.ToHex(),
                         codeHex: pe.Code.ToHex(),
-                        schema: new JRaw(pe.Schema),
                         royaltyVaultBalance: packageRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(packageRoyaltyVaultBalance).ToString() : null,
-                        blueprints: new GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintCollection(totalCount: blueprints.Count, items: blueprints));
+                        blueprints: new GatewayModel.StateEntityDetailsResponsePackageDetailsBlueprintCollection(totalCount: blueprints.Count, items: blueprints),
+                        schemas: new GatewayModel.StateEntityDetailsResponsePackageDetailsSchemaCollection(totalCount: schemas.Count, items: schemas));
                     break;
 
                 case VirtualIdentityEntity:
@@ -1737,15 +1742,15 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
-    private async Task<Dictionary<long, PackageBlueprintHistory[]>> GetPackageBlueprints(long[] entityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<Dictionary<long, PackageBlueprintHistory[]>> GetPackageBlueprints(long[] packageEntityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
-        if (!entityIds.Any())
+        if (!packageEntityIds.Any())
         {
             return new Dictionary<long, PackageBlueprintHistory[]>();
         }
 
         var blueprints = await _dbContext.PackageBlueprintHistory.FromSqlInterpolated($@"
-WITH variables (entity_id) AS (SELECT UNNEST({entityIds}))
+WITH variables (entity_id) AS (SELECT UNNEST({packageEntityIds}))
 SELECT pbh.*
 FROM variables
 INNER JOIN LATERAL(
@@ -1757,6 +1762,28 @@ INNER JOIN LATERAL(
             .ToListAsync(token);
 
         return blueprints.GroupBy(b => b.PackageEntityId).ToDictionary(g => g.Key, g => g.ToArray());
+    }
+
+    private async Task<Dictionary<long, PackageSchemaHistory[]>> GetPackageSchemas(long[] packageEntityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    {
+        if (!packageEntityIds.Any())
+        {
+            return new Dictionary<long, PackageSchemaHistory[]>();
+        }
+
+        var schemas = await _dbContext.PackageSchemaHistory.FromSqlInterpolated($@"
+WITH variables (entity_id) AS (SELECT UNNEST({packageEntityIds}))
+SELECT psh.*
+FROM variables
+INNER JOIN LATERAL(
+    SELECT *
+    FROM package_schema_history
+    WHERE package_entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
+    LIMIT 1
+) psh ON true")
+            .ToListAsync(token);
+
+        return schemas.GroupBy(b => b.PackageEntityId).ToDictionary(g => g.Key, g => g.ToArray());
     }
 
     private async Task<Dictionary<long, EntityAddress>> GetCorrelatedEntityAddresses(
