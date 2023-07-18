@@ -694,14 +694,14 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyValidatorEmissions(ICollection<ValidatorEmissions> entries, CancellationToken token)
+    public async Task<int> CopyValidatorEmissionStatistics(ICollection<ValidatorEmissionStatistics> entries, CancellationToken token)
     {
         if (!entries.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY validator_emissions (id, validator_entity_id,  epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY validator_emission_statistics (id, validator_entity_id, epoch_number, proposals_made, proposals_missed) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entries)
         {
@@ -921,7 +921,7 @@ SELECT
     setval('package_blueprint_history_id_seq', @packageBlueprintHistorySequence),
     setval('package_code_history_id_seq', @packageCodeHistorySequence),
     setval('package_schema_history_id_seq', @packageSchemaHistorySequence),
-    setval('validator_emissions_id_seq', @validatorEmissionsSequence)",
+    setval('validator_emission_statistics_id_seq', @validatorEmissionStatisticsSequence)",
             parameters: new
             {
                 accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
@@ -948,7 +948,7 @@ SELECT
                 packageBlueprintHistorySequence = sequences.PackageBlueprintHistorySequence,
                 packageCodeHistorySequence = sequences.PackageCodeHistorySequence,
                 packageSchemaHistorySequence = sequences.PackageSchemaHistorySequence,
-                validatorEmissionsSequence = sequences.ValidatorEmissionsSequence,
+                validatorEmissionStatisticsSequence = sequences.ValidatorEmissionStatisticsSequence,
             },
             cancellationToken: token);
 

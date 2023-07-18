@@ -114,5 +114,5 @@ internal class SequencesHolder
 
     public long PackageSchemaHistorySequence { get; set; }
 
-    public long ValidatorEmissionsSequence { get; set; }
+    public long ValidatorEmissionStatisticsSequence { get; set; }
 }

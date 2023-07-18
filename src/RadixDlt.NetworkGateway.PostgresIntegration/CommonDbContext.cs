@@ -135,7 +135,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<PackageSchemaHistory> PackageSchemaHistory => Set<PackageSchemaHistory>();
 
-    public DbSet<ValidatorEmissions> ValidatorEmissions => Set<ValidatorEmissions>();
+    public DbSet<ValidatorEmissionStatistics> ValidatorEmissionStatistics => Set<ValidatorEmissionStatistics>();
 
     public CommonDbContext(DbContextOptions options)
         : base(options)
@@ -371,8 +371,11 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<ValidatorActiveSetHistory>()
             .HasIndex(e => e.Epoch);
+    }
 
-        modelBuilder.Entity<ValidatorEmissions>()
+    private static void HookupStatistics(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ValidatorEmissionStatistics>()
             .HasIndex(e => new { e.ValidatorEntityId, e.EpochNumber });
     }
 }

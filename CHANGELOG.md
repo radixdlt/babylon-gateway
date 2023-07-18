@@ -1,5 +1,11 @@
+## ???
+_Release Date: unreleased_
+
+- Added package details to `/satus/entity/details` endpoint.
+- New endpoint `/statistics/validators/uptime` returns validator uptime data.
+
 ## 0.4.0 - RCNet-V2
-_Release Date: Unreleased_
+_Release Date: 17.07.2023_
 
 - Renamed `mutable_data` property to `data` in `/state/non-fungible/data` endpoint.
 - Opt-in properties added to `/transaction/committed-details`,`/state/entity/details` user can specify additional properties in response.
@@ -21,10 +27,9 @@ _Release Date: Unreleased_
 - Added `affected_global_entities` to `/transaction/committed-details` and `/stream/transactions` endpoints. To include them in response make sure to include `affected_global_entities` optin.
 - New `affected_global_entities_filter` filter in `/stream/transactions`.
 - Use strongly-typed metadata models.
-- return `pending_xrd_withdraw_vault`, `locked_owner_stake_unit_vault`, `pending_owner_stake_unit_unlock_vault`, `stake_vault` from `/state/validators/list` endpoint.
+- Return `pending_xrd_withdraw_vault`, `locked_owner_stake_unit_vault`, `pending_owner_stake_unit_unlock_vault`, `stake_vault` from `/state/validators/list` endpoint.
 - Changed `access_rule_chain` to partially strongly typed `access_rules`.
-- Added package details to `/satus/entity/details` endpoint.
-- new endpoint `/statistics/validators/uptime` returns validator uptime data. 
+
 ### 0.3.1
 
 - Fix `/state/non-fungible/data` to return data for all NFIDs

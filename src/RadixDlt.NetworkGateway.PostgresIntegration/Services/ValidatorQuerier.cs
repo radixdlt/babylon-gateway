@@ -108,12 +108,12 @@ WITH
 SELECT
     e.id AS ValidatorId,
     e.address AS ValidatorAddress,
-    SUM(proposals_made)::bigint AS proposalsMadeSum,
-    SUM(proposals_missed)::bigint AS proposalsMissedSum,
-    COUNT(*) AS epochsActiveIn
+    SUM(proposals_made)::bigint AS ProposalsMadeSum,
+    SUM(proposals_missed)::bigint AS ProposalsMissedSum,
+    COUNT(*) AS EpochsActiveIn
 FROM variables
 INNER JOIN entities e ON e.address = variables.validator_address AND e.from_state_version <= @stateVersion
-LEFT JOIN validator_emissions ve on ve.validator_entity_id = e.id AND ve.epoch_number BETWEEN @epochFrom AND @epochTo
+LEFT JOIN validator_emission_statistics ves on ve.validator_entity_id = e.id AND ves.epoch_number BETWEEN @epochFrom AND @epochTo
 GROUP BY (e.id, e.address)
 ;",
             parameters: new

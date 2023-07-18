@@ -731,7 +731,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var accountResourceDepositRuleHistoryToAdd = new List<AccountResourceDepositRuleHistory>();
         var accessRulesChangePointers = new Dictionary<AccessRulesChangePointerLookup, AccessRulesChangePointer>();
         var accessRulesChanges = new List<AccessRulesChangePointerLookup>();
-        var validatorUptimeToAdd = new List<ValidatorEmissions>();
+        var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
 
         // step: scan all substates to figure out changes
         {
@@ -1067,15 +1067,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (EventDecoder.TryGetValidatorEmissionsAppliedEvent(decodedEvent, out var validatorUptimeEvent))
                         {
-                            var uptime = new ValidatorEmissions
+                            validatorEmissionStatisticsToAdd.Add(new ValidatorEmissionStatistics
                             {
-                                Id = sequences.ValidatorEmissionsSequence++,
+                                Id = sequences.ValidatorEmissionStatisticsSequence++,
                                 ValidatorEntityId = eventEmitterEntity.DatabaseId,
                                 EpochNumber = (long)validatorUptimeEvent.epoch,
                                 ProposalsMade = (long)validatorUptimeEvent.proposalsMade,
                                 ProposalsMissed = (long)validatorUptimeEvent.proposalsMissed,
-                            };
-                            validatorUptimeToAdd.Add(uptime);
+                            });
                         }
                         else if (EventDecoder.TryGetFungibleVaultWithdrawalEvent(decodedEvent, out var fungibleVaultWithdrawalEvent))
                         {
@@ -1779,7 +1778,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyPackageSchemaHistory(packageSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountDefaultDepositRuleHistory(accountDefaultDepositRuleHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountResourceDepositRuleHistory(accountResourceDepositRuleHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyValidatorEmissions(validatorUptimeToAdd, token);
+            rowsInserted += await writeHelper.CopyValidatorEmissionStatistics(validatorEmissionStatisticsToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);
 
             dbWriteDuration += sw.Elapsed;
