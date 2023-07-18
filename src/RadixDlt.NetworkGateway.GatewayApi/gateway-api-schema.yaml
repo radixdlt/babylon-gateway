@@ -1813,7 +1813,7 @@ components:
           required:
             - vm_type
             - code_hash_hex
-            - schema_hash_hex
+            - code_hex
           properties:
             vm_type:
               $ref: "#/components/schemas/PackageVmType"
@@ -1821,16 +1821,13 @@ components:
               $ref: "#/components/schemas/HexString"
             code_hex:
               $ref: "#/components/schemas/HexString"
-            schema_hash_hex:
-              $ref: "#/components/schemas/HexString"
-            schema:
-              type: object
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
             blueprints:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsBlueprintCollection"
+            schemas:
+              $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsSchemaCollection"
     StateEntityDetailsResponsePackageDetailsBlueprintCollection:
-      description: Entity metadata collection.
       allOf:
         - $ref: "#/components/schemas/ResultSetCursorMixin"
         - type: object
@@ -1868,6 +1865,27 @@ components:
         royalty_config_is_locked:
           type: boolean
           nullable: true
+    StateEntityDetailsResponsePackageDetailsSchemaCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsSchemaItem"
+    StateEntityDetailsResponsePackageDetailsSchemaItem:
+      type: object
+      required:
+        - schema_hash_hex
+        - schema_hex
+      properties:
+        schema_hash_hex:
+          $ref: "#/components/schemas/HexString"
+        schema_hex:
+          $ref: "#/components/schemas/HexString"
     StateEntityDetailsResponseComponentDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"

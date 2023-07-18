@@ -450,24 +450,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 e.VmType = packageCodeVmType.Value.VmType.ToModel();
                             });
                         }
-
-                        if (substateData is CoreModel.PackageCodeOriginalCodeEntrySubstate packageCodeOriginalCode)
-                        {
-                            referencedEntity.PostResolveConfigure((GlobalPackageEntity e) =>
-                            {
-                                e.CodeHash = packageCodeOriginalCode.Key.CodeHash.ConvertFromHex();
-                                e.Code = packageCodeOriginalCode.Value.CodeHex.ConvertFromHex();
-                            });
-                        }
-
-                        if (substateData is CoreModel.PackageSchemaEntrySubstate packageSchema)
-                        {
-                            referencedEntity.PostResolveConfigure((GlobalPackageEntity e) =>
-                            {
-                                e.SchemaHash = packageSchema.Key.SchemaHash.ConvertFromHex();
-                                e.Schema = packageSchema.Value.Schema.SborData.ToJson();
-                            });
-                        }
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -742,12 +724,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var entityStateToAdd = new List<EntityStateHistory>();
         var componentMethodRoyaltiesToAdd = new List<ComponentMethodRoyaltyEntryHistory>();
         var packageBlueprintHistoryToAdd = new Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>();
+        var packageCodeHistoryToAdd = new List<PackageCodeHistory>();
+        var packageSchemaHistoryToAdd = new List<PackageSchemaHistory>();
         var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>(); // TODO follow Pointer+ordered List pattern to ensure proper order of ingestion
         var accountDefaultDepositRuleHistoryToAdd = new List<AccountDefaultDepositRuleHistory>();
         var accountResourceDepositRuleHistoryToAdd = new List<AccountResourceDepositRuleHistory>();
         var accessRulesChangePointers = new Dictionary<AccessRulesChangePointerLookup, AccessRulesChangePointer>();
         var accessRulesChanges = new List<AccessRulesChangePointerLookup>();
-        var validatorUptimeToAdd = new List<ValidatorEmissions>();
+        var validatorEmissionStatisticsToAdd = new List<ValidatorEmissionStatistics>();
 
         // step: scan all substates to figure out changes
         {
@@ -1000,6 +984,30 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             pb.AuthTemplateIsLocked = packageBlueprintAuthTemplate.IsLocked;
                         }
 
+                        if (substateData is CoreModel.PackageCodeOriginalCodeEntrySubstate packageCodeOriginalCode)
+                        {
+                            packageCodeHistoryToAdd.Add(new PackageCodeHistory
+                            {
+                                Id = sequences.PackageCodeHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                PackageEntityId = referencedEntity.DatabaseId,
+                                CodeHash = packageCodeOriginalCode.Key.CodeHash.ConvertFromHex(),
+                                Code = packageCodeOriginalCode.Value.CodeHex.ConvertFromHex(),
+                            });
+                        }
+
+                        if (substateData is CoreModel.PackageSchemaEntrySubstate packageSchema)
+                        {
+                            packageSchemaHistoryToAdd.Add(new PackageSchemaHistory
+                            {
+                                Id = sequences.PackageSchemaHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                PackageEntityId = referencedEntity.DatabaseId,
+                                SchemaHash = packageSchema.Key.SchemaHash.ConvertFromHex(),
+                                Schema = packageSchema.Value.Schema.SborData.Hex.ConvertFromHex(),
+                            });
+                        }
+
                         if (substateData is CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate methodRoyaltyEntry)
                         {
                             componentMethodRoyaltiesToAdd.Add(new ComponentMethodRoyaltyEntryHistory
@@ -1059,15 +1067,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (EventDecoder.TryGetValidatorEmissionsAppliedEvent(decodedEvent, out var validatorUptimeEvent))
                         {
-                            var uptime = new ValidatorEmissions
+                            validatorEmissionStatisticsToAdd.Add(new ValidatorEmissionStatistics
                             {
-                                Id = sequences.ValidatorEmissionsSequence++,
+                                Id = sequences.ValidatorEmissionStatisticsSequence++,
                                 ValidatorEntityId = eventEmitterEntity.DatabaseId,
                                 EpochNumber = (long)validatorUptimeEvent.epoch,
                                 ProposalsMade = (long)validatorUptimeEvent.proposalsMade,
                                 ProposalsMissed = (long)validatorUptimeEvent.proposalsMissed,
-                            };
-                            validatorUptimeToAdd.Add(uptime);
+                            });
                         }
                         else if (EventDecoder.TryGetFungibleVaultWithdrawalEvent(decodedEvent, out var fungibleVaultWithdrawalEvent))
                         {
@@ -1767,9 +1774,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyValidatorKeyHistory(validatorKeyHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyPackageBlueprintHistory(packageBlueprintHistoryToAdd.Values, token);
+            rowsInserted += await writeHelper.CopyPackageCodeHistory(packageCodeHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyPackageSchemaHistory(packageSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountDefaultDepositRuleHistory(accountDefaultDepositRuleHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountResourceDepositRuleHistory(accountResourceDepositRuleHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyValidatorEmissions(validatorUptimeToAdd, token);
+            rowsInserted += await writeHelper.CopyValidatorEmissionStatistics(validatorEmissionStatisticsToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);
 
             dbWriteDuration += sw.Elapsed;

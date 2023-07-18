@@ -90,83 +90,62 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponsePackageDetailsAllOf
+    /// StateEntityDetailsResponsePackageDetailsSchemaCollection
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponsePackageDetails_allOf")]
-    public partial class StateEntityDetailsResponsePackageDetailsAllOf : IEquatable<StateEntityDetailsResponsePackageDetailsAllOf>
+    [DataContract(Name = "StateEntityDetailsResponsePackageDetailsSchemaCollection")]
+    public partial class StateEntityDetailsResponsePackageDetailsSchemaCollection : IEquatable<StateEntityDetailsResponsePackageDetailsSchemaCollection>
     {
-
         /// <summary>
-        /// Gets or Sets VmType
-        /// </summary>
-        [DataMember(Name = "vm_type", IsRequired = true, EmitDefaultValue = true)]
-        public PackageVmType VmType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsSchemaCollection" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponsePackageDetailsAllOf() { }
+        protected StateEntityDetailsResponsePackageDetailsSchemaCollection() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateEntityDetailsResponsePackageDetailsSchemaCollection" /> class.
         /// </summary>
-        /// <param name="vmType">vmType (required).</param>
-        /// <param name="codeHashHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="codeHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
-        /// <param name="blueprints">blueprints.</param>
-        /// <param name="schemas">schemas.</param>
-        public StateEntityDetailsResponsePackageDetailsAllOf(PackageVmType vmType = default(PackageVmType), string codeHashHex = default(string), string codeHex = default(string), string royaltyVaultBalance = default(string), StateEntityDetailsResponsePackageDetailsBlueprintCollection blueprints = default(StateEntityDetailsResponsePackageDetailsBlueprintCollection), StateEntityDetailsResponsePackageDetailsSchemaCollection schemas = default(StateEntityDetailsResponsePackageDetailsSchemaCollection))
+        /// <param name="totalCount">Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection..</param>
+        /// <param name="previousCursor">If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection..</param>
+        /// <param name="nextCursor">If specified, contains a cursor to query next page of the &#x60;items&#x60; collection..</param>
+        /// <param name="items">items (required).</param>
+        public StateEntityDetailsResponsePackageDetailsSchemaCollection(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<StateEntityDetailsResponsePackageDetailsSchemaItem> items = default(List<StateEntityDetailsResponsePackageDetailsSchemaItem>))
         {
-            this.VmType = vmType;
-            // to ensure "codeHashHex" is required (not null)
-            if (codeHashHex == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("codeHashHex is a required property for StateEntityDetailsResponsePackageDetailsAllOf and cannot be null");
+                throw new ArgumentNullException("items is a required property for StateEntityDetailsResponsePackageDetailsSchemaCollection and cannot be null");
             }
-            this.CodeHashHex = codeHashHex;
-            // to ensure "codeHex" is required (not null)
-            if (codeHex == null)
-            {
-                throw new ArgumentNullException("codeHex is a required property for StateEntityDetailsResponsePackageDetailsAllOf and cannot be null");
-            }
-            this.CodeHex = codeHex;
-            this.RoyaltyVaultBalance = royaltyVaultBalance;
-            this.Blueprints = blueprints;
-            this.Schemas = schemas;
+            this.Items = items;
+            this.TotalCount = totalCount;
+            this.PreviousCursor = previousCursor;
+            this.NextCursor = nextCursor;
         }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "code_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string CodeHashHex { get; set; }
+        /// <value>Total number of items in underlying collection, fragment of which is available in &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "total_count", EmitDefaultValue = true)]
+        public long? TotalCount { get; set; }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string CodeHex { get; set; }
+        /// <value>If specified, contains a cursor to query previous page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
+        public string PreviousCursor { get; set; }
 
         /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
+        /// If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.
         /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "royalty_vault_balance", EmitDefaultValue = true)]
-        public string RoyaltyVaultBalance { get; set; }
+        /// <value>If specified, contains a cursor to query next page of the &#x60;items&#x60; collection.</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
 
         /// <summary>
-        /// Gets or Sets Blueprints
+        /// Gets or Sets Items
         /// </summary>
-        [DataMember(Name = "blueprints", EmitDefaultValue = true)]
-        public StateEntityDetailsResponsePackageDetailsBlueprintCollection Blueprints { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Schemas
-        /// </summary>
-        [DataMember(Name = "schemas", EmitDefaultValue = true)]
-        public StateEntityDetailsResponsePackageDetailsSchemaCollection Schemas { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<StateEntityDetailsResponsePackageDetailsSchemaItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -175,13 +154,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponsePackageDetailsAllOf {\n");
-            sb.Append("  VmType: ").Append(VmType).Append("\n");
-            sb.Append("  CodeHashHex: ").Append(CodeHashHex).Append("\n");
-            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
-            sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
-            sb.Append("  Blueprints: ").Append(Blueprints).Append("\n");
-            sb.Append("  Schemas: ").Append(Schemas).Append("\n");
+            sb.Append("class StateEntityDetailsResponsePackageDetailsSchemaCollection {\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -202,15 +179,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponsePackageDetailsAllOf);
+            return this.Equals(input as StateEntityDetailsResponsePackageDetailsSchemaCollection);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponsePackageDetailsAllOf instances are equal
+        /// Returns true if StateEntityDetailsResponsePackageDetailsSchemaCollection instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsAllOf to be compared</param>
+        /// <param name="input">Instance of StateEntityDetailsResponsePackageDetailsSchemaCollection to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponsePackageDetailsAllOf input)
+        public bool Equals(StateEntityDetailsResponsePackageDetailsSchemaCollection input)
         {
             if (input == null)
             {
@@ -218,33 +195,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.VmType == input.VmType ||
-                    this.VmType.Equals(input.VmType)
+                    this.TotalCount == input.TotalCount ||
+                    (this.TotalCount != null &&
+                    this.TotalCount.Equals(input.TotalCount))
                 ) && 
                 (
-                    this.CodeHashHex == input.CodeHashHex ||
-                    (this.CodeHashHex != null &&
-                    this.CodeHashHex.Equals(input.CodeHashHex))
+                    this.PreviousCursor == input.PreviousCursor ||
+                    (this.PreviousCursor != null &&
+                    this.PreviousCursor.Equals(input.PreviousCursor))
                 ) && 
                 (
-                    this.CodeHex == input.CodeHex ||
-                    (this.CodeHex != null &&
-                    this.CodeHex.Equals(input.CodeHex))
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
                 ) && 
                 (
-                    this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
-                    (this.RoyaltyVaultBalance != null &&
-                    this.RoyaltyVaultBalance.Equals(input.RoyaltyVaultBalance))
-                ) && 
-                (
-                    this.Blueprints == input.Blueprints ||
-                    (this.Blueprints != null &&
-                    this.Blueprints.Equals(input.Blueprints))
-                ) && 
-                (
-                    this.Schemas == input.Schemas ||
-                    (this.Schemas != null &&
-                    this.Schemas.Equals(input.Schemas))
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -257,26 +226,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.VmType.GetHashCode();
-                if (this.CodeHashHex != null)
+                if (this.TotalCount != null)
                 {
-                    hashCode = (hashCode * 59) + this.CodeHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
                 }
-                if (this.CodeHex != null)
+                if (this.PreviousCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
                 }
-                if (this.RoyaltyVaultBalance != null)
+                if (this.NextCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoyaltyVaultBalance.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
                 }
-                if (this.Blueprints != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.Blueprints.GetHashCode();
-                }
-                if (this.Schemas != null)
-                {
-                    hashCode = (hashCode * 59) + this.Schemas.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

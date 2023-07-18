@@ -67,22 +67,22 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("validator_emissions")]
-internal class ValidatorEmissions
+[Table("package_code_history")]
+internal class PackageCodeHistory
 {
     [Key]
     [Column("id")]
     public long Id { get; set; }
 
-    [Column("validator_entity_id")]
-    public long ValidatorEntityId { get; set; }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-    [Column("epoch_number")]
-    public long EpochNumber { get; set; }
+    [Column("package_entity_id")]
+    public long PackageEntityId { get; set; }
 
-    [Column("proposals_made")]
-    public long ProposalsMade { get; set; }
+    [Column("code_hash")]
+    public byte[] CodeHash { get; set; }
 
-    [Column("proposals_missed")]
-    public long ProposalsMissed { get; set; }
+    [Column("code")]
+    public byte[] Code { get; set; }
 }
