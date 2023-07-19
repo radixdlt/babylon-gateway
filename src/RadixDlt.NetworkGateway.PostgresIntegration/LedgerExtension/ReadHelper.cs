@@ -163,39 +163,41 @@ INNER JOIN LATERAL (
         }
 
         var entityIds = new List<long>();
-        var keys = new List<string>();
+        var keyRoles = new List<string>();
+        var keyModuleIds = new List<string>();
         var lookupSet = new HashSet<AccessRuleEntryLookup>();
 
         foreach (var accessRuleChangePointer in accessRuleChangePointers)
         {
             foreach (var entry in accessRuleChangePointer.Entries)
             {
-                lookupSet.Add(new AccessRuleEntryLookup(accessRuleChangePointer.ReferencedEntity.DatabaseId, entry.Key.RoleKey));
+                lookupSet.Add(new AccessRuleEntryLookup(accessRuleChangePointer.ReferencedEntity.DatabaseId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToString()));
             }
         }
 
         foreach (var lookup in lookupSet)
         {
             entityIds.Add(lookup.EntityId);
-            keys.Add(lookup.Key);
+            keyRoles.Add(lookup.KeyRole);
+            keyModuleIds.Add(lookup.KeyModule);
         }
 
         return await _dbContext.EntityAccessRulesEntryHistory
             .FromSqlInterpolated(@$"
-WITH variables (entity_id, key) AS (
-    SELECT UNNEST({entityIds}), UNNEST({keys})
+WITH variables (entity_id, key_role, module_id) AS (
+    SELECT UNNEST({entityIds}), UNNEST({keyRoles}), UNNEST({keyModuleIds})
 )
 SELECT eareh.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
     FROM entity_access_rules_entry_history
-    WHERE entity_id = variables.entity_id AND key = variables.key
+    WHERE entity_id = variables.entity_id AND key_role = variables.key_role AND key_module = variables.module_id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) eareh ON true;")
             .AsNoTracking()
-            .ToDictionaryAsync(e => new AccessRuleEntryLookup(e.EntityId, e.Key), token);
+            .ToDictionaryAsync(e => new AccessRuleEntryLookup(e.EntityId, e.KeyRole, e.KeyModule), token);
     }
 
     public async Task<Dictionary<long, EntityAccessRulesAggregateHistory>> MostRecentEntityAccessRulesAggregateHistoryFor(List<AccessRulesChangePointerLookup> accessRuleChanges, CancellationToken token)

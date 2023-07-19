@@ -81,8 +81,11 @@ internal class EntityAccessRulesEntryHistory
     [Column("entity_id")]
     public long EntityId { get; set; }
 
-    [Column("key")]
-    public string Key { get; set; }
+    [Column("key_role")]
+    public string KeyRole { get; set; }
+
+    [Column("key_module")]
+    public string KeyModule { get; set; }
 
     [Column("access_rules", TypeName = "jsonb")]
     public string? AccessRules { get; set; }

@@ -90,48 +90,48 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ComponentEntityAccessRules
+    /// ComponentEntityAccessRuleEntry
     /// </summary>
-    [DataContract(Name = "ComponentEntityAccessRules")]
-    public partial class ComponentEntityAccessRules : IEquatable<ComponentEntityAccessRules>
+    [DataContract(Name = "ComponentEntityAccessRuleEntry")]
+    public partial class ComponentEntityAccessRuleEntry : IEquatable<ComponentEntityAccessRuleEntry>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentEntityAccessRules" /> class.
+        /// Initializes a new instance of the <see cref="ComponentEntityAccessRuleEntry" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ComponentEntityAccessRules() { }
+        protected ComponentEntityAccessRuleEntry() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentEntityAccessRules" /> class.
+        /// Initializes a new instance of the <see cref="ComponentEntityAccessRuleEntry" /> class.
         /// </summary>
-        /// <param name="owner">owner (required).</param>
-        /// <param name="entries">entries (required).</param>
-        public ComponentEntityAccessRules(Object owner = default(Object), List<ComponentEntityAccessRuleEntry> entries = default(List<ComponentEntityAccessRuleEntry>))
+        /// <param name="roleKey">roleKey (required).</param>
+        /// <param name="rule">rule (required).</param>
+        public ComponentEntityAccessRuleEntry(ComponentEntityAccessRuleEntryRoleKey roleKey = default(ComponentEntityAccessRuleEntryRoleKey), Object rule = default(Object))
         {
-            // to ensure "owner" is required (not null)
-            if (owner == null)
+            // to ensure "roleKey" is required (not null)
+            if (roleKey == null)
             {
-                throw new ArgumentNullException("owner is a required property for ComponentEntityAccessRules and cannot be null");
+                throw new ArgumentNullException("roleKey is a required property for ComponentEntityAccessRuleEntry and cannot be null");
             }
-            this.Owner = owner;
-            // to ensure "entries" is required (not null)
-            if (entries == null)
+            this.RoleKey = roleKey;
+            // to ensure "rule" is required (not null)
+            if (rule == null)
             {
-                throw new ArgumentNullException("entries is a required property for ComponentEntityAccessRules and cannot be null");
+                throw new ArgumentNullException("rule is a required property for ComponentEntityAccessRuleEntry and cannot be null");
             }
-            this.Entries = entries;
+            this.Rule = rule;
         }
 
         /// <summary>
-        /// Gets or Sets Owner
+        /// Gets or Sets RoleKey
         /// </summary>
-        [DataMember(Name = "owner", IsRequired = true, EmitDefaultValue = true)]
-        public Object Owner { get; set; }
+        [DataMember(Name = "role_key", IsRequired = true, EmitDefaultValue = true)]
+        public ComponentEntityAccessRuleEntryRoleKey RoleKey { get; set; }
 
         /// <summary>
-        /// Gets or Sets Entries
+        /// Gets or Sets Rule
         /// </summary>
-        [DataMember(Name = "entries", IsRequired = true, EmitDefaultValue = true)]
-        public List<ComponentEntityAccessRuleEntry> Entries { get; set; }
+        [DataMember(Name = "rule", IsRequired = true, EmitDefaultValue = true)]
+        public Object Rule { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -140,9 +140,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ComponentEntityAccessRules {\n");
-            sb.Append("  Owner: ").Append(Owner).Append("\n");
-            sb.Append("  Entries: ").Append(Entries).Append("\n");
+            sb.Append("class ComponentEntityAccessRuleEntry {\n");
+            sb.Append("  RoleKey: ").Append(RoleKey).Append("\n");
+            sb.Append("  Rule: ").Append(Rule).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -163,15 +163,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ComponentEntityAccessRules);
+            return this.Equals(input as ComponentEntityAccessRuleEntry);
         }
 
         /// <summary>
-        /// Returns true if ComponentEntityAccessRules instances are equal
+        /// Returns true if ComponentEntityAccessRuleEntry instances are equal
         /// </summary>
-        /// <param name="input">Instance of ComponentEntityAccessRules to be compared</param>
+        /// <param name="input">Instance of ComponentEntityAccessRuleEntry to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ComponentEntityAccessRules input)
+        public bool Equals(ComponentEntityAccessRuleEntry input)
         {
             if (input == null)
             {
@@ -179,15 +179,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Owner == input.Owner ||
-                    (this.Owner != null &&
-                    this.Owner.Equals(input.Owner))
+                    this.RoleKey == input.RoleKey ||
+                    (this.RoleKey != null &&
+                    this.RoleKey.Equals(input.RoleKey))
                 ) && 
                 (
-                    this.Entries == input.Entries ||
-                    this.Entries != null &&
-                    input.Entries != null &&
-                    this.Entries.SequenceEqual(input.Entries)
+                    this.Rule == input.Rule ||
+                    (this.Rule != null &&
+                    this.Rule.Equals(input.Rule))
                 );
         }
 
@@ -200,13 +199,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Owner != null)
+                if (this.RoleKey != null)
                 {
-                    hashCode = (hashCode * 59) + this.Owner.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RoleKey.GetHashCode();
                 }
-                if (this.Entries != null)
+                if (this.Rule != null)
                 {
-                    hashCode = (hashCode * 59) + this.Entries.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Rule.GetHashCode();
                 }
                 return hashCode;
             }

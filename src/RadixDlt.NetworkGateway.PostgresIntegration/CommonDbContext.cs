@@ -321,7 +321,7 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityAccessRulesEntryHistory>()
-            .HasIndex(e => new { e.EntityId, e.Key, e.FromStateVersion });
+            .HasIndex(e => new { e.EntityId, e.KeyRole, e.KeyModule, e.FromStateVersion });
 
         modelBuilder.Entity<EntityAccessRulesAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });

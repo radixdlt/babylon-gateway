@@ -251,7 +251,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         blueprintName: "Account",
                         state: new JObject(),
-                        accessRules: new GatewayModel.ComponentEntityAccessRules(new JObject(), new JObject())
+                        accessRules: new GatewayModel.ComponentEntityAccessRules(new JObject(), new List<GatewayModel.ComponentEntityAccessRuleEntry>())
                     );
                     break;
 
@@ -263,7 +263,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         blueprintName: "Account",
                         state: new JObject(),
-                        accessRules: new GatewayModel.ComponentEntityAccessRules(new JObject(), new JObject())
+                        accessRules: new GatewayModel.ComponentEntityAccessRules(new JObject(), new List<GatewayModel.ComponentEntityAccessRuleEntry>())
                     );
                     break;
 
@@ -1709,9 +1709,12 @@ INNER JOIN LATERAL (
 
         return ownerRoles.ToDictionary(or => or.EntityId, or =>
         {
-            var ore = entries.Where(e => e.EntityId == or.EntityId).Select(e => new KeyValuePair<string, object>(e.Key, new JRaw(e.AccessRules)));
+            var accessRuleEntries = entries
+                .Where(e => e.EntityId == or.EntityId)
+                .Select(e => new GatewayModel.ComponentEntityAccessRuleEntry(new GatewayModel.ComponentEntityAccessRuleEntryRoleKey(e.KeyRole, e.KeyModule), e.AccessRules))
+                .ToList();
 
-            return new GatewayModel.ComponentEntityAccessRules(new JRaw(or.AccessRules), ore);
+            return new GatewayModel.ComponentEntityAccessRules(new JRaw(or.AccessRules), accessRuleEntries);
         });
     }
 

@@ -378,7 +378,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_access_rules_entry_history (id, from_state_version, entity_id, key, access_rules, is_deleted) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_access_rules_entry_history (id, from_state_version, entity_id, key_role, key_module, access_rules, is_deleted) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -386,7 +386,8 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.Key, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.KeyRole, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.KeyModule, NpgsqlDbType.Text, token);
             await writer.WriteAsync(e.AccessRules, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
         }

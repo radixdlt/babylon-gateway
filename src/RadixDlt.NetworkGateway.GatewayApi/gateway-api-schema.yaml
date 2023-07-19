@@ -876,6 +876,27 @@ components:
         owner:
           type: object
         entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ComponentEntityAccessRuleEntry"
+
+    ComponentEntityAccessRuleEntry:
+      type: object
+      required:
+        - role_key
+        - rule
+      properties:
+        role_key:
+          type: object
+          required:
+            - role
+            - module
+          properties:
+            role:
+              type: string
+            module:
+              type: string
+        rule:
           type: object
 
     FungibleResourcesCollection:

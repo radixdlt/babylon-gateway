@@ -98,7 +98,7 @@ internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType 
 
 internal record struct AccessRulesChangePointerLookup(long EntityId, long StateVersion);
 
-internal record struct AccessRuleEntryLookup(long EntityId, string Key);
+internal record struct AccessRuleEntryLookup(long EntityId, string KeyRole, string KeyModule);
 
 internal record AccessRulesChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
 {

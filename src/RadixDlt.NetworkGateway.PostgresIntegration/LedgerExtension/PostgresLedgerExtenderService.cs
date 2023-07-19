@@ -1336,13 +1336,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 foreach (var entry in accessRuleChange.Entries)
                 {
-                    var entryLookup = new AccessRuleEntryLookup(lookup.EntityId, entry.Key.RoleKey);
+                    var entryLookup = new AccessRuleEntryLookup(lookup.EntityId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToString());
                     var entryHistory = new EntityAccessRulesEntryHistory
                     {
                         Id = sequences.EntityAccessRulesEntryHistorySequence++,
                         FromStateVersion = lookup.StateVersion,
                         EntityId = lookup.EntityId,
-                        Key = entry.Key.RoleKey,
+                        KeyRole = entry.Key.RoleKey,
+                        KeyModule = entry.Key.ObjectModuleId.ToString(),
                         AccessRules = entry.Value?.AccessRule.ToJson(),
                         IsDeleted = entry.Value == null,
                     };
