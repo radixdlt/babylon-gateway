@@ -3,6 +3,7 @@ _Release Date: unreleased_
 
 - Added package details to `/satus/entity/details` endpoint.
 - New endpoint `/statistics/validators/uptime` returns validator uptime data.
+- Renamed `access_rules` to `role_assignments`. Included missing `module` to role assignment key.
 
 ## 0.4.0 - RCNet-V2
 _Release Date: 17.07.2023_

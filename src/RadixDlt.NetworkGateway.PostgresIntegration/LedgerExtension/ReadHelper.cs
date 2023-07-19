@@ -74,6 +74,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -155,23 +156,23 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
-    public async Task<Dictionary<AccessRuleEntryLookup, EntityAccessRulesEntryHistory>> MostRecentEntityAccessRulesEntryHistoryFor(ICollection<AccessRulesChangePointer> accessRuleChangePointers, CancellationToken token)
+    public async Task<Dictionary<RoleAssignmentEntryLookup, EntityRoleAssignmentsEntryHistory>> MostRecentEntityAccessRulesEntryHistoryFor(ICollection<AccessRulesChangePointer> accessRuleChangePointers, CancellationToken token)
     {
         if (!accessRuleChangePointers.Any())
         {
-            return new Dictionary<AccessRuleEntryLookup, EntityAccessRulesEntryHistory>();
+            return new Dictionary<RoleAssignmentEntryLookup, EntityRoleAssignmentsEntryHistory>();
         }
 
         var entityIds = new List<long>();
         var keyRoles = new List<string>();
-        var keyModuleIds = new List<string>();
-        var lookupSet = new HashSet<AccessRuleEntryLookup>();
+        var keyModuleIds = new List<ObjectModuleId>();
+        var lookupSet = new HashSet<RoleAssignmentEntryLookup>();
 
         foreach (var accessRuleChangePointer in accessRuleChangePointers)
         {
             foreach (var entry in accessRuleChangePointer.Entries)
             {
-                lookupSet.Add(new AccessRuleEntryLookup(accessRuleChangePointer.ReferencedEntity.DatabaseId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToString()));
+                lookupSet.Add(new RoleAssignmentEntryLookup(accessRuleChangePointer.ReferencedEntity.DatabaseId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToInternalModel()));
             }
         }
 
@@ -191,20 +192,20 @@ SELECT eareh.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
-    FROM entity_access_rules_entry_history
+    FROM entity_role_assignments_entry_history
     WHERE entity_id = variables.entity_id AND key_role = variables.key_role AND key_module = variables.module_id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) eareh ON true;")
             .AsNoTracking()
-            .ToDictionaryAsync(e => new AccessRuleEntryLookup(e.EntityId, e.KeyRole, e.KeyModule), token);
+            .ToDictionaryAsync(e => new RoleAssignmentEntryLookup(e.EntityId, e.KeyRole, e.KeyModule), token);
     }
 
-    public async Task<Dictionary<long, EntityAccessRulesAggregateHistory>> MostRecentEntityAccessRulesAggregateHistoryFor(List<AccessRulesChangePointerLookup> accessRuleChanges, CancellationToken token)
+    public async Task<Dictionary<long, EntityRoleAssignmentsAggregateHistory>> MostRecentEntityAccessRulesAggregateHistoryFor(List<AccessRulesChangePointerLookup> accessRuleChanges, CancellationToken token)
     {
         if (!accessRuleChanges.Any())
         {
-            return new Dictionary<long, EntityAccessRulesAggregateHistory>();
+            return new Dictionary<long, EntityRoleAssignmentsAggregateHistory>();
         }
 
         var entityIds = accessRuleChanges.Select(x => x.EntityId).Distinct().ToList();
@@ -218,7 +219,7 @@ SELECT earah.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
-    FROM entity_access_rules_aggregate_history
+    FROM entity_role_assignments_aggregate_history
     WHERE entity_id = variables.entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
@@ -569,9 +570,9 @@ SELECT
     nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
     nextval('entity_resource_vault_aggregate_history_id_seq') AS EntityResourceVaultAggregateHistorySequence,
     nextval('entity_vault_history_id_seq') AS EntityVaultHistorySequence,
-    nextval('entity_access_rules_aggregate_history_id_seq') AS EntityAccessRulesAggregateHistorySequence,
-    nextval('entity_access_rules_entry_history_id_seq') AS EntityAccessRulesEntryHistorySequence,
-    nextval('entity_access_rules_owner_role_history_id_seq') AS EntityAccessRulesOwnerRoleHistorySequence,
+    nextval('entity_role_assignments_aggregate_history_id_seq') AS EntityRoleAssignmentsAggregateHistorySequence,
+    nextval('entity_role_assignments_entry_history_id_seq') AS EntityRoleAssignmentsEntryHistorySequence,
+    nextval('entity_role_assignments_owner_role_history_id_seq') AS EntityRoleAssignmentsOwnerRoleHistorySequence,
     nextval('component_method_royalty_entry_history_id_seq') AS ComponentMethodRoyaltyEntryHistorySequence,
     nextval('resource_entity_supply_history_id_seq') AS ResourceEntitySupplyHistorySequence,
     nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,

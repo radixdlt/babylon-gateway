@@ -90,127 +90,34 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ComponentEntityAccessRules
+    /// Defines ObjectModuleId
     /// </summary>
-    [DataContract(Name = "ComponentEntityAccessRules")]
-    public partial class ComponentEntityAccessRules : IEquatable<ComponentEntityAccessRules>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum ObjectModuleId
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentEntityAccessRules" /> class.
+        /// Enum Main for value: Main
         /// </summary>
-        [JsonConstructorAttribute]
-        protected ComponentEntityAccessRules() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentEntityAccessRules" /> class.
-        /// </summary>
-        /// <param name="owner">owner (required).</param>
-        /// <param name="entries">entries (required).</param>
-        public ComponentEntityAccessRules(Object owner = default(Object), List<ComponentEntityAccessRuleEntry> entries = default(List<ComponentEntityAccessRuleEntry>))
-        {
-            // to ensure "owner" is required (not null)
-            if (owner == null)
-            {
-                throw new ArgumentNullException("owner is a required property for ComponentEntityAccessRules and cannot be null");
-            }
-            this.Owner = owner;
-            // to ensure "entries" is required (not null)
-            if (entries == null)
-            {
-                throw new ArgumentNullException("entries is a required property for ComponentEntityAccessRules and cannot be null");
-            }
-            this.Entries = entries;
-        }
+        [EnumMember(Value = "Main")]
+        Main = 1,
 
         /// <summary>
-        /// Gets or Sets Owner
+        /// Enum Metadata for value: Metadata
         /// </summary>
-        [DataMember(Name = "owner", IsRequired = true, EmitDefaultValue = true)]
-        public Object Owner { get; set; }
+        [EnumMember(Value = "Metadata")]
+        Metadata = 2,
 
         /// <summary>
-        /// Gets or Sets Entries
+        /// Enum Royalty for value: Royalty
         /// </summary>
-        [DataMember(Name = "entries", IsRequired = true, EmitDefaultValue = true)]
-        public List<ComponentEntityAccessRuleEntry> Entries { get; set; }
+        [EnumMember(Value = "Royalty")]
+        Royalty = 3,
 
         /// <summary>
-        /// Returns the string presentation of the object
+        /// Enum AccessRules for value: AccessRules
         /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class ComponentEntityAccessRules {\n");
-            sb.Append("  Owner: ").Append(Owner).Append("\n");
-            sb.Append("  Entries: ").Append(Entries).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Returns the JSON string presentation of the object
-        /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Returns true if objects are equal
-        /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as ComponentEntityAccessRules);
-        }
-
-        /// <summary>
-        /// Returns true if ComponentEntityAccessRules instances are equal
-        /// </summary>
-        /// <param name="input">Instance of ComponentEntityAccessRules to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(ComponentEntityAccessRules input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.Owner == input.Owner ||
-                    (this.Owner != null &&
-                    this.Owner.Equals(input.Owner))
-                ) && 
-                (
-                    this.Entries == input.Entries ||
-                    this.Entries != null &&
-                    input.Entries != null &&
-                    this.Entries.SequenceEqual(input.Entries)
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                if (this.Owner != null)
-                {
-                    hashCode = (hashCode * 59) + this.Owner.GetHashCode();
-                }
-                if (this.Entries != null)
-                {
-                    hashCode = (hashCode * 59) + this.Entries.GetHashCode();
-                }
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "AccessRules")]
+        AccessRules = 4
 
     }
 

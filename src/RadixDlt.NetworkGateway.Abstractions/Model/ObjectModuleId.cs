@@ -62,28 +62,12 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
-
-[Table("entity_access_rules_aggregate_history")]
-internal class EntityAccessRulesAggregateHistory
+public enum ObjectModuleId
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("entity_id")]
-    public long EntityId { get; set; }
-
-    [Column("owner_role_id")]
-    public long OwnerRoleId { get; set; }
-
-    [Column("entry_ids")]
-    public List<long> EntryIds { get; set; }
+    Main,
+    Metadata,
+    Royalty,
+    AccessRules,
 }

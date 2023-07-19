@@ -348,14 +348,14 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyEntityAccessRulesOwnerRoleHistory(List<EntityAccessRulesOwnerRoleHistory> entities, CancellationToken token)
+    public async Task<int> CopyEntityRoleAssignmentsOwnerRoleHistory(List<EntityRoleAssignmentsOwnerRoleHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_access_rules_owner_role_history (id, from_state_version, entity_id, access_rules) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_role_assignments_owner_role_history (id, from_state_version, entity_id, role_assignments) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -363,7 +363,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.AccessRules, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.RoleAssignments, NpgsqlDbType.Jsonb, token);
         }
 
         await writer.CompleteAsync(token);
@@ -371,14 +371,14 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyEntityAccessRulesEntryHistory(List<EntityAccessRulesEntryHistory> entities, CancellationToken token)
+    public async Task<int> CopyEntityRoleAssignmentsRulesEntryHistory(List<EntityRoleAssignmentsEntryHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_access_rules_entry_history (id, from_state_version, entity_id, key_role, key_module, access_rules, is_deleted) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_role_assignments_entry_history (id, from_state_version, entity_id, key_role, key_module, role_assignments, is_deleted) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -387,8 +387,8 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.KeyRole, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(e.KeyModule, NpgsqlDbType.Text, token);
-            await writer.WriteAsync(e.AccessRules, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.KeyModule, "object_module_id", token);
+            await writer.WriteAsync(e.RoleAssignments, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
         }
 
@@ -397,14 +397,14 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyEntityAccessRulesAggregateHistory(List<EntityAccessRulesAggregateHistory> entities, CancellationToken token)
+    public async Task<int> CopyEntityRoleAssignmentsAggregateHistory(List<EntityRoleAssignmentsAggregateHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_access_rules_aggregate_history (id, from_state_version, entity_id, owner_role_id, entry_ids) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_role_assignments_aggregate_history (id, from_state_version, entity_id, owner_role_id, entry_ids) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -908,9 +908,9 @@ SELECT
     setval('entity_resource_aggregate_history_id_seq', @entityResourceAggregateHistorySequence),
     setval('entity_resource_vault_aggregate_history_id_seq', @entityResourceVaultAggregateHistorySequence),
     setval('entity_vault_history_id_seq', @entityVaultHistorySequence),
-    setval('entity_access_rules_aggregate_history_id_seq', @entityAccessRulesAggregateHistorySequence),
-    setval('entity_access_rules_entry_history_id_seq', @EntityAccessRulesEntryHistorySequence),
-    setval('entity_access_rules_owner_role_history_id_seq', @entityAccessRulesOwnerRoleHistorySequence),
+    setval('entity_role_assignments_aggregate_history_id_seq', @entityRoleAssignmentsAggregateHistorySequence),
+    setval('entity_role_assignments_entry_history_id_seq', @entityRoleAssignmentsEntryHistorySequence),
+    setval('entity_role_assignments_owner_role_history_id_seq', @entityRoleAssignmentsOwnerRoleHistorySequence),
     setval('component_method_royalty_entry_history_id_seq', @componentMethodRoyaltyEntryHistorySequence),
     setval('resource_entity_supply_history_id_seq', @resourceEntitySupplyHistorySequence),
     setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
@@ -935,9 +935,9 @@ SELECT
                 entityResourceAggregateHistorySequence = sequences.EntityResourceAggregateHistorySequence,
                 entityResourceVaultAggregateHistorySequence = sequences.EntityResourceVaultAggregateHistorySequence,
                 entityVaultHistorySequence = sequences.EntityVaultHistorySequence,
-                entityAccessRulesAggregateHistorySequence = sequences.EntityAccessRulesAggregateHistorySequence,
-                entityAccessRulesEntryHistorySequence = sequences.EntityAccessRulesEntryHistorySequence,
-                entityAccessRulesOwnerRoleHistorySequence = sequences.EntityAccessRulesOwnerRoleHistorySequence,
+                entityRoleAssignmentsAggregateHistorySequence = sequences.EntityRoleAssignmentsAggregateHistorySequence,
+                entityRoleAssignmentsEntryHistorySequence = sequences.EntityRoleAssignmentsEntryHistorySequence,
+                entityRoleAssignmentsOwnerRoleHistorySequence = sequences.EntityRoleAssignmentsOwnerRoleHistorySequence,
                 componentMethodRoyaltyEntryHistorySequence = sequences.ComponentMethodRoyaltyEntryHistorySequence,
                 resourceEntitySupplyHistorySequence = sequences.ResourceEntitySupplyHistorySequence,
                 nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,

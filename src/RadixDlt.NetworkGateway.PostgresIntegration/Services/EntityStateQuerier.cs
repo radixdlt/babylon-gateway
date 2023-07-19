@@ -185,7 +185,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 case GlobalFungibleResourceEntity frme:
                     var fungibleResourceSupplyData = resourcesSupplyData[frme.Id];
                     details = new GatewayModel.StateEntityDetailsResponseFungibleResourceDetails(
-                        accessRules: accessRulesHistory[frme.Id],
+                        roleAssignments: accessRulesHistory[frme.Id],
                         totalSupply: fungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: fungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: fungibleResourceSupplyData.TotalBurned.ToString(),
@@ -201,7 +201,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     }
 
                     details = new GatewayModel.StateEntityDetailsResponseNonFungibleResourceDetails(
-                        accessRules: accessRulesHistory[nfrme.Id],
+                        roleAssignments: accessRulesHistory[nfrme.Id],
                         totalSupply: nonFungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: nonFungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: nonFungibleResourceSupplyData.TotalBurned.ToString(),
@@ -251,7 +251,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         blueprintName: "Account",
                         state: new JObject(),
-                        accessRules: new GatewayModel.ComponentEntityAccessRules(new JObject(), new List<GatewayModel.ComponentEntityAccessRuleEntry>())
+                        roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(new JObject(), new List<GatewayModel.ComponentEntityRoleAssignmentEntry>())
                     );
                     break;
 
@@ -263,7 +263,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         blueprintName: "Account",
                         state: new JObject(),
-                        accessRules: new GatewayModel.ComponentEntityAccessRules(new JObject(), new List<GatewayModel.ComponentEntityAccessRuleEntry>())
+                        roleAssignments: new GatewayModel.ComponentEntityRoleAssignments(new JObject(), new List<GatewayModel.ComponentEntityRoleAssignmentEntry>())
                     );
                     break;
 
@@ -277,7 +277,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                         packageAddress: correlatedAddresses[ce.PackageId],
                         blueprintName: ce.BlueprintName,
                         state: state != null ? new JRaw(state.State) : null,
-                        accessRules: accessRules,
+                        roleAssignments: accessRules,
                         royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null
                     );
                     break;
@@ -1660,7 +1660,7 @@ order by ord
         return entities;
     }
 
-    private async Task<Dictionary<long, GatewayModel.ComponentEntityAccessRules>> GetAccessRulesHistory(ICollection<ResourceEntity> resourceEntities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    private async Task<Dictionary<long, GatewayModel.ComponentEntityRoleAssignments>> GetAccessRulesHistory(ICollection<ResourceEntity> resourceEntities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var lookup = new HashSet<long>();
 
@@ -1676,7 +1676,7 @@ order by ord
 
         if (!lookup.Any())
         {
-            return new Dictionary<long, GatewayModel.ComponentEntityAccessRules>();
+            return new Dictionary<long, GatewayModel.ComponentEntityRoleAssignments>();
         }
 
         var entityIds = lookup.ToList();
@@ -1688,7 +1688,7 @@ SELECT earah.*
 FROM variables v
 INNER JOIN LATERAL (
     SELECT *
-    FROM entity_access_rules_aggregate_history
+    FROM entity_role_assignments_aggregate_history
     WHERE entity_id = v.entity_id AND from_state_version <= {ledgerState.StateVersion}
     ORDER BY from_state_version DESC
     LIMIT 1
@@ -1711,10 +1711,10 @@ INNER JOIN LATERAL (
         {
             var accessRuleEntries = entries
                 .Where(e => e.EntityId == or.EntityId)
-                .Select(e => new GatewayModel.ComponentEntityAccessRuleEntry(new GatewayModel.ComponentEntityAccessRuleEntryRoleKey(e.KeyRole, e.KeyModule), e.AccessRules))
+                .Select(e => new GatewayModel.ComponentEntityRoleAssignmentEntry(new GatewayModel.ComponentEntityRoleAssignmentEntryRoleKey(e.KeyRole, e.KeyModule.ToGatewayModel()), e.RoleAssignments))
                 .ToList();
 
-            return new GatewayModel.ComponentEntityAccessRules(new JRaw(or.AccessRules), accessRuleEntries);
+            return new GatewayModel.ComponentEntityRoleAssignments(new JRaw(or.RoleAssignments), accessRuleEntries);
         });
     }
 
