@@ -103,41 +103,39 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateKeyValueStoreDataResponseItem" /> class.
         /// </summary>
-        /// <param name="keyHex">Hex-encoded binary blob. (required).</param>
-        /// <param name="valueHex">Hex-encoded binary blob. (required).</param>
+        /// <param name="key">key (required).</param>
+        /// <param name="value">value (required).</param>
         /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
         /// <param name="isLocked">isLocked (required).</param>
-        public StateKeyValueStoreDataResponseItem(string keyHex = default(string), string valueHex = default(string), long lastUpdatedAtStateVersion = default(long), bool isLocked = default(bool))
+        public StateKeyValueStoreDataResponseItem(ScryptoSborValue key = default(ScryptoSborValue), ScryptoSborValue value = default(ScryptoSborValue), long lastUpdatedAtStateVersion = default(long), bool isLocked = default(bool))
         {
-            // to ensure "keyHex" is required (not null)
-            if (keyHex == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("keyHex is a required property for StateKeyValueStoreDataResponseItem and cannot be null");
+                throw new ArgumentNullException("key is a required property for StateKeyValueStoreDataResponseItem and cannot be null");
             }
-            this.KeyHex = keyHex;
-            // to ensure "valueHex" is required (not null)
-            if (valueHex == null)
+            this.Key = key;
+            // to ensure "value" is required (not null)
+            if (value == null)
             {
-                throw new ArgumentNullException("valueHex is a required property for StateKeyValueStoreDataResponseItem and cannot be null");
+                throw new ArgumentNullException("value is a required property for StateKeyValueStoreDataResponseItem and cannot be null");
             }
-            this.ValueHex = valueHex;
+            this.Value = value;
             this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
             this.IsLocked = isLocked;
         }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Gets or Sets Key
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string KeyHex { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public ScryptoSborValue Key { get; set; }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// Gets or Sets Value
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "value_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string ValueHex { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public ScryptoSborValue Value { get; set; }
 
         /// <summary>
         /// TBD
@@ -160,8 +158,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateKeyValueStoreDataResponseItem {\n");
-            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
-            sb.Append("  ValueHex: ").Append(ValueHex).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("  IsLocked: ").Append(IsLocked).Append("\n");
             sb.Append("}\n");
@@ -200,14 +198,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.KeyHex == input.KeyHex ||
-                    (this.KeyHex != null &&
-                    this.KeyHex.Equals(input.KeyHex))
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && 
                 (
-                    this.ValueHex == input.ValueHex ||
-                    (this.ValueHex != null &&
-                    this.ValueHex.Equals(input.ValueHex))
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 ) && 
                 (
                     this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
@@ -228,13 +226,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.KeyHex != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                if (this.ValueHex != null)
+                if (this.Value != null)
                 {
-                    hashCode = (hashCode * 59) + this.ValueHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 hashCode = (hashCode * 59) + this.IsLocked.GetHashCode();

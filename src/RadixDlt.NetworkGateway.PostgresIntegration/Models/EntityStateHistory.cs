@@ -80,6 +80,6 @@ internal class EntityStateHistory
     [Column("entity_id")]
     public long EntityId { get; set; }
 
-    [Column("state", TypeName = "jsonb")]
-    public string State { get; set; }
+    [Column("state")]
+    public byte[] State { get; set; }
 }

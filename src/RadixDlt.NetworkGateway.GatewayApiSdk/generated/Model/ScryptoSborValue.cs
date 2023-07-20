@@ -104,8 +104,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="ScryptoSborValue" /> class.
         /// </summary>
         /// <param name="rawHex">rawHex (required).</param>
-        /// <param name="rawJson">rawJson (required).</param>
-        public ScryptoSborValue(string rawHex = default(string), Object rawJson = default(Object))
+        /// <param name="json">json (required).</param>
+        public ScryptoSborValue(string rawHex = default(string), Object json = default(Object))
         {
             // to ensure "rawHex" is required (not null)
             if (rawHex == null)
@@ -113,12 +113,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("rawHex is a required property for ScryptoSborValue and cannot be null");
             }
             this.RawHex = rawHex;
-            // to ensure "rawJson" is required (not null)
-            if (rawJson == null)
+            // to ensure "json" is required (not null)
+            if (json == null)
             {
-                throw new ArgumentNullException("rawJson is a required property for ScryptoSborValue and cannot be null");
+                throw new ArgumentNullException("json is a required property for ScryptoSborValue and cannot be null");
             }
-            this.RawJson = rawJson;
+            this.Json = json;
         }
 
         /// <summary>
@@ -128,10 +128,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string RawHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets RawJson
+        /// Gets or Sets Json
         /// </summary>
-        [DataMember(Name = "raw_json", IsRequired = true, EmitDefaultValue = true)]
-        public Object RawJson { get; set; }
+        [DataMember(Name = "json", IsRequired = true, EmitDefaultValue = true)]
+        public Object Json { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,7 +142,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ScryptoSborValue {\n");
             sb.Append("  RawHex: ").Append(RawHex).Append("\n");
-            sb.Append("  RawJson: ").Append(RawJson).Append("\n");
+            sb.Append("  Json: ").Append(Json).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -184,9 +184,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.RawHex.Equals(input.RawHex))
                 ) && 
                 (
-                    this.RawJson == input.RawJson ||
-                    (this.RawJson != null &&
-                    this.RawJson.Equals(input.RawJson))
+                    this.Json == input.Json ||
+                    (this.Json != null &&
+                    this.Json.Equals(input.Json))
                 );
         }
 
@@ -203,9 +203,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
                 }
-                if (this.RawJson != null)
+                if (this.Json != null)
                 {
-                    hashCode = (hashCode * 59) + this.RawJson.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Json.GetHashCode();
                 }
                 return hashCode;
             }

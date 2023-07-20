@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\RadixDlt.NetworkGateway.DataAggregator\RadixDlt.NetworkGateway.DataAggregator.csproj" />
     <ProjectReference Include="..\RadixDlt.NetworkGateway.GatewayApi\RadixDlt.NetworkGateway.GatewayApi.csproj" />
+    <PackageReference Include="RadixDlt.RadixEngineToolkit" />
   </ItemGroup>
 
 </Project>

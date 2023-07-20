@@ -108,6 +108,7 @@ internal static class CustomTypes
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PublicKeyType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<ResourceType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<ObjectModuleId>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<KeyTypeKind>();
 #pragma warning restore CS0618
 
         _configured = true;

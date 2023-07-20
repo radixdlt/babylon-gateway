@@ -80,4 +80,14 @@ public static class MappingExtensions
             _ => throw new UnreachableException($"Didn't expect {objectModuleId} value"),
         };
     }
+
+    public static KeyTypeKind ToInternalModel(this CoreModel.LocalTypeIndex.KindEnum indexKind)
+    {
+        return indexKind switch
+        {
+            CoreModel.LocalTypeIndex.KindEnum.SchemaLocal => KeyTypeKind.SchemaLocal,
+            CoreModel.LocalTypeIndex.KindEnum.WellKnown => KeyTypeKind.WellKnown,
+            _ => throw new UnreachableException($"Didn't expect {indexKind} value"),
+        };
+    }
 }

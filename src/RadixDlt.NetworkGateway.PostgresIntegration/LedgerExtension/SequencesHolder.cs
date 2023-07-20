@@ -72,6 +72,8 @@ internal class SequencesHolder
 
     public long EntityStateHistorySequence { get; set; }
 
+    public long ValidatorStateHistorySequence { get; set; }
+
     public long EntitySequence { get; set; }
 
     public long EntityMetadataHistorySequence { get; set; }
@@ -117,4 +119,8 @@ internal class SequencesHolder
     public long KeyValueStoreEntryHistorySequence { get; set; }
 
     public long ValidatorEmissionStatisticsSequence { get; set; }
+
+    public long NonFungibleDataSchemaHistorySequence { get; set; }
+
+    public long KeyValueSchemaHistorySequence { get; set; }
 }

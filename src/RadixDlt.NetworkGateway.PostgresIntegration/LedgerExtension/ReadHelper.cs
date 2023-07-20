@@ -563,6 +563,7 @@ SELECT
     nextval('account_default_deposit_rule_history_id_seq') AS AccountDefaultDepositRuleHistorySequence,
     nextval('account_resource_deposit_rule_history_id_seq') AS AccountResourceDepositRuleHistorySequence,
     nextval('entity_state_history_id_seq') AS EntityStateHistorySequence,
+    nextval('validator_state_history_id_seq') AS ValidatorStateHistorySequence,
     nextval('entities_id_seq') AS EntitySequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
     nextval('entity_metadata_aggregate_history_id_seq') AS EntityMetadataAggregateHistorySequence,
@@ -585,7 +586,9 @@ SELECT
     nextval('package_code_history_id_seq') AS PackageCodeHistorySequence,
     nextval('package_schema_history_id_seq') AS PackageSchemaHistorySequence,
     nextval('key_value_store_entry_history_id_seq') AS KeyValueStoreEntryHistorySequence,
-    nextval('validator_emission_statistics_id_seq') AS ValidatorEmissionStatisticsSequence",
+    nextval('validator_emission_statistics_id_seq') AS ValidatorEmissionStatisticsSequence,
+    nextval('non_fungible_data_schema_history_id_seq') AS NonFungibleDataSchemaHistorySequence,
+    nextval('key_value_store_schema_history_id_seq') AS KeyValueSchemaHistorySequence",
             cancellationToken: token);
 
         return await _connection.QueryFirstAsync<SequencesHolder>(cd);

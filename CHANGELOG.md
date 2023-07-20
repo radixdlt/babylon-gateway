@@ -19,6 +19,10 @@ _WORK IN PROGRESS_
 - Added package details to `/satus/entity/details` endpoint.
 - New endpoint `/statistics/validators/uptime` returns validator uptime data.
 - New endpoint `/state/key-value/data` returns entries of requested KeyValueStore.
+- Return programmatic json with type names for:
+  - key-value key and data in `/state/key-value/data` endpoint
+  - non fungible data in `/state/non-fungible/data` endpoint
+  - events in `/transaction/committed-details` and `/stream/transactions` endpoints.
 
 -------
 
