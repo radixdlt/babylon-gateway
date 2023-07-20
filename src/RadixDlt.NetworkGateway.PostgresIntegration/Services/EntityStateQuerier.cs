@@ -374,13 +374,11 @@ internal class EntityStateQuerier : IEntityStateQuerier
             ledgerState,
             token);
 
-        var nonFungibleIdsFirstPage = nonFungibleIds
-            .GroupBy(x => x.EntityId)
-            .ToDictionary(x => x.Key, x => x.ToList());
+        var nonFungibleIdsFirstPage = nonFungibleIds.GroupBy(x => x.EntityId);
 
         return nonFungiblesSliceAggregatedPerVault.ToDictionary(
             x => x.Key,
-            x => MapToNonFungibleResourcesCollection(x.Value, nonFungibleIdsFirstPage[x.Key], offset, limit, offset, limit)
+            x => MapToNonFungibleResourcesCollection(x.Value, nonFungibleIdsFirstPage.FirstOrDefault(y => y.Key == x.Key)?.ToList(), offset, limit, offset, limit)
         );
     }
 
