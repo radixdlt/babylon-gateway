@@ -71,6 +71,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 using LedgerTransaction = RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction;
 using NonFungibleIdType = RadixDlt.NetworkGateway.Abstractions.Model.NonFungibleIdType;
 using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
@@ -181,6 +182,24 @@ internal static class GatewayModelExtensions
             _ => throw new UnreachableException($"Didn't expect {vmType} value"),
         };
     }
+
+    public static GatewayModel.PublicKey ToGatewayModel(this ToolkitModel.PublicKey publicKey)
+    {
+        return publicKey switch
+        {
+            ToolkitModel.PublicKey.Secp256k1 secp256k1 => new GatewayModel.PublicKeyEcdsaSecp256k1(secp256k1.value.ToArray().ToHex()),
+            ToolkitModel.PublicKey.Ed25519 ed25519 => new GatewayModel.PublicKeyEddsaEd25519(ed25519.value.ToArray().ToHex()),
+            _ => throw new UnreachableException($"Didn't expect {publicKey} value"),
+        };
+    }
+
+    public static GatewayModel.PublicKeyHash ToGatewayModel(this ToolkitModel.PublicKeyHash publicKeyHash)
+    {
+        return publicKeyHash switch
+        {
+            ToolkitModel.PublicKeyHash.Secp256k1 secp256k1 => new GatewayModel.PublicKeyHashEcdsaSecp256k1(secp256k1.value.ToArray().ToHex()),
+            ToolkitModel.PublicKeyHash.Ed25519 ed25519 => new GatewayModel.PublicKeyHashEddsaEd25519(ed25519.value.ToArray().ToHex()),
+            _ => throw new UnreachableException($"Didn't expect {publicKeyHash} value"),
 
     public static GatewayModel.ObjectModuleId ToGatewayModel(this ObjectModuleId objectModuleId)
     {

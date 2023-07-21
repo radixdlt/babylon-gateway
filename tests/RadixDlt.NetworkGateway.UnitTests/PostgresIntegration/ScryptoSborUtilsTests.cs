@@ -81,8 +81,8 @@ public class ScryptoSborUtilsTests
         var result = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(Convert.FromHexString(Input), 1);
 
         result.ShouldNotBeNull();
-        result.Should().BeOfType<GatewayModel.MetadataScalarValue>();
-        (result as GatewayModel.MetadataScalarValue)!.Value.Should().BeEquivalentTo("My metadata string");
+        result.Should().BeOfType<GatewayModel.MetadataStringValue>();
+        (result as GatewayModel.MetadataStringValue)!.Value.Should().BeEquivalentTo("My metadata string");
     }
 
     [Fact]
@@ -93,8 +93,8 @@ public class ScryptoSborUtilsTests
         var expected = new List<string> { "My metadata array string 1", "My metadata array string 2" };
 
         result.ShouldNotBeNull();
-        result.Should().BeOfType<GatewayModel.MetadataScalarArrayValue>();
-        (result as GatewayModel.MetadataScalarArrayValue)!.Values.Should().BeEquivalentTo(expected);
+        result.Should().BeOfType<GatewayModel.MetadataStringArrayValue>();
+        (result as GatewayModel.MetadataStringArrayValue)!.Values.Should().BeEquivalentTo(expected);
     }
 
     [Theory]
