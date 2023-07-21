@@ -98,16 +98,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityMetadataItemValueAllOf" /> class.
         /// </summary>
-        /// <param name="typed">typed.</param>
+        [JsonConstructorAttribute]
+        protected EntityMetadataItemValueAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityMetadataItemValueAllOf" /> class.
+        /// </summary>
+        /// <param name="typed">typed (required).</param>
         public EntityMetadataItemValueAllOf(MetadataTypedValue typed = default(MetadataTypedValue))
         {
+            // to ensure "typed" is required (not null)
+            if (typed == null)
+            {
+                throw new ArgumentNullException("typed is a required property for EntityMetadataItemValueAllOf and cannot be null");
+            }
             this.Typed = typed;
         }
 
         /// <summary>
         /// Gets or Sets Typed
         /// </summary>
-        [DataMember(Name = "typed", EmitDefaultValue = true)]
+        [DataMember(Name = "typed", IsRequired = true, EmitDefaultValue = true)]
         public MetadataTypedValue Typed { get; set; }
 
         /// <summary>

@@ -904,6 +904,8 @@ components:
       allOf:
         - $ref: "#/components/schemas/ScryptoSborValue"
         - type: object
+          required:
+            - typed
           properties:
             typed:
               $ref: "#/components/schemas/MetadataTypedValue"
