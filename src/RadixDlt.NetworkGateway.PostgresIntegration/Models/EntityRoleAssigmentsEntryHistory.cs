@@ -62,14 +62,15 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entity_access_rules_aggregate_history")]
-internal class EntityAccessRulesAggregateHistory
+[Table("entity_role_assignments_entry_history")]
+internal class EntityRoleAssignmentsEntryHistory
 {
     [Key]
     [Column("id")]
@@ -81,9 +82,16 @@ internal class EntityAccessRulesAggregateHistory
     [Column("entity_id")]
     public long EntityId { get; set; }
 
-    [Column("owner_role_id")]
-    public long OwnerRoleId { get; set; }
+    [Column("key_role")]
+    public string KeyRole { get; set; }
 
-    [Column("entry_ids")]
-    public List<long> EntryIds { get; set; }
+    [Column("key_module")]
+    public ObjectModuleId KeyModule { get; set; }
+
+    [Column("role_assignments", TypeName = "jsonb")]
+    public string? RoleAssignments { get; set; }
+
+    [MemberNotNullWhen(false, nameof(RoleAssignments))]
+    [Column("is_deleted")]
+    public bool IsDeleted { get; set; }
 }

@@ -627,10 +627,6 @@ components:
       description: Hex-encoded notarized transaction payload which can be submitted.
       type: string
 
-    AccessRulesChain:
-      description: Refer to `#/components/schemas/AccessRules` of CoreApi for more details.
-      type: object
-
     LastUpdatedAtStateVersion:
       description: TBD # TODO describe
       type: integer
@@ -737,6 +733,14 @@ components:
     #
     # Common Response Types
     #
+
+    ObjectModuleId:
+      type: string
+      enum:
+        - Main
+        - Metadata
+        - Royalty
+        - AccessRules
 
     ValidatorVaultItem:
       type: object
@@ -867,7 +871,7 @@ components:
             typed:
               $ref: "#/components/schemas/MetadataTypedValue"
 
-    ComponentEntityAccessRules:
+    ComponentEntityRoleAssignments:
       type: object
       required:
         - owner
@@ -876,6 +880,27 @@ components:
         owner:
           type: object
         entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ComponentEntityRoleAssignmentEntry"
+
+    ComponentEntityRoleAssignmentEntry:
+      type: object
+      required:
+        - role_key
+        - rule
+      properties:
+        role_key:
+          type: object
+          required:
+            - role
+            - module
+          properties:
+            role:
+              type: string
+            module:
+              type: ObjectModuleId
+        rule:
           type: object
 
     FungibleResourcesCollection:
@@ -1760,14 +1785,14 @@ components:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
-            - access_rules
+            - role_assignments
             - divisibility
             - total_supply
             - total_minted
             - total_burned
           properties:
-            access_rules:
-              $ref: "#/components/schemas/ComponentEntityAccessRules"
+            role_assignments:
+              $ref: "#/components/schemas/ComponentEntityRoleAssignments"
             divisibility:
               type: integer
               minimum: 0
@@ -1782,14 +1807,14 @@ components:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
-            - access_rules
+            - role_assignments
             - non_fungible_id_type
             - total_supply
             - total_minted
             - total_burned
           properties:
-            access_rules:
-              $ref: "#/components/schemas/ComponentEntityAccessRules"
+            role_assignments:
+              $ref: "#/components/schemas/ComponentEntityRoleAssignments"
             non_fungible_id_type:
               $ref: "#/components/schemas/NonFungibleIdType"
             total_supply:
@@ -1892,7 +1917,7 @@ components:
         - type: object
           required:
             - blueprint_name
-            - access_rules
+            - role_assignments
           properties:
             package_address:
               $ref: "#/components/schemas/Address"
@@ -1900,8 +1925,8 @@ components:
               type: string
             state:
               type: object
-            access_rules:
-              $ref: "#/components/schemas/ComponentEntityAccessRules"
+            role_assignments:
+              $ref: "#/components/schemas/ComponentEntityRoleAssignments"
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
 

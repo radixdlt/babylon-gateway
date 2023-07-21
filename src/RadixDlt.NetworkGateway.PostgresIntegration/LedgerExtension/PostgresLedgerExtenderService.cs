@@ -1223,9 +1223,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var entityResourceAggregateHistoryCandidates = new List<EntityResourceAggregateHistory>();
             var entityResourceAggregatedVaultsHistoryToAdd = new List<EntityResourceAggregatedVaultsHistory>();
             var entityResourceVaultAggregateHistoryToAdd = new List<EntityResourceVaultAggregateHistory>();
-            var entityAccessRulesOwnerRoleHistoryToAdd = new List<EntityAccessRulesOwnerRoleHistory>();
-            var entityAccessRulesEntryHistoryToAdd = new List<EntityAccessRulesEntryHistory>();
-            var entityAccessRulesAggregateHistoryToAdd = new List<EntityAccessRulesAggregateHistory>();
+            var entityAccessRulesOwnerRoleHistoryToAdd = new List<EntityRoleAssignmentsOwnerRoleHistory>();
+            var entityAccessRulesEntryHistoryToAdd = new List<EntityRoleAssignmentsEntryHistory>();
+            var entityAccessRulesAggregateHistoryToAdd = new List<EntityRoleAssignmentsAggregateHistory>();
             var nonFungibleIdStoreHistoryToAdd = new Dictionary<NonFungibleStoreLookup, NonFungibleIdStoreHistory>();
             var nonFungibleIdDataToAdd = new List<NonFungibleIdData>();
             var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
@@ -1293,28 +1293,28 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             {
                 var accessRuleChange = accessRulesChangePointers[lookup];
 
-                EntityAccessRulesOwnerRoleHistory? ownerRole = null;
+                EntityRoleAssignmentsOwnerRoleHistory? ownerRole = null;
 
                 if (accessRuleChange.OwnerRole != null)
                 {
-                    ownerRole = new EntityAccessRulesOwnerRoleHistory
+                    ownerRole = new EntityRoleAssignmentsOwnerRoleHistory
                     {
-                        Id = sequences.EntityAccessRulesOwnerRoleHistorySequence++,
+                        Id = sequences.EntityRoleAssignmentsOwnerRoleHistorySequence++,
                         FromStateVersion = lookup.StateVersion,
                         EntityId = lookup.EntityId,
-                        AccessRules = accessRuleChange.OwnerRole.Value.OwnerRole.ToJson(),
+                        RoleAssignments = accessRuleChange.OwnerRole.Value.OwnerRole.ToJson(),
                     };
 
                     entityAccessRulesOwnerRoleHistoryToAdd.Add(ownerRole);
                 }
 
-                EntityAccessRulesAggregateHistory aggregate;
+                EntityRoleAssignmentsAggregateHistory aggregate;
 
                 if (!mostRecentAccessRulesAggregateHistory.TryGetValue(lookup.EntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
                 {
-                    aggregate = new EntityAccessRulesAggregateHistory
+                    aggregate = new EntityRoleAssignmentsAggregateHistory
                     {
-                        Id = sequences.EntityAccessRulesAggregateHistorySequence++,
+                        Id = sequences.EntityRoleAssignmentsAggregateHistorySequence++,
                         FromStateVersion = lookup.StateVersion,
                         EntityId = lookup.EntityId,
                         OwnerRoleId = ownerRole?.Id ?? previousAggregate?.OwnerRoleId ?? throw new InvalidOperationException("Unable to determine OwnerRoleId"),
@@ -1336,14 +1336,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 foreach (var entry in accessRuleChange.Entries)
                 {
-                    var entryLookup = new AccessRuleEntryLookup(lookup.EntityId, entry.Key.RoleKey);
-                    var entryHistory = new EntityAccessRulesEntryHistory
+                    var entryLookup = new RoleAssignmentEntryLookup(lookup.EntityId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToInternalModel());
+                    var entryHistory = new EntityRoleAssignmentsEntryHistory
                     {
-                        Id = sequences.EntityAccessRulesEntryHistorySequence++,
+                        Id = sequences.EntityRoleAssignmentsEntryHistorySequence++,
                         FromStateVersion = lookup.StateVersion,
                         EntityId = lookup.EntityId,
-                        Key = entry.Key.RoleKey,
-                        AccessRules = entry.Value?.AccessRule.ToJson(),
+                        KeyRole = entry.Key.RoleKey,
+                        KeyModule = entry.Key.ObjectModuleId.ToInternalModel(),
+                        RoleAssignments = entry.Value?.AccessRule.ToJson(),
                         IsDeleted = entry.Value == null,
                     };
 
@@ -1759,9 +1760,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyEntityStateHistory(entityStateToAdd, token);
             rowsInserted += await writeHelper.CopyEntityMetadataHistory(entityMetadataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityMetadataAggregateHistory(entityMetadataAggregateHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityAccessRulesOwnerRoleHistory(entityAccessRulesOwnerRoleHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityAccessRulesEntryHistory(entityAccessRulesEntryHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityAccessRulesAggregateHistory(entityAccessRulesAggregateHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityRoleAssignmentsOwnerRoleHistory(entityAccessRulesOwnerRoleHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityRoleAssignmentsRulesEntryHistory(entityAccessRulesEntryHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityRoleAssignmentsAggregateHistory(entityAccessRulesAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceAggregatedVaultsHistory(entityResourceAggregatedVaultsHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceAggregateHistory(entityResourceAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceVaultAggregateHistory(entityResourceVaultAggregateHistoryToAdd, token);

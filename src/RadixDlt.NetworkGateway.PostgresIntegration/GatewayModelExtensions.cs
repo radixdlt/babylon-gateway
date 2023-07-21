@@ -71,6 +71,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using LedgerTransaction = RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction;
+using NonFungibleIdType = RadixDlt.NetworkGateway.Abstractions.Model.NonFungibleIdType;
+using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
+using UserLedgerTransaction = RadixDlt.NetworkGateway.PostgresIntegration.Models.UserLedgerTransaction;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
@@ -175,6 +179,18 @@ internal static class GatewayModelExtensions
             PackageVmType.Native => GatewayModel.PackageVmType.Native,
             PackageVmType.ScryptoV1 => GatewayModel.PackageVmType.ScryptoV1,
             _ => throw new UnreachableException($"Didn't expect {vmType} value"),
+        };
+    }
+
+    public static GatewayModel.ObjectModuleId ToGatewayModel(this ObjectModuleId objectModuleId)
+    {
+        return objectModuleId switch
+        {
+            ObjectModuleId.Main => GatewayModel.ObjectModuleId.Main,
+            ObjectModuleId.Metadata => GatewayModel.ObjectModuleId.Metadata,
+            ObjectModuleId.Royalty => GatewayModel.ObjectModuleId.Royalty,
+            ObjectModuleId.AccessRules => GatewayModel.ObjectModuleId.AccessRules,
+            _ => throw new UnreachableException($"Didn't expect {objectModuleId} value"),
         };
     }
 }

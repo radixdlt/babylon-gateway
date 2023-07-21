@@ -90,33 +90,33 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ComponentEntityAccessRules
+    /// ComponentEntityRoleAssignments
     /// </summary>
-    [DataContract(Name = "ComponentEntityAccessRules")]
-    public partial class ComponentEntityAccessRules : IEquatable<ComponentEntityAccessRules>
+    [DataContract(Name = "ComponentEntityRoleAssignments")]
+    public partial class ComponentEntityRoleAssignments : IEquatable<ComponentEntityRoleAssignments>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentEntityAccessRules" /> class.
+        /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignments" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ComponentEntityAccessRules() { }
+        protected ComponentEntityRoleAssignments() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentEntityAccessRules" /> class.
+        /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignments" /> class.
         /// </summary>
         /// <param name="owner">owner (required).</param>
         /// <param name="entries">entries (required).</param>
-        public ComponentEntityAccessRules(Object owner = default(Object), Object entries = default(Object))
+        public ComponentEntityRoleAssignments(Object owner = default(Object), List<ComponentEntityRoleAssignmentEntry> entries = default(List<ComponentEntityRoleAssignmentEntry>))
         {
             // to ensure "owner" is required (not null)
             if (owner == null)
             {
-                throw new ArgumentNullException("owner is a required property for ComponentEntityAccessRules and cannot be null");
+                throw new ArgumentNullException("owner is a required property for ComponentEntityRoleAssignments and cannot be null");
             }
             this.Owner = owner;
             // to ensure "entries" is required (not null)
             if (entries == null)
             {
-                throw new ArgumentNullException("entries is a required property for ComponentEntityAccessRules and cannot be null");
+                throw new ArgumentNullException("entries is a required property for ComponentEntityRoleAssignments and cannot be null");
             }
             this.Entries = entries;
         }
@@ -131,7 +131,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Entries
         /// </summary>
         [DataMember(Name = "entries", IsRequired = true, EmitDefaultValue = true)]
-        public Object Entries { get; set; }
+        public List<ComponentEntityRoleAssignmentEntry> Entries { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -140,7 +140,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ComponentEntityAccessRules {\n");
+            sb.Append("class ComponentEntityRoleAssignments {\n");
             sb.Append("  Owner: ").Append(Owner).Append("\n");
             sb.Append("  Entries: ").Append(Entries).Append("\n");
             sb.Append("}\n");
@@ -163,15 +163,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ComponentEntityAccessRules);
+            return this.Equals(input as ComponentEntityRoleAssignments);
         }
 
         /// <summary>
-        /// Returns true if ComponentEntityAccessRules instances are equal
+        /// Returns true if ComponentEntityRoleAssignments instances are equal
         /// </summary>
-        /// <param name="input">Instance of ComponentEntityAccessRules to be compared</param>
+        /// <param name="input">Instance of ComponentEntityRoleAssignments to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ComponentEntityAccessRules input)
+        public bool Equals(ComponentEntityRoleAssignments input)
         {
             if (input == null)
             {
@@ -185,8 +185,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 ) && 
                 (
                     this.Entries == input.Entries ||
-                    (this.Entries != null &&
-                    this.Entries.Equals(input.Entries))
+                    this.Entries != null &&
+                    input.Entries != null &&
+                    this.Entries.SequenceEqual(input.Entries)
                 );
         }
 

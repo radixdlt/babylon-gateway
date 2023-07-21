@@ -67,8 +67,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entity_access_rules_owner_role_history")]
-internal class EntityAccessRulesOwnerRoleHistory
+[Table("entity_role_assignments_owner_role_history")]
+internal class EntityRoleAssignmentsOwnerRoleHistory
 {
     [Key]
     [Column("id")]
@@ -80,6 +80,6 @@ internal class EntityAccessRulesOwnerRoleHistory
     [Column("entity_id")]
     public long EntityId { get; set; }
 
-    [Column("access_rules", TypeName = "jsonb")]
-    public string AccessRules { get; set; }
+    [Column("role_assignments", TypeName = "jsonb")]
+    public string RoleAssignments { get; set; }
 }

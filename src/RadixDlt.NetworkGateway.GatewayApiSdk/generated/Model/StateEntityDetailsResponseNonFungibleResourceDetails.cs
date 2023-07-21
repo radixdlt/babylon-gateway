@@ -117,20 +117,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityDetailsResponseNonFungibleResourceDetails" /> class.
         /// </summary>
-        /// <param name="accessRules">accessRules (required).</param>
+        /// <param name="roleAssignments">roleAssignments (required).</param>
         /// <param name="nonFungibleIdType">nonFungibleIdType (required).</param>
         /// <param name="totalSupply">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="totalMinted">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="totalBurned">String-encoded decimal representing the amount of a related fungible resource. (required).</param>
         /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.NonFungibleResource).</param>
-        public StateEntityDetailsResponseNonFungibleResourceDetails(ComponentEntityAccessRules accessRules = default(ComponentEntityAccessRules), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.NonFungibleResource) : base(type)
+        public StateEntityDetailsResponseNonFungibleResourceDetails(ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), string totalSupply = default(string), string totalMinted = default(string), string totalBurned = default(string), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.NonFungibleResource) : base(type)
         {
-            // to ensure "accessRules" is required (not null)
-            if (accessRules == null)
+            // to ensure "roleAssignments" is required (not null)
+            if (roleAssignments == null)
             {
-                throw new ArgumentNullException("accessRules is a required property for StateEntityDetailsResponseNonFungibleResourceDetails and cannot be null");
+                throw new ArgumentNullException("roleAssignments is a required property for StateEntityDetailsResponseNonFungibleResourceDetails and cannot be null");
             }
-            this.AccessRules = accessRules;
+            this.RoleAssignments = roleAssignments;
             this.NonFungibleIdType = nonFungibleIdType;
             // to ensure "totalSupply" is required (not null)
             if (totalSupply == null)
@@ -153,10 +153,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets AccessRules
+        /// Gets or Sets RoleAssignments
         /// </summary>
-        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public ComponentEntityAccessRules AccessRules { get; set; }
+        [DataMember(Name = "role_assignments", IsRequired = true, EmitDefaultValue = true)]
+        public ComponentEntityRoleAssignments RoleAssignments { get; set; }
 
         /// <summary>
         /// String-encoded decimal representing the amount of a related fungible resource.
@@ -188,7 +188,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateEntityDetailsResponseNonFungibleResourceDetails {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
+            sb.Append("  RoleAssignments: ").Append(RoleAssignments).Append("\n");
             sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
             sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
             sb.Append("  TotalMinted: ").Append(TotalMinted).Append("\n");
@@ -229,9 +229,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.AccessRules == input.AccessRules ||
-                    (this.AccessRules != null &&
-                    this.AccessRules.Equals(input.AccessRules))
+                    this.RoleAssignments == input.RoleAssignments ||
+                    (this.RoleAssignments != null &&
+                    this.RoleAssignments.Equals(input.RoleAssignments))
                 ) && base.Equals(input) && 
                 (
                     this.NonFungibleIdType == input.NonFungibleIdType ||
@@ -263,9 +263,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.AccessRules != null)
+                if (this.RoleAssignments != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RoleAssignments.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
                 if (this.TotalSupply != null)
