@@ -84,89 +84,54 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateEntityDetailsResponseComponentDetails
+    /// ComponentEntityRoleAssignments
     /// </summary>
-    [DataContract(Name = "StateEntityDetailsResponseComponentDetails")]
-    [JsonConverter(typeof(JsonSubtypes), "type")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseComponentDetails), "Component")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleResourceDetails), "FungibleResource")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseFungibleVaultDetails), "FungibleVault")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleResourceDetails), "NonFungibleResource")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleVaultDetails), "NonFungibleVault")]
-    [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponsePackageDetails), "Package")]
-    public partial class StateEntityDetailsResponseComponentDetails : StateEntityDetailsResponseItemDetails, IEquatable<StateEntityDetailsResponseComponentDetails>
+    [DataContract(Name = "ComponentEntityRoleAssignments")]
+    public partial class ComponentEntityRoleAssignments : IEquatable<ComponentEntityRoleAssignments>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetails" /> class.
+        /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignments" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateEntityDetailsResponseComponentDetails() { }
+        protected ComponentEntityRoleAssignments() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateEntityDetailsResponseComponentDetails" /> class.
+        /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignments" /> class.
         /// </summary>
-        /// <param name="packageAddress">Bech32m-encoded human readable version of the address..</param>
-        /// <param name="blueprintName">blueprintName (required).</param>
-        /// <param name="state">state.</param>
-        /// <param name="roleAssignments">roleAssignments (required).</param>
-        /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
-        /// <param name="type">type (required) (default to StateEntityDetailsResponseItemDetailsType.Component).</param>
-        public StateEntityDetailsResponseComponentDetails(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string), StateEntityDetailsResponseItemDetailsType type = StateEntityDetailsResponseItemDetailsType.Component) : base(type)
+        /// <param name="owner">owner (required).</param>
+        /// <param name="entries">entries (required).</param>
+        public ComponentEntityRoleAssignments(Object owner = default(Object), List<ComponentEntityRoleAssignmentEntry> entries = default(List<ComponentEntityRoleAssignmentEntry>))
         {
-            // to ensure "blueprintName" is required (not null)
-            if (blueprintName == null)
+            // to ensure "owner" is required (not null)
+            if (owner == null)
             {
-                throw new ArgumentNullException("blueprintName is a required property for StateEntityDetailsResponseComponentDetails and cannot be null");
+                throw new ArgumentNullException("owner is a required property for ComponentEntityRoleAssignments and cannot be null");
             }
-            this.BlueprintName = blueprintName;
-            // to ensure "roleAssignments" is required (not null)
-            if (roleAssignments == null)
+            this.Owner = owner;
+            // to ensure "entries" is required (not null)
+            if (entries == null)
             {
-                throw new ArgumentNullException("roleAssignments is a required property for StateEntityDetailsResponseComponentDetails and cannot be null");
+                throw new ArgumentNullException("entries is a required property for ComponentEntityRoleAssignments and cannot be null");
             }
-            this.RoleAssignments = roleAssignments;
-            this.PackageAddress = packageAddress;
-            this.State = state;
-            this.RoyaltyVaultBalance = royaltyVaultBalance;
+            this.Entries = entries;
         }
 
         /// <summary>
-        /// Bech32m-encoded human readable version of the address.
+        /// Gets or Sets Owner
         /// </summary>
-        /// <value>Bech32m-encoded human readable version of the address.</value>
-        [DataMember(Name = "package_address", EmitDefaultValue = true)]
-        public string PackageAddress { get; set; }
+        [DataMember(Name = "owner", IsRequired = true, EmitDefaultValue = true)]
+        public Object Owner { get; set; }
 
         /// <summary>
-        /// Gets or Sets BlueprintName
+        /// Gets or Sets Entries
         /// </summary>
-        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
-        public string BlueprintName { get; set; }
-
-        /// <summary>
-        /// Gets or Sets State
-        /// </summary>
-        [DataMember(Name = "state", EmitDefaultValue = true)]
-        public Object State { get; set; }
-
-        /// <summary>
-        /// Gets or Sets RoleAssignments
-        /// </summary>
-        [DataMember(Name = "role_assignments", IsRequired = true, EmitDefaultValue = true)]
-        public ComponentEntityRoleAssignments RoleAssignments { get; set; }
-
-        /// <summary>
-        /// String-encoded decimal representing the amount of a related fungible resource.
-        /// </summary>
-        /// <value>String-encoded decimal representing the amount of a related fungible resource.</value>
-        [DataMember(Name = "royalty_vault_balance", EmitDefaultValue = true)]
-        public string RoyaltyVaultBalance { get; set; }
+        [DataMember(Name = "entries", IsRequired = true, EmitDefaultValue = true)]
+        public List<ComponentEntityRoleAssignmentEntry> Entries { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -175,13 +140,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateEntityDetailsResponseComponentDetails {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
-            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
-            sb.Append("  State: ").Append(State).Append("\n");
-            sb.Append("  RoleAssignments: ").Append(RoleAssignments).Append("\n");
-            sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
+            sb.Append("class ComponentEntityRoleAssignments {\n");
+            sb.Append("  Owner: ").Append(Owner).Append("\n");
+            sb.Append("  Entries: ").Append(Entries).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -190,7 +151,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -202,45 +163,31 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateEntityDetailsResponseComponentDetails);
+            return this.Equals(input as ComponentEntityRoleAssignments);
         }
 
         /// <summary>
-        /// Returns true if StateEntityDetailsResponseComponentDetails instances are equal
+        /// Returns true if ComponentEntityRoleAssignments instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateEntityDetailsResponseComponentDetails to be compared</param>
+        /// <param name="input">Instance of ComponentEntityRoleAssignments to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateEntityDetailsResponseComponentDetails input)
+        public bool Equals(ComponentEntityRoleAssignments input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.PackageAddress == input.PackageAddress ||
-                    (this.PackageAddress != null &&
-                    this.PackageAddress.Equals(input.PackageAddress))
-                ) && base.Equals(input) && 
+                    this.Owner == input.Owner ||
+                    (this.Owner != null &&
+                    this.Owner.Equals(input.Owner))
+                ) && 
                 (
-                    this.BlueprintName == input.BlueprintName ||
-                    (this.BlueprintName != null &&
-                    this.BlueprintName.Equals(input.BlueprintName))
-                ) && base.Equals(input) && 
-                (
-                    this.State == input.State ||
-                    (this.State != null &&
-                    this.State.Equals(input.State))
-                ) && base.Equals(input) && 
-                (
-                    this.RoleAssignments == input.RoleAssignments ||
-                    (this.RoleAssignments != null &&
-                    this.RoleAssignments.Equals(input.RoleAssignments))
-                ) && base.Equals(input) && 
-                (
-                    this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
-                    (this.RoyaltyVaultBalance != null &&
-                    this.RoyaltyVaultBalance.Equals(input.RoyaltyVaultBalance))
+                    this.Entries == input.Entries ||
+                    this.Entries != null &&
+                    input.Entries != null &&
+                    this.Entries.SequenceEqual(input.Entries)
                 );
         }
 
@@ -252,26 +199,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.PackageAddress != null)
+                int hashCode = 41;
+                if (this.Owner != null)
                 {
-                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Owner.GetHashCode();
                 }
-                if (this.BlueprintName != null)
+                if (this.Entries != null)
                 {
-                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
-                }
-                if (this.State != null)
-                {
-                    hashCode = (hashCode * 59) + this.State.GetHashCode();
-                }
-                if (this.RoleAssignments != null)
-                {
-                    hashCode = (hashCode * 59) + this.RoleAssignments.GetHashCode();
-                }
-                if (this.RoyaltyVaultBalance != null)
-                {
-                    hashCode = (hashCode * 59) + this.RoyaltyVaultBalance.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Entries.GetHashCode();
                 }
                 return hashCode;
             }

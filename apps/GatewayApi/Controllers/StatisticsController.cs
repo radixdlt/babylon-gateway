@@ -62,25 +62,31 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace GatewayApi.Controllers;
 
-[Table("component_schema")]
-internal class ComponentSchema
+[ApiController]
+[Route("statistics")]
+[ServiceFilter(typeof(ExceptionFilter))]
+[ServiceFilter(typeof(InvalidModelStateFilter))]
+public class StatisticsController : ControllerBase
 {
-    [Key]
-    [Column(name: "id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public int Id
+    private readonly IValidatorHandler _validatorStateHandler;
+
+    public StatisticsController(IValidatorHandler validatorStateHandler)
     {
-        get { return 1; }
-        // ReSharper disable once ValueParameterNotUsed
-        set { }
+        _validatorStateHandler = validatorStateHandler;
     }
 
-    [Column("event_type_identifiers", TypeName = "jsonb")]
-    public EventTypeIdentifiers EventTypeIdentifiers { get; set; }
+    [HttpPost("validators/uptime")]
+    public async Task<GatewayModel.ValidatorsUptimeResponse> Uptime(GatewayModel.ValidatorsUptimeRequest request, CancellationToken token)
+    {
+        return await _validatorStateHandler.Uptime(request, token);
+    }
 }

@@ -1,36 +1,36 @@
 <Project>
   <ItemGroup>
     <!-- runtime dependencies -->
-    <PackageVersion Include="Dapper" Version="2.0.123" />
-    <PackageVersion Include="FluentValidation" Version="11.5.2" />
+    <PackageVersion Include="Dapper" Version="2.0.143" />
+    <PackageVersion Include="FluentValidation" Version="11.6.0" />
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.0" />
     <PackageVersion Include="JsonSubTypes" Version="2.0.1" />
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.5" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.9" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.10" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="7.0.5" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.5" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.5" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="7.0.9" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.9" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
-    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="7.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="7.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="6.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
-    <PackageVersion Include="Microsoft.OpenApi.Readers" Version="1.6.3" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
+    <PackageVersion Include="Microsoft.OpenApi.Readers" Version="1.6.5" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
-    <PackageVersion Include="Polly" Version="7.2.3" />
-    <PackageVersion Include="prometheus-net" Version="8.0.0" />
-    <PackageVersion Include="prometheus-net.AspNetCore" Version="8.0.0" />
-    <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="8.0.0" />
     <PackageVersion Include="RadixDlt.RadixEngineToolkit" Version="0.10.0-commit-0da9539" />
+    <PackageVersion Include="Polly" Version="7.2.4" />
+    <PackageVersion Include="prometheus-net" Version="8.0.1" />
+    <PackageVersion Include="prometheus-net.AspNetCore" Version="8.0.1" />
+    <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="8.0.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <!-- build time dependencies -->
-    <PackageVersion Include="coverlet.collector" Version="3.2.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.6.3" />
     <PackageVersion Include="Moq" Version="4.18.2" />
     <PackageVersion Include="FluentAssertions" Version="6.11.0" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.435" />
-    <PackageVersion Include="xunit" Version="2.4.2" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
+    <PackageVersion Include="xunit" Version="2.5.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.0" />
   </ItemGroup>
 </Project>

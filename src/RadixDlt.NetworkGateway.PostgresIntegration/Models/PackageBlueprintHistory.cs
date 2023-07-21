@@ -69,7 +69,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("package_blueprint_history")]
-public class PackageBlueprintHistory
+internal class PackageBlueprintHistory
 {
     [Key]
     [Column("id")]

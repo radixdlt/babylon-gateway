@@ -90,48 +90,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ComponentEntityAccessRules
+    /// ValidatorUptimeCollection
     /// </summary>
-    [DataContract(Name = "ComponentEntityAccessRules")]
-    public partial class ComponentEntityAccessRules : IEquatable<ComponentEntityAccessRules>
+    [DataContract(Name = "ValidatorUptimeCollection")]
+    public partial class ValidatorUptimeCollection : IEquatable<ValidatorUptimeCollection>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentEntityAccessRules" /> class.
+        /// Initializes a new instance of the <see cref="ValidatorUptimeCollection" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ComponentEntityAccessRules() { }
+        protected ValidatorUptimeCollection() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentEntityAccessRules" /> class.
+        /// Initializes a new instance of the <see cref="ValidatorUptimeCollection" /> class.
         /// </summary>
-        /// <param name="owner">owner (required).</param>
-        /// <param name="entries">entries (required).</param>
-        public ComponentEntityAccessRules(Object owner = default(Object), Object entries = default(Object))
+        /// <param name="items">items (required).</param>
+        public ValidatorUptimeCollection(List<ValidatorUptimeCollectionItem> items = default(List<ValidatorUptimeCollectionItem>))
         {
-            // to ensure "owner" is required (not null)
-            if (owner == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("owner is a required property for ComponentEntityAccessRules and cannot be null");
+                throw new ArgumentNullException("items is a required property for ValidatorUptimeCollection and cannot be null");
             }
-            this.Owner = owner;
-            // to ensure "entries" is required (not null)
-            if (entries == null)
-            {
-                throw new ArgumentNullException("entries is a required property for ComponentEntityAccessRules and cannot be null");
-            }
-            this.Entries = entries;
+            this.Items = items;
         }
 
         /// <summary>
-        /// Gets or Sets Owner
+        /// Gets or Sets Items
         /// </summary>
-        [DataMember(Name = "owner", IsRequired = true, EmitDefaultValue = true)]
-        public Object Owner { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Entries
-        /// </summary>
-        [DataMember(Name = "entries", IsRequired = true, EmitDefaultValue = true)]
-        public Object Entries { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<ValidatorUptimeCollectionItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -140,9 +127,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ComponentEntityAccessRules {\n");
-            sb.Append("  Owner: ").Append(Owner).Append("\n");
-            sb.Append("  Entries: ").Append(Entries).Append("\n");
+            sb.Append("class ValidatorUptimeCollection {\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -163,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ComponentEntityAccessRules);
+            return this.Equals(input as ValidatorUptimeCollection);
         }
 
         /// <summary>
-        /// Returns true if ComponentEntityAccessRules instances are equal
+        /// Returns true if ValidatorUptimeCollection instances are equal
         /// </summary>
-        /// <param name="input">Instance of ComponentEntityAccessRules to be compared</param>
+        /// <param name="input">Instance of ValidatorUptimeCollection to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ComponentEntityAccessRules input)
+        public bool Equals(ValidatorUptimeCollection input)
         {
             if (input == null)
             {
@@ -179,14 +165,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Owner == input.Owner ||
-                    (this.Owner != null &&
-                    this.Owner.Equals(input.Owner))
-                ) && 
-                (
-                    this.Entries == input.Entries ||
-                    (this.Entries != null &&
-                    this.Entries.Equals(input.Entries))
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -199,13 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Owner != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.Owner.GetHashCode();
-                }
-                if (this.Entries != null)
-                {
-                    hashCode = (hashCode * 59) + this.Entries.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

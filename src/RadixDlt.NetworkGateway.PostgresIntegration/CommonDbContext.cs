@@ -121,17 +121,21 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ValidatorActiveSetHistory> ValidatorActiveSetHistory => Set<ValidatorActiveSetHistory>();
 
-    public DbSet<EntityAccessRulesOwnerRoleHistory> EntityAccessRulesOwnerHistory => Set<EntityAccessRulesOwnerRoleHistory>();
+    public DbSet<EntityRoleAssignmentsOwnerRoleHistory> EntityAccessRulesOwnerHistory => Set<EntityRoleAssignmentsOwnerRoleHistory>();
 
-    public DbSet<EntityAccessRulesEntryHistory> EntityAccessRulesEntryHistory => Set<EntityAccessRulesEntryHistory>();
+    public DbSet<EntityRoleAssignmentsEntryHistory> EntityAccessRulesEntryHistory => Set<EntityRoleAssignmentsEntryHistory>();
 
-    public DbSet<EntityAccessRulesAggregateHistory> EntityAccessRulesAggregateHistory => Set<EntityAccessRulesAggregateHistory>();
+    public DbSet<EntityRoleAssignmentsAggregateHistory> EntityAccessRulesAggregateHistory => Set<EntityRoleAssignmentsAggregateHistory>();
 
     public DbSet<ComponentMethodRoyaltyEntryHistory> ComponentMethodRoyaltyEntryHistory => Set<ComponentMethodRoyaltyEntryHistory>();
 
     public DbSet<PackageBlueprintHistory> PackageBlueprintHistory => Set<PackageBlueprintHistory>();
 
-    public DbSet<ComponentSchema> ComponentSchema => Set<ComponentSchema>();
+    public DbSet<PackageCodeHistory> PackageCodeHistory => Set<PackageCodeHistory>();
+
+    public DbSet<PackageSchemaHistory> PackageSchemaHistory => Set<PackageSchemaHistory>();
+
+    public DbSet<ValidatorEmissionStatistics> ValidatorEmissionStatistics => Set<ValidatorEmissionStatistics>();
 
     public CommonDbContext(DbContextOptions options)
         : base(options)
@@ -156,6 +160,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();
         modelBuilder.HasPostgresEnum<ResourceType>();
+        modelBuilder.HasPostgresEnum<ObjectModuleId>();
 
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
@@ -313,13 +318,13 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<EntityVaultHistory>()
             .HasIndex(e => new { e.GlobalEntityId, e.VaultEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityAccessRulesOwnerRoleHistory>()
+        modelBuilder.Entity<EntityRoleAssignmentsOwnerRoleHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityAccessRulesEntryHistory>()
-            .HasIndex(e => new { e.EntityId, e.Key, e.FromStateVersion });
+        modelBuilder.Entity<EntityRoleAssignmentsEntryHistory>()
+            .HasIndex(e => new { e.EntityId, e.KeyRole, e.KeyModule, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityAccessRulesAggregateHistory>()
+        modelBuilder.Entity<EntityRoleAssignmentsAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<ComponentMethodRoyaltyEntryHistory>()
@@ -350,6 +355,12 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<PackageBlueprintHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
+        modelBuilder.Entity<PackageCodeHistory>()
+            .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<PackageSchemaHistory>()
+            .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
+
         modelBuilder.Entity<ValidatorPublicKeyHistory>()
             .HasIndex(e => new { e.ValidatorEntityId, e.FromStateVersion });
 
@@ -361,5 +372,11 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<ValidatorActiveSetHistory>()
             .HasIndex(e => e.Epoch);
+    }
+
+    private static void HookupStatistics(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ValidatorEmissionStatistics>()
+            .HasIndex(e => new { e.ValidatorEntityId, e.EpochNumber });
     }
 }

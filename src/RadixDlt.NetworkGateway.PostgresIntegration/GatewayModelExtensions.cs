@@ -72,6 +72,10 @@ using System.Diagnostics;
 using System.Linq;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using ToolkitModel = RadixEngineToolkit;
+using LedgerTransaction = RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction;
+using NonFungibleIdType = RadixDlt.NetworkGateway.Abstractions.Model.NonFungibleIdType;
+using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
+using UserLedgerTransaction = RadixDlt.NetworkGateway.PostgresIntegration.Models.UserLedgerTransaction;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
@@ -196,6 +200,16 @@ internal static class GatewayModelExtensions
             ToolkitModel.PublicKeyHash.Secp256k1 secp256k1 => new GatewayModel.PublicKeyHashEcdsaSecp256k1(secp256k1.value.ToArray().ToHex()),
             ToolkitModel.PublicKeyHash.Ed25519 ed25519 => new GatewayModel.PublicKeyHashEddsaEd25519(ed25519.value.ToArray().ToHex()),
             _ => throw new UnreachableException($"Didn't expect {publicKeyHash} value"),
+
+    public static GatewayModel.ObjectModuleId ToGatewayModel(this ObjectModuleId objectModuleId)
+    {
+        return objectModuleId switch
+        {
+            ObjectModuleId.Main => GatewayModel.ObjectModuleId.Main,
+            ObjectModuleId.Metadata => GatewayModel.ObjectModuleId.Metadata,
+            ObjectModuleId.Royalty => GatewayModel.ObjectModuleId.Royalty,
+            ObjectModuleId.AccessRules => GatewayModel.ObjectModuleId.AccessRules,
+            _ => throw new UnreachableException($"Didn't expect {objectModuleId} value"),
         };
     }
 }

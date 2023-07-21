@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -63,47 +63,14 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.Collections.Generic;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-internal record FungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion);
-
-internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsWithdrawal, long StateVersion);
-
-internal record NonFungibleIdChange(ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
-
-internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, bool IsLocked, long StateVersion);
-
-internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, TokenAmount? TotalSupply = null, TokenAmount? Minted = null, TokenAmount? Burned = null);
-
-internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
-
-internal record struct MetadataLookup(long EntityId, string Key);
-
-internal record struct PackageBlueprintLookup(long PackageEntityId, string Name, string BlueprintVersion);
-
-internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
-
-internal record struct EntityResourceVaultLookup(long EntityId, long ResourceEntityId);
-
-internal record struct NonFungibleStoreLookup(long NonFungibleEntityId, long StateVersion);
-
-internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFungibleId);
-
-internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);
-
-internal record struct AccessRulesChangePointerLookup(long EntityId, long StateVersion);
-
-internal record struct RoleAssignmentEntryLookup(long EntityId, string KeyRole, ObjectModuleId KeyModule);
-
-internal record AccessRulesChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
+public interface IValidatorQuerier
 {
-    public CoreModel.AccessRulesModuleFieldOwnerRoleSubstate? OwnerRole { get; set; }
-
-    public IList<CoreModel.AccessRulesModuleRuleEntrySubstate> Entries { get; } = new List<CoreModel.AccessRulesModuleRuleEntrySubstate>();
+    Task<GatewayApiSdk.Model.ValidatorsUptimeResponse> ValidatorsUptimeStatistics(IList<EntityAddress> validatorAddresses, GatewayApiSdk.Model.LedgerState ledgerState,
+        GatewayApiSdk.Model.LedgerState? fromLedgerState, CancellationToken token = default);
 }

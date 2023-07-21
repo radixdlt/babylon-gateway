@@ -62,48 +62,27 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using System.Collections.Generic;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal record FungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion);
-
-internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsWithdrawal, long StateVersion);
-
-internal record NonFungibleIdChange(ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
-
-internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, bool IsLocked, long StateVersion);
-
-internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, TokenAmount? TotalSupply = null, TokenAmount? Minted = null, TokenAmount? Burned = null);
-
-internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
-
-internal record struct MetadataLookup(long EntityId, string Key);
-
-internal record struct PackageBlueprintLookup(long PackageEntityId, string Name, string BlueprintVersion);
-
-internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
-
-internal record struct EntityResourceVaultLookup(long EntityId, long ResourceEntityId);
-
-internal record struct NonFungibleStoreLookup(long NonFungibleEntityId, long StateVersion);
-
-internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFungibleId);
-
-internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);
-
-internal record struct AccessRulesChangePointerLookup(long EntityId, long StateVersion);
-
-internal record struct RoleAssignmentEntryLookup(long EntityId, string KeyRole, ObjectModuleId KeyModule);
-
-internal record AccessRulesChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
+[Table("package_code_history")]
+internal class PackageCodeHistory
 {
-    public CoreModel.AccessRulesModuleFieldOwnerRoleSubstate? OwnerRole { get; set; }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public IList<CoreModel.AccessRulesModuleRuleEntrySubstate> Entries { get; } = new List<CoreModel.AccessRulesModuleRuleEntrySubstate>();
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
+
+    [Column("package_entity_id")]
+    public long PackageEntityId { get; set; }
+
+    [Column("code_hash")]
+    public byte[] CodeHash { get; set; }
+
+    [Column("code")]
+    public byte[] Code { get; set; }
 }

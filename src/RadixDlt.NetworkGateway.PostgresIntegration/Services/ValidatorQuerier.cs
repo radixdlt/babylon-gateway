@@ -62,48 +62,75 @@
  * permissions under this License.
  */
 
+using Dapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
 using System.Collections.Generic;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-internal record FungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion);
-
-internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsWithdrawal, long StateVersion);
-
-internal record NonFungibleIdChange(ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
-
-internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, bool IsLocked, long StateVersion);
-
-internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, TokenAmount? TotalSupply = null, TokenAmount? Minted = null, TokenAmount? Burned = null);
-
-internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
-
-internal record struct MetadataLookup(long EntityId, string Key);
-
-internal record struct PackageBlueprintLookup(long PackageEntityId, string Name, string BlueprintVersion);
-
-internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
-
-internal record struct EntityResourceVaultLookup(long EntityId, long ResourceEntityId);
-
-internal record struct NonFungibleStoreLookup(long NonFungibleEntityId, long StateVersion);
-
-internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFungibleId);
-
-internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);
-
-internal record struct AccessRulesChangePointerLookup(long EntityId, long StateVersion);
-
-internal record struct RoleAssignmentEntryLookup(long EntityId, string KeyRole, ObjectModuleId KeyModule);
-
-internal record AccessRulesChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
+internal class ValidatorQuerier : IValidatorQuerier
 {
-    public CoreModel.AccessRulesModuleFieldOwnerRoleSubstate? OwnerRole { get; set; }
+    private record ValidatorUptimeViewModel(long ValidatorId,  EntityAddress ValidatorAddress, long? ProposalsMadeSum, long? ProposalsMissedSum, long EpochsActiveIn);
 
-    public IList<CoreModel.AccessRulesModuleRuleEntrySubstate> Entries { get; } = new List<CoreModel.AccessRulesModuleRuleEntrySubstate>();
+    private readonly ReadOnlyDbContext _dbContext;
+
+    public ValidatorQuerier(ReadOnlyDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    public async Task<GatewayModel.ValidatorsUptimeResponse> ValidatorsUptimeStatistics(IList<EntityAddress> validatorAddresses, GatewayModel.LedgerState ledgerState,
+        GatewayModel.LedgerState? fromLedgerState, CancellationToken token = default)
+    {
+        var cd = new CommandDefinition(
+            commandText: @"
+WITH
+    variables (validator_address) AS (SELECT UNNEST(@validatorAddresses))
+SELECT
+    e.id AS ValidatorId,
+    e.address AS ValidatorAddress,
+    SUM(proposals_made)::bigint AS ProposalsMadeSum,
+    SUM(proposals_missed)::bigint AS ProposalsMissedSum,
+    COUNT(proposals_made) AS EpochsActiveIn
+FROM variables
+INNER JOIN entities e ON e.address = variables.validator_address AND e.from_state_version <= @stateVersion
+LEFT JOIN validator_emission_statistics ves on ves.validator_entity_id = e.id AND ves.epoch_number BETWEEN @epochFrom AND @epochTo
+GROUP BY (e.id, e.address)
+;",
+            parameters: new
+            {
+                validatorAddresses = validatorAddresses.Select(x => x.ToString()).ToList(),
+                stateVersion = ledgerState.StateVersion,
+                epochTo = ledgerState.Epoch,
+                epochFrom = fromLedgerState?.Epoch ?? 0,
+            },
+            cancellationToken: token);
+
+        var validatorUptime = (await _dbContext.Database.GetDbConnection().QueryAsync<ValidatorUptimeViewModel>(cd)).ToList();
+
+        var items = validatorUptime
+            .Select(x => new GatewayModel.ValidatorUptimeCollectionItem(x.ValidatorAddress, x.ProposalsMadeSum, x.ProposalsMissedSum, x.EpochsActiveIn))
+            .ToList();
+
+        return new GatewayModel.ValidatorsUptimeResponse(ledgerState, new GatewayModel.ValidatorUptimeCollection(items));
+    }
 }
