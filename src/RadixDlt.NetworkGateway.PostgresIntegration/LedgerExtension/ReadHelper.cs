@@ -584,6 +584,7 @@ SELECT
     nextval('package_blueprint_history_id_seq') AS PackageBlueprintHistorySequence,
     nextval('package_code_history_id_seq') AS PackageCodeHistorySequence,
     nextval('package_schema_history_id_seq') AS PackageSchemaHistorySequence,
+    nextval('key_value_store_entry_history_id_seq') AS KeyValueStoreEntryHistorySequence,
     nextval('validator_emission_statistics_id_seq') AS ValidatorEmissionStatisticsSequence",
             cancellationToken: token);
 

@@ -65,7 +65,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
@@ -722,6 +721,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
         var entityStateToAdd = new List<EntityStateHistory>();
+        var keyValueStoreEntryHistoryToAdd = new List<KeyValueStoreEntryHistory>();
         var componentMethodRoyaltiesToAdd = new List<ComponentMethodRoyaltyEntryHistory>();
         var packageBlueprintHistoryToAdd = new Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>();
         var packageCodeHistoryToAdd = new List<PackageCodeHistory>();
@@ -822,6 +822,20 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 FromStateVersion = stateVersion,
                                 EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
                                 State = componentState.Value.DataStruct.StructData.ToJson(),
+                            });
+                        }
+
+                        if (substateData is CoreModel.GenericKeyValueStoreEntrySubstate genericKeyValueStoreEntry)
+                        {
+                            keyValueStoreEntryHistoryToAdd.Add(new KeyValueStoreEntryHistory
+                            {
+                                Id = sequences.KeyValueStoreEntryHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                KeyValueStoreEntityId = referencedEntity.DatabaseId,
+                                Key = genericKeyValueStoreEntry.Key.KeyData.GetDataBytes(),
+                                Value = genericKeyValueStoreEntry.Value?.Data.StructData.GetDataBytes(),
+                                IsDeleted = genericKeyValueStoreEntry.Value == null,
+                                IsLocked = genericKeyValueStoreEntry.IsLocked,
                             });
                         }
 
@@ -1777,6 +1791,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyPackageBlueprintHistory(packageBlueprintHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyPackageCodeHistory(packageCodeHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyPackageSchemaHistory(packageSchemaHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyKeyValueStoreEntryHistory(keyValueStoreEntryHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountDefaultDepositRuleHistory(accountDefaultDepositRuleHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountResourceDepositRuleHistory(accountResourceDepositRuleHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorEmissionStatistics(validatorEmissionStatisticsToAdd, token);

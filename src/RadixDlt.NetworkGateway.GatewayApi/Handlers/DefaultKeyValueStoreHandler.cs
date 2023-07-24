@@ -62,59 +62,32 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
+
+internal class DefaultKeyValueStoreHandler : IKeyValueStoreHandler
 {
-    public long AccountDefaultDepositRuleHistorySequence { get; set; }
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly IEntityStateQuerier _entityStateQuerier;
 
-    public long AccountResourceDepositRuleHistorySequence { get; set; }
+    public DefaultKeyValueStoreHandler(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier)
+    {
+        _ledgerStateQuerier = ledgerStateQuerier;
+        _entityStateQuerier = entityStateQuerier;
+    }
 
-    public long EntityStateHistorySequence { get; set; }
+    public async Task<GatewayModel.StateKeyValueStoreDataResponse> Data(GatewayModel.StateKeyValueStoreDataRequest request, CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        var keys = request.Keys.Select(k => new ValueBytes(k.KeyHex.ConvertFromHex())).ToArray();
 
-    public long EntitySequence { get; set; }
-
-    public long EntityMetadataHistorySequence { get; set; }
-
-    public long EntityMetadataAggregateHistorySequence { get; set; }
-
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsEntryHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsOwnerRoleHistorySequence { get; set; }
-
-    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
-
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionMarkerSequence { get; set; }
-
-    public long PackageBlueprintHistorySequence { get; set; }
-
-    public long PackageCodeHistorySequence { get; set; }
-
-    public long PackageSchemaHistorySequence { get; set; }
-
-    public long KeyValueStoreEntryHistorySequence { get; set; }
-
-    public long ValidatorEmissionStatisticsSequence { get; set; }
+        return await _entityStateQuerier.KeyValueStoreData((EntityAddress)request.KeyValueStoreAddress, keys, ledgerState, token);
+    }
 }

@@ -18,11 +18,11 @@
     <PackageVersion Include="Microsoft.OpenApi.Readers" Version="1.6.5" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
-    <PackageVersion Include="RadixDlt.RadixEngineToolkit" Version="0.10.0-commit-0da9539" />
     <PackageVersion Include="Polly" Version="7.2.4" />
     <PackageVersion Include="prometheus-net" Version="8.0.1" />
     <PackageVersion Include="prometheus-net.AspNetCore" Version="8.0.1" />
     <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="8.0.1" />
+    <PackageVersion Include="RadixDlt.RadixEngineToolkit" Version="0.10.0-commit-0b6c43c" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <!-- build time dependencies -->
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />

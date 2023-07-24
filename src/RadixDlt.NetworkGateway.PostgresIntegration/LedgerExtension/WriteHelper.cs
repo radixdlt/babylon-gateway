@@ -893,6 +893,32 @@ internal class WriteHelper
         return entities.Count;
     }
 
+    public async Task<int> CopyKeyValueStoreEntryHistory(List<KeyValueStoreEntryHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY key_value_store_entry_history (id, from_state_version, key_value_store_entity_id, key, value, is_deleted, is_locked) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.KeyValueStoreEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.Key.ToArray(), NpgsqlDbType.Bytea, token);
+            await writer.WriteNullableAsync(e.Value?.ToArray(), NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
+            await writer.WriteAsync(e.IsLocked, NpgsqlDbType.Boolean, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
     public async Task UpdateSequences(SequencesHolder sequences, CancellationToken token)
     {
         var cd = new CommandDefinition(
@@ -922,6 +948,7 @@ SELECT
     setval('package_blueprint_history_id_seq', @packageBlueprintHistorySequence),
     setval('package_code_history_id_seq', @packageCodeHistorySequence),
     setval('package_schema_history_id_seq', @packageSchemaHistorySequence),
+    setval('key_value_store_entry_history_id_seq', @keyValueStoreEntryHistorySequence),
     setval('validator_emission_statistics_id_seq', @validatorEmissionStatisticsSequence)",
             parameters: new
             {
@@ -949,6 +976,7 @@ SELECT
                 packageBlueprintHistorySequence = sequences.PackageBlueprintHistorySequence,
                 packageCodeHistorySequence = sequences.PackageCodeHistorySequence,
                 packageSchemaHistorySequence = sequences.PackageSchemaHistorySequence,
+                keyValueStoreEntryHistorySequence = sequences.KeyValueStoreEntryHistorySequence,
                 validatorEmissionStatisticsSequence = sequences.ValidatorEmissionStatisticsSequence,
             },
             cancellationToken: token);

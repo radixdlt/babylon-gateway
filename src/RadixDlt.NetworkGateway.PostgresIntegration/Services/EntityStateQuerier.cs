@@ -63,6 +63,7 @@
  */
 
 using Dapper;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -760,6 +761,46 @@ INNER JOIN LATERAL (
             : null;
 
         return new GatewayModel.StateValidatorsListResponse(ledgerState, new GatewayModel.ValidatorCollection(null, null, nextCursor, items));
+    }
+
+    public async Task<GatewayModel.StateKeyValueStoreDataResponse> KeyValueStoreData(EntityAddress keyValueStoreAddress, IList<ValueBytes> keys, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    {
+        var keyValueStore = await GetEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
+        var dbKeys = keys.Distinct().Select(k => (byte[])k).ToList();
+
+        var entries = await _dbContext.KeyValueStoreEntryHistory
+            .FromSqlInterpolated(@$"
+WITH variables (key) AS (
+    SELECT UNNEST({dbKeys})
+)
+SELECT kvseh.*
+FROM variables
+INNER JOIN LATERAL (
+    SELECT *
+    FROM key_value_store_entry_history
+    WHERE key_value_store_entity_id = {keyValueStore.Id} AND key = variables.key AND from_state_version <= {ledgerState.StateVersion}
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) kvseh ON TRUE;")
+            .ToListAsync(token);
+
+        var items = new List<GatewayModel.StateKeyValueStoreDataResponseItem>();
+
+        foreach (var e in entries)
+        {
+            if (e.IsDeleted)
+            {
+                continue;
+            }
+
+            items.Add(new GatewayModel.StateKeyValueStoreDataResponseItem(
+                keyHex: e.Key.ToHex(),
+                valueHex: e.Value.ToHex(),
+                lastUpdatedAtStateVersion: e.FromStateVersion,
+                isLocked: e.IsLocked));
+        }
+
+        return new GatewayModel.StateKeyValueStoreDataResponse(ledgerState, keyValueStoreAddress, items);
     }
 
     private static GatewayModel.NonFungibleResourcesCollection MapToNonFungibleResourcesCollection(

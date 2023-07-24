@@ -135,6 +135,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<PackageSchemaHistory> PackageSchemaHistory => Set<PackageSchemaHistory>();
 
+    public DbSet<KeyValueStoreEntryHistory> KeyValueStoreEntryHistory => Set<KeyValueStoreEntryHistory>();
+
     public DbSet<ValidatorEmissionStatistics> ValidatorEmissionStatistics => Set<ValidatorEmissionStatistics>();
 
     public CommonDbContext(DbContextOptions options)
@@ -372,6 +374,9 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<ValidatorActiveSetHistory>()
             .HasIndex(e => e.Epoch);
+
+        modelBuilder.Entity<KeyValueStoreEntryHistory>()
+            .HasIndex(e => new { e.KeyValueStoreEntityId, e.Key, e.FromStateVersion });
     }
 
     private static void HookupStatistics(ModelBuilder modelBuilder)
