@@ -90,35 +90,49 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityMetadataItemValueAllOf
+    /// StateKeyValueStoreDataRequestAllOf
     /// </summary>
-    [DataContract(Name = "EntityMetadataItemValue_allOf")]
-    public partial class EntityMetadataItemValueAllOf : IEquatable<EntityMetadataItemValueAllOf>
+    [DataContract(Name = "StateKeyValueStoreDataRequest_allOf")]
+    public partial class StateKeyValueStoreDataRequestAllOf : IEquatable<StateKeyValueStoreDataRequestAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataItemValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityMetadataItemValueAllOf() { }
+        protected StateKeyValueStoreDataRequestAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataItemValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestAllOf" /> class.
         /// </summary>
-        /// <param name="typed">typed (required).</param>
-        public EntityMetadataItemValueAllOf(MetadataTypedValue typed = default(MetadataTypedValue))
+        /// <param name="keyValueStoreAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="keys">keys (required).</param>
+        public StateKeyValueStoreDataRequestAllOf(string keyValueStoreAddress = default(string), List<StateKeyValueStoreDataRequestKeyItem> keys = default(List<StateKeyValueStoreDataRequestKeyItem>))
         {
-            // to ensure "typed" is required (not null)
-            if (typed == null)
+            // to ensure "keyValueStoreAddress" is required (not null)
+            if (keyValueStoreAddress == null)
             {
-                throw new ArgumentNullException("typed is a required property for EntityMetadataItemValueAllOf and cannot be null");
+                throw new ArgumentNullException("keyValueStoreAddress is a required property for StateKeyValueStoreDataRequestAllOf and cannot be null");
             }
-            this.Typed = typed;
+            this.KeyValueStoreAddress = keyValueStoreAddress;
+            // to ensure "keys" is required (not null)
+            if (keys == null)
+            {
+                throw new ArgumentNullException("keys is a required property for StateKeyValueStoreDataRequestAllOf and cannot be null");
+            }
+            this.Keys = keys;
         }
 
         /// <summary>
-        /// Gets or Sets Typed
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        [DataMember(Name = "typed", IsRequired = true, EmitDefaultValue = true)]
-        public MetadataTypedValue Typed { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "key_value_store_address", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyValueStoreAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Keys
+        /// </summary>
+        [DataMember(Name = "keys", IsRequired = true, EmitDefaultValue = true)]
+        public List<StateKeyValueStoreDataRequestKeyItem> Keys { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +141,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityMetadataItemValueAllOf {\n");
-            sb.Append("  Typed: ").Append(Typed).Append("\n");
+            sb.Append("class StateKeyValueStoreDataRequestAllOf {\n");
+            sb.Append("  KeyValueStoreAddress: ").Append(KeyValueStoreAddress).Append("\n");
+            sb.Append("  Keys: ").Append(Keys).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +164,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityMetadataItemValueAllOf);
+            return this.Equals(input as StateKeyValueStoreDataRequestAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityMetadataItemValueAllOf instances are equal
+        /// Returns true if StateKeyValueStoreDataRequestAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityMetadataItemValueAllOf to be compared</param>
+        /// <param name="input">Instance of StateKeyValueStoreDataRequestAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityMetadataItemValueAllOf input)
+        public bool Equals(StateKeyValueStoreDataRequestAllOf input)
         {
             if (input == null)
             {
@@ -165,9 +180,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Typed == input.Typed ||
-                    (this.Typed != null &&
-                    this.Typed.Equals(input.Typed))
+                    this.KeyValueStoreAddress == input.KeyValueStoreAddress ||
+                    (this.KeyValueStoreAddress != null &&
+                    this.KeyValueStoreAddress.Equals(input.KeyValueStoreAddress))
+                ) && 
+                (
+                    this.Keys == input.Keys ||
+                    this.Keys != null &&
+                    input.Keys != null &&
+                    this.Keys.SequenceEqual(input.Keys)
                 );
         }
 
@@ -180,9 +201,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Typed != null)
+                if (this.KeyValueStoreAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Typed.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyValueStoreAddress.GetHashCode();
+                }
+                if (this.Keys != null)
+                {
+                    hashCode = (hashCode * 59) + this.Keys.GetHashCode();
                 }
                 return hashCode;
             }

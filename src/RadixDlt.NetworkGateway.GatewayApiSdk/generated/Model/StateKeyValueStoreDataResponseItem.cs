@@ -90,35 +90,67 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityMetadataItemValueAllOf
+    /// StateKeyValueStoreDataResponseItem
     /// </summary>
-    [DataContract(Name = "EntityMetadataItemValue_allOf")]
-    public partial class EntityMetadataItemValueAllOf : IEquatable<EntityMetadataItemValueAllOf>
+    [DataContract(Name = "StateKeyValueStoreDataResponseItem")]
+    public partial class StateKeyValueStoreDataResponseItem : IEquatable<StateKeyValueStoreDataResponseItem>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataItemValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataResponseItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityMetadataItemValueAllOf() { }
+        protected StateKeyValueStoreDataResponseItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataItemValueAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateKeyValueStoreDataResponseItem" /> class.
         /// </summary>
-        /// <param name="typed">typed (required).</param>
-        public EntityMetadataItemValueAllOf(MetadataTypedValue typed = default(MetadataTypedValue))
+        /// <param name="keyHex">Hex-encoded binary blob. (required).</param>
+        /// <param name="valueHex">Hex-encoded binary blob. (required).</param>
+        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
+        /// <param name="isLocked">isLocked (required).</param>
+        public StateKeyValueStoreDataResponseItem(string keyHex = default(string), string valueHex = default(string), long lastUpdatedAtStateVersion = default(long), bool isLocked = default(bool))
         {
-            // to ensure "typed" is required (not null)
-            if (typed == null)
+            // to ensure "keyHex" is required (not null)
+            if (keyHex == null)
             {
-                throw new ArgumentNullException("typed is a required property for EntityMetadataItemValueAllOf and cannot be null");
+                throw new ArgumentNullException("keyHex is a required property for StateKeyValueStoreDataResponseItem and cannot be null");
             }
-            this.Typed = typed;
+            this.KeyHex = keyHex;
+            // to ensure "valueHex" is required (not null)
+            if (valueHex == null)
+            {
+                throw new ArgumentNullException("valueHex is a required property for StateKeyValueStoreDataResponseItem and cannot be null");
+            }
+            this.ValueHex = valueHex;
+            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
+            this.IsLocked = isLocked;
         }
 
         /// <summary>
-        /// Gets or Sets Typed
+        /// Hex-encoded binary blob.
         /// </summary>
-        [DataMember(Name = "typed", IsRequired = true, EmitDefaultValue = true)]
-        public MetadataTypedValue Typed { get; set; }
+        /// <value>Hex-encoded binary blob.</value>
+        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyHex { get; set; }
+
+        /// <summary>
+        /// Hex-encoded binary blob.
+        /// </summary>
+        /// <value>Hex-encoded binary blob.</value>
+        [DataMember(Name = "value_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string ValueHex { get; set; }
+
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <value>TBD</value>
+        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long LastUpdatedAtStateVersion { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IsLocked
+        /// </summary>
+        [DataMember(Name = "is_locked", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsLocked { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +159,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityMetadataItemValueAllOf {\n");
-            sb.Append("  Typed: ").Append(Typed).Append("\n");
+            sb.Append("class StateKeyValueStoreDataResponseItem {\n");
+            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
+            sb.Append("  ValueHex: ").Append(ValueHex).Append("\n");
+            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
+            sb.Append("  IsLocked: ").Append(IsLocked).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +184,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityMetadataItemValueAllOf);
+            return this.Equals(input as StateKeyValueStoreDataResponseItem);
         }
 
         /// <summary>
-        /// Returns true if EntityMetadataItemValueAllOf instances are equal
+        /// Returns true if StateKeyValueStoreDataResponseItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityMetadataItemValueAllOf to be compared</param>
+        /// <param name="input">Instance of StateKeyValueStoreDataResponseItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityMetadataItemValueAllOf input)
+        public bool Equals(StateKeyValueStoreDataResponseItem input)
         {
             if (input == null)
             {
@@ -165,9 +200,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Typed == input.Typed ||
-                    (this.Typed != null &&
-                    this.Typed.Equals(input.Typed))
+                    this.KeyHex == input.KeyHex ||
+                    (this.KeyHex != null &&
+                    this.KeyHex.Equals(input.KeyHex))
+                ) && 
+                (
+                    this.ValueHex == input.ValueHex ||
+                    (this.ValueHex != null &&
+                    this.ValueHex.Equals(input.ValueHex))
+                ) && 
+                (
+                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
+                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
+                ) && 
+                (
+                    this.IsLocked == input.IsLocked ||
+                    this.IsLocked.Equals(input.IsLocked)
                 );
         }
 
@@ -180,10 +228,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Typed != null)
+                if (this.KeyHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Typed.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
                 }
+                if (this.ValueHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValueHex.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
+                hashCode = (hashCode * 59) + this.IsLocked.GetHashCode();
                 return hashCode;
             }
         }

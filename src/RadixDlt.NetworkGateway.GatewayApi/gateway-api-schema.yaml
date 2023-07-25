@@ -533,6 +533,30 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+  /state/key-value-store/data:
+    post:
+      operationId: KeyValueStoreData
+      summary: Get KeyValueStore Data
+      description: |
+        Returns data (value) associated with a given key of a given key-value store.
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateKeyValueStoreDataRequest"
+      responses:
+        "200":
+          description: Non-Fungible ID Data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateKeyValueStoreDataResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
   /state/validators/list:
     post:
       operationId: StateValidatorsList
@@ -904,6 +928,8 @@ components:
       allOf:
         - $ref: "#/components/schemas/ScryptoSborValue"
         - type: object
+          required:
+            - typed
           properties:
             typed:
               $ref: "#/components/schemas/MetadataTypedValue"
@@ -2237,6 +2263,63 @@ components:
           $ref: "#/components/schemas/ScryptoSborValue"
         last_updated_at_state_version:
           $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+
+    StateKeyValueStoreDataRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - type: object
+          required:
+            - key_value_store_address
+            - keys
+          properties:
+            key_value_store_address:
+              $ref: "#/components/schemas/Address"
+            keys:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateKeyValueStoreDataRequestKeyItem"
+      example:
+        key_value_store_address: "<key-value-store-address>"
+        keys:
+          - key_hex: "edafaaccee"
+          - key_hex: "ffbbaa2311"
+    StateKeyValueStoreDataRequestKeyItem:
+      type: object
+      required:
+        - key_hex
+      properties:
+        key_hex:
+          $ref: "#/components/schemas/HexString"
+    StateKeyValueStoreDataResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - key_value_store_address
+            - entries
+          properties:
+            key_value_store_address:
+              $ref: "#/components/schemas/Address"
+            entries:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateKeyValueStoreDataResponseItem"
+    StateKeyValueStoreDataResponseItem:
+      type: object
+      required:
+        - key_hex
+        - value_hex
+        - last_updated_at_state_version
+        - is_locked
+      properties:
+        key_hex:
+          $ref: "#/components/schemas/HexString"
+        value_hex:
+          $ref: "#/components/schemas/HexString"
+        last_updated_at_state_version:
+          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+        is_locked:
+          type: boolean
 
 
     #

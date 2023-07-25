@@ -62,59 +62,36 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using FluentValidation;
+using FluentValidation.Validators;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+
+internal class StateKeyValueStoreDataRequestValidator : AbstractValidator<GatewayModel.StateKeyValueStoreDataRequest>
 {
-    public long AccountDefaultDepositRuleHistorySequence { get; set; }
+    public StateKeyValueStoreDataRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    {
+        RuleFor(x => x.KeyValueStoreAddress)
+            .NotEmpty()
+            .RadixAddress();
 
-    public long AccountResourceDepositRuleHistorySequence { get; set; }
+        RuleFor(x => x.Keys)
+            .NotEmpty()
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.Keys.Count)
+                    .GreaterThan(0)
+                    .LessThan(endpointOptionsSnapshot.Value.MaxPageSize);
 
-    public long EntityStateHistorySequence { get; set; }
+                RuleForEach(x => x.Keys)
+                    .NotNull()
+                    .SetValidator(new StateKeyValueStoreDataRequestKeyItemValidator());
+            });
 
-    public long EntitySequence { get; set; }
-
-    public long EntityMetadataHistorySequence { get; set; }
-
-    public long EntityMetadataAggregateHistorySequence { get; set; }
-
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsEntryHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsOwnerRoleHistorySequence { get; set; }
-
-    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
-
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionMarkerSequence { get; set; }
-
-    public long PackageBlueprintHistorySequence { get; set; }
-
-    public long PackageCodeHistorySequence { get; set; }
-
-    public long PackageSchemaHistorySequence { get; set; }
-
-    public long KeyValueStoreEntryHistorySequence { get; set; }
-
-    public long ValidatorEmissionStatisticsSequence { get; set; }
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
+    }
 }
