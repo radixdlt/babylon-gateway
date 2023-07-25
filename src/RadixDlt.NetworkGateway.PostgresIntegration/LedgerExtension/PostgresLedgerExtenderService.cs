@@ -356,6 +356,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         var substateData = substate.Value.SubstateData;
                         var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)substateId.EntityAddress, ea => new ReferencedEntity(ea, substateId.EntityType, stateVersion));
 
+                        if (substateData is CoreModel.ConsensusManagerFieldCurrentTimeSubstate currentTime)
+                        {
+                            roundTimestampUpdate = DateTimeOffset.FromUnixTimeMilliseconds(currentTime.Value.ProposerTimestamp.UnixTimestampMs).UtcDateTime;
+                        }
+
                         if (substateData is CoreModel.IEntityOwner entityOwner)
                         {
                             foreach (var oe in entityOwner.GetOwnedEntities())
