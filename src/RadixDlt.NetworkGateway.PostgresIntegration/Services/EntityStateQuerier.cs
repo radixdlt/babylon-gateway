@@ -242,7 +242,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         blueprintName: "Account",
                         state: new JObject(),
-                        accessRules: new GatewayModel.ComponentEntityAccessRules(new JObject(), new JObject())
+                        accessRules: new GatewayModel.ComponentEntityAccessRules(new JObject(), new JArray())
                     );
                     break;
 
@@ -254,7 +254,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         blueprintName: "Account",
                         state: new JObject(),
-                        accessRules: new GatewayModel.ComponentEntityAccessRules(new JObject(), new JObject())
+                        accessRules: new GatewayModel.ComponentEntityAccessRules(new JObject(), new JArray())
                     );
                     break;
 
