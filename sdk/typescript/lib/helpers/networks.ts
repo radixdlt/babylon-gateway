@@ -26,18 +26,6 @@ export type NetworkConfig = {
 }
 
 export const RadixNetworkConfig: Record<string, NetworkConfig> = {
-  RCnetV1: {
-    networkName: 'RCnetV1',
-    networkId: RadixNetwork.RCnetV1,
-    gatewayUrl: 'https://rcnet.radixdlt.com',
-    dashboardUrl: 'https://rcnet-dashboard.radixdlt.com',
-  },
-  RCnetV2: {
-    networkName: 'RCNetV2',
-    networkId: RadixNetwork.RCnetV2,
-    gatewayUrl: 'https://ansharnet-gateway.radixdlt.com',
-    dashboardUrl: 'https://rcnet-v2-dashboard.radixdlt.com',
-  },
   Kisharnet: {
     networkName: 'Kisharnet',
     networkId: RadixNetwork.Kisharnet,
@@ -67,6 +55,18 @@ export const RadixNetworkConfig: Record<string, NetworkConfig> = {
     networkId: RadixNetwork.Hammunet,
     gatewayUrl: 'https://hammunet-gateway.radixdlt.com:443',
     dashboardUrl: 'https://hammunet-dashboard.rdx-works-main.extratools.works',
+  },
+  RCnetV1: {
+    networkName: 'RCnetV1',
+    networkId: RadixNetwork.RCnetV1,
+    gatewayUrl: 'https://rcnet.radixdlt.com',
+    dashboardUrl: 'https://rcnet-dashboard.radixdlt.com',
+  },
+  RCnetV2: {
+    networkName: 'RCNetV2',
+    networkId: RadixNetwork.RCnetV2,
+    gatewayUrl: 'https://ansharnet-gateway.radixdlt.com',
+    dashboardUrl: 'https://rcnet-v2-dashboard.radixdlt.com',
   },
 }
 
