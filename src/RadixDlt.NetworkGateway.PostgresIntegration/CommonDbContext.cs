@@ -66,6 +66,7 @@ using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
@@ -82,9 +83,9 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<NetworkConfiguration> NetworkConfiguration => Set<NetworkConfiguration>();
 
-    public DbSet<LedgerStatus> LedgerStatus => Set<LedgerStatus>();
-
     public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
+
+    public DbSet<LedgerTransactionMarker> LedgerTransactionMarkers => Set<LedgerTransactionMarker>();
 
     public DbSet<PendingTransaction> PendingTransactions => Set<PendingTransaction>();
 
@@ -92,11 +93,17 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityMetadataHistory> EntityMetadataHistory => Set<EntityMetadataHistory>();
 
+    public DbSet<EntityMetadataAggregateHistory> EntityMetadataAggregateHistory => Set<EntityMetadataAggregateHistory>();
+
     public DbSet<EntityResourceAggregateHistory> EntityResourceAggregateHistory => Set<EntityResourceAggregateHistory>();
 
     public DbSet<EntityResourceVaultAggregateHistory> EntityResourceVaultAggregateHistory => Set<EntityResourceVaultAggregateHistory>();
 
     public DbSet<EntityResourceAggregatedVaultsHistory> EntityResourceAggregatedVaultsHistory => Set<EntityResourceAggregatedVaultsHistory>();
+
+    public DbSet<AccountDefaultDepositRuleHistory> AccountDefaultDepositRuleHistory => Set<AccountDefaultDepositRuleHistory>();
+
+    public DbSet<AccountResourceDepositRuleHistory> AccountDepositRuleHistory => Set<AccountResourceDepositRuleHistory>();
 
     public DbSet<EntityVaultHistory> EntityVaultHistory => Set<EntityVaultHistory>();
 
@@ -104,7 +111,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<NonFungibleIdData> NonFungibleIdData => Set<NonFungibleIdData>();
 
-    public DbSet<NonFungibleIdMutableDataHistory> NonFungibleIdMutableDataHistory => Set<NonFungibleIdMutableDataHistory>();
+    public DbSet<NonFungibleIdDataHistory> NonFungibleIdDataHistory => Set<NonFungibleIdDataHistory>();
 
     public DbSet<NonFungibleIdStoreHistory> NonFungibleIdStoreHistory => Set<NonFungibleIdStoreHistory>();
 
@@ -114,7 +121,17 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ValidatorActiveSetHistory> ValidatorActiveSetHistory => Set<ValidatorActiveSetHistory>();
 
-    public DbSet<EntityAccessRulesChainHistory> EntityAccessRulesChainHistory => Set<EntityAccessRulesChainHistory>();
+    public DbSet<EntityAccessRulesOwnerRoleHistory> EntityAccessRulesOwnerHistory => Set<EntityAccessRulesOwnerRoleHistory>();
+
+    public DbSet<EntityAccessRulesEntryHistory> EntityAccessRulesEntryHistory => Set<EntityAccessRulesEntryHistory>();
+
+    public DbSet<EntityAccessRulesAggregateHistory> EntityAccessRulesAggregateHistory => Set<EntityAccessRulesAggregateHistory>();
+
+    public DbSet<ComponentMethodRoyaltyEntryHistory> ComponentMethodRoyaltyEntryHistory => Set<ComponentMethodRoyaltyEntryHistory>();
+
+    public DbSet<PackageBlueprintHistory> PackageBlueprintHistory => Set<PackageBlueprintHistory>();
+
+    public DbSet<ComponentSchema> ComponentSchema => Set<ComponentSchema>();
 
     public CommonDbContext(DbContextOptions options)
         : base(options)
@@ -125,21 +142,30 @@ internal abstract class CommonDbContext : DbContext
     // So secondary indexes might benefit from the inclusion of columns for faster lookups
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasPostgresEnum<AccessRulesChainSubtype>();
+        modelBuilder.HasPostgresEnum<AccountDefaultDepositRule>();
+        modelBuilder.HasPostgresEnum<AccountResourceDepositRule>();
         modelBuilder.HasPostgresEnum<EntityType>();
-        modelBuilder.HasPostgresEnum<LedgerTransactionKindFilterConstraint>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerEventType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOperationType>();
+        modelBuilder.HasPostgresEnum<LedgerTransactionMarkerOriginType>();
         modelBuilder.HasPostgresEnum<NonFungibleIdType>();
+        modelBuilder.HasPostgresEnum<PackageVmType>();
         modelBuilder.HasPostgresEnum<PendingTransactionStatus>();
         modelBuilder.HasPostgresEnum<PublicKeyType>();
         modelBuilder.HasPostgresEnum<ResourceType>();
 
-        HookupSingleEntries(modelBuilder);
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
         HookupEntities(modelBuilder);
         HookupHistory(modelBuilder);
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.AddInterceptors(new ForceDistinctInterceptor());
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -152,17 +178,8 @@ internal abstract class CommonDbContext : DbContext
         configurationBuilder.Properties<RadixAddress>()
             .HaveConversion<RadixAddressToByteArrayConverter>();
 
-        configurationBuilder.Properties<GlobalAddress>()
-            .HaveConversion<GlobalAddressToStringConverter>();
-    }
-
-    private static void HookupSingleEntries(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<LedgerStatus>()
-            .HasOne(ls => ls.TopOfLedgerTransaction)
-            .WithMany()
-            .HasForeignKey(ls => ls.TopOfLedgerStateVersion)
-            .OnDelete(DeleteBehavior.NoAction);
+        configurationBuilder.Properties<EntityAddress>()
+            .HaveConversion<EntityAddressToStringConverter>();
     }
 
     private static void HookupTransactions(ModelBuilder modelBuilder)
@@ -170,8 +187,8 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<LedgerTransaction>()
             .HasDiscriminator<LedgerTransactionType>(DiscriminatorColumnName)
             .HasValue<UserLedgerTransaction>(LedgerTransactionType.User)
-            .HasValue<ValidatorLedgerTransaction>(LedgerTransactionType.Validator)
-            .HasValue<SystemLedgerTransaction>(LedgerTransactionType.System);
+            .HasValue<RoundUpdateLedgerTransaction>(LedgerTransactionType.RoundUpdate)
+            .HasValue<GenesisLedgerTransaction>(LedgerTransactionType.Genesis);
 
         modelBuilder.Entity<UserLedgerTransaction>()
             .HasIndex(lt => lt.IntentHash)
@@ -193,10 +210,28 @@ internal abstract class CommonDbContext : DbContext
             .IsUnique()
             .HasFilter("index_in_round = 0");
 
-        // This index lets you quickly filter out transaction stream
-        modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => new { lt.KindFilterConstraint, lt.StateVersion })
-            .HasFilter("kind_filter_constraint IS NOT NULL");
+        modelBuilder.Entity<LedgerTransactionMarker>()
+            .HasDiscriminator<LedgerTransactionMarkerType>(DiscriminatorColumnName)
+            .HasValue<EventLedgerTransactionMarker>(LedgerTransactionMarkerType.Event)
+            .HasValue<OriginLedgerTransactionMarker>(LedgerTransactionMarkerType.Origin)
+            .HasValue<ManifestAddressLedgerTransactionMarker>(LedgerTransactionMarkerType.ManifestAddress)
+            .HasValue<AffectedGlobalEntityTransactionMarker>(LedgerTransactionMarkerType.AffectedGlobalEntity);
+
+        modelBuilder.Entity<EventLedgerTransactionMarker>()
+            .HasIndex(e => new { e.EventType, e.EntityId, e.StateVersion })
+            .HasFilter("discriminator = 'event'");
+
+        modelBuilder.Entity<OriginLedgerTransactionMarker>()
+            .HasIndex(e => new { e.OriginType, e.StateVersion })
+            .HasFilter("discriminator = 'origin'");
+
+        modelBuilder.Entity<ManifestAddressLedgerTransactionMarker>()
+            .HasIndex(e => new { e.OperationType, e.EntityId, e.StateVersion })
+            .HasFilter("discriminator = 'manifest_address'");
+
+        modelBuilder.Entity<AffectedGlobalEntityTransactionMarker>()
+            .HasIndex(e => new { e.EntityId, e.StateVersion })
+            .HasFilter("discriminator = 'affected_global_entity'");
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)
@@ -215,33 +250,42 @@ internal abstract class CommonDbContext : DbContext
     private static void HookupEntities(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Entity>()
+            .HasIndex(e => e.Address);
+
+        modelBuilder.Entity<Entity>()
             .HasDiscriminator<EntityType>(DiscriminatorColumnName)
-            .HasValue<EpochManagerEntity>(EntityType.EpochManager)
-            .HasValue<FungibleResourceEntity>(EntityType.FungibleResource)
-            .HasValue<NonFungibleResourceEntity>(EntityType.NonFungibleResource)
-            .HasValue<NormalComponentEntity>(EntityType.NormalComponent)
-            .HasValue<AccountComponentEntity>(EntityType.AccountComponent)
-            .HasValue<PackageEntity>(EntityType.Package)
-            .HasValue<KeyValueStoreEntity>(EntityType.KeyValueStore)
-            .HasValue<VaultEntity>(EntityType.Vault)
-            .HasValue<ClockEntity>(EntityType.Clock)
-            .HasValue<ValidatorEntity>(EntityType.Validator)
-            .HasValue<AccessControllerEntity>(EntityType.AccessController)
-            .HasValue<IdentityEntity>(EntityType.Identity);
-
-        modelBuilder.Entity<Entity>()
-            .HasIndex(e => e.Address)
-            .HasMethod("hash");
-
-        modelBuilder.Entity<Entity>()
-            .HasIndex(e => e.GlobalAddress)
-            .HasMethod("hash")
-            .HasFilter("global_address IS NOT NULL");
+            .HasValue<GlobalConsensusManager>(EntityType.GlobalConsensusManager)
+            .HasValue<GlobalFungibleResourceEntity>(EntityType.GlobalFungibleResource)
+            .HasValue<GlobalNonFungibleResourceEntity>(EntityType.GlobalNonFungibleResource)
+            .HasValue<GlobalGenericComponentEntity>(EntityType.GlobalGenericComponent)
+            .HasValue<InternalGenericComponentEntity>(EntityType.InternalGenericComponent)
+            .HasValue<InternalAccountEntity>(EntityType.InternalAccountComponent)
+            .HasValue<GlobalAccountEntity>(EntityType.GlobalAccountComponent)
+            .HasValue<GlobalPackageEntity>(EntityType.GlobalPackage)
+            .HasValue<InternalKeyValueStoreEntity>(EntityType.InternalKeyValueStore)
+            .HasValue<InternalFungibleVaultEntity>(EntityType.InternalFungibleVault)
+            .HasValue<InternalNonFungibleVaultEntity>(EntityType.InternalNonFungibleVault)
+            .HasValue<GlobalValidatorEntity>(EntityType.GlobalValidator)
+            .HasValue<GlobalAccessControllerEntity>(EntityType.GlobalAccessController)
+            .HasValue<GlobalIdentityEntity>(EntityType.GlobalIdentity)
+            .HasValue<GlobalOneResourcePoolEntity>(EntityType.GlobalOneResourcePool)
+            .HasValue<GlobalTwoResourcePoolEntity>(EntityType.GlobalTwoResourcePool)
+            .HasValue<GlobalMultiResourcePoolEntity>(EntityType.GlobalMultiResourcePool)
+            .HasValue<GlobalTransactionTrackerEntity>(EntityType.GlobalTransactionTracker);
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AccountDefaultDepositRuleHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<AccountResourceDepositRuleHistory>()
+            .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion });
+
         modelBuilder.Entity<EntityMetadataHistory>()
+            .HasIndex(e => new { e.EntityId, e.Key, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityMetadataAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityResourceAggregateHistory>()
@@ -269,6 +313,21 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<EntityVaultHistory>()
             .HasIndex(e => new { e.GlobalEntityId, e.VaultEntityId, e.FromStateVersion });
 
+        modelBuilder.Entity<EntityAccessRulesOwnerRoleHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityAccessRulesEntryHistory>()
+            .HasIndex(e => new { e.EntityId, e.Key, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityAccessRulesAggregateHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<ComponentMethodRoyaltyEntryHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<ComponentMethodRoyaltyEntryHistory>()
+            .HasIndex(e => new { e.EntityId, e.MethodName, e.FromStateVersion });
+
         modelBuilder.Entity<ResourceEntitySupplyHistory>()
             .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
 
@@ -279,7 +338,7 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.NonFungibleResourceEntityId, e.NonFungibleId, e.FromStateVersion })
             .IsUnique();
 
-        modelBuilder.Entity<NonFungibleIdMutableDataHistory>()
+        modelBuilder.Entity<NonFungibleIdDataHistory>()
             .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleIdStoreHistory>()
@@ -287,6 +346,9 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<EntityStateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<PackageBlueprintHistory>()
+            .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<ValidatorPublicKeyHistory>()
             .HasIndex(e => new { e.ValidatorEntityId, e.FromStateVersion });
@@ -299,8 +361,5 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<ValidatorActiveSetHistory>()
             .HasIndex(e => e.Epoch);
-
-        modelBuilder.Entity<EntityAccessRulesChainHistory>()
-            .HasIndex(e => new { e.EntityId, e.Subtype, e.FromStateVersion });
     }
 }

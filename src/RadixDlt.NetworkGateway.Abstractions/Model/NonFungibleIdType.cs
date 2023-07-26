@@ -69,5 +69,5 @@ public enum NonFungibleIdType
     String,
     Integer,
     Bytes,
-    UUID,
+    RUID,
 }

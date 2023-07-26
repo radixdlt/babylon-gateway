@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System;
@@ -70,12 +71,6 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
-
-internal enum LedgerTransactionKindFilterConstraint
-{
-    User,
-    EpochChange,
-}
 
 /// <summary>
 /// A transaction committed onto the radix ledger.
@@ -88,15 +83,6 @@ internal abstract class LedgerTransaction
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     [Column("state_version")]
     public long StateVersion { get; set; }
-
-    [Column("status")]
-    public LedgerTransactionStatus Status { get; set; }
-
-    [Column("error_message")]
-    public string? ErrorMessage { get; set; }
-
-    [Column("transaction_accumulator")]
-    public byte[] TransactionAccumulator { get; set; }
 
     [Column("message")]
     public byte[]? Message { get; set; }
@@ -116,14 +102,14 @@ internal abstract class LedgerTransaction
     [Column("is_end_of_epoch")]
     public bool IsEndOfEpoch { get; set; }
 
-    [Column("referenced_entities")]
-    public List<long> ReferencedEntities { get; set; }
-
     [Column("fee_paid")]
     public TokenAmount? FeePaid { get; set; }
 
     [Column("tip_paid")]
     public TokenAmount? TipPaid { get; set; }
+
+    [Column("affected_global_entities")]
+    public long[] AffectedGlobalEntities { get; set; }
 
     /// <summary>
     /// The round timestamp of a round where vertex V was voted on is derived as the median of the timestamp of the
@@ -148,19 +134,41 @@ internal abstract class LedgerTransaction
     public DateTime NormalizedRoundTimestamp { get; set; }
 
     /// <summary>
-    /// Transaction kind filter used as optional filter constraint in transaction stream endpoint.
-    /// </summary>
-    [Column("kind_filter_constraint")]
-    public LedgerTransactionKindFilterConstraint? KindFilterConstraint { get; set; }
-
-    /// <summary>
     /// The raw payload of the transaction.
     /// </summary>
     [Column("raw_payload")]
     public byte[] RawPayload { get; set; }
 
-    [Column("engine_receipt", TypeName = "jsonb")]
-    public string EngineReceipt { get; set; }
+    public TransactionReceipt EngineReceipt { get; set; }
+}
+
+[Owned]
+internal class TransactionReceipt
+{
+    [Column("receipt_status")]
+    public LedgerTransactionStatus Status { get; set; }
+
+    [Column("receipt_fee_summary", TypeName = "jsonb")]
+    public string FeeSummary { get; set; }
+
+    [Column("receipt_state_updates", TypeName = "jsonb")]
+    public string StateUpdates { get; set; }
+
+    [Column("receipt_next_epoch", TypeName = "jsonb")]
+    public string? NextEpoch { get; set; }
+
+    [Column("receipt_output", TypeName = "jsonb")]
+    public string? Output { get; set; }
+
+    [Column("receipt_error_message")]
+    public string? ErrorMessage { get; set; }
+
+    [Column("receipt_events", TypeName = "jsonb")]
+    public string? Events { get; set; }
+}
+
+internal class GenesisLedgerTransaction : LedgerTransaction
+{
 }
 
 internal class UserLedgerTransaction : LedgerTransaction
@@ -186,10 +194,6 @@ internal class UserLedgerTransaction : LedgerTransaction
     public byte[] SignedIntentHash { get; set; }
 }
 
-internal class ValidatorLedgerTransaction : LedgerTransaction
-{
-}
-
-internal class SystemLedgerTransaction : LedgerTransaction
+internal class RoundUpdateLedgerTransaction : LedgerTransaction
 {
 }

@@ -82,7 +82,7 @@ internal static class CustomTypes
         }
 
         // needed to read int[], bigint[] and text[] columns using Dapper
-        SqlMapper.AddTypeHandler(new GlobalAddressHandler());
+        SqlMapper.AddTypeHandler(new EntityAddressHandler());
         SqlMapper.AddTypeHandler(new GenericArrayHandler<int>());
         SqlMapper.AddTypeHandler(new GenericArrayHandler<long>());
         SqlMapper.AddTypeHandler(new GenericArrayHandler<string>());
@@ -90,12 +90,17 @@ internal static class CustomTypes
 
 #pragma warning disable CS0618
         // needed to support custom enums in postgres
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccessRulesChainSubtype>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccountDefaultDepositRule>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<AccountResourceDepositRule>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<EntityType>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionKindFilterConstraint>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerEventType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOperationType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<LedgerTransactionMarkerOriginType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<NonFungibleIdType>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<PackageVmType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PendingTransactionStatus>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<PublicKeyType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<ResourceType>();

@@ -62,9 +62,9 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
@@ -81,12 +81,16 @@ internal class EntityMetadataHistory
     [Column("entity_id")]
     public long EntityId { get; set; }
 
-    [Column("keys")]
-    public List<string> Keys { get; set; }
+    [Column("key")]
+    public string Key { get; set; }
 
-    [Column("values")]
-    public List<byte[]> Values { get; set; }
+    [Column("value")]
+    public byte[]? Value { get; set; }
 
-    [Column("updated_at_state_versions")]
-    public List<long> UpdatedAtStateVersions { get; set; }
+    [MemberNotNullWhen(false, nameof(Value))]
+    [Column("is_deleted")]
+    public bool IsDeleted { get; set; }
+
+    [Column("is_locked")]
+    public bool IsLocked { get; set; }
 }

@@ -62,8 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.Abstractions.StaticHelpers;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 
 namespace RadixDlt.NetworkGateway.DataAggregator;
@@ -81,39 +79,13 @@ public static class TransactionConsistency
         }
     }
 
-    public static void AssertChildTransactionConsistent(long previousStateVersion, byte[] previousAccumulator, long stateVersion, byte[] accumulator, byte[] payload)
+    public static void AssertChildTransactionConsistent(long previousStateVersion, long stateVersion)
     {
         if (stateVersion != previousStateVersion + 1)
         {
             throw new InvalidLedgerCommitException(
                 $"Attempted to commit a transaction with state version {stateVersion}" +
                 $" on top of transaction with state version {previousStateVersion}"
-            );
-        }
-
-        var payloadHash = HashingHelper.Hash(payload);
-
-        if (!RadixHashing.IsValidAccumulator(previousAccumulator, payloadHash, accumulator))
-        {
-            throw new InconsistentLedgerException(
-                $"Failure to commit a child transaction with resultant state version {stateVersion}." +
-                $" The parent (with resultant state version {previousStateVersion}) has accumulator {previousAccumulator.ToHex()}" +
-                $" and the child has transaction id hash {payloadHash.ToHex()}" +
-                " which should result in an accumulator of" +
-                $" {RadixHashing.CreateNewAccumulator(previousAccumulator, payloadHash).ToHex()}" +
-                $" but the child reports an inconsistent accumulator of {accumulator.ToHex()}."
-            );
-        }
-    }
-
-    public static void AssertTransactionHashCorrect(byte[] payload, byte[] payloadHash)
-    {
-        if (!RadixHashing.IsValidTransactionPayloadHash(payload, payloadHash))
-        {
-            throw new InvalidLedgerCommitException(
-                $"Attempted to commit a transaction with claimed payload hash {payloadHash.ToHex()} " +
-                $"but it was calculated to have hash {RadixHashing.CreateTransactionPayloadHash(payload).ToHex()} " +
-                $"(transaction contents: {payload.ToHex()})"
             );
         }
     }

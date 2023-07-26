@@ -91,5 +91,21 @@ internal class StreamTransactionsRequestValidator : AbstractValidator<GatewayMod
 
         RuleFor(x => x.Order)
             .IsInEnum();
+
+        RuleForEach(x => x.ManifestAccountsWithdrawnFromFilter)
+            .NotNull()
+            .RadixAddress();
+
+        RuleForEach(x => x.ManifestAccountsDepositedIntoFilter)
+            .NotNull()
+            .RadixAddress();
+
+        RuleForEach(x => x.ManifestResourcesFilter)
+            .NotNull()
+            .RadixAddress();
+
+        RuleForEach(x => x.EventsFilter)
+            .NotNull()
+            .SetValidator(new StreamTransactionsRequestEventItemValidator());
     }
 }

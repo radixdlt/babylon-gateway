@@ -1,14 +1,77 @@
-## 0.4.0 - RCNet-V2
-_Release Date: Unreleased_
+# 0.4.0 - RCNet v2
+Release Date: 26.07.2023
 
-Changelog will appear here when changes are merged.
+## RCNet v1 to RCNet v2 Migration Guide
+### What’s New?
+
+* Some properties are now annotated with an `is_locked` field indicating whether the value is locked or is still able to be updated.
+* Strongly-typed metadata values. Each metadata property is now represented as raw SBOR value and one of sixteen possible typed values, as per the [Entity Metadata docs](https://docs-babylon.radixdlt.com/main/scrypto/system/entity-metadata.html)
+* Additional entity details are returned from the `/state/entity/details` endpoint:
+  * Entity Role Assignments "access rules"
+    * _NOTE: Expect minor field renames at RCnet v3, to better align with the new role abstractions._
+  * Total supply alongside overall number of minted and burned tokens for resources.
+    * _WARNING: Total supply is not currently accurate. This will be fixed at RCnet v3._
+  * Package code, blueprints, schemas and royalty vaults
+* New opt-in flags are supported for `/state/entity/details` endpoint:
+  * `explicit_metadata` - allows to specify a collection of metadata keys you’d like to receive in the response,
+  * `ancestor_identities` - to include parental entity identifiers,
+  * `component_royalty_vault_valance` and `package_royalty_vault_balance` - to include royalty vaults and their respective balances where applicable,
+  * `non_fungible_include_nfids` - to include a first chunk of NFIDs of a returned NF vaults.
+* New opt-in flags supported for `/stream/transactions` endpoint:
+  * `raw_hex` to include raw bytes of a TX,
+  * `receipt_state_changes` to include low-level state changes,
+  * `receipt_fee_sumary` to include TX fees,
+  * `receipt_events` to include low-level events,
+  * `affected_global_entities` to include list of entities affected by given TX,
+* Additional transaction details in `/stream/transactions` endpoint: epoch, round, round_timestamp.
+* New filters in `/stream/transactions` endpoint to limit search results:
+  * `manifest_accounts_withdrawn_from_filter` - filter for TXs where given accounts have been withdrawn from,
+  * `manifest_accounts_deposited_into_filter` - filter for TXs where given accounts have been deposited into,
+  * `manifest_resources_filter` - filter for TXs where given resources have been used,
+  * `affected_global_entities_filter` - filter for TXs where given entities have had internal updates,
+  * `events_filter` - filter for TXs where the given event occurred (only Vault Deposit/Withdrawal events are currently supported)
+
+* More validator details in `/state/validators/list` endpoint: `state_vault`, `pending_xrd_withdraw_vault`, `locked_owner_stake_unit_vault`, `pending_owner_stake_unit_unlock_vault`
+
+### Breaking Changes
+
+* All addresses (including internal addresses) are now represented with a single Address type.
+* No more `as_string` and `as_string_collection` metadata representations - they’ve been replaced with strongly-typed models.
+* Minor property renames to reflect changes in upstream engine and Core APIs
+
+## Full technical changelog by minor release
+### 0.4.0
+
+- Renamed `mutable_data` property to `data` in `/state/non-fungible/data` endpoint.
+- Opt-in properties added to `/transaction/committed-details`,`/state/entity/details` user can specify additional properties in response.
+- Added opt-in royalty vault balance to `/state/entity/details` if queried entity is component or package.
+- Possibility to configure max number of transaction fetched from CoreAPI in single batch by `MaxCoreApiTransactionBatchSize`. By default it's fetching 1000.
+- New opt-in property `non_fungible_include_nfids` in `/state/entity/details`, `/state/entity/page/non-fungibles`, `/state/entity/page/non-fungible-vaults`, when enabled and aggregating per vault first page of non fungible resource ids is going be returned.
+- Multiple address-related aliases (`ResourceAddress`, `ComponentAddress` etc.) have been combined into single generic `Address`.
+- Added `explicit_metadata` parameter to  `/state/entity/details`, ` /state/entity/page/fungibles` and `/state/entity/page/non-fungibles` - if given metadata keys exist, they will be returned for top level entity and all returned resources.
+- Added information about `epoch`, `round`, `round_timestamp` to `/transaction/committed-details` and `/stream/transactions` endpoints.
+- Flattened `transaction` and `details` properties of `/transaction/committed-details` endpoint.
+- Added all the properties and opt-ins available in `/transaction/committed-details` endpoint to `/stream/transactions` endpoint.
+- Dropped `TokenAmount` type (used to represent transaction fee which was always expressed in XRDs) in favor of `BigDecimal` scalar value.
+- `/status/network-configuration` endpoint returns several new well-known addresses.
+- Added `image_tag` with currently deployed image tag to release information.
+- Added multiple new filter options to `/stream/transactions` endpoint.
+- Added `total_supply`, `total_minted`, `total_burned` to `/state/entity/details` when querying for fungible or non fungible resources.
+- Unwrapped non fungible ids in `/state/non-fungible/ids`, `/state/entity/page/non-fungible-vault/ids` endpoints. They are no longer wrapped in `non_fungible_id` object.
+- Dropped `transaction.referenced_entities` from `/transaction/committed-details` endpoint.
+- Added `affected_global_entities` to `/transaction/committed-details` and `/stream/transactions` endpoints. To include them in response make sure to include `affected_global_entities` optin.
+- New `affected_global_entities_filter` filter in `/stream/transactions`.
+- Use strongly-typed metadata models.
+- return `pending_xrd_withdraw_vault`, `locked_owner_stake_unit_vault`, `pending_owner_stake_unit_unlock_vault`, `stake_vault` from `/state/validators/list` endpoint.
+- Changed `access_rule_chain` to partially strongly typed `access_rules`.
+- Added package details to `/satus/entity/details` endpoint.
 
 ### 0.3.1
 
 - Fix `/state/non-fungible/data` to return data for all NFIDs
 
-## 0.3.0 - RCNet-V1
-_Release Date: 31.03.2023_
+# 0.3.0 - RCNet v1
+Release Date: 31.03.2023
 
 - `/entity/overview` and `/entity/details` endpoints replaced with single `/state/entity/details`.
 - Fungible and non-fungible resources are now ordered by the most recently updated.
@@ -22,8 +85,9 @@ _Release Date: 31.03.2023_
 - new paginable endpoints `/state/entity/page/{x}` for metadata, fungibles, fungible-vaults, non-fungibles, non-fungible-vaults and non-fungible-vault/ids. Cursors returned from `state/entity/details` can be later used to query for next pages in specific endpoints.
 - `/transaction/committed-details` endpoint operates on `intent_hash_hex` only now
 
-## 0.1.1 - Betanet V2
-_Release Date: 14.02.2023_
+
+# 0.1.1 - Betanet v2
+Release Date: 14.02.2023
 
 - Added `/state/validators/list` endpoint: returns paginable collection of all validators ever observed; validators that are part of so called active-set (i.e. participate in consensus for current/requested epoch) are decorated with some extra information like their public_key and stake.
 - `NonFungibleIdType`s `u32` and `u64` have been replaced with single `Number`.
@@ -36,15 +100,3 @@ Fixes for the following issues:
 - Incorrect calculation of balances when there are multiple vaults in a component. (Note - NFIds are still incorrectly tracked if spread across multiple vaults - this will be fixed as part of a schema overhaul)
 - Fungible resource metadata is updated properly
 
-
-## 0.1.0 - Betanet V1
-_Release Date: 20.12.2022_
-
-## 0.0.3
-_Release Date: 17.11.2022_
-
-## 0.0.2
-_Release Date: 14.11.2022_
-
-## 0.0.1 - Alphanet
-_Release Date: 24.10.2022_

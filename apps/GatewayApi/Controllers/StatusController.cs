@@ -102,12 +102,31 @@ public sealed class StatusController : ControllerBase
             _networkConfigurationProvider.GetNetworkId(),
             _networkConfigurationProvider.GetNetworkName(),
             new GatewayModel.NetworkConfigurationResponseWellKnownAddresses(
-                wellKnownAddresses.Faucet,
-                wellKnownAddresses.EpochManager,
-                wellKnownAddresses.Clock,
-                wellKnownAddresses.EcdsaSecp256k1,
-                wellKnownAddresses.EddsaEd25519,
-                wellKnownAddresses.Xrd
+                xrd: wellKnownAddresses.Xrd,
+                secp256k1SignatureVirtualBadge: wellKnownAddresses.Secp256k1SignatureVirtualBadge,
+                ed25519SignatureVirtualBadge: wellKnownAddresses.Ed25519SignatureVirtualBadge,
+                packageOfDirectCallerVirtualBadge: wellKnownAddresses.PackageOfDirectCallerVirtualBadge,
+                globalCallerVirtualBadge: wellKnownAddresses.GlobalCallerVirtualBadge,
+                systemTransactionBadge: wellKnownAddresses.SystemTransactionBadge,
+                packageOwnerBadge: wellKnownAddresses.PackageOwnerBadge,
+                validatorOwnerBadge: wellKnownAddresses.ValidatorOwnerBadge,
+                accountOwnerBadge: wellKnownAddresses.AccountOwnerBadge,
+                identityOwnerBadge: wellKnownAddresses.IdentityOwnerBadge,
+                packagePackage: wellKnownAddresses.PackagePackage,
+                resourcePackage: wellKnownAddresses.ResourcePackage,
+                accountPackage: wellKnownAddresses.AccountPackage,
+                identityPackage: wellKnownAddresses.IdentityPackage,
+                consensusManagerPackage: wellKnownAddresses.ConsensusManagerPackage,
+                accessControllerPackage: wellKnownAddresses.AccessControllerPackage,
+                transactionProcessorPackage: wellKnownAddresses.TransactionProcessorPackage,
+                metadataModulePackage: wellKnownAddresses.MetadataModulePackage,
+                royaltyModulePackage: wellKnownAddresses.RoyaltyModulePackage,
+                accessRulesPackage: wellKnownAddresses.AccessRulesPackage,
+                genesisHelperPackage: wellKnownAddresses.GenesisHelperPackage,
+                faucetPackage: wellKnownAddresses.FaucetPackage,
+                consensusManager: wellKnownAddresses.ConsensusManager,
+                genesisHelper: wellKnownAddresses.GenesisHelper,
+                faucet: wellKnownAddresses.Faucet
             )
         );
     }

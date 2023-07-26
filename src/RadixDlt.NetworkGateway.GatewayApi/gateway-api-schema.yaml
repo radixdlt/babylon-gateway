@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  version: 0.3.0
-  title: Babylon Gateway API - RCnet V1
+  version: 0.4.0
+  title: Babylon Gateway API - RCnet V2
   license:
     name: The Radix License, Version 1.0
     url: https://www.radixfoundation.org/licenses/license-v1
@@ -22,12 +22,16 @@ info:
     This document is an API reference documentation, visit [User Guide](https://docs-babylon.radixdlt.com/) to learn more
     about how to run a Gateway of your own.
 
+    ## Migration guide
+
+    Please see [the latest release notes](https://github.com/radixdlt/babylon-gateway/releases).
+
     ## Integration and forward compatibility guarantees
 
     We give no guarantees that other endpoints will not change before Babylon mainnet launch, although changes are expected to
     be minimal.
 servers:
-  - url: https://rcnet.radixdlt.com
+  - url: https://rcnet-v2.radixdlt.com
 x-tagGroups:
   - name: Overview
     tags:
@@ -583,14 +587,8 @@ components:
       type: string
       example: "<network-name>"
 
-    EntityAddress:
-      description: Bech32m-encoded human readable version of the entity's global address or hex-encoded id.
-      type: string
-    ComponentAddress:
-      description: Bech32m-encoded human readable version of the component (normal, account, system) global address or hex-encoded id.
-      type: string
-    ResourceAddress:
-      description: Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address or hex-encoded id.
+    Address:
+      description: Bech32m-encoded human readable version of the address.
       type: string
 
     BigDecimal:
@@ -618,7 +616,7 @@ components:
     LastUpdatedAtStateVersion:
       description: TBD # TODO describe
       type: integer
-      format: int64
+      format: int64 # TODO define min/max using CoreApi as a reference
 
     #
     # Keys
@@ -666,6 +664,43 @@ components:
               minLength: 64
               maxLength: 64
               description: The hex-encoded compressed EdDSA Ed25519 public key (32 bytes)
+
+    PublicKeyHashType:
+      type: string
+      enum:
+        - EcdsaSecp256k1
+        - EddsaEd25519
+    PublicKeyHash:
+      type: object
+      required:
+        - key_hash_type
+      properties:
+        key_hash_type:
+          $ref: "#/components/schemas/PublicKeyHashType"
+      discriminator:
+        propertyName: key_hash_type
+        mapping:
+          # NOTE: These need to match PublicKeyHashType
+          EcdsaSecp256k1: "#/components/schemas/PublicKeyHashEcdsaSecp256k1"
+          EddsaEd25519: "#/components/schemas/PublicKeyHashEddsaEd25519"
+    PublicKeyHashEcdsaSecp256k1:
+      allOf:
+        - $ref: "#/components/schemas/PublicKeyHash"
+        - type: object
+          required:
+            - hash_hex
+          properties:
+            hash_hex:
+              $ref: "#/components/schemas/HashHexString"
+    PublicKeyHashEddsaEd25519:
+      allOf:
+        - $ref: "#/components/schemas/PublicKeyHash"
+        - type: object
+          required:
+            - hash_hex
+          properties:
+            hash_hex:
+              $ref: "#/components/schemas/HashHexString"
 
     #
     # Common Request Types
@@ -721,6 +756,21 @@ components:
     #
     # Common Response Types
     #
+
+    ValidatorVaultItem:
+      type: object
+      required:
+        - balance
+        - last_changed_at_state_version
+        - address
+      properties:
+        balance:
+          $ref: "#/components/schemas/BigDecimal"
+        last_changed_at_state_version:
+          type: integer
+          format: int64
+        address:
+          $ref: "#/components/schemas/Address"
 
     LedgerStateMixin:
       type: object
@@ -816,6 +866,7 @@ components:
       required:
         - key
         - value
+        - is_locked
         - last_updated_at_state_version
       properties:
         key:
@@ -823,6 +874,8 @@ components:
           type: string
         value:
           $ref: "#/components/schemas/EntityMetadataItemValue"
+        is_locked:
+          type: boolean
         last_updated_at_state_version:
           $ref: "#/components/schemas/LastUpdatedAtStateVersion"
     EntityMetadataItemValue:
@@ -830,12 +883,19 @@ components:
         - $ref: "#/components/schemas/ScryptoSborValue"
         - type: object
           properties:
-            as_string:
-              type: string
-            as_string_collection:
-              type: array
-              items:
-                type: string
+            typed:
+              $ref: "#/components/schemas/MetadataTypedValue"
+
+    ComponentEntityAccessRules:
+      type: object
+      required:
+        - owner
+        - entries
+      properties:
+        owner:
+          type: object
+        entries:
+          type: object
 
     FungibleResourcesCollection:
       description: Fungible resources collection.
@@ -858,7 +918,9 @@ components:
         aggregation_level:
           $ref: "#/components/schemas/ResourceAggregationLevel"
         resource_address:
-          $ref: "#/components/schemas/ResourceAddress"
+          $ref: "#/components/schemas/Address"
+        explicit_metadata:
+          $ref: "#/components/schemas/EntityMetadataCollection"
       discriminator:
         propertyName: aggregation_level
         mapping:
@@ -905,7 +967,7 @@ components:
         - last_updated_at_state_version
       properties:
         vault_address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/Address"
         amount:
           $ref: "#/components/schemas/BigDecimal"
         last_updated_at_state_version:
@@ -932,7 +994,9 @@ components:
         aggregation_level:
           $ref: "#/components/schemas/ResourceAggregationLevel"
         resource_address:
-          $ref: "#/components/schemas/ResourceAddress"
+          $ref: "#/components/schemas/Address"
+        explicit_metadata:
+          $ref: "#/components/schemas/EntityMetadataCollection"
       discriminator:
         propertyName: aggregation_level
         mapping:
@@ -974,19 +1038,32 @@ components:
               items:
                 $ref: "#/components/schemas/NonFungibleResourcesCollectionItemVaultAggregatedVaultItem"
     NonFungibleResourcesCollectionItemVaultAggregatedVaultItem:
-      type: object
-      required:
-        - vault_address
-        - total_count
-        - last_updated_at_state_version
-      properties:
-        vault_address:
-          $ref: "#/components/schemas/EntityAddress"
-        total_count:
-          type: integer
-          format: int64
-        last_updated_at_state_version:
-          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+      allOf:
+        - $ref: "#/components/schemas/OptionalNonFungibleIdsCollection"
+        - type: object
+          required:
+            - vault_address
+            - total_count
+            - last_updated_at_state_version
+          properties:
+            vault_address:
+              $ref: "#/components/schemas/Address"
+            total_count:
+              type: integer
+              format: int64
+            last_updated_at_state_version:
+              $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+
+    OptionalNonFungibleIdsCollection:
+      description: Non-fungible resource IDs collection.
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/NonFungibleId"
 
     NonFungibleIdsCollection:
       description: Non-fungible resource IDs collection.
@@ -999,25 +1076,29 @@ components:
             items:
               type: array
               items:
-                $ref: "#/components/schemas/NonFungibleIdsCollectionItem"
-    NonFungibleIdsCollectionItem:
-      type: object
-      required:
-        - non_fungible_id
-      properties:
-        non_fungible_id:
-          $ref: "#/components/schemas/NonFungibleId"
+                $ref: "#/components/schemas/NonFungibleId"
 
     CommittedTransactionInfo:
       type: object
       required:
         - state_version
+        - epoch
+        - round
+        - round_timestamp
         - transaction_status
       properties:
         state_version:
-          nullable: true
           type: integer
           format: int64
+        epoch:
+          type: integer
+          format: int64
+        round:
+          type: integer
+          format: int64
+        round_timestamp:
+          type: string
+          # TODO add format: date-time once OAS generator get fixed support for required value-types
         transaction_status:
           $ref: "#/components/schemas/TransactionStatus"
         payload_hash_hex:
@@ -1025,7 +1106,11 @@ components:
         intent_hash_hex:
           $ref: "#/components/schemas/HashHexString"
         fee_paid:
-          $ref: "#/components/schemas/TokenAmount"
+          $ref: "#/components/schemas/BigDecimal"
+        affected_global_entities:
+          type: array
+          items:
+            $ref: "#/components/schemas/Address"
         confirmed_at:
           nullable: true
           type: string
@@ -1033,6 +1118,12 @@ components:
         error_message:
           type: string
           nullable: true
+        raw_hex:
+          $ref: "#/components/schemas/HexString"
+        receipt:
+          $ref: "#/components/schemas/TransactionReceipt"
+        message_hex:
+          $ref: "#/components/schemas/HexString"
 
     TransactionStatus:
       type: string
@@ -1043,18 +1134,31 @@ components:
         - Pending
         - Rejected
 
-    # TODO Obsolete - use BigDecimal instead
-    TokenAmount:
-      description: Represents a decimal amount of a given resource.
+    TransactionReceipt:
       type: object
-      required:
-        - value
-        - token_identifier
       properties:
-        value:
-          $ref: "#/components/schemas/BigDecimal"
-        address:
-          $ref: "#/components/schemas/ResourceAddress"
+        status:
+          description: The status of the transaction.
+          type: object
+        fee_summary:
+          description: Fees paid, Only present if the `status` is not `Rejected`.
+          type: object
+        state_updates:
+          description: Transaction state updates (only present if status is Succeeded or Failed).
+          type: object
+        next_epoch:
+          description: Information (number and active validator list) about new epoch if occured.
+          type: object
+        output:
+          description: The manifest line-by-line engine return data (only present if `status` is `Succeeded`).
+          type: object
+        events:
+          description: Events emitted by a transaction.
+          type: object
+        error_message:
+          description: Error message (only present if status is `Failed` or `Rejected`)
+          type: string
+          nullable: true
 
     NonFungibleIdType:
       type: string
@@ -1062,7 +1166,13 @@ components:
         - String
         - Integer
         - Bytes
-        - Uuid
+        - Ruid
+
+    PackageVmType:
+      type: string
+      enum:
+        - Native
+        - ScryptoV1
 
     ValidatorCollection:
       allOf:
@@ -1080,15 +1190,24 @@ components:
       required:
         - address
         - metadata
-        - current_stake
+        - stake_vault
+        - pending_xrd_withdraw_vault
+        - locked_owner_stake_unit_vault
+        - pending_owner_stake_unit_unlock_vault
       properties:
         address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/Address"
+        stake_vault:
+          $ref: "#/components/schemas/ValidatorVaultItem"
+        pending_xrd_withdraw_vault:
+          $ref: "#/components/schemas/ValidatorVaultItem"
+        locked_owner_stake_unit_vault:
+          $ref: "#/components/schemas/ValidatorVaultItem"
+        pending_owner_stake_unit_unlock_vault:
+          $ref: "#/components/schemas/ValidatorVaultItem"
         state:
           type: object
           nullable: true
-        current_stake:
-          $ref: "#/components/schemas/BigDecimal"
         active_in_epoch:
           $ref: "#/components/schemas/ValidatorCollectionItemActiveInEpoch"
         metadata:
@@ -1125,25 +1244,82 @@ components:
         well_known_addresses:
           type: object
           required:
-            - faucet
-            - epoch_manager
-            - clock
-            - ecdsa_secp256k1
-            - eddsa_ed25519
             - xrd
+            - secp256k1_signature_virtual_badge
+            - ed25519_signature_virtual_badge
+            - package_of_direct_caller_virtual_badge
+            - global_caller_virtual_badge
+            - system_transaction_badge
+            - package_owner_badge
+            - validator_owner_badge
+            - account_owner_badge
+            - identity_owner_badge
+            - package_package
+            - resource_package
+            - account_package
+            - identity_package
+            - consensus_manager_package
+            - access_controller_package
+            - transaction_processor_package
+            - metadata_module_package
+            - royalty_module_package
+            - access_rules_package
+            - genesis_helper_package
+            - faucet_package
+            - consensus_manager
+            - genesis_helper
+            - faucet
           properties:
-            faucet:
-              $ref: "#/components/schemas/ComponentAddress"
-            epoch_manager:
-              $ref: "#/components/schemas/EntityAddress"
-            clock:
-              $ref: "#/components/schemas/EntityAddress"
-            ecdsa_secp256k1:
-              $ref: "#/components/schemas/ResourceAddress"
-            eddsa_ed25519:
-              $ref: "#/components/schemas/ResourceAddress"
             xrd:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
+            secp256k1_signature_virtual_badge:
+              $ref: "#/components/schemas/Address"
+            ed25519_signature_virtual_badge:
+              $ref: "#/components/schemas/Address"
+            package_of_direct_caller_virtual_badge:
+              $ref: "#/components/schemas/Address"
+            global_caller_virtual_badge:
+              $ref: "#/components/schemas/Address"
+            system_transaction_badge:
+              $ref: "#/components/schemas/Address"
+            package_owner_badge:
+              $ref: "#/components/schemas/Address"
+            validator_owner_badge:
+              $ref: "#/components/schemas/Address"
+            account_owner_badge:
+              $ref: "#/components/schemas/Address"
+            identity_owner_badge:
+              $ref: "#/components/schemas/Address"
+            package_package:
+              $ref: "#/components/schemas/Address"
+            resource_package:
+              $ref: "#/components/schemas/Address"
+            account_package:
+              $ref: "#/components/schemas/Address"
+            identity_package:
+              $ref: "#/components/schemas/Address"
+            consensus_manager_package:
+              $ref: "#/components/schemas/Address"
+            access_controller_package:
+              $ref: "#/components/schemas/Address"
+            transaction_processor_package:
+              $ref: "#/components/schemas/Address"
+            metadata_module_package:
+              $ref: "#/components/schemas/Address"
+            royalty_module_package:
+              $ref: "#/components/schemas/Address"
+            access_rules_package:
+              $ref: "#/components/schemas/Address"
+            genesis_helper_package:
+              $ref: "#/components/schemas/Address"
+            faucet_package:
+              $ref: "#/components/schemas/Address"
+            consensus_manager:
+              $ref: "#/components/schemas/Address"
+            genesis_helper:
+              $ref: "#/components/schemas/Address"
+            faucet:
+              $ref: "#/components/schemas/Address"
 
     GatewayStatusResponse:
       allOf:
@@ -1168,6 +1344,7 @@ components:
       type: object
       required:
         - release_version
+        - image_tag
         - open_api_schema_version
       properties:
         release_version:
@@ -1175,6 +1352,9 @@ components:
           type: string
         open_api_schema_version:
           description: The Open API Schema version that was used to generate the API models.
+          type: string
+        image_tag:
+          description: Image tag that is currently deployed to the Gateway API.
           type: string
 
     #
@@ -1192,7 +1372,6 @@ components:
         - manifest
         - start_epoch_inclusive
         - end_epoch_exclusive
-        - cost_unit_limit
         - tip_percentage
         - nonce
         - signer_public_keys
@@ -1221,15 +1400,9 @@ components:
         notary_public_key:
           $ref: "#/components/schemas/PublicKey"
           description: The notary public key to use (optional)
-        notary_as_signatory:
+        notary_is_signatory:
           type: boolean
           description: Whether the notary should count as a signatory (optional, default false)
-        cost_unit_limit:
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 4294967295
-          description: An integer between `0` and `2^32 - 1`, giving the maximum number of cost units available for transaction execution
         tip_percentage:
           type: integer
           format: int32
@@ -1237,8 +1410,10 @@ components:
           maximum: 255
           description: An integer between `0` and `255`, giving the validator tip as a percentage amount. A value of `1` corresponds to 1% of the fee.
         nonce:
-          type: string
-          description: A decimal-string-encoded integer between `0` and `2^64 - 1`, used to ensure the transaction intent is unique.
+          type: integer
+          format: int64
+          minimum: 0
+          description: A decimal-string-encoded integer between `0` and `2^32 - 1`, used to ensure the transaction intent is unique.
         signer_public_keys:
           type: array
           items:
@@ -1247,18 +1422,15 @@ components:
         flags:
           type: object
           required:
-            - unlimited_loan
+            - use_free_credit
             - assume_all_signature_proofs
-            - permit_duplicate_intent_hash
-            - permit_invalid_header_epoch
+            - skip_epoch_check
           properties:
-            unlimited_loan:
+            use_free_credit:
               type: boolean
             assume_all_signature_proofs:
               type: boolean
-            permit_duplicate_intent_hash:
-              type: boolean
-            permit_invalid_header_epoch:
+            skip_epoch_check:
               type: boolean
     TransactionPreviewResponse:
       type: object
@@ -1355,37 +1527,32 @@ components:
           properties:
             intent_hash_hex:
               $ref: "#/components/schemas/HashHexString"
+            opt_ins:
+              $ref: "#/components/schemas/TransactionCommittedDetailsOptIns"
       example:
         intent_hash_hex: "<transaction-intent-hash>"
+    TransactionCommittedDetailsOptIns:
+      type: object
+      properties:
+        raw_hex:
+          type: boolean
+        receipt_state_changes:
+          type: boolean
+        receipt_fee_summary:
+          type: boolean
+        receipt_events:
+          type: boolean
+        affected_global_entities:
+          type: boolean
     TransactionCommittedDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
         - type: object
           required:
             - transaction
-            - details
           properties:
             transaction:
               $ref: "#/components/schemas/CommittedTransactionInfo"
-            details:
-              $ref: "#/components/schemas/TransactionCommittedDetailsResponseDetails"
-    TransactionCommittedDetailsResponseDetails:
-      type: object
-      required:
-        - raw_hex
-        - receipt
-        - referenced_global_entities
-      properties:
-        raw_hex:
-          $ref: "#/components/schemas/HexString"
-        receipt:
-          type: object
-        referenced_global_entities:
-          type: array
-          items:
-            type: string
-        message_hex:
-          $ref: "#/components/schemas/HexString"
 
     #
     # /stream/* Request & Response Types
@@ -1406,28 +1573,65 @@ components:
                 - User
                 - EpochChange
                 - All
+            manifest_accounts_withdrawn_from_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+            manifest_accounts_deposited_into_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+            manifest_resources_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+            affected_global_entities_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+            events_filter:
+              type: array
+              items:
+                $ref: "#/components/schemas/StreamTransactionsRequestEventFilterItem"
             order:
               description: Configures the order of returned result set. Defaults to `desc`.
               type: string
               enum:
                 - Asc
                 - Desc
+            opt_ins:
+              $ref: "#/components/schemas/TransactionCommittedDetailsOptIns"
       example:
         limit_per_page: 5
+    StreamTransactionsRequestEventFilterItem:
+      type: object
+      required:
+        - event
+      properties:
+        event:
+          type: string
+          enum:
+            - Deposit
+            - Withdrawal
+        emitter_address:
+          $ref: "#/components/schemas/Address"
+        resource_address:
+          $ref: "#/components/schemas/Address"
+        quantity:
+          $ref: "#/components/schemas/BigDecimal"
     StreamTransactionsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
-        - allOf:
-            - $ref: "#/components/schemas/ResultSetCursorMixin"
-            - type: object
-              required:
-                - items
-              properties:
-                items:
-                  description: The page of user transactions.
-                  type: array
-                  items:
-                    $ref: "#/components/schemas/CommittedTransactionInfo"
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              description: The page of user transactions.
+              type: array
+              items:
+                $ref: "#/components/schemas/CommittedTransactionInfo"
 
     #
     # /state/entity/* Request & Response Types
@@ -1440,15 +1644,41 @@ components:
           required:
             - addresses
           properties:
+            opt_ins:
+              $ref: "#/components/schemas/StateEntityDetailsOptIns"
             addresses:
               type: array
               items:
-                $ref: "#/components/schemas/EntityAddress"
+                $ref: "#/components/schemas/Address"
             aggregation_level:
               $ref: "#/components/schemas/ResourceAggregationLevel"
       example:
         addresses:
           - "<entity-address>"
+        aggregation_level: "Vault"
+        opt_ins:
+          ancestor_identities: true
+          component_royalty_vault_balance: true
+          package_royalty_vault_balance: true
+          non_fungible_include_nfids: true
+          explicit_metadata:
+            - name
+            - description
+    StateEntityDetailsOptIns:
+      type: object
+      properties:
+        ancestor_identities:
+          type: boolean
+        component_royalty_vault_balance:
+          type: boolean
+        package_royalty_vault_balance:
+          type: boolean
+        non_fungible_include_nfids:
+          type: boolean
+        explicit_metadata:
+          type: array
+          items:
+            type: string
     StateEntityDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1467,7 +1697,7 @@ components:
         - metadata
       properties:
         address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/Address"
         fungible_resources:
           $ref: "#/components/schemas/FungibleResourcesCollection"
         non_fungible_resources:
@@ -1476,17 +1706,19 @@ components:
           $ref: "#/components/schemas/StateEntityDetailsResponseItemAncestorIdentities"
         metadata:
           $ref: "#/components/schemas/EntityMetadataCollection"
+        explicit_metadata:
+          $ref: "#/components/schemas/EntityMetadataCollection"
         details:
           $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
     StateEntityDetailsResponseItemAncestorIdentities:
       type: object
       properties:
         parent_address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/Address"
         owner_address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/Address"
         global_address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/Address"
     StateEntityDetailsResponseItemDetailsType:
       type: string
       enum:
@@ -1518,32 +1750,44 @@ components:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
-            - access_rules_chain
-            - vault_access_rules_chain
+            - access_rules
             - divisibility
+            - total_supply
+            - total_minted
+            - total_burned
           properties:
-            access_rules_chain:
-              type: object
-            vault_access_rules_chain:
-              type: object
+            access_rules:
+              $ref: "#/components/schemas/ComponentEntityAccessRules"
             divisibility:
               type: integer
               minimum: 0
+            total_supply:
+              $ref: "#/components/schemas/BigDecimal"
+            total_minted:
+              $ref: "#/components/schemas/BigDecimal"
+            total_burned:
+              $ref: "#/components/schemas/BigDecimal"
     StateEntityDetailsResponseNonFungibleResourceDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
-            - access_rules_chain
-            - vault_access_rules_chain
+            - access_rules
             - non_fungible_id_type
+            - total_supply
+            - total_minted
+            - total_burned
           properties:
-            access_rules_chain:
-              type: object
-            vault_access_rules_chain:
-              type: object
+            access_rules:
+              $ref: "#/components/schemas/ComponentEntityAccessRules"
             non_fungible_id_type:
               $ref: "#/components/schemas/NonFungibleIdType"
+            total_supply:
+              $ref: "#/components/schemas/BigDecimal"
+            total_minted:
+              $ref: "#/components/schemas/BigDecimal"
+            total_burned:
+              $ref: "#/components/schemas/BigDecimal"
     StateEntityDetailsResponseFungibleVaultDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
@@ -1556,29 +1800,82 @@ components:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
+          required:
+            - vm_type
+            - code_hash_hex
+            - schema_hash_hex
           properties:
+            vm_type:
+              $ref: "#/components/schemas/PackageVmType"
+            code_hash_hex:
+              $ref: "#/components/schemas/HexString"
             code_hex:
               $ref: "#/components/schemas/HexString"
-            royalty_aggregator:
-              $ref: "#/components/schemas/FungibleResourcesCollectionItemGloballyAggregated"
+            schema_hash_hex:
+              $ref: "#/components/schemas/HexString"
+            schema:
+              type: object
+            royalty_vault_balance:
+              $ref: "#/components/schemas/BigDecimal"
+            blueprints:
+              $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsBlueprintCollection"
+    StateEntityDetailsResponsePackageDetailsBlueprintCollection:
+      description: Entity metadata collection.
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsBlueprintItem"
+    StateEntityDetailsResponsePackageDetailsBlueprintItem:
+      type: object
+      required:
+        - name
+        - version
+        - definition
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+        definition:
+          type: object
+        dependant_entities:
+          type: array
+          items:
+            $ref: "#/components/schemas/Address"
+        auth_template:
+          type: object
+        auth_template_is_locked:
+          type: boolean
+          nullable: true
+        royalty_config:
+          type: object
+        royalty_config_is_locked:
+          type: boolean
+          nullable: true
     StateEntityDetailsResponseComponentDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
             - blueprint_name
-            - access_rules_chain
+            - access_rules
           properties:
             package_address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             blueprint_name:
               type: string
             state:
               type: object
-            access_rules_chain:
-              type: object
-            royalty_aggregator:
-              $ref: "#/components/schemas/FungibleResourcesCollectionItemGloballyAggregated"
+            access_rules:
+              $ref: "#/components/schemas/ComponentEntityAccessRules"
+            royalty_vault_balance:
+              $ref: "#/components/schemas/BigDecimal"
 
     StateEntityMetadataPageRequest:
       allOf:
@@ -1589,7 +1886,7 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
       example:
         address: "<entity-address>"
     StateEntityMetadataPageResponse:
@@ -1601,7 +1898,7 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
 
     StateEntityFungiblesPageRequest:
       allOf:
@@ -1612,11 +1909,20 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             aggregation_level:
               $ref: "#/components/schemas/ResourceAggregationLevel"
+            opt_ins:
+              $ref: "#/components/schemas/StateEntityFungiblesPageRequestOptIns"
       example:
         address: "<component-entity-address>"
+    StateEntityFungiblesPageRequestOptIns:
+      type: object
+      properties:
+        explicit_metadata:
+          type: array
+          items:
+            type: string
     StateEntityFungiblesPageResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1626,7 +1932,7 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
     StateEntityFungibleResourceVaultsPageRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
@@ -1637,9 +1943,9 @@ components:
             - resource_address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
       example:
         address: "<component-entity-address>"
         resource_address: "<resource_address>"
@@ -1653,9 +1959,9 @@ components:
             - resource_address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
 
     StateEntityNonFungiblesPageRequest:
       allOf:
@@ -1666,11 +1972,22 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             aggregation_level:
               $ref: "#/components/schemas/ResourceAggregationLevel"
+            opt_ins:
+              $ref: "#/components/schemas/StateEntityNonFungiblesPageRequestOptIns"
       example:
         address: "<component-entity-address>"
+    StateEntityNonFungiblesPageRequestOptIns:
+      type: object
+      properties:
+        non_fungible_include_nfids:
+          type: boolean
+        explicit_metadata:
+          type: array
+          items:
+            type: string
     StateEntityNonFungiblesPageResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1680,7 +1997,7 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
 
     StateEntityNonFungibleResourceVaultsPageRequest:
       allOf:
@@ -1692,12 +2009,20 @@ components:
             - resource_address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
+            opt_ins:
+              $ref: "#/components/schemas/StateEntityNonFungibleResourceVaultsPageOptIns"
       example:
         address: "<component-entity-address>"
         resource_address: "<resource_address>"
+    StateEntityNonFungibleResourceVaultsPageOptIns:
+      type: object
+      properties:
+        non_fungible_include_nfids:
+          type: boolean
+
     StateEntityNonFungibleResourceVaultsPageResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1708,9 +2033,9 @@ components:
             - resource_address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
 
     StateEntityNonFungibleIdsPageRequest:
       allOf:
@@ -1723,11 +2048,11 @@ components:
             - resource_address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             vault_address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
       example:
         address: "<component-entity-address>"
         resource_address: null
@@ -1742,9 +2067,9 @@ components:
             - resource_address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
 
     #
     # /state/non-fungible/* Request & Response Types
@@ -1759,7 +2084,7 @@ components:
             - resource_address
           properties:
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
       example:
         resource_address: "<non-fungible-entity-address>"
     StateNonFungibleIdsResponse:
@@ -1771,21 +2096,20 @@ components:
             - non_fungible_ids
           properties:
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
             non_fungible_ids:
               $ref: "#/components/schemas/NonFungibleIdsCollection"
 
     StateNonFungibleDataRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
-        - $ref: "#/components/schemas/CursorLimitMixin"
         - type: object
           required:
             - resource_address
             - non_fungible_ids
           properties:
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
             non_fungible_ids:
               type: array
               items:
@@ -1803,7 +2127,7 @@ components:
             - non_fungible_ids
           properties:
             resource_address:
-              $ref: "#/components/schemas/ResourceAddress"
+              $ref: "#/components/schemas/Address"
             non_fungible_id_type:
               $ref: "#/components/schemas/NonFungibleIdType"
             non_fungible_ids:
@@ -1814,12 +2138,12 @@ components:
       type: object
       required:
         - non_fungible_id
-        - mutable_data
+        - data
         - last_updated_at_state_version
       properties:
         non_fungible_id:
           $ref: "#/components/schemas/NonFungibleId"
-        mutable_data:
+        data:
           $ref: "#/components/schemas/ScryptoSborValue"
         last_updated_at_state_version:
           $ref: "#/components/schemas/LastUpdatedAtStateVersion"
@@ -1897,7 +2221,7 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
     InvalidEntityError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"
@@ -1906,7 +2230,7 @@ components:
             - address
           properties:
             address:
-              $ref: "#/components/schemas/EntityAddress"
+              $ref: "#/components/schemas/Address"
     NotSyncedUpError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"
@@ -1978,3 +2302,415 @@ components:
           type: array
           items:
             type: string
+
+    #
+    # Metadata Typed Value
+    #
+
+    MetadataValueType:
+      type: string
+      enum:
+        - String
+        - Bool
+        - U8
+        - U32
+        - U64
+        - I32
+        - I64
+        - Decimal
+        - GlobalAddress
+        - PublicKey
+        - NonFungibleGlobalId
+        - NonFungibleLocalId
+        - Instant
+        - Url
+        - Origin
+        - PublicKeyHash
+        - StringArray
+        - BoolArray
+        - U8Array
+        - U32Array
+        - U64Array
+        - I32Array
+        - I64Array
+        - DecimalArray
+        - GlobalAddressArray
+        - PublicKeyArray
+        - NonFungibleGlobalIdArray
+        - NonFungibleLocalIdArray
+        - InstantArray
+        - UrlArray
+        - OriginArray
+        - PublicKeyHashArray
+    MetadataTypedValue:
+      type: object
+      discriminator:
+        propertyName: type
+        mapping:
+          String: "#/components/schemas/MetadataStringValue"
+          Bool: "#/components/schemas/MetadataBoolValue"
+          U8: "#/components/schemas/MetadataU8Value"
+          U32: "#/components/schemas/MetadataU32Value"
+          U64: "#/components/schemas/MetadataU64Value"
+          I32: "#/components/schemas/MetadataI32Value"
+          I64: "#/components/schemas/MetadataI64Value"
+          Decimal: "#/components/schemas/MetadataDecimalValue"
+          GlobalAddress: "#/components/schemas/MetadataGlobalAddressValue"
+          PublicKey: "#/components/schemas/MetadataPublicKeyValue"
+          NonFungibleGlobalId: "#/components/schemas/MetadataNonFungibleGlobalIdValue"
+          NonFungibleLocalId: "#/components/schemas/MetadataNonFungibleLocalIdValue"
+          Instant: "#/components/schemas/MetadataInstantValue"
+          Url: "#/components/schemas/MetadataUrlValue"
+          Origin: "#/components/schemas/MetadataOriginValue"
+          PublicKeyHash: "#/components/schemas/MetadataPublicKeyHashValue"
+          StringArray: "#/components/schemas/MetadataStringArrayValue"
+          BoolArray: "#/components/schemas/MetadataBoolArrayValue"
+          U8Array: "#/components/schemas/MetadataU8ArrayValue"
+          U32Array: "#/components/schemas/MetadataU32ArrayValue"
+          U64Array: "#/components/schemas/MetadataU64ArrayValue"
+          I32Array: "#/components/schemas/MetadataI32ArrayValue"
+          I64Array: "#/components/schemas/MetadataI64ArrayValue"
+          DecimalArray: "#/components/schemas/MetadataDecimalArrayValue"
+          GlobalAddressArray: "#/components/schemas/MetadataGlobalAddressArrayValue"
+          PublicKeyArray: "#/components/schemas/MetadataPublicKeyArrayValue"
+          NonFungibleGlobalIdArray: "#/components/schemas/MetadataNonFungibleGlobalIdArrayValue"
+          NonFungibleLocalIdArray: "#/components/schemas/MetadataNonFungibleLocalIdArrayValue"
+          InstantArray: "#/components/schemas/MetadataInstantArrayValue"
+          UrlArray: "#/components/schemas/MetadataUrlArrayValue"
+          OriginArray: "#/components/schemas/MetadataOriginArrayValue"
+          PublicKeyHashArray: "#/components/schemas/MetadataPublicKeyHashArrayValue"
+      required:
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/MetadataValueType"
+    MetadataStringValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    MetadataBoolValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: boolean
+    MetadataU8Value:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    MetadataU32Value:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    MetadataU64Value:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    MetadataI32Value:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    MetadataI64Value:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    MetadataDecimalValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    MetadataGlobalAddressValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    MetadataPublicKeyValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              $ref: "#/components/schemas/PublicKey"
+    MetadataNonFungibleGlobalIdValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - resource_address
+            - non_fungible_id
+          properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
+            non_fungible_id:
+              $ref: "#/components/schemas/NonFungibleId"
+    MetadataNonFungibleLocalIdValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    MetadataInstantValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    MetadataUrlValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    MetadataOriginValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+    MetadataPublicKeyHashValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value
+          properties:
+            value:
+              $ref: "#/components/schemas/PublicKeyHash"
+    MetadataStringArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                type: string
+    MetadataBoolArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                type: boolean
+    MetadataU8ArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - value_hex
+          properties:
+            value_hex:
+              type: string
+    MetadataU32ArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                type: string
+    MetadataU64ArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                type: string
+    MetadataI32ArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                type: string
+    MetadataI64ArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                type: string
+    MetadataDecimalArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                type: string
+    MetadataGlobalAddressArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                type: string
+    MetadataPublicKeyArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                $ref: "#/components/schemas/PublicKey"
+    MetadataNonFungibleGlobalIdArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                type: object
+                required:
+                  - resource_address
+                  - non_fungible_id
+                properties:
+                  resource_address:
+                    $ref: "#/components/schemas/Address"
+                  non_fungible_id:
+                    $ref: "#/components/schemas/NonFungibleId"
+    MetadataNonFungibleLocalIdArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                type: string
+    MetadataInstantArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                type: string
+    MetadataUrlArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                type: string
+    MetadataOriginArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                type: string
+    MetadataPublicKeyHashArrayValue:
+      allOf:
+        - $ref: "#/components/schemas/MetadataTypedValue"
+        - type: object
+          required:
+            - values
+          properties:
+            values:
+              type: array
+              items:
+                $ref: "#/components/schemas/PublicKeyHash"
+

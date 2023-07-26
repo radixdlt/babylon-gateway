@@ -63,14 +63,25 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("network_configuration")]
-internal class NetworkConfiguration : SingleEntryBase
+internal class NetworkConfiguration
 {
+    [Key]
+    [Column(name: "id")]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    public int Id
+    {
+        get { return 1; }
+        // ReSharper disable once ValueParameterNotUsed
+        set { }
+    }
+
     [Column("network_id")]
     public byte NetworkId { get; set; }
 
@@ -86,12 +97,20 @@ internal class NetworkConfiguration : SingleEntryBase
     [Column("address_type_definitions", TypeName = "jsonb")]
     public AddressTypeDefinition[] AddressTypeDefinitions { get; set; }
 
+    [Column("genesis_epoch")]
+    public long GenesisEpoch { get; set; }
+
+    [Column("genesis_round")]
+    public long GenesisRound { get; set; }
+
     public bool HasEqualConfiguration(NetworkConfiguration other)
     {
         return NetworkId == other.NetworkId
                && NetworkName == other.NetworkName
                && HrpDefinition == other.HrpDefinition
                && WellKnownAddresses == other.WellKnownAddresses
-               && AddressTypeDefinitions.SequenceEqual(other.AddressTypeDefinitions);
+               && AddressTypeDefinitions.SequenceEqual(other.AddressTypeDefinitions)
+               && GenesisEpoch == other.GenesisEpoch
+               && GenesisRound == other.GenesisRound;
     }
 }

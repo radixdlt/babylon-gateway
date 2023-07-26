@@ -66,7 +66,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
-using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -74,7 +74,7 @@ public interface ISubmissionTrackingService
 {
     Task<TackingGuidance> TrackInitialSubmission(
         DateTime submittedTimestamp,
-        ToolkitModel.Transaction.NotarizedTransaction notarizedTransaction,
+        ToolkitModel.NotarizedTransaction notarizedTransaction,
         string submittedToNodeName,
         CancellationToken token = default
     );

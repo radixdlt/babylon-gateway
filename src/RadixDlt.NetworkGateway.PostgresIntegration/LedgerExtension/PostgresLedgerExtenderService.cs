@@ -65,15 +65,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.RadixEngineToolkit.Model.Value;
+using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -82,6 +82,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Array = System.Array;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -91,6 +92,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
     private readonly ILogger<PostgresLedgerExtenderService> _logger;
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
+    private readonly IComponentSchemaProvider _componentSchemaProvider;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
     private readonly IClock _clock;
@@ -100,13 +102,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         INetworkConfigurationProvider networkConfigurationProvider,
         IEnumerable<ILedgerExtenderServiceObserver> observers,
-        IClock clock)
+        IClock clock, IComponentSchemaProvider componentSchemaProvider)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
         _networkConfigurationProvider = networkConfigurationProvider;
         _observers = observers;
         _clock = clock;
+        _componentSchemaProvider = componentSchemaProvider;
     }
 
     public async Task<TransactionSummary> GetLatestTransactionSummary(CancellationToken token = default)
@@ -143,7 +146,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
             var extendLedgerReport = await ProcessTransactions(dbContext, ledgerExtension, token);
 
-            await CreateOrUpdateLedgerStatus(dbContext, extendLedgerReport.FinalTransaction, latestSyncTarget.TargetStateVersion, token);
             await tx.CommitAsync(token);
 
             return new CommitTransactionsReport(
@@ -212,7 +214,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         foreach (var pendingTransaction in toUpdate)
         {
-            if (pendingTransaction.Status is PendingTransactionStatus.RejectedPermanently or PendingTransactionStatus.RejectedTemporarily)
+            if (pendingTransaction.Status is PendingTransactionStatus.RejectedPermanently)
             {
                 await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedWhichWasFailed());
 
@@ -248,7 +250,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var dbWriteDuration = TimeSpan.Zero;
         var outerStopwatch = Stopwatch.StartNew();
         var referencedEntities = new ReferencedEntityDictionary();
-        var childToParentEntities = new Dictionary<string, string>();
+        var childToParentEntities = new Dictionary<EntityAddress, EntityAddress>();
+        var manifestExtractedAddresses = new Dictionary<long, ManifestAddressesExtractor.ManifestAddresses>();
 
         var readHelper = new ReadHelper(dbContext);
         var writeHelper = new WriteHelper(dbContext);
@@ -256,6 +259,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
 
         var ledgerTransactionsToAdd = new List<LedgerTransaction>();
+        var ledgerTransactionMarkersToAdd = new List<LedgerTransactionMarker>();
         var entitiesToAdd = new List<Entity>();
 
         SequencesHolder sequences;
@@ -281,257 +285,329 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         // step: scan for any referenced entities
         {
-            var hrp = _networkConfigurationProvider.GetHrpDefinition();
-
-            foreach (var commitedTransaction in ledgerExtension.CommittedTransactions)
+            foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
             {
-                var stateVersion = commitedTransaction.StateVersion;
-                var stateUpdates = commitedTransaction.Receipt.StateUpdates;
+                var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
+                var stateUpdates = committedTransaction.Receipt.StateUpdates;
 
-                long? nextEpoch = null;
-                long? newRoundInEpoch = null;
-                DateTime? newRoundTimestamp = null;
-                LedgerTransactionKindFilterConstraint? kindFilterConstraint = null;
-
-                if (commitedTransaction.LedgerTransaction is CoreModel.ValidatorLedgerTransaction vlt)
+                try
                 {
-                    switch (vlt.ValidatorTransaction)
+                    if (committedTransaction.LedgerTransaction is CoreModel.GenesisLedgerTransaction)
                     {
-                        case CoreModel.RoundUpdateValidatorTransaction roundUpdate:
-                            newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(roundUpdate.ProposerTimestamp.UnixTimestampMs).UtcDateTime;
-                            break;
-                    }
-                }
-
-                if (commitedTransaction.LedgerTransaction is CoreModel.SystemLedgerTransaction)
-                {
-                    // no-op so far
-                }
-
-                if (commitedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction)
-                {
-                    kindFilterConstraint = LedgerTransactionKindFilterConstraint.User;
-                }
-
-                foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
-                {
-                    var referencedEntity = referencedEntities
-                        .GetOrAdd(
-                            newGlobalEntity.EntityReference.EntityIdHex,
-                            _ => new ReferencedEntity(newGlobalEntity.EntityReference.EntityIdHex, newGlobalEntity.EntityReference.EntityType, stateVersion)
-                        );
-
-                    referencedEntity.Globalize((GlobalAddress)newGlobalEntity.GlobalAddress);
-                    referencedEntity.WithTypeHint(newGlobalEntity.EntityReference.EntityType switch
-                    {
-                        CoreModel.EntityType.NormalComponent => typeof(NormalComponentEntity),
-                        CoreModel.EntityType.Package => typeof(PackageEntity),
-                        CoreModel.EntityType.EpochManager => typeof(EpochManagerEntity),
-                        CoreModel.EntityType.Clock => typeof(ClockEntity),
-                        CoreModel.EntityType.Validator => typeof(ValidatorEntity),
-                        CoreModel.EntityType.AccessController => typeof(AccessControllerEntity),
-                        CoreModel.EntityType.Account => typeof(AccountComponentEntity),
-                        CoreModel.EntityType.Identity => typeof(IdentityEntity),
-                        CoreModel.EntityType.KeyValueStore => typeof(KeyValueStoreEntity),
-                        CoreModel.EntityType.Vault => typeof(VaultEntity),
-                        CoreModel.EntityType.FungibleResource => typeof(FungibleResourceEntity),
-                        CoreModel.EntityType.NonFungibleResource => typeof(NonFungibleResourceEntity),
-                        _ => throw new ArgumentOutOfRangeException(),
-                    });
-                }
-
-                foreach (var substate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates).ToList())
-                {
-                    var substateId = substate.SubstateId;
-                    var substateData = substate.SubstateData;
-
-                    if (substateData is CoreModel.EpochManagerSubstate epochManagerSubstate)
-                    {
-                        newRoundInEpoch = epochManagerSubstate.Round;
-
-                        if (epochManagerSubstate.Round == 0)
+                        if (stateVersion == 1)
                         {
-                            nextEpoch = epochManagerSubstate.Epoch;
-                            kindFilterConstraint = LedgerTransactionKindFilterConstraint.EpochChange;
+                            var eventSchema = SchemaExtractor.ExtractEventTypeIdentifiers(committedTransaction.Receipt);
+                            await _componentSchemaProvider.SaveComponentSchema(new ComponentSchema { EventTypeIdentifiers = eventSchema }, token);
                         }
                     }
 
-                    var referencedEntity = referencedEntities.GetOrAdd(substateId.EntityIdHex, _ => new ReferencedEntity(substateId.EntityIdHex, substateId.EntityType, stateVersion));
+                    long? epochUpdate = null;
+                    long? roundInEpochUpdate = null;
+                    DateTime? roundTimestampUpdate = null;
 
-                    if (substateData is CoreModel.IEntityOwner entityOwner)
+                    if (committedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction userLedgerTransaction)
                     {
-                        foreach (var oe in entityOwner.GetOwnedEntities())
+                        ledgerTransactionMarkersToAdd.Add(new OriginLedgerTransactionMarker
                         {
-                            referencedEntities.GetOrAdd(oe.EntityIdHex, _ => new ReferencedEntity(oe.EntityIdHex, oe.EntityType, stateVersion)).IsImmediateChildOf(referencedEntity);
-                            childToParentEntities[oe.EntityIdHex] = substateId.EntityIdHex;
-                        }
-                    }
-
-                    if (substateData is CoreModel.IRoyaltyVaultHolder royaltyVaultHolder && royaltyVaultHolder.TryGetRoyaltyVault(out var rv))
-                    {
-                        referencedEntities.GetOrAdd(rv.EntityIdHex, _ => new ReferencedEntity(rv.EntityIdHex, rv.EntityType, stateVersion)).IsImmediateChildOf(referencedEntity);
-                        childToParentEntities[rv.EntityIdHex] = substateId.EntityIdHex;
-
-                        referencedEntity.PostResolveConfigure((IRoyaltyVaultHolder e) => e.RoyaltyVaultEntityId = referencedEntities.Get(rv.EntityIdHex).DatabaseId);
-                        referencedEntities.Get(rv.EntityIdHex).PostResolveConfigure((VaultEntity e) => e.RoyaltyVaultOfEntityId = referencedEntity.DatabaseId);
-                    }
-
-                    if (substateData is CoreModel.IGlobalAddressPointer globalEntityPointer)
-                    {
-                        foreach (var globalAddress in globalEntityPointer.GetGlobalAddresses())
-                        {
-                            referencedEntities.MarkSeenGlobalAddress((GlobalAddress)globalAddress);
-                        }
-                    }
-
-                    if (substateData is CoreModel.FungibleResourceManagerSubstate fungibleResourceManager)
-                    {
-                        referencedEntity.PostResolveConfigure((FungibleResourceEntity e) => e.Divisibility = fungibleResourceManager.Divisibility);
-                    }
-
-                    if (substateData is CoreModel.NonFungibleResourceManagerSubstate nonFungibleResourceManager)
-                    {
-                        var dataTable = nonFungibleResourceManager.NonFungibleDataTable;
-
-                        referencedEntity.PostResolveConfigure((NonFungibleResourceEntity e) => e.NonFungibleIdType = nonFungibleResourceManager.NonFungibleIdType switch
-                        {
-                            CoreModel.NonFungibleIdType.String => NonFungibleIdType.String,
-                            CoreModel.NonFungibleIdType.Integer => NonFungibleIdType.Integer,
-                            CoreModel.NonFungibleIdType.Bytes => NonFungibleIdType.Bytes,
-                            CoreModel.NonFungibleIdType.UUID => NonFungibleIdType.UUID,
-                            _ => throw new ArgumentOutOfRangeException(nameof(e.NonFungibleIdType), e.NonFungibleIdType, "Unexpected value of NonFungibleIdType"),
+                            Id = sequences.LedgerTransactionMarkerSequence++,
+                            StateVersion = stateVersion,
+                            OriginType = LedgerTransactionMarkerOriginType.User,
                         });
 
-                        referencedEntities
-                            .GetOrAdd(dataTable.EntityIdHex, _ => new ReferencedEntity(dataTable.EntityIdHex, dataTable.EntityType, stateVersion))
-                            .PostResolveConfigure((KeyValueStoreEntity e) => e.StoreOfNonFungibleResourceEntityId = referencedEntity.DatabaseId);
+                        var coreInstructions = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.Instructions;
+                        var coreBlobs = userLedgerTransaction.NotarizedTransaction.SignedIntent.Intent.BlobsHex;
+                        using var manifestInstructions = ToolkitModel.Instructions.FromString(coreInstructions, _networkConfigurationProvider.GetNetworkId());
+                        using var toolkitManifest = new ToolkitModel.TransactionManifest(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex().ToList()).ToList());
+                        var extractedAddresses = ManifestAddressesExtractor.ExtractAddresses(toolkitManifest);
+
+                        foreach (var address in extractedAddresses.All())
+                        {
+                            referencedEntities.MarkSeenAddress(address);
+                        }
+
+                        manifestExtractedAddresses[stateVersion] = extractedAddresses;
                     }
 
-                    if (substateData is CoreModel.VaultInfoSubstate vaultInfo)
+                    if (committedTransaction.LedgerTransaction is CoreModel.RoundUpdateLedgerTransaction rult)
                     {
-                        referencedEntity.PostResolveConfigure((VaultEntity e) =>
+                        epochUpdate = rult.RoundUpdateTransaction.Epoch;
+                        roundInEpochUpdate = rult.RoundUpdateTransaction.RoundInEpoch;
+                        roundTimestampUpdate = DateTimeOffset.FromUnixTimeMilliseconds(rult.RoundUpdateTransaction.ProposerTimestamp.UnixTimestampMs).UtcDateTime;
+                    }
+
+                    foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
+                    {
+                        var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)newGlobalEntity.EntityAddress, ea => new ReferencedEntity(ea,  newGlobalEntity.EntityType, stateVersion));
+
+                        referencedEntity.WithTypeHint(newGlobalEntity.EntityType switch
                         {
-                            e.ResourceEntityId = referencedEntities.GetByGlobal((GlobalAddress)vaultInfo.ResourceAddress).DatabaseId;
+                            CoreModel.EntityType.GlobalGenericComponent => typeof(GlobalGenericComponentEntity),
+                            CoreModel.EntityType.GlobalPackage => typeof(GlobalPackageEntity),
+                            CoreModel.EntityType.GlobalConsensusManager => typeof(GlobalConsensusManager),
+                            CoreModel.EntityType.GlobalValidator => typeof(GlobalValidatorEntity),
+                            CoreModel.EntityType.GlobalAccessController => typeof(GlobalAccessControllerEntity),
+                            CoreModel.EntityType.GlobalVirtualEd25519Account => typeof(GlobalAccountEntity),
+                            CoreModel.EntityType.GlobalVirtualSecp256k1Account => typeof(GlobalAccountEntity),
+                            CoreModel.EntityType.GlobalAccount => typeof(GlobalAccountEntity),
+                            CoreModel.EntityType.GlobalIdentity => typeof(GlobalIdentityEntity),
+                            CoreModel.EntityType.GlobalVirtualEd25519Identity => typeof(GlobalIdentityEntity),
+                            CoreModel.EntityType.GlobalVirtualSecp256k1Identity => typeof(GlobalIdentityEntity),
+                            CoreModel.EntityType.GlobalFungibleResource => typeof(GlobalFungibleResourceEntity),
+                            CoreModel.EntityType.GlobalNonFungibleResource => typeof(GlobalNonFungibleResourceEntity),
+                            CoreModel.EntityType.GlobalTransactionTracker => typeof(GlobalTransactionTrackerEntity),
+                            CoreModel.EntityType.GlobalOneResourcePool => typeof(GlobalOneResourcePoolEntity),
+                            CoreModel.EntityType.GlobalTwoResourcePool => typeof(GlobalTwoResourcePoolEntity),
+                            CoreModel.EntityType.GlobalMultiResourcePool => typeof(GlobalMultiResourcePoolEntity),
+                            _ => throw new ArgumentOutOfRangeException(nameof(newGlobalEntity.EntityType), newGlobalEntity.EntityType.ToString()),
                         });
                     }
 
-                    if (substateData is CoreModel.TypeInfoSubstate typeInfoSubstate)
+                    foreach (var substate in stateUpdates.CreatedSubstates.Select(x => new { x.SubstateId, x.Value }).Concat(stateUpdates.UpdatedSubstates.Select(x => new { x.SubstateId, Value = x.NewValue })))
                     {
-                        switch (typeInfoSubstate.Details)
+                        var substateId = substate.SubstateId;
+                        var substateData = substate.Value.SubstateData;
+                        var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)substateId.EntityAddress, ea => new ReferencedEntity(ea, substateId.EntityType, stateVersion));
+
+                        if (substateData is CoreModel.IEntityOwner entityOwner)
                         {
-                            case CoreModel.KeyValueStoreTypeInfoDetails _:
-                                // TODO schema not supported yet
-                                break;
-                            case CoreModel.ObjectTypeInfoDetails objectDetails:
-                                referencedEntity.PostResolveConfigure((ComponentEntity e) =>
+                            foreach (var oe in entityOwner.GetOwnedEntities())
+                            {
+                                referencedEntities
+                                    .GetOrAdd((EntityAddress)oe.EntityAddress, ea => new ReferencedEntity(ea, oe.EntityType, stateVersion))
+                                    .IsImmediateChildOf(referencedEntity);
+                                childToParentEntities[(EntityAddress)oe.EntityAddress] = (EntityAddress)substateId.EntityAddress;
+                            }
+                        }
+
+                        if (substateData is CoreModel.IRoyaltyVaultHolder royaltyVaultHolder && royaltyVaultHolder.TryGetRoyaltyVault(out var rv))
+                        {
+                            referencedEntities
+                                .GetOrAdd((EntityAddress)rv.EntityAddress, _ => new ReferencedEntity((EntityAddress)rv.EntityAddress,  rv.EntityType, stateVersion))
+                                .IsImmediateChildOf(referencedEntity);
+                            childToParentEntities[(EntityAddress)rv.EntityAddress] = (EntityAddress)substateId.EntityAddress;
+
+                            referencedEntities.Get((EntityAddress)rv.EntityAddress)
+                                .PostResolveConfigure((InternalFungibleVaultEntity e) => e.RoyaltyVaultOfEntityId = referencedEntity.DatabaseId);
+                        }
+
+                        if (substateData is CoreModel.IEntityAddressPointer parentAddressPointer)
+                        {
+                            foreach (var entityAddress in parentAddressPointer.GetEntityAddresses())
+                            {
+                                referencedEntities.MarkSeenAddress((EntityAddress)entityAddress);
+                            }
+                        }
+
+                        if (substateData is CoreModel.FungibleResourceManagerFieldDivisibilitySubstate fungibleResourceManager)
+                        {
+                            referencedEntity.PostResolveConfigure((GlobalFungibleResourceEntity e) => e.Divisibility = fungibleResourceManager.Value.Divisibility);
+                        }
+
+                        if (substateData is CoreModel.NonFungibleResourceManagerFieldIdTypeSubstate nonFungibleResourceManagerFieldIdTypeSubstate)
+                        {
+                            referencedEntity.PostResolveConfigure((GlobalNonFungibleResourceEntity e) => e.NonFungibleIdType = nonFungibleResourceManagerFieldIdTypeSubstate.Value.NonFungibleIdType switch
+                            {
+                                CoreModel.NonFungibleIdType.String => NonFungibleIdType.String,
+                                CoreModel.NonFungibleIdType.Integer => NonFungibleIdType.Integer,
+                                CoreModel.NonFungibleIdType.Bytes => NonFungibleIdType.Bytes,
+                                CoreModel.NonFungibleIdType.RUID => NonFungibleIdType.RUID,
+                                _ => throw new ArgumentOutOfRangeException(nameof(e.NonFungibleIdType), e.NonFungibleIdType, "Unexpected value of NonFungibleIdType"),
+                            });
+                        }
+
+                        if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate typeInfoSubstate)
+                        {
+                            switch (typeInfoSubstate.Value.Details)
+                            {
+                                case CoreModel.ObjectTypeInfoDetails objectDetails:
+                                    referencedEntity.PostResolveConfigure((ComponentEntity e) =>
+                                    {
+                                        e.PackageId = referencedEntities.Get((EntityAddress)objectDetails.PackageAddress).DatabaseId;
+                                        e.BlueprintName = objectDetails.BlueprintName;
+                                    });
+
+                                    if (objectDetails.BlueprintName is NativeBlueprintNames.FungibleVault or NativeBlueprintNames.NonFungibleVault)
+                                    {
+                                        referencedEntity.PostResolveConfigure((VaultEntity e) =>
+                                        {
+                                            e.ResourceEntityId = referencedEntities.Get((EntityAddress)objectDetails.OuterObject).DatabaseId;
+                                        });
+                                    }
+
+                                    break;
+                                case CoreModel.KeyValueStoreTypeInfoDetails:
+                                    // TODO not supported yet
+                                    break;
+                                default:
+                                    throw new UnreachableException($"Didn't expect '{typeInfoSubstate.Value.Details.Type}' value");
+                            }
+                        }
+
+                        if (substateData is CoreModel.ValidatorFieldStateSubstate validator)
+                        {
+                            referencedEntity.PostResolveConfigure((GlobalValidatorEntity e) =>
+                            {
+                                e.StakeVaultEntityId = referencedEntities.Get((EntityAddress)validator.Value.StakeXrdVault.EntityAddress).DatabaseId;
+                                e.PendingXrdWithdrawVault = referencedEntities.Get((EntityAddress)validator.Value.PendingXrdWithdrawVault.EntityAddress).DatabaseId;
+                                e.LockedOwnerStakeUnitVault = referencedEntities.Get((EntityAddress)validator.Value.LockedOwnerStakeUnitVault.EntityAddress).DatabaseId;
+                                e.PendingOwnerStakeUnitUnlockVault = referencedEntities.Get((EntityAddress)validator.Value.PendingOwnerStakeUnitUnlockVault.EntityAddress).DatabaseId;
+                            });
+                        }
+
+                        if (substateData is CoreModel.PackageCodeVmTypeEntrySubstate packageCodeVmType)
+                        {
+                            referencedEntity.PostResolveConfigure((GlobalPackageEntity e) =>
+                            {
+                                e.VmType = packageCodeVmType.Value.VmType.ToModel();
+                            });
+                        }
+
+                        if (substateData is CoreModel.PackageCodeOriginalCodeEntrySubstate packageCodeOriginalCode)
+                        {
+                            referencedEntity.PostResolveConfigure((GlobalPackageEntity e) =>
+                            {
+                                e.CodeHash = packageCodeOriginalCode.Key.CodeHash.ConvertFromHex();
+                                e.Code = packageCodeOriginalCode.Value.CodeHex.ConvertFromHex();
+                            });
+                        }
+
+                        if (substateData is CoreModel.PackageSchemaEntrySubstate packageSchema)
+                        {
+                            referencedEntity.PostResolveConfigure((GlobalPackageEntity e) =>
+                            {
+                                e.SchemaHash = packageSchema.Key.SchemaHash.ConvertFromHex();
+                                e.Schema = packageSchema.Value.Schema.SborData.ToJson();
+                            });
+                        }
+                    }
+
+                    foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
+                    {
+                        var sid = deletedSubstate.SubstateId;
+                        referencedEntities.GetOrAdd((EntityAddress)sid.EntityAddress, ea => new ReferencedEntity(ea, sid.EntityType, stateVersion));
+                    }
+
+                    if (committedTransaction.Receipt.Events != null)
+                    {
+                        foreach (var @event in committedTransaction.Receipt.Events)
+                        {
+                            switch (@event.Type.Emitter)
+                            {
+                                case CoreModel.FunctionEventEmitterIdentifier functionEventEmitterIdentifier:
                                 {
-                                    e.PackageId = referencedEntities.GetByGlobal((GlobalAddress)objectDetails.PackageAddress).DatabaseId;
-                                    e.BlueprintName = objectDetails.BlueprintName;
-                                });
-                                break;
-                            default:
-                                throw new UnreachableException($"Didn't expect '{typeInfoSubstate.Details.Type}' value");
+                                    var entityAddress = (EntityAddress)functionEventEmitterIdentifier.Entity.EntityAddress;
+
+                                    referencedEntities.GetOrAdd(entityAddress, ea => new ReferencedEntity(ea, functionEventEmitterIdentifier.Entity.EntityType, stateVersion));
+                                    break;
+                                }
+
+                                case CoreModel.MethodEventEmitterIdentifier methodEventEmitterIdentifier:
+                                {
+                                    var entityAddress = (EntityAddress)methodEventEmitterIdentifier.Entity.EntityAddress;
+
+                                    referencedEntities.GetOrAdd(entityAddress, ea => new ReferencedEntity(ea, methodEventEmitterIdentifier.Entity.EntityType, stateVersion));
+                                    break;
+                                }
+
+                                default:
+                                    throw new ArgumentOutOfRangeException(nameof(@event.Type.Emitter), @event.Type.Emitter, null);
+                            }
                         }
                     }
 
-                    if (substateData is CoreModel.PackageCodeSubstate packageCode)
-                    {
-                        referencedEntity.PostResolveConfigure((PackageEntity e) => e.Code = packageCode.GetCodeBytes());
-                    }
+                    /* NB:
+                       The Epoch Transition Transaction sort of fits between epochs, but it seems to fit slightly more naturally
+                       as the _first_ transaction of a new epoch, as creates the next EpochData, and the RoundData to 0.
+                    */
 
-                    if (substateData is CoreModel.PackageCodeTypeSubstate packageCodeType)
-                    {
-                        referencedEntity.PostResolveConfigure((PackageEntity e) => e.CodeType = packageCodeType.CodeType);
-                    }
+                    var isStartOfEpoch = epochUpdate.HasValue && epochUpdate.Value != lastTransactionSummary.Epoch;
+                    var isStartOfRound = roundInEpochUpdate.HasValue;
+                    var roundTimestamp = roundTimestampUpdate ?? lastTransactionSummary.RoundTimestamp;
+                    var createdTimestamp = _clock.UtcNow;
+                    var normalizedRoundTimestamp = // Clamp between lastTransaction.NormalizedTimestamp and createdTimestamp
+                        roundTimestamp < lastTransactionSummary.NormalizedRoundTimestamp ? lastTransactionSummary.NormalizedRoundTimestamp
+                        : roundTimestamp > createdTimestamp ? createdTimestamp
+                        : roundTimestamp;
 
-                    if (substateData is CoreModel.ValidatorSubstate validator)
+                    var summary = new TransactionSummary(
+                        StateVersion: stateVersion,
+                        RoundTimestamp: roundTimestamp,
+                        NormalizedRoundTimestamp: normalizedRoundTimestamp,
+                        CreatedTimestamp: createdTimestamp,
+                        Epoch: epochUpdate ?? lastTransactionSummary.Epoch,
+                        RoundInEpoch: roundInEpochUpdate ?? lastTransactionSummary.RoundInEpoch,
+                        IndexInEpoch: isStartOfEpoch ? 0 : lastTransactionSummary.IndexInEpoch + 1,
+                        IndexInRound: isStartOfRound ? 0 : lastTransactionSummary.IndexInRound + 1,
+                        IsEndOfEpoch: epochUpdate != null);
+
+                    LedgerTransaction ledgerTransaction = committedTransaction.LedgerTransaction switch
                     {
-                        referencedEntity.PostResolveConfigure((ValidatorEntity e) =>
+                        CoreModel.GenesisLedgerTransaction => new GenesisLedgerTransaction(),
+                        CoreModel.UserLedgerTransaction ult => new UserLedgerTransaction
                         {
-                            e.EpochManagerEntityId = referencedEntities.GetByGlobal((GlobalAddress)validator.EpochManagerAddress).DatabaseId;
-                            e.StakeVaultEntityId = referencedEntities.Get(validator.StakeVault.EntityIdHex).DatabaseId;
-                            e.UnstakeVaultEntityId = referencedEntities.Get(validator.UnstakeVault.EntityIdHex).DatabaseId;
+                            PayloadHash = ult.NotarizedTransaction.GetHashBytes(),
+                            IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.GetHashBytes(),
+                            SignedIntentHash = ult.NotarizedTransaction.SignedIntent.GetHashBytes(),
+                        },
+                        CoreModel.RoundUpdateLedgerTransaction => new RoundUpdateLedgerTransaction(),
+                        _ => throw new UnreachableException(),
+                    };
+
+                    var feeSummary = committedTransaction.Receipt.FeeSummary;
+
+                    ledgerTransaction.StateVersion = stateVersion;
+                    // TODO commented out as incompatible with current Core API version
+                    ledgerTransaction.Message = null; // message: transaction.Metadata.Message?.ConvertFromHex(),
+                    ledgerTransaction.Epoch = summary.Epoch;
+                    ledgerTransaction.RoundInEpoch = summary.RoundInEpoch;
+                    ledgerTransaction.IndexInEpoch = summary.IndexInEpoch;
+                    ledgerTransaction.IndexInRound = summary.IndexInRound;
+                    ledgerTransaction.IsEndOfEpoch = summary.IsEndOfEpoch;
+                    ledgerTransaction.FeePaid = feeSummary != null
+                        ? TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdTotalExecutionCost)
+                        : null;
+                    ledgerTransaction.TipPaid = feeSummary != null
+                        ? TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdTotalTipped)
+                        : null;
+                    ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
+                    ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
+                    ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
+                    ledgerTransaction.RawPayload = committedTransaction.LedgerTransaction.GetUnwrappedPayloadBytes();
+                    ledgerTransaction.EngineReceipt = new TransactionReceipt
+                    {
+                        StateUpdates = committedTransaction.Receipt.StateUpdates.ToJson(),
+                        Status = committedTransaction.Receipt.Status.ToModel(),
+                        FeeSummary = committedTransaction.Receipt.FeeSummary.ToJson(),
+                        ErrorMessage = committedTransaction.Receipt.ErrorMessage,
+                        Output = committedTransaction.Receipt.Output != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Output) : null,
+                        NextEpoch = committedTransaction.Receipt.NextEpoch?.ToJson(),
+                        Events = committedTransaction.Receipt.Events != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Events) : null,
+                    };
+
+                    ledgerTransactionsToAdd.Add(ledgerTransaction);
+
+                    if (committedTransaction.Receipt.NextEpoch != null)
+                    {
+                        ledgerTransactionMarkersToAdd.Add(new OriginLedgerTransactionMarker
+                        {
+                            Id = sequences.LedgerTransactionMarkerSequence++,
+                            StateVersion = stateVersion,
+                            OriginType = LedgerTransactionMarkerOriginType.EpochChange,
                         });
                     }
+
+                    lastTransactionSummary = summary;
                 }
-
-                foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
+                catch (Exception ex)
                 {
-                    var sid = deletedSubstate.SubstateId;
-
-                    referencedEntities.GetOrAdd(sid.EntityIdHex, _ => new ReferencedEntity(sid.EntityIdHex, sid.EntityType, stateVersion));
+                    _logger.LogError(ex, "Failed to process transaction {StateVersion} at referenced entities scan stage", stateVersion);
+                    throw;
                 }
-
-                /* NB:
-                   The Epoch Transition Transaction sort of fits between epochs, but it seems to fit slightly more naturally
-                   as the _first_ transaction of a new epoch, as creates the next EpochData, and the RoundData to 0.
-                */
-
-                var isStartOfEpoch = lastTransactionSummary.IsEndOfEpoch;
-                var isStartOfRound = newRoundInEpoch != null;
-                var roundTimestamp = newRoundTimestamp ?? lastTransactionSummary.RoundTimestamp;
-                var createdTimestamp = _clock.UtcNow;
-                var normalizedRoundTimestamp = // Clamp between lastTransaction.NormalizedTimestamp and createdTimestamp
-                    roundTimestamp < lastTransactionSummary.NormalizedRoundTimestamp ? lastTransactionSummary.NormalizedRoundTimestamp
-                    : roundTimestamp > createdTimestamp ? createdTimestamp
-                    : roundTimestamp;
-
-                var summary = new TransactionSummary(
-                    StateVersion: stateVersion,
-                    RoundTimestamp: roundTimestamp,
-                    NormalizedRoundTimestamp: normalizedRoundTimestamp,
-                    CreatedTimestamp: createdTimestamp,
-                    Epoch: isStartOfEpoch ? lastTransactionSummary.Epoch + 1 : lastTransactionSummary.Epoch,
-                    RoundInEpoch: newRoundInEpoch ?? lastTransactionSummary.RoundInEpoch,
-                    IndexInEpoch: isStartOfEpoch ? 0 : lastTransactionSummary.IndexInEpoch + 1,
-                    IndexInRound: isStartOfRound ? 0 : lastTransactionSummary.IndexInRound + 1,
-                    IsEndOfEpoch: nextEpoch != null,
-                    TransactionAccumulator: commitedTransaction.LedgerTransaction.GetPayloadBytes());
-
-                LedgerTransaction ledgerTransaction = commitedTransaction.LedgerTransaction switch
-                {
-                    CoreModel.UserLedgerTransaction ult => new UserLedgerTransaction
-                    {
-                        PayloadHash = ult.NotarizedTransaction.GetHashBytes(),
-                        IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.GetHashBytes(),
-                        SignedIntentHash = ult.NotarizedTransaction.SignedIntent.GetHashBytes(),
-                    },
-                    CoreModel.ValidatorLedgerTransaction => new ValidatorLedgerTransaction(),
-                    CoreModel.SystemLedgerTransaction => new SystemLedgerTransaction(),
-                    _ => throw new UnreachableException(),
-                };
-
-                var feeSummary = commitedTransaction.Receipt.FeeSummary;
-
-                ledgerTransaction.StateVersion = commitedTransaction.StateVersion;
-                ledgerTransaction.Status = commitedTransaction.Receipt.Status.ToModel();
-                ledgerTransaction.ErrorMessage = commitedTransaction.Receipt.ErrorMessage;
-                ledgerTransaction.TransactionAccumulator = commitedTransaction.GetAccumulatorHashBytes();
-                // TODO commented out as incompatible with current Core API version
-                ledgerTransaction.Message = null; // message: transaction.Metadata.Message?.ConvertFromHex(),
-                ledgerTransaction.Epoch = summary.Epoch;
-                ledgerTransaction.RoundInEpoch = summary.RoundInEpoch;
-                ledgerTransaction.IndexInEpoch = summary.IndexInEpoch;
-                ledgerTransaction.IndexInRound = summary.IndexInRound;
-                ledgerTransaction.IsEndOfEpoch = summary.IsEndOfEpoch;
-                ledgerTransaction.FeePaid = feeSummary != null
-                    ? TokenAmount.FromDecimalString(commitedTransaction.Receipt.FeeSummary.XrdTotalExecutionCost)
-                    : null;
-                ledgerTransaction.TipPaid = feeSummary != null
-                    ? TokenAmount.FromDecimalString(commitedTransaction.Receipt.FeeSummary.XrdTotalTipped)
-                    : null;
-                ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
-                ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
-                ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
-                ledgerTransaction.KindFilterConstraint = kindFilterConstraint;
-                ledgerTransaction.RawPayload = commitedTransaction.LedgerTransaction.GetUnwrappedPayloadBytes();
-                ledgerTransaction.EngineReceipt = commitedTransaction.Receipt.ToJson();
-
-                ledgerTransactionsToAdd.Add(ledgerTransaction);
-
-                lastTransactionSummary = summary;
             }
         }
+
+        // TODO dirty hack around https://radixdlt.atlassian.net/browse/NG-356
+        var missingMintedEvents = new List<ResourceSupplyChange>();
 
         // step: resolve known types & optionally create missing entities
         {
@@ -545,59 +621,79 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             {
                 var entityType = knownDbEntity switch
                 {
-                    EpochManagerEntity => CoreModel.EntityType.EpochManager,
-                    AccountComponentEntity => CoreModel.EntityType.Account,
-                    FungibleResourceEntity => CoreModel.EntityType.FungibleResource,
-                    NonFungibleResourceEntity => CoreModel.EntityType.NonFungibleResource,
-                    ClockEntity => CoreModel.EntityType.Clock,
-                    ValidatorEntity => CoreModel.EntityType.Validator,
-                    VaultEntity => CoreModel.EntityType.Vault,
-                    PackageEntity => CoreModel.EntityType.Package,
-                    IdentityEntity => CoreModel.EntityType.Identity,
-                    AccessControllerEntity => CoreModel.EntityType.AccessController,
-                    ComponentEntity => CoreModel.EntityType.NormalComponent,
-                    KeyValueStoreEntity => CoreModel.EntityType.KeyValueStore,
+                    GlobalConsensusManager => CoreModel.EntityType.GlobalConsensusManager,
+                    GlobalAccountEntity => CoreModel.EntityType.GlobalAccount,
+                    InternalAccountEntity => CoreModel.EntityType.InternalAccount,
+                    GlobalFungibleResourceEntity => CoreModel.EntityType.GlobalFungibleResource,
+                    GlobalNonFungibleResourceEntity => CoreModel.EntityType.GlobalNonFungibleResource,
+                    GlobalValidatorEntity => CoreModel.EntityType.GlobalValidator,
+                    InternalFungibleVaultEntity => CoreModel.EntityType.InternalFungibleVault,
+                    InternalNonFungibleVaultEntity => CoreModel.EntityType.InternalNonFungibleVault,
+                    GlobalPackageEntity => CoreModel.EntityType.GlobalPackage,
+                    GlobalIdentityEntity => CoreModel.EntityType.GlobalIdentity,
+                    GlobalAccessControllerEntity => CoreModel.EntityType.GlobalAccessController,
+                    GlobalGenericComponentEntity => CoreModel.EntityType.GlobalGenericComponent,
+                    InternalGenericComponentEntity => CoreModel.EntityType.InternalGenericComponent,
+                    InternalKeyValueStoreEntity => CoreModel.EntityType.InternalKeyValueStore,
+                    GlobalOneResourcePoolEntity => CoreModel.EntityType.GlobalOneResourcePool,
+                    GlobalTwoResourcePoolEntity => CoreModel.EntityType.GlobalTwoResourcePool,
+                    GlobalMultiResourcePoolEntity => CoreModel.EntityType.GlobalMultiResourcePool,
+                    GlobalTransactionTrackerEntity => CoreModel.EntityType.GlobalTransactionTracker,
                     _ => throw new ArgumentOutOfRangeException(nameof(knownDbEntity), knownDbEntity.GetType().Name),
                 };
 
-                referencedEntities.GetOrAdd(knownDbEntity.Address.ToHex(), address => new ReferencedEntity(address, entityType, knownDbEntity.FromStateVersion));
+                referencedEntities.GetOrAdd(knownDbEntity.Address, address => new ReferencedEntity(address, entityType, knownDbEntity.FromStateVersion));
             }
 
             foreach (var referencedEntity in referencedEntities.All)
             {
-                if (knownDbEntities.ContainsKey(referencedEntity.IdHex))
+                if (knownDbEntities.TryGetValue(referencedEntity.Address, out var entity))
                 {
-                    referencedEntity.Resolve(knownDbEntities[referencedEntity.IdHex]);
+                    referencedEntity.Resolve(entity);
 
                     continue;
                 }
 
                 Entity dbEntity = referencedEntity.Type switch
                 {
-                    CoreModel.EntityType.EpochManager => new EpochManagerEntity(),
-                    CoreModel.EntityType.FungibleResource => referencedEntity.CreateUsingTypeHint<FungibleResourceEntity>(),
-                    CoreModel.EntityType.NonFungibleResource => referencedEntity.CreateUsingTypeHint<NonFungibleResourceEntity>(),
-                    // If the component is a local / owned component, it doesn't have a Component/Account type hint
-                    // from the address, so assume it's a normal component for now until we can do better from the ComponentInfo
-                    CoreModel.EntityType.NormalComponent => referencedEntity.CreateUsingTypeHintOrDefault<ComponentEntity>(typeof(NormalComponentEntity)),
-                    CoreModel.EntityType.Package => new PackageEntity(),
-                    CoreModel.EntityType.Vault => new VaultEntity(),
-                    CoreModel.EntityType.KeyValueStore => new KeyValueStoreEntity(),
-                    CoreModel.EntityType.Clock => new ClockEntity(),
-                    CoreModel.EntityType.AccessController => new AccessControllerEntity(),
-                    CoreModel.EntityType.Validator => new ValidatorEntity(),
-                    CoreModel.EntityType.Identity => new IdentityEntity(),
-                    CoreModel.EntityType.Account => new AccountComponentEntity(),
-                    _ => throw new ArgumentOutOfRangeException(nameof(referencedEntity.Type), referencedEntity.Type, null),
+                    CoreModel.EntityType.GlobalConsensusManager => new GlobalConsensusManager(),
+                    CoreModel.EntityType.GlobalFungibleResource => new GlobalFungibleResourceEntity(),
+                    CoreModel.EntityType.GlobalNonFungibleResource => new GlobalNonFungibleResourceEntity(),
+                    CoreModel.EntityType.GlobalGenericComponent => new GlobalGenericComponentEntity(),
+                    CoreModel.EntityType.InternalGenericComponent => new InternalGenericComponentEntity(),
+                    CoreModel.EntityType.GlobalPackage => new GlobalPackageEntity(),
+                    CoreModel.EntityType.InternalFungibleVault => new InternalFungibleVaultEntity(),
+                    CoreModel.EntityType.InternalNonFungibleVault => new InternalNonFungibleVaultEntity(),
+                    CoreModel.EntityType.InternalKeyValueStore => new InternalKeyValueStoreEntity(),
+                    CoreModel.EntityType.GlobalAccessController => new GlobalAccessControllerEntity(),
+                    CoreModel.EntityType.GlobalValidator => new GlobalValidatorEntity(),
+                    CoreModel.EntityType.GlobalIdentity => new GlobalIdentityEntity(),
+                    CoreModel.EntityType.GlobalAccount => new GlobalAccountEntity(),
+                    CoreModel.EntityType.InternalAccount => new InternalAccountEntity(),
+                    CoreModel.EntityType.GlobalVirtualEd25519Identity => new GlobalIdentityEntity(),
+                    CoreModel.EntityType.GlobalVirtualSecp256k1Identity => new GlobalIdentityEntity(),
+                    CoreModel.EntityType.GlobalVirtualEd25519Account => new GlobalAccountEntity(),
+                    CoreModel.EntityType.GlobalVirtualSecp256k1Account => new GlobalAccountEntity(),
+                    CoreModel.EntityType.GlobalOneResourcePool => new GlobalOneResourcePoolEntity(),
+                    CoreModel.EntityType.GlobalTwoResourcePool => new GlobalTwoResourcePoolEntity(),
+                    CoreModel.EntityType.GlobalMultiResourcePool => new GlobalMultiResourcePoolEntity(),
+                    CoreModel.EntityType.GlobalTransactionTracker => new GlobalTransactionTrackerEntity(),
+                    _ => throw new ArgumentOutOfRangeException(nameof(referencedEntity.Type), referencedEntity.Type, "Unexpected entity type"),
                 };
 
                 dbEntity.Id = sequences.EntitySequence++;
                 dbEntity.FromStateVersion = referencedEntity.StateVersion;
-                dbEntity.Address = referencedEntity.IdHex.ConvertFromHex();
-                dbEntity.GlobalAddress = referencedEntity.GlobalAddress;
+                dbEntity.Address = referencedEntity.Address;
+                dbEntity.IsGlobal = referencedEntity.IsGlobal;
 
                 referencedEntity.Resolve(dbEntity);
                 entitiesToAdd.Add(dbEntity);
+
+                // TODO dirty hack around https://radixdlt.atlassian.net/browse/NG-356
+                if (dbEntity is GlobalFungibleResourceEntity or GlobalNonFungibleResourceEntity)
+                {
+                    missingMintedEvents.Add(new ResourceSupplyChange(dbEntity.Id, dbEntity.FromStateVersion, Minted: TokenAmount.Zero));
+                }
             }
 
             referencedEntities.OnAllEntitiesResolved();
@@ -655,13 +751,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             }
 
             referencedEntities.InvokePostResolveConfiguration();
-
-            sw = Stopwatch.StartNew();
-
-            rowsInserted += await writeHelper.CopyEntity(entitiesToAdd, token);
-            rowsInserted += await writeHelper.CopyLedgerTransaction(ledgerTransactionsToAdd, referencedEntities, token);
-
-            dbWriteDuration += sw.Elapsed;
         }
 
         var fungibleVaultChanges = new List<FungibleVaultChange>();
@@ -670,138 +759,508 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var metadataChanges = new List<MetadataChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
-        var entityAccessRulesChainHistoryToAdd = new List<EntityAccessRulesChainHistory>();
         var entityStateToAdd = new List<EntityStateHistory>();
-        var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>();
+        var componentMethodRoyaltiesToAdd = new List<ComponentMethodRoyaltyEntryHistory>();
+        var packageBlueprintHistoryToAdd = new Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>();
+        var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>(); // TODO follow Pointer+ordered List pattern to ensure proper order of ingestion
+        var accountDefaultDepositRuleHistoryToAdd = new List<AccountDefaultDepositRuleHistory>();
+        var accountResourceDepositRuleHistoryToAdd = new List<AccountResourceDepositRuleHistory>();
+        var accessRulesChangePointers = new Dictionary<AccessRulesChangePointerLookup, AccessRulesChangePointer>();
+        var accessRulesChanges = new List<AccessRulesChangePointerLookup>();
 
         // step: scan all substates to figure out changes
         {
             foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
             {
-                var stateVersion = committedTransaction.StateVersion;
+                var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
                 var stateUpdates = committedTransaction.Receipt.StateUpdates;
+                var currentEpoch = ledgerExtension.LatestTransactionSummary.Epoch;
+                var affectedGlobalEntities = new HashSet<long>();
 
-                foreach (var substate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
+                try
                 {
-                    var substateId = substate.SubstateId;
-                    var substateData = substate.SubstateData;
-
-                    var referencedEntity = referencedEntities.Get(substateId.EntityIdHex);
-
-                    if (substateData is CoreModel.MetadataEntrySubstate metadata)
+                    foreach (var substate in stateUpdates.CreatedSubstates.Select(x => new { x.SubstateId, x.Value }).Concat(stateUpdates.UpdatedSubstates.Select(x => new { x.SubstateId, Value = x.NewValue })))
                     {
-                        // TODO decompile SBOR or use ValueBytes
-                        var keyHex = metadata.KeyHex;
-                        var valueHex = metadata.DataStruct?.StructData.DataHex;
-                        var isDeleted = metadata.IsDeleted;
+                        var substateId = substate.SubstateId;
+                        var substateData = substate.Value.SubstateData;
+                        var referencedEntity = referencedEntities.Get((EntityAddress)substateId.EntityAddress);
+                        affectedGlobalEntities.Add(referencedEntity.AffectedGlobalEntityId);
 
-                        metadataChanges.Add(new MetadataChange(referencedEntity, keyHex, valueHex, isDeleted, stateVersion));
-                    }
-
-                    if (substateData is CoreModel.FungibleResourceManagerSubstate fungibleResourceManager)
-                    {
-                        resourceSupplyChanges.Add(new ResourceSupplyChange(referencedEntity, TokenAmount.FromDecimalString(fungibleResourceManager.TotalSupply), stateVersion));
-                    }
-
-                    if (substateData is CoreModel.NonFungibleResourceManagerSubstate nonFungibleResourceManager)
-                    {
-                        resourceSupplyChanges.Add(new ResourceSupplyChange(referencedEntity, TokenAmount.FromDecimalString(nonFungibleResourceManager.TotalSupply), stateVersion));
-                    }
-
-                    if (substateData is CoreModel.VaultFungibleSubstate vaultFungible)
-                    {
-                        var amount = TokenAmount.FromDecimalString(vaultFungible.Amount);
-                        var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<VaultEntity>().ResourceEntityId);
-
-                        fungibleVaultChanges.Add(new FungibleVaultChange(referencedEntity, resourceEntity, amount, stateVersion));
-                    }
-
-                    if (substateData is CoreModel.VaultNonFungibleSubstate vaultNonFungible)
-                    {
-                        var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<VaultEntity>().ResourceEntityId);
-
-                        nonFungibleVaultChanges.Add(new NonFungibleVaultChange(referencedEntity, resourceEntity, vaultNonFungible.NonFungibleIds.Select(nfid => nfid.SimpleRep).ToList(), stateVersion));
-                    }
-
-                    if (substateData is CoreModel.KeyValueStoreEntrySubstate keyValueStoreEntry)
-                    {
-                        var nfStoreOf = referencedEntity.GetDatabaseEntity<KeyValueStoreEntity>().StoreOfNonFungibleResourceEntityId;
-
-                        if (nfStoreOf.HasValue)
+                        if (substateData is CoreModel.MetadataModuleEntrySubstate metadata)
                         {
-                            var resourceManagerEntity = referencedEntities.GetByDatabaseId(nfStoreOf.Value);
+                            var isDeleted = metadata.Value == null;
+                            var key = metadata.Key.Name;
+                            var value = metadata.Value?.DataStruct.StructData.Hex.ConvertFromHex();
 
-                            nonFungibleIdChanges.Add(new NonFungibleIdChange(referencedEntity, resourceManagerEntity, keyValueStoreEntry.KeyNonFungibleLocalId.SimpleRep,
-                                keyValueStoreEntry.IsDeleted, keyValueStoreEntry.DataStruct?.StructData.GetDataBytes(), stateVersion));
+                            metadataChanges.Add(new MetadataChange(referencedEntity, key, value, isDeleted, metadata.IsLocked, stateVersion));
+                        }
+
+                        if (substateData is CoreModel.FungibleResourceManagerFieldTotalSupplySubstate fungibleResourceManagerFieldTotalSupplySubstate)
+                        {
+                            resourceSupplyChanges.Add(new ResourceSupplyChange(
+                                referencedEntity.DatabaseId,
+                                stateVersion,
+                                TotalSupply: TokenAmount.FromDecimalString(fungibleResourceManagerFieldTotalSupplySubstate.Value.TotalSupply)
+                            ));
+                        }
+
+                        if (substateData is CoreModel.NonFungibleResourceManagerFieldTotalSupplySubstate nonFungibleResourceManagerFieldTotalSupplySubstate)
+                        {
+                            resourceSupplyChanges.Add(new ResourceSupplyChange(
+                                referencedEntity.DatabaseId,
+                                stateVersion,
+                                TotalSupply: TokenAmount.FromDecimalString(nonFungibleResourceManagerFieldTotalSupplySubstate.Value.TotalSupply)
+                            ));
+                        }
+
+                        if (substateData is CoreModel.FungibleVaultFieldBalanceSubstate fungibleVaultFieldBalanceSubstate)
+                        {
+                            var amount = TokenAmount.FromDecimalString(fungibleVaultFieldBalanceSubstate.Value.Amount);
+                            var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId);
+
+                            fungibleVaultChanges.Add(new FungibleVaultChange(referencedEntity, resourceEntity, amount, stateVersion));
+                        }
+
+                        if (substateData is CoreModel.NonFungibleVaultContentsIndexEntrySubstate nonFungibleVaultContentsIndexEntrySubstate)
+                        {
+                            var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId);
+
+                            nonFungibleVaultChanges.Add(new NonFungibleVaultChange(
+                                referencedEntity,
+                                resourceEntity,
+                                nonFungibleVaultContentsIndexEntrySubstate.Key.NonFungibleLocalId.SimpleRep,
+                                false,
+                                stateVersion));
+                        }
+
+                        if (substateData is CoreModel.NonFungibleResourceManagerDataEntrySubstate nonFungibleResourceManagerDataEntrySubstate)
+                        {
+                            var resourceManagerEntityId = substateId.EntityAddress;
+                            var resourceManagerEntity = referencedEntities.Get((EntityAddress)resourceManagerEntityId);
+
+                            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex);
+
+                            nonFungibleIdChanges.Add(new NonFungibleIdChange(
+                                resourceManagerEntity,
+                                nonFungibleId,
+                                nonFungibleResourceManagerDataEntrySubstate.Value == null,
+                                nonFungibleResourceManagerDataEntrySubstate.IsLocked,
+                                nonFungibleResourceManagerDataEntrySubstate.Value?.DataStruct.StructData.GetDataBytes(),
+                                stateVersion));
+                        }
+
+                        if (substateData is CoreModel.GenericScryptoComponentFieldStateSubstate componentState)
+                        {
+                            entityStateToAdd.Add(new EntityStateHistory
+                            {
+                                Id = sequences.EntityStateHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                                State = componentState.Value.DataStruct.StructData.ToJson(),
+                            });
+                        }
+
+                        if (substateData is CoreModel.ValidatorFieldStateSubstate validator)
+                        {
+                            var lookup = new ValidatorKeyLookup(referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId, validator.Value.PublicKey.KeyType.ToModel(),
+                                validator.Value.PublicKey.GetKeyBytes());
+
+                            validatorKeyHistoryToAdd[lookup] = new ValidatorPublicKeyHistory
+                            {
+                                Id = sequences.ValidatorPublicKeyHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                ValidatorEntityId = lookup.ValidatorEntityId,
+                                KeyType = lookup.PublicKeyType,
+                                Key = lookup.PublicKey,
+                            };
+
+                            entityStateToAdd.Add(new EntityStateHistory
+                            {
+                                Id = sequences.EntityStateHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                                State = validator.ToJson(),
+                            });
+                        }
+
+                        if (substateData is CoreModel.ConsensusManagerFieldStateSubstate consensusManagerFieldStateSubstate)
+                        {
+                            currentEpoch = consensusManagerFieldStateSubstate.Value.Epoch;
+                        }
+
+                        if (substateData is CoreModel.ConsensusManagerFieldCurrentValidatorSetSubstate validatorSet)
+                        {
+                            var change = validatorSet.Value.ValidatorSet
+                                .ToDictionary(
+                                    v =>
+                                    {
+                                        var vid = referencedEntities.Get((EntityAddress)v.Address).DatabaseId;
+
+                                        return new ValidatorKeyLookup(vid, v.Key.KeyType.ToModel(), v.Key.GetKeyBytes());
+                                    },
+                                    v => TokenAmount.FromDecimalString(v.Stake));
+
+                            validatorSetChanges.Add(new ValidatorSetChange(currentEpoch, change, stateVersion));
+                        }
+
+                        if (substateData is CoreModel.AccountFieldStateSubstate accountFieldState)
+                        {
+                            accountDefaultDepositRuleHistoryToAdd.Add(new AccountDefaultDepositRuleHistory
+                            {
+                                Id = sequences.AccountDefaultDepositRuleHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                AccountEntityId = referencedEntity.DatabaseId,
+                                DefaultDepositRule = accountFieldState.Value.DefaultDepositRule.ToModel(),
+                            });
+                        }
+
+                        if (substateData is CoreModel.AccountDepositRuleIndexEntrySubstate accountDepositRule)
+                        {
+                            accountResourceDepositRuleHistoryToAdd.Add(new AccountResourceDepositRuleHistory
+                            {
+                                Id = sequences.AccountResourceDepositRuleHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                AccountEntityId = referencedEntity.DatabaseId,
+                                ResourceEntityId = referencedEntities.Get((EntityAddress)accountDepositRule.Key.ResourceAddress).DatabaseId,
+                                ResourceDepositRule = accountDepositRule.Value?.DepositRule?.ToModel(),
+                                IsDeleted = accountDepositRule.Value == null,
+                            });
+                        }
+
+                        if (substateData is CoreModel.AccessRulesModuleFieldOwnerRoleSubstate accessRulesFieldOwnerRole)
+                        {
+                            accessRulesChangePointers
+                                .GetOrAdd(new AccessRulesChangePointerLookup(referencedEntity.DatabaseId, stateVersion), lookup =>
+                                {
+                                    accessRulesChanges.Add(lookup);
+
+                                    return new AccessRulesChangePointer(referencedEntity, stateVersion);
+                                })
+                                .OwnerRole = accessRulesFieldOwnerRole;
+                        }
+
+                        if (substateData is CoreModel.AccessRulesModuleRuleEntrySubstate accessRulesEntry)
+                        {
+                            accessRulesChangePointers
+                                .GetOrAdd(new AccessRulesChangePointerLookup(referencedEntity.DatabaseId, stateVersion), lookup =>
+                                {
+                                    accessRulesChanges.Add(lookup);
+
+                                    return new AccessRulesChangePointer(referencedEntity, stateVersion);
+                                })
+                                .Entries
+                                .Add(accessRulesEntry);
+                        }
+
+                        if (substateData is CoreModel.PackageBlueprintDefinitionEntrySubstate packageBlueprintDefinition)
+                        {
+                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDefinition.Key.BlueprintName, packageBlueprintDefinition.Key.BlueprintVersion);
+
+                            packageBlueprintHistoryToAdd
+                                .GetOrAdd(lookup, _ => new PackageBlueprintHistory
+                                {
+                                    Id = sequences.PackageBlueprintHistorySequence++,
+                                    FromStateVersion = stateVersion,
+                                    PackageEntityId = referencedEntity.DatabaseId,
+                                    Name = lookup.Name,
+                                    Version = lookup.BlueprintVersion,
+                                })
+                                .Definition = packageBlueprintDefinition.Value.Definition.ToJson();
+                        }
+
+                        if (substateData is CoreModel.PackageBlueprintDependenciesEntrySubstate packageBlueprintDependencies)
+                        {
+                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDependencies.Key.BlueprintName, packageBlueprintDependencies.Key.BlueprintVersion);
+
+                            packageBlueprintHistoryToAdd
+                                .GetOrAdd(lookup, _ => new PackageBlueprintHistory
+                                {
+                                    Id = sequences.PackageBlueprintHistorySequence++,
+                                    FromStateVersion = stateVersion,
+                                    PackageEntityId = referencedEntity.DatabaseId,
+                                    Name = lookup.Name,
+                                    Version = lookup.BlueprintVersion,
+                                })
+                                .DependantEntityIds = packageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
+                        }
+
+                        if (substateData is CoreModel.PackageBlueprintRoyaltyEntrySubstate packageBlueprintRoyalty)
+                        {
+                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintRoyalty.Key.BlueprintName, packageBlueprintRoyalty.Key.BlueprintVersion);
+                            var pb = packageBlueprintHistoryToAdd.GetOrAdd(lookup, _ => new PackageBlueprintHistory
+                            {
+                                Id = sequences.PackageBlueprintHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                PackageEntityId = referencedEntity.DatabaseId,
+                                Name = lookup.Name,
+                                Version = lookup.BlueprintVersion,
+                            });
+
+                            pb.RoyaltyConfig = packageBlueprintRoyalty.Value.RoyaltyConfig.ToJson();
+                            pb.RoyaltyConfigIsLocked = packageBlueprintRoyalty.IsLocked;
+                        }
+
+                        if (substateData is CoreModel.PackageBlueprintAuthTemplateEntrySubstate packageBlueprintAuthTemplate)
+                        {
+                            var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintAuthTemplate.Key.BlueprintName, packageBlueprintAuthTemplate.Key.BlueprintVersion);
+                            var pb = packageBlueprintHistoryToAdd.GetOrAdd(lookup, _ => new PackageBlueprintHistory
+                            {
+                                Id = sequences.PackageBlueprintHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                PackageEntityId = referencedEntity.DatabaseId,
+                                Name = lookup.Name,
+                                Version = lookup.BlueprintVersion,
+                            });
+
+                            pb.AuthTemplate = packageBlueprintAuthTemplate.Value.AuthConfig.ToJson();
+                            pb.AuthTemplateIsLocked = packageBlueprintAuthTemplate.IsLocked;
+                        }
+
+                        if (substateData is CoreModel.RoyaltyModuleMethodRoyaltyEntrySubstate methodRoyaltyEntry)
+                        {
+                            componentMethodRoyaltiesToAdd.Add(new ComponentMethodRoyaltyEntryHistory
+                            {
+                                Id = sequences.ComponentMethodRoyaltyEntryHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                EntityId = referencedEntity.DatabaseId,
+                                MethodName = methodRoyaltyEntry.Key.MethodName,
+                                RoyaltyAmount = methodRoyaltyEntry.Value?.ToJson(),
+                                IsLocked = methodRoyaltyEntry.IsLocked,
+                            });
                         }
                     }
 
-                    if (substateData is CoreModel.AccessRulesSubstate accessRulesSubstate)
+                    foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
                     {
-                        AccessRulesChainSubtype subtype = substateId.ModuleType switch
-                        {
-                            CoreModel.ModuleType.AccessRules => AccessRulesChainSubtype.None,
-                            CoreModel.ModuleType.AccessRules1 => AccessRulesChainSubtype.ResourceManagerVaultAccessRulesChain,
-                            _ => throw new UnreachableException($"Didn't expect {substateId.ModuleType} value"),
-                        };
+                        var substateId = deletedSubstate.SubstateId;
+                        var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)substateId.EntityAddress, ea => new ReferencedEntity(ea, substateId.EntityType, stateVersion));
+                        affectedGlobalEntities.Add(referencedEntity.AffectedGlobalEntityId);
 
-                        entityAccessRulesChainHistoryToAdd.Add(new EntityAccessRulesChainHistory
+                        if (substateId.SubstateType == CoreModel.SubstateType.NonFungibleVaultContentsIndexEntry)
                         {
-                            Id = sequences.EntityAccessRulesChainHistorySequence++,
-                            FromStateVersion = stateVersion,
-                            EntityId = referencedEntities.Get(substateId.EntityIdHex).DatabaseId,
-                            Subtype = subtype,
-                            AccessRulesChain = JsonConvert.SerializeObject(accessRulesSubstate.AccessRules),
-                        });
+                            var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId);
+                            var nonFungibleId = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex);
+
+                            nonFungibleVaultChanges.Add(new NonFungibleVaultChange(
+                                referencedEntity,
+                                resourceEntity,
+                                nonFungibleId,
+                                true,
+                                stateVersion));
+                        }
                     }
 
-                    if (substateData is CoreModel.ComponentStateSubstate componentState)
+                    var transaction = ledgerTransactionsToAdd.Single(x => x.StateVersion == stateVersion);
+                    transaction.AffectedGlobalEntities = affectedGlobalEntities.ToArray();
+
+                    ledgerTransactionMarkersToAdd.AddRange(affectedGlobalEntities.Select(affectedEntity => new AffectedGlobalEntityTransactionMarker
                     {
-                        entityStateToAdd.Add(new EntityStateHistory
-                        {
-                            Id = sequences.EntityStateHistorySequence++,
-                            FromStateVersion = stateVersion,
-                            EntityId = referencedEntities.Get(substateId.EntityIdHex).DatabaseId,
-                            State = componentState.DataStruct.StructData.ToJson(),
-                        });
-                    }
+                        Id = sequences.LedgerTransactionMarkerSequence++,
+                        EntityId = affectedEntity,
+                        StateVersion = stateVersion,
+                    }));
 
-                    if (substateData is CoreModel.ValidatorSubstate validator)
+                    var eventTypeIdentifiers = await _componentSchemaProvider.GetEventTypeIdentifiers();
+                    // TODO we'd love to see schemed JSON payload here and/or support for SBOR to schemed JSON in RET but this is not available yet; consider this entire section heavy WIP
+                    foreach (var @event in committedTransaction.Receipt.Events)
                     {
-                        var lookup = new ValidatorKeyLookup(referencedEntities.Get(substateId.EntityIdHex).DatabaseId, validator.PublicKey.KeyType.ToModel(), validator.PublicKey.GetKeyBytes());
-
-                        validatorKeyHistoryToAdd[lookup] = new ValidatorPublicKeyHistory
+                        if (@event.Type.Emitter is not CoreModel.MethodEventEmitterIdentifier methodEventEmitter
+                            || @event.Type.TypePointer is not CoreModel.PackageTypePointer packageTypePointer
+                            || methodEventEmitter.ObjectModuleId != CoreModel.ObjectModuleId.Main)
                         {
-                            Id = sequences.ValidatorPublicKeyHistorySequence++,
-                            FromStateVersion = stateVersion,
-                            ValidatorEntityId = lookup.ValidatorEntityId,
-                            KeyType = lookup.PublicKeyType,
-                            Key = lookup.PublicKey,
-                        };
+                            continue;
+                        }
 
-                        entityStateToAdd.Add(new EntityStateHistory
+                        var eventEmitterEntity = referencedEntities.Get((EntityAddress)methodEventEmitter.Entity.EntityAddress);
+
+                        // TODO "deposit" and "withdrawal" events should be used to alter entity_resource_aggregated_vaults_history table (drop tmp_tmp_remove_me_once_tx_events_become_available column)
+                        if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalFungibleVault)
                         {
-                            Id = sequences.EntityStateHistorySequence++,
-                            FromStateVersion = stateVersion,
-                            EntityId = referencedEntities.Get(substateId.EntityIdHex).DatabaseId,
-                            State = validator.ToJson(),
-                        });
-                    }
-
-                    if (substateData is CoreModel.ValidatorSetSubstate validatorSet && substateId.SubstateKeyType == CoreModel.SubstateKeyType.CurrentValidatorSet)
-                    {
-                        var change = validatorSet.ValidatorSet
-                            .ToDictionary(
-                                v =>
+                            if (packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
+                                || packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Deposit)
+                            {
+                                var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
+                                var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId;
+                                var data = (JObject)@event.Data.ProgrammaticJson;
+                                // TODO:
+                                // To be removed once toolkit allows us to read strongly typed event's schema.
+                                if (data["variant_id"]!.ToString() == "0")
                                 {
-                                    var vid = referencedEntities.GetByGlobal((GlobalAddress)v.Address).DatabaseId;
+                                    var fungibleAmount = data["fields"]?[0]?["value"]?.ToString();
+                                    var eventType = packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
+                                        ? LedgerTransactionMarkerEventType.Withdrawal
+                                        : LedgerTransactionMarkerEventType.Deposit;
 
-                                    return new ValidatorKeyLookup(vid, v.Key.KeyType.ToModel(), v.Key.GetKeyBytes());
-                                },
-                                v => TokenAmount.FromDecimalString(v.Stake));
+                                    if (fungibleAmount == null)
+                                    {
+                                        throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].value to be present");
+                                    }
 
-                        validatorSetChanges.Add(new ValidatorSetChange(validatorSet.Epoch, change, stateVersion));
+                                    var quantity = TokenAmount.FromDecimalString(fungibleAmount);
+
+                                    ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
+                                    {
+                                        Id = sequences.LedgerTransactionMarkerSequence++,
+                                        StateVersion = stateVersion,
+                                        EventType = eventType,
+                                        EntityId = globalAncestorId,
+                                        ResourceEntityId = resourceEntityId,
+                                        Quantity = quantity,
+                                    });
+                                }
+                            }
+                        }
+
+                        if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.InternalNonFungibleVault)
+                        {
+                            if (packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleVault.Withdrawal
+                                || packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleVault.Deposit)
+                            {
+                                var globalAncestorId = eventEmitterEntity.DatabaseGlobalAncestorId;
+                                var resourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId;
+                                var data = (JObject)@event.Data.ProgrammaticJson;
+
+                                // TODO:
+                                // To be removed once toolkit allows us to read strongly typed event's schema.
+                                if (data["variant_id"]!.ToString() == "1")
+                                {
+                                    var nonFungibleIds = data["fields"]?[0]?["elements"]?.Select(x => x["value"]?.ToString()).ToList();
+                                    var eventType = packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleVault.Withdrawal
+                                        ? LedgerTransactionMarkerEventType.Withdrawal
+                                        : LedgerTransactionMarkerEventType.Deposit;
+
+                                    if (nonFungibleIds?.Any() != true)
+                                    {
+                                        throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].elements to be present");
+                                    }
+
+                                    var quantity = TokenAmount.FromDecimalString(nonFungibleIds.Count.ToString());
+                                    ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
+                                    {
+                                        Id = sequences.LedgerTransactionMarkerSequence++,
+                                        StateVersion = stateVersion,
+                                        EventType = eventType,
+                                        EntityId = globalAncestorId,
+                                        ResourceEntityId = resourceEntityId,
+                                        Quantity = quantity,
+                                    });
+                                }
+                            }
+                        }
+
+                        if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.GlobalFungibleResource)
+                        {
+                            if (packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleResource.Minted)
+                            {
+                                var data = (JObject)@event.Data.ProgrammaticJson;
+                                var amount = data["fields"]?[0]?["value"]?.ToString();
+
+                                if (string.IsNullOrEmpty(amount))
+                                {
+                                    throw new InvalidOperationException("Unable to read resource minted amount from event. Unexpected event structure.");
+                                }
+
+                                resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion, Minted: TokenAmount.FromDecimalString(amount)));
+                            }
+                            else if (packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.FungibleResource.Burned)
+                            {
+                                var data = (JObject)@event.Data.ProgrammaticJson;
+                                var amount = data["fields"]?[0]?["value"]?.ToString();
+
+                                if (string.IsNullOrEmpty(amount))
+                                {
+                                    throw new InvalidOperationException("Unable to read resource burned amount from event. Unexpected event structure.");
+                                }
+
+                                resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion, Burned: TokenAmount.FromDecimalString(amount)));
+                            }
+                        }
+
+                        if (methodEventEmitter.Entity.EntityType == CoreModel.EntityType.GlobalNonFungibleResource)
+                        {
+                            if (packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleResource.Minted)
+                            {
+                                var data = (JObject)@event.Data.ProgrammaticJson;
+                                var mintedCount = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).Count();
+                                if (!mintedCount.HasValue)
+                                {
+                                    throw new InvalidOperationException("Unable to read non fungible resource burned amount from event. Unexpected event structure.");
+                                }
+
+                                resourceSupplyChanges.Add(
+                                    new ResourceSupplyChange(
+                                        eventEmitterEntity.DatabaseId,
+                                        stateVersion,
+                                        Minted: TokenAmount.FromDecimalString(mintedCount.Value.ToString())));
+                            }
+                            else if (packageTypePointer.LocalTypeIndex.Index == eventTypeIdentifiers.NonFungibleResource.Burned)
+                            {
+                                var data = (JObject)@event.Data.ProgrammaticJson;
+                                var burnedCount = data["fields"]?[0]?["elements"]?.Select(x => x.ToString()).Count();
+
+                                if (!burnedCount.HasValue)
+                                {
+                                    throw new InvalidOperationException("Unable to read non fungible resource burned amount from event. Unexpected event structure.");
+                                }
+
+                                resourceSupplyChanges.Add(
+                                    new ResourceSupplyChange(
+                                        eventEmitterEntity.DatabaseId,
+                                        stateVersion,
+                                        Burned: TokenAmount.FromDecimalString(burnedCount.Value.ToString())));
+                            }
+                        }
                     }
+
+                    if (manifestExtractedAddresses.TryGetValue(stateVersion, out var extractedAddresses))
+                    {
+                        foreach (var address in extractedAddresses.ResourceAddresses)
+                        {
+                            if (referencedEntities.TryGet(address, out var re))
+                            {
+                                ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    OperationType = LedgerTransactionMarkerOperationType.ResourceInUse,
+                                    EntityId = re.DatabaseId,
+                                });
+                            }
+                        }
+
+                        foreach (var address in extractedAddresses.AccountsDepositedInto)
+                        {
+                            if (referencedEntities.TryGet(address, out var re))
+                            {
+                                ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    OperationType = LedgerTransactionMarkerOperationType.AccountDepositedInto,
+                                    EntityId = re.DatabaseId,
+                                });
+                            }
+                        }
+
+                        foreach (var address in extractedAddresses.AccountsWithdrawnFrom)
+                        {
+                            if (referencedEntities.TryGet(address, out var re))
+                            {
+                                ledgerTransactionMarkersToAdd.Add(new ManifestAddressLedgerTransactionMarker
+                                {
+                                    Id = sequences.LedgerTransactionMarkerSequence++,
+                                    StateVersion = stateVersion,
+                                    OperationType = LedgerTransactionMarkerOperationType.AccountWithdrawnFrom,
+                                    EntityId = re.DatabaseId,
+                                });
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to process transaction {StateVersion} at substate processing stage", stateVersion);
+                    throw;
                 }
             }
         }
@@ -811,70 +1270,168 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var sw = Stopwatch.StartNew();
 
             var mostRecentMetadataHistory = await readHelper.MostRecentEntityMetadataHistoryFor(metadataChanges, token);
+            var mostRecentAggregatedMetadataHistory = await readHelper.MostRecentEntityAggregateMetadataHistoryFor(metadataChanges, token);
+            var mostRecentAccessRulesEntryHistory = await readHelper.MostRecentEntityAccessRulesEntryHistoryFor(accessRulesChangePointers.Values, token);
+            var mostRecentAccessRulesAggregateHistory = await readHelper.MostRecentEntityAccessRulesAggregateHistoryFor(accessRulesChanges, token);
             var mostRecentEntityResourceAggregateHistory = await readHelper.MostRecentEntityResourceAggregateHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
             var mostRecentEntityResourceAggregatedVaultsHistory = await readHelper.MostRecentEntityResourceAggregatedVaultsHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
             var mostRecentEntityResourceVaultAggregateHistory = await readHelper.MostRecentEntityResourceVaultAggregateHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
             var mostRecentNonFungibleIdStoreHistory = await readHelper.MostRecentNonFungibleIdStoreHistoryFor(nonFungibleIdChanges, token);
             var mostRecentResourceEntitySupplyHistory = await readHelper.MostRecentResourceEntitySupplyHistoryFor(resourceSupplyChanges, token);
+            var mostRecentEntityNonFungibleVaultHistory = await readHelper.MostRecentEntityNonFungibleVaultHistory(nonFungibleVaultChanges, token);
             var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, nonFungibleVaultChanges, token);
             var existingValidatorKeys = await readHelper.ExistingValidatorKeysFor(validatorSetChanges, token);
 
             dbReadDuration += sw.Elapsed;
 
             var entityMetadataHistoryToAdd = new List<EntityMetadataHistory>();
+            var entityMetadataAggregateHistoryToAdd = new List<EntityMetadataAggregateHistory>();
             var entityResourceAggregateHistoryCandidates = new List<EntityResourceAggregateHistory>();
             var entityResourceAggregatedVaultsHistoryToAdd = new List<EntityResourceAggregatedVaultsHistory>();
             var entityResourceVaultAggregateHistoryToAdd = new List<EntityResourceVaultAggregateHistory>();
+            var entityAccessRulesOwnerRoleHistoryToAdd = new List<EntityAccessRulesOwnerRoleHistory>();
+            var entityAccessRulesEntryHistoryToAdd = new List<EntityAccessRulesEntryHistory>();
+            var entityAccessRulesAggregateHistoryToAdd = new List<EntityAccessRulesAggregateHistory>();
             var nonFungibleIdStoreHistoryToAdd = new Dictionary<NonFungibleStoreLookup, NonFungibleIdStoreHistory>();
             var nonFungibleIdDataToAdd = new List<NonFungibleIdData>();
-            var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdMutableDataHistory>();
+            var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
 
             foreach (var metadataChange in metadataChanges)
             {
-                EntityMetadataHistory metadataHistory;
-
-                if (!mostRecentMetadataHistory.TryGetValue(metadataChange.ReferencedEntity.DatabaseId, out var previous) || previous.FromStateVersion != metadataChange.StateVersion)
+                var lookup = new MetadataLookup(metadataChange.ReferencedEntity.DatabaseId, metadataChange.Key);
+                var metadataHistory = new EntityMetadataHistory
                 {
-                    metadataHistory = new EntityMetadataHistory
+                    Id = sequences.EntityMetadataHistorySequence++,
+                    FromStateVersion = metadataChange.StateVersion,
+                    EntityId = metadataChange.ReferencedEntity.DatabaseId,
+                    Key = metadataChange.Key,
+                    Value = metadataChange.Value,
+                    IsDeleted = metadataChange.IsDeleted,
+                    IsLocked = metadataChange.IsLocked,
+                };
+
+                entityMetadataHistoryToAdd.Add(metadataHistory);
+
+                EntityMetadataAggregateHistory aggregate;
+
+                if (!mostRecentAggregatedMetadataHistory.TryGetValue(metadataChange.ReferencedEntity.DatabaseId, out var previousAggregate) || previousAggregate.FromStateVersion != metadataChange.StateVersion)
+                {
+                    aggregate = new EntityMetadataAggregateHistory
                     {
-                        Id = sequences.EntityMetadataHistorySequence++,
+                        Id = sequences.EntityMetadataAggregateHistorySequence++,
                         FromStateVersion = metadataChange.StateVersion,
                         EntityId = metadataChange.ReferencedEntity.DatabaseId,
-                        Keys = new List<string>(),
-                        Values = new List<byte[]>(),
-                        UpdatedAtStateVersions = new List<long>(),
+                        MetadataIds = new List<long>(),
                     };
 
-                    if (previous != null)
+                    if (previousAggregate != null)
                     {
-                        metadataHistory.Keys.AddRange(previous.Keys);
-                        metadataHistory.Values.AddRange(previous.Values);
-                        metadataHistory.UpdatedAtStateVersions.AddRange(previous.UpdatedAtStateVersions);
+                        aggregate.MetadataIds.AddRange(previousAggregate.MetadataIds);
                     }
 
-                    entityMetadataHistoryToAdd.Add(metadataHistory);
-                    mostRecentMetadataHistory[metadataChange.ReferencedEntity.DatabaseId] = metadataHistory;
+                    entityMetadataAggregateHistoryToAdd.Add(aggregate);
+                    mostRecentAggregatedMetadataHistory[metadataChange.ReferencedEntity.DatabaseId] = aggregate;
                 }
                 else
                 {
-                    metadataHistory = previous;
+                    aggregate = previousAggregate;
                 }
 
-                var key = ScryptoSborUtils.ConvertFromScryptoSborString(metadataChange.KeyHex, _networkConfigurationProvider.GetNetworkId());
-                var currentPosition = metadataHistory.Keys.IndexOf(key);
-
-                if (currentPosition != -1)
+                if (mostRecentMetadataHistory.TryGetValue(lookup, out var previous))
                 {
-                    metadataHistory.Keys.RemoveAt(currentPosition);
-                    metadataHistory.Values.RemoveAt(currentPosition);
-                    metadataHistory.UpdatedAtStateVersions.RemoveAt(currentPosition);
+                    var currentPosition = aggregate.MetadataIds.IndexOf(previous.Id);
+
+                    if (currentPosition != -1)
+                    {
+                        aggregate.MetadataIds.RemoveAt(currentPosition);
+                    }
                 }
 
                 if (!metadataChange.IsDeleted)
                 {
-                    metadataHistory.Keys.Insert(0, key);
-                    metadataHistory.Values.Insert(0, metadataChange.ValueHex?.ConvertFromHex() ?? throw new InvalidOperationException("impossible x3")); // TODO improve
-                    metadataHistory.UpdatedAtStateVersions.Insert(0, metadataChange.StateVersion);
+                    aggregate.MetadataIds.Insert(0, metadataHistory.Id);
+                }
+
+                mostRecentMetadataHistory[lookup] = metadataHistory;
+            }
+
+            foreach (var lookup in accessRulesChanges)
+            {
+                var accessRuleChange = accessRulesChangePointers[lookup];
+
+                EntityAccessRulesOwnerRoleHistory? ownerRole = null;
+
+                if (accessRuleChange.OwnerRole != null)
+                {
+                    ownerRole = new EntityAccessRulesOwnerRoleHistory
+                    {
+                        Id = sequences.EntityAccessRulesOwnerRoleHistorySequence++,
+                        FromStateVersion = lookup.StateVersion,
+                        EntityId = lookup.EntityId,
+                        AccessRules = accessRuleChange.OwnerRole.Value.OwnerRole.ToJson(),
+                    };
+
+                    entityAccessRulesOwnerRoleHistoryToAdd.Add(ownerRole);
+                }
+
+                EntityAccessRulesAggregateHistory aggregate;
+
+                if (!mostRecentAccessRulesAggregateHistory.TryGetValue(lookup.EntityId, out var previousAggregate) || previousAggregate.FromStateVersion != lookup.StateVersion)
+                {
+                    aggregate = new EntityAccessRulesAggregateHistory
+                    {
+                        Id = sequences.EntityAccessRulesAggregateHistorySequence++,
+                        FromStateVersion = lookup.StateVersion,
+                        EntityId = lookup.EntityId,
+                        OwnerRoleId = ownerRole?.Id ?? previousAggregate?.OwnerRoleId ?? throw new InvalidOperationException("Unable to determine OwnerRoleId"),
+                        EntryIds = new List<long>(),
+                    };
+
+                    if (previousAggregate != null)
+                    {
+                        aggregate.EntryIds.AddRange(previousAggregate.EntryIds);
+                    }
+
+                    entityAccessRulesAggregateHistoryToAdd.Add(aggregate);
+                    mostRecentAccessRulesAggregateHistory[lookup.EntityId] = aggregate;
+                }
+                else
+                {
+                    aggregate = previousAggregate;
+                }
+
+                foreach (var entry in accessRuleChange.Entries)
+                {
+                    var entryLookup = new AccessRuleEntryLookup(lookup.EntityId, entry.Key.RoleKey);
+                    var entryHistory = new EntityAccessRulesEntryHistory
+                    {
+                        Id = sequences.EntityAccessRulesEntryHistorySequence++,
+                        FromStateVersion = lookup.StateVersion,
+                        EntityId = lookup.EntityId,
+                        Key = entry.Key.RoleKey,
+                        AccessRules = entry.Value?.AccessRule.ToJson(),
+                        IsDeleted = entry.Value == null,
+                    };
+
+                    entityAccessRulesEntryHistoryToAdd.Add(entryHistory);
+
+                    if (mostRecentAccessRulesEntryHistory.TryGetValue(entryLookup, out var previousEntry))
+                    {
+                        var currentPosition = aggregate.EntryIds.IndexOf(previousEntry.Id);
+
+                        if (currentPosition != -1)
+                        {
+                            aggregate.EntryIds.RemoveAt(currentPosition);
+                        }
+                    }
+
+                    // !entry.IsDeleted
+                    if (entry.Value != null)
+                    {
+                        aggregate.EntryIds.Insert(0, entryHistory.Id);
+                    }
+
+                    mostRecentAccessRulesEntryHistory[entryLookup] = entryHistory;
                 }
             }
 
@@ -886,7 +1443,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     {
                         Id = sequences.NonFungibleIdDataSequence++,
                         FromStateVersion = e.StateVersion,
-                        KeyValueStoreEntityId = e.ReferencedStore.DatabaseId,
                         NonFungibleResourceEntityId = e.ReferencedResource.DatabaseId,
                         NonFungibleId = e.NonFungibleId,
                     };
@@ -896,33 +1452,33 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     return ret;
                 });
 
-                var nonFungibleIdStore = nonFungibleIdStoreHistoryToAdd.GetOrAdd(new NonFungibleStoreLookup(e.ReferencedStore.DatabaseGlobalAncestorId, e.StateVersion), _ =>
+                var nonFungibleIdStore = nonFungibleIdStoreHistoryToAdd.GetOrAdd(new NonFungibleStoreLookup(e.ReferencedResource.DatabaseId, e.StateVersion), _ =>
                 {
-                    IEnumerable<long> previousNonFungibleIdDataIds = mostRecentNonFungibleIdStoreHistory.ContainsKey(e.ReferencedStore.DatabaseGlobalAncestorId)
-                        ? mostRecentNonFungibleIdStoreHistory[e.ReferencedStore.DatabaseGlobalAncestorId].NonFungibleIdDataIds
+                    IEnumerable<long> previousNonFungibleIdDataIds = mostRecentNonFungibleIdStoreHistory.TryGetValue(e.ReferencedResource.DatabaseId, out var value)
+                        ? value.NonFungibleIdDataIds
                         : Array.Empty<long>();
 
                     var ret = new NonFungibleIdStoreHistory
                     {
                         Id = sequences.NonFungibleIdStoreHistorySequence++,
                         FromStateVersion = e.StateVersion,
-                        KeyValueStoreEntityId = e.ReferencedStore.DatabaseId,
-                        NonFungibleResourceEntityId = e.ReferencedStore.DatabaseGlobalAncestorId,
+                        NonFungibleResourceEntityId = e.ReferencedResource.DatabaseId,
                         NonFungibleIdDataIds = new List<long>(previousNonFungibleIdDataIds),
                     };
 
-                    mostRecentNonFungibleIdStoreHistory[e.ReferencedStore.DatabaseGlobalAncestorId] = ret;
+                    mostRecentNonFungibleIdStoreHistory[e.ReferencedResource.DatabaseId] = ret;
 
                     return ret;
                 });
 
-                nonFungibleIdsMutableDataHistoryToAdd.Add(new NonFungibleIdMutableDataHistory
+                nonFungibleIdsMutableDataHistoryToAdd.Add(new NonFungibleIdDataHistory
                 {
-                    Id = sequences.NonFungibleIdMutableDataHistorySequence++,
+                    Id = sequences.NonFungibleIdDataHistorySequence++,
                     FromStateVersion = e.StateVersion,
                     NonFungibleIdDataId = nonFungibleIdData.Id,
+                    Data = e.MutableData,
                     IsDeleted = e.IsDeleted,
-                    MutableData = e.MutableData,
+                    IsLocked = e.IsLocked,
                 });
 
                 if (!nonFungibleIdStore.NonFungibleIdDataIds.Contains(nonFungibleIdData.Id))
@@ -939,9 +1495,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 TokenAmount? tmpFungibleBalance,
                 long? tmpNonFungibleTotalCount)
             {
-                // TODO we most likely want to introduce FungibleVaultEntity and NonFungibleVaultEntity
-
-                if (referencedVault.GetDatabaseEntity<VaultEntity>().IsRoyaltyVault)
+                if (referencedVault.GetDatabaseEntity<VaultEntity>() is InternalFungibleVaultEntity { IsRoyaltyVault: true })
                 {
                     return;
                 }
@@ -1163,62 +1717,87 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         GlobalEntityId = e.ReferencedVault.DatabaseGlobalAncestorId,
                         ResourceEntityId = e.ReferencedResource.DatabaseId,
                         VaultEntityId = e.ReferencedVault.DatabaseId,
-                        IsRoyaltyVault = e.ReferencedVault.GetDatabaseEntity<VaultEntity>().IsRoyaltyVault,
+                        IsRoyaltyVault = e.ReferencedVault.GetDatabaseEntity<InternalFungibleVaultEntity>().IsRoyaltyVault,
                         Balance = e.Balance,
                     };
                 })
                 .ToList();
 
             var entityNonFungibleVaultHistoryToAdd = nonFungibleVaultChanges
+                .GroupBy(x => new { x.StateVersion, x.ReferencedVault, x.ReferencedResource })
                 .Select(e =>
                 {
-                    AggregateEntityResource(e.ReferencedVault, e.ReferencedResource, e.StateVersion, false, null, e.NonFungibleIds.Count);
+                    var vaultExists = mostRecentEntityNonFungibleVaultHistory.TryGetValue(e.Key.ReferencedVault.DatabaseId, out var existingVaultHistory);
+
+                    var nfids = vaultExists ? existingVaultHistory!.NonFungibleIds : new List<long>();
+                    var addedItems = e.Where(x => !x.IsWithdrawal)
+                        .Select(x => existingNonFungibleIdData[new NonFungibleIdLookup(e.Key.ReferencedResource.DatabaseId, x.NonFungibleId)].Id)
+                        .ToList();
+
+                    var deletedItems = e.Where(x => x.IsWithdrawal)
+                        .Select(x => existingNonFungibleIdData[new NonFungibleIdLookup(e.Key.ReferencedResource.DatabaseId, x.NonFungibleId)].Id)
+                        .ToList();
+
+                    nfids.AddRange(addedItems);
+                    nfids.RemoveAll(x => deletedItems.Contains(x));
+
+                    AggregateEntityResource(e.Key.ReferencedVault, e.Key.ReferencedResource, e.Key.StateVersion, false, null, nfids.Count);
 
                     return new EntityNonFungibleVaultHistory
                     {
                         Id = sequences.EntityVaultHistorySequence++,
-                        FromStateVersion = e.StateVersion,
-                        OwnerEntityId = e.ReferencedVault.DatabaseOwnerAncestorId,
-                        GlobalEntityId = e.ReferencedVault.DatabaseGlobalAncestorId,
-                        ResourceEntityId = e.ReferencedResource.DatabaseId,
-                        VaultEntityId = e.ReferencedVault.DatabaseId,
-                        NonFungibleIds = e.NonFungibleIds.Select(nfid => existingNonFungibleIdData[new NonFungibleIdLookup(e.ReferencedResource.DatabaseId, nfid)].Id).ToList(),
+                        FromStateVersion = e.Key.StateVersion,
+                        OwnerEntityId = e.Key.ReferencedVault.DatabaseOwnerAncestorId,
+                        GlobalEntityId = e.Key.ReferencedVault.DatabaseGlobalAncestorId,
+                        ResourceEntityId = e.Key.ReferencedResource.DatabaseId,
+                        VaultEntityId = e.Key.ReferencedVault.DatabaseId,
+                        NonFungibleIds = nfids.ToList(),
                     };
                 })
                 .ToList();
 
-            var resourceEntitySupplyHistoryToAdd = resourceSupplyChanges
-                .Select(e =>
+            var resourceEntitySupplyHistoryToAdd = missingMintedEvents.Concat(resourceSupplyChanges)
+                .GroupBy(x => new { x.ResourceEntityId, x.StateVersion })
+                .Select(group =>
                 {
                     var previous = mostRecentResourceEntitySupplyHistory.GetOrAdd(
-                        e.ResourceEntity.DatabaseId,
-                        _ => new ResourceEntitySupplyHistory { TotalSupply = TokenAmount.Zero, TotalMinted = TokenAmount.Zero, TotalBurnt = TokenAmount.Zero, });
+                        group.Key.ResourceEntityId,
+                        _ => new ResourceEntitySupplyHistory { TotalSupply = TokenAmount.Zero, TotalMinted = TokenAmount.Zero, TotalBurned = TokenAmount.Zero });
 
-                    TokenAmount totalMinted = previous.TotalMinted;
-                    TokenAmount totalBurnt = previous.TotalBurnt;
+                    var totalSupply = group.SingleOrDefault(x => x.TotalSupply.HasValue)?.TotalSupply ?? previous.TotalSupply;
 
-                    if (previous.TotalSupply < e.TotalSupply)
+                    var totalMinted = group
+                        .Where(x => x.Minted.HasValue)
+                        .Select(x => x.Minted)
+                        .Aggregate(previous.TotalMinted, (sum, x) => sum + x!.Value);
+
+                    var totalBurned = group
+                        .Where(x => x.Burned.HasValue)
+                        .Select(x => x.Burned)
+                        .Aggregate(previous.TotalBurned, (sum, x) => sum + x!.Value);
+
+                    // TODO:
+                    // If resource was created with initial supply minted event is not published, to properly track TotalMinted value we have to detect that situation.
+                    // Requested that to change, worth revisting later if we can remove that.
+                    var isCreateWithInitialSupply = previous.TotalSupply == TokenAmount.Zero &&
+                                                    previous.TotalMinted == TokenAmount.Zero &&
+                                                    previous.TotalBurned == TokenAmount.Zero &&
+                                                    totalSupply > totalMinted;
+
+                    if (isCreateWithInitialSupply)
                     {
-                        totalMinted += e.TotalSupply - previous.TotalSupply;
-                    }
-                    else if (previous.TotalSupply > e.TotalSupply)
-                    {
-                        totalBurnt += previous.TotalSupply - e.TotalSupply;
+                        totalMinted += totalSupply;
                     }
 
-                    var entry = new ResourceEntitySupplyHistory
+                    return new ResourceEntitySupplyHistory
                     {
                         Id = sequences.ResourceEntitySupplyHistorySequence++,
-                        FromStateVersion = e.StateVersion,
-                        ResourceEntityId = e.ResourceEntity.DatabaseId,
-                        TotalSupply = e.TotalSupply,
+                        FromStateVersion = group.Key.StateVersion,
+                        ResourceEntityId = group.Key.ResourceEntityId,
+                        TotalSupply = totalSupply,
                         TotalMinted = totalMinted,
-                        TotalBurnt = totalBurnt,
+                        TotalBurned = totalBurned,
                     };
-
-                    mostRecentResourceEntitySupplyHistory[e.ResourceEntity.DatabaseId] = entry;
-
-                    return entry;
                 })
                 .ToList();
 
@@ -1240,19 +1819,29 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
             sw = Stopwatch.StartNew();
 
+            rowsInserted += await writeHelper.CopyEntity(entitiesToAdd, token);
+            rowsInserted += await writeHelper.CopyLedgerTransaction(ledgerTransactionsToAdd, token);
+            rowsInserted += await writeHelper.CopyLedgerTransactionMarkers(ledgerTransactionMarkersToAdd, token);
             rowsInserted += await writeHelper.CopyEntityStateHistory(entityStateToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityAccessRulesChainHistory(entityAccessRulesChainHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityMetadataHistory(entityMetadataHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityMetadataAggregateHistory(entityMetadataAggregateHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityAccessRulesOwnerRoleHistory(entityAccessRulesOwnerRoleHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityAccessRulesEntryHistory(entityAccessRulesEntryHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityAccessRulesAggregateHistory(entityAccessRulesAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceAggregatedVaultsHistory(entityResourceAggregatedVaultsHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceAggregateHistory(entityResourceAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityResourceVaultAggregateHistory(entityResourceVaultAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityVaultHistory(entityFungibleVaultHistoryToAdd, entityNonFungibleVaultHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyComponentMethodRoyalties(componentMethodRoyaltiesToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdData(nonFungibleIdDataToAdd, token);
-            rowsInserted += await writeHelper.CopyNonFungibleIdMutableDataHistory(nonFungibleIdsMutableDataHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(nonFungibleIdsMutableDataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(nonFungibleIdStoreHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorKeyHistory(validatorKeyHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyPackageBlueprintHistory(packageBlueprintHistoryToAdd.Values, token);
+            rowsInserted += await writeHelper.CopyAccountDefaultDepositRuleHistory(accountDefaultDepositRuleHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyAccountResourceDepositRuleHistory(accountResourceDepositRuleHistoryToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);
 
             dbWriteDuration += sw.Elapsed;
@@ -1276,32 +1865,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         }
     }
 
-    private async Task CreateOrUpdateLedgerStatus(ReadWriteDbContext dbContext, TransactionSummary finalTransaction, long latestSyncTarget, CancellationToken token)
-    {
-        var ledgerStatus = await dbContext.LedgerStatus.SingleOrDefaultAsync(token);
-
-        if (ledgerStatus == null)
-        {
-            ledgerStatus = new LedgerStatus();
-            dbContext.Add(ledgerStatus);
-        }
-
-        ledgerStatus.LastUpdated = _clock.UtcNow;
-        ledgerStatus.TopOfLedgerStateVersion = finalTransaction.StateVersion;
-        ledgerStatus.TargetStateVersion = latestSyncTarget;
-
-        await dbContext.SaveChangesAsync(token);
-    }
-
     private async Task<TransactionSummary> GetTopOfLedger(ReadWriteDbContext dbContext, CancellationToken token)
     {
-        var lastTransaction = await dbContext.LedgerTransactions
-            .AsNoTracking()
-            .OrderByDescending(lt => lt.StateVersion)
-            .FirstOrDefaultAsync(token);
+        var lastTransaction = await dbContext.GetTopLedgerTransaction().FirstOrDefaultAsync(token);
 
-        var lastOverview = lastTransaction == null
-            ? null
+        return lastTransaction == null
+            ? PreGenesisTransactionSummary()
             : new TransactionSummary(
                 StateVersion: lastTransaction.StateVersion,
                 RoundTimestamp: lastTransaction.RoundTimestamp,
@@ -1311,11 +1880,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 RoundInEpoch: lastTransaction.RoundInEpoch,
                 IndexInEpoch: lastTransaction.IndexInEpoch,
                 IndexInRound: lastTransaction.IndexInRound,
-                IsEndOfEpoch: lastTransaction.IsEndOfEpoch,
-                TransactionAccumulator: lastTransaction.TransactionAccumulator
+                IsEndOfEpoch: lastTransaction.IsEndOfEpoch
             );
-
-        return lastOverview ?? PreGenesisTransactionSummary();
     }
 
     private TransactionSummary PreGenesisTransactionSummary()
@@ -1326,12 +1892,11 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             RoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
             NormalizedRoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
             CreatedTimestamp: _clock.UtcNow,
-            Epoch: 0,
-            RoundInEpoch: 0,
+            Epoch: _networkConfigurationProvider.GetGenesisEpoch(),
+            RoundInEpoch: _networkConfigurationProvider.GetGenesisRound(),
             IndexInEpoch: 0,
             IndexInRound: 0,
-            IsEndOfEpoch: false,
-            TransactionAccumulator: new byte[32]
+            IsEndOfEpoch: false
         );
     }
 }

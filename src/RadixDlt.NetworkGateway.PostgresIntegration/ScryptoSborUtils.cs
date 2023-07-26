@@ -62,192 +62,110 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.RadixEngineToolkit.Model.Exchange;
-using RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Numerics;
-using Array = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Array;
-using Decimal = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Decimal;
-using Enum = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Enum;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using String = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.String;
-using ToolkitModel = RadixDlt.RadixEngineToolkit.Model;
-using Tuple = RadixDlt.RadixEngineToolkit.Model.Value.ScryptoSbor.Tuple;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class ScryptoSborUtils
 {
-    public static string ConvertFromScryptoSborString(string input, byte networkId)
+     public static string GetNonFungibleId(string input)
+     {
+         var decodedNfid = ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdSborDecode(Convert.FromHexString(input).ToList());
+         var stringNfid = ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(decodedNfid);
+         return stringNfid;
+     }
+
+     public static GatewayModel.ScryptoSborValue NonFungibleDataToGatewayScryptoSbor(byte[] rawScryptoSbor, byte networkId)
+     {
+         var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.SborDecodeToStringRepresentation(rawScryptoSbor.ToList(), ToolkitModel.SerializationMode.PROGRAMMATIC, networkId, null);
+
+         return new GatewayModel.ScryptoSborValue(
+             rawHex: rawScryptoSbor.ToHex(),
+             rawJson: JObject.Parse(stringRepresentation)
+             );
+     }
+
+     public static GatewayModel.MetadataTypedValue DecodeToGatewayMetadataItemValue(byte[] rawScryptoSbor, byte networkId)
+     {
+         using var metadataValue = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborDecode(rawScryptoSbor.ToList(), networkId);
+         return ConvertToolkitMetadataToGateway(metadataValue);
+     }
+
+     public static GatewayModel.MetadataTypedValue ConvertToolkitMetadataToGateway(ToolkitModel.MetadataValue metadataValue)
     {
-        var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(Convert.FromHexString(input), networkId);
-
-        if (result is not SborDecodeResponse.ScryptoSbor scryptoSbor)
+        switch (metadataValue)
         {
-            throw new UnreachableException("Expected ScryptoSbor response");
-        }
-
-        if (scryptoSbor.Value is not String value)
-        {
-            throw new UnreachableException("Expected ScryptoSbor.String");
-        }
-
-        return value;
-    }
-
-    public static GatewayModel.EntityMetadataItemValue MetadataValueToGatewayMetadataItemValue(ILogger logger, byte[] rawScryptoSbor, byte networkId)
-    {
-        var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(rawScryptoSbor, networkId);
-
-        if (result is not SborDecodeResponse.ScryptoSbor scryptoSbor)
-        {
-            throw new UnreachableException("Expected ScryptoSbor response");
-        }
-
-        if (scryptoSbor.Value is not Enum metadataEntry)
-        {
-            throw new UnreachableException("Expected ScryptoSbor.Enum");
-        }
-
-        string? asString = null;
-        List<string>? asStringCollection = null;
-
-        switch (metadataEntry.Variant)
-        {
-            case 0 when metadataEntry.Fields is [Enum variantEnum]:
-                asString = GetSimpleStringOfMetadataValue(logger, variantEnum);
-                break;
-            case 1 when metadataEntry.Fields is [Array innerArray]:
-                if (innerArray.ElementKind == ValueKind.Enum)
-                {
-                    // For RCNet, Dashboard would rather have asString also populated for arrays
-                    // For Mainnet, we may wish to give more structured metadata values from the Gateway API
-                    asStringCollection = innerArray.Elements.OfType<Enum>().Select(variantEnum => GetSimpleStringOfMetadataValue(logger, variantEnum)).ToList();
-                    asString = string.Join(", ", asStringCollection);
-                }
-
-                break;
-        }
-
-        if (asString == null)
-        {
-            logger.LogWarning("Unknown MetadataEntry variant: {}", metadataEntry.Variant);
-            asString = "[UnrecognizedMetadataEntry]";
-        }
-
-        return new GatewayModel.EntityMetadataItemValue(
-            rawHex: rawScryptoSbor.ToHex(),
-            rawJson: new JRaw(RadixEngineToolkit.RadixEngineToolkit.ScryptoSborEncodeJson(metadataEntry)),
-            asString: asString,
-            asStringCollection: asStringCollection);
-    }
-
-    public static string GetSimpleStringOfMetadataValue(ILogger logger, Enum variantEnum)
-    {
-        switch (variantEnum.Variant)
-        {
-            // See https://github.com/radixdlt/radixdlt-scrypto/blob/release/rcnet-v1/transaction/examples/metadata/metadata.rtm
-            case 0 when variantEnum.Fields is [String value]:
-                return value.Value;
-            case 1 when variantEnum.Fields is [Bool value]:
-                return value.Value.ToString();
-            case 2 when variantEnum.Fields is [U8 value]:
-                return value.Value.ToString();
-            case 3 when variantEnum.Fields is [U32 value]:
-                return value.Value.ToString();
-            case 4 when variantEnum.Fields is [U64 value]:
-                return value.Value.ToString();
-            case 5 when variantEnum.Fields is [I32 value]:
-                return value.Value.ToString();
-            case 6 when variantEnum.Fields is [I64 value]:
-                return value.Value.ToString();
-            case 7 when variantEnum.Fields is [Decimal value]:
-                return value.Value;
-            case 8 when variantEnum.Fields is [Address value]:
-                return value.TmpAddress;
-            case 9 when variantEnum.Fields is [Enum publicKeyEnum]:
-                var keyName = publicKeyEnum.Variant switch
-                {
-                    0 => "EcdsaSecp256k1PublicKey",
-                    1 => "EddsaEd25519PublicKey",
-                    _ => $"PublicKeyType[{publicKeyEnum.Variant}]", // Fallback
-                };
-
-                if (publicKeyEnum.Fields is [Array keyBytes])
-                {
-                    try
-                    {
-                        var bytes = keyBytes.Elements.Cast<U8>().Select(byteValue => byteValue.Value).ToArray();
-                        return $"{keyName}(\"{Convert.ToHexString(bytes).ToLowerInvariant()}\")";
-                    }
-                    catch (InvalidCastException)
-                    {
-                        // Fallthrough to default
-                    }
-                }
-
-                break;
-            case 10 when variantEnum.Fields is [Tuple nonFungibleGlobalId]:
-                if (nonFungibleGlobalId.Elements is [Address nonFungibleResourceAddress, NonFungibleLocalId nonFungibleLocalId])
-                {
-                    return $"{nonFungibleResourceAddress.TmpAddress}:{FormatNonFungibleLocalId(nonFungibleLocalId.Value)}";
-                }
-
-                break;
-            case 11 when variantEnum.Fields is [NonFungibleLocalId value]:
-                return FormatNonFungibleLocalId(value.Value);
-            case 12 when variantEnum.Fields is [Tuple instant]:
-                if (instant.Elements is [I64 unixTimestampSeconds])
-                {
-                    return DateTimeOffset.FromUnixTimeSeconds(unixTimestampSeconds.Value).AsUtcIsoDateAtSecondsPrecisionString();
-                }
-
-                break;
-            case 13 when variantEnum.Fields is [String url]:
-                return url.Value;
-        }
-
-        logger.LogWarning("MetadataValue variant could not be mapped successfully: {}", variantEnum.Variant);
-        return "[UnrecognizedMetadataValue]";
-    }
-
-    public static string FormatNonFungibleLocalId(ToolkitModel.INonFungibleLocalId nonFungibleLocalId)
-    {
-        switch (nonFungibleLocalId)
-        {
-            case ToolkitModel.INonFungibleLocalId.Bytes bytes:
-                return $"[{Convert.ToHexString(bytes.Value).ToLowerInvariant()}]";
-            case ToolkitModel.INonFungibleLocalId.Integer integer:
-                return $"#{integer.Value}#";
-            case ToolkitModel.INonFungibleLocalId.String s:
-                return $"<{s.Value}>";
-            case ToolkitModel.INonFungibleLocalId.UUID uuid:
-                // Checked that this matches the representation in the Engine.
-                // EG 5c220001220b01c0031c8cb574c04c44b2aa87263a00000000 should be {1c8cb574-c04c-44b2-aa87-263a00000000}
-                // This should probably be lifted into the toolkit wrapper and a Guid be wrapped.
-                return Guid.ParseExact(Convert.ToHexString(BigInteger.Parse(uuid.Value).ToByteArray(isUnsigned: true, isBigEndian: true)), "N").ToString("B");
+            case ToolkitModel.MetadataValue.BoolArrayValue boolArrayValue:
+                return new GatewayModel.MetadataBoolArrayValue(boolArrayValue.value.Select(x => x).ToList());
+            case ToolkitModel.MetadataValue.BoolValue boolValue:
+                return new GatewayModel.MetadataBoolValue(boolValue.value);
+            case ToolkitModel.MetadataValue.DecimalArrayValue decimalArrayValue:
+                return new GatewayModel.MetadataDecimalArrayValue(decimalArrayValue.value.Select(x => x.ToString()).ToList());
+            case ToolkitModel.MetadataValue.DecimalValue decimalValue:
+                return new GatewayModel.MetadataDecimalValue(decimalValue.value.ToString());
+            case ToolkitModel.MetadataValue.GlobalAddressArrayValue globalAddressArrayValue:
+                return new GatewayModel.MetadataGlobalAddressArrayValue(globalAddressArrayValue.value.Select(x => x.AddressString()).ToList());
+            case ToolkitModel.MetadataValue.GlobalAddressValue globalAddressValue:
+                return new GatewayModel.MetadataGlobalAddressValue(globalAddressValue.value.AddressString());
+            case ToolkitModel.MetadataValue.I32ArrayValue i32ArrayValue:
+                return new GatewayModel.MetadataI32ArrayValue(i32ArrayValue.value.Select(x => x.ToString()).ToList());
+            case ToolkitModel.MetadataValue.I32Value i32Value:
+                return new GatewayModel.MetadataI32Value(i32Value.value.ToString());
+            case ToolkitModel.MetadataValue.I64ArrayValue i64ArrayValue:
+                return new GatewayModel.MetadataI64ArrayValue(i64ArrayValue.value.Select(x => x.ToString()).ToList());
+            case ToolkitModel.MetadataValue.I64Value i64Value:
+                return new GatewayModel.MetadataI64Value(i64Value.value.ToString());
+            case ToolkitModel.MetadataValue.InstantArrayValue instantArrayValue:
+                return new GatewayModel.MetadataInstantArrayValue(instantArrayValue.value.Select(x => DateTimeOffset.FromUnixTimeSeconds(x).AsUtcIsoDateAtSecondsPrecisionString()).ToList());
+            case ToolkitModel.MetadataValue.InstantValue instantValue:
+                return new GatewayModel.MetadataInstantValue(DateTimeOffset.FromUnixTimeSeconds(instantValue.value).AsUtcIsoDateAtSecondsPrecisionString());
+            case ToolkitModel.MetadataValue.NonFungibleGlobalIdArrayValue nonFungibleGlobalIdArrayValue:
+                return new GatewayModel.MetadataNonFungibleGlobalIdArrayValue(nonFungibleGlobalIdArrayValue.value.Select(x => new GatewayModel.MetadataNonFungibleGlobalIdValueAllOf(x.ResourceAddress().AddressString(), x.LocalId().ToString())).ToList());
+            case ToolkitModel.MetadataValue.NonFungibleGlobalIdValue nonFungibleGlobalIdValue:
+                return new GatewayModel.MetadataNonFungibleGlobalIdValue(nonFungibleGlobalIdValue.value.ResourceAddress().AddressString(), nonFungibleGlobalIdValue.value.LocalId().ToString());
+            case ToolkitModel.MetadataValue.NonFungibleLocalIdArrayValue nonFungibleLocalIdArrayValue:
+                return new GatewayModel.MetadataNonFungibleLocalIdArrayValue(nonFungibleLocalIdArrayValue.value.Select(ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr).ToList());
+            case ToolkitModel.MetadataValue.NonFungibleLocalIdValue nonFungibleLocalIdValue:
+                return new GatewayModel.MetadataNonFungibleLocalIdValue(ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(nonFungibleLocalIdValue.value));
+            case ToolkitModel.MetadataValue.OriginArrayValue originArrayValue:
+                return new GatewayModel.MetadataOriginArrayValue(originArrayValue.value.Select(x => x.ToString()).ToList());
+            case ToolkitModel.MetadataValue.OriginValue originValue:
+                return new GatewayModel.MetadataOriginValue(originValue.value);
+            case ToolkitModel.MetadataValue.PublicKeyArrayValue publicKeyArrayValue:
+                return new GatewayModel.MetadataPublicKeyArrayValue(publicKeyArrayValue.value.Select(x => x.ToGatewayModel()).ToList());
+            case ToolkitModel.MetadataValue.PublicKeyValue publicKeyValue:
+                return new GatewayModel.MetadataPublicKeyValue(publicKeyValue.value.ToGatewayModel());
+            case ToolkitModel.MetadataValue.PublicKeyHashArrayValue publicKeyHashArray:
+                return new GatewayModel.MetadataPublicKeyHashArrayValue(publicKeyHashArray.value.Select(x => x.ToGatewayModel()).ToList());
+            case ToolkitModel.MetadataValue.PublicKeyHashValue publicKeyHashValue:
+                return new GatewayModel.MetadataPublicKeyHashValue(publicKeyHashValue.value.ToGatewayModel());
+            case ToolkitModel.MetadataValue.StringArrayValue stringArrayValue:
+                return new GatewayModel.MetadataStringArrayValue(stringArrayValue.value);
+            case ToolkitModel.MetadataValue.StringValue stringValue:
+                return new GatewayModel.MetadataStringValue(stringValue.value);
+            case ToolkitModel.MetadataValue.U32ArrayValue u32ArrayValue:
+                return new GatewayModel.MetadataU32ArrayValue(u32ArrayValue.value.Select(x => x.ToString()).ToList());
+            case ToolkitModel.MetadataValue.U32Value u32Value:
+                return new GatewayModel.MetadataU32Value(u32Value.value.ToString());
+            case ToolkitModel.MetadataValue.U64ArrayValue u64ArrayValue:
+                return new GatewayModel.MetadataU64ArrayValue(u64ArrayValue.value.Select(x => x.ToString()).ToList());
+            case ToolkitModel.MetadataValue.U64Value u64Value:
+                return new GatewayModel.MetadataU64Value(u64Value.value.ToString());
+            case ToolkitModel.MetadataValue.U8ArrayValue u8ArrayValue:
+                return new GatewayModel.MetadataU8ArrayValue(u8ArrayValue.value.ToArray().ToHex());
+            case ToolkitModel.MetadataValue.U8Value u8Value:
+                return new GatewayModel.MetadataU8Value(u8Value.value.ToString());
+            case ToolkitModel.MetadataValue.UrlArrayValue urlArrayValue:
+                return new GatewayModel.MetadataUrlArrayValue(urlArrayValue.value);
+            case ToolkitModel.MetadataValue.UrlValue urlValue:
+                return new GatewayModel.MetadataUrlValue(urlValue.value);
             default:
-                throw new ArgumentOutOfRangeException(nameof(nonFungibleLocalId));
+                throw new NotSupportedException($"Unexpected metadataValue type {metadataValue.GetType()}");
         }
-    }
-
-    public static GatewayModel.ScryptoSborValue NonFungibleDataToGatewayScryptoSbor(byte[] rawScryptoSbor, byte networkId)
-    {
-        var result = RadixEngineToolkit.RadixEngineToolkit.SborDecode(rawScryptoSbor, networkId);
-
-        if (result is not SborDecodeResponse.ScryptoSbor scryptoSbor)
-        {
-            throw new UnreachableException("Expected ScryptoSbor response");
-        }
-
-        return new GatewayModel.ScryptoSborValue(
-            rawHex: rawScryptoSbor.ToHex(),
-            rawJson: new JRaw(RadixEngineToolkit.RadixEngineToolkit.ScryptoSborEncodeJson(scryptoSbor.Value)));
     }
 }

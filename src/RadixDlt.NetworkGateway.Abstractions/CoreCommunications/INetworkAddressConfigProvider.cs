@@ -72,5 +72,5 @@ public interface INetworkAddressConfigProvider
 
     WellKnownAddresses GetWellKnownAddresses();
 
-    AddressTypeDefinition GetAddressTypeDefinition(AddressSubtype subtype);
+    AddressTypeDefinition GetAddressTypeDefinition(AddressEntityType entityType);
 }

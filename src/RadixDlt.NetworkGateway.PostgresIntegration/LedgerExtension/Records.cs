@@ -72,15 +72,19 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal record FungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion);
 
-internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, List<string> NonFungibleIds, long StateVersion);
+internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsWithdrawal, long StateVersion);
 
-internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, byte[]? MutableData, long StateVersion);
+internal record NonFungibleIdChange(ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
 
-internal record MetadataChange(ReferencedEntity ReferencedEntity, string KeyHex, string? ValueHex, bool IsDeleted, long StateVersion); // TODO use ScryptoSbor.String/ValueButes Key, ScryptoSbor.Enum/ValueBytes? Value
+internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, bool IsLocked, long StateVersion);
 
-internal record ResourceSupplyChange(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, long StateVersion);
+internal record ResourceSupplyChange(long ResourceEntityId, long StateVersion, TokenAmount? TotalSupply = null, TokenAmount? Minted = null, TokenAmount? Burned = null);
 
 internal record ValidatorSetChange(long Epoch, IDictionary<ValidatorKeyLookup, TokenAmount> ValidatorSet, long StateVersion);
+
+internal record struct MetadataLookup(long EntityId, string Key);
+
+internal record struct PackageBlueprintLookup(long PackageEntityId, string Name, string BlueprintVersion);
 
 internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
 
@@ -91,3 +95,14 @@ internal record struct NonFungibleStoreLookup(long NonFungibleEntityId, long Sta
 internal record struct NonFungibleIdLookup(long ResourceEntityId, string NonFungibleId);
 
 internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType PublicKeyType, ValueBytes PublicKey);
+
+internal record struct AccessRulesChangePointerLookup(long EntityId, long StateVersion);
+
+internal record struct AccessRuleEntryLookup(long EntityId, string Key);
+
+internal record AccessRulesChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
+{
+    public CoreModel.AccessRulesModuleFieldOwnerRoleSubstate? OwnerRole { get; set; }
+
+    public IList<CoreModel.AccessRulesModuleRuleEntrySubstate> Entries { get; } = new List<CoreModel.AccessRulesModuleRuleEntrySubstate>();
+}

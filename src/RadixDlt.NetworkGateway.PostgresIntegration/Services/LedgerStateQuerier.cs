@@ -88,7 +88,8 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 {
     private static readonly Regex _oasVersionRegex = new("Version of the API: (\\d+\\.\\d+\\.\\d+)", RegexOptions.Compiled | RegexOptions.Multiline);
 
-    private static string _gatewayVersion = GetGatewayProductVersion();
+    private static string _gatewayVersion;
+    private static string _deployedImage;
     private static string _oasVersion = GetOpenApiSchemaVersion();
 
     private readonly ILogger<LedgerStateQuerier> _logger;
@@ -97,6 +98,13 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
     private readonly IOptionsMonitor<AcceptableLedgerLagOptions> _acceptableLedgerLagOptionsMonitor;
     private readonly IEnumerable<ILedgerStateQuerierObserver> _observers;
     private readonly IClock _clock;
+
+    static LedgerStateQuerier()
+    {
+        var productVersion = GetGatewayProductVersion();
+        _gatewayVersion = productVersion.FullVersion;
+        _deployedImage = productVersion.DeployedImage;
+    }
 
     public LedgerStateQuerier(
         ILogger<LedgerStateQuerier> logger,
@@ -116,17 +124,17 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
     public async Task<GatewayModel.GatewayStatusResponse> GetGatewayStatus(CancellationToken token)
     {
-        var ledgerStatus = await GetLedgerStatus(token);
+        var topLedgerTransaction = await GetTopLedgerTransaction(token);
 
         return new GatewayModel.GatewayStatusResponse(
             new GatewayModel.LedgerState(
                 _networkConfigurationProvider.GetNetworkName(),
-                ledgerStatus.TopOfLedgerTransaction.StateVersion,
-                ledgerStatus.TopOfLedgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
-                ledgerStatus.TopOfLedgerTransaction.Epoch,
-                ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
+                topLedgerTransaction.StateVersion,
+                topLedgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
+                topLedgerTransaction.Epoch,
+                topLedgerTransaction.RoundInEpoch
             ),
-            new GatewayModel.GatewayInfoResponseReleaseInfo(_gatewayVersion, _oasVersion)
+            new GatewayModel.GatewayInfoResponseReleaseInfo(_gatewayVersion, _oasVersion, _deployedImage)
         );
     }
 
@@ -226,16 +234,21 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
     public async Task<long> GetTopOfLedgerStateVersion(CancellationToken token = default)
     {
-        var ledgerStatus = await GetLedgerStatus(token);
+        var topLedgerTransaction = await GetTopLedgerTransaction(token);
 
-        return ledgerStatus.TopOfLedgerStateVersion;
+        return topLedgerTransaction.StateVersion;
     }
 
-    private static string GetGatewayProductVersion()
+    private static (string FullVersion, string DeployedImage) GetGatewayProductVersion()
     {
-        var version = FileVersionInfo.GetVersionInfo(typeof(NetworkGatewayConstants).Assembly.Location).ProductVersion;
+        var productVersion = FileVersionInfo.GetVersionInfo(typeof(NetworkGatewayConstants).Assembly.Location).ProductVersion;
+        if (productVersion == null)
+        {
+            throw new InvalidOperationException("Unable to determine product version");
+        }
 
-        return version ?? throw new InvalidOperationException("Unable to determine product version");
+        string image = productVersion.Substring(productVersion.IndexOf('-') + 1, productVersion.Length - productVersion.IndexOf('-') - 1);
+        return (productVersion, image);
     }
 
     private static string GetOpenApiSchemaVersion()
@@ -250,20 +263,19 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return match.Groups[1].Value;
     }
 
-    private async Task<LedgerStatus> GetLedgerStatus(CancellationToken token)
+    private async Task<LedgerTransaction> GetTopLedgerTransaction(CancellationToken token)
     {
         try
         {
-            var ledgerStatus = await _dbContext.LedgerStatus
-                .Include(ls => ls.TopOfLedgerTransaction)
-                .SingleOrDefaultAsync(token);
+            var topLedgerTransaction = await _dbContext.GetTopLedgerTransaction()
+                .FirstOrDefaultAsync(token);
 
-            if (ledgerStatus == null)
+            if (topLedgerTransaction == null)
             {
                 throw new InvalidStateException("There are no transactions in the database");
             }
 
-            return ledgerStatus;
+            return topLedgerTransaction;
         }
         catch (Exception ex)
         {

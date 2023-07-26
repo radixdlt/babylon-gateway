@@ -87,6 +87,8 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 /// </summary>
 public sealed class LedgerConfirmationService : ILedgerConfirmationService
 {
+    private record CommittedTransactionWithSize(CoreModel.CommittedTransaction CommittedTransaction, int EstimatedSize);
+
     private static readonly LogLimiter _noExtensionLogLimiter = new(TimeSpan.FromSeconds(5), LogLevel.Warning, LogLevel.Debug);
 
     /* Dependencies */
@@ -99,9 +101,9 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     private readonly IClock _clock;
 
     /* Variables */
-    private readonly ConcurrentLruCache<long, byte[]> _quorumAccumulatorCacheByStateVersion = new(2000);
+    private readonly ConcurrentLruCache<long, byte[]> _quorumTreeHashCacheByStateVersion = new(2000);
     private readonly ConcurrentDictionary<string, long> _latestLedgerTipByNode = new();
-    private readonly ConcurrentDictionary<string, ConcurrentDictionary<long, CoreModel.CommittedTransaction>> _transactionsByNode = new();
+    private readonly ConcurrentDictionary<string, ConcurrentDictionary<long, CommittedTransactionWithSize>> _transactionsByNode = new();
     private TransactionSummary? _knownTopOfCommittedLedger;
 
     private IList<CoreApiNode> TransactionNodes { get; set; } = new List<CoreApiNode>();
@@ -129,6 +131,8 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
 
         Config = _ledgerConfirmationOptionsMonitor.CurrentValue;
     }
+
+    public TransactionSummary? GetTip() => _knownTopOfCommittedLedger;
 
     /// <summary>
     /// To be run by the (single-threaded) ledger extender worker.
@@ -162,7 +166,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     /// <summary>
     /// To be called from the node worker.
     /// </summary>
-    public void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipAccumulator)
+    public void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipTreeHash)
     {
         _observers.ForEach(x => x.PreSubmitNodeNetworkStatus(nodeName, ledgerTipStateVersion));
 
@@ -174,16 +178,16 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
             return;
         }
 
-        var cachedAccumulator = _quorumAccumulatorCacheByStateVersion.GetOrDefault(ledgerTipStateVersion);
+        var cachedTreeHash = _quorumTreeHashCacheByStateVersion.GetOrDefault(ledgerTipStateVersion);
 
-        if (cachedAccumulator == null)
+        if (cachedTreeHash == null)
         {
             // Ledger Tip is too far behind -- so don't report on consistency.
             // We could change this to do a database look-up in future to give a consistency check.
 
             _observers.ForEach(x => x.SubmitNodeNetworkStatusUnknown(nodeName, ledgerTipStateVersion));
         }
-        else if (cachedAccumulator.BytesAreEqual(ledgerTipAccumulator))
+        else if (cachedTreeHash.BytesAreEqual(ledgerTipTreeHash))
         {
             _observers.ForEach(x => x.SubmitNodeNetworkStatusUpToDate(nodeName, ledgerTipStateVersion));
         }
@@ -196,18 +200,24 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     /// <summary>
     /// To be called from the node worker.
     /// </summary>
-    public void SubmitTransactionsFromNode(string nodeName, List<CoreModel.CommittedTransaction> transactions)
+    public void SubmitTransactionsFromNode(string nodeName, List<CoreModel.CommittedTransaction> transactions, int responseSize)
     {
         if (!_latestLedgerTipByNode.ContainsKey(nodeName))
         {
             throw new InvalidNodeStateException("The node's ledger tip must be written first");
         }
 
+        if (!transactions.Any())
+        {
+            return;
+        }
+
         var transactionStoreForNode = GetTransactionsForNode(nodeName);
+        var averageTransactionSize = responseSize / transactions.Count;
 
         foreach (var transaction in transactions)
         {
-            transactionStoreForNode[transaction.StateVersion] = transaction;
+            transactionStoreForNode[transaction.ResultantStateIdentifiers.StateVersion] = new CommittedTransactionWithSize(transaction, averageTransactionSize);
         }
     }
 
@@ -217,14 +227,36 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     public TransactionsRequested? GetWhichTransactionsAreRequestedFromNode(string nodeName)
     {
         var currentTopOfLedger = _knownTopOfCommittedLedger;
+
         if (currentTopOfLedger == null)
         {
             return null;
         }
 
+        var transactionsOnRecord = GetTransactionsForNode(nodeName);
         var exclusiveLowerBound = currentTopOfLedger.StateVersion;
         var inclusiveUpperBound = currentTopOfLedger.StateVersion + Config.MaxTransactionPipelineSizePerNode;
-        var firstMissingStateVersionGap = GetFirstStateVersionGapForNode(nodeName, exclusiveLowerBound, inclusiveUpperBound);
+        long? firstMissingStateVersionGap = null;
+        long accumulatedEstimatedSize = 0;
+
+        for (var stateVersion = exclusiveLowerBound + 1; stateVersion <= inclusiveUpperBound; stateVersion++)
+        {
+            if (transactionsOnRecord.TryGetValue(stateVersion, out var committedTransactionWithSize))
+            {
+                accumulatedEstimatedSize += committedTransactionWithSize.EstimatedSize;
+
+                if (accumulatedEstimatedSize > Config.MaxEstimatedTransactionPipelineByteSizePerNode)
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                firstMissingStateVersionGap = stateVersion;
+
+                break;
+            }
+        }
 
         if (firstMissingStateVersionGap == null || firstMissingStateVersionGap >= inclusiveUpperBound)
         {
@@ -408,9 +440,9 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     {
         foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
         {
-            _quorumAccumulatorCacheByStateVersion.Set(
-                committedTransaction.StateVersion,
-                committedTransaction.GetAccumulatorHashBytes()
+            _quorumTreeHashCacheByStateVersion.Set(
+                committedTransaction.ResultantStateIdentifiers.StateVersion,
+                committedTransaction.ResultantStateIdentifiers.GetTransactionTreeHashBytes()
             );
         }
     }
@@ -462,9 +494,9 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         }
 
         var groupedTransactions = transactionsWithTrust
-            .GroupBy(t => t.Transaction!.StateVersion)
+            .GroupBy(t => t.Transaction!.CommittedTransaction.ResultantStateIdentifiers.StateVersion)
             .Select(grouping => new TransactionClaim(
-                grouping.First().Transaction!,
+                grouping.First().Transaction!.CommittedTransaction,
                 grouping.Select(g => g.NodeName).ToList(),
                 grouping.Sum(x => x.Trust)
             ))
@@ -485,26 +517,14 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     {
         var transactionBatchParentSummary = _knownTopOfCommittedLedger!;
         var previousStateVersion = transactionBatchParentSummary.StateVersion;
-        var previousAccumulator = transactionBatchParentSummary.TransactionAccumulator;
 
         try
         {
             foreach (var transaction in transactions)
             {
-                TransactionConsistency.AssertChildTransactionConsistent(
-                    previousStateVersion: previousStateVersion,
-                    previousAccumulator: previousAccumulator,
-                    stateVersion: transaction.StateVersion,
-                    accumulator: transaction.GetAccumulatorHashBytes(),
-                    payload: transaction.LedgerTransaction.GetPayloadBytes());
+                TransactionConsistency.AssertChildTransactionConsistent(previousStateVersion: previousStateVersion, stateVersion: transaction.ResultantStateIdentifiers.StateVersion);
 
-                if (transaction.LedgerTransaction is CoreModel.UserLedgerTransaction ult)
-                {
-                    TransactionConsistency.AssertTransactionHashCorrect(ult.NotarizedTransaction.GetPayloadBytes(), ult.NotarizedTransaction.GetHashBytes());
-                }
-
-                previousStateVersion = transaction.StateVersion;
-                previousAccumulator = transaction.GetAccumulatorHashBytes();
+                previousStateVersion = transaction.ResultantStateIdentifiers.StateVersion;
             }
 
             _observers.ForEach(x => x.QuorumExtensionConsistentGained());
@@ -587,23 +607,8 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
                (ledgerTip + Config.SufficientlySyncedStateVersionThreshold) > _knownTopOfCommittedLedger!.StateVersion;
     }
 
-    private long? GetFirstStateVersionGapForNode(string nodeName, long stateVersionExclusiveLowerBound, long stateVersionInclusiveUpperBound)
+    private ConcurrentDictionary<long, CommittedTransactionWithSize> GetTransactionsForNode(string nodeName)
     {
-        var transactionsOnRecord = GetTransactionsForNode(nodeName);
-
-        for (var stateVersion = stateVersionExclusiveLowerBound + 1; stateVersion <= stateVersionInclusiveUpperBound; stateVersion++)
-        {
-            if (!transactionsOnRecord.ContainsKey(stateVersion))
-            {
-                return stateVersion;
-            }
-        }
-
-        return null;
-    }
-
-    private ConcurrentDictionary<long, CoreModel.CommittedTransaction> GetTransactionsForNode(string nodeName)
-    {
-        return _transactionsByNode.GetOrAdd(nodeName, new ConcurrentDictionary<long, CoreModel.CommittedTransaction>());
+        return _transactionsByNode.GetOrAdd(nodeName, new ConcurrentDictionary<long, CommittedTransactionWithSize>());
     }
 }

@@ -25,26 +25,35 @@ export class Transaction {
   }
 
   /**
-   * Get details of committed transaction together with ledger state at a time of commit. This will trigger two API requests, first to get transaction details and second to get ledger state at a time of commit.
+   * Get details of committed transaction including all opt-ins by default.
+   * Particular opt-ins can be skipped by passing `false` to corresponding keys
+   * inside `options` configuration object
+   *
+   * @example <caption>Get committed transaction details without raw hex transaction</caption>
+   * const details = await gatewayApi.transaction.getCommittedDetails('266cdfe0a28a761909d04761cdbfe33555ee5fdcf1db37fcf71c9a644b53e60b', { rawHex: false })
+   * console.log(details.transaction)
    */
   getCommittedDetails(
-    transactionIntentHashHex: string
+    transactionIntentHashHex: string,
+    options?: {
+      rawHex: false
+      receiptEvents: false
+      receiptFeeSummary: false
+      receiptStateChanges: false
+      affectedGlobalEntities: false
+    }
   ): Promise<TransactionCommittedDetailsResponse> {
-    return this.innerClient
-      .transactionCommittedDetails({
-        transactionCommittedDetailsRequest: {
-          intent_hash_hex: transactionIntentHashHex,
+    return this.innerClient.transactionCommittedDetails({
+      transactionCommittedDetailsRequest: {
+        intent_hash_hex: transactionIntentHashHex,
+        opt_ins: {
+          raw_hex: options?.rawHex ?? true,
+          receipt_events: options?.receiptEvents ?? true,
+          receipt_fee_summary: options?.receiptFeeSummary ?? true,
+          receipt_state_changes: options?.receiptStateChanges ?? true,
+          affected_global_entities: options?.affectedGlobalEntities ?? true,
         },
-      })
-      .then((response) =>
-        this.innerClient.transactionCommittedDetails({
-          transactionCommittedDetailsRequest: {
-            intent_hash_hex: transactionIntentHashHex,
-            at_ledger_state: {
-              state_version: response.transaction.state_version,
-            },
-          },
-        })
-      )
+      },
+    })
   }
 }

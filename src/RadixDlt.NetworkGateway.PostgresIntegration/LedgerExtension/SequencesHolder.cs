@@ -66,13 +66,17 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal class SequencesHolder
 {
+    public long AccountDefaultDepositRuleHistorySequence { get; set; }
+
+    public long AccountResourceDepositRuleHistorySequence { get; set; }
+
     public long EntityStateHistorySequence { get; set; }
 
     public long EntitySequence { get; set; }
 
-    public long EntityAccessRulesChainHistorySequence { get; set; }
-
     public long EntityMetadataHistorySequence { get; set; }
+
+    public long EntityMetadataAggregateHistorySequence { get; set; }
 
     public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
 
@@ -82,15 +86,27 @@ internal class SequencesHolder
 
     public long EntityVaultHistorySequence { get; set; }
 
+    public long EntityAccessRulesAggregateHistorySequence { get; set; }
+
+    public long EntityAccessRulesEntryHistorySequence { get; set; }
+
+    public long EntityAccessRulesOwnerRoleHistorySequence { get; set; }
+
+    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
+
     public long ResourceEntitySupplyHistorySequence { get; set; }
 
     public long NonFungibleIdDataSequence { get; set; }
 
-    public long NonFungibleIdMutableDataHistorySequence { get; set; }
+    public long NonFungibleIdDataHistorySequence { get; set; }
 
     public long NonFungibleIdStoreHistorySequence { get; set; }
 
     public long ValidatorPublicKeyHistorySequence { get; set; }
 
     public long ValidatorActiveSetHistorySequence { get; set; }
+
+    public long LedgerTransactionMarkerSequence { get; set; }
+
+    public long PackageBlueprintHistorySequence { get; set; }
 }

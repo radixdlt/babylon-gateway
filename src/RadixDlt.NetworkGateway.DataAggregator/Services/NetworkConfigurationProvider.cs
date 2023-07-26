@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using System.Threading;
 using System.Threading.Tasks;
@@ -71,13 +73,15 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 {
-    Task SetNetworkConfigurationOrAssertMatching(CoreModel.NetworkConfigurationResponse inputNetworkConfiguration, CancellationToken token);
-
-    Task<string?> EnsureNetworkConfigurationLoadedFromDatabaseIfExistsAndReturnNetworkName(CancellationToken token = default);
+    Task SetNetworkConfigurationOrAssertMatching(CoreModel.NetworkConfigurationResponse inputNetworkConfiguration, CoreModel.NetworkStatusResponse inputNetworkStatus, CancellationToken token);
 
     Task<bool> SaveLedgerNetworkConfigurationToDatabaseOnInitIfNotExists(CancellationToken token);
 
     byte GetNetworkId();
 
     string GetNetworkName();
+
+    long GetGenesisEpoch();
+
+    long GetGenesisRound();
 }

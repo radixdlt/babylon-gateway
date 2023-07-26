@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using System;
 using System.Collections.Generic;
@@ -89,11 +88,14 @@ internal class NetworkConfigurationReader : INetworkConfigurationReader
         _statusApi = coreApiProvider.StatusApi;
     }
 
-    public async Task<CoreModel.NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
+    public async Task<(CoreModel.NetworkConfigurationResponse Configuration, CoreModel.NetworkStatusResponse Status)> GetNetworkConfiguration(CancellationToken token)
     {
         try
         {
-            return await _statusApi.StatusNetworkConfigurationPostAsync(token);
+            var configuration = await _statusApi.StatusNetworkConfigurationPostAsync(token);
+            var status = await _statusApi.StatusNetworkStatusPostAsync(new CoreModel.NetworkStatusRequest(configuration.Network), token);
+
+            return (configuration, status);
         }
         catch (Exception ex)
         {

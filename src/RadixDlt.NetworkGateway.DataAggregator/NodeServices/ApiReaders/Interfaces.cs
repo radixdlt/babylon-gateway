@@ -66,6 +66,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreApi = RadixDlt.CoreApiSdk.Api;
+using CoreClient = RadixDlt.CoreApiSdk.Client;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
@@ -83,7 +84,7 @@ public interface ICoreApiProvider
 
 public interface INetworkConfigurationReader
 {
-    Task<CoreModel.NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token);
+    Task<(CoreModel.NetworkConfigurationResponse Configuration, CoreModel.NetworkStatusResponse Status)> GetNetworkConfiguration(CancellationToken token);
 }
 
 public interface INetworkStatusReader
@@ -93,7 +94,7 @@ public interface INetworkStatusReader
 
 public interface ITransactionStreamReader
 {
-    Task<CoreModel.StreamTransactionsResponse> GetTransactionStream(long fromStateVersion, int count, CancellationToken token);
+    Task<CoreClient.ApiResponse<CoreModel.StreamTransactionsResponse>> GetTransactionStream(long fromStateVersion, int count, CancellationToken token);
 }
 
 public interface INetworkConfigurationReaderObserver

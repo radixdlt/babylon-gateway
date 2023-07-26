@@ -90,15 +90,34 @@ internal class TransactionStreamReader : ITransactionStreamReader
         _streamApi = coreApiProvider.StreamApi;
     }
 
-    public async Task<CoreModel.StreamTransactionsResponse> GetTransactionStream(long fromStateVersion, int count, CancellationToken token)
+    public async Task<CoreClient.ApiResponse<CoreModel.StreamTransactionsResponse>> GetTransactionStream(long fromStateVersion, int count, CancellationToken token)
     {
         try
         {
-            return await _streamApi.StreamTransactionsPostAsync(
+            return await _streamApi.StreamTransactionsPostWithHttpInfoAsync(
                 new CoreModel.StreamTransactionsRequest(
                     network: _networkConfigurationProvider.GetNetworkName(),
                     fromStateVersion: fromStateVersion,
-                    limit: count
+                    limit: count,
+                    transactionFormatOptions: new CoreModel.TransactionFormatOptions
+                    {
+                        Blobs = true,
+                        Manifest = true,
+                        RawLedgerTransaction = true,
+                        RawNotarizedTransaction = true,
+                        RawSystemTransaction = true,
+                    },
+                    substateFormatOptions: new CoreModel.SubstateFormatOptions
+                    {
+                        Hash = false,
+                        Raw = false,
+                        Typed = true,
+                    },
+                    sborFormatOptions: new CoreModel.SborFormatOptions
+                    {
+                        Raw = true,
+                        ProgrammaticJson = true,
+                    }
                 ),
                 token
             );

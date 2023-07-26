@@ -123,10 +123,9 @@ internal class PreviewService : IPreviewService
         };
 
         var coreRequestFlags = new CoreModel.TransactionPreviewRequestFlags(
-            unlimitedLoan: request.Flags.UnlimitedLoan,
+            useFreeCredit: request.Flags.UseFreeCredit,
             assumeAllSignatureProofs: request.Flags.AssumeAllSignatureProofs,
-            permitDuplicateIntentHash: request.Flags.PermitDuplicateIntentHash,
-            permitInvalidHeaderEpoch: request.Flags.PermitInvalidHeaderEpoch);
+            skipEpochCheck: request.Flags.SkipEpochCheck);
 
         var coreRequest = new CoreModel.TransactionPreviewRequest(
             network: _coreApiHandler.GetNetworkName(),
@@ -135,8 +134,7 @@ internal class PreviewService : IPreviewService
             startEpochInclusive: request.StartEpochInclusive,
             endEpochExclusive: request.EndEpochExclusive,
             notaryPublicKey: request.NotaryPublicKey != null ? ToCoreModel(request.NotaryPublicKey) : null,
-            notaryAsSignatory: request.NotaryAsSignatory,
-            costUnitLimit: request.CostUnitLimit,
+            notaryIsSignatory: request.NotaryIsSignatory,
             tipPercentage: request.TipPercentage,
             nonce: request.Nonce,
             signerPublicKeys: request.SignerPublicKeys.Select(ToCoreModel).ToList(),

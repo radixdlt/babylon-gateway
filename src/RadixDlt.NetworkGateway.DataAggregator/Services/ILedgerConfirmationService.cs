@@ -71,13 +71,15 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface ILedgerConfirmationService
 {
+    public TransactionSummary? GetTip();
+
     // This method is to be called from the global LedgerExtensionWorker
     Task HandleLedgerExtensionIfQuorum(CancellationToken token);
 
     // Below are to be called from the node transaction log workers - to communicate with the LedgerConfirmationService
-    void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipAccumulator);
+    void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipTreeHash);
 
-    void SubmitTransactionsFromNode(string nodeName, List<CoreModel.CommittedTransaction> transactions);
+    void SubmitTransactionsFromNode(string nodeName, List<CoreModel.CommittedTransaction> transactions, int responseSize);
 
     TransactionsRequested? GetWhichTransactionsAreRequestedFromNode(string nodeName);
 }

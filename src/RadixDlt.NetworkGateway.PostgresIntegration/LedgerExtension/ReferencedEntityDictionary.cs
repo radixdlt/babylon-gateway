@@ -65,67 +65,42 @@
 using RadixDlt.NetworkGateway.Abstractions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal class ReferencedEntityDictionary
 {
-    private readonly Dictionary<string, ReferencedEntity> _storage = new();
-    private readonly Dictionary<long, List<ReferencedEntity>> _entitiesAtStateVersion = new();
-    private readonly Dictionary<GlobalAddress, ReferencedEntity> _globalsCache = new();
+    private readonly Dictionary<EntityAddress, ReferencedEntity> _storage = new();
     private readonly Dictionary<long, ReferencedEntity> _dbIdCache = new();
-    private readonly HashSet<GlobalAddress> _knownGlobalAddressesToLoad = new();
+    private readonly HashSet<EntityAddress> _knownAddressesToLoad = new();
 
-    public ICollection<GlobalAddress> KnownGlobalAddresses => _knownGlobalAddressesToLoad;
+    public ICollection<EntityAddress> KnownAddresses => _knownAddressesToLoad;
 
-    public ICollection<string> Addresses => _storage.Keys;
+    public ICollection<EntityAddress> Addresses => _storage.Keys;
 
     public ICollection<ReferencedEntity> All => _storage.Values;
 
-    public ReferencedEntity GetOrAdd(string addressHex, Func<string, ReferencedEntity> factory)
+    public ReferencedEntity GetOrAdd(EntityAddress address, Func<EntityAddress, ReferencedEntity> factory)
     {
-        if (_storage.TryGetValue(addressHex, out var existing))
-        {
-            return existing;
-        }
-
-        var value = factory(addressHex);
-
-        if (!_entitiesAtStateVersion.ContainsKey(value.StateVersion))
-        {
-            _entitiesAtStateVersion[value.StateVersion] = new List<ReferencedEntity>();
-        }
-
-        _storage[addressHex] = value;
-        _entitiesAtStateVersion[value.StateVersion].Add(value);
-
-        return value;
+        return _storage.GetOrAdd(address, factory);
     }
 
-    public ReferencedEntity Get(string addressHex)
+    public ReferencedEntity Get(EntityAddress address)
     {
-        return _storage[addressHex];
+        return _storage[address];
     }
 
-    public ReferencedEntity GetByGlobal(GlobalAddress globalAddress)
+    public bool TryGet(EntityAddress address, [MaybeNullWhen(false)] out ReferencedEntity entity)
     {
-        return _globalsCache.GetOrAdd(globalAddress, _ => All.First(re => re.GlobalAddress == globalAddress));
+        entity = null;
+
+        return _storage.TryGetValue(address, out entity);
     }
 
     public ReferencedEntity GetByDatabaseId(long id)
     {
         return _dbIdCache[id];
-    }
-
-    public IEnumerable<ReferencedEntity> OfStateVersion(long stateVersion)
-    {
-        if (_entitiesAtStateVersion.TryGetValue(stateVersion, out var existing))
-        {
-            return existing;
-        }
-
-        return Array.Empty<ReferencedEntity>();
     }
 
     public void OnAllEntitiesResolved()
@@ -144,8 +119,8 @@ internal class ReferencedEntityDictionary
         }
     }
 
-    public void MarkSeenGlobalAddress(GlobalAddress globalAddress)
+    public void MarkSeenAddress(EntityAddress entityAddress)
     {
-        _knownGlobalAddressesToLoad.Add(globalAddress);
+        _knownAddressesToLoad.Add(entityAddress);
     }
 }

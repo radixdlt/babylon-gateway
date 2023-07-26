@@ -83,10 +83,11 @@ public sealed class EndpointOptions
     [ConfigurationKeyName("ValidatorsPageSize")]
     public int ValidatorsPageSize { get; set; } = 1000;
 
-    // NOTE: Changed to 1000 to work around bugs in the RCNet Dashboard and Wallet
-    // Should he changed back to ~20 or so for mainnet launch
     [ConfigurationKeyName("StateEntityDetailsPageSize")]
-    public int StateEntityDetailsMaxPageSize { get; set; } = 1000;
+    public int StateEntityDetailsMaxPageSize { get; set; } = 20;
+
+    [ConfigurationKeyName("ExplicitMetadataMaxItems")]
+    public int ExplicitMetadataMaxItems { get; set; } = 10;
 }
 
 internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptions>
@@ -98,5 +99,6 @@ internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptio
         RuleFor(x => x.DefaultPageSize).GreaterThan(0);
         RuleFor(x => x.ValidatorsPageSize).GreaterThan(0);
         RuleFor(x => x.StateEntityDetailsMaxPageSize).GreaterThan(0);
+        RuleFor(x => x.ExplicitMetadataMaxItems).GreaterThan(0);
     }
 }

@@ -64,15 +64,19 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.Abstractions.Workers;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -84,6 +88,8 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 /// </summary>
 public sealed class NodeTransactionLogWorker : NodeWorker
 {
+    private record struct TransactionsWithSize(List<CoreModel.CommittedTransaction> Transactions, int ResponseSize);
+
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ExponentialDelayStrategy(
             delayBetweenLoopTriggersIfSuccessful: TimeSpan.FromMilliseconds(200),
@@ -98,6 +104,7 @@ public sealed class NodeTransactionLogWorker : NodeWorker
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IServiceProvider _services;
     private readonly IEnumerable<INodeTransactionLogWorkerObserver> _observers;
+    private readonly IOptionsMonitor<LedgerConfirmationOptions> _ledgerConfirmationOptionsMonitor;
 
     /* Properties */
     private string NodeName => _nodeConfigProvider.CoreApiNode.Name;
@@ -111,8 +118,8 @@ public sealed class NodeTransactionLogWorker : NodeWorker
         IServiceProvider services,
         IEnumerable<INodeTransactionLogWorkerObserver> observers,
         IEnumerable<INodeWorkerObserver> nodeWorkerObservers,
-        IClock clock
-    )
+        IClock clock,
+        IOptionsMonitor<LedgerConfirmationOptions> ledgerConfirmationOptionsMonitor)
         : base(logger, nodeConfigProvider.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers, clock)
     {
         _logger = logger;
@@ -120,6 +127,7 @@ public sealed class NodeTransactionLogWorker : NodeWorker
         _nodeConfigProvider = nodeConfigProvider;
         _services = services;
         _observers = observers;
+        _ledgerConfirmationOptionsMonitor = ledgerConfirmationOptionsMonitor;
     }
 
     public override bool IsEnabledByNodeConfiguration()
@@ -143,12 +151,11 @@ public sealed class NodeTransactionLogWorker : NodeWorker
 
     private async Task FetchAndSubmitTransactions(CancellationToken cancellationToken)
     {
-        const int FetchMaxBatchSize = 1000;
-
+        var fetchMaxBatchSize = _ledgerConfirmationOptionsMonitor.CurrentValue.MaxCoreApiTransactionBatchSize;
         var networkStatus = await _services.GetRequiredService<INetworkStatusReader>().GetNetworkStatus(cancellationToken);
         var nodeLedgerTip = networkStatus.CurrentStateIdentifier.StateVersion;
 
-        _ledgerConfirmationService.SubmitNodeNetworkStatus(NodeName, nodeLedgerTip, networkStatus.CurrentStateIdentifier.GetAccumulatorHashBytes());
+        _ledgerConfirmationService.SubmitNodeNetworkStatus(NodeName, nodeLedgerTip, networkStatus.CurrentStateIdentifier.GetTransactionTreeHashBytes());
 
         var toFetch = _ledgerConfirmationService.GetWhichTransactionsAreRequestedFromNode(NodeName);
 
@@ -163,16 +170,16 @@ public sealed class NodeTransactionLogWorker : NodeWorker
 
         var batchSize = Math.Min(
             (int)(toFetch.StateVersionInclusiveUpperBound - toFetch.StateVersionInclusiveLowerBound),
-            FetchMaxBatchSize
+            fetchMaxBatchSize
         );
 
-        var transactions = await FetchTransactionsFromCoreApiWithLogging(
+        var batch = await FetchTransactionsFromCoreApiWithLogging(
             toFetch.StateVersionInclusiveLowerBound,
             batchSize,
             cancellationToken
         );
 
-        if (transactions.Count == 0)
+        if (batch.Transactions.Count == 0)
         {
             _logger.LogDebug(
                 "No new transactions found, sleeping for {DelayMs}ms",
@@ -182,11 +189,12 @@ public sealed class NodeTransactionLogWorker : NodeWorker
 
         _ledgerConfirmationService.SubmitTransactionsFromNode(
             NodeName,
-            transactions
+            batch.Transactions,
+            batch.ResponseSize
         );
     }
 
-    private async Task<List<CoreModel.CommittedTransaction>> FetchTransactionsFromCoreApiWithLogging(long fromStateVersion, int count, CancellationToken token)
+    private async Task<TransactionsWithSize> FetchTransactionsFromCoreApiWithLogging(long fromStateVersion, int count, CancellationToken token)
     {
         _logger.LogDebug(
             "Fetching up to {TransactionCount} transactions from version {FromStateVersion} from the core api",
@@ -196,12 +204,8 @@ public sealed class NodeTransactionLogWorker : NodeWorker
 
         var transactionStreamReader = _services.GetRequiredService<ITransactionStreamReader>();
 
-        var (transactions, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(async () =>
-        {
-            var response = await transactionStreamReader.GetTransactionStream(fromStateVersion, count, token);
-
-            return response.Transactions;
-        });
+        var (apiResponse, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(async () => await transactionStreamReader.GetTransactionStream(fromStateVersion, count, token));
+        var transactions = apiResponse.Data.Transactions;
 
         await _observers.ForEachAsync(x => x.TransactionsFetched(NodeName, transactions, fetchTransactionsMs));
 
@@ -215,6 +219,6 @@ public sealed class NodeTransactionLogWorker : NodeWorker
             );
         }
 
-        return transactions;
+        return new TransactionsWithSize(transactions, Encoding.UTF8.GetByteCount(apiResponse.RawContent));
     }
 }

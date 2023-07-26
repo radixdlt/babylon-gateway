@@ -130,6 +130,25 @@ public sealed record LedgerConfirmationOptions
     /// </summary>
     [ConfigurationKeyName("MaxTransactionPipelineSizePerNode")]
     public long MaxTransactionPipelineSizePerNode { get; set; } = 3000;
+
+    /// <summary>
+    /// Gets or sets MaxEstimatedTransactionPipelineByteSizePerNode.
+    /// This allows roughly this many bytes to be consumed form upstream API to avoid memory starvation issues.
+    /// </summary>
+    /// <remarks>
+    /// This constraint works in conjunction with <see cref="MaxTransactionPipelineSizePerNode"/> where it should
+    /// be considered a secondary fail-safe mechanism that should prevent rare, but not impossible situation where
+    /// ingested transaction stream consists of extremely large transactions.
+    /// </remarks>
+    [ConfigurationKeyName("MaxEstimatedTransactionPipelineByteSizePerNode")]
+    public long MaxEstimatedTransactionPipelineByteSizePerNode { get; set; } = 50 * 1024 * 1024;
+
+    /// <summary>
+    /// Gets or sets MaxCoreApiTransactionBatchSize.
+    /// This allows to configure how many transactions are fetched from CoreAPI in one batch.
+    /// </summary>
+    [ConfigurationKeyName("MaxCoreApiTransactionBatchSize")]
+    public int MaxCoreApiTransactionBatchSize { get; set; } = 1000;
 }
 
 internal class LedgerConfirmationOptionsValidator : AbstractOptionsValidator<LedgerConfirmationOptions>
@@ -141,5 +160,6 @@ internal class LedgerConfirmationOptionsValidator : AbstractOptionsValidator<Led
         RuleFor(x => x.MaxCommitBatchSize).GreaterThan(0);
         RuleFor(x => x.LargeBatchSizeToAddDelay).GreaterThan(0);
         RuleFor(x => x.MaxTransactionPipelineSizePerNode).GreaterThan(0);
+        RuleFor(x => x.MaxCoreApiTransactionBatchSize).GreaterThan(0);
     }
 }

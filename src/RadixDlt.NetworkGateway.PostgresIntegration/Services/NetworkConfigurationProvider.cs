@@ -95,22 +95,22 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         _logger = logger;
     }
 
-    public async Task SetNetworkConfigurationOrAssertMatching(CoreModel.NetworkConfigurationResponse networkConfigurationResponse, CancellationToken token)
+    public async Task SetNetworkConfigurationOrAssertMatching(CoreModel.NetworkConfigurationResponse inputNetworkConfiguration, CoreModel.NetworkStatusResponse inputNetworkStatus, CancellationToken token)
     {
-        var inputNetworkConfiguration = MapNetworkConfigurationResponse(networkConfigurationResponse);
+        var networkConfiguration = Map(inputNetworkConfiguration, inputNetworkStatus);
         var existingNetworkConfiguration = await GetCurrentLedgerNetworkConfigurationFromDb(token);
 
-        EnsureNetworkConfigurationCaptured(inputNetworkConfiguration);
+        EnsureNetworkConfigurationCaptured(networkConfiguration);
 
         if (existingNetworkConfiguration != null)
         {
-            if (!existingNetworkConfiguration.HasEqualConfiguration(inputNetworkConfiguration))
+            if (!existingNetworkConfiguration.HasEqualConfiguration(networkConfiguration))
             {
                 throw new ConfigurationException("Network configuration does does not match those stored in the database.");
             }
         }
 
-        if (!GetCapturedConfig().HasEqualConfiguration(inputNetworkConfiguration))
+        if (!GetCapturedConfig().HasEqualConfiguration(networkConfiguration))
         {
             throw new ConfigurationException("Network configuration does does not match those stored from other nodes.");
         }
@@ -158,6 +158,16 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().NetworkName;
     }
 
+    public long GetGenesisEpoch()
+    {
+        return GetCapturedConfig().GenesisEpoch;
+    }
+
+    public long GetGenesisRound()
+    {
+        return GetCapturedConfig().GenesisRound;
+    }
+
     public HrpDefinition GetHrpDefinition()
     {
         return GetCapturedConfig().HrpDefinition;
@@ -168,12 +178,12 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().WellKnownAddresses;
     }
 
-    public AddressTypeDefinition GetAddressTypeDefinition(AddressSubtype subtype)
+    public AddressTypeDefinition GetAddressTypeDefinition(AddressEntityType entityType)
     {
-        return GetCapturedConfig().AddressTypeDefinitions.First(atd => atd.Subtype == subtype);
+        return GetCapturedConfig().AddressTypeDefinitions.First(atd => atd.EntityType == entityType);
     }
 
-    private static NetworkConfiguration MapNetworkConfigurationResponse(CoreModel.NetworkConfigurationResponse networkConfiguration)
+    private static NetworkConfiguration Map(CoreModel.NetworkConfigurationResponse networkConfiguration, CoreModel.NetworkStatusResponse networkStatus)
     {
         var wka = networkConfiguration.WellKnownAddresses;
         var at = networkConfiguration.AddressTypes.Select(MapAddressTypeDefinition).ToArray();
@@ -183,36 +193,65 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
             NetworkId = (byte)networkConfiguration.NetworkId,
             NetworkName = networkConfiguration.Network,
             HrpDefinition = new HrpDefinition(
-                Package: GetHrpPrefix(at, AddressSubtype.Package),
-                NormalComponent: GetHrpPrefix(at, AddressSubtype.NormalComponent),
-                AccountComponent: GetHrpPrefix(at, AddressSubtype.AccountComponent),
-                ValidatorComponent: GetHrpPrefix(at, AddressSubtype.Validator),
-                Identity: GetHrpPrefix(at, AddressSubtype.IdentityComponent),
-                EpochManager: GetHrpPrefix(at, AddressSubtype.EpochManager),
-                Clock: GetHrpPrefix(at, AddressSubtype.Clock),
-                FungibleResource: GetHrpPrefix(at, AddressSubtype.FungibleResource),
-                NonFungibleResource: GetHrpPrefix(at, AddressSubtype.NonFungibleResource)
+                GlobalPackage: GetHrpPrefix(at, AddressEntityType.GlobalPackage),
+                GlobalGenericComponent: GetHrpPrefix(at, AddressEntityType.GlobalGenericComponent),
+                InternalGenericComponent: GetHrpPrefix(at, AddressEntityType.InternalGenericComponent),
+                GlobalAccount: GetHrpPrefix(at, AddressEntityType.GlobalAccount),
+                InternalAccount: GetHrpPrefix(at, AddressEntityType.InternalAccount),
+                GlobalVirtualEd25519Account: GetHrpPrefix(at, AddressEntityType.GlobalVirtualEd25519Account),
+                GlobalVirtualSecp256k1Account: GetHrpPrefix(at, AddressEntityType.GlobalVirtualSecp256k1Account),
+                GlobalValidator: GetHrpPrefix(at, AddressEntityType.GlobalValidator),
+                GlobalIdentity: GetHrpPrefix(at, AddressEntityType.GlobalIdentity),
+                GlobalVirtualEd25519Identity: GetHrpPrefix(at, AddressEntityType.GlobalVirtualEd25519Identity),
+                GlobalVirtualSecp256k1Identity: GetHrpPrefix(at, AddressEntityType.GlobalVirtualSecp256k1Identity),
+                GlobalConsensusManager: GetHrpPrefix(at, AddressEntityType.GlobalConsensusManager),
+                GlobalFungibleResource: GetHrpPrefix(at, AddressEntityType.GlobalFungibleResource),
+                GlobalNonFungibleResource: GetHrpPrefix(at, AddressEntityType.GlobalNonFungibleResource),
+                InternalFungibleVault: GetHrpPrefix(at, AddressEntityType.InternalFungibleVault),
+                InternalNonFungibleVault: GetHrpPrefix(at, AddressEntityType.InternalNonFungibleVault),
+                InternalKeyValueStore: GetHrpPrefix(at, AddressEntityType.InternalKeyValueStore),
+                GlobalAccessController: GetHrpPrefix(at, AddressEntityType.GlobalAccessController)
             ),
             WellKnownAddresses = new WellKnownAddresses(
-                Faucet: wka.Faucet,
-                EpochManager: wka.EpochManager,
-                Clock: wka.Clock,
-                EcdsaSecp256k1: wka.EcdsaSecp256k1,
-                EddsaEd25519: wka.EddsaEd25519,
-                Xrd: wka.Xrd
-            ),
+                Xrd : wka.Xrd,
+                Secp256k1SignatureVirtualBadge: wka.Secp256k1SignatureVirtualBadge,
+                Ed25519SignatureVirtualBadge : wka.Ed25519SignatureVirtualBadge,
+                PackageOfDirectCallerVirtualBadge : wka.PackageOfDirectCallerVirtualBadge,
+                GlobalCallerVirtualBadge : wka.GlobalCallerVirtualBadge,
+                SystemTransactionBadge : wka.SystemTransactionBadge,
+                PackageOwnerBadge : wka.PackageOwnerBadge,
+                ValidatorOwnerBadge : wka.ValidatorOwnerBadge,
+                AccountOwnerBadge : wka.AccountOwnerBadge,
+                IdentityOwnerBadge : wka.IdentityOwnerBadge,
+                PackagePackage : wka.PackagePackage,
+                ResourcePackage : wka.ResourcePackage,
+                AccountPackage: wka.AccountPackage,
+                IdentityPackage: wka.IdentityPackage,
+                ConsensusManagerPackage: wka.ConsensusManagerPackage,
+                AccessControllerPackage: wka.AccessControllerPackage,
+                TransactionProcessorPackage: wka.TransactionProcessorPackage,
+                MetadataModulePackage: wka.MetadataModulePackage,
+                RoyaltyModulePackage: wka.RoyaltyModulePackage,
+                AccessRulesPackage: wka.AccessRulesPackage,
+                GenesisHelperPackage: wka.GenesisHelperPackage,
+                FaucetPackage: wka.FaucetPackage,
+                ConsensusManager: wka.ConsensusManager,
+                GenesisHelper: wka.GenesisHelper,
+                Faucet: wka.Faucet
+                ),
             AddressTypeDefinitions = at,
+            GenesisEpoch = networkStatus.GenesisEpochRound.Epoch,
         };
     }
 
-    private static string GetHrpPrefix(AddressTypeDefinition[] addressTypeDefinitions, AddressSubtype subtype)
+    private static string GetHrpPrefix(AddressTypeDefinition[] addressTypeDefinitions, AddressEntityType entityType)
     {
-        return addressTypeDefinitions.First(at => at.Subtype == subtype).HrpPrefix;
+        return addressTypeDefinitions.First(at => at.EntityType == entityType).HrpPrefix;
     }
 
     private static AddressTypeDefinition MapAddressTypeDefinition(CoreModel.AddressType arg)
     {
-        return new AddressTypeDefinition(Enum.Parse<AddressSubtype>(arg.Subtype.ToString(), true), arg.HrpPrefix, arg.AddressBytePrefix, arg.AddressByteLength);
+        return new AddressTypeDefinition(Enum.Parse<AddressEntityType>(arg.EntityType.ToString(), true), arg.HrpPrefix, arg.AddressBytePrefix, arg.AddressByteLength);
     }
 
     private NetworkConfiguration GetCapturedConfig()

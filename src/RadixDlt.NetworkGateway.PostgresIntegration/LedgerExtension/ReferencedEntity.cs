@@ -71,18 +71,17 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long StateVersion)
+internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Type, long StateVersion)
 {
     private readonly IList<Action> _postResolveActions = new List<Action>();
-
     private Entity? _databaseEntity;
     private ReferencedEntity? _immediateParentReference;
     private bool _resolved;
     private bool _postResolveConfigurationInvoked;
 
-    public GlobalAddress? GlobalAddress { get; private set; }
-
     public Type? TypeHint { get; private set; }
+
+    public bool IsGlobal => Address.IsGlobal;
 
     public long DatabaseId => GetDatabaseEntityInternal().Id;
 
@@ -92,29 +91,18 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
 
     public long DatabaseGlobalAncestorId => GetDatabaseEntityInternal().GlobalAncestorId ?? throw new InvalidOperationException("GlobalAncestorId not set, probably global entity or incorrectly configured one.");
 
-    public bool CanBeOwnerAncestor => Type is not CoreModel.EntityType.KeyValueStore;
+    public long AffectedGlobalEntityId => IsGlobal ? DatabaseId : DatabaseGlobalAncestorId;
 
-    public bool IsGlobal => GlobalAddress != null || GetDatabaseEntityInternal().GlobalAddress != null;
+    public bool CanBeOwnerAncestor => Type is not CoreModel.EntityType.InternalKeyValueStore;
 
     [MemberNotNullWhen(true, nameof(ImmediateParentReference))]
     public bool HasImmediateParentReference => _immediateParentReference != null;
 
     public ReferencedEntity ImmediateParentReference => _immediateParentReference ?? throw new InvalidOperationException("Parent not set, probably global entity or incorrectly configured one.");
 
-    public void Globalize(GlobalAddress globalAddress)
-    {
-        GlobalAddress = globalAddress;
-    }
-
     public void Resolve(Entity entity)
     {
         _databaseEntity = entity;
-
-        if (entity.GlobalAddress != null)
-        {
-            GlobalAddress = entity.GlobalAddress;
-        }
-
         _resolved = true;
     }
 
@@ -195,7 +183,7 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
 
         if (dbEntity is not T typedDbEntity)
         {
-            throw new ArgumentException($"Action argument type does not match underlying entity type.");
+            throw new ArgumentException("Action argument type does not match underlying entity type.");
         }
 
         return typedDbEntity;
@@ -219,6 +207,6 @@ internal record ReferencedEntity(string IdHex, CoreModel.EntityType Type, long S
     /// <returns>The string representation of the type for debugging.</returns>
     public override string ToString()
     {
-        return $"{nameof(ReferencedEntity)} {{ {nameof(IdHex)}: {IdHex}, {nameof(Type)}: {Type}, {nameof(StateVersion)}: {StateVersion}, {nameof(_databaseEntity)}: {_databaseEntity?.ToString() ?? "null"} }}";
+        return $"{nameof(ReferencedEntity)} {{ {nameof(Address)}: {Address}, {nameof(IsGlobal)}: {IsGlobal}, {nameof(Type)}: {Type}, {nameof(StateVersion)}: {StateVersion}, {nameof(_databaseEntity)}: {_databaseEntity?.ToString() ?? "null"} }}";
     }
 }

@@ -77,7 +77,7 @@ public interface IRoyaltyVaultHolder
     public bool TryGetRoyaltyVault([NotNullWhen(true)] out EntityReference royaltyVault);
 }
 
-public interface IGlobalAddressPointer
+public interface IEntityAddressPointer
 {
-    public IEnumerable<string> GetGlobalAddresses();
+    public IEnumerable<string> GetEntityAddresses();
 }
