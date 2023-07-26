@@ -1151,7 +1151,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         else if (EventDecoder.TryGetFungibleResourceBurnedEvent(decodedEvent, out var fungibleResourceBurnedEvent))
                         {
                             resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion,
-                                Minted: TokenAmount.FromDecimalString(fungibleResourceBurnedEvent.amount.AsStr())));
+                                Burned: TokenAmount.FromDecimalString(fungibleResourceBurnedEvent.amount.AsStr())));
                         }
                         else if (EventDecoder.TryGetNonFungibleResourceMintedEvent(decodedEvent, out var nonFungibleResourceMintedEvent))
                         {
@@ -1161,7 +1161,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         else if (EventDecoder.TryGetNonFungibleResourceBurnedEvent(decodedEvent, out var nonFungibleResourceBurnedEvent))
                         {
                             resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion,
-                                Minted: TokenAmount.FromDecimalString(nonFungibleResourceBurnedEvent.ids.Count.ToString())));
+                                Burned: TokenAmount.FromDecimalString(nonFungibleResourceBurnedEvent.ids.Count.ToString())));
                         }
                     }
 
