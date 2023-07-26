@@ -606,6 +606,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             }
         }
 
+        // TODO dirty hack around https://radixdlt.atlassian.net/browse/NG-356
+        var missingMintedEvents = new List<ResourceSupplyChange>();
+
         // step: resolve known types & optionally create missing entities
         {
             var sw = Stopwatch.StartNew();
@@ -685,6 +688,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 referencedEntity.Resolve(dbEntity);
                 entitiesToAdd.Add(dbEntity);
+
+                // TODO dirty hack around https://radixdlt.atlassian.net/browse/NG-356
+                if (dbEntity is GlobalFungibleResourceEntity or GlobalNonFungibleResourceEntity)
+                {
+                    missingMintedEvents.Add(new ResourceSupplyChange(dbEntity.Id, dbEntity.FromStateVersion, Minted: TokenAmount.Zero));
+                }
             }
 
             referencedEntities.OnAllEntitiesResolved();
@@ -1747,7 +1756,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 })
                 .ToList();
 
-            var resourceEntitySupplyHistoryToAdd = resourceSupplyChanges
+            var resourceEntitySupplyHistoryToAdd = missingMintedEvents.Concat(resourceSupplyChanges)
                 .GroupBy(x => new { x.ResourceEntityId, x.StateVersion })
                 .Select(group =>
                 {
