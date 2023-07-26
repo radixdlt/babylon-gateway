@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Entity metadata collection.
+    /// StateEntityDetailsResponsePackageDetailsBlueprintCollection
     /// </summary>
     [DataContract(Name = "StateEntityDetailsResponsePackageDetailsBlueprintCollection")]
     public partial class StateEntityDetailsResponsePackageDetailsBlueprintCollection : IEquatable<StateEntityDetailsResponsePackageDetailsBlueprintCollection>

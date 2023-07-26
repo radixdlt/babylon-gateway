@@ -218,6 +218,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of StateEntityNonFungiblesPageResponse</returns>
         ApiResponse<StateEntityNonFungiblesPageResponse> EntityNonFungiblesPageWithHttpInfo(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest);
         /// <summary>
+        /// Get KeyValueStore Data
+        /// </summary>
+        /// <remarks>
+        /// Returns data (value) associated with a given key of a given key-value store. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreDataRequest"></param>
+        /// <returns>StateKeyValueStoreDataResponse</returns>
+        StateKeyValueStoreDataResponse KeyValueStoreData(StateKeyValueStoreDataRequest stateKeyValueStoreDataRequest);
+
+        /// <summary>
+        /// Get KeyValueStore Data
+        /// </summary>
+        /// <remarks>
+        /// Returns data (value) associated with a given key of a given key-value store. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreDataRequest"></param>
+        /// <returns>ApiResponse of StateKeyValueStoreDataResponse</returns>
+        ApiResponse<StateKeyValueStoreDataResponse> KeyValueStoreDataWithHttpInfo(StateKeyValueStoreDataRequest stateKeyValueStoreDataRequest);
+        /// <summary>
         /// Get Non-Fungible Data
         /// </summary>
         /// <remarks>
@@ -445,6 +466,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (StateEntityNonFungiblesPageResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<StateEntityNonFungiblesPageResponse>> EntityNonFungiblesPageWithHttpInfoAsync(StateEntityNonFungiblesPageRequest stateEntityNonFungiblesPageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get KeyValueStore Data
+        /// </summary>
+        /// <remarks>
+        /// Returns data (value) associated with a given key of a given key-value store. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreDataRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateKeyValueStoreDataResponse</returns>
+        System.Threading.Tasks.Task<StateKeyValueStoreDataResponse> KeyValueStoreDataAsync(StateKeyValueStoreDataRequest stateKeyValueStoreDataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get KeyValueStore Data
+        /// </summary>
+        /// <remarks>
+        /// Returns data (value) associated with a given key of a given key-value store. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreDataRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateKeyValueStoreDataResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateKeyValueStoreDataResponse>> KeyValueStoreDataWithHttpInfoAsync(StateKeyValueStoreDataRequest stateKeyValueStoreDataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Non-Fungible Data
         /// </summary>
@@ -1446,6 +1490,123 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("EntityNonFungiblesPage", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get KeyValueStore Data Returns data (value) associated with a given key of a given key-value store. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreDataRequest"></param>
+        /// <returns>StateKeyValueStoreDataResponse</returns>
+        public StateKeyValueStoreDataResponse KeyValueStoreData(StateKeyValueStoreDataRequest stateKeyValueStoreDataRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateKeyValueStoreDataResponse> localVarResponse = KeyValueStoreDataWithHttpInfo(stateKeyValueStoreDataRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get KeyValueStore Data Returns data (value) associated with a given key of a given key-value store. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreDataRequest"></param>
+        /// <returns>ApiResponse of StateKeyValueStoreDataResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateKeyValueStoreDataResponse> KeyValueStoreDataWithHttpInfo(StateKeyValueStoreDataRequest stateKeyValueStoreDataRequest)
+        {
+            // verify the required parameter 'stateKeyValueStoreDataRequest' is set
+            if (stateKeyValueStoreDataRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateKeyValueStoreDataRequest' when calling StateApi->KeyValueStoreData");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateKeyValueStoreDataRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateKeyValueStoreDataResponse>("/state/key-value-store/data", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("KeyValueStoreData", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get KeyValueStore Data Returns data (value) associated with a given key of a given key-value store. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreDataRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateKeyValueStoreDataResponse</returns>
+        public async System.Threading.Tasks.Task<StateKeyValueStoreDataResponse> KeyValueStoreDataAsync(StateKeyValueStoreDataRequest stateKeyValueStoreDataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateKeyValueStoreDataResponse> localVarResponse = await KeyValueStoreDataWithHttpInfoAsync(stateKeyValueStoreDataRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get KeyValueStore Data Returns data (value) associated with a given key of a given key-value store. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateKeyValueStoreDataRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateKeyValueStoreDataResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateKeyValueStoreDataResponse>> KeyValueStoreDataWithHttpInfoAsync(StateKeyValueStoreDataRequest stateKeyValueStoreDataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateKeyValueStoreDataRequest' is set
+            if (stateKeyValueStoreDataRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateKeyValueStoreDataRequest' when calling StateApi->KeyValueStoreData");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateKeyValueStoreDataRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateKeyValueStoreDataResponse>("/state/key-value-store/data", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("KeyValueStoreData", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

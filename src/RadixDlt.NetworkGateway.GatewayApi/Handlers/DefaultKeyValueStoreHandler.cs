@@ -62,32 +62,32 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
-[Table("entity_access_rules_entry_history")]
-internal class EntityAccessRulesEntryHistory
+internal class DefaultKeyValueStoreHandler : IKeyValueStoreHandler
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly IEntityStateQuerier _entityStateQuerier;
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+    public DefaultKeyValueStoreHandler(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier)
+    {
+        _ledgerStateQuerier = ledgerStateQuerier;
+        _entityStateQuerier = entityStateQuerier;
+    }
 
-    [Column("entity_id")]
-    public long EntityId { get; set; }
+    public async Task<GatewayModel.StateKeyValueStoreDataResponse> Data(GatewayModel.StateKeyValueStoreDataRequest request, CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+        var keys = request.Keys.Select(k => new ValueBytes(k.KeyHex.ConvertFromHex())).ToArray();
 
-    [Column("key")]
-    public string Key { get; set; }
-
-    [Column("access_rules", TypeName = "jsonb")]
-    public string? AccessRules { get; set; }
-
-    [MemberNotNullWhen(false, nameof(AccessRules))]
-    [Column("is_deleted")]
-    public bool IsDeleted { get; set; }
+        return await _entityStateQuerier.KeyValueStoreData((EntityAddress)request.KeyValueStoreAddress, keys, ledgerState, token);
+    }
 }

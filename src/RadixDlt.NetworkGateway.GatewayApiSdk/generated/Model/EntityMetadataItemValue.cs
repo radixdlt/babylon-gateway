@@ -105,7 +105,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="rawHex">rawHex (required).</param>
         /// <param name="rawJson">rawJson (required).</param>
-        /// <param name="typed">typed.</param>
+        /// <param name="typed">typed (required).</param>
         public EntityMetadataItemValue(string rawHex = default(string), Object rawJson = default(Object), MetadataTypedValue typed = default(MetadataTypedValue))
         {
             // to ensure "rawHex" is required (not null)
@@ -120,6 +120,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("rawJson is a required property for EntityMetadataItemValue and cannot be null");
             }
             this.RawJson = rawJson;
+            // to ensure "typed" is required (not null)
+            if (typed == null)
+            {
+                throw new ArgumentNullException("typed is a required property for EntityMetadataItemValue and cannot be null");
+            }
             this.Typed = typed;
         }
 
@@ -138,7 +143,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets Typed
         /// </summary>
-        [DataMember(Name = "typed", EmitDefaultValue = true)]
+        [DataMember(Name = "typed", IsRequired = true, EmitDefaultValue = true)]
         public MetadataTypedValue Typed { get; set; }
 
         /// <summary>

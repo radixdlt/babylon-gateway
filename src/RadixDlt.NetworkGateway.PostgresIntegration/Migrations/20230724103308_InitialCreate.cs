@@ -67,7 +67,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -93,6 +92,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:ledger_transaction_status", "succeeded,failed")
                 .Annotation("Npgsql:Enum:ledger_transaction_type", "genesis,user,round_update")
                 .Annotation("Npgsql:Enum:non_fungible_id_type", "string,integer,bytes,ruid")
+                .Annotation("Npgsql:Enum:object_module_id", "main,metadata,royalty,access_rules")
                 .Annotation("Npgsql:Enum:package_vm_type", "native,scrypto_v1")
                 .Annotation("Npgsql:Enum:pending_transaction_status", "submitted_or_known_in_node_mempool,missing,rejected_temporarily,rejected_permanently,committed_success,committed_failure")
                 .Annotation("Npgsql:Enum:public_key_type", "ecdsa_secp256k1,eddsa_ed25519")
@@ -148,18 +148,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "component_schema",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false),
-                    event_type_identifiers = table.Column<EventTypeIdentifiers>(type: "jsonb", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_component_schema", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "entities",
                 columns: table => new
                 {
@@ -178,11 +166,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     blueprint_name = table.Column<string>(type: "text", nullable: true),
                     divisibility = table.Column<int>(type: "integer", nullable: true),
                     non_fungible_id_type = table.Column<NonFungibleIdType>(type: "non_fungible_id_type", nullable: true),
-                    code_hash = table.Column<byte[]>(type: "bytea", nullable: true),
-                    code = table.Column<byte[]>(type: "bytea", nullable: true),
                     vm_type = table.Column<PackageVmType>(type: "package_vm_type", nullable: true),
-                    schema_hash = table.Column<byte[]>(type: "bytea", nullable: true),
-                    schema = table.Column<string>(type: "jsonb", nullable: true),
                     stake_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     pending_xrd_withdraw_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
                     locked_owner_stake_unit_vault_entity_id = table.Column<long>(type: "bigint", nullable: true),
@@ -193,54 +177,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_entities", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "entity_access_rules_aggregate_history",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    owner_role_id = table.Column<long>(type: "bigint", nullable: false),
-                    entry_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_entity_access_rules_aggregate_history", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "entity_access_rules_entry_history",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    key = table.Column<string>(type: "text", nullable: false),
-                    access_rules = table.Column<string>(type: "jsonb", nullable: true),
-                    is_deleted = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_entity_access_rules_entry_history", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "entity_access_rules_owner_role_history",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    access_rules = table.Column<string>(type: "jsonb", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_entity_access_rules_owner_role_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -330,6 +266,55 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "entity_role_assignments_aggregate_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    owner_role_id = table.Column<long>(type: "bigint", nullable: false),
+                    entry_ids = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_entity_role_assignments_aggregate_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "entity_role_assignments_entry_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    key_role = table.Column<string>(type: "text", nullable: false),
+                    key_module = table.Column<ObjectModuleId>(type: "object_module_id", nullable: false),
+                    role_assignments = table.Column<string>(type: "jsonb", nullable: true),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_entity_role_assignments_entry_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "entity_role_assignments_owner_role_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    role_assignments = table.Column<string>(type: "jsonb", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_entity_role_assignments_owner_role_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "entity_state_history",
                 columns: table => new
                 {
@@ -363,6 +348,24 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_entity_vault_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "key_value_store_entry_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    key_value_store_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    key = table.Column<byte[]>(type: "bytea", nullable: false),
+                    value = table.Column<byte[]>(type: "bytea", nullable: true),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
+                    is_locked = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_key_value_store_entry_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -508,6 +511,38 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "package_code_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    package_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    code_hash = table.Column<byte[]>(type: "bytea", nullable: false),
+                    code = table.Column<byte[]>(type: "bytea", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_package_code_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "package_schema_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    package_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    schema_hash = table.Column<byte[]>(type: "bytea", nullable: false),
+                    schema = table.Column<byte[]>(type: "bytea", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_package_schema_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "pending_transactions",
                 columns: table => new
                 {
@@ -550,6 +585,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_resource_entity_supply_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "validator_emission_statistics",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    validator_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    epoch_number = table.Column<long>(type: "bigint", nullable: false),
+                    proposals_made = table.Column<long>(type: "bigint", nullable: false),
+                    proposals_missed = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_validator_emission_statistics", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -616,21 +667,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 column: "address");
 
             migrationBuilder.CreateIndex(
-                name: "IX_entity_access_rules_aggregate_history_entity_id_from_state_~",
-                table: "entity_access_rules_aggregate_history",
-                columns: new[] { "entity_id", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_entity_access_rules_entry_history_entity_id_key_from_state_~",
-                table: "entity_access_rules_entry_history",
-                columns: new[] { "entity_id", "key", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_entity_access_rules_owner_role_history_entity_id_from_state~",
-                table: "entity_access_rules_owner_role_history",
-                columns: new[] { "entity_id", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
                 name: "IX_entity_metadata_aggregate_history_entity_id_from_state_vers~",
                 table: "entity_metadata_aggregate_history",
                 columns: new[] { "entity_id", "from_state_version" });
@@ -656,6 +692,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "entity_id", "resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_entity_role_assignments_aggregate_history_entity_id_from_st~",
+                table: "entity_role_assignments_aggregate_history",
+                columns: new[] { "entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_role_assignments_entry_history_entity_id_key_role_ke~",
+                table: "entity_role_assignments_entry_history",
+                columns: new[] { "entity_id", "key_role", "key_module", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_role_assignments_owner_role_history_entity_id_from_s~",
+                table: "entity_role_assignments_owner_role_history",
+                columns: new[] { "entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_entity_state_history_entity_id_from_state_version",
                 table: "entity_state_history",
                 columns: new[] { "entity_id", "from_state_version" });
@@ -669,6 +720,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_entity_vault_history_owner_entity_id_vault_entity_id_from_s~",
                 table: "entity_vault_history",
                 columns: new[] { "owner_entity_id", "vault_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_key_value_store_entry_history_key_value_store_entity_id_key~",
+                table: "key_value_store_entry_history",
+                columns: new[] { "key_value_store_entity_id", "key", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transaction_markers_entity_id_state_version",
@@ -740,6 +796,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "package_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_package_code_history_package_entity_id_from_state_version",
+                table: "package_code_history",
+                columns: new[] { "package_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_package_schema_history_package_entity_id_from_state_version",
+                table: "package_schema_history",
+                columns: new[] { "package_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_intent_hash",
                 table: "pending_transactions",
                 column: "intent_hash");
@@ -799,19 +865,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "component_method_royalty_entry_history");
 
             migrationBuilder.DropTable(
-                name: "component_schema");
-
-            migrationBuilder.DropTable(
                 name: "entities");
-
-            migrationBuilder.DropTable(
-                name: "entity_access_rules_aggregate_history");
-
-            migrationBuilder.DropTable(
-                name: "entity_access_rules_entry_history");
-
-            migrationBuilder.DropTable(
-                name: "entity_access_rules_owner_role_history");
 
             migrationBuilder.DropTable(
                 name: "entity_metadata_aggregate_history");
@@ -829,10 +883,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "entity_resource_vault_aggregate_history");
 
             migrationBuilder.DropTable(
+                name: "entity_role_assignments_aggregate_history");
+
+            migrationBuilder.DropTable(
+                name: "entity_role_assignments_entry_history");
+
+            migrationBuilder.DropTable(
+                name: "entity_role_assignments_owner_role_history");
+
+            migrationBuilder.DropTable(
                 name: "entity_state_history");
 
             migrationBuilder.DropTable(
                 name: "entity_vault_history");
+
+            migrationBuilder.DropTable(
+                name: "key_value_store_entry_history");
 
             migrationBuilder.DropTable(
                 name: "ledger_transaction_markers");
@@ -856,6 +922,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "package_blueprint_history");
 
             migrationBuilder.DropTable(
+                name: "package_code_history");
+
+            migrationBuilder.DropTable(
+                name: "package_schema_history");
+
+            migrationBuilder.DropTable(
                 name: "pending_transactions");
 
             migrationBuilder.DropTable(
@@ -863,6 +935,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "validator_active_set_history");
+
+            migrationBuilder.DropTable(
+                name: "validator_emission_statistics");
 
             migrationBuilder.DropTable(
                 name: "validator_public_key_history");

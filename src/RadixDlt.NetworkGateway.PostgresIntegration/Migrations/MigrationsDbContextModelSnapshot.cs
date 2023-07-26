@@ -70,7 +70,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration;
@@ -87,7 +86,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.5")
+                .HasAnnotation("ProductVersion", "7.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "account_default_deposit_rule", new[] { "accept", "reject", "allow_existing" });
@@ -100,6 +99,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_status", new[] { "succeeded", "failed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ledger_transaction_type", new[] { "genesis", "user", "round_update" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "non_fungible_id_type", new[] { "string", "integer", "bytes", "ruid" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "object_module_id", new[] { "main", "metadata", "royalty", "access_rules" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "package_vm_type", new[] { "native", "scrypto_v1" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "pending_transaction_status", new[] { "submitted_or_known_in_node_mempool", "missing", "rejected_temporarily", "rejected_permanently", "committed_success", "committed_failure" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public_key_type", new[] { "ecdsa_secp256k1", "eddsa_ed25519" });
@@ -209,22 +209,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("component_method_royalty_entry_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentSchema", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    b.Property<EventTypeIdentifiers>("EventTypeIdentifiers")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("event_type_identifiers");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("component_schema");
-                });
-
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity", b =>
                 {
                     b.Property<long>("Id")
@@ -280,105 +264,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator<EntityType>("discriminator");
 
                     b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityAccessRulesAggregateHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("EntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("entity_id");
-
-                    b.Property<List<long>>("EntryIds")
-                        .IsRequired()
-                        .HasColumnType("bigint[]")
-                        .HasColumnName("entry_ids");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<long>("OwnerRoleId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("owner_role_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EntityId", "FromStateVersion");
-
-                    b.ToTable("entity_access_rules_aggregate_history");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityAccessRulesEntryHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("AccessRules")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("access_rules");
-
-                    b.Property<long>("EntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("entity_id");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_deleted");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("key");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EntityId", "Key", "FromStateVersion");
-
-                    b.ToTable("entity_access_rules_entry_history");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityAccessRulesOwnerRoleHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("AccessRules")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("access_rules");
-
-                    b.Property<long>("EntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("entity_id");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EntityId", "FromStateVersion");
-
-                    b.ToTable("entity_access_rules_owner_role_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityMetadataAggregateHistory", b =>
@@ -568,6 +453,109 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entity_resource_vault_aggregate_history");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityRoleAssignmentsAggregateHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<List<long>>("EntryIds")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("entry_ids");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("OwnerRoleId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("owner_role_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "FromStateVersion");
+
+                    b.ToTable("entity_role_assignments_aggregate_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityRoleAssignmentsEntryHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<ObjectModuleId>("KeyModule")
+                        .HasColumnType("object_module_id")
+                        .HasColumnName("key_module");
+
+                    b.Property<string>("KeyRole")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("key_role");
+
+                    b.Property<string>("RoleAssignments")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("role_assignments");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "KeyRole", "KeyModule", "FromStateVersion");
+
+                    b.ToTable("entity_role_assignments_entry_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityRoleAssignmentsOwnerRoleHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<string>("RoleAssignments")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("role_assignments");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "FromStateVersion");
+
+                    b.ToTable("entity_role_assignments_owner_role_history");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityStateHistory", b =>
                 {
                     b.Property<long>("Id")
@@ -640,6 +628,47 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator<ResourceType>("discriminator");
 
                     b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.KeyValueStoreEntryHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_locked");
+
+                    b.Property<byte[]>("Key")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("key");
+
+                    b.Property<long>("KeyValueStoreEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("key_value_store_entity_id");
+
+                    b.Property<byte[]>("Value")
+                        .HasColumnType("bytea")
+                        .HasColumnName("value");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KeyValueStoreEntityId", "Key", "FromStateVersion");
+
+                    b.ToTable("key_value_store_entry_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", b =>
@@ -946,6 +975,74 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("package_blueprint_history");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageCodeHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<byte[]>("Code")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("code");
+
+                    b.Property<byte[]>("CodeHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("code_hash");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("PackageEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("package_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PackageEntityId", "FromStateVersion");
+
+                    b.ToTable("package_code_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageSchemaHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("PackageEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("package_entity_id");
+
+                    b.Property<byte[]>("Schema")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("schema");
+
+                    b.Property<byte[]>("SchemaHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("schema_hash");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PackageEntityId", "FromStateVersion");
+
+                    b.ToTable("package_schema_history");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransaction", b =>
                 {
                     b.Property<long>("Id")
@@ -1110,6 +1207,36 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("ValidatorPublicKeyHistoryId");
 
                     b.ToTable("validator_active_set_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorEmissionStatistics", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EpochNumber")
+                        .HasColumnType("bigint")
+                        .HasColumnName("epoch_number");
+
+                    b.Property<long>("ProposalsMade")
+                        .HasColumnType("bigint")
+                        .HasColumnName("proposals_made");
+
+                    b.Property<long>("ProposalsMissed")
+                        .HasColumnType("bigint")
+                        .HasColumnName("proposals_missed");
+
+                    b.Property<long>("ValidatorEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("validator_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("validator_emission_statistics");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorPublicKeyHistory", b =>
@@ -1345,30 +1472,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("blueprint_name");
 
-                    b.Property<byte[]>("Code")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("code");
-
-                    b.Property<byte[]>("CodeHash")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("code_hash");
-
                     b.Property<long>("PackageId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
                         .HasColumnName("package_id");
-
-                    b.Property<string>("Schema")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("schema");
-
-                    b.Property<byte[]>("SchemaHash")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("schema_hash");
 
                     b.Property<PackageVmType>("VmType")
                         .HasColumnType("package_vm_type")

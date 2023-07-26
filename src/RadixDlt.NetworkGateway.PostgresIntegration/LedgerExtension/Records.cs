@@ -67,6 +67,7 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.Collections.Generic;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -98,7 +99,7 @@ internal record struct ValidatorKeyLookup(long ValidatorEntityId, PublicKeyType 
 
 internal record struct AccessRulesChangePointerLookup(long EntityId, long StateVersion);
 
-internal record struct AccessRuleEntryLookup(long EntityId, string Key);
+internal record struct RoleAssignmentEntryLookup(long EntityId, string KeyRole, ObjectModuleId KeyModule);
 
 internal record AccessRulesChangePointer(ReferencedEntity ReferencedEntity, long StateVersion)
 {

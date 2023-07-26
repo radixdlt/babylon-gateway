@@ -106,9 +106,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="packageAddress">Bech32m-encoded human readable version of the address..</param>
         /// <param name="blueprintName">blueprintName (required).</param>
         /// <param name="state">state.</param>
-        /// <param name="accessRules">accessRules (required).</param>
+        /// <param name="roleAssignments">roleAssignments (required).</param>
         /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
-        public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), ComponentEntityAccessRules accessRules = default(ComponentEntityAccessRules), string royaltyVaultBalance = default(string))
+        public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string))
         {
             // to ensure "blueprintName" is required (not null)
             if (blueprintName == null)
@@ -116,12 +116,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("blueprintName is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
             }
             this.BlueprintName = blueprintName;
-            // to ensure "accessRules" is required (not null)
-            if (accessRules == null)
+            // to ensure "roleAssignments" is required (not null)
+            if (roleAssignments == null)
             {
-                throw new ArgumentNullException("accessRules is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
+                throw new ArgumentNullException("roleAssignments is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
             }
-            this.AccessRules = accessRules;
+            this.RoleAssignments = roleAssignments;
             this.PackageAddress = packageAddress;
             this.State = state;
             this.RoyaltyVaultBalance = royaltyVaultBalance;
@@ -147,10 +147,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public Object State { get; set; }
 
         /// <summary>
-        /// Gets or Sets AccessRules
+        /// Gets or Sets RoleAssignments
         /// </summary>
-        [DataMember(Name = "access_rules", IsRequired = true, EmitDefaultValue = true)]
-        public ComponentEntityAccessRules AccessRules { get; set; }
+        [DataMember(Name = "role_assignments", IsRequired = true, EmitDefaultValue = true)]
+        public ComponentEntityRoleAssignments RoleAssignments { get; set; }
 
         /// <summary>
         /// String-encoded decimal representing the amount of a related fungible resource.
@@ -170,7 +170,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
-            sb.Append("  AccessRules: ").Append(AccessRules).Append("\n");
+            sb.Append("  RoleAssignments: ").Append(RoleAssignments).Append("\n");
             sb.Append("  RoyaltyVaultBalance: ").Append(RoyaltyVaultBalance).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -223,9 +223,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.State.Equals(input.State))
                 ) && 
                 (
-                    this.AccessRules == input.AccessRules ||
-                    (this.AccessRules != null &&
-                    this.AccessRules.Equals(input.AccessRules))
+                    this.RoleAssignments == input.RoleAssignments ||
+                    (this.RoleAssignments != null &&
+                    this.RoleAssignments.Equals(input.RoleAssignments))
                 ) && 
                 (
                     this.RoyaltyVaultBalance == input.RoyaltyVaultBalance ||
@@ -255,9 +255,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.State.GetHashCode();
                 }
-                if (this.AccessRules != null)
+                if (this.RoleAssignments != null)
                 {
-                    hashCode = (hashCode * 59) + this.AccessRules.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RoleAssignments.GetHashCode();
                 }
                 if (this.RoyaltyVaultBalance != null)
                 {

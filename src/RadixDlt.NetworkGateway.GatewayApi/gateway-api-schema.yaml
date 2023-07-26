@@ -537,6 +537,30 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+  /state/key-value-store/data:
+    post:
+      operationId: KeyValueStoreData
+      summary: Get KeyValueStore Data
+      description: |
+        Returns data (value) associated with a given key of a given key-value store.
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateKeyValueStoreDataRequest"
+      responses:
+        "200":
+          description: Non-Fungible ID Data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateKeyValueStoreDataResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
   /state/validators/list:
     post:
       operationId: StateValidatorsList
@@ -556,6 +580,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/StateValidatorsListResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /statistics/validators/uptime:
+    post:
+      operationId: ValidatorsUptime
+      summary: Get Validators Uptime
+      tags:
+        - Statistics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidatorsUptimeRequest"
+      responses:
+        "200":
+          description: Validators Uptime
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidatorsUptimeResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
@@ -608,10 +654,6 @@ components:
     NotarizedTransactionHexString:
       description: Hex-encoded notarized transaction payload which can be submitted.
       type: string
-
-    AccessRulesChain:
-      description: Refer to `#/components/schemas/AccessRules` of CoreApi for more details.
-      type: object
 
     LastUpdatedAtStateVersion:
       description: TBD # TODO describe
@@ -757,6 +799,14 @@ components:
     # Common Response Types
     #
 
+    ObjectModuleId:
+      type: string
+      enum:
+        - Main
+        - Metadata
+        - Royalty
+        - AccessRules
+
     ValidatorVaultItem:
       type: object
       required:
@@ -882,11 +932,13 @@ components:
       allOf:
         - $ref: "#/components/schemas/ScryptoSborValue"
         - type: object
+          required:
+            - typed
           properties:
             typed:
               $ref: "#/components/schemas/MetadataTypedValue"
 
-    ComponentEntityAccessRules:
+    ComponentEntityRoleAssignments:
       type: object
       required:
         - owner
@@ -895,6 +947,27 @@ components:
         owner:
           type: object
         entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ComponentEntityRoleAssignmentEntry"
+
+    ComponentEntityRoleAssignmentEntry:
+      type: object
+      required:
+        - role_key
+        - rule
+      properties:
+        role_key:
+          type: object
+          required:
+            - role
+            - module
+          properties:
+            role:
+              type: string
+            module:
+              type: ObjectModuleId
+        rule:
           type: object
 
     FungibleResourcesCollection:
@@ -1173,6 +1246,35 @@ components:
       enum:
         - Native
         - ScryptoV1
+
+    ValidatorUptimeCollection:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidatorUptimeCollectionItem"
+    ValidatorUptimeCollectionItem:
+      type: object
+      required:
+        - address
+        - epochs_active_in
+      properties:
+        address:
+          $ref: "#/components/schemas/Address"
+        proposals_made:
+          type: integer
+          format: int64
+          nullable: true
+        proposals_missed:
+          type: integer
+          format: int64
+          nullable: true
+        epochs_active_in:
+          type: integer
+          format: int64
 
     ValidatorCollection:
       allOf:
@@ -1750,14 +1852,14 @@ components:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
-            - access_rules
+            - role_assignments
             - divisibility
             - total_supply
             - total_minted
             - total_burned
           properties:
-            access_rules:
-              $ref: "#/components/schemas/ComponentEntityAccessRules"
+            role_assignments:
+              $ref: "#/components/schemas/ComponentEntityRoleAssignments"
             divisibility:
               type: integer
               minimum: 0
@@ -1772,14 +1874,14 @@ components:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
-            - access_rules
+            - role_assignments
             - non_fungible_id_type
             - total_supply
             - total_minted
             - total_burned
           properties:
-            access_rules:
-              $ref: "#/components/schemas/ComponentEntityAccessRules"
+            role_assignments:
+              $ref: "#/components/schemas/ComponentEntityRoleAssignments"
             non_fungible_id_type:
               $ref: "#/components/schemas/NonFungibleIdType"
             total_supply:
@@ -1803,7 +1905,7 @@ components:
           required:
             - vm_type
             - code_hash_hex
-            - schema_hash_hex
+            - code_hex
           properties:
             vm_type:
               $ref: "#/components/schemas/PackageVmType"
@@ -1811,16 +1913,13 @@ components:
               $ref: "#/components/schemas/HexString"
             code_hex:
               $ref: "#/components/schemas/HexString"
-            schema_hash_hex:
-              $ref: "#/components/schemas/HexString"
-            schema:
-              type: object
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
             blueprints:
               $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsBlueprintCollection"
+            schemas:
+              $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsSchemaCollection"
     StateEntityDetailsResponsePackageDetailsBlueprintCollection:
-      description: Entity metadata collection.
       allOf:
         - $ref: "#/components/schemas/ResultSetCursorMixin"
         - type: object
@@ -1858,13 +1957,34 @@ components:
         royalty_config_is_locked:
           type: boolean
           nullable: true
+    StateEntityDetailsResponsePackageDetailsSchemaCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateEntityDetailsResponsePackageDetailsSchemaItem"
+    StateEntityDetailsResponsePackageDetailsSchemaItem:
+      type: object
+      required:
+        - schema_hash_hex
+        - schema_hex
+      properties:
+        schema_hash_hex:
+          $ref: "#/components/schemas/HexString"
+        schema_hex:
+          $ref: "#/components/schemas/HexString"
     StateEntityDetailsResponseComponentDetails:
       allOf:
         - $ref: "#/components/schemas/StateEntityDetailsResponseItemDetails"
         - type: object
           required:
             - blueprint_name
-            - access_rules
+            - role_assignments
           properties:
             package_address:
               $ref: "#/components/schemas/Address"
@@ -1872,8 +1992,8 @@ components:
               type: string
             state:
               type: object
-            access_rules:
-              $ref: "#/components/schemas/ComponentEntityAccessRules"
+            role_assignments:
+              $ref: "#/components/schemas/ComponentEntityRoleAssignments"
             royalty_vault_balance:
               $ref: "#/components/schemas/BigDecimal"
 
@@ -2148,6 +2268,63 @@ components:
         last_updated_at_state_version:
           $ref: "#/components/schemas/LastUpdatedAtStateVersion"
 
+    StateKeyValueStoreDataRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - type: object
+          required:
+            - key_value_store_address
+            - keys
+          properties:
+            key_value_store_address:
+              $ref: "#/components/schemas/Address"
+            keys:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateKeyValueStoreDataRequestKeyItem"
+      example:
+        key_value_store_address: "<key-value-store-address>"
+        keys:
+          - key_hex: "edafaaccee"
+          - key_hex: "ffbbaa2311"
+    StateKeyValueStoreDataRequestKeyItem:
+      type: object
+      required:
+        - key_hex
+      properties:
+        key_hex:
+          $ref: "#/components/schemas/HexString"
+    StateKeyValueStoreDataResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - key_value_store_address
+            - entries
+          properties:
+            key_value_store_address:
+              $ref: "#/components/schemas/Address"
+            entries:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateKeyValueStoreDataResponseItem"
+    StateKeyValueStoreDataResponseItem:
+      type: object
+      required:
+        - key_hex
+        - value_hex
+        - last_updated_at_state_version
+        - is_locked
+      properties:
+        key_hex:
+          $ref: "#/components/schemas/HexString"
+        value_hex:
+          $ref: "#/components/schemas/HexString"
+        last_updated_at_state_version:
+          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+        is_locked:
+          type: boolean
+
 
     #
     # /state/validators/* Request & Response Types
@@ -2173,6 +2350,27 @@ components:
           properties:
             validators:
               $ref: "#/components/schemas/ValidatorCollection"
+
+    ValidatorsUptimeRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - type: object
+          properties:
+            from_ledger_state:
+              $ref: "#/components/schemas/LedgerStateSelector"
+            validator_addresses:
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+    ValidatorsUptimeResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - validators
+          properties:
+            validators:
+              $ref: "#/components/schemas/ValidatorUptimeCollection"
 
     #
     # Errors

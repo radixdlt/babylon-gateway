@@ -251,20 +251,8 @@ internal class GlobalIdentityEntity : ComponentEntity
 
 internal class GlobalPackageEntity : ComponentEntity
 {
-    [Column("code_hash")]
-    public byte[] CodeHash { get; set; }
-
-    [Column("code")]
-    public byte[] Code { get; set; }
-
     [Column("vm_type")]
     public PackageVmType VmType { get; set; }
-
-    [Column("schema_hash")]
-    public byte[] SchemaHash { get; set; }
-
-    [Column("schema", TypeName = "jsonb")]
-    public string Schema { get; set; }
 }
 
 // This is transient model, not stored in database
