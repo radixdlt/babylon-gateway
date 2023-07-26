@@ -22,12 +22,16 @@ info:
     This document is an API reference documentation, visit [User Guide](https://docs-babylon.radixdlt.com/) to learn more
     about how to run a Gateway of your own.
 
+    ## Migration guide
+
+    Please see [the latest release notes](https://github.com/radixdlt/babylon-gateway/releases).
+
     ## Integration and forward compatibility guarantees
 
     We give no guarantees that other endpoints will not change before Babylon mainnet launch, although changes are expected to
     be minimal.
 servers:
-  - url: https://rcnet.radixdlt.com
+  - url: https://rcnet-v2.radixdlt.com
 x-tagGroups:
   - name: Overview
     tags:
