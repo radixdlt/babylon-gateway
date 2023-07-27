@@ -9,7 +9,11 @@ The system is in three main parts:
 
 ## Using the Gateway API
 
-For documentation on the Gateway API, see the [RCNet-V1 Gateway API docs on ReDocly](https://radix-rcnet-v1-gateway.redoc.ly/).
+For documentation on the Gateway API, see the [RCNet V2 Gateway API docs on ReDocly](https://radix-rcnet-v2-gateway.redoc.ly/).
+
+### Known Issues
+
+* The returned total supply, minted and burned quantities are not accurate. This will be fixed at RCNet v3.
 
 ## Technical Docs
 

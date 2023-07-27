@@ -248,7 +248,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     var virtualIdentityMetadata = _virtualEntityMetadataProvider.GetVirtualEntityMetadata(entity.Address);
                     metadata[entity.Id] = virtualIdentityMetadata;
 
-                    // TODO - we should better fake the data - eg accessRulesChain when this is possible
+                    // TODO - we should better fake the data - eg roleAssignments when this is possible
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         blueprintName: "Account",
                         state: new JObject(),
@@ -260,7 +260,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     var virtualAccountMetadata = _virtualEntityMetadataProvider.GetVirtualEntityMetadata(entity.Address);
                     metadata[entity.Id] = virtualAccountMetadata;
 
-                    // TODO - we should better fake the data - eg accessRulesChain when this is possible
+                    // TODO - we should better fake the data - eg roleAssignments when this is possible
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         blueprintName: "Account",
                         state: new JObject(),

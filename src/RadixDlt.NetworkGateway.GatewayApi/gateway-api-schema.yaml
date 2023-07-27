@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  version: 0.4.0
-  title: Babylon Gateway API - RCnet V2
+  version: 0.5.0
+  title: Babylon Gateway API - RCnet V3
   license:
     name: The Radix License, Version 1.0
     url: https://www.radixfoundation.org/licenses/license-v1
@@ -22,12 +22,16 @@ info:
     This document is an API reference documentation, visit [User Guide](https://docs-babylon.radixdlt.com/) to learn more
     about how to run a Gateway of your own.
 
+    ## Migration guide
+
+    Please see [the latest release notes](https://github.com/radixdlt/babylon-gateway/releases).
+
     ## Integration and forward compatibility guarantees
 
     We give no guarantees that other endpoints will not change before Babylon mainnet launch, although changes are expected to
     be minimal.
 servers:
-  - url: https://rcnet.radixdlt.com
+  - url: https://rcnet-v3.radixdlt.com
 x-tagGroups:
   - name: Overview
     tags:
@@ -40,16 +44,18 @@ x-tagGroups:
       - Transaction
       - Stream
       - State
+      - Statistics
 tags:
   - name: SubAPIs
     x-displayName: Sub-APIs
     x-traitTag: true
     description: |
-      The Gateway API is split into 4 sub APIs:
+      The Gateway API is split into 5 sub APIs:
       - **Status** (`/status/*`) - For status and configuration details for the Gateway / Network.
       - **Transaction** (`/transaction/*`) - For transaction construction, preview, submission, and monitoring the status of an individual transaction.
       - **Stream** (`/transaction/*`) - For reading committed transactions.
-      - **State** (`/state/*`, `/entity/*` and `/non-fungible/*`) - For reading the current or past ledger state of the network.
+      - **State** (`/state/*`) - For reading the current or past ledger state of the network.
+      - **Statistics** (`/statistics/*`) - For calculating particular statistics against the current or past ledger state of the network.
   - name: Architecture
     x-traitTag: true
     description: |
@@ -142,6 +148,10 @@ tags:
   - name: State
     x-displayName: State Endpoints
     description: Query information snapshot about state of ledger entities at present or past time.
+  - name: Statistics
+    x-displayName: Statistics Endpoints
+    description: Calculate particular statistics based on current or historic ledger state.
+
 paths:
   "/status/gateway-status":
     post:
