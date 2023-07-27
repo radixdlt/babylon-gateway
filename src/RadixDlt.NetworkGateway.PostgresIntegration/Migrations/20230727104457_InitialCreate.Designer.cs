@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230727102737_InitialCreate")]
+    [Migration("20230727104457_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -577,9 +577,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
 
-                    b.Property<byte[]>("State")
+                    b.Property<string>("State")
                         .IsRequired()
-                        .HasColumnType("bytea")
+                        .HasColumnType("jsonb")
                         .HasColumnName("state");
 
                     b.HasKey("Id");
@@ -1379,7 +1379,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.Property<string>("State")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("jsonb")
                         .HasColumnName("state");
 
                     b.HasKey("Id");

@@ -859,7 +859,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 Id = sequences.EntityStateHistorySequence++,
                                 FromStateVersion = stateVersion,
                                 EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
-                                State = componentState.Value.DataStruct.StructData.Hex.ConvertFromHex(),
+                                State = componentState.Value.DataStruct.StructData.ToJson(),
                             });
                         }
 

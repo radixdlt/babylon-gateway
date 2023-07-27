@@ -574,9 +574,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
 
-                    b.Property<byte[]>("State")
+                    b.Property<string>("State")
                         .IsRequired()
-                        .HasColumnType("bytea")
+                        .HasColumnType("jsonb")
                         .HasColumnName("state");
 
                     b.HasKey("Id");
@@ -1376,7 +1376,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.Property<string>("State")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("jsonb")
                         .HasColumnName("state");
 
                     b.HasKey("Id");

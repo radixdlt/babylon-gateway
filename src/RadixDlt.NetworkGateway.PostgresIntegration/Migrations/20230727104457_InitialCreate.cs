@@ -323,7 +323,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    state = table.Column<byte[]>(type: "bytea", nullable: false)
+                    state = table.Column<string>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -667,7 +667,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    state = table.Column<string>(type: "text", nullable: false)
+                    state = table.Column<string>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
                 {

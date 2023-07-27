@@ -80,6 +80,6 @@ internal class ValidatorStateHistory
     [Column("entity_id")]
     public long EntityId { get; set; }
 
-    [Column("state")]
+    [Column("state", TypeName = "jsonb")]
     public string State { get; set; }
 }
