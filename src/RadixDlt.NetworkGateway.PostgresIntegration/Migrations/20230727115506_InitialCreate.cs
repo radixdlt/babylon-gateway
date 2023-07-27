@@ -871,6 +871,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "package_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_package_schema_history_schema_hash_from_state_version",
+                table: "package_schema_history",
+                columns: new[] { "schema_hash", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_intent_hash",
                 table: "pending_transactions",
                 column: "intent_hash");

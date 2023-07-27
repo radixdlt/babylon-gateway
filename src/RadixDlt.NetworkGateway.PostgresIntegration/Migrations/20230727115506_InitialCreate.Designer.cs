@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230727104457_InitialCreate")]
+    [Migration("20230727115506_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1125,6 +1125,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PackageEntityId", "FromStateVersion");
+
+                    b.HasIndex("SchemaHash", "FromStateVersion");
 
                     b.ToTable("package_schema_history");
                 });

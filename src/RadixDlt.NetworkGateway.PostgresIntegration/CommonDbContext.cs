@@ -373,6 +373,9 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<PackageSchemaHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
+        modelBuilder.Entity<PackageSchemaHistory>()
+            .HasIndex(e => new { e.SchemaHash, e.FromStateVersion });
+
         modelBuilder.Entity<ValidatorPublicKeyHistory>()
             .HasIndex(e => new { e.ValidatorEntityId, e.FromStateVersion });
 

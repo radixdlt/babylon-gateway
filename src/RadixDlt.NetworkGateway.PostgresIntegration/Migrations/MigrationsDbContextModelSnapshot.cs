@@ -1123,6 +1123,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("PackageEntityId", "FromStateVersion");
 
+                    b.HasIndex("SchemaHash", "FromStateVersion");
+
                     b.ToTable("package_schema_history");
                 });
 
