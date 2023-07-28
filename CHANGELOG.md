@@ -1,3 +1,27 @@
+# 0.5.0 - RCNet v3
+Release Date: unreleased
+
+## RCNet v2 to RCNet v3 Migration Guide
+
+_WORK IN PROGRESS_
+
+### What’s New?
+
+
+### Breaking Changes
+
+- Renamed `access_rules` to `role_assignments`. Included missing `module` to role assignment key.
+
+## Full technical changelog by minor release
+### 0.4.1
+
+- Renamed `access_rules` to `role_assignments`. Included missing `module` to role assignment key.
+- Added package details to `/satus/entity/details` endpoint.
+- New endpoint `/statistics/validators/uptime` returns validator uptime data.
+- New endpoint `/state/key-value/data` returns entries of requested KeyValueStore.
+
+-------
+
 # 0.4.0 - RCNet v2
 Release Date: 26.07.2023
 
@@ -62,13 +86,14 @@ Release Date: 26.07.2023
 - Added `affected_global_entities` to `/transaction/committed-details` and `/stream/transactions` endpoints. To include them in response make sure to include `affected_global_entities` optin.
 - New `affected_global_entities_filter` filter in `/stream/transactions`.
 - Use strongly-typed metadata models.
-- return `pending_xrd_withdraw_vault`, `locked_owner_stake_unit_vault`, `pending_owner_stake_unit_unlock_vault`, `stake_vault` from `/state/validators/list` endpoint.
+- Return `pending_xrd_withdraw_vault`, `locked_owner_stake_unit_vault`, `pending_owner_stake_unit_unlock_vault`, `stake_vault` from `/state/validators/list` endpoint.
 - Changed `access_rule_chain` to partially strongly typed `access_rules`.
-- Added package details to `/satus/entity/details` endpoint.
 
 ### 0.3.1
 
 - Fix `/state/non-fungible/data` to return data for all NFIDs
+
+-------
 
 # 0.3.0 - RCNet v1
 Release Date: 31.03.2023
@@ -85,6 +110,7 @@ Release Date: 31.03.2023
 - new paginable endpoints `/state/entity/page/{x}` for metadata, fungibles, fungible-vaults, non-fungibles, non-fungible-vaults and non-fungible-vault/ids. Cursors returned from `state/entity/details` can be later used to query for next pages in specific endpoints.
 - `/transaction/committed-details` endpoint operates on `intent_hash_hex` only now
 
+-------
 
 # 0.1.1 - Betanet v2
 Release Date: 14.02.2023

@@ -114,6 +114,7 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.MapEnum<PendingTransactionStatus>();
                 dataSourceBuilder.MapEnum<PublicKeyType>();
                 dataSourceBuilder.MapEnum<ResourceType>();
+                dataSourceBuilder.MapEnum<ObjectModuleId>();
 
                 return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
             },

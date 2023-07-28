@@ -62,83 +62,17 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Configuration;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System.Threading;
-using System.Threading.Tasks;
+using FluentValidation;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal interface IComponentSchemaProvider
+internal class StateKeyValueStoreDataRequestKeyItemValidator : AbstractValidator<GatewayModel.StateKeyValueStoreDataRequestKeyItem>
 {
-    ValueTask<EventTypeIdentifiers> GetEventTypeIdentifiers();
-
-    Task SaveComponentSchema(ComponentSchema componentSchema, CancellationToken token);
-}
-
-internal class ComponentSchemaProvider : IComponentSchemaProvider
-{
-    private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
-
-    private readonly object _writeLock = new();
-    private ComponentSchema? _capturedComponentSchema;
-
-    public ComponentSchemaProvider(IDbContextFactory<ReadWriteDbContext> dbContextFactory)
+    public StateKeyValueStoreDataRequestKeyItemValidator()
     {
-        _dbContextFactory = dbContextFactory;
-    }
-
-    public async ValueTask<EventTypeIdentifiers> GetEventTypeIdentifiers()
-    {
-        return (await GetCapturedComponentSchema()).EventTypeIdentifiers;
-    }
-
-    public async Task SaveComponentSchema(ComponentSchema componentSchema, CancellationToken token)
-    {
-        EnsureComponentSchemaCaptured(componentSchema);
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
-
-        if (!await dbContext.ComponentSchema.AnyAsync(token))
-        {
-            dbContext.ComponentSchema.Add(await GetCapturedComponentSchema());
-        }
-
-        await dbContext.SaveChangesAsync(token);
-    }
-
-    private async ValueTask<ComponentSchema> GetCapturedComponentSchema()
-    {
-        if (_capturedComponentSchema != null)
-        {
-            return _capturedComponentSchema;
-        }
-
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        var componentSchema = await dbContext.ComponentSchema.FirstOrDefaultAsync();
-
-        if (componentSchema == null)
-        {
-            throw new ConfigurationException("Config hasn't been captured from genesis transaction yet and/or is not stored in our database.");
-        }
-
-        EnsureComponentSchemaCaptured(componentSchema);
-
-        return componentSchema;
-    }
-
-    private void EnsureComponentSchemaCaptured(ComponentSchema componentSchema)
-    {
-        lock (_writeLock)
-        {
-            if (_capturedComponentSchema != null)
-            {
-                return;
-            }
-
-            _capturedComponentSchema = componentSchema;
-        }
+        RuleFor(x => x.KeyHex)
+            .NotEmpty()
+            .Hex();
     }
 }

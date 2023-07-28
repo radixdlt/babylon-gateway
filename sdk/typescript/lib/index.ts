@@ -1,13 +1,12 @@
-import { StreamApi } from './generated/apis/StreamApi'
 import {
   ConfigurationParameters,
   StateApi,
+  StatisticsApi,
   StatusApi,
+  StreamApi,
   TransactionApi,
 } from './generated'
-import { State } from './subapis/state'
-import { Status, Stream } from './subapis'
-import { Transaction } from './subapis/transaction'
+import { State, Statistics, Status, Stream, Transaction } from './subapis'
 import { RuntimeConfiguration } from './runtime'
 import { normalizeBasePath } from './helpers/normalize-base-path'
 
@@ -54,12 +53,14 @@ export class GatewayApiClient {
   stream: Stream
   status: Status
   transaction: Transaction
+  statistics: Statistics
 
   private lowLevel: {
     state: StateApi
     stream: StreamApi
     status: StatusApi
     transaction: TransactionApi
+    statistics: StatisticsApi
   }
 
   constructor(configuration: RuntimeConfiguration) {
@@ -68,11 +69,13 @@ export class GatewayApiClient {
       stream: new StreamApi(configuration),
       status: new StatusApi(configuration),
       transaction: new TransactionApi(configuration),
+      statistics: new StatisticsApi(configuration),
     }
 
     this.state = new State(this.lowLevel.state, configuration)
     this.stream = new Stream(this.lowLevel.stream)
     this.status = new Status(this.lowLevel.status)
     this.transaction = new Transaction(this.lowLevel.transaction)
+    this.statistics = new Statistics(this.lowLevel.statistics)
   }
 }

@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,24 +62,12 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
-[Table("entity_access_rules_owner_role_history")]
-internal class EntityAccessRulesOwnerRoleHistory
+public interface IValidatorHandler
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("entity_id")]
-    public long EntityId { get; set; }
-
-    [Column("access_rules", TypeName = "jsonb")]
-    public string AccessRules { get; set; }
+    Task<GatewayApiSdk.Model.ValidatorsUptimeResponse> Uptime(GatewayApiSdk.Model.ValidatorsUptimeRequest request, CancellationToken token);
 }

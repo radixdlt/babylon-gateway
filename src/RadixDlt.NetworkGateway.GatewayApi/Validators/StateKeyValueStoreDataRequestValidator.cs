@@ -62,28 +62,36 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
+using FluentValidation.Validators;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-[Table("entity_access_rules_aggregate_history")]
-internal class EntityAccessRulesAggregateHistory
+internal class StateKeyValueStoreDataRequestValidator : AbstractValidator<GatewayModel.StateKeyValueStoreDataRequest>
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    public StateKeyValueStoreDataRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, LedgerStateSelectorValidator ledgerStateSelectorValidator)
+    {
+        RuleFor(x => x.KeyValueStoreAddress)
+            .NotEmpty()
+            .RadixAddress();
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+        RuleFor(x => x.Keys)
+            .NotEmpty()
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.Keys.Count)
+                    .GreaterThan(0)
+                    .LessThan(endpointOptionsSnapshot.Value.MaxPageSize);
 
-    [Column("entity_id")]
-    public long EntityId { get; set; }
+                RuleForEach(x => x.Keys)
+                    .NotNull()
+                    .SetValidator(new StateKeyValueStoreDataRequestKeyItemValidator());
+            });
 
-    [Column("owner_role_id")]
-    public long OwnerRoleId { get; set; }
-
-    [Column("entry_ids")]
-    public List<long> EntryIds { get; set; }
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
+    }
 }

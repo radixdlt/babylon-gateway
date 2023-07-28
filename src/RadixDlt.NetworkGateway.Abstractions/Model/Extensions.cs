@@ -1,4 +1,4 @@
-﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,37 +62,22 @@
  * permissions under this License.
  */
 
-using System;
+using System.Diagnostics;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.Abstractions;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-public class EventTypeIdentifiers
+public static class MappingExtensions
 {
-    public EventTypeIdentifiers(
-        FungibleVaultEventTypeIdentifiers fungibleVault,
-        NonFungibleVaultEventTypeIdentifiers nonFungibleVault,
-        FungibleResourceEventTypeIdentifiers fungibleResource,
-        NonFungibleResourceEventTypeIdentifiers nonFungibleResource)
+    public static ObjectModuleId ToInternalModel(this CoreModel.ObjectModuleId objectModuleId)
     {
-        FungibleVault = fungibleVault;
-        NonFungibleVault = nonFungibleVault;
-        FungibleResource = fungibleResource;
-        NonFungibleResource = nonFungibleResource;
+        return objectModuleId switch
+        {
+            CoreModel.ObjectModuleId.Main => ObjectModuleId.Main,
+            CoreModel.ObjectModuleId.Metadata => ObjectModuleId.Metadata,
+            CoreModel.ObjectModuleId.Royalty => ObjectModuleId.Royalty,
+            CoreModel.ObjectModuleId.AccessRules => ObjectModuleId.AccessRules,
+            _ => throw new UnreachableException($"Didn't expect {objectModuleId} value"),
+        };
     }
-
-    public FungibleVaultEventTypeIdentifiers FungibleVault { get; }
-
-    public NonFungibleVaultEventTypeIdentifiers NonFungibleVault { get; }
-
-    public FungibleResourceEventTypeIdentifiers FungibleResource { get; }
-
-    public NonFungibleResourceEventTypeIdentifiers NonFungibleResource { get; }
-
-    public sealed record FungibleVaultEventTypeIdentifiers(int Withdrawal, int Deposit);
-
-    public sealed record NonFungibleVaultEventTypeIdentifiers(int Withdrawal, int Deposit);
-
-    public sealed record FungibleResourceEventTypeIdentifiers(int Minted, int Burned);
-
-    public sealed record NonFungibleResourceEventTypeIdentifiers(int Minted, int Burned);
 }
