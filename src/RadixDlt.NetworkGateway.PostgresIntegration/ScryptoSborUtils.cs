@@ -82,12 +82,12 @@ internal static class ScryptoSborUtils
          return stringNfid;
      }
 
-     public static string DataToProgrammaticJson(byte[] data, byte[] schemaBytes, KeyTypeKind keyTypeKind, int schemaIndex, byte networkId)
+     public static string DataToProgrammaticJson(byte[] data, byte[] schemaBytes, SborTypeKind keyTypeKind, int schemaIndex, byte networkId)
      {
          ToolkitModel.LocalTypeIndex typeIndex = keyTypeKind switch
          {
-             KeyTypeKind.SchemaLocal => new ToolkitModel.LocalTypeIndex.SchemaLocalIndex((ulong)schemaIndex),
-             KeyTypeKind.WellKnown => new ToolkitModel.LocalTypeIndex.WellKnown((byte)schemaIndex),
+             SborTypeKind.SchemaLocal => new ToolkitModel.LocalTypeIndex.SchemaLocalIndex((ulong)schemaIndex),
+             SborTypeKind.WellKnown => new ToolkitModel.LocalTypeIndex.WellKnown((byte)schemaIndex),
              _ => throw new ArgumentOutOfRangeException(nameof(keyTypeKind), keyTypeKind, null),
          };
 

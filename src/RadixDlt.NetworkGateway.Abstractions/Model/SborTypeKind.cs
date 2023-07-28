@@ -64,7 +64,7 @@
 
 namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-public enum KeyTypeKind
+public enum SborTypeKind
 {
     WellKnown,
     SchemaLocal,

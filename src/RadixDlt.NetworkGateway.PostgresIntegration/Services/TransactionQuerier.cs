@@ -335,17 +335,17 @@ internal class TransactionQuerier : ITransactionQuerier
         var entityIdToAddressMap = await GetEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToList(), token);
 
         var schemaHashes = transactions
-            .Where(x => x.EngineReceipt.EventsSchemaHash != null)
-            .SelectMany(x => x.EngineReceipt.EventsSchemaHash!)
+            .Where(x => x.EngineReceipt.EventsSchemaHash.Any())
+            .SelectMany(x => x.EngineReceipt.EventsSchemaHash)
             .ToList();
 
-        List<PackageSchemaHistory>? schemas = null;
+        Dictionary<ValueBytes, byte[]> schemas = new Dictionary<ValueBytes, byte[]>();
 
         if (optIns.ReceiptEvents && schemaHashes.Any())
         {
             schemas = await _dbContext.PackageSchemaHistory
                 .Where(x => schemaHashes.Contains(x.SchemaHash))
-                .ToListAsync(token);
+                .ToDictionaryAsync(x => (ValueBytes)x.SchemaHash, x => x.Schema, token);
         }
 
         List<GatewayModel.CommittedTransactionInfo> mappedTransactions = new List<GatewayModel.CommittedTransactionInfo>();
@@ -361,28 +361,16 @@ internal class TransactionQuerier : ITransactionQuerier
             {
                 List<string> events = new List<string>();
 
-                for (var i = 0; i < transaction.EngineReceipt.EventsSbor!.Length; ++i)
+                foreach (var @event in transaction.EngineReceipt.GetEvents())
                 {
-                    if (transaction.EngineReceipt.EventsSbor?[i] == null ||
-                        transaction.EngineReceipt.EventsSchemaHash?[i] == null ||
-                        transaction.EngineReceipt.EventsTypeIndex?[i] == null ||
-                        transaction.EngineReceipt.EventsTypeKind?[i] == null)
+                    var schemaFound = schemas.TryGetValue(@event.SchemaHash, out var schema);
+
+                    if (!schemaFound)
                     {
-                        throw new UnreachableException("Each event specific array in receipt should have same number of elements.");
+                        throw new UnreachableException($"Unable to find schema for given hash {Convert.ToHexString(@event.SchemaHash)}");
                     }
 
-                    var eventData = transaction.EngineReceipt.EventsSbor[i];
-                    var schemaHash = transaction.EngineReceipt.EventsSchemaHash[i];
-                    var index = transaction.EngineReceipt.EventsTypeIndex[i];
-                    var isSchemaLocalIndex = transaction.EngineReceipt.EventsTypeKind[i];
-                    var schema = schemas?.SingleOrDefault(x => x.SchemaHash.SequenceEqual(schemaHash));
-
-                    if (schema == null)
-                    {
-                        throw new UnreachableException($"Unable to find schema for given hash {Convert.ToHexString(schemaHash)}");
-                    }
-
-                    events.Add(ScryptoSborUtils.DataToProgrammaticJson(eventData, schema.Schema, isSchemaLocalIndex, index, networkId));
+                    events.Add(ScryptoSborUtils.DataToProgrammaticJson(@event.Data, schema!, @event.KeyTypeKind, @event.TypeIndex, networkId));
                 }
 
                 mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, events));

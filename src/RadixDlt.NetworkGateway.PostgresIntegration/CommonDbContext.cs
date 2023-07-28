@@ -169,7 +169,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<PublicKeyType>();
         modelBuilder.HasPostgresEnum<ResourceType>();
         modelBuilder.HasPostgresEnum<ObjectModuleId>();
-        modelBuilder.HasPostgresEnum<KeyTypeKind>();
+        modelBuilder.HasPostgresEnum<SborTypeKind>();
 
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
@@ -362,7 +362,7 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<ValidatorStateHistory>()
-            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+            .HasIndex(e => new { EntityId = e.ValidatorEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<PackageBlueprintHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
@@ -392,7 +392,7 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.KeyValueStoreEntityId, e.Key, e.FromStateVersion });
 
         modelBuilder.Entity<KeyValueStoreSchemaHistory>()
-            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+            .HasIndex(e => new { EntityId = e.KeyValueStoreEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<NonFungibleDataSchemaHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });

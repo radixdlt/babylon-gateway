@@ -63,6 +63,7 @@
  */
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
@@ -77,5 +78,31 @@ public partial class TypeInfoModuleFieldTypeInfoSubstate : IEntityAddressPointer
         }
 
         return Enumerable.Empty<string>();
+    }
+
+    public bool TryGetObjectInstanceSchema([NotNullWhen(true)] out InstanceSchema instanceSchema)
+    {
+        instanceSchema = null;
+
+        if (Value.Details is ObjectTypeInfoDetails objectTypeInfoDetails && objectTypeInfoDetails.InstanceSchema != null)
+        {
+            instanceSchema = objectTypeInfoDetails.InstanceSchema;
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool TryGetKeyValueStoreSchema([NotNullWhen(true)] out KeyValueStoreSchema keyValueStoreSchema)
+    {
+        keyValueStoreSchema = null;
+
+        if (Value.Details is KeyValueStoreTypeInfoDetails keyValueStoreTypeInfoDetails && keyValueStoreTypeInfoDetails.KeyValueStoreInfo.KvStoreSchema != null)
+        {
+            keyValueStoreSchema = keyValueStoreTypeInfoDetails.KeyValueStoreInfo.KvStoreSchema;
+            return true;
+        }
+
+        return false;
     }
 }

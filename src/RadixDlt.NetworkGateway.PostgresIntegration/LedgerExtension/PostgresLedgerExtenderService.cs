@@ -548,25 +548,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
                     ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
                     ledgerTransaction.RawPayload = committedTransaction.LedgerTransaction.GetUnwrappedPayloadBytes();
-
-                    var eventsTuple = committedTransaction.Receipt.Events?
-                        .Select(x =>
-                        {
-                            if (x.Type.TypePointer is not CoreModel.PackageTypePointer packageTypePointer)
-                            {
-                                throw new UnreachableException("All events are expected to be package type pointer.");
-                            }
-
-                            return new
-                            {
-                                typeIndex = packageTypePointer.LocalTypeIndex.Index,
-                                typeKind = packageTypePointer.LocalTypeIndex.Kind.ToInternalModel(),
-                                schemaHash = packageTypePointer.SchemaHash.ConvertFromHex(),
-                                data = x.Data.GetDataBytes(),
-                            };
-                        })
-                        .ToArray();
-
                     ledgerTransaction.EngineReceipt = new TransactionReceipt
                     {
                         StateUpdates = committedTransaction.Receipt.StateUpdates.ToJson(),
@@ -575,10 +556,18 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         ErrorMessage = committedTransaction.Receipt.ErrorMessage,
                         Output = committedTransaction.Receipt.Output != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Output) : null,
                         NextEpoch = committedTransaction.Receipt.NextEpoch?.ToJson(),
-                        EventsSbor = eventsTuple?.Select(x => x.data).ToArray(),
-                        EventsSchemaHash = eventsTuple?.Select(x => x.schemaHash).ToArray(),
-                        EventsTypeIndex = eventsTuple?.Select(x => x.typeIndex).ToArray(),
-                        EventsTypeKind = eventsTuple?.Select(x => x.typeKind).ToArray(),
+                        EventsSbor = committedTransaction.Receipt.Events != null ?
+                            committedTransaction.Receipt.Events.Select(x => x.Data.GetDataBytes()).ToArray()
+                            : Array.Empty<byte[]>(),
+                        EventsSchemaHash = committedTransaction.Receipt.Events != null ?
+                            committedTransaction.Receipt.Events.Select(x => ((CoreModel.PackageTypePointer)x.Type.TypePointer).SchemaHash.ConvertFromHex()).ToArray()
+                            : Array.Empty<byte[]>(),
+                        EventsTypeIndex = committedTransaction.Receipt.Events != null ?
+                            committedTransaction.Receipt.Events.Select(x => ((CoreModel.PackageTypePointer)x.Type.TypePointer).LocalTypeIndex.Index).ToArray()
+                            : Array.Empty<int>(),
+                        EventsSborTypeKind = committedTransaction.Receipt.Events != null ?
+                            committedTransaction.Receipt.Events.Select(x => ((CoreModel.PackageTypePointer)x.Type.TypePointer).LocalTypeIndex.Kind.ToInternalModel()).ToArray().ToArray()
+                            : Array.Empty<SborTypeKind>(),
                     };
 
                     ledgerTransactionsToAdd.Add(ledgerTransaction);
@@ -895,7 +884,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             {
                                 Id = sequences.ValidatorStateHistorySequence++,
                                 FromStateVersion = stateVersion,
-                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                                ValidatorEntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
                                 State = validator.Value.ToJson(),
                             });
                         }
@@ -1075,9 +1064,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate typeInfoSubstate)
                         {
-                            if (typeInfoSubstate.Value.Details is CoreModel.ObjectTypeInfoDetails { InstanceSchema: not null } objectTypeInfoDetails)
+                            if (typeInfoSubstate.TryGetObjectInstanceSchema(out var instanceSchema))
                             {
-                                if (objectTypeInfoDetails.InstanceSchema.ProvidedTypes.Count != 1)
+                                if (instanceSchema.ProvidedTypes.Count != 1)
                                 {
                                     throw new NotSupportedException("Expected non fungible data with only one data type entry.");
                                 }
@@ -1087,24 +1076,24 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                     Id = sequences.NonFungibleDataSchemaHistorySequence++,
                                     FromStateVersion = stateVersion,
                                     EntityId = referencedEntity.DatabaseId,
-                                    Schema = objectTypeInfoDetails.InstanceSchema.Schema.SborData.Hex.ConvertFromHex(),
-                                    TypeKind = objectTypeInfoDetails.InstanceSchema.ProvidedTypes[0].Kind.ToInternalModel(),
-                                    TypeIndex = objectTypeInfoDetails.InstanceSchema.ProvidedTypes[0].Index,
+                                    Schema = instanceSchema.Schema.SborData.Hex.ConvertFromHex(),
+                                    SborTypeKind = instanceSchema.ProvidedTypes[0].Kind.ToInternalModel(),
+                                    TypeIndex = instanceSchema.ProvidedTypes[0].Index,
                                 });
                             }
 
-                            if (typeInfoSubstate.Value.Details is CoreModel.KeyValueStoreTypeInfoDetails { KeyValueStoreInfo.KvStoreSchema.Schema: not null } kvStoreSchema )
+                            if (typeInfoSubstate.TryGetKeyValueStoreSchema(out var keyValueStoreSchema))
                             {
                                 keyVaulueStoreSchemaHistoryToAdd.Add(new KeyValueStoreSchemaHistory
                                 {
                                     Id = sequences.NonFungibleDataSchemaHistorySequence++,
                                     FromStateVersion = stateVersion,
-                                    EntityId = referencedEntity.DatabaseId,
-                                    Schema = kvStoreSchema.KeyValueStoreInfo.KvStoreSchema.Schema.SborData.Hex.ConvertFromHex(),
-                                    KeyTypeKind = kvStoreSchema.KeyValueStoreInfo.KvStoreSchema.KeyType.Kind.ToInternalModel(),
-                                    KeyTypeIndex = kvStoreSchema.KeyValueStoreInfo.KvStoreSchema.KeyType.Index,
-                                    ValueTypeKind = kvStoreSchema.KeyValueStoreInfo.KvStoreSchema.ValueType.Kind.ToInternalModel(),
-                                    ValueTypeIndex = kvStoreSchema.KeyValueStoreInfo.KvStoreSchema.ValueType.Index,
+                                    KeyValueStoreEntityId = referencedEntity.DatabaseId,
+                                    Schema = keyValueStoreSchema.Schema.SborData.Hex.ConvertFromHex(),
+                                    KeySborTypeKind = keyValueStoreSchema.KeyType.Kind.ToInternalModel(),
+                                    KeyTypeIndex = keyValueStoreSchema.KeyType.Index,
+                                    ValueSborTypeKind = keyValueStoreSchema.ValueType.Kind.ToInternalModel(),
+                                    ValueTypeIndex = keyValueStoreSchema.ValueType.Index,
                                 });
                             }
                         }

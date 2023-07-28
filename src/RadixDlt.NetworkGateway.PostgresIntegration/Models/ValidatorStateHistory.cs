@@ -77,8 +77,8 @@ internal class ValidatorStateHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("entity_id")]
-    public long EntityId { get; set; }
+    [Column("validator_entity_id")]
+    public long ValidatorEntityId { get; set; }
 
     [Column("state", TypeName = "jsonb")]
     public string State { get; set; }

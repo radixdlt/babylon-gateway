@@ -164,16 +164,16 @@ internal class TransactionReceipt
     public string? ErrorMessage { get; set; }
 
     [Column("receipt_events_sbor")]
-    public byte[][]? EventsSbor { get; set; }
+    public byte[][] EventsSbor { get; set; }
 
     [Column("receipt_events_schema_hash")]
-    public byte[][]? EventsSchemaHash { get; set; }
+    public byte[][] EventsSchemaHash { get; set; }
 
     [Column("receipt_events_type_index")]
-    public int[]? EventsTypeIndex { get; set; }
+    public int[] EventsTypeIndex { get; set; }
 
-    [Column("receipt_events_type_kind")]
-    public KeyTypeKind[]? EventsTypeKind { get; set; }
+    [Column("receipt_events_sbor_type_kind")]
+    public SborTypeKind[] EventsSborTypeKind { get; set; }
 }
 
 internal class GenesisLedgerTransaction : LedgerTransaction

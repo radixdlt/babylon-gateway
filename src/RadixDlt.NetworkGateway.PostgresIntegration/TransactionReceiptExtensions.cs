@@ -63,30 +63,29 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-[Table("non_fungible_data_schema_history")]
-internal class NonFungibleDataSchemaHistory
+internal record TransactionReceiptEventData(byte[] Data, byte[] SchemaHash, int TypeIndex, SborTypeKind KeyTypeKind);
+
+internal static class TransactionReceiptExtensions
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    public static List<TransactionReceiptEventData> GetEvents(this TransactionReceipt transactionReceipt)
+    {
+        var result = new List<TransactionReceiptEventData>();
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+        for (var i = 0; i < transactionReceipt.EventsSbor.Length; ++i)
+        {
+            var eventData = transactionReceipt.EventsSbor[i];
+            var schemaHash = transactionReceipt.EventsSchemaHash[i];
+            var index = transactionReceipt.EventsTypeIndex[i];
+            var typeKind = transactionReceipt.EventsSborTypeKind[i];
 
-    [Column("entity_id")]
-    public long EntityId { get; set; }
+            result.Add(new TransactionReceiptEventData(eventData, schemaHash, index, typeKind));
+        }
 
-    [Column("schema")]
-    public byte[] Schema { get; set; }
-
-    [Column("sbor_type_kind")]
-    public SborTypeKind SborTypeKind { get; set; }
-
-    [Column("type_index")]
-    public int TypeIndex { get; set; }
+        return result;
+    }
 }

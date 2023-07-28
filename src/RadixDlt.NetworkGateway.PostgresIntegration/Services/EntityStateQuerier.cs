@@ -605,7 +605,7 @@ ORDER BY nfid.from_state_version DESC
             }
 
             var programmaticJson = ScryptoSborUtils.DataToProgrammaticJson(vm.Data, nonFungibleDataSchema.Schema,
-                nonFungibleDataSchema.TypeKind, nonFungibleDataSchema.TypeIndex, _networkConfigurationProvider.GetNetworkId());
+                nonFungibleDataSchema.SborTypeKind, nonFungibleDataSchema.TypeIndex, _networkConfigurationProvider.GetNetworkId());
 
             items.Add(new GatewayModel.StateNonFungibleDetailsResponseItem(
                 nonFungibleId: vm.NonFungibleId,
@@ -690,7 +690,7 @@ INNER JOIN LATERAL (
 INNER JOIN LATERAL (
     SELECT state, from_state_version
     FROM validator_state_history
-    WHERE entity_id = variables.validator_entity_id AND from_state_version <= @stateVersion
+    WHERE validator_entity_id = variables.validator_entity_id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
 ) esh ON true
@@ -781,7 +781,7 @@ INNER JOIN LATERAL (
     {
         var keyValueStore = await GetEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
         var keyValueStoreSchema = await _dbContext.KeyValueStoreSchemaHistory
-            .Where(x => x.EntityId == keyValueStore.Id && x.FromStateVersion <= ledgerState.StateVersion)
+            .Where(x => x.KeyValueStoreEntityId == keyValueStore.Id && x.FromStateVersion <= ledgerState.StateVersion)
             .OrderByDescending(x => x.FromStateVersion)
             .FirstOrDefaultAsync(token);
 
@@ -817,10 +817,10 @@ INNER JOIN LATERAL (
                 continue;
             }
 
-            var keyJson = ScryptoSborUtils.DataToProgrammaticJson(e.Key, keyValueStoreSchema.Schema, keyValueStoreSchema.KeyTypeKind,
+            var keyJson = ScryptoSborUtils.DataToProgrammaticJson(e.Key, keyValueStoreSchema.Schema, keyValueStoreSchema.KeySborTypeKind,
                 keyValueStoreSchema.KeyTypeIndex, _networkConfigurationProvider.GetNetworkId());
 
-            var valueJson = ScryptoSborUtils.DataToProgrammaticJson(e.Value,  keyValueStoreSchema.Schema, keyValueStoreSchema.ValueTypeKind,
+            var valueJson = ScryptoSborUtils.DataToProgrammaticJson(e.Value,  keyValueStoreSchema.Schema, keyValueStoreSchema.ValueSborTypeKind,
                 keyValueStoreSchema.ValueTypeIndex, _networkConfigurationProvider.GetNetworkId());
 
             items.Add(new GatewayModel.StateKeyValueStoreDataResponseItem(

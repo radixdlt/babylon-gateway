@@ -115,7 +115,7 @@ public static class ServiceCollectionExtensions
                 dataSourceBuilder.MapEnum<PublicKeyType>();
                 dataSourceBuilder.MapEnum<ResourceType>();
                 dataSourceBuilder.MapEnum<ObjectModuleId>();
-                dataSourceBuilder.MapEnum<KeyTypeKind>();
+                dataSourceBuilder.MapEnum<SborTypeKind>();
 
                 return new NpgsqlDataSourceHolder<T>(dataSourceBuilder.Build());
             },

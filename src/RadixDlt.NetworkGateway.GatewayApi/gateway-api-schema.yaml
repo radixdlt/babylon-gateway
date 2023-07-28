@@ -897,11 +897,11 @@ components:
       type: object
       required:
         - raw_hex
-        - json
+        - programmatic_json
       properties:
         raw_hex:
           type: string
-        json:
+        programmatic_json:
           type: object
 
     EntityMetadataCollection:
