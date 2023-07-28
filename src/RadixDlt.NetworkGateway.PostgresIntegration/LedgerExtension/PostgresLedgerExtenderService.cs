@@ -79,7 +79,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Array = System.Array;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using ToolkitModel = RadixEngineToolkit;
 
@@ -736,10 +735,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             referencedEntities.InvokePostResolveConfiguration();
         }
 
+        var metadataChangePointers = new List<MetadataChangePointer>();
         var fungibleVaultChanges = new List<FungibleVaultChange>();
         var nonFungibleVaultChanges = new List<NonFungibleVaultChange>();
-        var nonFungibleIdChanges = new List<NonFungibleIdChange>();
-        var metadataChanges = new List<MetadataChange>();
+        var nonFungibleIdChangePointers = new List<NonFungibleIdChangePointer>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
         var entityStateToAdd = new List<EntityStateHistory>();
@@ -778,11 +777,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.MetadataModuleEntrySubstate metadata)
                         {
-                            var isDeleted = metadata.Value == null;
-                            var key = metadata.Key.Name;
-                            var value = metadata.Value?.DataStruct.StructData.Hex.ConvertFromHex();
-
-                            metadataChanges.Add(new MetadataChange(referencedEntity, key, value, isDeleted, metadata.IsLocked, stateVersion));
+                            metadataChangePointers.Add(new MetadataChangePointer(referencedEntity, metadata, stateVersion));
                         }
 
                         if (substateData is CoreModel.FungibleResourceManagerFieldTotalSupplySubstate fungibleResourceManagerFieldTotalSupplySubstate)
@@ -808,19 +803,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             var amount = TokenAmount.FromDecimalString(fungibleVaultFieldBalanceSubstate.Value.Amount);
                             var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId);
 
-                            fungibleVaultChanges.Add(new FungibleVaultChange(referencedEntity, resourceEntity, amount, stateVersion));
+                            fungibleVaultChanges.Add(new FungibleVaultChange(referencedEntity, resourceEntity, stateVersion, amount));
                         }
 
                         if (substateData is CoreModel.NonFungibleVaultContentsIndexEntrySubstate nonFungibleVaultContentsIndexEntrySubstate)
                         {
                             var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId);
 
-                            nonFungibleVaultChanges.Add(new NonFungibleVaultChange(
-                                referencedEntity,
-                                resourceEntity,
-                                nonFungibleVaultContentsIndexEntrySubstate.Key.NonFungibleLocalId.SimpleRep,
-                                false,
-                                stateVersion));
+                            nonFungibleVaultChanges.Add(new NonFungibleVaultChange(referencedEntity, resourceEntity, stateVersion, nonFungibleVaultContentsIndexEntrySubstate.Key.NonFungibleLocalId.SimpleRep, false));
                         }
 
                         if (substateData is CoreModel.NonFungibleResourceManagerDataEntrySubstate nonFungibleResourceManagerDataEntrySubstate)
@@ -830,13 +820,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                             var nonFungibleId = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex);
 
-                            nonFungibleIdChanges.Add(new NonFungibleIdChange(
-                                resourceManagerEntity,
-                                nonFungibleId,
-                                nonFungibleResourceManagerDataEntrySubstate.Value == null,
-                                nonFungibleResourceManagerDataEntrySubstate.IsLocked,
-                                nonFungibleResourceManagerDataEntrySubstate.Value?.DataStruct.StructData.GetDataBytes(),
-                                stateVersion));
+                            nonFungibleIdChangePointers.Add(new NonFungibleIdChangePointer(resourceManagerEntity, nonFungibleId, nonFungibleResourceManagerDataEntrySubstate, stateVersion));
                         }
 
                         if (substateData is CoreModel.GenericScryptoComponentFieldStateSubstate componentState)
@@ -1108,12 +1092,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId);
                             var nonFungibleId = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex);
 
-                            nonFungibleVaultChanges.Add(new NonFungibleVaultChange(
-                                referencedEntity,
-                                resourceEntity,
-                                nonFungibleId,
-                                true,
-                                stateVersion));
+                            nonFungibleVaultChanges.Add(new NonFungibleVaultChange(referencedEntity, resourceEntity, stateVersion, nonFungibleId, true));
                         }
                     }
 
@@ -1279,91 +1258,21 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         {
             var sw = Stopwatch.StartNew();
 
-            var mostRecentMetadataHistory = await readHelper.MostRecentEntityMetadataHistoryFor(metadataChanges, token);
-            var mostRecentAggregatedMetadataHistory = await readHelper.MostRecentEntityAggregateMetadataHistoryFor(metadataChanges, token);
+            var metadataDump = await MetadataDump.Create(metadataChangePointers, readHelper, sequences, token);
+            var resourceDump = await ResourceDump.Create(fungibleVaultChanges, nonFungibleVaultChanges, nonFungibleIdChangePointers, readHelper, sequences, token);
             var mostRecentAccessRulesEntryHistory = await readHelper.MostRecentEntityAccessRulesEntryHistoryFor(accessRulesChangePointers.Values, token);
             var mostRecentAccessRulesAggregateHistory = await readHelper.MostRecentEntityAccessRulesAggregateHistoryFor(accessRulesChanges, token);
-            var mostRecentEntityResourceAggregateHistory = await readHelper.MostRecentEntityResourceAggregateHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
-            var mostRecentEntityResourceAggregatedVaultsHistory = await readHelper.MostRecentEntityResourceAggregatedVaultsHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
-            var mostRecentEntityResourceVaultAggregateHistory = await readHelper.MostRecentEntityResourceVaultAggregateHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
-            var mostRecentNonFungibleIdStoreHistory = await readHelper.MostRecentNonFungibleIdStoreHistoryFor(nonFungibleIdChanges, token);
             var mostRecentResourceEntitySupplyHistory = await readHelper.MostRecentResourceEntitySupplyHistoryFor(resourceSupplyChanges, token);
-            var mostRecentEntityNonFungibleVaultHistory = await readHelper.MostRecentEntityNonFungibleVaultHistory(nonFungibleVaultChanges, token);
-            var existingNonFungibleIdData = await readHelper.ExistingNonFungibleIdDataFor(nonFungibleIdChanges, nonFungibleVaultChanges, token);
             var existingValidatorKeys = await readHelper.ExistingValidatorKeysFor(validatorSetChanges, token);
 
             dbReadDuration += sw.Elapsed;
 
-            var entityMetadataHistoryToAdd = new List<EntityMetadataHistory>();
-            var entityMetadataAggregateHistoryToAdd = new List<EntityMetadataAggregateHistory>();
-            var entityResourceAggregateHistoryCandidates = new List<EntityResourceAggregateHistory>();
-            var entityResourceAggregatedVaultsHistoryToAdd = new List<EntityResourceAggregatedVaultsHistory>();
-            var entityResourceVaultAggregateHistoryToAdd = new List<EntityResourceVaultAggregateHistory>();
             var entityAccessRulesOwnerRoleHistoryToAdd = new List<EntityRoleAssignmentsOwnerRoleHistory>();
             var entityAccessRulesEntryHistoryToAdd = new List<EntityRoleAssignmentsEntryHistory>();
             var entityAccessRulesAggregateHistoryToAdd = new List<EntityRoleAssignmentsAggregateHistory>();
-            var nonFungibleIdStoreHistoryToAdd = new Dictionary<NonFungibleStoreLookup, NonFungibleIdStoreHistory>();
-            var nonFungibleIdDataToAdd = new List<NonFungibleIdData>();
-            var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdDataHistory>();
 
-            foreach (var metadataChange in metadataChanges)
-            {
-                var lookup = new MetadataLookup(metadataChange.ReferencedEntity.DatabaseId, metadataChange.Key);
-                var metadataHistory = new EntityMetadataHistory
-                {
-                    Id = sequences.EntityMetadataHistorySequence++,
-                    FromStateVersion = metadataChange.StateVersion,
-                    EntityId = metadataChange.ReferencedEntity.DatabaseId,
-                    Key = metadataChange.Key,
-                    Value = metadataChange.Value,
-                    IsDeleted = metadataChange.IsDeleted,
-                    IsLocked = metadataChange.IsLocked,
-                };
-
-                entityMetadataHistoryToAdd.Add(metadataHistory);
-
-                EntityMetadataAggregateHistory aggregate;
-
-                if (!mostRecentAggregatedMetadataHistory.TryGetValue(metadataChange.ReferencedEntity.DatabaseId, out var previousAggregate) || previousAggregate.FromStateVersion != metadataChange.StateVersion)
-                {
-                    aggregate = new EntityMetadataAggregateHistory
-                    {
-                        Id = sequences.EntityMetadataAggregateHistorySequence++,
-                        FromStateVersion = metadataChange.StateVersion,
-                        EntityId = metadataChange.ReferencedEntity.DatabaseId,
-                        MetadataIds = new List<long>(),
-                    };
-
-                    if (previousAggregate != null)
-                    {
-                        aggregate.MetadataIds.AddRange(previousAggregate.MetadataIds);
-                    }
-
-                    entityMetadataAggregateHistoryToAdd.Add(aggregate);
-                    mostRecentAggregatedMetadataHistory[metadataChange.ReferencedEntity.DatabaseId] = aggregate;
-                }
-                else
-                {
-                    aggregate = previousAggregate;
-                }
-
-                if (mostRecentMetadataHistory.TryGetValue(lookup, out var previous))
-                {
-                    var currentPosition = aggregate.MetadataIds.IndexOf(previous.Id);
-
-                    if (currentPosition != -1)
-                    {
-                        aggregate.MetadataIds.RemoveAt(currentPosition);
-                    }
-                }
-
-                if (!metadataChange.IsDeleted)
-                {
-                    aggregate.MetadataIds.Insert(0, metadataHistory.Id);
-                }
-
-                mostRecentMetadataHistory[lookup] = metadataHistory;
-            }
+            metadataDump.DoSth();
+            resourceDump.DoSth();
 
             foreach (var lookup in accessRulesChanges)
             {
@@ -1446,327 +1355,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 }
             }
 
-            foreach (var e in nonFungibleIdChanges)
-            {
-                var nonFungibleIdData = existingNonFungibleIdData.GetOrAdd(new NonFungibleIdLookup(e.ReferencedResource.DatabaseId, e.NonFungibleId), _ =>
-                {
-                    var ret = new NonFungibleIdData
-                    {
-                        Id = sequences.NonFungibleIdDataSequence++,
-                        FromStateVersion = e.StateVersion,
-                        NonFungibleResourceEntityId = e.ReferencedResource.DatabaseId,
-                        NonFungibleId = e.NonFungibleId,
-                    };
-
-                    nonFungibleIdDataToAdd.Add(ret);
-
-                    return ret;
-                });
-
-                var nonFungibleIdStore = nonFungibleIdStoreHistoryToAdd.GetOrAdd(new NonFungibleStoreLookup(e.ReferencedResource.DatabaseId, e.StateVersion), _ =>
-                {
-                    IEnumerable<long> previousNonFungibleIdDataIds = mostRecentNonFungibleIdStoreHistory.TryGetValue(e.ReferencedResource.DatabaseId, out var value)
-                        ? value.NonFungibleIdDataIds
-                        : Array.Empty<long>();
-
-                    var ret = new NonFungibleIdStoreHistory
-                    {
-                        Id = sequences.NonFungibleIdStoreHistorySequence++,
-                        FromStateVersion = e.StateVersion,
-                        NonFungibleResourceEntityId = e.ReferencedResource.DatabaseId,
-                        NonFungibleIdDataIds = new List<long>(previousNonFungibleIdDataIds),
-                    };
-
-                    mostRecentNonFungibleIdStoreHistory[e.ReferencedResource.DatabaseId] = ret;
-
-                    return ret;
-                });
-
-                nonFungibleIdsMutableDataHistoryToAdd.Add(new NonFungibleIdDataHistory
-                {
-                    Id = sequences.NonFungibleIdDataHistorySequence++,
-                    FromStateVersion = e.StateVersion,
-                    NonFungibleIdDataId = nonFungibleIdData.Id,
-                    Data = e.MutableData,
-                    IsDeleted = e.IsDeleted,
-                    IsLocked = e.IsLocked,
-                });
-
-                if (!nonFungibleIdStore.NonFungibleIdDataIds.Contains(nonFungibleIdData.Id))
-                {
-                    nonFungibleIdStore.NonFungibleIdDataIds.Add(nonFungibleIdData.Id);
-                }
-            }
-
-            void AggregateEntityResource(
-                ReferencedEntity referencedVault,
-                ReferencedEntity referencedResource,
-                long stateVersion,
-                bool fungibleResource,
-                TokenAmount? tmpFungibleBalance,
-                long? tmpNonFungibleTotalCount)
-            {
-                if (referencedVault.GetDatabaseEntity<VaultEntity>() is InternalFungibleVaultEntity { IsRoyaltyVault: true })
-                {
-                    return;
-                }
-
-                if (fungibleResource)
-                {
-                    var tmpBalance = tmpFungibleBalance ?? throw new InvalidOperationException("impossible x1"); // TODO improve
-
-                    AggregateEntityFungibleResourceVaultInternal(referencedVault.DatabaseOwnerAncestorId, referencedResource.DatabaseId, tmpBalance, referencedVault.DatabaseId);
-                    AggregateEntityFungibleResourceVaultInternal(referencedVault.DatabaseGlobalAncestorId, referencedResource.DatabaseId, tmpBalance, referencedVault.DatabaseId);
-                }
-                else
-                {
-                    var tmpTotalCount = tmpNonFungibleTotalCount ?? throw new InvalidOperationException("impossible x2"); // TODO improve
-
-                    AggregateEntityNonFungibleResourceVaultInternal(referencedVault.DatabaseOwnerAncestorId, referencedResource.DatabaseId, tmpTotalCount, referencedVault.DatabaseId);
-                    AggregateEntityNonFungibleResourceVaultInternal(referencedVault.DatabaseGlobalAncestorId, referencedResource.DatabaseId, tmpTotalCount, referencedVault.DatabaseId);
-                }
-
-                AggregateEntityResourceInternal(referencedVault.DatabaseOwnerAncestorId, referencedResource.DatabaseId);
-                AggregateEntityResourceInternal(referencedVault.DatabaseGlobalAncestorId, referencedResource.DatabaseId);
-                AggregateEntityResourceVaultInternal(referencedVault.DatabaseOwnerAncestorId, referencedResource.DatabaseId, referencedVault.DatabaseId);
-                AggregateEntityResourceVaultInternal(referencedVault.DatabaseGlobalAncestorId, referencedResource.DatabaseId, referencedVault.DatabaseId);
-
-                // TODO rename tmpBalance->delta and drop tmpResourceVaultEntityId once TX events become available
-                void AggregateEntityFungibleResourceVaultInternal(long entityId, long resourceEntityId, TokenAmount tmpBalance, long tmpResourceVaultEntityId)
-                {
-                    var lookup = new EntityResourceLookup(entityId, resourceEntityId);
-
-                    if (!mostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var aggregate) || aggregate.FromStateVersion != stateVersion)
-                    {
-                        var previousTmpTmp = aggregate?.TmpTmpRemoveMeOnceTxEventsBecomeAvailable ?? string.Empty;
-
-                        aggregate = new EntityFungibleResourceAggregatedVaultsHistory
-                        {
-                            Id = sequences.EntityResourceAggregatedVaultsHistorySequence++,
-                            FromStateVersion = stateVersion,
-                            EntityId = entityId,
-                            ResourceEntityId = resourceEntityId,
-                            TmpTmpRemoveMeOnceTxEventsBecomeAvailable = previousTmpTmp,
-                        };
-
-                        entityResourceAggregatedVaultsHistoryToAdd.Add(aggregate);
-                        mostRecentEntityResourceAggregatedVaultsHistory[lookup] = aggregate;
-                    }
-
-                    // TODO replace with simple aggregate.Balance += delta once TX events become available
-                    var tmpSum = TokenAmount.Zero;
-                    var tmpExists = false;
-                    var tmpColl = aggregate.TmpTmpRemoveMeOnceTxEventsBecomeAvailable
-                        .Split(';', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(e =>
-                        {
-                            var parts = e.Split('=');
-                            var vaultId = long.Parse(parts[0]);
-                            var balance = TokenAmount.FromDecimalString(parts[1]);
-
-                            if (vaultId == tmpResourceVaultEntityId)
-                            {
-                                tmpExists = true;
-                                balance = tmpBalance;
-                            }
-
-                            tmpSum += balance;
-
-                            return $"{vaultId}={balance}";
-                        })
-                        .ToList();
-
-                    if (tmpExists == false)
-                    {
-                        tmpColl.Add($"{tmpResourceVaultEntityId}={tmpBalance}");
-                        tmpSum += tmpBalance;
-                    }
-
-                    aggregate.TmpTmpRemoveMeOnceTxEventsBecomeAvailable = string.Join(";", tmpColl);
-
-                    ((EntityFungibleResourceAggregatedVaultsHistory)aggregate).Balance = tmpSum;
-                }
-
-                // TODO rename tmpTotalCount->delta and drop tmpResourceVaultEntityId once TX events become available
-                void AggregateEntityNonFungibleResourceVaultInternal(long entityId, long resourceEntityId, long tmpTotalCount, long tmpResourceVaultEntityId)
-                {
-                    var lookup = new EntityResourceLookup(entityId, resourceEntityId);
-
-                    if (!mostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var aggregate) || aggregate.FromStateVersion != stateVersion)
-                    {
-                        var previousTmpTmp = aggregate?.TmpTmpRemoveMeOnceTxEventsBecomeAvailable ?? string.Empty;
-
-                        aggregate = new EntityNonFungibleResourceAggregatedVaultsHistory
-                        {
-                            Id = sequences.EntityResourceAggregatedVaultsHistorySequence++,
-                            FromStateVersion = stateVersion,
-                            EntityId = entityId,
-                            ResourceEntityId = resourceEntityId,
-                            TmpTmpRemoveMeOnceTxEventsBecomeAvailable = previousTmpTmp,
-                        };
-
-                        entityResourceAggregatedVaultsHistoryToAdd.Add(aggregate);
-                        mostRecentEntityResourceAggregatedVaultsHistory[lookup] = aggregate;
-                    }
-
-                    // TODO replace with simple aggregate.TotalCount += delta once TX events become available
-                    var tmpSum = 0L;
-                    var tmpExists = false;
-                    var tmpColl = aggregate.TmpTmpRemoveMeOnceTxEventsBecomeAvailable
-                        .Split(';', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(e =>
-                        {
-                            var parts = e.Split('=');
-                            var vaultId = long.Parse(parts[0]);
-                            var totalCount = long.Parse(parts[1]);
-
-                            if (vaultId == tmpResourceVaultEntityId)
-                            {
-                                tmpExists = true;
-                                totalCount = tmpTotalCount;
-                            }
-
-                            tmpSum += totalCount;
-
-                            return $"{vaultId}={totalCount}";
-                        })
-                        .ToList();
-
-                    if (tmpExists == false)
-                    {
-                        tmpColl.Add($"{tmpResourceVaultEntityId}={tmpTotalCount}");
-                        tmpSum += tmpTotalCount;
-                    }
-
-                    aggregate.TmpTmpRemoveMeOnceTxEventsBecomeAvailable = string.Join(";", tmpColl);
-
-                    ((EntityNonFungibleResourceAggregatedVaultsHistory)aggregate).TotalCount = tmpSum;
-                }
-
-                void AggregateEntityResourceInternal(long entityId, long resourceEntityId)
-                {
-                    // we only want to create new aggregated resource history entry if
-                    // - given resource is seen for the very first time,
-                    // - given resource is already stored but has been updated and this update caused change of order (this is evaluated right before db persistence)
-
-                    if (mostRecentEntityResourceAggregateHistory.TryGetValue(entityId, out var aggregate))
-                    {
-                        var existingResourceCollection = fungibleResource
-                            ? aggregate.FungibleResourceEntityIds
-                            : aggregate.NonFungibleResourceEntityIds;
-
-                        // we're already the most recent one, there's nothing more to do
-                        if (existingResourceCollection.IndexOf(resourceEntityId) == 0)
-                        {
-                            return;
-                        }
-                    }
-
-                    if (aggregate == null || aggregate.FromStateVersion != stateVersion)
-                    {
-                        aggregate = aggregate == null
-                            ? EntityResourceAggregateHistory.Create(sequences.EntityResourceAggregateHistorySequence++, entityId, stateVersion)
-                            : EntityResourceAggregateHistory.CopyOf(sequences.EntityResourceAggregateHistorySequence++, aggregate, stateVersion);
-
-                        entityResourceAggregateHistoryCandidates.Add(aggregate);
-                        mostRecentEntityResourceAggregateHistory[entityId] = aggregate;
-                    }
-
-                    if (fungibleResource)
-                    {
-                        aggregate.TryUpsertFungible(resourceEntityId, stateVersion);
-                    }
-                    else
-                    {
-                        aggregate.TryUpsertNonFungible(resourceEntityId, stateVersion);
-                    }
-                }
-
-                void AggregateEntityResourceVaultInternal(long entityId, long resourceEntityId, long resourceVaultEntityId)
-                {
-                    var lookup = new EntityResourceVaultLookup(entityId, resourceEntityId);
-
-                    if (mostRecentEntityResourceVaultAggregateHistory.TryGetValue(lookup, out var existingAggregate))
-                    {
-                        if (existingAggregate.VaultEntityIds.Contains(resourceVaultEntityId))
-                        {
-                            return;
-                        }
-                    }
-
-                    var aggregate = existingAggregate;
-
-                    if (aggregate == null || aggregate.FromStateVersion != stateVersion)
-                    {
-                        aggregate = new EntityResourceVaultAggregateHistory
-                        {
-                            Id = sequences.EntityResourceVaultAggregateHistorySequence++,
-                            FromStateVersion = stateVersion,
-                            EntityId = entityId,
-                            ResourceEntityId = resourceEntityId,
-                            VaultEntityIds = new List<long>(existingAggregate?.VaultEntityIds.ToArray() ?? Array.Empty<long>()),
-                        };
-
-                        entityResourceVaultAggregateHistoryToAdd.Add(aggregate);
-                        mostRecentEntityResourceVaultAggregateHistory[lookup] = aggregate;
-                    }
-
-                    aggregate.VaultEntityIds.Add(resourceVaultEntityId);
-                }
-            }
-
-            var entityFungibleVaultHistoryToAdd = fungibleVaultChanges
-                .Select(e =>
-                {
-                    AggregateEntityResource(e.ReferencedVault, e.ReferencedResource, e.StateVersion, true, e.Balance, null);
-
-                    return new EntityFungibleVaultHistory
-                    {
-                        Id = sequences.EntityVaultHistorySequence++,
-                        FromStateVersion = e.StateVersion,
-                        OwnerEntityId = e.ReferencedVault.DatabaseOwnerAncestorId,
-                        GlobalEntityId = e.ReferencedVault.DatabaseGlobalAncestorId,
-                        ResourceEntityId = e.ReferencedResource.DatabaseId,
-                        VaultEntityId = e.ReferencedVault.DatabaseId,
-                        IsRoyaltyVault = e.ReferencedVault.GetDatabaseEntity<InternalFungibleVaultEntity>().IsRoyaltyVault,
-                        Balance = e.Balance,
-                    };
-                })
-                .ToList();
-
-            var entityNonFungibleVaultHistoryToAdd = nonFungibleVaultChanges
-                .GroupBy(x => new { x.StateVersion, x.ReferencedVault, x.ReferencedResource })
-                .Select(e =>
-                {
-                    var vaultExists = mostRecentEntityNonFungibleVaultHistory.TryGetValue(e.Key.ReferencedVault.DatabaseId, out var existingVaultHistory);
-
-                    var nfids = vaultExists ? existingVaultHistory!.NonFungibleIds : new List<long>();
-                    var addedItems = e.Where(x => !x.IsWithdrawal)
-                        .Select(x => existingNonFungibleIdData[new NonFungibleIdLookup(e.Key.ReferencedResource.DatabaseId, x.NonFungibleId)].Id)
-                        .ToList();
-
-                    var deletedItems = e.Where(x => x.IsWithdrawal)
-                        .Select(x => existingNonFungibleIdData[new NonFungibleIdLookup(e.Key.ReferencedResource.DatabaseId, x.NonFungibleId)].Id)
-                        .ToList();
-
-                    nfids.AddRange(addedItems);
-                    nfids.RemoveAll(x => deletedItems.Contains(x));
-
-                    AggregateEntityResource(e.Key.ReferencedVault, e.Key.ReferencedResource, e.Key.StateVersion, false, null, nfids.Count);
-
-                    return new EntityNonFungibleVaultHistory
-                    {
-                        Id = sequences.EntityVaultHistorySequence++,
-                        FromStateVersion = e.Key.StateVersion,
-                        OwnerEntityId = e.Key.ReferencedVault.DatabaseOwnerAncestorId,
-                        GlobalEntityId = e.Key.ReferencedVault.DatabaseGlobalAncestorId,
-                        ResourceEntityId = e.Key.ReferencedResource.DatabaseId,
-                        VaultEntityId = e.Key.ReferencedVault.DatabaseId,
-                        NonFungibleIds = nfids.ToList(),
-                    };
-                })
-                .ToList();
-
             var resourceEntitySupplyHistoryToAdd = missingMintedEvents.Concat(resourceSupplyChanges)
                 .GroupBy(x => new { x.ResourceEntityId, x.StateVersion })
                 .Select(group =>
@@ -1826,8 +1414,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 })
                 .ToList();
 
-            var entityResourceAggregateHistoryToAdd = entityResourceAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()).ToList();
-
             sw = Stopwatch.StartNew();
 
             rowsInserted += await writeHelper.CopyEntity(entitiesToAdd, token);
@@ -1835,19 +1421,19 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyLedgerTransactionMarkers(ledgerTransactionMarkersToAdd, token);
             rowsInserted += await writeHelper.CopyEntityStateHistory(entityStateToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorStateHistory(validatorStateToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityMetadataHistory(entityMetadataHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityMetadataAggregateHistory(entityMetadataAggregateHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityMetadataHistory(metadataDump.EntityMetadataHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityMetadataAggregateHistory(metadataDump.EntityMetadataAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityRoleAssignmentsOwnerRoleHistory(entityAccessRulesOwnerRoleHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityRoleAssignmentsRulesEntryHistory(entityAccessRulesEntryHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityRoleAssignmentsAggregateHistory(entityAccessRulesAggregateHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityResourceAggregatedVaultsHistory(entityResourceAggregatedVaultsHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityResourceAggregateHistory(entityResourceAggregateHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityResourceVaultAggregateHistory(entityResourceVaultAggregateHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityVaultHistory(entityFungibleVaultHistoryToAdd, entityNonFungibleVaultHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityResourceAggregatedVaultsHistory(resourceDump.EntityResourceAggregatedVaultsHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityResourceAggregateHistory(resourceDump.EntityResourceAggregateHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityResourceVaultAggregateHistory(resourceDump.EntityResourceVaultAggregateHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityVaultHistory(resourceDump.EntityFungibleVaultHistoryToAdd, resourceDump.EntityNonFungibleVaultHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyNonFungibleIdData(resourceDump.NonFungibleIdDataToAdd, token);
             rowsInserted += await writeHelper.CopyComponentMethodRoyalties(componentMethodRoyaltiesToAdd, token);
-            rowsInserted += await writeHelper.CopyNonFungibleIdData(nonFungibleIdDataToAdd, token);
-            rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(nonFungibleIdsMutableDataHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(nonFungibleIdStoreHistoryToAdd.Values, token);
+            rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(resourceDump.NonFungibleIdsMutableDataHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(resourceDump.NonFungibleIdStoreHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorKeyHistory(validatorKeyHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);

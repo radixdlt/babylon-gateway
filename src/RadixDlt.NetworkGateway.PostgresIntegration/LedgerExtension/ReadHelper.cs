@@ -89,7 +89,7 @@ internal class ReadHelper
         _connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
     }
 
-    public async Task<Dictionary<MetadataLookup, EntityMetadataHistory>> MostRecentEntityMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
+    public async Task<Dictionary<MetadataLookup, EntityMetadataHistory>> MostRecentEntityMetadataHistoryFor(List<MetadataChangePointer> metadataChanges, CancellationToken token)
     {
         if (!metadataChanges.Any())
         {
@@ -129,7 +129,7 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => new MetadataLookup(e.EntityId, e.Key), token);
     }
 
-    public async Task<Dictionary<long, EntityMetadataAggregateHistory>> MostRecentEntityAggregateMetadataHistoryFor(List<MetadataChange> metadataChanges, CancellationToken token)
+    public async Task<Dictionary<long, EntityMetadataAggregateHistory>> MostRecentEntityAggregateMetadataHistoryFor(List<MetadataChangePointer> metadataChanges, CancellationToken token)
     {
         if (!metadataChanges.Any())
         {
@@ -399,7 +399,7 @@ INNER JOIN LATERAL (
     //     return await _dbContext.
     // }
 
-    public async Task<Dictionary<long, NonFungibleIdStoreHistory>> MostRecentNonFungibleIdStoreHistoryFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, CancellationToken token)
+    public async Task<Dictionary<long, NonFungibleIdStoreHistory>> MostRecentNonFungibleIdStoreHistoryFor(List<NonFungibleIdChangePointer> nonFungibleIdStoreChanges, CancellationToken token)
     {
         if (!nonFungibleIdStoreChanges.Any())
         {
@@ -475,7 +475,7 @@ WHERE id IN(
             .ToDictionaryAsync(e => e.Address, token);
     }
 
-    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(List<NonFungibleIdChangePointer> nonFungibleIdStoreChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
     {
         if (!nonFungibleVaultChanges.Any() && !nonFungibleVaultChanges.Any())
         {
