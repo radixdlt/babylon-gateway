@@ -749,7 +749,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var packageBlueprintHistoryToAdd = new Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>();
         var packageCodeHistoryToAdd = new List<PackageCodeHistory>();
         var packageSchemaHistoryToAdd = new List<PackageSchemaHistory>();
-        var nonFungibleDataSchemaHistoryToAdd = new List<NonFungibleDataSchemaHistory>();
+        var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
         var keyVaulueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
         var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>(); // TODO follow Pointer+ordered List pattern to ensure proper order of ingestion
         var accountDefaultDepositRuleHistoryToAdd = new List<AccountDefaultDepositRuleHistory>();
@@ -1069,9 +1069,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                     throw new NotSupportedException("Expected non fungible data with only one data type entry.");
                                 }
 
-                                nonFungibleDataSchemaHistoryToAdd.Add(new NonFungibleDataSchemaHistory
+                                nonFungibleSchemaHistoryToAdd.Add(new NonFungibleSchemaHistory
                                 {
-                                    Id = sequences.NonFungibleDataSchemaHistorySequence++,
+                                    Id = sequences.NonFungibleSchemaHistorySequence++,
                                     FromStateVersion = stateVersion,
                                     EntityId = referencedEntity.DatabaseId,
                                     Schema = instanceSchema.Schema.SborData.Hex.ConvertFromHex(),
@@ -1084,7 +1084,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             {
                                 keyVaulueStoreSchemaHistoryToAdd.Add(new KeyValueStoreSchemaHistory
                                 {
-                                    Id = sequences.NonFungibleDataSchemaHistorySequence++,
+                                    Id = sequences.KeyValueSchemaHistorySequence++,
                                     FromStateVersion = stateVersion,
                                     KeyValueStoreEntityId = referencedEntity.DatabaseId,
                                     Schema = keyValueStoreSchema.Schema.SborData.Hex.ConvertFromHex(),
@@ -1858,7 +1858,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyAccountDefaultDepositRuleHistory(accountDefaultDepositRuleHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountResourceDepositRuleHistory(accountResourceDepositRuleHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorEmissionStatistics(validatorEmissionStatisticsToAdd, token);
-            rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleDataSchemaHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyVaulueStoreSchemaHistoryToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);
 

@@ -120,7 +120,7 @@ internal class SequencesHolder
 
     public long ValidatorEmissionStatisticsSequence { get; set; }
 
-    public long NonFungibleDataSchemaHistorySequence { get; set; }
+    public long NonFungibleSchemaHistorySequence { get; set; }
 
     public long KeyValueSchemaHistorySequence { get; set; }
 }

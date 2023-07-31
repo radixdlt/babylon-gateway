@@ -465,23 +465,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "non_fungible_data_schema_history",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    schema = table.Column<byte[]>(type: "bytea", nullable: false),
-                    sbor_type_kind = table.Column<SborTypeKind>(type: "sbor_type_kind", nullable: false),
-                    type_index = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_non_fungible_data_schema_history", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "non_fungible_id_data",
                 columns: table => new
                 {
@@ -526,6 +509,23 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_non_fungible_id_store_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "non_fungible_schema_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    schema = table.Column<byte[]>(type: "bytea", nullable: false),
+                    sbor_type_kind = table.Column<SborTypeKind>(type: "sbor_type_kind", nullable: false),
+                    type_index = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_non_fungible_schema_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -830,11 +830,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 column: "round_timestamp");
 
             migrationBuilder.CreateIndex(
-                name: "IX_non_fungible_data_schema_history_entity_id_from_state_versi~",
-                table: "non_fungible_data_schema_history",
-                columns: new[] { "entity_id", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
                 name: "IX_non_fungible_id_data_non_fungible_resource_entity_id_from_s~",
                 table: "non_fungible_id_data",
                 columns: new[] { "non_fungible_resource_entity_id", "from_state_version" });
@@ -854,6 +849,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_non_fungible_id_store_history_non_fungible_resource_entity_~",
                 table: "non_fungible_id_store_history",
                 columns: new[] { "non_fungible_resource_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_non_fungible_schema_history_entity_id_from_state_version",
+                table: "non_fungible_schema_history",
+                columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_package_blueprint_history_package_entity_id_from_state_vers~",
@@ -988,9 +988,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "network_configuration");
 
             migrationBuilder.DropTable(
-                name: "non_fungible_data_schema_history");
-
-            migrationBuilder.DropTable(
                 name: "non_fungible_id_data");
 
             migrationBuilder.DropTable(
@@ -998,6 +995,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "non_fungible_id_store_history");
+
+            migrationBuilder.DropTable(
+                name: "non_fungible_schema_history");
 
             migrationBuilder.DropTable(
                 name: "package_blueprint_history");

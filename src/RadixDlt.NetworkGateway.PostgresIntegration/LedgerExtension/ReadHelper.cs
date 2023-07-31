@@ -587,7 +587,7 @@ SELECT
     nextval('package_schema_history_id_seq') AS PackageSchemaHistorySequence,
     nextval('key_value_store_entry_history_id_seq') AS KeyValueStoreEntryHistorySequence,
     nextval('validator_emission_statistics_id_seq') AS ValidatorEmissionStatisticsSequence,
-    nextval('non_fungible_data_schema_history_id_seq') AS NonFungibleDataSchemaHistorySequence,
+    nextval('non_fungible_schema_history_id_seq') AS NonFungibleSchemaHistorySequence,
     nextval('key_value_store_schema_history_id_seq') AS KeyValueSchemaHistorySequence",
             cancellationToken: token);
 

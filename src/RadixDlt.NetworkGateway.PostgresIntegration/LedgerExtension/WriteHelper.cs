@@ -945,14 +945,14 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyNonFungibleDataSchemaHistory(ICollection<NonFungibleDataSchemaHistory> entities, CancellationToken token)
+    public async Task<int> CopyNonFungibleDataSchemaHistory(ICollection<NonFungibleSchemaHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_data_schema_history (id, from_state_version, entity_id, schema, sbor_type_kind, type_index) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_schema_history (id, from_state_version, entity_id, schema, sbor_type_kind, type_index) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -1029,7 +1029,7 @@ SELECT
     setval('package_schema_history_id_seq', @packageSchemaHistorySequence),
     setval('key_value_store_entry_history_id_seq', @keyValueStoreEntryHistorySequence),
     setval('validator_emission_statistics_id_seq', @validatorEmissionStatisticsSequence),
-    setval('non_fungible_data_schema_history_id_seq', @NonFungibleDataSchemaHistorySequence),
+    setval('non_fungible_schema_history_id_seq', @NonFungibleSchemaHistorySequence),
     setval('key_value_store_schema_history_id_seq', @KeyValueSchemaHistorySequence)",
             parameters: new
             {
@@ -1060,7 +1060,7 @@ SELECT
                 packageSchemaHistorySequence = sequences.PackageSchemaHistorySequence,
                 keyValueStoreEntryHistorySequence = sequences.KeyValueStoreEntryHistorySequence,
                 validatorEmissionStatisticsSequence = sequences.ValidatorEmissionStatisticsSequence,
-                nonFungibleDataSchemaHistorySequence = sequences.NonFungibleDataSchemaHistorySequence,
+                nonFungibleSchemaHistorySequence = sequences.NonFungibleSchemaHistorySequence,
                 keyValueSchemaHistorySequence = sequences.KeyValueSchemaHistorySequence,
             },
             cancellationToken: token);

@@ -68,8 +68,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("non_fungible_data_schema_history")]
-internal class NonFungibleDataSchemaHistory
+[Table("non_fungible_schema_history")]
+internal class NonFungibleSchemaHistory
 {
     [Key]
     [Column("id")]

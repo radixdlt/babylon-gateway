@@ -865,43 +865,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("network_configuration");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleDataSchemaHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("EntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("entity_id");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<SborTypeKind>("SborTypeKind")
-                        .HasColumnType("sbor_type_kind")
-                        .HasColumnName("sbor_type_kind");
-
-                    b.Property<byte[]>("Schema")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("schema");
-
-                    b.Property<int>("TypeIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("type_index");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EntityId", "FromStateVersion");
-
-                    b.ToTable("non_fungible_data_schema_history");
-                });
-
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleIdData", b =>
                 {
                     b.Property<long>("Id")
@@ -997,6 +960,43 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("NonFungibleResourceEntityId", "FromStateVersion");
 
                     b.ToTable("non_fungible_id_store_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleSchemaHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<SborTypeKind>("SborTypeKind")
+                        .HasColumnType("sbor_type_kind")
+                        .HasColumnName("sbor_type_kind");
+
+                    b.Property<byte[]>("Schema")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("schema");
+
+                    b.Property<int>("TypeIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("type_index");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "FromStateVersion");
+
+                    b.ToTable("non_fungible_schema_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageBlueprintHistory", b =>

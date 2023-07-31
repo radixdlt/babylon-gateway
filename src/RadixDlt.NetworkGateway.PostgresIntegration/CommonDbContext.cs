@@ -141,7 +141,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ValidatorEmissionStatistics> ValidatorEmissionStatistics => Set<ValidatorEmissionStatistics>();
 
-    public DbSet<NonFungibleDataSchemaHistory> NonFungibleDataSchemaHistory => Set<NonFungibleDataSchemaHistory>();
+    public DbSet<NonFungibleSchemaHistory> NonFungibleDataSchemaHistory => Set<NonFungibleSchemaHistory>();
 
     public DbSet<KeyValueStoreSchemaHistory> KeyValueStoreSchemaHistory => Set<KeyValueStoreSchemaHistory>();
 
@@ -394,7 +394,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<KeyValueStoreSchemaHistory>()
             .HasIndex(e => new { EntityId = e.KeyValueStoreEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<NonFungibleDataSchemaHistory>()
+        modelBuilder.Entity<NonFungibleSchemaHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
     }
 
