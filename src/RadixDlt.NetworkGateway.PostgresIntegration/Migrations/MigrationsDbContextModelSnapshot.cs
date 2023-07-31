@@ -68,7 +68,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
@@ -81,11 +80,9 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230728093452_InitialCreate")]
-    partial class InitialCreate
+    partial class MigrationsDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1983,25 +1980,25 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("receipt_error_message");
 
-                            b1.Property<byte[][]>("EventsSbor")
-                                .IsRequired()
-                                .HasColumnType("bytea[]")
-                                .HasColumnName("receipt_events_sbor");
-
-                            b1.Property<SborTypeKind[]>("EventsSborTypeKind")
+                            b1.Property<SborTypeKind[]>("EventSborTypeKinds")
                                 .IsRequired()
                                 .HasColumnType("sbor_type_kind[]")
-                                .HasColumnName("receipt_events_sbor_type_kind");
+                                .HasColumnName("receipt_event_sbor_type_kinds");
 
-                            b1.Property<byte[][]>("EventsSchemaHash")
+                            b1.Property<byte[][]>("EventSchemaHashes")
                                 .IsRequired()
                                 .HasColumnType("bytea[]")
-                                .HasColumnName("receipt_events_schema_hash");
+                                .HasColumnName("receipt_event_schema_hashes");
 
-                            b1.Property<int[]>("EventsTypeIndex")
+                            b1.Property<int[]>("EventTypeIndexes")
                                 .IsRequired()
                                 .HasColumnType("integer[]")
-                                .HasColumnName("receipt_events_type_index");
+                                .HasColumnName("receipt_event_type_indexes");
+
+                            b1.Property<byte[][]>("EventsSbors")
+                                .IsRequired()
+                                .HasColumnType("bytea[]")
+                                .HasColumnName("receipt_event_sbors");
 
                             b1.Property<string>("FeeSummary")
                                 .IsRequired()

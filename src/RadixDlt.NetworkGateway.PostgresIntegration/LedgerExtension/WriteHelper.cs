@@ -179,7 +179,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, fee_paid, tip_paid, affected_global_entities, round_timestamp, created_timestamp, normalized_round_timestamp, raw_payload, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_error_message, receipt_output, receipt_next_epoch, receipt_events_sbor, receipt_events_schema_hash, receipt_events_type_index, receipt_events_sbor_type_kind, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, fee_paid, tip_paid, affected_global_entities, round_timestamp, created_timestamp, normalized_round_timestamp, raw_payload, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_error_message, receipt_output, receipt_next_epoch, receipt_event_sbors, receipt_event_schema_hashes, receipt_event_type_indexes, receipt_event_sbor_type_kinds, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var lt in entities)
         {
@@ -207,10 +207,10 @@ internal class WriteHelper
             await writer.WriteAsync(lt.EngineReceipt.ErrorMessage, NpgsqlDbType.Text, token);
             await writer.WriteAsync(lt.EngineReceipt.Output, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(lt.EngineReceipt.NextEpoch, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(lt.EngineReceipt.EventsSbor, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(lt.EngineReceipt.EventsSchemaHash, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(lt.EngineReceipt.EventsTypeIndex, NpgsqlDbType.Array | NpgsqlDbType.Integer, token);
-            await writer.WriteAsync(lt.EngineReceipt.EventsSborTypeKind, "sbor_type_kind[]", token);
+            await writer.WriteAsync(lt.EngineReceipt.EventsSbors, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(lt.EngineReceipt.EventSchemaHashes, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(lt.EngineReceipt.EventTypeIndexes, NpgsqlDbType.Array | NpgsqlDbType.Integer, token);
+            await writer.WriteAsync(lt.EngineReceipt.EventSborTypeKinds, "sbor_type_kind[]", token);
             await writer.WriteAsync(discriminator, "ledger_transaction_type", token);
 
             switch (lt)
@@ -945,16 +945,16 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyNonFungibleDataSchemaHistory(ICollection<NonFungibleDataSchemaHistory> nonFungibleDataSchemaEntries, CancellationToken token)
+    public async Task<int> CopyNonFungibleDataSchemaHistory(ICollection<NonFungibleDataSchemaHistory> entities, CancellationToken token)
     {
-        if (!nonFungibleDataSchemaEntries.Any())
+        if (!entities.Any())
         {
             return 0;
         }
 
         await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_data_schema_history (id, from_state_version, entity_id, schema, sbor_type_kind, type_index) FROM STDIN (FORMAT BINARY)", token);
 
-        foreach (var e in nonFungibleDataSchemaEntries)
+        foreach (var e in entities)
         {
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
@@ -967,19 +967,19 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
-        return nonFungibleDataSchemaEntries.Count;
+        return entities.Count;
     }
 
-    public async Task<int> CopyKeyValueStoreSchemaHistory(ICollection<KeyValueStoreSchemaHistory> kvSchemaHistoryEntries, CancellationToken token)
+    public async Task<int> CopyKeyValueStoreSchemaHistory(ICollection<KeyValueStoreSchemaHistory> entities, CancellationToken token)
     {
-        if (!kvSchemaHistoryEntries.Any())
+        if (!entities.Any())
         {
             return 0;
         }
 
         await using var writer = await _connection.BeginBinaryImportAsync("COPY key_value_store_schema_history (id, from_state_version, key_value_store_entity_id, schema, key_sbor_type_kind, key_type_index, value_sbor_type_kind, value_type_index) FROM STDIN (FORMAT BINARY)", token);
 
-        foreach (var e in kvSchemaHistoryEntries)
+        foreach (var e in entities)
         {
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
@@ -994,7 +994,7 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
-        return kvSchemaHistoryEntries.Count;
+        return entities.Count;
     }
 
     public async Task UpdateSequences(SequencesHolder sequences, CancellationToken token)

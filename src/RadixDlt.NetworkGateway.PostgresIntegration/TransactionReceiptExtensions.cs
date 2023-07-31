@@ -76,12 +76,12 @@ internal static class TransactionReceiptExtensions
     {
         var result = new List<TransactionReceiptEventData>();
 
-        for (var i = 0; i < transactionReceipt.EventsSbor.Length; ++i)
+        for (var i = 0; i < transactionReceipt.EventsSbors.Length; ++i)
         {
-            var eventData = transactionReceipt.EventsSbor[i];
-            var schemaHash = transactionReceipt.EventsSchemaHash[i];
-            var index = transactionReceipt.EventsTypeIndex[i];
-            var typeKind = transactionReceipt.EventsSborTypeKind[i];
+            var eventData = transactionReceipt.EventsSbors[i];
+            var schemaHash = transactionReceipt.EventSchemaHashes[i];
+            var index = transactionReceipt.EventTypeIndexes[i];
+            var typeKind = transactionReceipt.EventSborTypeKinds[i];
 
             result.Add(new TransactionReceiptEventData(eventData, schemaHash, index, typeKind));
         }

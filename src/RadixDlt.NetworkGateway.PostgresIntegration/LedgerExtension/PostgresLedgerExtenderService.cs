@@ -556,18 +556,16 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         ErrorMessage = committedTransaction.Receipt.ErrorMessage,
                         Output = committedTransaction.Receipt.Output != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Output) : null,
                         NextEpoch = committedTransaction.Receipt.NextEpoch?.ToJson(),
-                        EventsSbor = committedTransaction.Receipt.Events != null ?
-                            committedTransaction.Receipt.Events.Select(x => x.Data.GetDataBytes()).ToArray()
-                            : Array.Empty<byte[]>(),
-                        EventsSchemaHash = committedTransaction.Receipt.Events != null ?
-                            committedTransaction.Receipt.Events.Select(x => ((CoreModel.PackageTypePointer)x.Type.TypePointer).SchemaHash.ConvertFromHex()).ToArray()
-                            : Array.Empty<byte[]>(),
-                        EventsTypeIndex = committedTransaction.Receipt.Events != null ?
-                            committedTransaction.Receipt.Events.Select(x => ((CoreModel.PackageTypePointer)x.Type.TypePointer).LocalTypeIndex.Index).ToArray()
-                            : Array.Empty<int>(),
-                        EventsSborTypeKind = committedTransaction.Receipt.Events != null ?
-                            committedTransaction.Receipt.Events.Select(x => ((CoreModel.PackageTypePointer)x.Type.TypePointer).LocalTypeIndex.Kind.ToInternalModel()).ToArray().ToArray()
-                            : Array.Empty<SborTypeKind>(),
+                        EventsSbors = committedTransaction.Receipt.Events?.Select(x => x.Data.GetDataBytes()).ToArray() ?? Array.Empty<byte[]>(),
+                        EventSchemaHashes =
+                            committedTransaction.Receipt.Events?.Select(x => ((CoreModel.PackageTypePointer)x.Type.TypePointer).SchemaHash.ConvertFromHex()).ToArray()
+                                            ?? Array.Empty<byte[]>(),
+                        EventTypeIndexes =
+                            committedTransaction.Receipt.Events?.Select(x => ((CoreModel.PackageTypePointer)x.Type.TypePointer).LocalTypeIndex.Index).ToArray()
+                                           ?? Array.Empty<int>(),
+                        EventSborTypeKinds =
+                            committedTransaction.Receipt.Events?.Select(x => ((CoreModel.PackageTypePointer)x.Type.TypePointer).LocalTypeIndex.Kind.ToInternalModel()).ToArray().ToArray()
+                                             ?? Array.Empty<SborTypeKind>(),
                     };
 
                     ledgerTransactionsToAdd.Add(ledgerTransaction);

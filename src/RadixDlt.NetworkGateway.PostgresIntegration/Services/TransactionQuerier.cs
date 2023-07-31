@@ -335,8 +335,8 @@ internal class TransactionQuerier : ITransactionQuerier
         var entityIdToAddressMap = await GetEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToList(), token);
 
         var schemaHashes = transactions
-            .Where(x => x.EngineReceipt.EventsSchemaHash.Any())
-            .SelectMany(x => x.EngineReceipt.EventsSchemaHash)
+            .Where(x => x.EngineReceipt.EventSchemaHashes.Any())
+            .SelectMany(x => x.EngineReceipt.EventSchemaHashes)
             .ToList();
 
         Dictionary<ValueBytes, byte[]> schemas = new Dictionary<ValueBytes, byte[]>();
