@@ -479,6 +479,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 e.Schema = packageSchema.Value.Schema.SborData.ToJson();
                             });
                         }
+
+                        if (substateData is CoreModel.ConsensusManagerFieldCurrentValidatorSetSubstate currentValidatorSet)
+                        {
+                            foreach (var activeValidator in currentValidatorSet.Value.ValidatorSet)
+                            {
+                                referencedEntities.GetOrAdd((EntityAddress)activeValidator.Address, ea => new ReferencedEntity(ea, CoreModel.EntityType.GlobalValidator, stateVersion));
+                            }
+                        }
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
