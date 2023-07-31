@@ -105,9 +105,9 @@ internal static class ScryptoSborUtils
             case ToolkitModel.MetadataValue.BoolValue boolValue:
                 return new GatewayModel.MetadataBoolValue(boolValue.value);
             case ToolkitModel.MetadataValue.DecimalArrayValue decimalArrayValue:
-                return new GatewayModel.MetadataDecimalArrayValue(decimalArrayValue.value.Select(x => x.ToString()).ToList());
+                return new GatewayModel.MetadataDecimalArrayValue(decimalArrayValue.value.Select(x => x.AsStr()).ToList());
             case ToolkitModel.MetadataValue.DecimalValue decimalValue:
-                return new GatewayModel.MetadataDecimalValue(decimalValue.value.ToString());
+                return new GatewayModel.MetadataDecimalValue(decimalValue.value.AsStr());
             case ToolkitModel.MetadataValue.GlobalAddressArrayValue globalAddressArrayValue:
                 return new GatewayModel.MetadataGlobalAddressArrayValue(globalAddressArrayValue.value.Select(x => x.AddressString()).ToList());
             case ToolkitModel.MetadataValue.GlobalAddressValue globalAddressValue:
@@ -125,9 +125,9 @@ internal static class ScryptoSborUtils
             case ToolkitModel.MetadataValue.InstantValue instantValue:
                 return new GatewayModel.MetadataInstantValue(DateTimeOffset.FromUnixTimeSeconds(instantValue.value).AsUtcIsoDateAtSecondsPrecisionString());
             case ToolkitModel.MetadataValue.NonFungibleGlobalIdArrayValue nonFungibleGlobalIdArrayValue:
-                return new GatewayModel.MetadataNonFungibleGlobalIdArrayValue(nonFungibleGlobalIdArrayValue.value.Select(x => new GatewayModel.MetadataNonFungibleGlobalIdValueAllOf(x.ResourceAddress().AddressString(), x.LocalId().ToString())).ToList());
+                return new GatewayModel.MetadataNonFungibleGlobalIdArrayValue(nonFungibleGlobalIdArrayValue.value.Select(x => new GatewayModel.MetadataNonFungibleGlobalIdValueAllOf(x.ResourceAddress().AddressString(), ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(x.LocalId()))).ToList());
             case ToolkitModel.MetadataValue.NonFungibleGlobalIdValue nonFungibleGlobalIdValue:
-                return new GatewayModel.MetadataNonFungibleGlobalIdValue(nonFungibleGlobalIdValue.value.ResourceAddress().AddressString(), nonFungibleGlobalIdValue.value.LocalId().ToString());
+                return new GatewayModel.MetadataNonFungibleGlobalIdValue(nonFungibleGlobalIdValue.value.ResourceAddress().AddressString(), ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(nonFungibleGlobalIdValue.value.LocalId()));
             case ToolkitModel.MetadataValue.NonFungibleLocalIdArrayValue nonFungibleLocalIdArrayValue:
                 return new GatewayModel.MetadataNonFungibleLocalIdArrayValue(nonFungibleLocalIdArrayValue.value.Select(ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr).ToList());
             case ToolkitModel.MetadataValue.NonFungibleLocalIdValue nonFungibleLocalIdValue:
