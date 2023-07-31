@@ -145,6 +145,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                     .OfType<ManifestAddressLedgerTransactionMarker>()
                     .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountDepositedInto && maltm.EntityId == entityId)
+                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
                     .Select(maltm => maltm.StateVersion);
             }
         }
@@ -164,6 +165,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                     .OfType<ManifestAddressLedgerTransactionMarker>()
                     .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.AccountWithdrawnFrom && maltm.EntityId == entityId)
+                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
                     .Select(maltm => maltm.StateVersion);
             }
         }
@@ -183,6 +185,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                     .OfType<ManifestAddressLedgerTransactionMarker>()
                     .Where(maltm => maltm.OperationType == LedgerTransactionMarkerOperationType.ResourceInUse && maltm.EntityId == entityId)
+                    .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
                     .Select(maltm => maltm.StateVersion);
             }
         }
@@ -200,6 +203,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                     .OfType<AffectedGlobalEntityTransactionMarker>()
                     .Where(agetm => agetm.EntityId == entityId)
+                    .Where(agetm => agetm.StateVersion <= upperStateVersion && agetm.StateVersion >= (lowerStateVersion ?? agetm.StateVersion))
                     .Select(agetm => agetm.StateVersion);
             }
         }
@@ -244,6 +248,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                     .OfType<EventLedgerTransactionMarker>()
                     .Where(eltm => eltm.EventType == eventType && eltm.EntityId == (eventEmitterEntityId ?? eltm.EntityId) && eltm.ResourceEntityId == (eventResourceEntityId ?? eltm.ResourceEntityId))
+                    .Where(eltm => eltm.StateVersion <= upperStateVersion && eltm.StateVersion >= (lowerStateVersion ?? eltm.StateVersion))
                     .Select(eltm => eltm.StateVersion);
             }
         }
@@ -269,6 +274,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
                 .OfType<OriginLedgerTransactionMarker>()
                 .Where(oltm => oltm.OriginType == originType)
+                .Where(oltm => oltm.StateVersion <= upperStateVersion && oltm.StateVersion >= (lowerStateVersion ?? oltm.StateVersion))
                 .Select(oltm => oltm.StateVersion);
         }
 
