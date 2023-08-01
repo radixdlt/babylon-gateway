@@ -124,8 +124,8 @@ public class VirtualEntityMetadataProvider : IVirtualEntityMetadataProvider
         return new EntityMetadataCollection(2, null, null,
             new List<EntityMetadataItem>
             {
-                new("owner_keys", new EntityMetadataItemValue(ownerKeysRawHex, JObject.Parse(ownerKeysJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownedKeysItem))),
-                new("owner_badge", new EntityMetadataItemValue(ownerBadgeRawHex, JObject.Parse(ownerBadgeJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownerBadgeItem))),
+                new("owner_keys", new EntityMetadataItemValue(ownerKeysRawHex, new JRaw(ownerKeysJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownedKeysItem))),
+                new("owner_badge", new EntityMetadataItemValue(ownerBadgeRawHex, new JRaw(ownerBadgeJson), ScryptoSborUtils.ConvertToolkitMetadataToGateway(ownerBadgeItem))),
             }
         );
     }

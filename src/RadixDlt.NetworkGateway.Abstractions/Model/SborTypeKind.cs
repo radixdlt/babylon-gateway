@@ -62,65 +62,10 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-internal class SequencesHolder
+public enum SborTypeKind
 {
-    public long AccountDefaultDepositRuleHistorySequence { get; set; }
-
-    public long AccountResourceDepositRuleHistorySequence { get; set; }
-
-    public long EntityStateHistorySequence { get; set; }
-
-    public long ValidatorStateHistorySequence { get; set; }
-
-    public long EntitySequence { get; set; }
-
-    public long EntityMetadataHistorySequence { get; set; }
-
-    public long EntityMetadataAggregateHistorySequence { get; set; }
-
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsEntryHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsOwnerRoleHistorySequence { get; set; }
-
-    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
-
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionMarkerSequence { get; set; }
-
-    public long PackageBlueprintHistorySequence { get; set; }
-
-    public long PackageCodeHistorySequence { get; set; }
-
-    public long PackageSchemaHistorySequence { get; set; }
-
-    public long KeyValueStoreEntryHistorySequence { get; set; }
-
-    public long ValidatorEmissionStatisticsSequence { get; set; }
-
-    public long NonFungibleSchemaHistorySequence { get; set; }
-
-    public long KeyValueSchemaHistorySequence { get; set; }
+    WellKnown,
+    SchemaLocal,
 }

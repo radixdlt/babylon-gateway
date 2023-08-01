@@ -179,7 +179,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, fee_paid, tip_paid, affected_global_entities, round_timestamp, created_timestamp, normalized_round_timestamp, raw_payload, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_error_message, receipt_output, receipt_next_epoch, receipt_events, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY ledger_transactions (state_version, message, epoch, round_in_epoch, index_in_epoch, index_in_round, is_end_of_epoch, fee_paid, tip_paid, affected_global_entities, round_timestamp, created_timestamp, normalized_round_timestamp, raw_payload, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_error_message, receipt_output, receipt_next_epoch, receipt_event_sbors, receipt_event_schema_hashes, receipt_event_type_indexes, receipt_event_sbor_type_kinds, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var lt in entities)
         {
@@ -207,7 +207,10 @@ internal class WriteHelper
             await writer.WriteAsync(lt.EngineReceipt.ErrorMessage, NpgsqlDbType.Text, token);
             await writer.WriteAsync(lt.EngineReceipt.Output, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(lt.EngineReceipt.NextEpoch, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(lt.EngineReceipt.Events, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(lt.EngineReceipt.EventsSbors, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(lt.EngineReceipt.EventSchemaHashes, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(lt.EngineReceipt.EventTypeIndexes, NpgsqlDbType.Array | NpgsqlDbType.Integer, token);
+            await writer.WriteAsync(lt.EngineReceipt.EventSborTypeKinds, "sbor_type_kind[]", token);
             await writer.WriteAsync(discriminator, "ledger_transaction_type", token);
 
             switch (lt)
@@ -421,16 +424,39 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyEntityStateHistory(ICollection<EntityStateHistory> entities, CancellationToken token)
+    public async Task<int> CopyValidatorStateHistory(ICollection<ValidatorStateHistory> stateHistory, CancellationToken token)
     {
-        if (!entities.Any())
+        if (!stateHistory.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY validator_state_history (id, from_state_version, validator_entity_id, state) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in stateHistory)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ValidatorEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.State, NpgsqlDbType.Jsonb, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return stateHistory.Count;
+    }
+
+    public async Task<int> CopyEntityStateHistory(ICollection<EntityStateHistory> entityStateHistory, CancellationToken token)
+    {
+        if (!entityStateHistory.Any())
         {
             return 0;
         }
 
         await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_state_history (id, from_state_version, entity_id, state) FROM STDIN (FORMAT BINARY)", token);
 
-        foreach (var e in entities)
+        foreach (var e in entityStateHistory)
         {
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
@@ -441,7 +467,7 @@ internal class WriteHelper
 
         await writer.CompleteAsync(token);
 
-        return entities.Count;
+        return entityStateHistory.Count;
     }
 
     public async Task<int> CopyValidatorKeyHistory(ICollection<ValidatorPublicKeyHistory> entities, CancellationToken token)
@@ -919,6 +945,58 @@ internal class WriteHelper
         return entities.Count;
     }
 
+    public async Task<int> CopyNonFungibleDataSchemaHistory(ICollection<NonFungibleSchemaHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_schema_history (id, from_state_version, entity_id, schema, sbor_type_kind, type_index) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.Schema, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.SborTypeKind, "sbor_type_kind", token);
+            await writer.WriteAsync(e.TypeIndex, NpgsqlDbType.Integer, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
+    public async Task<int> CopyKeyValueStoreSchemaHistory(ICollection<KeyValueStoreSchemaHistory> entities, CancellationToken token)
+    {
+        if (!entities.Any())
+        {
+            return 0;
+        }
+
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY key_value_store_schema_history (id, from_state_version, key_value_store_entity_id, schema, key_sbor_type_kind, key_type_index, value_sbor_type_kind, value_type_index) FROM STDIN (FORMAT BINARY)", token);
+
+        foreach (var e in entities)
+        {
+            await writer.StartRowAsync(token);
+            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.KeyValueStoreEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.Schema, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.KeySborTypeKind, "sbor_type_kind", token);
+            await writer.WriteAsync(e.KeyTypeIndex, NpgsqlDbType.Integer, token);
+            await writer.WriteAsync(e.ValueSborTypeKind, "sbor_type_kind", token);
+            await writer.WriteAsync(e.ValueTypeIndex, NpgsqlDbType.Integer, token);
+        }
+
+        await writer.CompleteAsync(token);
+
+        return entities.Count;
+    }
+
     public async Task UpdateSequences(SequencesHolder sequences, CancellationToken token)
     {
         var cd = new CommandDefinition(
@@ -927,6 +1005,7 @@ SELECT
     setval('account_default_deposit_rule_history_id_seq', @accountDefaultDepositRuleHistorySequence),
     setval('account_resource_deposit_rule_history_id_seq', @accountResourceDepositRuleHistorySequence),
     setval('entity_state_history_id_seq', @entityStateHistorySequence),
+    setval('validator_state_history_id_seq', @validatorStateHistorySequence),
     setval('entities_id_seq', @entitySequence),
     setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
     setval('entity_metadata_aggregate_history_id_seq', @entityMetadataAggregateHistorySequence),
@@ -949,12 +1028,15 @@ SELECT
     setval('package_code_history_id_seq', @packageCodeHistorySequence),
     setval('package_schema_history_id_seq', @packageSchemaHistorySequence),
     setval('key_value_store_entry_history_id_seq', @keyValueStoreEntryHistorySequence),
-    setval('validator_emission_statistics_id_seq', @validatorEmissionStatisticsSequence)",
+    setval('validator_emission_statistics_id_seq', @validatorEmissionStatisticsSequence),
+    setval('non_fungible_schema_history_id_seq', @NonFungibleSchemaHistorySequence),
+    setval('key_value_store_schema_history_id_seq', @KeyValueSchemaHistorySequence)",
             parameters: new
             {
                 accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
                 accountResourceDepositRuleHistorySequence = sequences.AccountResourceDepositRuleHistorySequence,
                 entityStateHistorySequence = sequences.EntityStateHistorySequence,
+                validatorStateHistorySequence = sequences.ValidatorStateHistorySequence,
                 entitySequence = sequences.EntitySequence,
                 entityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,
                 entityMetadataAggregateHistorySequence = sequences.EntityMetadataAggregateHistorySequence,
@@ -978,6 +1060,8 @@ SELECT
                 packageSchemaHistorySequence = sequences.PackageSchemaHistorySequence,
                 keyValueStoreEntryHistorySequence = sequences.KeyValueStoreEntryHistorySequence,
                 validatorEmissionStatisticsSequence = sequences.ValidatorEmissionStatisticsSequence,
+                nonFungibleSchemaHistorySequence = sequences.NonFungibleSchemaHistorySequence,
+                keyValueSchemaHistorySequence = sequences.KeyValueSchemaHistorySequence,
             },
             cancellationToken: token);
 

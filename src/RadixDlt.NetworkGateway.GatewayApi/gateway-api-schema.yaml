@@ -897,11 +897,11 @@ components:
       type: object
       required:
         - raw_hex
-        - raw_json
+        - programmatic_json
       properties:
         raw_hex:
           type: string
-        raw_json:
+        programmatic_json:
           type: object
 
     EntityMetadataCollection:
@@ -2317,15 +2317,15 @@ components:
     StateKeyValueStoreDataResponseItem:
       type: object
       required:
-        - key_hex
-        - value_hex
+        - key
+        - value
         - last_updated_at_state_version
         - is_locked
       properties:
-        key_hex:
-          $ref: "#/components/schemas/HexString"
-        value_hex:
-          $ref: "#/components/schemas/HexString"
+        key:
+          $ref: "#/components/schemas/ScryptoSborValue"
+        value:
+          $ref: "#/components/schemas/ScryptoSborValue"
         last_updated_at_state_version:
           $ref: "#/components/schemas/LastUpdatedAtStateVersion"
         is_locked:

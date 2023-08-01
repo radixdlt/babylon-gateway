@@ -119,8 +119,8 @@ internal static class GatewayModelExtensions
         };
     }
 
-    public static GatewayModel.CommittedTransactionInfo ToGatewayModel(this LedgerTransaction lt, GatewayModel.TransactionCommittedDetailsOptIns optIns,
-        Dictionary<long, string> entityIdToAddressMap)
+    public static GatewayModel.CommittedTransactionInfo ToGatewayModel(
+        this LedgerTransaction lt, GatewayModel.TransactionCommittedDetailsOptIns optIns, Dictionary<long, string> entityIdToAddressMap, List<string>? events)
     {
         string? payloadHashHex = null;
         string? intentHashHex = null;
@@ -143,7 +143,7 @@ internal static class GatewayModelExtensions
             FeeSummary = optIns.ReceiptFeeSummary ? new JRaw(lt.EngineReceipt.FeeSummary) : null,
             NextEpoch = lt.EngineReceipt.NextEpoch != null ? new JRaw(lt.EngineReceipt.NextEpoch) : null,
             StateUpdates = optIns.ReceiptStateChanges ? new JRaw(lt.EngineReceipt.StateUpdates) : null,
-            Events = optIns.ReceiptEvents && lt.EngineReceipt.Events != null ? new JRaw(lt.EngineReceipt.Events) : null,
+            Events = events?.Select(x => new JRaw(x)).ToList(),
         };
 
         return new GatewayModel.CommittedTransactionInfo(

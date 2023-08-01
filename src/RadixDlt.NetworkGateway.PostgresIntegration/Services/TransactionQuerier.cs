@@ -69,6 +69,7 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Interceptors;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -82,11 +83,13 @@ internal class TransactionQuerier : ITransactionQuerier
 {
     private readonly ReadOnlyDbContext _dbContext;
     private readonly ReadWriteDbContext _rwDbContext;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
-    public TransactionQuerier(ReadOnlyDbContext dbContext, ReadWriteDbContext rwDbContext)
+    public TransactionQuerier(ReadOnlyDbContext dbContext, ReadWriteDbContext rwDbContext, INetworkConfigurationProvider networkConfigurationProvider)
     {
         _dbContext = dbContext;
         _rwDbContext = rwDbContext;
+        _networkConfigurationProvider = networkConfigurationProvider;
     }
 
     public async Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
@@ -328,7 +331,8 @@ internal class TransactionQuerier : ITransactionQuerier
         return pendingTransactions.Select(pt => new StatusLookupResult(pt.PayloadHash.ToHex(), pt.Status.ToGatewayModel(), pt.LastFailureReason)).ToArray();
     }
 
-    private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(List<long> transactionStateVersions, GatewayModel.TransactionCommittedDetailsOptIns optIns, CancellationToken token)
+    private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(
+        List<long> transactionStateVersions, GatewayModel.TransactionCommittedDetailsOptIns optIns, CancellationToken token)
     {
         var transactions = await _dbContext.LedgerTransactions
             .Where(ult => transactionStateVersions.Contains(ult.StateVersion))
@@ -336,10 +340,50 @@ internal class TransactionQuerier : ITransactionQuerier
 
         var entityIdToAddressMap = await GetEntityAddresses(transactions.SelectMany(x => x.AffectedGlobalEntities).ToList(), token);
 
-        return transactions
-            .OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion))
-            .Select(lt => lt.ToGatewayModel(optIns, entityIdToAddressMap))
+        var schemaHashes = transactions
+            .Where(x => x.EngineReceipt.EventSchemaHashes.Any())
+            .SelectMany(x => x.EngineReceipt.EventSchemaHashes)
             .ToList();
+
+        Dictionary<ValueBytes, byte[]> schemas = new Dictionary<ValueBytes, byte[]>();
+
+        if (optIns.ReceiptEvents && schemaHashes.Any())
+        {
+            schemas = await _dbContext.PackageSchemaHistory
+                .Where(x => schemaHashes.Contains(x.SchemaHash))
+                .ToDictionaryAsync(x => (ValueBytes)x.SchemaHash, x => x.Schema, token);
+        }
+
+        List<GatewayModel.CommittedTransactionInfo> mappedTransactions = new List<GatewayModel.CommittedTransactionInfo>();
+        var networkId = _networkConfigurationProvider.GetNetworkId();
+
+        foreach (var transaction in transactions.OrderBy(lt => transactionStateVersions.IndexOf(lt.StateVersion)))
+        {
+            if (!optIns.ReceiptEvents || schemaHashes?.Any() == false)
+            {
+                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, null));
+            }
+            else
+            {
+                List<string> events = new List<string>();
+
+                foreach (var @event in transaction.EngineReceipt.GetEvents())
+                {
+                    var schemaFound = schemas.TryGetValue(@event.SchemaHash, out var schema);
+
+                    if (!schemaFound)
+                    {
+                        throw new UnreachableException($"Unable to find schema for given hash {Convert.ToHexString(@event.SchemaHash)}");
+                    }
+
+                    events.Add(ScryptoSborUtils.DataToProgrammaticJson(@event.Data, schema!, @event.KeyTypeKind, @event.TypeIndex, networkId));
+                }
+
+                mappedTransactions.Add(transaction.ToGatewayModel(optIns, entityIdToAddressMap, events));
+            }
+        }
+
+        return mappedTransactions;
     }
 
     private async Task<Dictionary<string, long>> GetEntityIds(List<string> addresses, CancellationToken token = default)

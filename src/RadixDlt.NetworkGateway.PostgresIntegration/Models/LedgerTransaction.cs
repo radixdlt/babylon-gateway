@@ -163,8 +163,17 @@ internal class TransactionReceipt
     [Column("receipt_error_message")]
     public string? ErrorMessage { get; set; }
 
-    [Column("receipt_events", TypeName = "jsonb")]
-    public string? Events { get; set; }
+    [Column("receipt_event_sbors")]
+    public byte[][] EventsSbors { get; set; }
+
+    [Column("receipt_event_schema_hashes")]
+    public byte[][] EventSchemaHashes { get; set; }
+
+    [Column("receipt_event_type_indexes")]
+    public int[] EventTypeIndexes { get; set; }
+
+    [Column("receipt_event_sbor_type_kinds")]
+    public SborTypeKind[] EventSborTypeKinds { get; set; }
 }
 
 internal class GenesisLedgerTransaction : LedgerTransaction

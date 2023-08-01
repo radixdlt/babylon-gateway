@@ -63,7 +63,9 @@
  */
 
 using Newtonsoft.Json.Linq;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using System;
 using System.Linq;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -80,14 +82,24 @@ internal static class ScryptoSborUtils
          return stringNfid;
      }
 
-     public static GatewayModel.ScryptoSborValue NonFungibleDataToGatewayScryptoSbor(byte[] rawScryptoSbor, byte networkId)
+     public static string DataToProgrammaticJson(byte[] data, byte[] schemaBytes, SborTypeKind keyTypeKind, int schemaIndex, byte networkId)
      {
-         var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.SborDecodeToStringRepresentation(rawScryptoSbor.ToList(), ToolkitModel.SerializationMode.PROGRAMMATIC, networkId, null);
+         ToolkitModel.LocalTypeIndex typeIndex = keyTypeKind switch
+         {
+             SborTypeKind.SchemaLocal => new ToolkitModel.LocalTypeIndex.SchemaLocalIndex((ulong)schemaIndex),
+             SborTypeKind.WellKnown => new ToolkitModel.LocalTypeIndex.WellKnown((byte)schemaIndex),
+             _ => throw new ArgumentOutOfRangeException(nameof(keyTypeKind), keyTypeKind, null),
+         };
 
-         return new GatewayModel.ScryptoSborValue(
-             rawHex: rawScryptoSbor.ToHex(),
-             rawJson: JObject.Parse(stringRepresentation)
-             );
+         var schema = new ToolkitModel.Schema(typeIndex, schemaBytes.ToList());
+
+         var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.SborDecodeToStringRepresentation(
+             data.ToList(),
+             ToolkitModel.SerializationMode.PROGRAMMATIC,
+             networkId,
+             schema);
+
+         return stringRepresentation;
      }
 
      public static GatewayModel.MetadataTypedValue DecodeToGatewayMetadataItemValue(byte[] rawScryptoSbor, byte networkId)

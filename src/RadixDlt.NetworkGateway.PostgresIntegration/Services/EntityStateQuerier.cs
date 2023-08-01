@@ -71,6 +71,7 @@ using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
@@ -79,6 +80,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -157,6 +159,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
         var accessRulesHistory = await GetAccessRulesHistory(resourceEntities, componentEntities, ledgerState, token);
         var stateHistory = await GetStateHistory(componentEntities, ledgerState, token);
+
         var resourcesSupplyData = await GetResourcesSupplyData(resourceEntities.Select(x => x.Id).ToArray(), ledgerState, token);
         var packageBlueprintHistory = await GetPackageBlueprintHistory(packageEntities.Select(e => e.Id).ToArray(), ledgerState, token);
         var packageCodeHistory = await GetPackageCodeHistory(packageEntities.Select(e => e.Id).ToArray(), ledgerState, token);
@@ -271,7 +274,6 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 case ComponentEntity ce:
                     stateHistory.TryGetValue(ce.Id, out var state);
                     accessRulesHistory.TryGetValue(ce.Id, out var accessRules);
-
                     var componentRoyaltyVaultBalance = royaltyVaultsBalance?.SingleOrDefault(x => x.OwnerEntityId == ce.Id)?.Balance;
 
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
@@ -562,6 +564,16 @@ ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
     {
         var entity = await GetEntity<GlobalNonFungibleResourceEntity>(resourceAddress, ledgerState, token);
 
+        var nonFungibleDataSchema = await _dbContext.NonFungibleDataSchemaHistory
+            .Where(x => x.EntityId == entity.Id && x.FromStateVersion <= ledgerState.StateVersion)
+            .OrderByDescending(x => x.FromStateVersion)
+            .FirstOrDefaultAsync(token);
+
+        if (nonFungibleDataSchema == null)
+        {
+            throw new UnreachableException("No schema found for nonfungible resource: {resourceAddress}");
+        }
+
         var cd = new CommandDefinition(
             commandText: @"
 SELECT nfid.non_fungible_id AS NonFungibleId, md.is_deleted AS IsDeleted, md.data AS Data, md.from_state_version AS DataLastUpdatedAtStateVersion
@@ -593,9 +605,12 @@ ORDER BY nfid.from_state_version DESC
                 continue;
             }
 
+            var programmaticJson = ScryptoSborUtils.DataToProgrammaticJson(vm.Data, nonFungibleDataSchema.Schema,
+                nonFungibleDataSchema.SborTypeKind, nonFungibleDataSchema.TypeIndex, _networkConfigurationProvider.GetNetworkId());
+
             items.Add(new GatewayModel.StateNonFungibleDetailsResponseItem(
                 nonFungibleId: vm.NonFungibleId,
-                data: ScryptoSborUtils.NonFungibleDataToGatewayScryptoSbor(vm.Data, _networkConfigurationProvider.GetNetworkId()),
+                data: new GatewayModel.ScryptoSborValue(vm.Data.ToHex(), new JRaw(programmaticJson)),
                 lastUpdatedAtStateVersion: vm.DataLastUpdatedAtStateVersion));
         }
 
@@ -675,8 +690,8 @@ INNER JOIN LATERAL (
 ) evh ON TRUE
 INNER JOIN LATERAL (
     SELECT state, from_state_version
-    FROM entity_state_history
-    WHERE entity_id = variables.validator_entity_id AND from_state_version <= @stateVersion
+    FROM validator_state_history
+    WHERE validator_entity_id = variables.validator_entity_id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
 ) esh ON true
@@ -766,6 +781,16 @@ INNER JOIN LATERAL (
     public async Task<GatewayModel.StateKeyValueStoreDataResponse> KeyValueStoreData(EntityAddress keyValueStoreAddress, IList<ValueBytes> keys, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var keyValueStore = await GetEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
+        var keyValueStoreSchema = await _dbContext.KeyValueStoreSchemaHistory
+            .Where(x => x.KeyValueStoreEntityId == keyValueStore.Id && x.FromStateVersion <= ledgerState.StateVersion)
+            .OrderByDescending(x => x.FromStateVersion)
+            .FirstOrDefaultAsync(token);
+
+        if (keyValueStoreSchema == null)
+        {
+            throw new UnreachableException($"Missing key value store schema for :{keyValueStoreAddress}");
+        }
+
         var dbKeys = keys.Distinct().Select(k => (byte[])k).ToList();
 
         var entries = await _dbContext.KeyValueStoreEntryHistory
@@ -793,9 +818,15 @@ INNER JOIN LATERAL (
                 continue;
             }
 
+            var keyJson = ScryptoSborUtils.DataToProgrammaticJson(e.Key, keyValueStoreSchema.Schema, keyValueStoreSchema.KeySborTypeKind,
+                keyValueStoreSchema.KeyTypeIndex, _networkConfigurationProvider.GetNetworkId());
+
+            var valueJson = ScryptoSborUtils.DataToProgrammaticJson(e.Value,  keyValueStoreSchema.Schema, keyValueStoreSchema.ValueSborTypeKind,
+                keyValueStoreSchema.ValueTypeIndex, _networkConfigurationProvider.GetNetworkId());
+
             items.Add(new GatewayModel.StateKeyValueStoreDataResponseItem(
-                keyHex: e.Key.ToHex(),
-                valueHex: e.Value.ToHex(),
+                key: new GatewayModel.ScryptoSborValue(e.Key.ToHex(), new JRaw(keyJson)),
+                value: new GatewayModel.ScryptoSborValue(e.Value.ToHex(), new JRaw(valueJson)),
                 lastUpdatedAtStateVersion: e.FromStateVersion,
                 isLocked: e.IsLocked));
         }
@@ -971,7 +1002,7 @@ ORDER BY metadata_join.ordinality ASC;",
 
             var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(vm.Value, _networkConfigurationProvider.GetNetworkId());
             var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(vm.Value.ToList(), ToolkitModel.SerializationMode.PROGRAMMATIC, _networkConfigurationProvider.GetNetworkId(), null);
-            var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(vm.Value.ToHex(), JObject.Parse(stringRepresentation), value);
+            var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(vm.Value.ToHex(), new JRaw(stringRepresentation), value);
 
             result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, entityMetadataItemValue, vm.IsLocked, vm.FromStateVersion));
         }
@@ -1036,7 +1067,7 @@ INNER JOIN LATERAL (
 
             var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(mh.Value, _networkConfigurationProvider.GetNetworkId());
             var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(mh.Value.ToList(), ToolkitModel.SerializationMode.PROGRAMMATIC, _networkConfigurationProvider.GetNetworkId(), null);
-            var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(mh.Value.ToHex(), JObject.Parse(stringRepresentation), value);
+            var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(mh.Value.ToHex(), new JRaw(stringRepresentation), value);
 
             result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, entityMetadataItemValue, mh.IsLocked, mh.FromStateVersion));
         }

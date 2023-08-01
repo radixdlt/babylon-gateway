@@ -62,65 +62,24 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+
+[Table("validator_state_history")]
+internal class ValidatorStateHistory
 {
-    public long AccountDefaultDepositRuleHistorySequence { get; set; }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public long AccountResourceDepositRuleHistorySequence { get; set; }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-    public long EntityStateHistorySequence { get; set; }
+    [Column("validator_entity_id")]
+    public long ValidatorEntityId { get; set; }
 
-    public long ValidatorStateHistorySequence { get; set; }
-
-    public long EntitySequence { get; set; }
-
-    public long EntityMetadataHistorySequence { get; set; }
-
-    public long EntityMetadataAggregateHistorySequence { get; set; }
-
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsEntryHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsOwnerRoleHistorySequence { get; set; }
-
-    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
-
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionMarkerSequence { get; set; }
-
-    public long PackageBlueprintHistorySequence { get; set; }
-
-    public long PackageCodeHistorySequence { get; set; }
-
-    public long PackageSchemaHistorySequence { get; set; }
-
-    public long KeyValueStoreEntryHistorySequence { get; set; }
-
-    public long ValidatorEmissionStatisticsSequence { get; set; }
-
-    public long NonFungibleSchemaHistorySequence { get; set; }
-
-    public long KeyValueSchemaHistorySequence { get; set; }
+    [Column("state", TypeName = "jsonb")]
+    public string State { get; set; }
 }

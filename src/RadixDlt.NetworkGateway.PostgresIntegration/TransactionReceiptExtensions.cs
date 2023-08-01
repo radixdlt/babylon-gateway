@@ -62,65 +62,30 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Collections.Generic;
 
-internal class SequencesHolder
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
+
+internal record TransactionReceiptEventData(byte[] Data, byte[] SchemaHash, int TypeIndex, SborTypeKind KeyTypeKind);
+
+internal static class TransactionReceiptExtensions
 {
-    public long AccountDefaultDepositRuleHistorySequence { get; set; }
+    public static List<TransactionReceiptEventData> GetEvents(this TransactionReceipt transactionReceipt)
+    {
+        var result = new List<TransactionReceiptEventData>();
 
-    public long AccountResourceDepositRuleHistorySequence { get; set; }
+        for (var i = 0; i < transactionReceipt.EventsSbors.Length; ++i)
+        {
+            var eventData = transactionReceipt.EventsSbors[i];
+            var schemaHash = transactionReceipt.EventSchemaHashes[i];
+            var index = transactionReceipt.EventTypeIndexes[i];
+            var typeKind = transactionReceipt.EventSborTypeKinds[i];
 
-    public long EntityStateHistorySequence { get; set; }
+            result.Add(new TransactionReceiptEventData(eventData, schemaHash, index, typeKind));
+        }
 
-    public long ValidatorStateHistorySequence { get; set; }
-
-    public long EntitySequence { get; set; }
-
-    public long EntityMetadataHistorySequence { get; set; }
-
-    public long EntityMetadataAggregateHistorySequence { get; set; }
-
-    public long EntityResourceAggregatedVaultsHistorySequence { get; set; }
-
-    public long EntityResourceAggregateHistorySequence { get; set; }
-
-    public long EntityResourceVaultAggregateHistorySequence { get; set; }
-
-    public long EntityVaultHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsEntryHistorySequence { get; set; }
-
-    public long EntityRoleAssignmentsOwnerRoleHistorySequence { get; set; }
-
-    public long ComponentMethodRoyaltyEntryHistorySequence { get; set; }
-
-    public long ResourceEntitySupplyHistorySequence { get; set; }
-
-    public long NonFungibleIdDataSequence { get; set; }
-
-    public long NonFungibleIdDataHistorySequence { get; set; }
-
-    public long NonFungibleIdStoreHistorySequence { get; set; }
-
-    public long ValidatorPublicKeyHistorySequence { get; set; }
-
-    public long ValidatorActiveSetHistorySequence { get; set; }
-
-    public long LedgerTransactionMarkerSequence { get; set; }
-
-    public long PackageBlueprintHistorySequence { get; set; }
-
-    public long PackageCodeHistorySequence { get; set; }
-
-    public long PackageSchemaHistorySequence { get; set; }
-
-    public long KeyValueStoreEntryHistorySequence { get; set; }
-
-    public long ValidatorEmissionStatisticsSequence { get; set; }
-
-    public long NonFungibleSchemaHistorySequence { get; set; }
-
-    public long KeyValueSchemaHistorySequence { get; set; }
+        return result;
+    }
 }

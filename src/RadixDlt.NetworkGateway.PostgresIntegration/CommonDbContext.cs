@@ -117,6 +117,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityStateHistory> EntityStateHistory => Set<EntityStateHistory>();
 
+    public DbSet<ValidatorStateHistory> ValidatorStateHistory => Set<ValidatorStateHistory>();
+
     public DbSet<ValidatorPublicKeyHistory> ValidatorKeyHistory => Set<ValidatorPublicKeyHistory>();
 
     public DbSet<ValidatorActiveSetHistory> ValidatorActiveSetHistory => Set<ValidatorActiveSetHistory>();
@@ -138,6 +140,10 @@ internal abstract class CommonDbContext : DbContext
     public DbSet<KeyValueStoreEntryHistory> KeyValueStoreEntryHistory => Set<KeyValueStoreEntryHistory>();
 
     public DbSet<ValidatorEmissionStatistics> ValidatorEmissionStatistics => Set<ValidatorEmissionStatistics>();
+
+    public DbSet<NonFungibleSchemaHistory> NonFungibleDataSchemaHistory => Set<NonFungibleSchemaHistory>();
+
+    public DbSet<KeyValueStoreSchemaHistory> KeyValueStoreSchemaHistory => Set<KeyValueStoreSchemaHistory>();
 
     public CommonDbContext(DbContextOptions options)
         : base(options)
@@ -163,6 +169,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<PublicKeyType>();
         modelBuilder.HasPostgresEnum<ResourceType>();
         modelBuilder.HasPostgresEnum<ObjectModuleId>();
+        modelBuilder.HasPostgresEnum<SborTypeKind>();
 
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
@@ -354,6 +361,9 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<EntityStateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
+        modelBuilder.Entity<ValidatorStateHistory>()
+            .HasIndex(e => new { EntityId = e.ValidatorEntityId, e.FromStateVersion });
+
         modelBuilder.Entity<PackageBlueprintHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
@@ -362,6 +372,9 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<PackageSchemaHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<PackageSchemaHistory>()
+            .HasIndex(e => new { e.SchemaHash, e.FromStateVersion });
 
         modelBuilder.Entity<ValidatorPublicKeyHistory>()
             .HasIndex(e => new { e.ValidatorEntityId, e.FromStateVersion });
@@ -377,6 +390,12 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<KeyValueStoreEntryHistory>()
             .HasIndex(e => new { e.KeyValueStoreEntityId, e.Key, e.FromStateVersion });
+
+        modelBuilder.Entity<KeyValueStoreSchemaHistory>()
+            .HasIndex(e => new { EntityId = e.KeyValueStoreEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<NonFungibleSchemaHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
     }
 
     private static void HookupStatistics(ModelBuilder modelBuilder)
