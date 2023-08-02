@@ -66,14 +66,16 @@ using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-internal interface ITheStruct
+internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
+
+internal interface ITrackableVaultEvent
 {
     long EntityId { get; }
 
@@ -84,13 +86,11 @@ internal interface ITheStruct
     long StateVersion { get; }
 }
 
-internal sealed record FungibleTheStruct(long EntityId, long VaultEntityId, long ResourceEntityId, long StateVersion, TokenAmount Delta) : ITheStruct;
+internal sealed record FungibleTrackableVaultEvent(long EntityId, long VaultEntityId, long ResourceEntityId, long StateVersion, TokenAmount Delta) : ITrackableVaultEvent;
 
-internal sealed record NonFungibleTheStruct(long EntityId, long VaultEntityId, long ResourceEntityId, long StateVersion, long Delta) : ITheStruct;
+internal sealed record NonFungibleTrackableVaultEvent(long EntityId, long VaultEntityId, long ResourceEntityId, long StateVersion, long Delta) : ITrackableVaultEvent;
 
-internal record struct EntityResourceLookup(long EntityId, long ResourceEntityId);
-
-internal class TrackableResourceProcessor
+internal class TrackableVaultProcessor
 {
     public List<EntityResourceAggregateHistory> EntityResourceAggregateHistoryToAdd { get; } = new();
 
@@ -98,17 +98,13 @@ internal class TrackableResourceProcessor
 
     public List<EntityResourceAggregatedVaultsHistory> EntityResourceAggregatedVaultsHistoryToAdd { get; } = new();
 
-    private Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory> MostRecentEntityResourceAggregatedVaultsHistory { get; set; } = null!;
+    private readonly List<ITrackableVaultEvent> _trackableVaultEvents = new();
+    private readonly UnitOfWork _uow;
 
-    private Dictionary<EntityResourceLookup, EntityResourceVaultAggregateHistory> MostRecentEntityResourceVaultAggregateHistory { get; set; } = null!;
-
-    private Dictionary<long, EntityResourceAggregateHistory> MostRecentEntityResourceAggregateHistory { get; set; } = null!;
-
-    private readonly List<EntityResourceAggregateHistory> _entityResourceAggregateHistoryCandidates = new();
-    private readonly List<EntityResourceVaultAggregateHistory> _entityResourceVaultAggregateHistoryCandidates = new();
-
-    private readonly List<ITheStruct> _trackedEvents = new();
-    private SequencesHolder _sequences = null!;
+    public TrackableVaultProcessor(UnitOfWork uow)
+    {
+        _uow = uow;
+    }
 
     public bool TryTrackVault(InternalFungibleVaultEntity vaultEntity, GlobalFungibleResourceEntity resourceEntity, TokenAmount delta, long stateVersion)
     {
@@ -117,11 +113,11 @@ internal class TrackableResourceProcessor
             return false;
         }
 
-        _trackedEvents.Add(new FungibleTheStruct(vaultEntity.GlobalAncestorId!.Value, vaultEntity.Id, resourceEntity.Id, stateVersion, delta));
+        _trackableVaultEvents.Add(new FungibleTrackableVaultEvent(vaultEntity.GlobalAncestorId!.Value, vaultEntity.Id, resourceEntity.Id, stateVersion, delta));
 
         if (vaultEntity.ParentAncestorId.HasValue && vaultEntity.ParentAncestorId.Value != vaultEntity.GlobalAncestorId)
         {
-            _trackedEvents.Add(new FungibleTheStruct(vaultEntity.ParentAncestorId.Value, vaultEntity.Id, resourceEntity.Id, stateVersion, delta));
+            _trackableVaultEvents.Add(new FungibleTrackableVaultEvent(vaultEntity.ParentAncestorId.Value, vaultEntity.Id, resourceEntity.Id, stateVersion, delta));
         }
 
         return true;
@@ -129,138 +125,140 @@ internal class TrackableResourceProcessor
 
     public bool TryTrackVault(InternalNonFungibleVaultEntity vaultEntity, GlobalNonFungibleResourceEntity resourceEntity, long delta, long stateVersion)
     {
-        _trackedEvents.Add(new NonFungibleTheStruct(vaultEntity.GlobalAncestorId!.Value, vaultEntity.Id, resourceEntity.Id, stateVersion, delta));
+        _trackableVaultEvents.Add(new NonFungibleTrackableVaultEvent(vaultEntity.GlobalAncestorId!.Value, vaultEntity.Id, resourceEntity.Id, stateVersion, delta));
 
         if (vaultEntity.ParentAncestorId.HasValue && vaultEntity.ParentAncestorId.Value != vaultEntity.GlobalAncestorId)
         {
-            _trackedEvents.Add(new NonFungibleTheStruct(vaultEntity.ParentAncestorId.Value, vaultEntity.Id, resourceEntity.Id, stateVersion, delta));
+            _trackableVaultEvents.Add(new NonFungibleTrackableVaultEvent(vaultEntity.ParentAncestorId.Value, vaultEntity.Id, resourceEntity.Id, stateVersion, delta));
         }
 
         return true;
     }
 
-    public async Task LoadDependencies(ReadHelper readHelper, SequencesHolder sequences, CancellationToken token)
+    public async Task Process()
     {
-        _sequences = sequences;
-        MostRecentEntityResourceAggregateHistory = await readHelper.MostRecentEntityResourceAggregateHistoryFor(_trackedEvents, token);
-        MostRecentEntityResourceVaultAggregateHistory = await readHelper.MostRecentEntityResourceVaultAggregateHistoryFor(_trackedEvents, token);
-        MostRecentEntityResourceAggregatedVaultsHistory = await readHelper.MostRecentEntityResourceAggregatedVaultsHistoryFor(_trackedEvents, token);
-    }
+        var sw = Stopwatch.StartNew();
 
-    public void DoSth()
-    {
-        foreach (var e in _trackedEvents)
+        var mostRecentEntityResourceAggregateHistory = await _uow.ReadHelper.MostRecentEntityResourceAggregateHistoryFor(_trackableVaultEvents, _uow.CancellationToken);
+        var mostRecentEntityResourceVaultAggregateHistory = await _uow.ReadHelper.MostRecentEntityResourceVaultAggregateHistoryFor(_trackableVaultEvents, _uow.CancellationToken);
+        var mostRecentEntityResourceAggregatedVaultsHistory = await _uow.ReadHelper.MostRecentEntityResourceAggregatedVaultsHistoryFor(_trackableVaultEvents, _uow.CancellationToken);
+        var entityResourceAggregateHistoryCandidates = new List<EntityResourceAggregateHistory>();
+        var entityResourceVaultAggregateHistoryCandidates = new List<EntityResourceVaultAggregateHistory>();
+
+        _uow.MeasureDbRead(sw.Elapsed);
+
+        foreach (var e in _trackableVaultEvents)
         {
             var lookup = new EntityResourceLookup(e.EntityId, e.ResourceEntityId);
 
             // SECTION 1: old AggregateEntityResourceInternal
-            EntityResourceAggregateHistory a1;
+            EntityResourceAggregateHistory resourceAggregate;
 
-            if (!MostRecentEntityResourceAggregateHistory.TryGetValue(e.EntityId, out var previousA1) || previousA1.FromStateVersion != e.StateVersion)
+            if (!mostRecentEntityResourceAggregateHistory.TryGetValue(e.EntityId, out var previousA1) || previousA1.FromStateVersion != e.StateVersion)
             {
-                a1 = previousA1 == null
-                    ? EntityResourceAggregateHistory.Create(_sequences.EntityResourceAggregateHistorySequence++, e.EntityId, e.StateVersion)
-                    : EntityResourceAggregateHistory.CopyOf(_sequences.EntityResourceAggregateHistorySequence++, previousA1, e.StateVersion);
+                resourceAggregate = previousA1 == null
+                    ? EntityResourceAggregateHistory.Create(_uow.Sequences.EntityResourceAggregateHistorySequence++, e.EntityId, e.StateVersion)
+                    : EntityResourceAggregateHistory.CopyOf(_uow.Sequences.EntityResourceAggregateHistorySequence++, previousA1, e.StateVersion);
 
-                _entityResourceAggregateHistoryCandidates.Add(a1);
-                MostRecentEntityResourceAggregateHistory[e.EntityId] = a1;
+                entityResourceAggregateHistoryCandidates.Add(resourceAggregate);
+                mostRecentEntityResourceAggregateHistory[e.EntityId] = resourceAggregate;
             }
             else
             {
-                a1 = previousA1;
+                resourceAggregate = previousA1;
             }
 
             switch (e)
             {
-                case FungibleTheStruct:
-                    a1.TryUpsertFungible(e.ResourceEntityId, e.StateVersion);
+                case FungibleTrackableVaultEvent:
+                    resourceAggregate.TryUpsertFungible(e.ResourceEntityId, e.StateVersion);
                     break;
-                case NonFungibleTheStruct:
-                    a1.TryUpsertNonFungible(e.ResourceEntityId, e.StateVersion);
+                case NonFungibleTrackableVaultEvent:
+                    resourceAggregate.TryUpsertNonFungible(e.ResourceEntityId, e.StateVersion);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(e), e, null);
             }
 
             // SECTION 2: old AggregateEntityResourceVaultInternal
-            EntityResourceVaultAggregateHistory a2;
+            EntityResourceVaultAggregateHistory resourceVaultAggregate;
 
-            if (!MostRecentEntityResourceVaultAggregateHistory.TryGetValue(lookup, out var previousA2) || previousA2.FromStateVersion != e.StateVersion)
+            if (!mostRecentEntityResourceVaultAggregateHistory.TryGetValue(lookup, out var previousA2) || previousA2.FromStateVersion != e.StateVersion)
             {
-                a2 = previousA2 == null
-                    ? EntityResourceVaultAggregateHistory.Create(_sequences.EntityResourceAggregateHistorySequence++, e.EntityId, e.ResourceEntityId, e.StateVersion)
-                    : EntityResourceVaultAggregateHistory.CopyOf(_sequences.EntityResourceAggregateHistorySequence++, previousA2, e.StateVersion);
+                resourceVaultAggregate = previousA2 == null
+                    ? EntityResourceVaultAggregateHistory.Create(_uow.Sequences.EntityResourceAggregateHistorySequence++, e.EntityId, e.ResourceEntityId, e.StateVersion)
+                    : EntityResourceVaultAggregateHistory.CopyOf(_uow.Sequences.EntityResourceAggregateHistorySequence++, previousA2, e.StateVersion);
 
-                _entityResourceVaultAggregateHistoryCandidates.Add(a2);
-                MostRecentEntityResourceVaultAggregateHistory[lookup] = a2;
+                entityResourceVaultAggregateHistoryCandidates.Add(resourceVaultAggregate);
+                mostRecentEntityResourceVaultAggregateHistory[lookup] = resourceVaultAggregate;
             }
             else
             {
-                a2 = previousA2;
+                resourceVaultAggregate = previousA2;
             }
 
-            a2.TryUpsertVault(e.VaultEntityId, e.StateVersion);
+            resourceVaultAggregate.TryUpsertVault(e.VaultEntityId, e.StateVersion);
 
             // SECTION 3: old AggregateEntityFungibleResourceVaultInternal
 
             switch (e)
             {
-                case FungibleTheStruct fe:
+                case FungibleTrackableVaultEvent fe:
                 {
-                    EntityFungibleResourceAggregatedVaultsHistory a3;
+                    EntityFungibleResourceAggregatedVaultsHistory fungibleResourceAggregatedVaults;
 
-                    if (!MostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var previousA3) || previousA3.FromStateVersion != e.StateVersion)
+                    if (!mostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var previousA3) || previousA3.FromStateVersion != e.StateVersion)
                     {
                         var previousBalance = (previousA3 as EntityFungibleResourceAggregatedVaultsHistory)?.Balance ?? TokenAmount.Zero;
 
-                        a3 = new EntityFungibleResourceAggregatedVaultsHistory
+                        fungibleResourceAggregatedVaults = new EntityFungibleResourceAggregatedVaultsHistory
                         {
-                            Id = _sequences.EntityResourceAggregatedVaultsHistorySequence++,
+                            Id = _uow.Sequences.EntityResourceAggregatedVaultsHistorySequence++,
                             FromStateVersion = fe.StateVersion,
                             EntityId = fe.EntityId,
                             ResourceEntityId = fe.ResourceEntityId,
                             Balance = previousBalance,
                         };
 
-                        EntityResourceAggregatedVaultsHistoryToAdd.Add(a3);
-                        MostRecentEntityResourceAggregatedVaultsHistory[lookup] = a3;
+                        EntityResourceAggregatedVaultsHistoryToAdd.Add(fungibleResourceAggregatedVaults);
+                        mostRecentEntityResourceAggregatedVaultsHistory[lookup] = fungibleResourceAggregatedVaults;
                     }
                     else
                     {
-                        a3 = (EntityFungibleResourceAggregatedVaultsHistory)previousA3;
+                        fungibleResourceAggregatedVaults = (EntityFungibleResourceAggregatedVaultsHistory)previousA3;
                     }
 
-                    a3.Balance += fe.Delta;
+                    fungibleResourceAggregatedVaults.Balance += fe.Delta;
 
                     break;
                 }
 
-                case NonFungibleTheStruct nfe:
+                case NonFungibleTrackableVaultEvent nfe:
                 {
-                    EntityNonFungibleResourceAggregatedVaultsHistory a4;
+                    EntityNonFungibleResourceAggregatedVaultsHistory nonFungibleResourceAggregatedVaults;
 
-                    if (!MostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var previousA4) || previousA4.FromStateVersion != e.StateVersion)
+                    if (!mostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var previousA4) || previousA4.FromStateVersion != e.StateVersion)
                     {
                         var previousTotalCount = (previousA4 as EntityNonFungibleResourceAggregatedVaultsHistory)?.TotalCount ?? 0;
 
-                        a4 = new EntityNonFungibleResourceAggregatedVaultsHistory
+                        nonFungibleResourceAggregatedVaults = new EntityNonFungibleResourceAggregatedVaultsHistory
                         {
-                            Id = _sequences.EntityResourceAggregatedVaultsHistorySequence++,
+                            Id = _uow.Sequences.EntityResourceAggregatedVaultsHistorySequence++,
                             FromStateVersion = nfe.StateVersion,
                             EntityId = nfe.EntityId,
                             ResourceEntityId = nfe.ResourceEntityId,
                             TotalCount = previousTotalCount,
                         };
 
-                        EntityResourceAggregatedVaultsHistoryToAdd.Add(a4);
-                        MostRecentEntityResourceAggregatedVaultsHistory[lookup] = a4;
+                        EntityResourceAggregatedVaultsHistoryToAdd.Add(nonFungibleResourceAggregatedVaults);
+                        mostRecentEntityResourceAggregatedVaultsHistory[lookup] = nonFungibleResourceAggregatedVaults;
                     }
                     else
                     {
-                        a4 = (EntityNonFungibleResourceAggregatedVaultsHistory)previousA4;
+                        nonFungibleResourceAggregatedVaults = (EntityNonFungibleResourceAggregatedVaultsHistory)previousA4;
                     }
 
-                    a4.TotalCount += nfe.Delta;
+                    nonFungibleResourceAggregatedVaults.TotalCount += nfe.Delta;
 
                     break;
                 }
@@ -270,7 +268,7 @@ internal class TrackableResourceProcessor
             }
         }
 
-        EntityResourceAggregateHistoryToAdd.AddRange(_entityResourceAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()));
-        EntityResourceVaultAggregateHistoryToAdd.AddRange(_entityResourceVaultAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()));
+        EntityResourceAggregateHistoryToAdd.AddRange(entityResourceAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()));
+        EntityResourceVaultAggregateHistoryToAdd.AddRange(entityResourceVaultAggregateHistoryCandidates.Where(x => x.ShouldBePersisted()));
     }
 }

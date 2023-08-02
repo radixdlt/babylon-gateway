@@ -227,7 +227,7 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
-    public async Task<Dictionary<long, EntityResourceAggregateHistory>> MostRecentEntityResourceAggregateHistoryFor(List<ITheStruct> trackableVaultEvents, CancellationToken token)
+    public async Task<Dictionary<long, EntityResourceAggregateHistory>> MostRecentEntityResourceAggregateHistoryFor(List<ITrackableVaultEvent> trackableVaultEvents, CancellationToken token)
     {
         if (trackableVaultEvents.Count == 0)
         {
@@ -257,7 +257,7 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
-    public async Task<Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>> MostRecentEntityResourceAggregatedVaultsHistoryFor(List<ITheStruct> trackableVaultEvents, CancellationToken token)
+    public async Task<Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>> MostRecentEntityResourceAggregatedVaultsHistoryFor(List<ITrackableVaultEvent> trackableVaultEvents, CancellationToken token)
     {
         if (trackableVaultEvents.Count == 0)
         {
@@ -292,7 +292,7 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId), token);
     }
 
-    public async Task<Dictionary<EntityResourceLookup, EntityResourceVaultAggregateHistory>> MostRecentEntityResourceVaultAggregateHistoryFor(List<ITheStruct> trackableVaultEvents, CancellationToken token)
+    public async Task<Dictionary<EntityResourceLookup, EntityResourceVaultAggregateHistory>> MostRecentEntityResourceVaultAggregateHistoryFor(List<ITrackableVaultEvent> trackableVaultEvents, CancellationToken token)
     {
         if (trackableVaultEvents.Count == 0)
         {

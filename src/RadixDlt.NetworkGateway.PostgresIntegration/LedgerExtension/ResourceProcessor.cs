@@ -125,7 +125,7 @@ internal class ResourceProcessor
         };
     }
 
-    public void DoSth()
+    public void Process()
     {
         foreach (var e in _fungibleVaultSnapshots)
         {

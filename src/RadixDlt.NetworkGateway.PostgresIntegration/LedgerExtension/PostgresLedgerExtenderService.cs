@@ -270,6 +270,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             dbReadDuration += sw.Elapsed;
         }
 
+        // TODO this class should replace ProcessTransactions method
+        var uow = new UnitOfWork(referencedEntities, sequences, readHelper, token);
+
         // update the status of all the pending transactions that might have been commited with this ledger extension
         {
             var sw = Stopwatch.StartNew();
@@ -735,7 +738,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             referencedEntities.InvokePostResolveConfiguration();
         }
 
-        var trackableResourceProcessor = new TrackableResourceProcessor();
+        var trackableResourceProcessor = new TrackableVaultProcessor(uow);
 
         // todo those collections should be defined by XxxProcessors as internal ones
         var metadataChangePointers = new List<MetadataChangePointer>();
@@ -1288,7 +1291,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
             var metadataDump = await MetadataProcessor.Create(metadataChangePointers, readHelper, sequences, token);
             var resourceDump = await ResourceProcessor.Create(fungibleVaultSnapshots, nonFungibleVaultChanges, nonFungibleIdChangePointers, readHelper, sequences, token);
-            await trackableResourceProcessor.LoadDependencies(readHelper, sequences, token);
 
             var mostRecentAccessRulesEntryHistory = await readHelper.MostRecentEntityAccessRulesEntryHistoryFor(accessRulesChangePointers.Values, token);
             var mostRecentAccessRulesAggregateHistory = await readHelper.MostRecentEntityAccessRulesAggregateHistoryFor(accessRulesChanges, token);
@@ -1301,9 +1303,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var entityAccessRulesEntryHistoryToAdd = new List<EntityRoleAssignmentsEntryHistory>();
             var entityAccessRulesAggregateHistoryToAdd = new List<EntityRoleAssignmentsAggregateHistory>();
 
-            metadataDump.DoSth();
-            resourceDump.DoSth();
-            trackableResourceProcessor.DoSth();
+            metadataDump.Process();
+            resourceDump.Process();
+            await trackableResourceProcessor.Process();
 
             foreach (var lookup in accessRulesChanges)
             {
@@ -1486,9 +1488,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             dbWriteDuration += sw.Elapsed;
         }
 
-        var contentHandlingDuration = outerStopwatch.Elapsed - dbReadDuration - dbWriteDuration;
+        var contentHandlingDuration = outerStopwatch.Elapsed - dbReadDuration - uow.DbReadDuration - dbWriteDuration - uow.DbWriteDuration;
 
-        return new ExtendLedgerReport(lastTransactionSummary, rowsInserted + rowsUpdated, dbReadDuration, dbWriteDuration, contentHandlingDuration);
+        return new ExtendLedgerReport(lastTransactionSummary, rowsInserted + rowsUpdated, dbReadDuration + uow.DbReadDuration, dbWriteDuration + uow.DbWriteDuration, contentHandlingDuration);
     }
 
     private async Task EnsureDbLedgerIsInitialized(CancellationToken token)

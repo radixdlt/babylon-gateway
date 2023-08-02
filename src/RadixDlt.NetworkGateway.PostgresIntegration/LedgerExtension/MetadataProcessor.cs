@@ -112,7 +112,7 @@ internal class MetadataProcessor
         };
     }
 
-    public void DoSth()
+    public void Process()
     {
         foreach (var e in _metadataChangePointers)
         {
