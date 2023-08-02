@@ -90,8 +90,8 @@ public static class EventDecoder
 
     public static bool TryGetFungibleVaultDepositEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out ToolkitModel.DepositResourceEvent.Amount? unwrappedEvent)
     {
-        unwrappedEvent = (((typedNativeEvent as ToolkitModel.TypedNativeEvent.Resource)?.value as ToolkitModel.TypedResourcePackageEvent.NonFungibleVault)?.value as
-            ToolkitModel.TypedNonFungibleVaultBlueprintEvent.DepositResourceEventValue)?.value as ToolkitModel.DepositResourceEvent.Amount;
+        unwrappedEvent = (((typedNativeEvent as ToolkitModel.TypedNativeEvent.Resource)?.value as ToolkitModel.TypedResourcePackageEvent.FungibleVault)?.value as
+            ToolkitModel.TypedFungibleVaultBlueprintEvent.DepositResourceEventValue)?.value as ToolkitModel.DepositResourceEvent.Amount;
 
         return unwrappedEvent != null;
     }
@@ -106,8 +106,8 @@ public static class EventDecoder
 
     public static bool TryGetNonFungibleVaultDepositEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out ToolkitModel.DepositResourceEvent.Ids? unwrappedEvent)
     {
-        unwrappedEvent = (((typedNativeEvent as ToolkitModel.TypedNativeEvent.Resource)?.value as ToolkitModel.TypedResourcePackageEvent.FungibleVault)?.value as
-            ToolkitModel.TypedFungibleVaultBlueprintEvent.DepositResourceEventValue)?.value as ToolkitModel.DepositResourceEvent.Ids;
+        unwrappedEvent = (((typedNativeEvent as ToolkitModel.TypedNativeEvent.Resource)?.value as ToolkitModel.TypedResourcePackageEvent.NonFungibleVault)?.value as
+            ToolkitModel.TypedNonFungibleVaultBlueprintEvent.DepositResourceEventValue)?.value as ToolkitModel.DepositResourceEvent.Ids;
 
         return unwrappedEvent != null;
     }
