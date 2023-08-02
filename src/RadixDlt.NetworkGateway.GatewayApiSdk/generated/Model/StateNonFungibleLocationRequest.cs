@@ -90,36 +90,44 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateNonFungibleDataRequestAllOf
+    /// StateNonFungibleLocationRequest
     /// </summary>
-    [DataContract(Name = "StateNonFungibleDataRequest_allOf")]
-    public partial class StateNonFungibleDataRequestAllOf : IEquatable<StateNonFungibleDataRequestAllOf>
+    [DataContract(Name = "StateNonFungibleLocationRequest")]
+    public partial class StateNonFungibleLocationRequest : IEquatable<StateNonFungibleLocationRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateNonFungibleDataRequestAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleLocationRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateNonFungibleDataRequestAllOf() { }
+        protected StateNonFungibleLocationRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateNonFungibleDataRequestAllOf" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleLocationRequest" /> class.
         /// </summary>
+        /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
-        public StateNonFungibleDataRequestAllOf(string resourceAddress = default(string), List<string> nonFungibleIds = default(List<string>))
+        public StateNonFungibleLocationRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string resourceAddress = default(string), List<string> nonFungibleIds = default(List<string>))
         {
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
             {
-                throw new ArgumentNullException("resourceAddress is a required property for StateNonFungibleDataRequestAllOf and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for StateNonFungibleLocationRequest and cannot be null");
             }
             this.ResourceAddress = resourceAddress;
             // to ensure "nonFungibleIds" is required (not null)
             if (nonFungibleIds == null)
             {
-                throw new ArgumentNullException("nonFungibleIds is a required property for StateNonFungibleDataRequestAllOf and cannot be null");
+                throw new ArgumentNullException("nonFungibleIds is a required property for StateNonFungibleLocationRequest and cannot be null");
             }
             this.NonFungibleIds = nonFungibleIds;
+            this.AtLedgerState = atLedgerState;
         }
+
+        /// <summary>
+        /// Gets or Sets AtLedgerState
+        /// </summary>
+        [DataMember(Name = "at_ledger_state", EmitDefaultValue = true)]
+        public LedgerStateSelector AtLedgerState { get; set; }
 
         /// <summary>
         /// Bech32m-encoded human readable version of the address.
@@ -141,7 +149,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateNonFungibleDataRequestAllOf {\n");
+            sb.Append("class StateNonFungibleLocationRequest {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
             sb.Append("}\n");
@@ -164,21 +173,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateNonFungibleDataRequestAllOf);
+            return this.Equals(input as StateNonFungibleLocationRequest);
         }
 
         /// <summary>
-        /// Returns true if StateNonFungibleDataRequestAllOf instances are equal
+        /// Returns true if StateNonFungibleLocationRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateNonFungibleDataRequestAllOf to be compared</param>
+        /// <param name="input">Instance of StateNonFungibleLocationRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateNonFungibleDataRequestAllOf input)
+        public bool Equals(StateNonFungibleLocationRequest input)
         {
             if (input == null)
             {
                 return false;
             }
             return 
+                (
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
                 (
                     this.ResourceAddress == input.ResourceAddress ||
                     (this.ResourceAddress != null &&
@@ -201,6 +215,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
                 if (this.ResourceAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();

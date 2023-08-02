@@ -103,4 +103,11 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
 
         return await _entityStateQuerier.NonFungibleIdData((EntityAddress)request.ResourceAddress, request.NonFungibleIds, ledgerState, token);
     }
+
+    public async Task<GatewayModel.StateNonFungibleLocationResponse> Location(GatewayModel.StateNonFungibleLocationRequest request, CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
+
+        return await _entityStateQuerier.NonFungibleIdLocation((EntityAddress)request.ResourceAddress, request.NonFungibleIds, ledgerState, token);
+    }
 }

@@ -73,4 +73,6 @@ public interface INonFungibleHandler
     Task<GatewayModel.StateNonFungibleIdsResponse> Ids(GatewayModel.StateNonFungibleIdsRequest request, CancellationToken token = default);
 
     Task<GatewayModel.StateNonFungibleDataResponse> Data(GatewayModel.StateNonFungibleDataRequest request, CancellationToken token = default);
+
+    Task<GatewayModel.StateNonFungibleLocationResponse> Location(GatewayModel.StateNonFungibleLocationRequest request, CancellationToken token = default);
 }

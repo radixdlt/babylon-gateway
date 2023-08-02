@@ -281,6 +281,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of StateNonFungibleIdsResponse</returns>
         ApiResponse<StateNonFungibleIdsResponse> NonFungibleIdsWithHttpInfo(StateNonFungibleIdsRequest stateNonFungibleIdsRequest);
         /// <summary>
+        /// Get Non-Fungible Location
+        /// </summary>
+        /// <remarks>
+        /// Returns location of a given non-fungible ID. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleLocationRequest"></param>
+        /// <returns>StateNonFungibleLocationResponse</returns>
+        StateNonFungibleLocationResponse NonFungibleLocation(StateNonFungibleLocationRequest stateNonFungibleLocationRequest);
+
+        /// <summary>
+        /// Get Non-Fungible Location
+        /// </summary>
+        /// <remarks>
+        /// Returns location of a given non-fungible ID. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleLocationRequest"></param>
+        /// <returns>ApiResponse of StateNonFungibleLocationResponse</returns>
+        ApiResponse<StateNonFungibleLocationResponse> NonFungibleLocationWithHttpInfo(StateNonFungibleLocationRequest stateNonFungibleLocationRequest);
+        /// <summary>
         /// Get Entity Details
         /// </summary>
         /// <remarks>
@@ -535,6 +556,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (StateNonFungibleIdsResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<StateNonFungibleIdsResponse>> NonFungibleIdsWithHttpInfoAsync(StateNonFungibleIdsRequest stateNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Non-Fungible Location
+        /// </summary>
+        /// <remarks>
+        /// Returns location of a given non-fungible ID. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleLocationRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateNonFungibleLocationResponse</returns>
+        System.Threading.Tasks.Task<StateNonFungibleLocationResponse> NonFungibleLocationAsync(StateNonFungibleLocationRequest stateNonFungibleLocationRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Non-Fungible Location
+        /// </summary>
+        /// <remarks>
+        /// Returns location of a given non-fungible ID. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleLocationRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateNonFungibleLocationResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<StateNonFungibleLocationResponse>> NonFungibleLocationWithHttpInfoAsync(StateNonFungibleLocationRequest stateNonFungibleLocationRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Entity Details
         /// </summary>
@@ -1841,6 +1885,123 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("NonFungibleIds", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Non-Fungible Location Returns location of a given non-fungible ID. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleLocationRequest"></param>
+        /// <returns>StateNonFungibleLocationResponse</returns>
+        public StateNonFungibleLocationResponse NonFungibleLocation(StateNonFungibleLocationRequest stateNonFungibleLocationRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleLocationResponse> localVarResponse = NonFungibleLocationWithHttpInfo(stateNonFungibleLocationRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Non-Fungible Location Returns location of a given non-fungible ID. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleLocationRequest"></param>
+        /// <returns>ApiResponse of StateNonFungibleLocationResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleLocationResponse> NonFungibleLocationWithHttpInfo(StateNonFungibleLocationRequest stateNonFungibleLocationRequest)
+        {
+            // verify the required parameter 'stateNonFungibleLocationRequest' is set
+            if (stateNonFungibleLocationRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateNonFungibleLocationRequest' when calling StateApi->NonFungibleLocation");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateNonFungibleLocationRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<StateNonFungibleLocationResponse>("/state/non-fungible/location", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("NonFungibleLocation", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Non-Fungible Location Returns location of a given non-fungible ID. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleLocationRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of StateNonFungibleLocationResponse</returns>
+        public async System.Threading.Tasks.Task<StateNonFungibleLocationResponse> NonFungibleLocationAsync(StateNonFungibleLocationRequest stateNonFungibleLocationRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleLocationResponse> localVarResponse = await NonFungibleLocationWithHttpInfoAsync(stateNonFungibleLocationRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Non-Fungible Location Returns location of a given non-fungible ID. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="stateNonFungibleLocationRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (StateNonFungibleLocationResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<StateNonFungibleLocationResponse>> NonFungibleLocationWithHttpInfoAsync(StateNonFungibleLocationRequest stateNonFungibleLocationRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'stateNonFungibleLocationRequest' is set
+            if (stateNonFungibleLocationRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'stateNonFungibleLocationRequest' when calling StateApi->NonFungibleLocation");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = stateNonFungibleLocationRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<StateNonFungibleLocationResponse>("/state/non-fungible/location", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("NonFungibleLocation", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

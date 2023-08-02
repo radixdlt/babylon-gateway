@@ -104,9 +104,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityMetadataItemValue" /> class.
         /// </summary>
         /// <param name="rawHex">rawHex (required).</param>
-        /// <param name="json">json (required).</param>
+        /// <param name="programmaticJson">programmaticJson (required).</param>
         /// <param name="typed">typed (required).</param>
-        public EntityMetadataItemValue(string rawHex = default(string), Object json = default(Object), MetadataTypedValue typed = default(MetadataTypedValue))
+        public EntityMetadataItemValue(string rawHex = default(string), Object programmaticJson = default(Object), MetadataTypedValue typed = default(MetadataTypedValue))
         {
             // to ensure "rawHex" is required (not null)
             if (rawHex == null)
@@ -114,12 +114,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("rawHex is a required property for EntityMetadataItemValue and cannot be null");
             }
             this.RawHex = rawHex;
-            // to ensure "json" is required (not null)
-            if (json == null)
+            // to ensure "programmaticJson" is required (not null)
+            if (programmaticJson == null)
             {
-                throw new ArgumentNullException("json is a required property for EntityMetadataItemValue and cannot be null");
+                throw new ArgumentNullException("programmaticJson is a required property for EntityMetadataItemValue and cannot be null");
             }
-            this.Json = json;
+            this.ProgrammaticJson = programmaticJson;
             // to ensure "typed" is required (not null)
             if (typed == null)
             {
@@ -135,10 +135,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string RawHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets Json
+        /// Gets or Sets ProgrammaticJson
         /// </summary>
-        [DataMember(Name = "json", IsRequired = true, EmitDefaultValue = true)]
-        public Object Json { get; set; }
+        [DataMember(Name = "programmatic_json", IsRequired = true, EmitDefaultValue = true)]
+        public Object ProgrammaticJson { get; set; }
 
         /// <summary>
         /// Gets or Sets Typed
@@ -155,7 +155,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityMetadataItemValue {\n");
             sb.Append("  RawHex: ").Append(RawHex).Append("\n");
-            sb.Append("  Json: ").Append(Json).Append("\n");
+            sb.Append("  ProgrammaticJson: ").Append(ProgrammaticJson).Append("\n");
             sb.Append("  Typed: ").Append(Typed).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -198,9 +198,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.RawHex.Equals(input.RawHex))
                 ) && 
                 (
-                    this.Json == input.Json ||
-                    (this.Json != null &&
-                    this.Json.Equals(input.Json))
+                    this.ProgrammaticJson == input.ProgrammaticJson ||
+                    (this.ProgrammaticJson != null &&
+                    this.ProgrammaticJson.Equals(input.ProgrammaticJson))
                 ) && 
                 (
                     this.Typed == input.Typed ||
@@ -222,9 +222,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
                 }
-                if (this.Json != null)
+                if (this.ProgrammaticJson != null)
                 {
-                    hashCode = (hashCode * 59) + this.Json.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ProgrammaticJson.GetHashCode();
                 }
                 if (this.Typed != null)
                 {

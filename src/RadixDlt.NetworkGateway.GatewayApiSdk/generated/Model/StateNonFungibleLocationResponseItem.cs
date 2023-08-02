@@ -90,41 +90,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateNonFungibleDetailsResponseItem
+    /// StateNonFungibleLocationResponseItem
     /// </summary>
-    [DataContract(Name = "StateNonFungibleDetailsResponseItem")]
-    public partial class StateNonFungibleDetailsResponseItem : IEquatable<StateNonFungibleDetailsResponseItem>
+    [DataContract(Name = "StateNonFungibleLocationResponseItem")]
+    public partial class StateNonFungibleLocationResponseItem : IEquatable<StateNonFungibleLocationResponseItem>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateNonFungibleDetailsResponseItem" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleLocationResponseItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateNonFungibleDetailsResponseItem() { }
+        protected StateNonFungibleLocationResponseItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateNonFungibleDetailsResponseItem" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleLocationResponseItem" /> class.
         /// </summary>
-        /// <param name="isBurned">isBurned (required).</param>
         /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
-        /// <param name="data">data.</param>
+        /// <param name="owningVaultAddress">Bech32m-encoded human readable version of the address..</param>
+        /// <param name="isBurned">isBurned (required).</param>
         /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
-        public StateNonFungibleDetailsResponseItem(bool isBurned = default(bool), string nonFungibleId = default(string), ScryptoSborValue data = default(ScryptoSborValue), long lastUpdatedAtStateVersion = default(long))
+        public StateNonFungibleLocationResponseItem(string nonFungibleId = default(string), string owningVaultAddress = default(string), bool isBurned = default(bool), long lastUpdatedAtStateVersion = default(long))
         {
-            this.IsBurned = isBurned;
             // to ensure "nonFungibleId" is required (not null)
             if (nonFungibleId == null)
             {
-                throw new ArgumentNullException("nonFungibleId is a required property for StateNonFungibleDetailsResponseItem and cannot be null");
+                throw new ArgumentNullException("nonFungibleId is a required property for StateNonFungibleLocationResponseItem and cannot be null");
             }
             this.NonFungibleId = nonFungibleId;
+            this.IsBurned = isBurned;
             this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
-            this.Data = data;
+            this.OwningVaultAddress = owningVaultAddress;
         }
-
-        /// <summary>
-        /// Gets or Sets IsBurned
-        /// </summary>
-        [DataMember(Name = "is_burned", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsBurned { get; set; }
 
         /// <summary>
         /// String-encoded non-fungible ID.
@@ -134,10 +128,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string NonFungibleId { get; set; }
 
         /// <summary>
-        /// Gets or Sets Data
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        [DataMember(Name = "data", EmitDefaultValue = true)]
-        public ScryptoSborValue Data { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "owning_vault_address", EmitDefaultValue = true)]
+        public string OwningVaultAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IsBurned
+        /// </summary>
+        [DataMember(Name = "is_burned", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsBurned { get; set; }
 
         /// <summary>
         /// TBD
@@ -153,10 +154,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateNonFungibleDetailsResponseItem {\n");
-            sb.Append("  IsBurned: ").Append(IsBurned).Append("\n");
+            sb.Append("class StateNonFungibleLocationResponseItem {\n");
             sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
-            sb.Append("  Data: ").Append(Data).Append("\n");
+            sb.Append("  OwningVaultAddress: ").Append(OwningVaultAddress).Append("\n");
+            sb.Append("  IsBurned: ").Append(IsBurned).Append("\n");
             sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -178,15 +179,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateNonFungibleDetailsResponseItem);
+            return this.Equals(input as StateNonFungibleLocationResponseItem);
         }
 
         /// <summary>
-        /// Returns true if StateNonFungibleDetailsResponseItem instances are equal
+        /// Returns true if StateNonFungibleLocationResponseItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateNonFungibleDetailsResponseItem to be compared</param>
+        /// <param name="input">Instance of StateNonFungibleLocationResponseItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateNonFungibleDetailsResponseItem input)
+        public bool Equals(StateNonFungibleLocationResponseItem input)
         {
             if (input == null)
             {
@@ -194,18 +195,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.IsBurned == input.IsBurned ||
-                    this.IsBurned.Equals(input.IsBurned)
-                ) && 
-                (
                     this.NonFungibleId == input.NonFungibleId ||
                     (this.NonFungibleId != null &&
                     this.NonFungibleId.Equals(input.NonFungibleId))
                 ) && 
                 (
-                    this.Data == input.Data ||
-                    (this.Data != null &&
-                    this.Data.Equals(input.Data))
+                    this.OwningVaultAddress == input.OwningVaultAddress ||
+                    (this.OwningVaultAddress != null &&
+                    this.OwningVaultAddress.Equals(input.OwningVaultAddress))
+                ) && 
+                (
+                    this.IsBurned == input.IsBurned ||
+                    this.IsBurned.Equals(input.IsBurned)
                 ) && 
                 (
                     this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
@@ -222,15 +223,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.IsBurned.GetHashCode();
                 if (this.NonFungibleId != null)
                 {
                     hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
                 }
-                if (this.Data != null)
+                if (this.OwningVaultAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Data.GetHashCode();
+                    hashCode = (hashCode * 59) + this.OwningVaultAddress.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.IsBurned.GetHashCode();
                 hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
