@@ -105,11 +105,11 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<AccountResourceDepositRuleHistory> AccountDepositRuleHistory => Set<AccountResourceDepositRuleHistory>();
 
-    public DbSet<EntityVaultHistory> EntityVaultHistory => Set<EntityVaultHistory>();
+    public DbSet<VaultHistory> EntityVaultHistory => Set<VaultHistory>();
 
     public DbSet<ResourceEntitySupplyHistory> ResourceEntitySupplyHistory => Set<ResourceEntitySupplyHistory>();
 
-    public DbSet<NonFungibleIdData> NonFungibleIdData => Set<NonFungibleIdData>();
+    public DbSet<NonFungibleId> NonFungibleIdData => Set<NonFungibleId>();
 
     public DbSet<NonFungibleIdDataHistory> NonFungibleIdDataHistory => Set<NonFungibleIdDataHistory>();
 
@@ -316,15 +316,15 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<EntityResourceVaultAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityVaultHistory>()
+        modelBuilder.Entity<VaultHistory>()
             .HasDiscriminator<ResourceType>(DiscriminatorColumnName)
-            .HasValue<EntityFungibleVaultHistory>(ResourceType.Fungible)
-            .HasValue<EntityNonFungibleVaultHistory>(ResourceType.NonFungible);
+            .HasValue<FungibleVaultHistory>(ResourceType.Fungible)
+            .HasValue<NonFungibleVaultHistory>(ResourceType.NonFungible);
 
-        modelBuilder.Entity<EntityVaultHistory>()
+        modelBuilder.Entity<VaultHistory>()
             .HasIndex(e => new { e.OwnerEntityId, e.VaultEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityVaultHistory>()
+        modelBuilder.Entity<VaultHistory>()
             .HasIndex(e => new { e.GlobalEntityId, e.VaultEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityRoleAssignmentsOwnerRoleHistory>()
@@ -345,11 +345,11 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<ResourceEntitySupplyHistory>()
             .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<NonFungibleIdData>()
+        modelBuilder.Entity<NonFungibleId>()
             .HasIndex(e => new { e.NonFungibleResourceEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<NonFungibleIdData>()
-            .HasIndex(e => new { e.NonFungibleResourceEntityId, e.NonFungibleId, e.FromStateVersion })
+        modelBuilder.Entity<NonFungibleId>()
+            .HasIndex(e => new { e.NonFungibleResourceEntityId, NonFungibleId = e.SimpleRepresentation, e.FromStateVersion })
             .IsUnique();
 
         modelBuilder.Entity<NonFungibleIdDataHistory>()

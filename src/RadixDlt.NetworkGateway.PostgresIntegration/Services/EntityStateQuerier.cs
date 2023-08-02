@@ -510,8 +510,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         var cd = new CommandDefinition(
             commandText: @"
-WITH most_recent_non_fungible_id_store_history_slice (non_fungible_id_data_ids, non_fungible_ids_total_count) AS (
-    SELECT non_fungible_id_data_ids[@offset:@limit], cardinality(non_fungible_id_data_ids)
+WITH most_recent_non_fungible_id_store_history_slice (non_fungible_id_ids, non_fungible_ids_total_count) AS (
+    SELECT non_fungible_id_ids[@offset:@limit], cardinality(non_fungible_id_ids)
     FROM non_fungible_id_store_history
     WHERE from_state_version <= @stateVersion AND non_fungible_resource_entity_id = @entityId
     ORDER BY from_state_version DESC
@@ -519,8 +519,8 @@ WITH most_recent_non_fungible_id_store_history_slice (non_fungible_id_data_ids, 
 )
 SELECT nfid.non_fungible_id AS NonFungibleId, hs.non_fungible_ids_total_count AS NonFungibleIdsTotalCount
 FROM most_recent_non_fungible_id_store_history_slice hs
-INNER JOIN non_fungible_id_data nfid ON nfid.id = ANY(hs.non_fungible_id_data_ids)
-ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
+INNER JOIN non_fungible_id_data nfid ON nfid.id = ANY(hs.non_fungible_id_ids)
+ORDER BY array_position(hs.non_fungible_id_ids, nfid.id);
 ",
             parameters: new
             {
@@ -925,7 +925,7 @@ INNER JOIN LATERAL (
             commandText: @"
 WITH owner_ids (entity_id) AS (SELECT UNNEST(@ownerIds))
 SELECT evh.*
-from owner_ids
+FROM owner_ids
 INNER JOIN LATERAL (
     SELECT
         vault_entity_id as royaltyVaultEntityId,

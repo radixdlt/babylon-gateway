@@ -62,47 +62,46 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-[Table("entity_vault_history")]
-internal abstract class EntityVaultHistory
+public class OrderedDictionary<TKey, TVal> : ICollection<KeyValuePair<TKey, TVal>>
+    where TKey : notnull
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    private readonly Dictionary<TKey, TVal> _dictionary = new();
+    private readonly List<TKey> _keys = new();
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+    public int Count => _keys.Count;
 
-    [Column("owner_entity_id")]
-    public long OwnerEntityId { get; set; }
+    public bool IsReadOnly => false;
 
-    [Column("global_entity_id")]
-    public long GlobalEntityId { get; set; }
+    public TVal GetOrAdd(TKey key, Func<TKey, TVal> factory)
+    {
+        return _dictionary.GetOrAdd(key, _ =>
+        {
+            _keys.Add(key);
 
-    [Column("vault_entity_id")]
-    public long VaultEntityId { get; set; }
+            return factory(key);
+        });
+    }
 
-    [Column("resource_entity_id")]
-    public long ResourceEntityId { get; set; }
-}
+    public IEnumerator<KeyValuePair<TKey, TVal>> GetEnumerator() => _keys.Select(key => new KeyValuePair<TKey, TVal>(key, _dictionary[key])).GetEnumerator();
 
-internal class EntityFungibleVaultHistory : EntityVaultHistory
-{
-    [Column("balance")]
-    public TokenAmount Balance { get; set; }
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    [Column("is_royalty_vault")]
-    public bool IsRoyaltyVault { get; set; }
-}
+    public void Add(KeyValuePair<TKey, TVal> item) => throw CreateException();
 
-internal class EntityNonFungibleVaultHistory : EntityVaultHistory
-{
-    [Column("non_fungible_ids")]
-    public List<long> NonFungibleIds { get; set; }
+    public void Clear() => throw CreateException();
+
+    public bool Contains(KeyValuePair<TKey, TVal> item) => throw CreateException();
+
+    public void CopyTo(KeyValuePair<TKey, TVal>[] array, int arrayIndex) => throw CreateException();
+
+    public bool Remove(KeyValuePair<TKey, TVal> item) => throw CreateException();
+
+    private Exception CreateException() => new InvalidOperationException("This is an append-only collection where GetOrAdd method is the only available mutation method.");
 }

@@ -74,7 +74,7 @@ internal class SequencesHolder
 
     public long ValidatorStateHistorySequence { get; set; }
 
-    public long EntitySequence { get; set; }
+    public long EntitiesSequence { get; set; }
 
     public long EntityMetadataHistorySequence { get; set; }
 
@@ -86,7 +86,7 @@ internal class SequencesHolder
 
     public long EntityResourceVaultAggregateHistorySequence { get; set; }
 
-    public long EntityVaultHistorySequence { get; set; }
+    public long VaultHistorySequence { get; set; }
 
     public long EntityRoleAssignmentsAggregateHistorySequence { get; set; }
 
@@ -98,7 +98,7 @@ internal class SequencesHolder
 
     public long ResourceEntitySupplyHistorySequence { get; set; }
 
-    public long NonFungibleIdDataSequence { get; set; }
+    public long NonFungibleIdsSequence { get; set; }
 
     public long NonFungibleIdDataHistorySequence { get; set; }
 

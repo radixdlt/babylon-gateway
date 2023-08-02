@@ -663,7 +663,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     _ => throw new ArgumentOutOfRangeException(nameof(referencedEntity.Type), referencedEntity.Type, "Unexpected entity type"),
                 };
 
-                dbEntity.Id = sequences.EntitySequence++;
+                dbEntity.Id = sequences.EntitiesSequence++;
                 dbEntity.FromStateVersion = referencedEntity.StateVersion;
                 dbEntity.Address = referencedEntity.Address;
                 dbEntity.IsGlobal = referencedEntity.IsGlobal;
@@ -735,10 +735,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             referencedEntities.InvokePostResolveConfiguration();
         }
 
+        var trackableResourceProcessor = new TrackableResourceProcessor();
+
+        // todo those collections should be defined by XxxProcessors as internal ones
         var metadataChangePointers = new List<MetadataChangePointer>();
-        var fungibleVaultChanges = new List<FungibleVaultChange>();
+        var fungibleVaultSnapshots = new List<FungibleVaultSnapshot>();
         var nonFungibleVaultChanges = new List<NonFungibleVaultChange>();
-        var nonFungibleIdChangePointers = new List<NonFungibleIdChangePointer>();
+        var nonFungibleIdChangePointers = new List<NonFungibleIdDataChangePointer>();
+
+        // todo rework all below
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
         var entityStateToAdd = new List<EntityStateHistory>();
@@ -803,7 +808,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             var amount = TokenAmount.FromDecimalString(fungibleVaultFieldBalanceSubstate.Value.Amount);
                             var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId);
 
-                            fungibleVaultChanges.Add(new FungibleVaultChange(referencedEntity, resourceEntity, stateVersion, amount));
+                            fungibleVaultSnapshots.Add(new FungibleVaultSnapshot(referencedEntity, resourceEntity, stateVersion, amount));
                         }
 
                         if (substateData is CoreModel.NonFungibleVaultContentsIndexEntrySubstate nonFungibleVaultContentsIndexEntrySubstate)
@@ -817,10 +822,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         {
                             var resourceManagerEntityId = substateId.EntityAddress;
                             var resourceManagerEntity = referencedEntities.Get((EntityAddress)resourceManagerEntityId);
-
                             var nonFungibleId = ScryptoSborUtils.GetNonFungibleId((substateId.SubstateKey as CoreModel.MapSubstateKey)!.KeyHex);
 
-                            nonFungibleIdChangePointers.Add(new NonFungibleIdChangePointer(resourceManagerEntity, nonFungibleId, nonFungibleResourceManagerDataEntrySubstate, stateVersion));
+                            nonFungibleIdChangePointers.Add(new NonFungibleIdDataChangePointer(resourceManagerEntity, nonFungibleId, nonFungibleResourceManagerDataEntrySubstate, stateVersion));
                         }
 
                         if (substateData is CoreModel.GenericScryptoComponentFieldStateSubstate componentState)
@@ -1133,6 +1137,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         }
                         else if (EventDecoder.TryGetFungibleVaultWithdrawalEvent(decodedEvent, out var fungibleVaultWithdrawalEvent))
                         {
+                            var amount = TokenAmount.FromDecimalString(fungibleVaultWithdrawalEvent.value.AsStr());
+                            var vaultEntity = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>();
+                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.ResourceEntityId).GetDatabaseEntity<GlobalFungibleResourceEntity>();
+
+                            trackableResourceProcessor.TryTrackVault(vaultEntity, resourceEntity, amount * TokenAmount.MinusOne, stateVersion);
+
                             ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
                             {
                                 Id = sequences.LedgerTransactionMarkerSequence++,
@@ -1140,11 +1150,17 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 EventType = LedgerTransactionMarkerEventType.Withdrawal,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
                                 ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(fungibleVaultWithdrawalEvent.value.AsStr()),
+                                Quantity = amount,
                             });
                         }
                         else if (EventDecoder.TryGetFungibleVaultDepositEvent(decodedEvent, out var fungibleVaultDepositEvent))
                         {
+                            var amount = TokenAmount.FromDecimalString(fungibleVaultDepositEvent.value.AsStr());
+                            var vaultEntity = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>();
+                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.ResourceEntityId).GetDatabaseEntity<GlobalFungibleResourceEntity>();
+
+                            trackableResourceProcessor.TryTrackVault(vaultEntity, resourceEntity, amount, stateVersion);
+
                             ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
                             {
                                 Id = sequences.LedgerTransactionMarkerSequence++,
@@ -1152,11 +1168,17 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 EventType = LedgerTransactionMarkerEventType.Deposit,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
                                 ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(fungibleVaultDepositEvent.value.AsStr()),
+                                Quantity = amount,
                             });
                         }
                         else if (EventDecoder.TryGetNonFungibleVaultWithdrawalEvent(decodedEvent, out var nonFungibleVaultWithdrawalEvent))
                         {
+                            var amount = nonFungibleVaultWithdrawalEvent.value.Count;
+                            var vaultEntity = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>();
+                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.ResourceEntityId).GetDatabaseEntity<GlobalNonFungibleResourceEntity>();
+
+                            trackableResourceProcessor.TryTrackVault(vaultEntity, resourceEntity, amount * -1, stateVersion);
+
                             ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
                             {
                                 Id = sequences.LedgerTransactionMarkerSequence++,
@@ -1164,11 +1186,17 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 EventType = LedgerTransactionMarkerEventType.Withdrawal,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
                                 ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(nonFungibleVaultWithdrawalEvent.value.Count.ToString()),
+                                Quantity = TokenAmount.FromDecimalString(amount.ToString()),
                             });
                         }
                         else if (EventDecoder.TryGetNonFungibleVaultDepositEvent(decodedEvent, out var nonFungibleVaultDepositEvent))
                         {
+                            var amount = nonFungibleVaultDepositEvent.value.Count;
+                            var vaultEntity = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>();
+                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.ResourceEntityId).GetDatabaseEntity<GlobalNonFungibleResourceEntity>();
+
+                            trackableResourceProcessor.TryTrackVault(vaultEntity, resourceEntity, amount, stateVersion);
+
                             ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
                             {
                                 Id = sequences.LedgerTransactionMarkerSequence++,
@@ -1176,7 +1204,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 EventType = LedgerTransactionMarkerEventType.Deposit,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
                                 ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(nonFungibleVaultDepositEvent.value.Count.ToString()),
+                                Quantity = TokenAmount.FromDecimalString(amount.ToString()),
                             });
                         }
                         else if (EventDecoder.TryGetFungibleResourceMintedEvent(decodedEvent, out var fungibleResourceMintedEvent))
@@ -1258,8 +1286,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         {
             var sw = Stopwatch.StartNew();
 
-            var metadataDump = await MetadataDump.Create(metadataChangePointers, readHelper, sequences, token);
-            var resourceDump = await ResourceDump.Create(fungibleVaultChanges, nonFungibleVaultChanges, nonFungibleIdChangePointers, readHelper, sequences, token);
+            var metadataDump = await MetadataProcessor.Create(metadataChangePointers, readHelper, sequences, token);
+            var resourceDump = await ResourceProcessor.Create(fungibleVaultSnapshots, nonFungibleVaultChanges, nonFungibleIdChangePointers, readHelper, sequences, token);
+            await trackableResourceProcessor.LoadDependencies(readHelper, sequences, token);
+
             var mostRecentAccessRulesEntryHistory = await readHelper.MostRecentEntityAccessRulesEntryHistoryFor(accessRulesChangePointers.Values, token);
             var mostRecentAccessRulesAggregateHistory = await readHelper.MostRecentEntityAccessRulesAggregateHistoryFor(accessRulesChanges, token);
             var mostRecentResourceEntitySupplyHistory = await readHelper.MostRecentResourceEntitySupplyHistoryFor(resourceSupplyChanges, token);
@@ -1273,6 +1303,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
             metadataDump.DoSth();
             resourceDump.DoSth();
+            trackableResourceProcessor.DoSth();
 
             foreach (var lookup in accessRulesChanges)
             {
@@ -1416,24 +1447,17 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
             sw = Stopwatch.StartNew();
 
-            rowsInserted += await writeHelper.CopyEntity(entitiesToAdd, token);
             rowsInserted += await writeHelper.CopyLedgerTransaction(ledgerTransactionsToAdd, token);
             rowsInserted += await writeHelper.CopyLedgerTransactionMarkers(ledgerTransactionMarkersToAdd, token);
+            rowsInserted += await writeHelper.CopyEntity(entitiesToAdd, token);
+
+            // TODO rework those below
             rowsInserted += await writeHelper.CopyEntityStateHistory(entityStateToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorStateHistory(validatorStateToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityMetadataHistory(metadataDump.EntityMetadataHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityMetadataAggregateHistory(metadataDump.EntityMetadataAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityRoleAssignmentsOwnerRoleHistory(entityAccessRulesOwnerRoleHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityRoleAssignmentsRulesEntryHistory(entityAccessRulesEntryHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityRoleAssignmentsAggregateHistory(entityAccessRulesAggregateHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityResourceAggregatedVaultsHistory(resourceDump.EntityResourceAggregatedVaultsHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityResourceAggregateHistory(resourceDump.EntityResourceAggregateHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityResourceVaultAggregateHistory(resourceDump.EntityResourceVaultAggregateHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityVaultHistory(resourceDump.EntityFungibleVaultHistoryToAdd, resourceDump.EntityNonFungibleVaultHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyNonFungibleIdData(resourceDump.NonFungibleIdDataToAdd, token);
             rowsInserted += await writeHelper.CopyComponentMethodRoyalties(componentMethodRoyaltiesToAdd, token);
-            rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(resourceDump.NonFungibleIdsMutableDataHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(resourceDump.NonFungibleIdStoreHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyResourceEntitySupplyHistory(resourceEntitySupplyHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorKeyHistory(validatorKeyHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);
@@ -1446,6 +1470,17 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyValidatorEmissionStatistics(validatorEmissionStatisticsToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyVaulueStoreSchemaHistoryToAdd, token);
+
+            // TODO reworked
+            rowsInserted += await writeHelper.CopyEntityMetadataHistory(metadataDump.EntityMetadataHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityMetadataAggregateHistory(metadataDump.EntityMetadataAggregateHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyVaultHistory(resourceDump.VaultHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyNonFungibleIdData(resourceDump.NonFungibleIdsToAdd, token);
+            rowsInserted += await writeHelper.CopyNonFungibleIdDataHistory(resourceDump.NonFungibleIdDataHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyNonFungibleIdStoreHistory(resourceDump.NonFungibleIdStoreHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityResourceAggregateHistory(trackableResourceProcessor.EntityResourceAggregateHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityResourceVaultAggregateHistory(trackableResourceProcessor.EntityResourceVaultAggregateHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyEntityResourceAggregatedVaultsHistory(trackableResourceProcessor.EntityResourceAggregatedVaultsHistoryToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);
 
             dbWriteDuration += sw.Elapsed;

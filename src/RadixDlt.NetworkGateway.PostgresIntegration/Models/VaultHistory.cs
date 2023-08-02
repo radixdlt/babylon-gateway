@@ -62,13 +62,15 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("non_fungible_id_data")]
-internal class NonFungibleIdData
+[Table("vault_history")]
+internal abstract class VaultHistory
 {
     [Key]
     [Column("id")]
@@ -77,9 +79,33 @@ internal class NonFungibleIdData
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("non_fungible_resource_entity_id")]
-    public long NonFungibleResourceEntityId { get; set; }
+    [Column("owner_entity_id")]
+    public long OwnerEntityId { get; set; }
 
-    [Column("non_fungible_id")]
-    public string NonFungibleId { get; set; }
+    [Column("global_entity_id")]
+    public long GlobalEntityId { get; set; }
+
+    [Column("vault_entity_id")]
+    public long VaultEntityId { get; set; }
+
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+}
+
+internal class FungibleVaultHistory : VaultHistory
+{
+    [Column("balance")]
+    public TokenAmount Balance { get; set; }
+
+    // TODO this one should most likely not exist at all over here
+    [Column("is_royalty_vault")]
+    public bool IsRoyaltyVault { get; set; }
+}
+
+internal class NonFungibleVaultHistory : VaultHistory
+{
+    [Column("non_fungible_id_ids")]
+    public List<long> NonFungibleIdIds { get; set; }
+
+    // TODO should we keep track of "last significant nfid update state_version"?
 }

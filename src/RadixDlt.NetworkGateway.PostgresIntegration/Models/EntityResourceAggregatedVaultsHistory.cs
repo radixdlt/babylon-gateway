@@ -63,11 +63,13 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
+// TODO rename to EntityResourceHistory?
 [Table("entity_resource_aggregated_vaults_history")]
 internal abstract class EntityResourceAggregatedVaultsHistory
 {
@@ -83,10 +85,6 @@ internal abstract class EntityResourceAggregatedVaultsHistory
 
     [Column("resource_entity_id")]
     public long ResourceEntityId { get; set; }
-
-    // TODO remove once TX events get available
-    [Column("tmp_tmp_remove_me_once_tx_events_become_available")]
-    public string TmpTmpRemoveMeOnceTxEventsBecomeAvailable { get; set; }
 }
 
 internal class EntityFungibleResourceAggregatedVaultsHistory : EntityResourceAggregatedVaultsHistory

@@ -67,7 +67,6 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
@@ -228,33 +227,22 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
-    public async Task<Dictionary<long, EntityResourceAggregateHistory>> MostRecentEntityResourceAggregateHistoryFor(List<FungibleVaultChange> fungibleVaultChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    public async Task<Dictionary<long, EntityResourceAggregateHistory>> MostRecentEntityResourceAggregateHistoryFor(List<ITheStruct> trackableVaultEvents, CancellationToken token)
     {
-        if (!fungibleVaultChanges.Any() && !nonFungibleVaultChanges.Any())
+        if (trackableVaultEvents.Count == 0)
         {
             return new Dictionary<long, EntityResourceAggregateHistory>();
         }
 
-        var entityIds = new HashSet<long>();
-
-        foreach (var change in fungibleVaultChanges)
-        {
-            entityIds.Add(change.ReferencedVault.DatabaseOwnerAncestorId);
-            entityIds.Add(change.ReferencedVault.DatabaseGlobalAncestorId);
-        }
-
-        foreach (var change in nonFungibleVaultChanges)
-        {
-            entityIds.Add(change.ReferencedVault.DatabaseOwnerAncestorId);
-            entityIds.Add(change.ReferencedVault.DatabaseGlobalAncestorId);
-        }
-
-        var ids = entityIds.ToList();
+        var entityIds = trackableVaultEvents
+            .Select(kvp => kvp.EntityId)
+            .ToHashSet()
+            .ToList();
 
         return await _dbContext.EntityResourceAggregateHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id) AS (
-    SELECT UNNEST({ids})
+    SELECT UNNEST({entityIds})
 )
 SELECT erah.*
 FROM variables
@@ -269,27 +257,14 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
-    public async Task<Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>> MostRecentEntityResourceAggregatedVaultsHistoryFor(List<FungibleVaultChange> fungibleVaultChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    public async Task<Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>> MostRecentEntityResourceAggregatedVaultsHistoryFor(List<ITheStruct> trackableVaultEvents, CancellationToken token)
     {
-        if (!fungibleVaultChanges.Any() && !nonFungibleVaultChanges.Any())
+        if (trackableVaultEvents.Count == 0)
         {
             return new Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>();
         }
 
-        var data = new HashSet<EntityResourceLookup>();
-
-        foreach (var change in fungibleVaultChanges)
-        {
-            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseOwnerAncestorId, change.ReferencedResource.DatabaseId));
-            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseGlobalAncestorId, change.ReferencedResource.DatabaseId));
-        }
-
-        foreach (var change in nonFungibleVaultChanges)
-        {
-            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseOwnerAncestorId, change.ReferencedResource.DatabaseId));
-            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseGlobalAncestorId, change.ReferencedResource.DatabaseId));
-        }
-
+        var data = trackableVaultEvents.Select(kvp => new EntityResourceLookup(kvp.EntityId, kvp.ResourceEntityId)).ToHashSet();
         var entityIds = new List<long>();
         var resourceEntityIds = new List<long>();
 
@@ -317,27 +292,14 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId), token);
     }
 
-    public async Task<Dictionary<EntityResourceVaultLookup, EntityResourceVaultAggregateHistory>> MostRecentEntityResourceVaultAggregateHistoryFor(List<FungibleVaultChange> fungibleVaultChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    public async Task<Dictionary<EntityResourceLookup, EntityResourceVaultAggregateHistory>> MostRecentEntityResourceVaultAggregateHistoryFor(List<ITheStruct> trackableVaultEvents, CancellationToken token)
     {
-        if (!fungibleVaultChanges.Any() && !nonFungibleVaultChanges.Any())
+        if (trackableVaultEvents.Count == 0)
         {
-            return new Dictionary<EntityResourceVaultLookup, EntityResourceVaultAggregateHistory>();
+            return new Dictionary<EntityResourceLookup, EntityResourceVaultAggregateHistory>();
         }
 
-        var data = new HashSet<EntityResourceVaultLookup>();
-
-        foreach (var change in fungibleVaultChanges)
-        {
-            data.Add(new EntityResourceVaultLookup(change.ReferencedVault.DatabaseOwnerAncestorId, change.ReferencedResource.DatabaseId));
-            data.Add(new EntityResourceVaultLookup(change.ReferencedVault.DatabaseGlobalAncestorId, change.ReferencedResource.DatabaseId));
-        }
-
-        foreach (var change in nonFungibleVaultChanges)
-        {
-            data.Add(new EntityResourceVaultLookup(change.ReferencedVault.DatabaseOwnerAncestorId, change.ReferencedResource.DatabaseId));
-            data.Add(new EntityResourceVaultLookup(change.ReferencedVault.DatabaseGlobalAncestorId, change.ReferencedResource.DatabaseId));
-        }
-
+        var data = trackableVaultEvents.Select(kvp => new EntityResourceLookup(kvp.EntityId, kvp.ResourceEntityId)).ToHashSet();
         var entityIds = new List<long>();
         var resourceEntityIds = new List<long>();
 
@@ -362,14 +324,14 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) ervah ON true;")
             .AsNoTracking()
-            .ToDictionaryAsync(e => new EntityResourceVaultLookup(e.EntityId, e.ResourceEntityId), token);
+            .ToDictionaryAsync(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId), token);
     }
 
-    public async Task<Dictionary<long, EntityNonFungibleVaultHistory>> MostRecentEntityNonFungibleVaultHistory(List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    public async Task<Dictionary<long, NonFungibleVaultHistory>> MostRecentNonFungibleVaultHistory(List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
     {
         if (!nonFungibleVaultChanges.Any())
         {
-            return new Dictionary<long, EntityNonFungibleVaultHistory>();
+            return new Dictionary<long, NonFungibleVaultHistory>();
         }
 
         var vaultIds = nonFungibleVaultChanges.Select(x => x.ReferencedVault.DatabaseId).Distinct().ToList();
@@ -383,13 +345,13 @@ SELECT evh.*
 FROM variables
 INNER JOIN LATERAL (
     SELECT *
-    FROM entity_vault_history
+    FROM vault_history
     WHERE vault_entity_id = variables.vault_entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) evh ON true;")
             .AsNoTracking()
-            .ToDictionaryAsync(e => e.VaultEntityId, e => (EntityNonFungibleVaultHistory)e, token);
+            .ToDictionaryAsync(e => e.VaultEntityId, e => (NonFungibleVaultHistory)e, token);
     }
 
     // public async Task<> MostRecentPackageDefinitionHistory(List<PackageChange> packageChanges, CancellationToken token)
@@ -399,7 +361,7 @@ INNER JOIN LATERAL (
     //     return await _dbContext.
     // }
 
-    public async Task<Dictionary<long, NonFungibleIdStoreHistory>> MostRecentNonFungibleIdStoreHistoryFor(List<NonFungibleIdChangePointer> nonFungibleIdStoreChanges, CancellationToken token)
+    public async Task<Dictionary<long, NonFungibleIdStoreHistory>> MostRecentNonFungibleIdStoreHistoryFor(List<NonFungibleIdDataChangePointer> nonFungibleIdStoreChanges, CancellationToken token)
     {
         if (!nonFungibleIdStoreChanges.Any())
         {
@@ -475,18 +437,18 @@ WHERE id IN(
             .ToDictionaryAsync(e => e.Address, token);
     }
 
-    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(List<NonFungibleIdChangePointer> nonFungibleIdStoreChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    public async Task<Dictionary<NonFungibleIdLookup, NonFungibleId>> ExistingNonFungibleIdsFor(List<NonFungibleIdDataChangePointer> nonFungibleIdDataChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
     {
         if (!nonFungibleVaultChanges.Any() && !nonFungibleVaultChanges.Any())
         {
-            return new Dictionary<NonFungibleIdLookup, NonFungibleIdData>();
+            return new Dictionary<NonFungibleIdLookup, NonFungibleId>();
         }
 
         var nonFungibles = new HashSet<NonFungibleIdLookup>();
         var resourceEntityIds = new List<long>();
         var nonFungibleIds = new List<string>();
 
-        foreach (var nonFungibleIdChange in nonFungibleIdStoreChanges)
+        foreach (var nonFungibleIdChange in nonFungibleIdDataChanges)
         {
             nonFungibles.Add(new NonFungibleIdLookup(nonFungibleIdChange.ReferencedResource.DatabaseId, nonFungibleIdChange.NonFungibleId));
         }
@@ -504,11 +466,11 @@ WHERE id IN(
 
         return await _dbContext.NonFungibleIdData
             .FromSqlInterpolated(@$"
-SELECT * FROM non_fungible_id_data WHERE (non_fungible_resource_entity_id, non_fungible_id) IN (
+SELECT * FROM non_fungible_ids WHERE (non_fungible_resource_entity_id, simple_representation) IN (
     SELECT UNNEST({resourceEntityIds}), UNNEST({nonFungibleIds})
 )")
             .AsNoTracking()
-            .ToDictionaryAsync(e => new NonFungibleIdLookup(e.NonFungibleResourceEntityId, e.NonFungibleId), token);
+            .ToDictionaryAsync(e => new NonFungibleIdLookup(e.NonFungibleResourceEntityId, e.SimpleRepresentation), token);
     }
 
     public async Task<Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>> ExistingValidatorKeysFor(List<ValidatorSetChange> validatorKeyLookups, CancellationToken token)
@@ -564,19 +526,19 @@ SELECT
     nextval('account_resource_deposit_rule_history_id_seq') AS AccountResourceDepositRuleHistorySequence,
     nextval('entity_state_history_id_seq') AS EntityStateHistorySequence,
     nextval('validator_state_history_id_seq') AS ValidatorStateHistorySequence,
-    nextval('entities_id_seq') AS EntitySequence,
+    nextval('entities_id_seq') AS EntitiesSequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
     nextval('entity_metadata_aggregate_history_id_seq') AS EntityMetadataAggregateHistorySequence,
     nextval('entity_resource_aggregated_vaults_history_id_seq') AS EntityResourceAggregatedVaultsHistorySequence,
     nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
     nextval('entity_resource_vault_aggregate_history_id_seq') AS EntityResourceVaultAggregateHistorySequence,
-    nextval('entity_vault_history_id_seq') AS EntityVaultHistorySequence,
+    nextval('vault_history_id_seq') AS VaultHistorySequence,
     nextval('entity_role_assignments_aggregate_history_id_seq') AS EntityRoleAssignmentsAggregateHistorySequence,
     nextval('entity_role_assignments_entry_history_id_seq') AS EntityRoleAssignmentsEntryHistorySequence,
     nextval('entity_role_assignments_owner_role_history_id_seq') AS EntityRoleAssignmentsOwnerRoleHistorySequence,
     nextval('component_method_royalty_entry_history_id_seq') AS ComponentMethodRoyaltyEntryHistorySequence,
     nextval('resource_entity_supply_history_id_seq') AS ResourceEntitySupplyHistorySequence,
-    nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
+    nextval('non_fungible_ids_id_seq') AS NonFungibleIdsSequence,
     nextval('non_fungible_id_data_history_id_seq') AS NonFungibleIdDataHistorySequence,
     nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence,
     nextval('validator_public_key_history_id_seq') AS ValidatorPublicKeyHistorySequence,

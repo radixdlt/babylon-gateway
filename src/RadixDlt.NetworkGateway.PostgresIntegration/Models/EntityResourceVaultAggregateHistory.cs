@@ -62,15 +62,19 @@
  * permissions under this License.
  */
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("entity_resource_vault_aggregate_history")]
 internal class EntityResourceVaultAggregateHistory
 {
+    private long[]? _originalVaultEntityIds = null;
+
     [Key]
     [Column("id")]
     public long Id { get; set; }
@@ -86,4 +90,86 @@ internal class EntityResourceVaultAggregateHistory
 
     [Column("vault_entity_ids")]
     public List<long> VaultEntityIds { get; set; }
+
+    [Column("vault_entity_id_significant_update_state_versions")]
+    public List<long> VaultEntityIdSignificantUpdateStateVersions { get; set; }
+
+    public static EntityResourceVaultAggregateHistory Create(long databaseId, long entityId, long resourceEntityId, long stateVersion)
+    {
+        return CopyOrCreate(databaseId, null, entityId, resourceEntityId, stateVersion);
+    }
+
+    public static EntityResourceVaultAggregateHistory CopyOf(long databaseId, EntityResourceVaultAggregateHistory other, long stateVersion)
+    {
+        return CopyOrCreate(databaseId, other, other.EntityId, other.ResourceEntityId, stateVersion);
+    }
+
+    /// <summary>
+    /// Attempts to add new or update existing vault unless it is already the most recently modified one.
+    /// </summary>
+    /// <returns>true if added or modified, otherwise false.</returns>
+    public bool TryUpsertVault(long vaultEntityId, long stateVersion)
+    {
+        var currentIndex = VaultEntityIds.IndexOf(vaultEntityId);
+
+        // we're already the most recent one and there's no point potential second resource with same state_version
+        if (currentIndex == 0 && VaultEntityIds.Count == 1)
+        {
+            return false;
+        }
+
+        // we're already the most recent one but there might be second resource with matching state_version
+        // so in order to guarantee that we'll be unambiguously earlier in the overall sequence we might potentially
+        // want to update anyways
+        if (currentIndex == 0 && VaultEntityIds.Count > 1 && VaultEntityIdSignificantUpdateStateVersions[1] < VaultEntityIdSignificantUpdateStateVersions[0])
+        {
+            return false;
+        }
+
+        if (currentIndex != -1)
+        {
+            VaultEntityIds.RemoveAt(currentIndex);
+            VaultEntityIdSignificantUpdateStateVersions.RemoveAt(currentIndex);
+        }
+
+        VaultEntityIds.Insert(0, vaultEntityId);
+        VaultEntityIdSignificantUpdateStateVersions.Insert(0, stateVersion);
+
+        return true;
+    }
+
+    public bool ShouldBePersisted()
+    {
+        if (_originalVaultEntityIds == null)
+        {
+            return true;
+        }
+
+        if (!_originalVaultEntityIds.SequenceEqual(VaultEntityIds.ToArray()))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static EntityResourceVaultAggregateHistory CopyOrCreate(long databaseId, EntityResourceVaultAggregateHistory? other, long entityId, long resourceEntityId, long stateVersion)
+    {
+        var ret = new EntityResourceVaultAggregateHistory
+        {
+            Id = databaseId,
+            FromStateVersion = stateVersion,
+            EntityId = entityId,
+            ResourceEntityId = resourceEntityId,
+            VaultEntityIds = new List<long>(other?.VaultEntityIds.ToArray() ?? Array.Empty<long>()),
+            VaultEntityIdSignificantUpdateStateVersions = new List<long>(other?.VaultEntityIdSignificantUpdateStateVersions.ToArray() ?? Array.Empty<long>()),
+        };
+
+        if (other != null)
+        {
+            ret._originalVaultEntityIds = ret.VaultEntityIds.ToArray();
+        }
+
+        return ret;
+    }
 }

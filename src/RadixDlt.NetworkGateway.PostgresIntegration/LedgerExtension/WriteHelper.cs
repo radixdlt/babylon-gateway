@@ -550,7 +550,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_resource_aggregated_vaults_history (id, from_state_version, entity_id, resource_entity_id, tmp_tmp_remove_me_once_tx_events_Become_available, discriminator, balance, total_count) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_resource_aggregated_vaults_history (id, from_state_version, entity_id, resource_entity_id, discriminator, balance, total_count) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -559,18 +559,20 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.TmpTmpRemoveMeOnceTxEventsBecomeAvailable, NpgsqlDbType.Text, token);
             await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
 
-            if (e is EntityFungibleResourceAggregatedVaultsHistory fe)
+            switch (e)
             {
-                await writer.WriteAsync(fe.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-                await writer.WriteNullAsync(token);
-            }
-            else if (e is EntityNonFungibleResourceAggregatedVaultsHistory nfe)
-            {
-                await writer.WriteNullAsync(token);
-                await writer.WriteAsync(nfe.TotalCount, NpgsqlDbType.Bigint, token);
+                case EntityFungibleResourceAggregatedVaultsHistory fe:
+                    await writer.WriteAsync(fe.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                    await writer.WriteNullAsync(token);
+                    break;
+                case EntityNonFungibleResourceAggregatedVaultsHistory nfe:
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(nfe.TotalCount, NpgsqlDbType.Bigint, token);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(e), e, null);
             }
         }
 
@@ -612,7 +614,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_resource_vault_aggregate_history (id, from_state_version, entity_id, resource_entity_id, vault_entity_ids) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_resource_vault_aggregate_history (id, from_state_version, entity_id, resource_entity_id, vault_entity_ids, vault_entity_id_significant_update_state_versions) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -622,6 +624,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.VaultEntityIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.VaultEntityIdSignificantUpdateStateVersions.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
         }
 
         await writer.CompleteAsync(token);
@@ -629,16 +632,16 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyEntityVaultHistory(ICollection<EntityFungibleVaultHistory> fungibleEntities, ICollection<EntityNonFungibleVaultHistory> nonFungibleEntities, CancellationToken token)
+    public async Task<int> CopyVaultHistory(ICollection<VaultHistory> entities, CancellationToken token)
     {
-        if (!fungibleEntities.Any() && !nonFungibleEntities.Any())
+        if (!entities.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_vault_history (id, from_state_version, owner_entity_id, global_entity_id, vault_entity_id, resource_entity_id, discriminator, balance, is_royalty_vault, non_fungible_ids) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY vault_history (id, from_state_version, owner_entity_id, global_entity_id, vault_entity_id, resource_entity_id, discriminator, balance, is_royalty_vault, non_fungible_id_ids) FROM STDIN (FORMAT BINARY)", token);
 
-        foreach (var e in fungibleEntities)
+        foreach (var e in entities)
         {
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
@@ -648,29 +651,27 @@ internal class WriteHelper
             await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
-            await writer.WriteAsync(e.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-            await writer.WriteAsync(e.IsRoyaltyVault, NpgsqlDbType.Boolean, token);
-            await writer.WriteNullAsync(token);
-        }
 
-        foreach (var e in nonFungibleEntities)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.OwnerEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.GlobalEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.VaultEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(GetDiscriminator<ResourceType>(e.GetType()), "resource_type", token);
-            await writer.WriteNullAsync(token);
-            await writer.WriteNullAsync(token);
-            await writer.WriteAsync(e.NonFungibleIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            switch (e)
+            {
+                case FungibleVaultHistory f:
+                    await writer.WriteAsync(f.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                    await writer.WriteAsync(f.IsRoyaltyVault, NpgsqlDbType.Boolean, token);
+                    await writer.WriteNullAsync(token);
+                    break;
+                case NonFungibleVaultHistory nf:
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(nf.NonFungibleIdIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(e), e, null);
+            }
         }
 
         await writer.CompleteAsync(token);
 
-        return fungibleEntities.Count + nonFungibleEntities.Count;
+        return entities.Count;
     }
 
     public async Task<int> CopyComponentMethodRoyalties(List<ComponentMethodRoyaltyEntryHistory> entities, CancellationToken token)
@@ -770,14 +771,14 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyNonFungibleIdData(ICollection<NonFungibleIdData> entities, CancellationToken token)
+    public async Task<int> CopyNonFungibleIdData(ICollection<NonFungibleId> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_id_data (id, from_state_version, non_fungible_resource_entity_id, non_fungible_id) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_ids (id, from_state_version, non_fungible_resource_entity_id, simple_representation) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -785,7 +786,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.NonFungibleResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleId, NpgsqlDbType.Text, token);
+            await writer.WriteAsync(e.SimpleRepresentation, NpgsqlDbType.Text, token);
         }
 
         await writer.CompleteAsync(token);
@@ -825,7 +826,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_id_store_history (id, from_state_version, non_fungible_resource_entity_id, non_fungible_id_data_ids) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY non_fungible_id_store_history (id, from_state_version, non_fungible_resource_entity_id, non_fungible_id_ids) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -833,7 +834,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.NonFungibleResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.NonFungibleIdDataIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.NonFungibleIdIds.ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
         }
 
         await writer.CompleteAsync(token);
@@ -1006,19 +1007,19 @@ SELECT
     setval('account_resource_deposit_rule_history_id_seq', @accountResourceDepositRuleHistorySequence),
     setval('entity_state_history_id_seq', @entityStateHistorySequence),
     setval('validator_state_history_id_seq', @validatorStateHistorySequence),
-    setval('entities_id_seq', @entitySequence),
+    setval('entities_id_seq', @entitiesSequence),
     setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
     setval('entity_metadata_aggregate_history_id_seq', @entityMetadataAggregateHistorySequence),
     setval('entity_resource_aggregated_vaults_history_id_seq', @entityResourceAggregatedVaultsHistorySequence),
     setval('entity_resource_aggregate_history_id_seq', @entityResourceAggregateHistorySequence),
     setval('entity_resource_vault_aggregate_history_id_seq', @entityResourceVaultAggregateHistorySequence),
-    setval('entity_vault_history_id_seq', @entityVaultHistorySequence),
+    setval('vault_history_id_seq', @vaultHistorySequence),
     setval('entity_role_assignments_aggregate_history_id_seq', @entityRoleAssignmentsAggregateHistorySequence),
     setval('entity_role_assignments_entry_history_id_seq', @entityRoleAssignmentsEntryHistorySequence),
     setval('entity_role_assignments_owner_role_history_id_seq', @entityRoleAssignmentsOwnerRoleHistorySequence),
     setval('component_method_royalty_entry_history_id_seq', @componentMethodRoyaltyEntryHistorySequence),
     setval('resource_entity_supply_history_id_seq', @resourceEntitySupplyHistorySequence),
-    setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
+    setval('non_fungible_ids_id_seq', @nonFungibleIdsSequence),
     setval('non_fungible_id_data_history_id_seq', @nonFungibleIdDataHistorySequence),
     setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence),
     setval('validator_public_key_history_id_seq', @validatorPublicKeyHistorySequence),
@@ -1037,19 +1038,19 @@ SELECT
                 accountResourceDepositRuleHistorySequence = sequences.AccountResourceDepositRuleHistorySequence,
                 entityStateHistorySequence = sequences.EntityStateHistorySequence,
                 validatorStateHistorySequence = sequences.ValidatorStateHistorySequence,
-                entitySequence = sequences.EntitySequence,
+                entitiesSequence = sequences.EntitiesSequence,
                 entityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,
                 entityMetadataAggregateHistorySequence = sequences.EntityMetadataAggregateHistorySequence,
                 entityResourceAggregatedVaultsHistorySequence = sequences.EntityResourceAggregatedVaultsHistorySequence,
                 entityResourceAggregateHistorySequence = sequences.EntityResourceAggregateHistorySequence,
                 entityResourceVaultAggregateHistorySequence = sequences.EntityResourceVaultAggregateHistorySequence,
-                entityVaultHistorySequence = sequences.EntityVaultHistorySequence,
+                vaultHistorySequence = sequences.VaultHistorySequence,
                 entityRoleAssignmentsAggregateHistorySequence = sequences.EntityRoleAssignmentsAggregateHistorySequence,
                 entityRoleAssignmentsEntryHistorySequence = sequences.EntityRoleAssignmentsEntryHistorySequence,
                 entityRoleAssignmentsOwnerRoleHistorySequence = sequences.EntityRoleAssignmentsOwnerRoleHistorySequence,
                 componentMethodRoyaltyEntryHistorySequence = sequences.ComponentMethodRoyaltyEntryHistorySequence,
                 resourceEntitySupplyHistorySequence = sequences.ResourceEntitySupplyHistorySequence,
-                nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
+                nonFungibleIdsSequence = sequences.NonFungibleIdsSequence,
                 nonFungibleIdDataHistorySequence = sequences.NonFungibleIdDataHistorySequence,
                 nonFungibleIdStoreHistorySequence = sequences.NonFungibleIdStoreHistorySequence,
                 validatorPublicKeyHistorySequence = sequences.ValidatorPublicKeyHistorySequence,

@@ -62,14 +62,13 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("non_fungible_id_store_history")]
-internal class NonFungibleIdStoreHistory
+[Table("non_fungible_ids")]
+internal class NonFungibleId
 {
     [Key]
     [Column("id")]
@@ -81,8 +80,6 @@ internal class NonFungibleIdStoreHistory
     [Column("non_fungible_resource_entity_id")]
     public long NonFungibleResourceEntityId { get; set; }
 
-    [Column("non_fungible_id_ids")]
-    public List<long> NonFungibleIdIds { get; set; }
-
-    // TODO should we keep track of "last significant nfid update state_version" if we ever can only mint/burn those?
+    [Column("simple_representation")]
+    public string SimpleRepresentation { get; set; }
 }
