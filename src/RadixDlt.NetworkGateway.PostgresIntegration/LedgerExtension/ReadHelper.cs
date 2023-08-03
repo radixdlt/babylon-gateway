@@ -477,7 +477,7 @@ WHERE id IN(
 
     public async Task<Dictionary<NonFungibleIdLookup, NonFungibleIdData>> ExistingNonFungibleIdDataFor(List<NonFungibleIdChange> nonFungibleIdStoreChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
     {
-        if (!nonFungibleVaultChanges.Any() && !nonFungibleVaultChanges.Any())
+        if (!nonFungibleIdStoreChanges.Any() && !nonFungibleVaultChanges.Any())
         {
             return new Dictionary<NonFungibleIdLookup, NonFungibleIdData>();
         }
