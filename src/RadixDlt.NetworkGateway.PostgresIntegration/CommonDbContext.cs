@@ -327,6 +327,9 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<EntityVaultHistory>()
             .HasIndex(e => new { e.GlobalEntityId, e.VaultEntityId, e.FromStateVersion });
 
+        modelBuilder.Entity<EntityVaultHistory>()
+            .HasIndex(e => new { e.Id, e.ResourceEntityId, e.FromStateVersion });
+
         modelBuilder.Entity<EntityRoleAssignmentsOwnerRoleHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 

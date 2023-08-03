@@ -118,6 +118,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record NonFungibleIdDataViewModel(string NonFungibleId, bool IsDeleted, byte[] Data, long DataLastUpdatedAtStateVersion);
 
+    private record NonFungibleIdLocationViewModel(string NonFungibleId, bool IsDeleted, long OwnerVaultId, EntityAddress OwnerVaultAddress, long FromStateVersion);
+
     private record struct NonFungibleIdOwnerLookup(long EntityId, long ResourceEntityId, long VaultEntityId);
 
     private record struct ExplicitMetadataLookup(long EntityId, string MetadataKey);
@@ -600,17 +602,15 @@ ORDER BY nfid.from_state_version DESC
 
         foreach (var vm in await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdDataViewModel>(cd))
         {
-            if (vm.IsDeleted)
-            {
-                continue;
-            }
-
-            var programmaticJson = ScryptoSborUtils.DataToProgrammaticJson(vm.Data, nonFungibleDataSchema.Schema,
-                nonFungibleDataSchema.SborTypeKind, nonFungibleDataSchema.TypeIndex, _networkConfigurationProvider.GetNetworkId());
+            var programmaticJson = !vm.IsDeleted
+                ? ScryptoSborUtils.DataToProgrammaticJson(vm.Data, nonFungibleDataSchema.Schema,
+                    nonFungibleDataSchema.SborTypeKind, nonFungibleDataSchema.TypeIndex, _networkConfigurationProvider.GetNetworkId())
+                : null;
 
             items.Add(new GatewayModel.StateNonFungibleDetailsResponseItem(
                 nonFungibleId: vm.NonFungibleId,
-                data: new GatewayModel.ScryptoSborValue(vm.Data.ToHex(), new JRaw(programmaticJson)),
+                isBurned: vm.IsDeleted,
+                data: !vm.IsDeleted ? new GatewayModel.ScryptoSborValue(vm.Data.ToHex(), new JRaw(programmaticJson)) : null,
                 lastUpdatedAtStateVersion: vm.DataLastUpdatedAtStateVersion));
         }
 
@@ -619,6 +619,62 @@ ORDER BY nfid.from_state_version DESC
             resourceAddress: resourceAddress.ToString(),
             nonFungibleIdType: entity.NonFungibleIdType.ToGatewayModel(),
             nonFungibleIds: items);
+    }
+
+    public async Task<GatewayModel.StateNonFungibleLocationResponse> NonFungibleIdLocation(EntityAddress resourceAddress, IList<string> nonFungibleIds, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    {
+        var resourceEntity = await GetEntity<GlobalNonFungibleResourceEntity>(resourceAddress, ledgerState, token);
+
+        var cd = new CommandDefinition(
+            commandText: @"
+SELECT
+    nfid.non_fungible_id as NonFungibleId,
+    md.IsDeleted,
+    vh.OwnerVaultId,
+    e.address as OwnerVaultAddress,
+    (CASE WHEN md.IsDeleted THEN md.DataFromStateVersion
+          ELSE vh.LocationFromStateVersion END) AS FromStateVersion
+FROM non_fungible_id_data nfid
+LEFT JOIN LATERAL (
+    SELECT
+        is_deleted as IsDeleted,
+        from_state_version as DataFromStateVersion
+    FROM non_fungible_id_data_history nfiddh
+    WHERE nfiddh.non_fungible_id_data_id = nfid.id AND nfiddh.from_state_version <= @stateVersion
+    ORDER BY nfiddh.from_state_version DESC
+    LIMIT 1
+) md ON TRUE
+LEFT JOIN LATERAL (
+    SELECT
+        vault_entity_id as OwnerVaultId,
+        from_state_version as LocationFromStateVersion
+    FROM entity_vault_history evh
+    WHERE resource_entity_id = @resourceEntityId AND from_state_version <= @stateVersion and nfid.id = ANY(non_fungible_ids)
+    ORDER BY evh.from_state_version DESC
+    LIMIT 1
+) vh ON TRUE
+INNER JOIN entities e ON e.id = vh.OwnerVaultId AND e.from_state_version <= @stateVersion AND nfid.non_fungible_resource_entity_id = @resourceEntityId AND nfid.non_fungible_id = ANY(@nonFungibleIds)
+order by FromStateVersion DESC
+",
+            parameters: new
+            {
+                stateVersion = ledgerState.StateVersion,
+                resourceEntityId = resourceEntity.Id,
+                nonFungibleIds = nonFungibleIds,
+            },
+            cancellationToken: token);
+
+        var result = await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdLocationViewModel>(cd);
+
+        return new GatewayModel.StateNonFungibleLocationResponse(
+            ledgerState: ledgerState,
+            resourceAddress: resourceAddress.ToString(),
+            nonFungibleIds: result.Select(x => new GatewayModel.StateNonFungibleLocationResponseItem(
+                nonFungibleId: x.NonFungibleId,
+                owningVaultAddress: !x.IsDeleted ? x.OwnerVaultAddress : null,
+                isBurned: x.IsDeleted,
+                lastUpdatedAtStateVersion:x.FromStateVersion
+            )).ToList());
     }
 
     public async Task<GatewayModel.StateValidatorsListResponse> StateValidatorsList(GatewayModel.StateValidatorsListCursor? cursor, GatewayModel.LedgerState ledgerState,

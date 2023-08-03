@@ -90,61 +90,49 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// StateNonFungibleDetailsResponseItem
+    /// StateNonFungibleLocationResponseAllOf
     /// </summary>
-    [DataContract(Name = "StateNonFungibleDetailsResponseItem")]
-    public partial class StateNonFungibleDetailsResponseItem : IEquatable<StateNonFungibleDetailsResponseItem>
+    [DataContract(Name = "StateNonFungibleLocationResponse_allOf")]
+    public partial class StateNonFungibleLocationResponseAllOf : IEquatable<StateNonFungibleLocationResponseAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateNonFungibleDetailsResponseItem" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleLocationResponseAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateNonFungibleDetailsResponseItem() { }
+        protected StateNonFungibleLocationResponseAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateNonFungibleDetailsResponseItem" /> class.
+        /// Initializes a new instance of the <see cref="StateNonFungibleLocationResponseAllOf" /> class.
         /// </summary>
-        /// <param name="isBurned">isBurned (required).</param>
-        /// <param name="nonFungibleId">String-encoded non-fungible ID. (required).</param>
-        /// <param name="data">data.</param>
-        /// <param name="lastUpdatedAtStateVersion">TBD (required).</param>
-        public StateNonFungibleDetailsResponseItem(bool isBurned = default(bool), string nonFungibleId = default(string), ScryptoSborValue data = default(ScryptoSborValue), long lastUpdatedAtStateVersion = default(long))
+        /// <param name="resourceAddress">Bech32m-encoded human readable version of the address. (required).</param>
+        /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
+        public StateNonFungibleLocationResponseAllOf(string resourceAddress = default(string), List<StateNonFungibleLocationResponseItem> nonFungibleIds = default(List<StateNonFungibleLocationResponseItem>))
         {
-            this.IsBurned = isBurned;
-            // to ensure "nonFungibleId" is required (not null)
-            if (nonFungibleId == null)
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("nonFungibleId is a required property for StateNonFungibleDetailsResponseItem and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for StateNonFungibleLocationResponseAllOf and cannot be null");
             }
-            this.NonFungibleId = nonFungibleId;
-            this.LastUpdatedAtStateVersion = lastUpdatedAtStateVersion;
-            this.Data = data;
+            this.ResourceAddress = resourceAddress;
+            // to ensure "nonFungibleIds" is required (not null)
+            if (nonFungibleIds == null)
+            {
+                throw new ArgumentNullException("nonFungibleIds is a required property for StateNonFungibleLocationResponseAllOf and cannot be null");
+            }
+            this.NonFungibleIds = nonFungibleIds;
         }
 
         /// <summary>
-        /// Gets or Sets IsBurned
+        /// Bech32m-encoded human readable version of the address.
         /// </summary>
-        [DataMember(Name = "is_burned", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsBurned { get; set; }
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// String-encoded non-fungible ID.
+        /// Gets or Sets NonFungibleIds
         /// </summary>
-        /// <value>String-encoded non-fungible ID.</value>
-        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
-        public string NonFungibleId { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Data
-        /// </summary>
-        [DataMember(Name = "data", EmitDefaultValue = true)]
-        public ScryptoSborValue Data { get; set; }
-
-        /// <summary>
-        /// TBD
-        /// </summary>
-        /// <value>TBD</value>
-        [DataMember(Name = "last_updated_at_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long LastUpdatedAtStateVersion { get; set; }
+        [DataMember(Name = "non_fungible_ids", IsRequired = true, EmitDefaultValue = true)]
+        public List<StateNonFungibleLocationResponseItem> NonFungibleIds { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -153,11 +141,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateNonFungibleDetailsResponseItem {\n");
-            sb.Append("  IsBurned: ").Append(IsBurned).Append("\n");
-            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
-            sb.Append("  Data: ").Append(Data).Append("\n");
-            sb.Append("  LastUpdatedAtStateVersion: ").Append(LastUpdatedAtStateVersion).Append("\n");
+            sb.Append("class StateNonFungibleLocationResponseAllOf {\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -178,15 +164,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateNonFungibleDetailsResponseItem);
+            return this.Equals(input as StateNonFungibleLocationResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if StateNonFungibleDetailsResponseItem instances are equal
+        /// Returns true if StateNonFungibleLocationResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateNonFungibleDetailsResponseItem to be compared</param>
+        /// <param name="input">Instance of StateNonFungibleLocationResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateNonFungibleDetailsResponseItem input)
+        public bool Equals(StateNonFungibleLocationResponseAllOf input)
         {
             if (input == null)
             {
@@ -194,22 +180,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.IsBurned == input.IsBurned ||
-                    this.IsBurned.Equals(input.IsBurned)
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 ) && 
                 (
-                    this.NonFungibleId == input.NonFungibleId ||
-                    (this.NonFungibleId != null &&
-                    this.NonFungibleId.Equals(input.NonFungibleId))
-                ) && 
-                (
-                    this.Data == input.Data ||
-                    (this.Data != null &&
-                    this.Data.Equals(input.Data))
-                ) && 
-                (
-                    this.LastUpdatedAtStateVersion == input.LastUpdatedAtStateVersion ||
-                    this.LastUpdatedAtStateVersion.Equals(input.LastUpdatedAtStateVersion)
+                    this.NonFungibleIds == input.NonFungibleIds ||
+                    this.NonFungibleIds != null &&
+                    input.NonFungibleIds != null &&
+                    this.NonFungibleIds.SequenceEqual(input.NonFungibleIds)
                 );
         }
 
@@ -222,16 +201,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.IsBurned.GetHashCode();
-                if (this.NonFungibleId != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
-                if (this.Data != null)
+                if (this.NonFungibleIds != null)
                 {
-                    hashCode = (hashCode * 59) + this.Data.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleIds.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.LastUpdatedAtStateVersion.GetHashCode();
                 return hashCode;
             }
         }

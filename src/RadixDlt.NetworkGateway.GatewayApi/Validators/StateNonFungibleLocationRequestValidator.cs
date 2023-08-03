@@ -62,43 +62,36 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using System.Threading;
-using System.Threading.Tasks;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace GatewayApi.Controllers;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-[ApiController]
-[Route("state/non-fungible")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
-public class StateNonFungibleController : ControllerBase
+internal class StateNonFungibleLocationRequestValidator : AbstractValidator<GatewayModel.StateNonFungibleLocationRequest>
 {
-    private readonly INonFungibleHandler _nonFungibleHandler;
-
-    public StateNonFungibleController(INonFungibleHandler nonFungibleHandler)
+    public StateNonFungibleLocationRequestValidator(
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
+        LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
-        _nonFungibleHandler = nonFungibleHandler;
-    }
+        RuleFor(x => x.ResourceAddress)
+            .NotEmpty()
+            .RadixAddress();
 
-    [HttpPost("ids")]
-    public async Task<GatewayModel.StateNonFungibleIdsResponse> Ids(GatewayModel.StateNonFungibleIdsRequest request, CancellationToken token)
-    {
-        return await _nonFungibleHandler.Ids(request, token);
-    }
+        RuleFor(x => x.NonFungibleIds)
+            .NotEmpty()
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.NonFungibleIds.Count)
+                    .GreaterThan(0)
+                    .LessThan(endpointOptionsSnapshot.Value.MaxPageSize);
 
-    [HttpPost("data")]
-    public async Task<GatewayModel.StateNonFungibleDataResponse> Data(GatewayModel.StateNonFungibleDataRequest request, CancellationToken token)
-    {
-        return await _nonFungibleHandler.Data(request, token);
-    }
+                RuleForEach(x => x.NonFungibleIds)
+                    .NotEmpty();
+            });
 
-    [HttpPost("location")]
-    public async Task<GatewayModel.StateNonFungibleLocationResponse> Data(GatewayModel.StateNonFungibleLocationRequest request, CancellationToken token)
-    {
-        return await _nonFungibleHandler.Location(request, token);
+        RuleFor(x => x.AtLedgerState)
+            .SetValidator(ledgerStateSelectorValidator);
     }
 }

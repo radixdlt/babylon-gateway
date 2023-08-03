@@ -622,6 +622,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("GlobalEntityId", "VaultEntityId", "FromStateVersion");
 
+                    b.HasIndex("Id", "ResourceEntityId", "FromStateVersion");
+
                     b.HasIndex("OwnerEntityId", "VaultEntityId", "FromStateVersion");
 
                     b.ToTable("entity_vault_history");

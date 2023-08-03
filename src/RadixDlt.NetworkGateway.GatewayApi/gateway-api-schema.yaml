@@ -542,6 +542,29 @@ paths:
                 $ref: "#/components/schemas/StateNonFungibleDataResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
+  /state/non-fungible/location:
+    post:
+      operationId: NonFungibleLocation
+      summary: Get Non-Fungible Location
+      description: |
+        Returns location of a given non-fungible ID.
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateNonFungibleLocationRequest"
+      responses:
+        "200":
+          description: Non-Fungible ID Location
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateNonFungibleLocationResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
 
   /state/key-value-store/data:
     post:
@@ -2226,6 +2249,54 @@ components:
             non_fungible_ids:
               $ref: "#/components/schemas/NonFungibleIdsCollection"
 
+    StateNonFungibleLocationRequest:
+      allOf:
+        - $ref: "#/components/schemas/AtLedgerStateMixin"
+        - type: object
+          required:
+            - resource_address
+            - non_fungible_ids
+          properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
+            non_fungible_ids:
+              type: array
+              items:
+                $ref: "#/components/schemas/NonFungibleId"
+      example:
+        resource_address: "<non-fungible-entity-address>"
+        non_fungible_ids: [ "#1#" ]
+
+    StateNonFungibleLocationResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - resource_address
+            - non_fungible_ids
+          properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
+            non_fungible_ids:
+              type: array
+              items:
+                $ref: "#/components/schemas/StateNonFungibleLocationResponseItem"
+    StateNonFungibleLocationResponseItem:
+      type: object
+      required:
+        - non_fungible_id
+        - last_updated_at_state_version
+        - is_burned
+      properties:
+        non_fungible_id:
+          $ref: "#/components/schemas/NonFungibleId"
+        owning_vault_address:
+          $ref: "#/components/schemas/Address"
+        is_burned:
+          type: boolean
+        last_updated_at_state_version:
+          $ref: "#/components/schemas/LastUpdatedAtStateVersion"
+
     StateNonFungibleDataRequest:
       allOf:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
@@ -2242,7 +2313,7 @@ components:
                 $ref: "#/components/schemas/NonFungibleId"
       example:
         resource_address: "<non-fungible-entity-address>"
-        non_fungible_ids: ["#1#"]
+        non_fungible_ids: [ "#1#" ]
     StateNonFungibleDataResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -2264,9 +2335,11 @@ components:
       type: object
       required:
         - non_fungible_id
-        - data
+        - is_burned
         - last_updated_at_state_version
       properties:
+        is_burned:
+          type: boolean
         non_fungible_id:
           $ref: "#/components/schemas/NonFungibleId"
         data:
