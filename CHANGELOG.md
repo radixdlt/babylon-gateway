@@ -11,6 +11,7 @@ _WORK IN PROGRESS_
 ### Breaking Changes
 
 - Renamed `access_rules` to `role_assignments`. Included missing `module` to role assignment key.
+- deleted non fungible ids are also returned from `/state/non-fungible/data` with null data, marked as `is_burned` with state version when they got burned.
 
 ## Full technical changelog by minor release
 ### 0.4.1
@@ -23,7 +24,8 @@ _WORK IN PROGRESS_
   - key-value key and data in `/state/key-value/data` endpoint
   - non fungible data in `/state/non-fungible/data` endpoint
   - events in `/transaction/committed-details` and `/stream/transactions` endpoints.
-
+- new endpoint `/state/non-fungible/location` returns location of given non fungible id.
+- deleted non fungible ids are also returned from `/state/non-fungible/data` with null data, marked as `is_burned` with state version when they got burned.
 -------
 
 # 0.4.0 - RCNet v2
