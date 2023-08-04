@@ -62,63 +62,74 @@
  * permissions under this License.
  */
 
-using Npgsql;
-using NpgsqlTypes;
-using System.Numerics;
-using System.Threading;
-using System.Threading.Tasks;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-internal static class NpgsqlBinaryImporterExtensions
+internal record RoleAssignmentRuleKey(string Name, ObjectModuleId ObjectModuleId);
+internal record RoleAssignmentEntry(RoleAssignmentRuleKey Key, RoleAssignmentRuleKey[] Updaters);
+
+internal interface IRoleAssignmentsKeyProvider
 {
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, bool? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
+    List<RoleAssignmentEntry> GetFungibleResourceKeys();
+
+    List<RoleAssignmentEntry> GetNonFungibleResourceKeys();
+
+    List<RoleAssignmentEntry> GetNativeModulesKeys();
+}
+
+internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
+{
+    private static readonly string[] _fungibleMainModuleResourceRuleKeys = { "burner", "minter", "freezer", "recaller", "depositor", "withdrawer", };
+
+    private static readonly string[] _nonFungibleMainModuleResourceRuleKeys = { "burner", "minter", "freezer", "recaller", "depositor", "withdrawer", "non_fungible_data_updater", };
+
+    private static readonly string[] _metadataRuleKeys = { "metadata_locker", "metadata_setter", };
+
+    private static readonly string[] _royaltyAccessRuleKeys = { "royalty_setter", "royalty_locker", "royalty_claimer", };
+
+    public List<RoleAssignmentEntry> GetFungibleResourceKeys()
     {
-        return value.HasValue
-            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
+        var fungibleResourceWithUpdaterKeys = GetAccessRulesKeysWithUpdaterRoles(_fungibleMainModuleResourceRuleKeys, ObjectModuleId.Main);
+
+        return GetNativeModulesKeys()
+            .Concat(fungibleResourceWithUpdaterKeys)
+            .ToList();
     }
 
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, int? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
+    public List<RoleAssignmentEntry> GetNonFungibleResourceKeys()
     {
-        return value.HasValue
-            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
+        var nonFungibleResourceWithUpdaterKeys = GetAccessRulesKeysWithUpdaterRoles(_nonFungibleMainModuleResourceRuleKeys, ObjectModuleId.Main);
+
+        return GetNativeModulesKeys()
+            .Concat(nonFungibleResourceWithUpdaterKeys)
+            .ToList();
     }
 
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, long? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
+    public List<RoleAssignmentEntry> GetNativeModulesKeys()
     {
-        return value.HasValue
-            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
+        var metadataWithUpdaterKeys = GetAccessRulesKeysWithUpdaterRoles(_metadataRuleKeys, ObjectModuleId.Metadata);
+        var royaltyWithUpdaterKeys = GetAccessRulesKeysWithUpdaterRoles(_royaltyAccessRuleKeys, ObjectModuleId.Royalty);
+
+        return metadataWithUpdaterKeys
+            .Concat(royaltyWithUpdaterKeys)
+            .ToList();
     }
 
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, BigInteger? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
+    private List<RoleAssignmentEntry> GetAccessRulesKeysWithUpdaterRoles(string[] ruleKeys, ObjectModuleId objectModuleId)
     {
-        return value.HasValue
-            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
-    }
+        const string UpdaterSuffix = "updater";
 
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, byte[]? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
-    {
-        return value != null
-            ? writer.WriteAsync(value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
-    }
-
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, long[]? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
-    {
-        return value != null
-            ? writer.WriteAsync(value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
-    }
-
-    public static Task WriteNullableAsync<T>(this NpgsqlBinaryImporter writer, T? value, string dataTypeName, CancellationToken cancellationToken = default)
-        where T : struct
-    {
-        return value.HasValue
-            ? writer.WriteAsync(value.Value, dataTypeName, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
+        return
+            ruleKeys
+                .Select(key => new List<RoleAssignmentEntry>
+                {
+                    new(new RoleAssignmentRuleKey(key, objectModuleId), new[] { new RoleAssignmentRuleKey($"{key}_{UpdaterSuffix}", objectModuleId) }),
+                    new(new RoleAssignmentRuleKey($"{key}_{UpdaterSuffix}", objectModuleId), new[] { new RoleAssignmentRuleKey($"{key}_{UpdaterSuffix}", objectModuleId) }),
+                })
+                .SelectMany(x => x)
+                .ToList();
     }
 }

@@ -62,63 +62,90 @@
  * permissions under this License.
  */
 
-using Npgsql;
-using NpgsqlTypes;
-using System.Numerics;
-using System.Threading;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using CoreApiModel = RadixDlt.CoreApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-internal static class NpgsqlBinaryImporterExtensions
+internal interface IRoleAssignmentsMapper
 {
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, bool? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
+    Dictionary<long, GatewayApiSdk.Model.ComponentEntityRoleAssignments> GetEffectiveRoleAssignments(
+        ICollection<Entity> componentEntities, ICollection<EntityRoleAssignmentsOwnerRoleHistory> ownerRoles, ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments);
+}
+
+internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
+{
+    private readonly IRoleAssignmentsKeyProvider _roleAssignmentsKeyProvider;
+
+    public RoleAssignmentsMapper(IRoleAssignmentsKeyProvider roleAssignmentsKeyProvider)
     {
-        return value.HasValue
-            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
+        _roleAssignmentsKeyProvider = roleAssignmentsKeyProvider;
     }
 
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, int? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
+    public Dictionary<long, GatewayModel.ComponentEntityRoleAssignments> GetEffectiveRoleAssignments(
+        ICollection<Entity> componentEntities, ICollection<EntityRoleAssignmentsOwnerRoleHistory> ownerRoles, ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments)
     {
-        return value.HasValue
-            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
+        var fungibleResourceAccessRuleKeys = _roleAssignmentsKeyProvider.GetFungibleResourceKeys();
+        var nonFungibleResourceRuleKeys = _roleAssignmentsKeyProvider.GetNonFungibleResourceKeys();
+        var nativeModulesAccessRuleKeys = _roleAssignmentsKeyProvider.GetNativeModulesKeys();
+
+        return componentEntities.ToDictionary(entity => entity.Id, entity =>
+        {
+            var ownerRole = ownerRoles.FirstOrDefault(x => x.EntityId == entity.Id)?.RoleAssignments;
+
+            if (ownerRole == null)
+            {
+                throw new UnreachableException($"No owner role defined for entity: {entity.Address}");
+            }
+
+            var isFungibleResource = entity is GlobalFungibleResourceEntity;
+            var isNonFungibleResource = entity is GlobalNonFungibleResourceEntity;
+
+            if (isFungibleResource)
+            {
+                return new GatewayApiSdk.Model.ComponentEntityRoleAssignments(
+                    new JRaw(ownerRole),
+                    GetEntries(entity.Id, fungibleResourceAccessRuleKeys, roleAssignments)
+                );
+            }
+
+            if (isNonFungibleResource)
+            {
+                return new GatewayApiSdk.Model.ComponentEntityRoleAssignments(
+                    new JRaw(ownerRole),
+                    GetEntries(entity.Id, nonFungibleResourceRuleKeys, roleAssignments)
+                );
+            }
+
+            return new GatewayApiSdk.Model.ComponentEntityRoleAssignments(
+                new JRaw(ownerRole),
+                GetEntries(entity.Id, nativeModulesAccessRuleKeys, roleAssignments)
+            );
+        });
     }
 
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, long? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
+    private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GetEntries(long entityId, List<RoleAssignmentEntry> accessRuleKeys,
+        ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments)
     {
-        return value.HasValue
-            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
-    }
+        return accessRuleKeys.Select(role =>
+        {
+            var existingRoleAssignments = roleAssignments
+                .Where(e => e.EntityId == entityId && e.KeyRole == role.Key.Name && e.KeyModule == role.Key.ObjectModuleId)
+                .Select(x => new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Explicit, new JRaw(x.RoleAssignments)))
+                .FirstOrDefault();
 
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, BigInteger? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
-    {
-        return value.HasValue
-            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
-    }
-
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, byte[]? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
-    {
-        return value != null
-            ? writer.WriteAsync(value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
-    }
-
-    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, long[]? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
-    {
-        return value != null
-            ? writer.WriteAsync(value, npgsqlDbType, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
-    }
-
-    public static Task WriteNullableAsync<T>(this NpgsqlBinaryImporter writer, T? value, string dataTypeName, CancellationToken cancellationToken = default)
-        where T : struct
-    {
-        return value.HasValue
-            ? writer.WriteAsync(value.Value, dataTypeName, cancellationToken)
-            : writer.WriteNullAsync(cancellationToken);
+            return new GatewayModel.ComponentEntityRoleAssignmentEntry(
+                new GatewayModel.RoleAssignmentKey(role.Key.Name, role.Key.ObjectModuleId.ToGatewayModel()),
+                existingRoleAssignments ?? new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner, null),
+                role.Updaters.Select(x => new GatewayModel.RoleAssignmentKey(x.Name, x.ObjectModuleId.ToGatewayModel())).ToList()
+            );
+        }).ToList();
     }
 }

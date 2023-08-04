@@ -90,56 +90,43 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ComponentEntityRoleAssignmentEntry
+    /// RoleAssignmentKey
     /// </summary>
-    [DataContract(Name = "ComponentEntityRoleAssignmentEntry")]
-    public partial class ComponentEntityRoleAssignmentEntry : IEquatable<ComponentEntityRoleAssignmentEntry>
+    [DataContract(Name = "RoleAssignmentKey")]
+    public partial class RoleAssignmentKey : IEquatable<RoleAssignmentKey>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignmentEntry" /> class.
+        /// Gets or Sets Module
+        /// </summary>
+        [DataMember(Name = "module", IsRequired = true, EmitDefaultValue = true)]
+        public ObjectModuleId Module { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoleAssignmentKey" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ComponentEntityRoleAssignmentEntry() { }
+        protected RoleAssignmentKey() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignmentEntry" /> class.
+        /// Initializes a new instance of the <see cref="RoleAssignmentKey" /> class.
         /// </summary>
-        /// <param name="roleKey">roleKey (required).</param>
-        /// <param name="assignment">assignment (required).</param>
-        /// <param name="updaterRoles">updaterRoles.</param>
-        public ComponentEntityRoleAssignmentEntry(RoleAssignmentKey roleKey = default(RoleAssignmentKey), ComponentEntityRoleAssignmentEntryAssignment assignment = default(ComponentEntityRoleAssignmentEntryAssignment), List<RoleAssignmentKey> updaterRoles = default(List<RoleAssignmentKey>))
+        /// <param name="name">name (required).</param>
+        /// <param name="module">module (required).</param>
+        public RoleAssignmentKey(string name = default(string), ObjectModuleId module = default(ObjectModuleId))
         {
-            // to ensure "roleKey" is required (not null)
-            if (roleKey == null)
+            // to ensure "name" is required (not null)
+            if (name == null)
             {
-                throw new ArgumentNullException("roleKey is a required property for ComponentEntityRoleAssignmentEntry and cannot be null");
+                throw new ArgumentNullException("name is a required property for RoleAssignmentKey and cannot be null");
             }
-            this.RoleKey = roleKey;
-            // to ensure "assignment" is required (not null)
-            if (assignment == null)
-            {
-                throw new ArgumentNullException("assignment is a required property for ComponentEntityRoleAssignmentEntry and cannot be null");
-            }
-            this.Assignment = assignment;
-            this.UpdaterRoles = updaterRoles;
+            this.Name = name;
+            this.Module = module;
         }
 
         /// <summary>
-        /// Gets or Sets RoleKey
+        /// Gets or Sets Name
         /// </summary>
-        [DataMember(Name = "role_key", IsRequired = true, EmitDefaultValue = true)]
-        public RoleAssignmentKey RoleKey { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Assignment
-        /// </summary>
-        [DataMember(Name = "assignment", IsRequired = true, EmitDefaultValue = true)]
-        public ComponentEntityRoleAssignmentEntryAssignment Assignment { get; set; }
-
-        /// <summary>
-        /// Gets or Sets UpdaterRoles
-        /// </summary>
-        [DataMember(Name = "updater_roles", EmitDefaultValue = true)]
-        public List<RoleAssignmentKey> UpdaterRoles { get; set; }
+        [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
+        public string Name { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -148,10 +135,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ComponentEntityRoleAssignmentEntry {\n");
-            sb.Append("  RoleKey: ").Append(RoleKey).Append("\n");
-            sb.Append("  Assignment: ").Append(Assignment).Append("\n");
-            sb.Append("  UpdaterRoles: ").Append(UpdaterRoles).Append("\n");
+            sb.Append("class RoleAssignmentKey {\n");
+            sb.Append("  Name: ").Append(Name).Append("\n");
+            sb.Append("  Module: ").Append(Module).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -172,15 +158,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ComponentEntityRoleAssignmentEntry);
+            return this.Equals(input as RoleAssignmentKey);
         }
 
         /// <summary>
-        /// Returns true if ComponentEntityRoleAssignmentEntry instances are equal
+        /// Returns true if RoleAssignmentKey instances are equal
         /// </summary>
-        /// <param name="input">Instance of ComponentEntityRoleAssignmentEntry to be compared</param>
+        /// <param name="input">Instance of RoleAssignmentKey to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ComponentEntityRoleAssignmentEntry input)
+        public bool Equals(RoleAssignmentKey input)
         {
             if (input == null)
             {
@@ -188,20 +174,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.RoleKey == input.RoleKey ||
-                    (this.RoleKey != null &&
-                    this.RoleKey.Equals(input.RoleKey))
+                    this.Name == input.Name ||
+                    (this.Name != null &&
+                    this.Name.Equals(input.Name))
                 ) && 
                 (
-                    this.Assignment == input.Assignment ||
-                    (this.Assignment != null &&
-                    this.Assignment.Equals(input.Assignment))
-                ) && 
-                (
-                    this.UpdaterRoles == input.UpdaterRoles ||
-                    this.UpdaterRoles != null &&
-                    input.UpdaterRoles != null &&
-                    this.UpdaterRoles.SequenceEqual(input.UpdaterRoles)
+                    this.Module == input.Module ||
+                    this.Module.Equals(input.Module)
                 );
         }
 
@@ -214,18 +193,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.RoleKey != null)
+                if (this.Name != null)
                 {
-                    hashCode = (hashCode * 59) + this.RoleKey.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Name.GetHashCode();
                 }
-                if (this.Assignment != null)
-                {
-                    hashCode = (hashCode * 59) + this.Assignment.GetHashCode();
-                }
-                if (this.UpdaterRoles != null)
-                {
-                    hashCode = (hashCode * 59) + this.UpdaterRoles.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Module.GetHashCode();
                 return hashCode;
             }
         }

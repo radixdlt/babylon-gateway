@@ -984,20 +984,43 @@ components:
       type: object
       required:
         - role_key
-        - rule
+        - assignment
       properties:
         role_key:
+          $ref: "#/components/schemas/RoleAssignmentKey"
+        assignment:
           type: object
           required:
-            - role
-            - module
+            - resolution
           properties:
-            role:
-              type: string
-            module:
-              type: ObjectModuleId
-        rule:
-          type: object
+            resolution:
+              $ref: "#/components/schemas/RoleAssignmentResolution"
+            explicit_rule:
+              type: object
+        updater_roles:
+          type: array
+          items:
+            $ref: "#/components/schemas/RoleAssignmentKey"
+
+    RoleAssignmentResolution:
+      type: string
+      enum:
+        - Explicit
+        - Owner
+
+    RoleAssignmentKey:
+      type: object
+      required:
+        - name
+        - module
+      properties:
+        name:
+          type: string
+        module:
+          $ref: "#/components/schemas/ObjectModuleId"
+
+
+
 
     FungibleResourcesCollection:
       description: Fungible resources collection.
@@ -2013,7 +2036,6 @@ components:
         - type: object
           required:
             - blueprint_name
-            - role_assignments
           properties:
             package_address:
               $ref: "#/components/schemas/Address"
