@@ -987,7 +987,7 @@ components:
         - assignment
       properties:
         role_key:
-          $ref: "#/components/schemas/RoleAssignmentKey"
+          $ref: "#/components/schemas/RoleKey"
         assignment:
           type: object
           required:
@@ -1000,7 +1000,7 @@ components:
         updater_roles:
           type: array
           items:
-            $ref: "#/components/schemas/RoleAssignmentKey"
+            $ref: "#/components/schemas/RoleKey"
 
     RoleAssignmentResolution:
       type: string
@@ -1008,19 +1008,16 @@ components:
         - Explicit
         - Owner
 
-    RoleAssignmentKey:
+    RoleKey:
       type: object
       required:
-        - name
         - module
+        - name
       properties:
         name:
           type: string
         module:
           $ref: "#/components/schemas/ObjectModuleId"
-
-
-
 
     FungibleResourcesCollection:
       description: Fungible resources collection.

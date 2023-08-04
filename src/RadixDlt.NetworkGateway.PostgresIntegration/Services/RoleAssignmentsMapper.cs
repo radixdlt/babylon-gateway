@@ -142,9 +142,9 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
                 .FirstOrDefault();
 
             return new GatewayModel.ComponentEntityRoleAssignmentEntry(
-                new GatewayModel.RoleAssignmentKey(role.Key.Name, role.Key.ObjectModuleId.ToGatewayModel()),
+                new GatewayModel.RoleKey(role.Key.Name, role.Key.ObjectModuleId.ToGatewayModel()),
                 existingRoleAssignments ?? new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner, null),
-                role.Updaters.Select(x => new GatewayModel.RoleAssignmentKey(x.Name, x.ObjectModuleId.ToGatewayModel())).ToList()
+                role.Updaters.Select(x => new GatewayModel.RoleKey(x.Name, x.ObjectModuleId.ToGatewayModel())).ToList()
             );
         }).ToList();
     }

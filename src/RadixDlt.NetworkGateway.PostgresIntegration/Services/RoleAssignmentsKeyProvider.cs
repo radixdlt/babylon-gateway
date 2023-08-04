@@ -73,11 +73,11 @@ internal record RoleAssignmentEntry(RoleAssignmentRuleKey Key, RoleAssignmentRul
 
 internal interface IRoleAssignmentsKeyProvider
 {
-    List<RoleAssignmentEntry> GetFungibleResourceKeys();
+    List<RoleAssignmentEntry> GetNativeModulesKeys();
 
     List<RoleAssignmentEntry> GetNonFungibleResourceKeys();
 
-    List<RoleAssignmentEntry> GetNativeModulesKeys();
+    List<RoleAssignmentEntry> GetFungibleResourceKeys();
 }
 
 internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
@@ -90,33 +90,35 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
 
     private static readonly string[] _royaltyAccessRuleKeys = { "royalty_setter", "royalty_locker", "royalty_claimer", };
 
-    public List<RoleAssignmentEntry> GetFungibleResourceKeys()
-    {
-        var fungibleResourceWithUpdaterKeys = GetAccessRulesKeysWithUpdaterRoles(_fungibleMainModuleResourceRuleKeys, ObjectModuleId.Main);
+    private readonly List<RoleAssignmentEntry> _nativeModulesKeys;
 
-        return GetNativeModulesKeys()
-            .Concat(fungibleResourceWithUpdaterKeys)
-            .ToList();
-    }
+    private readonly List<RoleAssignmentEntry> _nonFungibleResourceKeys;
 
-    public List<RoleAssignmentEntry> GetNonFungibleResourceKeys()
-    {
-        var nonFungibleResourceWithUpdaterKeys = GetAccessRulesKeysWithUpdaterRoles(_nonFungibleMainModuleResourceRuleKeys, ObjectModuleId.Main);
+    private readonly List<RoleAssignmentEntry> _fungibleResourceKeys;
 
-        return GetNativeModulesKeys()
-            .Concat(nonFungibleResourceWithUpdaterKeys)
-            .ToList();
-    }
-
-    public List<RoleAssignmentEntry> GetNativeModulesKeys()
+    public RoleAssignmentsKeyProvider()
     {
         var metadataWithUpdaterKeys = GetAccessRulesKeysWithUpdaterRoles(_metadataRuleKeys, ObjectModuleId.Metadata);
         var royaltyWithUpdaterKeys = GetAccessRulesKeysWithUpdaterRoles(_royaltyAccessRuleKeys, ObjectModuleId.Royalty);
 
-        return metadataWithUpdaterKeys
+        _nativeModulesKeys = metadataWithUpdaterKeys
             .Concat(royaltyWithUpdaterKeys)
             .ToList();
+
+        _nonFungibleResourceKeys = _nativeModulesKeys
+            .Concat(GetAccessRulesKeysWithUpdaterRoles(_nonFungibleMainModuleResourceRuleKeys, ObjectModuleId.Main))
+            .ToList();
+
+        _fungibleResourceKeys = _nativeModulesKeys
+            .Concat(GetAccessRulesKeysWithUpdaterRoles(_fungibleMainModuleResourceRuleKeys, ObjectModuleId.Main))
+            .ToList();
     }
+
+    public List<RoleAssignmentEntry> GetNativeModulesKeys() => _nativeModulesKeys;
+
+    public List<RoleAssignmentEntry> GetNonFungibleResourceKeys() => _nonFungibleResourceKeys;
+
+    public List<RoleAssignmentEntry> GetFungibleResourceKeys() => _fungibleResourceKeys;
 
     private List<RoleAssignmentEntry> GetAccessRulesKeysWithUpdaterRoles(string[] ruleKeys, ObjectModuleId objectModuleId)
     {

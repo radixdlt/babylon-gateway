@@ -90,10 +90,10 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// RoleAssignmentKey
+    /// RoleKey
     /// </summary>
-    [DataContract(Name = "RoleAssignmentKey")]
-    public partial class RoleAssignmentKey : IEquatable<RoleAssignmentKey>
+    [DataContract(Name = "RoleKey")]
+    public partial class RoleKey : IEquatable<RoleKey>
     {
 
         /// <summary>
@@ -102,21 +102,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         [DataMember(Name = "module", IsRequired = true, EmitDefaultValue = true)]
         public ObjectModuleId Module { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="RoleAssignmentKey" /> class.
+        /// Initializes a new instance of the <see cref="RoleKey" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected RoleAssignmentKey() { }
+        protected RoleKey() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="RoleAssignmentKey" /> class.
+        /// Initializes a new instance of the <see cref="RoleKey" /> class.
         /// </summary>
         /// <param name="name">name (required).</param>
         /// <param name="module">module (required).</param>
-        public RoleAssignmentKey(string name = default(string), ObjectModuleId module = default(ObjectModuleId))
+        public RoleKey(string name = default(string), ObjectModuleId module = default(ObjectModuleId))
         {
             // to ensure "name" is required (not null)
             if (name == null)
             {
-                throw new ArgumentNullException("name is a required property for RoleAssignmentKey and cannot be null");
+                throw new ArgumentNullException("name is a required property for RoleKey and cannot be null");
             }
             this.Name = name;
             this.Module = module;
@@ -135,7 +135,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class RoleAssignmentKey {\n");
+            sb.Append("class RoleKey {\n");
             sb.Append("  Name: ").Append(Name).Append("\n");
             sb.Append("  Module: ").Append(Module).Append("\n");
             sb.Append("}\n");
@@ -158,15 +158,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as RoleAssignmentKey);
+            return this.Equals(input as RoleKey);
         }
 
         /// <summary>
-        /// Returns true if RoleAssignmentKey instances are equal
+        /// Returns true if RoleKey instances are equal
         /// </summary>
-        /// <param name="input">Instance of RoleAssignmentKey to be compared</param>
+        /// <param name="input">Instance of RoleKey to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(RoleAssignmentKey input)
+        public bool Equals(RoleKey input)
         {
             if (input == null)
             {

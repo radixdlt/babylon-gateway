@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="roleKey">roleKey (required).</param>
         /// <param name="assignment">assignment (required).</param>
         /// <param name="updaterRoles">updaterRoles.</param>
-        public ComponentEntityRoleAssignmentEntry(RoleAssignmentKey roleKey = default(RoleAssignmentKey), ComponentEntityRoleAssignmentEntryAssignment assignment = default(ComponentEntityRoleAssignmentEntryAssignment), List<RoleAssignmentKey> updaterRoles = default(List<RoleAssignmentKey>))
+        public ComponentEntityRoleAssignmentEntry(RoleKey roleKey = default(RoleKey), ComponentEntityRoleAssignmentEntryAssignment assignment = default(ComponentEntityRoleAssignmentEntryAssignment), List<RoleKey> updaterRoles = default(List<RoleKey>))
         {
             // to ensure "roleKey" is required (not null)
             if (roleKey == null)
@@ -127,7 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets RoleKey
         /// </summary>
         [DataMember(Name = "role_key", IsRequired = true, EmitDefaultValue = true)]
-        public RoleAssignmentKey RoleKey { get; set; }
+        public RoleKey RoleKey { get; set; }
 
         /// <summary>
         /// Gets or Sets Assignment
@@ -139,7 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets UpdaterRoles
         /// </summary>
         [DataMember(Name = "updater_roles", EmitDefaultValue = true)]
-        public List<RoleAssignmentKey> UpdaterRoles { get; set; }
+        public List<RoleKey> UpdaterRoles { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
