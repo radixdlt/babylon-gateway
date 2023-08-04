@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="packageAddress">Bech32m-encoded human readable version of the address..</param>
         /// <param name="blueprintName">blueprintName (required).</param>
         /// <param name="state">state.</param>
-        /// <param name="roleAssignments">roleAssignments (required).</param>
+        /// <param name="roleAssignments">roleAssignments.</param>
         /// <param name="royaltyVaultBalance">String-encoded decimal representing the amount of a related fungible resource..</param>
         public StateEntityDetailsResponseComponentDetailsAllOf(string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), ComponentEntityRoleAssignments roleAssignments = default(ComponentEntityRoleAssignments), string royaltyVaultBalance = default(string))
         {
@@ -116,14 +116,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("blueprintName is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
             }
             this.BlueprintName = blueprintName;
-            // to ensure "roleAssignments" is required (not null)
-            if (roleAssignments == null)
-            {
-                throw new ArgumentNullException("roleAssignments is a required property for StateEntityDetailsResponseComponentDetailsAllOf and cannot be null");
-            }
-            this.RoleAssignments = roleAssignments;
             this.PackageAddress = packageAddress;
             this.State = state;
+            this.RoleAssignments = roleAssignments;
             this.RoyaltyVaultBalance = royaltyVaultBalance;
         }
 
@@ -149,7 +144,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets RoleAssignments
         /// </summary>
-        [DataMember(Name = "role_assignments", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "role_assignments", EmitDefaultValue = true)]
         public ComponentEntityRoleAssignments RoleAssignments { get; set; }
 
         /// <summary>

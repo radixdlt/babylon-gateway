@@ -63,7 +63,6 @@
  */
 
 using Dapper;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -71,12 +70,10 @@ using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
@@ -95,8 +92,6 @@ internal class EntityStateQuerier : IEntityStateQuerier
     private record MetadataViewModel(long FromStateVersion, long EntityId, string Key, byte[] Value, bool IsLocked, int TotalCount);
 
     private record ValidatorCurrentStakeViewModel(long ValidatorId,  string State, long StateLastUpdatedAtStateVersion, string StakeVaultBalance, long StakeVaultLastUpdatedAtStateVersion, string PendingXrdWithdrawVaultBalance, long PendingXrdWithdrawVaultLastUpdatedAtStateVersion, string LockedOwnerStakeUnitVaultBalance, long LockedOwnerStakeUnitVaultLastUpdatedAtStateVersion, string PendingOwnerStakeUnitUnlockVaultBalance, long PendingOwnerStakeUnitUnlockVaultLastUpdatedAtStateVersion);
-
-    private record ValidatorUptimeViewModel(long ValidatorId,  EntityAddress ValidatorAddress, long? ProposalsMade, long? ProposalsMissed, long EpochsActiveIn);
 
     private record FungibleViewModel(EntityAddress ResourceEntityAddress, string Balance, int ResourcesTotalCount, long LastUpdatedAtStateVersion);
 
@@ -129,6 +124,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
     private readonly IOptionsSnapshot<EndpointOptions> _endpointConfiguration;
     private readonly ReadOnlyDbContext _dbContext;
     private readonly IVirtualEntityMetadataProvider _virtualEntityMetadataProvider;
+    private readonly IRoleAssignmentsMapper _roleAssignmentsMapper;
     private readonly ILogger<EntityStateQuerier> _logger;
     private readonly byte _ecdsaSecp256k1VirtualAccountAddressPrefix;
     private readonly byte _eddsaEd25519VirtualAccountAddressPrefix;
@@ -136,13 +132,15 @@ internal class EntityStateQuerier : IEntityStateQuerier
     private readonly byte _eddsaEd25519VirtualIdentityAddressPrefix;
 
     public EntityStateQuerier(INetworkConfigurationProvider networkConfigurationProvider, ReadOnlyDbContext dbContext,
-        IOptionsSnapshot<EndpointOptions> endpointConfiguration, ILogger<EntityStateQuerier> logger, IVirtualEntityMetadataProvider virtualEntityMetadataProvider)
+        IOptionsSnapshot<EndpointOptions> endpointConfiguration, ILogger<EntityStateQuerier> logger, IVirtualEntityMetadataProvider virtualEntityMetadataProvider,
+        IRoleAssignmentsMapper roleAssignmentsMapper)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _dbContext = dbContext;
         _endpointConfiguration = endpointConfiguration;
         _logger = logger;
         _virtualEntityMetadataProvider = virtualEntityMetadataProvider;
+        _roleAssignmentsMapper = roleAssignmentsMapper;
 
         _ecdsaSecp256k1VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualSecp256k1Account).AddressBytePrefix;
         _eddsaEd25519VirtualAccountAddressPrefix = (byte)_networkConfigurationProvider.GetAddressTypeDefinition(AddressEntityType.GlobalVirtualEd25519Account).AddressBytePrefix;
@@ -154,12 +152,13 @@ internal class EntityStateQuerier : IEntityStateQuerier
     {
         var entities = await GetEntities(addresses, ledgerState, token);
         var componentEntities = entities.OfType<ComponentEntity>().ToList();
+        var globalEntities = entities.Where(x => x.IsGlobal).ToList();
         var resourceEntities = entities.OfType<ResourceEntity>().ToList();
         var packageEntities = entities.OfType<GlobalPackageEntity>().ToList();
 
         // TODO ideally we'd like to run those in parallel
         var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, _endpointConfiguration.Value.DefaultPageSize, ledgerState, token);
-        var accessRulesHistory = await GetAccessRulesHistory(resourceEntities, componentEntities, ledgerState, token);
+        var roleAssignmentsHistory = await GetRoleAssignmentsHistory(globalEntities, ledgerState, token);
         var stateHistory = await GetStateHistory(componentEntities, ledgerState, token);
 
         var resourcesSupplyData = await GetResourcesSupplyData(resourceEntities.Select(x => x.Id).ToArray(), ledgerState, token);
@@ -191,7 +190,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 case GlobalFungibleResourceEntity frme:
                     var fungibleResourceSupplyData = resourcesSupplyData[frme.Id];
                     details = new GatewayModel.StateEntityDetailsResponseFungibleResourceDetails(
-                        roleAssignments: accessRulesHistory[frme.Id],
+                        roleAssignments: roleAssignmentsHistory[frme.Id],
                         totalSupply: fungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: fungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: fungibleResourceSupplyData.TotalBurned.ToString(),
@@ -207,7 +206,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     }
 
                     details = new GatewayModel.StateEntityDetailsResponseNonFungibleResourceDetails(
-                        roleAssignments: accessRulesHistory[nfrme.Id],
+                        roleAssignments: roleAssignmentsHistory[nfrme.Id],
                         totalSupply: nonFungibleResourceSupplyData.TotalSupply.ToString(),
                         totalMinted: nonFungibleResourceSupplyData.TotalMinted.ToString(),
                         totalBurned: nonFungibleResourceSupplyData.TotalBurned.ToString(),
@@ -275,14 +274,14 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
                 case ComponentEntity ce:
                     stateHistory.TryGetValue(ce.Id, out var state);
-                    accessRulesHistory.TryGetValue(ce.Id, out var accessRules);
+                    roleAssignmentsHistory.TryGetValue(ce.Id, out var roleAssignments);
                     var componentRoyaltyVaultBalance = royaltyVaultsBalance?.SingleOrDefault(x => x.OwnerEntityId == ce.Id)?.Balance;
 
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         packageAddress: correlatedAddresses[ce.PackageId],
                         blueprintName: ce.BlueprintName,
                         state: state != null ? new JRaw(state.State) : null,
-                        roleAssignments: accessRules,
+                        roleAssignments: roleAssignments,
                         royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null
                     );
                     break;
@@ -1786,16 +1785,11 @@ order by ord
         return entities;
     }
 
-    private async Task<Dictionary<long, GatewayModel.ComponentEntityRoleAssignments>> GetAccessRulesHistory(ICollection<ResourceEntity> resourceEntities, ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    private async Task<Dictionary<long, GatewayModel.ComponentEntityRoleAssignments>> GetRoleAssignmentsHistory(List<Entity> globalEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var lookup = new HashSet<long>();
 
-        foreach (var resourceEntity in resourceEntities)
-        {
-            lookup.Add(resourceEntity.Id);
-        }
-
-        foreach (var componentEntity in componentEntities)
+        foreach (var componentEntity in globalEntities)
         {
             lookup.Add(componentEntity.Id);
         }
@@ -1822,26 +1816,18 @@ INNER JOIN LATERAL (
             .ToListAsync(token);
 
         var ownerRoleIds = aggregates.Select(a => a.OwnerRoleId).Distinct().ToList();
-        var accessRuleEntryIds = aggregates.SelectMany(a => a.EntryIds).Distinct().ToList();
+        var roleAssignmentsHistory = aggregates.SelectMany(a => a.EntryIds).Distinct().ToList();
 
         var ownerRoles = await _dbContext.EntityAccessRulesOwnerHistory
             .Where(e => ownerRoleIds.Contains(e.Id))
             .ToListAsync(token);
 
         var entries = await _dbContext.EntityAccessRulesEntryHistory
-            .Where(e => accessRuleEntryIds.Contains(e.Id))
+            .Where(e => roleAssignmentsHistory.Contains(e.Id))
             .Where(e => !e.IsDeleted)
             .ToListAsync(token);
 
-        return ownerRoles.ToDictionary(or => or.EntityId, or =>
-        {
-            var accessRuleEntries = entries
-                .Where(e => e.EntityId == or.EntityId)
-                .Select(e => new GatewayModel.ComponentEntityRoleAssignmentEntry(new GatewayModel.ComponentEntityRoleAssignmentEntryRoleKey(e.KeyRole, e.KeyModule.ToGatewayModel()), e.RoleAssignments))
-                .ToList();
-
-            return new GatewayModel.ComponentEntityRoleAssignments(new JRaw(or.RoleAssignments), accessRuleEntries);
-        });
+        return _roleAssignmentsMapper.GetEffectiveRoleAssignments(globalEntities, ownerRoles, entries);
     }
 
     private async Task<Dictionary<long, EntityStateHistory>> GetStateHistory(ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)

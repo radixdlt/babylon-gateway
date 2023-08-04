@@ -90,43 +90,38 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ComponentEntityRoleAssignmentEntryRoleKey
+    /// ComponentEntityRoleAssignmentEntryAssignment
     /// </summary>
-    [DataContract(Name = "ComponentEntityRoleAssignmentEntry_role_key")]
-    public partial class ComponentEntityRoleAssignmentEntryRoleKey : IEquatable<ComponentEntityRoleAssignmentEntryRoleKey>
+    [DataContract(Name = "ComponentEntityRoleAssignmentEntry_assignment")]
+    public partial class ComponentEntityRoleAssignmentEntryAssignment : IEquatable<ComponentEntityRoleAssignmentEntryAssignment>
     {
 
         /// <summary>
-        /// Gets or Sets Module
+        /// Gets or Sets Resolution
         /// </summary>
-        [DataMember(Name = "module", IsRequired = true, EmitDefaultValue = true)]
-        public ObjectModuleId Module { get; set; }
+        [DataMember(Name = "resolution", IsRequired = true, EmitDefaultValue = true)]
+        public RoleAssignmentResolution Resolution { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignmentEntryRoleKey" /> class.
+        /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignmentEntryAssignment" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ComponentEntityRoleAssignmentEntryRoleKey() { }
+        protected ComponentEntityRoleAssignmentEntryAssignment() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignmentEntryRoleKey" /> class.
+        /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignmentEntryAssignment" /> class.
         /// </summary>
-        /// <param name="role">role (required).</param>
-        /// <param name="module">module (required).</param>
-        public ComponentEntityRoleAssignmentEntryRoleKey(string role = default(string), ObjectModuleId module = default(ObjectModuleId))
+        /// <param name="resolution">resolution (required).</param>
+        /// <param name="explicitRule">explicitRule.</param>
+        public ComponentEntityRoleAssignmentEntryAssignment(RoleAssignmentResolution resolution = default(RoleAssignmentResolution), Object explicitRule = default(Object))
         {
-            // to ensure "role" is required (not null)
-            if (role == null)
-            {
-                throw new ArgumentNullException("role is a required property for ComponentEntityRoleAssignmentEntryRoleKey and cannot be null");
-            }
-            this.Role = role;
-            this.Module = module;
+            this.Resolution = resolution;
+            this.ExplicitRule = explicitRule;
         }
 
         /// <summary>
-        /// Gets or Sets Role
+        /// Gets or Sets ExplicitRule
         /// </summary>
-        [DataMember(Name = "role", IsRequired = true, EmitDefaultValue = true)]
-        public string Role { get; set; }
+        [DataMember(Name = "explicit_rule", EmitDefaultValue = true)]
+        public Object ExplicitRule { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -135,9 +130,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ComponentEntityRoleAssignmentEntryRoleKey {\n");
-            sb.Append("  Role: ").Append(Role).Append("\n");
-            sb.Append("  Module: ").Append(Module).Append("\n");
+            sb.Append("class ComponentEntityRoleAssignmentEntryAssignment {\n");
+            sb.Append("  Resolution: ").Append(Resolution).Append("\n");
+            sb.Append("  ExplicitRule: ").Append(ExplicitRule).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -158,15 +153,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ComponentEntityRoleAssignmentEntryRoleKey);
+            return this.Equals(input as ComponentEntityRoleAssignmentEntryAssignment);
         }
 
         /// <summary>
-        /// Returns true if ComponentEntityRoleAssignmentEntryRoleKey instances are equal
+        /// Returns true if ComponentEntityRoleAssignmentEntryAssignment instances are equal
         /// </summary>
-        /// <param name="input">Instance of ComponentEntityRoleAssignmentEntryRoleKey to be compared</param>
+        /// <param name="input">Instance of ComponentEntityRoleAssignmentEntryAssignment to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ComponentEntityRoleAssignmentEntryRoleKey input)
+        public bool Equals(ComponentEntityRoleAssignmentEntryAssignment input)
         {
             if (input == null)
             {
@@ -174,13 +169,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Role == input.Role ||
-                    (this.Role != null &&
-                    this.Role.Equals(input.Role))
+                    this.Resolution == input.Resolution ||
+                    this.Resolution.Equals(input.Resolution)
                 ) && 
                 (
-                    this.Module == input.Module ||
-                    this.Module.Equals(input.Module)
+                    this.ExplicitRule == input.ExplicitRule ||
+                    (this.ExplicitRule != null &&
+                    this.ExplicitRule.Equals(input.ExplicitRule))
                 );
         }
 
@@ -193,11 +188,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Role != null)
+                hashCode = (hashCode * 59) + this.Resolution.GetHashCode();
+                if (this.ExplicitRule != null)
                 {
-                    hashCode = (hashCode * 59) + this.Role.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ExplicitRule.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.Module.GetHashCode();
                 return hashCode;
             }
         }

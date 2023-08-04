@@ -64,21 +64,9 @@
 
 using Dapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.Abstractions.Numerics;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;

@@ -26,6 +26,8 @@ _WORK IN PROGRESS_
   - events in `/transaction/committed-details` and `/stream/transactions` endpoints.
 - new endpoint `/state/non-fungible/location` returns location of given non fungible id.
 - deleted non fungible ids are also returned from `/state/non-fungible/data` with null data, marked as `is_burned` with state version when they got burned.
+- Rework in `role_assignments`. Returning all possible keys for native modules (`AccessRules`, `Metadata`, `Royalty`) and if no role is assigned pointer to owner role is returned. Same functionality applies to `MainModule` for FungibleResource and NonFungibleResource.
+
 -------
 
 # 0.4.0 - RCNet v2
