@@ -103,7 +103,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<AccountDefaultDepositRuleHistory> AccountDefaultDepositRuleHistory => Set<AccountDefaultDepositRuleHistory>();
 
-    public DbSet<AccountResourceDepositRuleHistory> AccountDepositRuleHistory => Set<AccountResourceDepositRuleHistory>();
+    public DbSet<AccountResourcePreferenceRuleHistory> AccountDepositRuleHistory => Set<AccountResourcePreferenceRuleHistory>();
 
     public DbSet<EntityVaultHistory> EntityVaultHistory => Set<EntityVaultHistory>();
 
@@ -123,11 +123,11 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ValidatorActiveSetHistory> ValidatorActiveSetHistory => Set<ValidatorActiveSetHistory>();
 
-    public DbSet<EntityRoleAssignmentsOwnerRoleHistory> EntityAccessRulesOwnerHistory => Set<EntityRoleAssignmentsOwnerRoleHistory>();
+    public DbSet<EntityRoleAssignmentsOwnerRoleHistory> EntityRoleAssignmentsOwnerHistory => Set<EntityRoleAssignmentsOwnerRoleHistory>();
 
-    public DbSet<EntityRoleAssignmentsEntryHistory> EntityAccessRulesEntryHistory => Set<EntityRoleAssignmentsEntryHistory>();
+    public DbSet<EntityRoleAssignmentsEntryHistory> EntityRoleAssignmentsEntryHistory => Set<EntityRoleAssignmentsEntryHistory>();
 
-    public DbSet<EntityRoleAssignmentsAggregateHistory> EntityAccessRulesAggregateHistory => Set<EntityRoleAssignmentsAggregateHistory>();
+    public DbSet<EntityRoleAssignmentsAggregateHistory> EntityRoleAssignmentsAggregateHistory => Set<EntityRoleAssignmentsAggregateHistory>();
 
     public DbSet<ComponentMethodRoyaltyEntryHistory> ComponentMethodRoyaltyEntryHistory => Set<ComponentMethodRoyaltyEntryHistory>();
 
@@ -155,7 +155,7 @@ internal abstract class CommonDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresEnum<AccountDefaultDepositRule>();
-        modelBuilder.HasPostgresEnum<AccountResourceDepositRule>();
+        modelBuilder.HasPostgresEnum<AccountResourcePreferenceRule>();
         modelBuilder.HasPostgresEnum<EntityType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
@@ -293,7 +293,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<AccountDefaultDepositRuleHistory>()
             .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<AccountResourceDepositRuleHistory>()
+        modelBuilder.Entity<AccountResourcePreferenceRuleHistory>()
             .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityMetadataHistory>()

@@ -1801,7 +1801,7 @@ order by ord
 
         var entityIds = lookup.ToList();
 
-        var aggregates = await _dbContext.EntityAccessRulesAggregateHistory
+        var aggregates = await _dbContext.EntityRoleAssignmentsAggregateHistory
             .FromSqlInterpolated($@"
 WITH variables (entity_id) AS (SELECT UNNEST({entityIds}))
 SELECT earah.*
@@ -1818,11 +1818,11 @@ INNER JOIN LATERAL (
         var ownerRoleIds = aggregates.Select(a => a.OwnerRoleId).Distinct().ToList();
         var roleAssignmentsHistory = aggregates.SelectMany(a => a.EntryIds).Distinct().ToList();
 
-        var ownerRoles = await _dbContext.EntityAccessRulesOwnerHistory
+        var ownerRoles = await _dbContext.EntityRoleAssignmentsOwnerHistory
             .Where(e => ownerRoleIds.Contains(e.Id))
             .ToListAsync(token);
 
-        var entries = await _dbContext.EntityAccessRulesEntryHistory
+        var entries = await _dbContext.EntityRoleAssignmentsEntryHistory
             .Where(e => roleAssignmentsHistory.Contains(e.Id))
             .Where(e => !e.IsDeleted)
             .ToListAsync(token);

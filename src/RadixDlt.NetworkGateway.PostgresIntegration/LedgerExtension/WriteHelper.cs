@@ -745,14 +745,14 @@ internal class WriteHelper
         return entries.Count;
     }
 
-    public async Task<int> CopyAccountResourceDepositRuleHistory(List<AccountResourceDepositRuleHistory> entities, CancellationToken token)
+    public async Task<int> CopyAccountResourcePreferenceRuleHistory(List<AccountResourcePreferenceRuleHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY account_resource_deposit_rule_history (id, from_state_version, account_entity_id, resource_entity_id, deposit_rule, is_deleted) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY account_resource_preference_rule_history (id, from_state_version, account_entity_id, resource_entity_id, account_resource_preference_rule, is_deleted) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -761,7 +761,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.AccountEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteNullableAsync(e.ResourceDepositRule, "account_resource_deposit_rule", token);
+            await writer.WriteNullableAsync(e.AccountResourcePreferenceRule, "resource_preference_rule", token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
         }
 
@@ -1003,7 +1003,7 @@ internal class WriteHelper
             commandText: @"
 SELECT
     setval('account_default_deposit_rule_history_id_seq', @accountDefaultDepositRuleHistorySequence),
-    setval('account_resource_deposit_rule_history_id_seq', @accountResourceDepositRuleHistorySequence),
+    setval('account_resource_preference_rule_history_id_seq', @accountResourceDepositRuleHistorySequence),
     setval('entity_state_history_id_seq', @entityStateHistorySequence),
     setval('validator_state_history_id_seq', @validatorStateHistorySequence),
     setval('entities_id_seq', @entitySequence),

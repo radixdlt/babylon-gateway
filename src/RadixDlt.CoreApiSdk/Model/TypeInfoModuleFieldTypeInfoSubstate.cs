@@ -84,9 +84,9 @@ public partial class TypeInfoModuleFieldTypeInfoSubstate : IEntityAddressPointer
     {
         instanceSchema = null;
 
-        if (Value.Details is ObjectTypeInfoDetails objectTypeInfoDetails && objectTypeInfoDetails.InstanceSchema != null)
+        if (Value.Details is ObjectTypeInfoDetails objectTypeInfoDetails && objectTypeInfoDetails.BlueprintInfo.InstanceSchema != null)
         {
-            instanceSchema = objectTypeInfoDetails.InstanceSchema;
+            instanceSchema = objectTypeInfoDetails.BlueprintInfo.InstanceSchema;
             return true;
         }
 

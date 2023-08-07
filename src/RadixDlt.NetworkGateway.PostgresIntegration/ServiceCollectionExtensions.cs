@@ -101,7 +101,7 @@ public static class ServiceCollectionExtensions
 
                 dataSourceBuilder.UseLoggerFactory(sp.GetService<ILoggerFactory>());
                 dataSourceBuilder.MapEnum<AccountDefaultDepositRule>();
-                dataSourceBuilder.MapEnum<AccountResourceDepositRule>();
+                dataSourceBuilder.MapEnum<AccountResourcePreferenceRule>();
                 dataSourceBuilder.MapEnum<EntityType>();
                 dataSourceBuilder.MapEnum<LedgerTransactionStatus>();
                 dataSourceBuilder.MapEnum<LedgerTransactionType>();

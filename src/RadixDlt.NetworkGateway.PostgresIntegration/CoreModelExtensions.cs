@@ -101,13 +101,12 @@ internal static class CoreModelExtensions
         };
     }
 
-    public static AccountResourceDepositRule ToModel(this CoreModel.DepositRule input)
+    public static AccountResourcePreferenceRule ToModel(this CoreModel.ResourcePreference input)
     {
         return input switch
         {
-            CoreModel.DepositRule.Neither => AccountResourceDepositRule.Neither,
-            CoreModel.DepositRule.Allowed => AccountResourceDepositRule.Allowed,
-            CoreModel.DepositRule.Disallowed => AccountResourceDepositRule.Disallowed,
+            CoreModel.ResourcePreference.Allowed => AccountResourcePreferenceRule.Allowed,
+            CoreModel.ResourcePreference.Disallowed => AccountResourcePreferenceRule.Disallowed,
             _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
         };
     }
@@ -119,6 +118,28 @@ internal static class CoreModelExtensions
             CoreModel.VmType.Native => PackageVmType.Native,
             CoreModel.VmType.ScryptoV1 => PackageVmType.ScryptoV1,
             _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
+        };
+    }
+
+    public static ObjectModuleId ToModel(this CoreModel.ObjectModuleId objectModuleId)
+    {
+        return objectModuleId switch
+        {
+            CoreModel.ObjectModuleId.Main => ObjectModuleId.Main,
+            CoreModel.ObjectModuleId.Metadata => ObjectModuleId.Metadata,
+            CoreModel.ObjectModuleId.Royalty => ObjectModuleId.Royalty,
+            CoreModel.ObjectModuleId.RoleAssignment => ObjectModuleId.RoleAssignment,
+            _ => throw new ArgumentOutOfRangeException(nameof(objectModuleId), objectModuleId, null),
+        };
+    }
+
+    public static SborTypeKind ToModel(this CoreModel.LocalTypeIndex.KindEnum indexKind)
+    {
+        return indexKind switch
+        {
+            CoreModel.LocalTypeIndex.KindEnum.SchemaLocal => SborTypeKind.SchemaLocal,
+            CoreModel.LocalTypeIndex.KindEnum.WellKnown => SborTypeKind.WellKnown,
+            _ => throw new ArgumentOutOfRangeException(nameof(indexKind), indexKind, null),
         };
     }
 }

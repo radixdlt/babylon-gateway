@@ -66,10 +66,16 @@ using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class AccountDepositRuleIndexEntrySubstate : IEntityAddressPointer
+public partial class AccountVaultEntrySubstate : IEntityAddressPointer, IEntityOwner
 {
     public IEnumerable<string> GetEntityAddresses()
     {
         yield return Key.ResourceAddress;
     }
+
+    public IEnumerable<EntityReference> GetOwnedEntities()
+    {
+        yield return Value.Vault;
+    }
 }
+

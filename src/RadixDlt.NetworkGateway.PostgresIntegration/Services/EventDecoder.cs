@@ -170,7 +170,7 @@ public static class EventDecoder
             CoreModel.ObjectModuleId.Main => ToolkitModel.ObjectModuleId.MAIN,
             CoreModel.ObjectModuleId.Metadata => ToolkitModel.ObjectModuleId.METADATA,
             CoreModel.ObjectModuleId.Royalty => ToolkitModel.ObjectModuleId.ROYALTY,
-            CoreModel.ObjectModuleId.AccessRules => ToolkitModel.ObjectModuleId.ACCESS_RULES,
+            CoreModel.ObjectModuleId.RoleAssignment => ToolkitModel.ObjectModuleId.ROLE_ASSIGNMENT,
             _ => throw new ArgumentOutOfRangeException(nameof(core), core, null),
         };
 }

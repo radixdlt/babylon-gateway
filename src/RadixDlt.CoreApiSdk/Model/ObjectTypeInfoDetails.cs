@@ -70,11 +70,11 @@ public partial class ObjectTypeInfoDetails : IEntityAddressPointer
 {
     public IEnumerable<string> GetEntityAddresses()
     {
-        yield return PackageAddress;
+        yield return BlueprintInfo.PackageAddress;
 
-        if (OuterObject != null)
+        if (BlueprintInfo.OuterObject != null)
         {
-            yield return OuterObject;
+            yield return BlueprintInfo.OuterObject;
         }
     }
 }

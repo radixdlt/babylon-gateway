@@ -88,7 +88,7 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
 
     private static readonly string[] _metadataRuleKeys = { "metadata_locker", "metadata_setter", };
 
-    private static readonly string[] _royaltyAccessRuleKeys = { "royalty_setter", "royalty_locker", "royalty_claimer", };
+    private static readonly string[] _royaltyRuleKeys = { "royalty_setter", "royalty_locker", "royalty_claimer", };
 
     private readonly List<RoleAssignmentEntry> _nativeModulesKeys;
 
@@ -98,19 +98,19 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
 
     public RoleAssignmentsKeyProvider()
     {
-        var metadataWithUpdaterKeys = GetAccessRulesKeysWithUpdaterRoles(_metadataRuleKeys, ObjectModuleId.Metadata);
-        var royaltyWithUpdaterKeys = GetAccessRulesKeysWithUpdaterRoles(_royaltyAccessRuleKeys, ObjectModuleId.Royalty);
+        var metadataWithUpdaterKeys = GetKeysWithUpdaterRoles(_metadataRuleKeys, ObjectModuleId.Metadata);
+        var royaltyWithUpdaterKeys = GetKeysWithUpdaterRoles(_royaltyRuleKeys, ObjectModuleId.Royalty);
 
         _nativeModulesKeys = metadataWithUpdaterKeys
             .Concat(royaltyWithUpdaterKeys)
             .ToList();
 
         _nonFungibleResourceKeys = _nativeModulesKeys
-            .Concat(GetAccessRulesKeysWithUpdaterRoles(_nonFungibleMainModuleResourceRuleKeys, ObjectModuleId.Main))
+            .Concat(GetKeysWithUpdaterRoles(_nonFungibleMainModuleResourceRuleKeys, ObjectModuleId.Main))
             .ToList();
 
         _fungibleResourceKeys = _nativeModulesKeys
-            .Concat(GetAccessRulesKeysWithUpdaterRoles(_fungibleMainModuleResourceRuleKeys, ObjectModuleId.Main))
+            .Concat(GetKeysWithUpdaterRoles(_fungibleMainModuleResourceRuleKeys, ObjectModuleId.Main))
             .ToList();
     }
 
@@ -120,7 +120,7 @@ internal class RoleAssignmentsKeyProvider : IRoleAssignmentsKeyProvider
 
     public List<RoleAssignmentEntry> GetFungibleResourceKeys() => _fungibleResourceKeys;
 
-    private List<RoleAssignmentEntry> GetAccessRulesKeysWithUpdaterRoles(string[] ruleKeys, ObjectModuleId objectModuleId)
+    private List<RoleAssignmentEntry> GetKeysWithUpdaterRoles(string[] ruleKeys, ObjectModuleId objectModuleId)
     {
         const string UpdaterSuffix = "updater";
 

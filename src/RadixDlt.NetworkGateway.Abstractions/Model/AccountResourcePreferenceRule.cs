@@ -62,32 +62,10 @@
  * permissions under this License.
  */
 
-using System.Diagnostics;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-
 namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-public static class MappingExtensions
+public enum AccountResourcePreferenceRule
 {
-    public static ObjectModuleId ToInternalModel(this CoreModel.ObjectModuleId objectModuleId)
-    {
-        return objectModuleId switch
-        {
-            CoreModel.ObjectModuleId.Main => ObjectModuleId.Main,
-            CoreModel.ObjectModuleId.Metadata => ObjectModuleId.Metadata,
-            CoreModel.ObjectModuleId.Royalty => ObjectModuleId.Royalty,
-            CoreModel.ObjectModuleId.AccessRules => ObjectModuleId.AccessRules,
-            _ => throw new UnreachableException($"Didn't expect {objectModuleId} value"),
-        };
-    }
-
-    public static SborTypeKind ToInternalModel(this CoreModel.LocalTypeIndex.KindEnum indexKind)
-    {
-        return indexKind switch
-        {
-            CoreModel.LocalTypeIndex.KindEnum.SchemaLocal => SborTypeKind.SchemaLocal,
-            CoreModel.LocalTypeIndex.KindEnum.WellKnown => SborTypeKind.WellKnown,
-            _ => throw new UnreachableException($"Didn't expect {indexKind} value"),
-        };
-    }
+    Allowed,
+    Disallowed,
 }

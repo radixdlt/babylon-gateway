@@ -834,7 +834,7 @@ components:
         - Main
         - Metadata
         - Royalty
-        - AccessRules
+        - RoleAssignment
 
     ValidatorVaultItem:
       type: object
@@ -1420,6 +1420,7 @@ components:
             - consensus_manager
             - genesis_helper
             - faucet
+            - pool_package
           properties:
             xrd:
               $ref: "#/components/schemas/Address"
@@ -1470,6 +1471,8 @@ components:
             genesis_helper:
               $ref: "#/components/schemas/Address"
             faucet:
+              $ref: "#/components/schemas/Address"
+            pool_package:
               $ref: "#/components/schemas/Address"
 
     GatewayStatusResponse:

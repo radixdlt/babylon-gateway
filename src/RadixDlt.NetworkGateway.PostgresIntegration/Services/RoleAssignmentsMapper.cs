@@ -92,9 +92,9 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
     public Dictionary<long, GatewayModel.ComponentEntityRoleAssignments> GetEffectiveRoleAssignments(
         ICollection<Entity> componentEntities, ICollection<EntityRoleAssignmentsOwnerRoleHistory> ownerRoles, ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments)
     {
-        var fungibleResourceAccessRuleKeys = _roleAssignmentsKeyProvider.GetFungibleResourceKeys();
-        var nonFungibleResourceRuleKeys = _roleAssignmentsKeyProvider.GetNonFungibleResourceKeys();
-        var nativeModulesAccessRuleKeys = _roleAssignmentsKeyProvider.GetNativeModulesKeys();
+        var fungibleResourceKeys = _roleAssignmentsKeyProvider.GetFungibleResourceKeys();
+        var nonFungibleResourceKeys = _roleAssignmentsKeyProvider.GetNonFungibleResourceKeys();
+        var nativeModulesKeys = _roleAssignmentsKeyProvider.GetNativeModulesKeys();
 
         return componentEntities.ToDictionary(entity => entity.Id, entity =>
         {
@@ -112,7 +112,7 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
             {
                 return new GatewayApiSdk.Model.ComponentEntityRoleAssignments(
                     new JRaw(ownerRole),
-                    GetEntries(entity.Id, fungibleResourceAccessRuleKeys, roleAssignments)
+                    GetEntries(entity.Id, fungibleResourceKeys, roleAssignments)
                 );
             }
 
@@ -120,21 +120,21 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
             {
                 return new GatewayApiSdk.Model.ComponentEntityRoleAssignments(
                     new JRaw(ownerRole),
-                    GetEntries(entity.Id, nonFungibleResourceRuleKeys, roleAssignments)
+                    GetEntries(entity.Id, nonFungibleResourceKeys, roleAssignments)
                 );
             }
 
             return new GatewayApiSdk.Model.ComponentEntityRoleAssignments(
                 new JRaw(ownerRole),
-                GetEntries(entity.Id, nativeModulesAccessRuleKeys, roleAssignments)
+                GetEntries(entity.Id, nativeModulesKeys, roleAssignments)
             );
         });
     }
 
-    private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GetEntries(long entityId, List<RoleAssignmentEntry> accessRuleKeys,
+    private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GetEntries(long entityId, List<RoleAssignmentEntry> roleAssignmentKeys,
         ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments)
     {
-        return accessRuleKeys.Select(role =>
+        return roleAssignmentKeys.Select(role =>
         {
             var existingRoleAssignments = roleAssignments
                 .Where(e => e.EntityId == entityId && e.KeyRole == role.Key.Name && e.KeyModule == role.Key.ObjectModuleId)

@@ -69,5 +69,5 @@ public enum ObjectModuleId
     Main,
     Metadata,
     Royalty,
-    AccessRules,
+    RoleAssignment,
 }

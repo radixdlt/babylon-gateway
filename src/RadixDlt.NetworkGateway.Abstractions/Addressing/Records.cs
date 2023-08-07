@@ -110,7 +110,8 @@ public sealed record WellKnownAddresses(
     string FaucetPackage,
     string ConsensusManager,
     string GenesisHelper,
-    string Faucet
+    string Faucet,
+    string PoolPackage
 );
 
 public enum AddressEntityType
