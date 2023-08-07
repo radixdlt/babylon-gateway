@@ -149,21 +149,23 @@ export class State {
    * Get paged list of validators
    * @param cursor
    */
-  async getValidators(cursor?: string): Promise<ValidatorCollection> {
-    return this.innerClient
-      .stateValidatorsList({
-        stateValidatorsListRequest: {
-          cursor: cursor || null,
-        },
-      })
-      .then(({ validators }) => validators)
+  async getValidators(cursor?: string) {
+    return this.innerClient.stateValidatorsList({
+      stateValidatorsListRequest: {
+        cursor: cursor || null,
+      },
+    })
   }
 
   /**
    * Get list of all validators. This will iterate over returned cursors and aggregate all responses.
    */
   async getAllValidators(start?: string): Promise<ValidatorCollectionItem[]> {
-    return exhaustPagination(this.getValidators.bind(this), start)
+    return exhaustPagination(
+      (cursor: string | undefined) =>
+        this.getValidators(cursor).then(({ validators }) => validators),
+      start
+    )
   }
 
   /**
