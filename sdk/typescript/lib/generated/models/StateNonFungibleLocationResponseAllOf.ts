@@ -13,68 +13,60 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { MetadataTypedValue } from './MetadataTypedValue';
+import type { StateNonFungibleLocationResponseItem } from './StateNonFungibleLocationResponseItem';
 import {
-    MetadataTypedValueFromJSON,
-    MetadataTypedValueFromJSONTyped,
-    MetadataTypedValueToJSON,
-} from './MetadataTypedValue';
+    StateNonFungibleLocationResponseItemFromJSON,
+    StateNonFungibleLocationResponseItemFromJSONTyped,
+    StateNonFungibleLocationResponseItemToJSON,
+} from './StateNonFungibleLocationResponseItem';
 
 /**
  * 
  * @export
- * @interface EntityMetadataItemValue
+ * @interface StateNonFungibleLocationResponseAllOf
  */
-export interface EntityMetadataItemValue {
+export interface StateNonFungibleLocationResponseAllOf {
     /**
-     * 
+     * Bech32m-encoded human readable version of the address.
      * @type {string}
-     * @memberof EntityMetadataItemValue
+     * @memberof StateNonFungibleLocationResponseAllOf
      */
-    raw_hex: string;
+    resource_address: string;
     /**
      * 
-     * @type {object}
-     * @memberof EntityMetadataItemValue
+     * @type {Array<StateNonFungibleLocationResponseItem>}
+     * @memberof StateNonFungibleLocationResponseAllOf
      */
-    programmatic_json: object;
-    /**
-     * 
-     * @type {MetadataTypedValue}
-     * @memberof EntityMetadataItemValue
-     */
-    typed: MetadataTypedValue;
+    non_fungible_ids: Array<StateNonFungibleLocationResponseItem>;
 }
 
 /**
- * Check if a given object implements the EntityMetadataItemValue interface.
+ * Check if a given object implements the StateNonFungibleLocationResponseAllOf interface.
  */
-export function instanceOfEntityMetadataItemValue(value: object): boolean {
+export function instanceOfStateNonFungibleLocationResponseAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "raw_hex" in value;
-    isInstance = isInstance && "programmatic_json" in value;
-    isInstance = isInstance && "typed" in value;
+    isInstance = isInstance && "resource_address" in value;
+    isInstance = isInstance && "non_fungible_ids" in value;
 
     return isInstance;
 }
 
-export function EntityMetadataItemValueFromJSON(json: any): EntityMetadataItemValue {
-    return EntityMetadataItemValueFromJSONTyped(json, false);
+export function StateNonFungibleLocationResponseAllOfFromJSON(json: any): StateNonFungibleLocationResponseAllOf {
+    return StateNonFungibleLocationResponseAllOfFromJSONTyped(json, false);
 }
 
-export function EntityMetadataItemValueFromJSONTyped(json: any, ignoreDiscriminator: boolean): EntityMetadataItemValue {
+export function StateNonFungibleLocationResponseAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateNonFungibleLocationResponseAllOf {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'raw_hex': json['raw_hex'],
-        'programmatic_json': json['programmatic_json'],
-        'typed': MetadataTypedValueFromJSON(json['typed']),
+        'resource_address': json['resource_address'],
+        'non_fungible_ids': ((json['non_fungible_ids'] as Array<any>).map(StateNonFungibleLocationResponseItemFromJSON)),
     };
 }
 
-export function EntityMetadataItemValueToJSON(value?: EntityMetadataItemValue | null): any {
+export function StateNonFungibleLocationResponseAllOfToJSON(value?: StateNonFungibleLocationResponseAllOf | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -83,9 +75,8 @@ export function EntityMetadataItemValueToJSON(value?: EntityMetadataItemValue | 
     }
     return {
         
-        'raw_hex': value.raw_hex,
-        'programmatic_json': value.programmatic_json,
-        'typed': MetadataTypedValueToJSON(value.typed),
+        'resource_address': value.resource_address,
+        'non_fungible_ids': ((value.non_fungible_ids as Array<any>).map(StateNonFungibleLocationResponseItemToJSON)),
     };
 }
 

@@ -169,6 +169,12 @@ export interface NetworkConfigurationResponseWellKnownAddresses {
      * @memberof NetworkConfigurationResponseWellKnownAddresses
      */
     faucet: string;
+    /**
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof NetworkConfigurationResponseWellKnownAddresses
+     */
+    pool_package: string;
 }
 
 /**
@@ -201,6 +207,7 @@ export function instanceOfNetworkConfigurationResponseWellKnownAddresses(value: 
     isInstance = isInstance && "consensus_manager" in value;
     isInstance = isInstance && "genesis_helper" in value;
     isInstance = isInstance && "faucet" in value;
+    isInstance = isInstance && "pool_package" in value;
 
     return isInstance;
 }
@@ -240,6 +247,7 @@ export function NetworkConfigurationResponseWellKnownAddressesFromJSONTyped(json
         'consensus_manager': json['consensus_manager'],
         'genesis_helper': json['genesis_helper'],
         'faucet': json['faucet'],
+        'pool_package': json['pool_package'],
     };
 }
 
@@ -277,6 +285,7 @@ export function NetworkConfigurationResponseWellKnownAddressesToJSON(value?: Net
         'consensus_manager': value.consensus_manager,
         'genesis_helper': value.genesis_helper,
         'faucet': value.faucet,
+        'pool_package': value.pool_package,
     };
 }
 

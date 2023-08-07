@@ -23,50 +23,50 @@ import {
 /**
  * 
  * @export
- * @interface ComponentEntityRoleAssignmentEntryRoleKey
+ * @interface RoleKey
  */
-export interface ComponentEntityRoleAssignmentEntryRoleKey {
+export interface RoleKey {
     /**
      * 
      * @type {string}
-     * @memberof ComponentEntityRoleAssignmentEntryRoleKey
+     * @memberof RoleKey
      */
-    role: string;
+    name: string;
     /**
      * 
      * @type {ObjectModuleId}
-     * @memberof ComponentEntityRoleAssignmentEntryRoleKey
+     * @memberof RoleKey
      */
     module: ObjectModuleId;
 }
 
 /**
- * Check if a given object implements the ComponentEntityRoleAssignmentEntryRoleKey interface.
+ * Check if a given object implements the RoleKey interface.
  */
-export function instanceOfComponentEntityRoleAssignmentEntryRoleKey(value: object): boolean {
+export function instanceOfRoleKey(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "role" in value;
+    isInstance = isInstance && "name" in value;
     isInstance = isInstance && "module" in value;
 
     return isInstance;
 }
 
-export function ComponentEntityRoleAssignmentEntryRoleKeyFromJSON(json: any): ComponentEntityRoleAssignmentEntryRoleKey {
-    return ComponentEntityRoleAssignmentEntryRoleKeyFromJSONTyped(json, false);
+export function RoleKeyFromJSON(json: any): RoleKey {
+    return RoleKeyFromJSONTyped(json, false);
 }
 
-export function ComponentEntityRoleAssignmentEntryRoleKeyFromJSONTyped(json: any, ignoreDiscriminator: boolean): ComponentEntityRoleAssignmentEntryRoleKey {
+export function RoleKeyFromJSONTyped(json: any, ignoreDiscriminator: boolean): RoleKey {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'role': json['role'],
+        'name': json['name'],
         'module': ObjectModuleIdFromJSON(json['module']),
     };
 }
 
-export function ComponentEntityRoleAssignmentEntryRoleKeyToJSON(value?: ComponentEntityRoleAssignmentEntryRoleKey | null): any {
+export function RoleKeyToJSON(value?: RoleKey | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -75,7 +75,7 @@ export function ComponentEntityRoleAssignmentEntryRoleKeyToJSON(value?: Componen
     }
     return {
         
-        'role': value.role,
+        'name': value.name,
         'module': ObjectModuleIdToJSON(value.module),
     };
 }

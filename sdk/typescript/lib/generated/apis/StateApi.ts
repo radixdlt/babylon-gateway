@@ -36,6 +36,8 @@ import type {
   StateNonFungibleDataResponse,
   StateNonFungibleIdsRequest,
   StateNonFungibleIdsResponse,
+  StateNonFungibleLocationRequest,
+  StateNonFungibleLocationResponse,
   StateValidatorsListRequest,
   StateValidatorsListResponse,
 } from '../models';
@@ -82,6 +84,10 @@ import {
     StateNonFungibleIdsRequestToJSON,
     StateNonFungibleIdsResponseFromJSON,
     StateNonFungibleIdsResponseToJSON,
+    StateNonFungibleLocationRequestFromJSON,
+    StateNonFungibleLocationRequestToJSON,
+    StateNonFungibleLocationResponseFromJSON,
+    StateNonFungibleLocationResponseToJSON,
     StateValidatorsListRequestFromJSON,
     StateValidatorsListRequestToJSON,
     StateValidatorsListResponseFromJSON,
@@ -122,6 +128,10 @@ export interface NonFungibleDataRequest {
 
 export interface NonFungibleIdsRequest {
     stateNonFungibleIdsRequest: StateNonFungibleIdsRequest;
+}
+
+export interface NonFungibleLocationRequest {
+    stateNonFungibleLocationRequest: StateNonFungibleLocationRequest;
 }
 
 export interface StateEntityDetailsOperationRequest {
@@ -449,6 +459,41 @@ export class StateApi extends runtime.BaseAPI {
      */
     async nonFungibleIds(requestParameters: NonFungibleIdsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateNonFungibleIdsResponse> {
         const response = await this.nonFungibleIdsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Returns location of a given non-fungible ID. 
+     * Get Non-Fungible Location
+     */
+    async nonFungibleLocationRaw(requestParameters: NonFungibleLocationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StateNonFungibleLocationResponse>> {
+        if (requestParameters.stateNonFungibleLocationRequest === null || requestParameters.stateNonFungibleLocationRequest === undefined) {
+            throw new runtime.RequiredError('stateNonFungibleLocationRequest','Required parameter requestParameters.stateNonFungibleLocationRequest was null or undefined when calling nonFungibleLocation.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/state/non-fungible/location`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: StateNonFungibleLocationRequestToJSON(requestParameters.stateNonFungibleLocationRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => StateNonFungibleLocationResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns location of a given non-fungible ID. 
+     * Get Non-Fungible Location
+     */
+    async nonFungibleLocation(requestParameters: NonFungibleLocationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StateNonFungibleLocationResponse> {
+        const response = await this.nonFungibleLocationRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

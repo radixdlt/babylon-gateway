@@ -27,6 +27,12 @@ import {
  */
 export interface StateNonFungibleDetailsResponseItem {
     /**
+     * 
+     * @type {boolean}
+     * @memberof StateNonFungibleDetailsResponseItem
+     */
+    is_burned: boolean;
+    /**
      * String-encoded non-fungible ID.
      * @type {string}
      * @memberof StateNonFungibleDetailsResponseItem
@@ -37,7 +43,7 @@ export interface StateNonFungibleDetailsResponseItem {
      * @type {ScryptoSborValue}
      * @memberof StateNonFungibleDetailsResponseItem
      */
-    data: ScryptoSborValue;
+    data?: ScryptoSborValue;
     /**
      * TBD
      * @type {number}
@@ -51,8 +57,8 @@ export interface StateNonFungibleDetailsResponseItem {
  */
 export function instanceOfStateNonFungibleDetailsResponseItem(value: object): boolean {
     let isInstance = true;
+    isInstance = isInstance && "is_burned" in value;
     isInstance = isInstance && "non_fungible_id" in value;
-    isInstance = isInstance && "data" in value;
     isInstance = isInstance && "last_updated_at_state_version" in value;
 
     return isInstance;
@@ -68,8 +74,9 @@ export function StateNonFungibleDetailsResponseItemFromJSONTyped(json: any, igno
     }
     return {
         
+        'is_burned': json['is_burned'],
         'non_fungible_id': json['non_fungible_id'],
-        'data': ScryptoSborValueFromJSON(json['data']),
+        'data': !exists(json, 'data') ? undefined : ScryptoSborValueFromJSON(json['data']),
         'last_updated_at_state_version': json['last_updated_at_state_version'],
     };
 }
@@ -83,6 +90,7 @@ export function StateNonFungibleDetailsResponseItemToJSON(value?: StateNonFungib
     }
     return {
         
+        'is_burned': value.is_burned,
         'non_fungible_id': value.non_fungible_id,
         'data': ScryptoSborValueToJSON(value.data),
         'last_updated_at_state_version': value.last_updated_at_state_version,

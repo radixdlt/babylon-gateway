@@ -55,7 +55,7 @@ export interface StateEntityDetailsResponseComponentDetails {
      * @type {ComponentEntityRoleAssignments}
      * @memberof StateEntityDetailsResponseComponentDetails
      */
-    role_assignments: ComponentEntityRoleAssignments;
+    role_assignments?: ComponentEntityRoleAssignments;
     /**
      * String-encoded decimal representing the amount of a related fungible resource.
      * @type {string}
@@ -81,7 +81,6 @@ export function instanceOfStateEntityDetailsResponseComponentDetails(value: obje
     let isInstance = true;
     isInstance = isInstance && "type" in value;
     isInstance = isInstance && "blueprint_name" in value;
-    isInstance = isInstance && "role_assignments" in value;
 
     return isInstance;
 }
@@ -100,7 +99,7 @@ export function StateEntityDetailsResponseComponentDetailsFromJSONTyped(json: an
         'package_address': !exists(json, 'package_address') ? undefined : json['package_address'],
         'blueprint_name': json['blueprint_name'],
         'state': !exists(json, 'state') ? undefined : json['state'],
-        'role_assignments': ComponentEntityRoleAssignmentsFromJSON(json['role_assignments']),
+        'role_assignments': !exists(json, 'role_assignments') ? undefined : ComponentEntityRoleAssignmentsFromJSON(json['role_assignments']),
         'royalty_vault_balance': !exists(json, 'royalty_vault_balance') ? undefined : json['royalty_vault_balance'],
     };
 }

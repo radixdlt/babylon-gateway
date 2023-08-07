@@ -13,30 +13,43 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { LedgerStateSelector } from './LedgerStateSelector';
+import {
+    LedgerStateSelectorFromJSON,
+    LedgerStateSelectorFromJSONTyped,
+    LedgerStateSelectorToJSON,
+} from './LedgerStateSelector';
+
 /**
  * 
  * @export
- * @interface StateNonFungibleDataRequestAllOf
+ * @interface StateNonFungibleLocationRequest
  */
-export interface StateNonFungibleDataRequestAllOf {
+export interface StateNonFungibleLocationRequest {
+    /**
+     * 
+     * @type {LedgerStateSelector}
+     * @memberof StateNonFungibleLocationRequest
+     */
+    at_ledger_state?: LedgerStateSelector | null;
     /**
      * Bech32m-encoded human readable version of the address.
      * @type {string}
-     * @memberof StateNonFungibleDataRequestAllOf
+     * @memberof StateNonFungibleLocationRequest
      */
     resource_address: string;
     /**
      * 
      * @type {Array<string>}
-     * @memberof StateNonFungibleDataRequestAllOf
+     * @memberof StateNonFungibleLocationRequest
      */
     non_fungible_ids: Array<string>;
 }
 
 /**
- * Check if a given object implements the StateNonFungibleDataRequestAllOf interface.
+ * Check if a given object implements the StateNonFungibleLocationRequest interface.
  */
-export function instanceOfStateNonFungibleDataRequestAllOf(value: object): boolean {
+export function instanceOfStateNonFungibleLocationRequest(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "resource_address" in value;
     isInstance = isInstance && "non_fungible_ids" in value;
@@ -44,22 +57,23 @@ export function instanceOfStateNonFungibleDataRequestAllOf(value: object): boole
     return isInstance;
 }
 
-export function StateNonFungibleDataRequestAllOfFromJSON(json: any): StateNonFungibleDataRequestAllOf {
-    return StateNonFungibleDataRequestAllOfFromJSONTyped(json, false);
+export function StateNonFungibleLocationRequestFromJSON(json: any): StateNonFungibleLocationRequest {
+    return StateNonFungibleLocationRequestFromJSONTyped(json, false);
 }
 
-export function StateNonFungibleDataRequestAllOfFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateNonFungibleDataRequestAllOf {
+export function StateNonFungibleLocationRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateNonFungibleLocationRequest {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
+        'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
         'resource_address': json['resource_address'],
         'non_fungible_ids': json['non_fungible_ids'],
     };
 }
 
-export function StateNonFungibleDataRequestAllOfToJSON(value?: StateNonFungibleDataRequestAllOf | null): any {
+export function StateNonFungibleLocationRequestToJSON(value?: StateNonFungibleLocationRequest | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -68,6 +82,7 @@ export function StateNonFungibleDataRequestAllOfToJSON(value?: StateNonFungibleD
     }
     return {
         
+        'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
         'resource_address': value.resource_address,
         'non_fungible_ids': value.non_fungible_ids,
     };
