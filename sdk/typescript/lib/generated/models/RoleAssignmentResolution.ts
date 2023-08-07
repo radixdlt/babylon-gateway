@@ -12,64 +12,27 @@
  * Do not edit the class manually.
  */
 
-import { exists, mapValues } from '../runtime';
+
 /**
  * 
  * @export
- * @interface ScryptoSborValue
  */
-export interface ScryptoSborValue {
-    /**
-     * 
-     * @type {string}
-     * @memberof ScryptoSborValue
-     */
-    raw_hex: string;
-    /**
-     * 
-     * @type {object}
-     * @memberof ScryptoSborValue
-     */
-    programmatic_json: object;
+export const RoleAssignmentResolution = {
+    Explicit: 'Explicit',
+    Owner: 'Owner'
+} as const;
+export type RoleAssignmentResolution = typeof RoleAssignmentResolution[keyof typeof RoleAssignmentResolution];
+
+
+export function RoleAssignmentResolutionFromJSON(json: any): RoleAssignmentResolution {
+    return RoleAssignmentResolutionFromJSONTyped(json, false);
 }
 
-/**
- * Check if a given object implements the ScryptoSborValue interface.
- */
-export function instanceOfScryptoSborValue(value: object): boolean {
-    let isInstance = true;
-    isInstance = isInstance && "raw_hex" in value;
-    isInstance = isInstance && "programmatic_json" in value;
-
-    return isInstance;
+export function RoleAssignmentResolutionFromJSONTyped(json: any, ignoreDiscriminator: boolean): RoleAssignmentResolution {
+    return json as RoleAssignmentResolution;
 }
 
-export function ScryptoSborValueFromJSON(json: any): ScryptoSborValue {
-    return ScryptoSborValueFromJSONTyped(json, false);
-}
-
-export function ScryptoSborValueFromJSONTyped(json: any, ignoreDiscriminator: boolean): ScryptoSborValue {
-    if ((json === undefined) || (json === null)) {
-        return json;
-    }
-    return {
-        
-        'raw_hex': json['raw_hex'],
-        'programmatic_json': json['programmatic_json'],
-    };
-}
-
-export function ScryptoSborValueToJSON(value?: ScryptoSborValue | null): any {
-    if (value === undefined) {
-        return undefined;
-    }
-    if (value === null) {
-        return null;
-    }
-    return {
-        
-        'raw_hex': value.raw_hex,
-        'programmatic_json': value.programmatic_json,
-    };
+export function RoleAssignmentResolutionToJSON(value?: RoleAssignmentResolution | null): any {
+    return value as any;
 }
 

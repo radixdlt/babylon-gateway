@@ -13,68 +13,59 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { MetadataTypedValue } from './MetadataTypedValue';
+import type { RoleAssignmentResolution } from './RoleAssignmentResolution';
 import {
-    MetadataTypedValueFromJSON,
-    MetadataTypedValueFromJSONTyped,
-    MetadataTypedValueToJSON,
-} from './MetadataTypedValue';
+    RoleAssignmentResolutionFromJSON,
+    RoleAssignmentResolutionFromJSONTyped,
+    RoleAssignmentResolutionToJSON,
+} from './RoleAssignmentResolution';
 
 /**
  * 
  * @export
- * @interface EntityMetadataItemValue
+ * @interface ComponentEntityRoleAssignmentEntryAssignment
  */
-export interface EntityMetadataItemValue {
+export interface ComponentEntityRoleAssignmentEntryAssignment {
     /**
      * 
-     * @type {string}
-     * @memberof EntityMetadataItemValue
+     * @type {RoleAssignmentResolution}
+     * @memberof ComponentEntityRoleAssignmentEntryAssignment
      */
-    raw_hex: string;
+    resolution: RoleAssignmentResolution;
     /**
      * 
      * @type {object}
-     * @memberof EntityMetadataItemValue
+     * @memberof ComponentEntityRoleAssignmentEntryAssignment
      */
-    programmatic_json: object;
-    /**
-     * 
-     * @type {MetadataTypedValue}
-     * @memberof EntityMetadataItemValue
-     */
-    typed: MetadataTypedValue;
+    explicit_rule?: object;
 }
 
 /**
- * Check if a given object implements the EntityMetadataItemValue interface.
+ * Check if a given object implements the ComponentEntityRoleAssignmentEntryAssignment interface.
  */
-export function instanceOfEntityMetadataItemValue(value: object): boolean {
+export function instanceOfComponentEntityRoleAssignmentEntryAssignment(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "raw_hex" in value;
-    isInstance = isInstance && "programmatic_json" in value;
-    isInstance = isInstance && "typed" in value;
+    isInstance = isInstance && "resolution" in value;
 
     return isInstance;
 }
 
-export function EntityMetadataItemValueFromJSON(json: any): EntityMetadataItemValue {
-    return EntityMetadataItemValueFromJSONTyped(json, false);
+export function ComponentEntityRoleAssignmentEntryAssignmentFromJSON(json: any): ComponentEntityRoleAssignmentEntryAssignment {
+    return ComponentEntityRoleAssignmentEntryAssignmentFromJSONTyped(json, false);
 }
 
-export function EntityMetadataItemValueFromJSONTyped(json: any, ignoreDiscriminator: boolean): EntityMetadataItemValue {
+export function ComponentEntityRoleAssignmentEntryAssignmentFromJSONTyped(json: any, ignoreDiscriminator: boolean): ComponentEntityRoleAssignmentEntryAssignment {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'raw_hex': json['raw_hex'],
-        'programmatic_json': json['programmatic_json'],
-        'typed': MetadataTypedValueFromJSON(json['typed']),
+        'resolution': RoleAssignmentResolutionFromJSON(json['resolution']),
+        'explicit_rule': !exists(json, 'explicit_rule') ? undefined : json['explicit_rule'],
     };
 }
 
-export function EntityMetadataItemValueToJSON(value?: EntityMetadataItemValue | null): any {
+export function ComponentEntityRoleAssignmentEntryAssignmentToJSON(value?: ComponentEntityRoleAssignmentEntryAssignment | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -83,9 +74,8 @@ export function EntityMetadataItemValueToJSON(value?: EntityMetadataItemValue | 
     }
     return {
         
-        'raw_hex': value.raw_hex,
-        'programmatic_json': value.programmatic_json,
-        'typed': MetadataTypedValueToJSON(value.typed),
+        'resolution': RoleAssignmentResolutionToJSON(value.resolution),
+        'explicit_rule': value.explicit_rule,
     };
 }
 

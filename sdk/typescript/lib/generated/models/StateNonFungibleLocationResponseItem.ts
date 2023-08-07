@@ -13,76 +13,68 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { ScryptoSborValue } from './ScryptoSborValue';
-import {
-    ScryptoSborValueFromJSON,
-    ScryptoSborValueFromJSONTyped,
-    ScryptoSborValueToJSON,
-} from './ScryptoSborValue';
-
 /**
  * 
  * @export
- * @interface StateKeyValueStoreDataResponseItem
+ * @interface StateNonFungibleLocationResponseItem
  */
-export interface StateKeyValueStoreDataResponseItem {
+export interface StateNonFungibleLocationResponseItem {
     /**
-     * 
-     * @type {ScryptoSborValue}
-     * @memberof StateKeyValueStoreDataResponseItem
+     * String-encoded non-fungible ID.
+     * @type {string}
+     * @memberof StateNonFungibleLocationResponseItem
      */
-    key: ScryptoSborValue;
+    non_fungible_id: string;
     /**
-     * 
-     * @type {ScryptoSborValue}
-     * @memberof StateKeyValueStoreDataResponseItem
+     * Bech32m-encoded human readable version of the address.
+     * @type {string}
+     * @memberof StateNonFungibleLocationResponseItem
      */
-    value: ScryptoSborValue;
-    /**
-     * TBD
-     * @type {number}
-     * @memberof StateKeyValueStoreDataResponseItem
-     */
-    last_updated_at_state_version: number;
+    owning_vault_address?: string;
     /**
      * 
      * @type {boolean}
-     * @memberof StateKeyValueStoreDataResponseItem
+     * @memberof StateNonFungibleLocationResponseItem
      */
-    is_locked: boolean;
+    is_burned: boolean;
+    /**
+     * TBD
+     * @type {number}
+     * @memberof StateNonFungibleLocationResponseItem
+     */
+    last_updated_at_state_version: number;
 }
 
 /**
- * Check if a given object implements the StateKeyValueStoreDataResponseItem interface.
+ * Check if a given object implements the StateNonFungibleLocationResponseItem interface.
  */
-export function instanceOfStateKeyValueStoreDataResponseItem(value: object): boolean {
+export function instanceOfStateNonFungibleLocationResponseItem(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "key" in value;
-    isInstance = isInstance && "value" in value;
+    isInstance = isInstance && "non_fungible_id" in value;
+    isInstance = isInstance && "is_burned" in value;
     isInstance = isInstance && "last_updated_at_state_version" in value;
-    isInstance = isInstance && "is_locked" in value;
 
     return isInstance;
 }
 
-export function StateKeyValueStoreDataResponseItemFromJSON(json: any): StateKeyValueStoreDataResponseItem {
-    return StateKeyValueStoreDataResponseItemFromJSONTyped(json, false);
+export function StateNonFungibleLocationResponseItemFromJSON(json: any): StateNonFungibleLocationResponseItem {
+    return StateNonFungibleLocationResponseItemFromJSONTyped(json, false);
 }
 
-export function StateKeyValueStoreDataResponseItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateKeyValueStoreDataResponseItem {
+export function StateNonFungibleLocationResponseItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): StateNonFungibleLocationResponseItem {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'key': ScryptoSborValueFromJSON(json['key']),
-        'value': ScryptoSborValueFromJSON(json['value']),
+        'non_fungible_id': json['non_fungible_id'],
+        'owning_vault_address': !exists(json, 'owning_vault_address') ? undefined : json['owning_vault_address'],
+        'is_burned': json['is_burned'],
         'last_updated_at_state_version': json['last_updated_at_state_version'],
-        'is_locked': json['is_locked'],
     };
 }
 
-export function StateKeyValueStoreDataResponseItemToJSON(value?: StateKeyValueStoreDataResponseItem | null): any {
+export function StateNonFungibleLocationResponseItemToJSON(value?: StateNonFungibleLocationResponseItem | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -91,10 +83,10 @@ export function StateKeyValueStoreDataResponseItemToJSON(value?: StateKeyValueSt
     }
     return {
         
-        'key': ScryptoSborValueToJSON(value.key),
-        'value': ScryptoSborValueToJSON(value.value),
+        'non_fungible_id': value.non_fungible_id,
+        'owning_vault_address': value.owning_vault_address,
+        'is_burned': value.is_burned,
         'last_updated_at_state_version': value.last_updated_at_state_version,
-        'is_locked': value.is_locked,
     };
 }
 
