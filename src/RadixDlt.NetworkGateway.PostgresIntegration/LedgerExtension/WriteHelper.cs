@@ -761,7 +761,7 @@ internal class WriteHelper
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.AccountEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteNullableAsync(e.AccountResourcePreferenceRule, "resource_preference_rule", token);
+            await writer.WriteNullableAsync(e.AccountResourcePreferenceRule, "account_resource_preference_rule", token);
             await writer.WriteAsync(e.IsDeleted, NpgsqlDbType.Boolean, token);
         }
 
