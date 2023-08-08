@@ -180,7 +180,7 @@ jobs:
       deployments: write
     strategy:
       matrix:
-        app: ["database-migrations", "data-aggregator" "gateway-api"]
+        app: ["database-migrations", "data-aggregator", "gateway-api"]
     steps:
       - name: Snyk ${{ matrix.app }} container monitor
         uses: radixdlt/public-iac-resuable-artifacts/snyk-container-monitor@main
