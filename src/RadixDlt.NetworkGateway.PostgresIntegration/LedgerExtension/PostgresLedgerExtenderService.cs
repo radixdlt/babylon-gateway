@@ -1746,7 +1746,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         .Select(x => existingNonFungibleIdData[new NonFungibleIdLookup(e.Key.ReferencedResource.DatabaseId, x.NonFungibleId)].Id)
                         .ToList();
 
-                    nfids.AddRange(addedItems);
+                    // TODO: NonFungibleVaultContentsIndexEntrySubstate is published even if nfid already exist in vault, that's causing duplicates.
+                    // Node is supposed to filter out that substate.
+                    // To fix that temporarily we need to remove duplicates.
+                    var uniqueAddedItems = addedItems.Except(nfids);
+
+                    nfids.AddRange(uniqueAddedItems);
                     nfids.RemoveAll(x => deletedItems.Contains(x));
 
                     AggregateEntityResource(e.Key.ReferencedVault, e.Key.ReferencedResource, e.Key.StateVersion, false, null, nfids.Count);
