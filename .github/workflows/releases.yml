@@ -3,7 +3,7 @@ on:
   release:
     types: [published]
 env:
-  dotnet_version: "7.0.x"
+  DOTNET_VERSION: "7.0.x"
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -206,6 +206,12 @@ jobs:
           secret_prefix: 'SNYK'
           secret_name: ${{ secrets.AWS_SECRET_NAME_SNYK }}
           parse_json: true
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Install dependencies
+        run: dotnet restore
       - name: Enable Snyk online monitoring to check for vulnerabilities
         uses: snyk/actions/dotnet@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
         with:
