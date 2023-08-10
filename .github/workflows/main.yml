@@ -96,6 +96,7 @@ jobs:
     name: (DatabaseMigrations) Docker
     needs:
       - setup-tags
+      - snyk-scan
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
@@ -119,6 +120,7 @@ jobs:
     name: (DataAggregator) Docker
     needs:
       - setup-tags
+      - snyk-scan
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
@@ -142,6 +144,7 @@ jobs:
     name: (GatewayApi) Docker
     needs:
       - setup-tags
+      - snyk-scan
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04

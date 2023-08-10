@@ -154,7 +154,7 @@ jobs:
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       role_to_assume: ${{ secrets.DOCKERHUB_RELEASER_ROLE }}
 
-  snyk_container_monitor:
+  snyk-container-monitor:
     name: Snyk monitor container
     runs-on: ubuntu-latest
     needs:
@@ -184,7 +184,7 @@ jobs:
           image: docker.io/radixdlt/babylon-ng-${{ matrix.app }}:${{ needs.setup-tags.outputs.version-suffix }}
           target_ref: ${{ github.ref_name }}
 
-  snyk_monitor:
+  snyk-monitor:
     name: Snyk monitor
     runs-on: ubuntu-latest
     needs:
@@ -216,7 +216,6 @@ jobs:
     name: Snyk SBOM
     runs-on: ubuntu-latest
     permissions: write-all
-    needs: release
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
