@@ -12,7 +12,49 @@ on:
       - develop
       - release\/*
 
+env:
+  DOTNET_VERSION: "7.0.x"
+
 jobs:
+  snyk-scan:
+    name: snyk scan
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      pull-requests: read
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
+        with:
+          role_name: ${{ secrets.AWS_ROLE_NAME_SNYK_SECRET }}
+          app_name: 'babylon-gateway'
+          step_name: 'snyk-scan'
+          secret_prefix: 'SNYK'
+          secret_name: ${{ secrets.AWS_SECRET_NAME_SNYK }}
+          parse_json: true
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Run Snyk to check for deps vulnerabilities
+        uses: snyk/actions/dotnet@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
+        with:
+          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --severity-threshold=critical
+      - name: Run Snyk to check for code vulnerabilities
+        uses: snyk/actions/dotnet@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
+        with:
+          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --severity-threshold=high
+          command: code test
+      - name: Generate SBOM # check SBOM can be generated but nothing is done with it
+        uses: snyk/actions/dotnet@b98d498629f1c368650224d6d212bf7dfa89e4bf # v0.4.0
+        with:
+          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --exclude=package.json --format=cyclonedx1.4+json --json-file-output sbom.json
+          command: sbom
+
   build:
     runs-on: ubuntu-22.04
     steps:
@@ -20,7 +62,7 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a
         with:
-          dotnet-version: 7.0.x
+          dotnet-version: ${{ env.DOTNET_VERSION }}
       - name: Install dependencies
         run: dotnet restore
       - name: Build
@@ -54,6 +96,7 @@ jobs:
     name: (DatabaseMigrations) Docker
     needs:
       - setup-tags
+      - snyk-scan
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
@@ -67,6 +110,8 @@ jobs:
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
+      scan_image: true
+      snyk_target_ref: ${{ github.ref_name }}
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -75,6 +120,7 @@ jobs:
     name: (DataAggregator) Docker
     needs:
       - setup-tags
+      - snyk-scan
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
@@ -88,6 +134,8 @@ jobs:
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
+      scan_image: true
+      snyk_target_ref: ${{ github.ref_name }}
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -96,6 +144,7 @@ jobs:
     name: (GatewayApi) Docker
     needs:
       - setup-tags
+      - snyk-scan
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/docker-build.yml@main
     with:
       runs_on: ubuntu-22.04
@@ -109,6 +158,8 @@ jobs:
       restore_artifact: "true"
       artifact_location: "./"
       artifact_name: build_props
+      scan_image: true
+      snyk_target_ref: ${{ github.ref_name }}
     secrets:
       workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
