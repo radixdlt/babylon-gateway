@@ -739,8 +739,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var metadataChanges = new List<MetadataChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
         var validatorSetChanges = new List<ValidatorSetChange>();
-        var entityStateToAdd = new List<EntityStateHistory>();
-        var validatorStateToAdd = new List<ValidatorStateHistory>();
+        var entityStateToAdd = new List<StateHistory>();
+        var stateToAdd = new List<StateHistory>();
         var keyValueStoreEntryHistoryToAdd = new List<KeyValueStoreEntryHistory>();
         var componentMethodRoyaltiesToAdd = new List<ComponentMethodRoyaltyEntryHistory>();
         var packageBlueprintHistoryToAdd = new Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>();
@@ -838,12 +838,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.GenericScryptoComponentFieldStateSubstate componentState)
                         {
-                            entityStateToAdd.Add(new EntityStateHistory
+                            stateToAdd.Add(new StateHistory
                             {
-                                Id = sequences.EntityStateHistorySequence++,
+                                Id = sequences.StateHistorySequence++,
                                 FromStateVersion = stateVersion,
                                 EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
-                                State = componentState.Value.DataStruct.StructData.ToJson(),
+                                JsonState = componentState.Value.DataStruct.StructData.ToJson(),
                             });
                         }
 
@@ -875,12 +875,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 Key = lookup.PublicKey,
                             };
 
-                            validatorStateToAdd.Add(new ValidatorStateHistory
+                            stateToAdd.Add(new StateHistory
                             {
-                                Id = sequences.ValidatorStateHistorySequence++,
+                                Id = sequences.StateHistorySequence++,
                                 FromStateVersion = stateVersion,
-                                ValidatorEntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
-                                State = validator.Value.ToJson(),
+                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                                JsonState = validator.Value.ToJson(),
                             });
                         }
 
@@ -1835,8 +1835,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyEntity(entitiesToAdd, token);
             rowsInserted += await writeHelper.CopyLedgerTransaction(ledgerTransactionsToAdd, token);
             rowsInserted += await writeHelper.CopyLedgerTransactionMarkers(ledgerTransactionMarkersToAdd, token);
-            rowsInserted += await writeHelper.CopyEntityStateHistory(entityStateToAdd, token);
-            rowsInserted += await writeHelper.CopyValidatorStateHistory(validatorStateToAdd, token);
+            rowsInserted += await writeHelper.CopyStateHistory(stateToAdd, token);
             rowsInserted += await writeHelper.CopyEntityMetadataHistory(entityMetadataHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityMetadataAggregateHistory(entityMetadataAggregateHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyEntityRoleAssignmentsOwnerRoleHistory(entityAccessRulesOwnerRoleHistoryToAdd, token);

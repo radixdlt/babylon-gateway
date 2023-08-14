@@ -115,9 +115,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<NonFungibleIdStoreHistory> NonFungibleIdStoreHistory => Set<NonFungibleIdStoreHistory>();
 
-    public DbSet<EntityStateHistory> EntityStateHistory => Set<EntityStateHistory>();
-
-    public DbSet<ValidatorStateHistory> ValidatorStateHistory => Set<ValidatorStateHistory>();
+    public DbSet<StateHistory> StateHistory => Set<StateHistory>();
 
     public DbSet<ValidatorPublicKeyHistory> ValidatorKeyHistory => Set<ValidatorPublicKeyHistory>();
 
@@ -361,11 +359,8 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<NonFungibleIdStoreHistory>()
             .HasIndex(e => new { e.NonFungibleResourceEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityStateHistory>()
-            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
-
-        modelBuilder.Entity<ValidatorStateHistory>()
-            .HasIndex(e => new { EntityId = e.ValidatorEntityId, e.FromStateVersion });
+        modelBuilder.Entity<StateHistory>()
+            .HasIndex(e => new { EntityId = e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<PackageBlueprintHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });

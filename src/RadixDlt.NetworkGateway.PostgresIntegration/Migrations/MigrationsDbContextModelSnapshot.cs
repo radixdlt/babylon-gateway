@@ -557,35 +557,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entity_role_assignments_owner_role_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityStateHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("EntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("entity_id");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("state");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EntityId", "FromStateVersion");
-
-                    b.ToTable("entity_state_history");
-                });
-
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityVaultHistory", b =>
                 {
                     b.Property<long>("Id")
@@ -1259,6 +1230,38 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("resource_entity_supply_history");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.StateHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<string>("JsonState")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("json_state");
+
+                    b.Property<byte[]>("SborState")
+                        .HasColumnType("bytea")
+                        .HasColumnName("sbor_state");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "FromStateVersion");
+
+                    b.ToTable("state_history");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorActiveSetHistory", b =>
                 {
                     b.Property<long>("Id")
@@ -1359,35 +1362,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("ValidatorEntityId", "KeyType", "Key");
 
                     b.ToTable("validator_public_key_history");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorStateHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("state");
-
-                    b.Property<long>("ValidatorEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("validator_entity_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ValidatorEntityId", "FromStateVersion");
-
-                    b.ToTable("validator_state_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalAccessControllerEntity", b =>
