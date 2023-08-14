@@ -9,7 +9,7 @@ index.ts
 models/AtLedgerStateMixin.ts
 models/CommittedTransactionInfo.ts
 models/ComponentEntityRoleAssignmentEntry.ts
-models/ComponentEntityRoleAssignmentEntryRoleKey.ts
+models/ComponentEntityRoleAssignmentEntryAssignment.ts
 models/ComponentEntityRoleAssignments.ts
 models/CursorLimitMixin.ts
 models/EntityMetadataCollection.ts
@@ -155,6 +155,8 @@ models/PublicKeyHashType.ts
 models/PublicKeyType.ts
 models/ResourceAggregationLevel.ts
 models/ResultSetCursorMixin.ts
+models/RoleAssignmentResolution.ts
+models/RoleKey.ts
 models/ScryptoSborValue.ts
 models/StateEntityDetailsOptIns.ts
 models/StateEntityDetailsRequest.ts
@@ -212,7 +214,6 @@ models/StateKeyValueStoreDataResponse.ts
 models/StateKeyValueStoreDataResponseAllOf.ts
 models/StateKeyValueStoreDataResponseItem.ts
 models/StateNonFungibleDataRequest.ts
-models/StateNonFungibleDataRequestAllOf.ts
 models/StateNonFungibleDataResponse.ts
 models/StateNonFungibleDataResponseAllOf.ts
 models/StateNonFungibleDetailsResponseItem.ts
@@ -220,6 +221,11 @@ models/StateNonFungibleIdsRequest.ts
 models/StateNonFungibleIdsRequestAllOf.ts
 models/StateNonFungibleIdsResponse.ts
 models/StateNonFungibleIdsResponseAllOf.ts
+models/StateNonFungibleLocationRequest.ts
+models/StateNonFungibleLocationRequestAllOf.ts
+models/StateNonFungibleLocationResponse.ts
+models/StateNonFungibleLocationResponseAllOf.ts
+models/StateNonFungibleLocationResponseItem.ts
 models/StateValidatorsListRequest.ts
 models/StateValidatorsListRequestAllOf.ts
 models/StateValidatorsListResponse.ts

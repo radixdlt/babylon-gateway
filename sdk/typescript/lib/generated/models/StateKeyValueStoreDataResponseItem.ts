@@ -13,6 +13,13 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { ScryptoSborValue } from './ScryptoSborValue';
+import {
+    ScryptoSborValueFromJSON,
+    ScryptoSborValueFromJSONTyped,
+    ScryptoSborValueToJSON,
+} from './ScryptoSborValue';
+
 /**
  * 
  * @export
@@ -20,17 +27,17 @@ import { exists, mapValues } from '../runtime';
  */
 export interface StateKeyValueStoreDataResponseItem {
     /**
-     * Hex-encoded binary blob.
-     * @type {string}
+     * 
+     * @type {ScryptoSborValue}
      * @memberof StateKeyValueStoreDataResponseItem
      */
-    key_hex: string;
+    key: ScryptoSborValue;
     /**
-     * Hex-encoded binary blob.
-     * @type {string}
+     * 
+     * @type {ScryptoSborValue}
      * @memberof StateKeyValueStoreDataResponseItem
      */
-    value_hex: string;
+    value: ScryptoSborValue;
     /**
      * TBD
      * @type {number}
@@ -50,8 +57,8 @@ export interface StateKeyValueStoreDataResponseItem {
  */
 export function instanceOfStateKeyValueStoreDataResponseItem(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "key_hex" in value;
-    isInstance = isInstance && "value_hex" in value;
+    isInstance = isInstance && "key" in value;
+    isInstance = isInstance && "value" in value;
     isInstance = isInstance && "last_updated_at_state_version" in value;
     isInstance = isInstance && "is_locked" in value;
 
@@ -68,8 +75,8 @@ export function StateKeyValueStoreDataResponseItemFromJSONTyped(json: any, ignor
     }
     return {
         
-        'key_hex': json['key_hex'],
-        'value_hex': json['value_hex'],
+        'key': ScryptoSborValueFromJSON(json['key']),
+        'value': ScryptoSborValueFromJSON(json['value']),
         'last_updated_at_state_version': json['last_updated_at_state_version'],
         'is_locked': json['is_locked'],
     };
@@ -84,8 +91,8 @@ export function StateKeyValueStoreDataResponseItemToJSON(value?: StateKeyValueSt
     }
     return {
         
-        'key_hex': value.key_hex,
-        'value_hex': value.value_hex,
+        'key': ScryptoSborValueToJSON(value.key),
+        'value': ScryptoSborValueToJSON(value.value),
         'last_updated_at_state_version': value.last_updated_at_state_version,
         'is_locked': value.is_locked,
     };

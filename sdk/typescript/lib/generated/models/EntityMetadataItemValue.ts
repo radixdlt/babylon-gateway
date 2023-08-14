@@ -37,7 +37,7 @@ export interface EntityMetadataItemValue {
      * @type {object}
      * @memberof EntityMetadataItemValue
      */
-    raw_json: object;
+    programmatic_json: object;
     /**
      * 
      * @type {MetadataTypedValue}
@@ -52,7 +52,7 @@ export interface EntityMetadataItemValue {
 export function instanceOfEntityMetadataItemValue(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "raw_hex" in value;
-    isInstance = isInstance && "raw_json" in value;
+    isInstance = isInstance && "programmatic_json" in value;
     isInstance = isInstance && "typed" in value;
 
     return isInstance;
@@ -69,7 +69,7 @@ export function EntityMetadataItemValueFromJSONTyped(json: any, ignoreDiscrimina
     return {
         
         'raw_hex': json['raw_hex'],
-        'raw_json': json['raw_json'],
+        'programmatic_json': json['programmatic_json'],
         'typed': MetadataTypedValueFromJSON(json['typed']),
     };
 }
@@ -84,7 +84,7 @@ export function EntityMetadataItemValueToJSON(value?: EntityMetadataItemValue | 
     return {
         
         'raw_hex': value.raw_hex,
-        'raw_json': value.raw_json,
+        'programmatic_json': value.programmatic_json,
         'typed': MetadataTypedValueToJSON(value.typed),
     };
 }

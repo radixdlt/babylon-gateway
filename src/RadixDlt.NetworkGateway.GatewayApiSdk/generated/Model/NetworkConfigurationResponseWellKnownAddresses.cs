@@ -128,7 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="consensusManager">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="genesisHelper">Bech32m-encoded human readable version of the address. (required).</param>
         /// <param name="faucet">Bech32m-encoded human readable version of the address. (required).</param>
-        public NetworkConfigurationResponseWellKnownAddresses(string xrd = default(string), string secp256k1SignatureVirtualBadge = default(string), string ed25519SignatureVirtualBadge = default(string), string packageOfDirectCallerVirtualBadge = default(string), string globalCallerVirtualBadge = default(string), string systemTransactionBadge = default(string), string packageOwnerBadge = default(string), string validatorOwnerBadge = default(string), string accountOwnerBadge = default(string), string identityOwnerBadge = default(string), string packagePackage = default(string), string resourcePackage = default(string), string accountPackage = default(string), string identityPackage = default(string), string consensusManagerPackage = default(string), string accessControllerPackage = default(string), string transactionProcessorPackage = default(string), string metadataModulePackage = default(string), string royaltyModulePackage = default(string), string accessRulesPackage = default(string), string genesisHelperPackage = default(string), string faucetPackage = default(string), string consensusManager = default(string), string genesisHelper = default(string), string faucet = default(string))
+        /// <param name="poolPackage">Bech32m-encoded human readable version of the address. (required).</param>
+        public NetworkConfigurationResponseWellKnownAddresses(string xrd = default(string), string secp256k1SignatureVirtualBadge = default(string), string ed25519SignatureVirtualBadge = default(string), string packageOfDirectCallerVirtualBadge = default(string), string globalCallerVirtualBadge = default(string), string systemTransactionBadge = default(string), string packageOwnerBadge = default(string), string validatorOwnerBadge = default(string), string accountOwnerBadge = default(string), string identityOwnerBadge = default(string), string packagePackage = default(string), string resourcePackage = default(string), string accountPackage = default(string), string identityPackage = default(string), string consensusManagerPackage = default(string), string accessControllerPackage = default(string), string transactionProcessorPackage = default(string), string metadataModulePackage = default(string), string royaltyModulePackage = default(string), string accessRulesPackage = default(string), string genesisHelperPackage = default(string), string faucetPackage = default(string), string consensusManager = default(string), string genesisHelper = default(string), string faucet = default(string), string poolPackage = default(string))
         {
             // to ensure "xrd" is required (not null)
             if (xrd == null)
@@ -280,6 +281,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("faucet is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
             this.Faucet = faucet;
+            // to ensure "poolPackage" is required (not null)
+            if (poolPackage == null)
+            {
+                throw new ArgumentNullException("poolPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.PoolPackage = poolPackage;
         }
 
         /// <summary>
@@ -458,6 +465,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Faucet { get; set; }
 
         /// <summary>
+        /// Bech32m-encoded human readable version of the address.
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the address.</value>
+        [DataMember(Name = "pool_package", IsRequired = true, EmitDefaultValue = true)]
+        public string PoolPackage { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -490,6 +504,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  ConsensusManager: ").Append(ConsensusManager).Append("\n");
             sb.Append("  GenesisHelper: ").Append(GenesisHelper).Append("\n");
             sb.Append("  Faucet: ").Append(Faucet).Append("\n");
+            sb.Append("  PoolPackage: ").Append(PoolPackage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -649,6 +664,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Faucet == input.Faucet ||
                     (this.Faucet != null &&
                     this.Faucet.Equals(input.Faucet))
+                ) && 
+                (
+                    this.PoolPackage == input.PoolPackage ||
+                    (this.PoolPackage != null &&
+                    this.PoolPackage.Equals(input.PoolPackage))
                 );
         }
 
@@ -760,6 +780,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Faucet != null)
                 {
                     hashCode = (hashCode * 59) + this.Faucet.GetHashCode();
+                }
+                if (this.PoolPackage != null)
+                {
+                    hashCode = (hashCode * 59) + this.PoolPackage.GetHashCode();
                 }
                 return hashCode;
             }

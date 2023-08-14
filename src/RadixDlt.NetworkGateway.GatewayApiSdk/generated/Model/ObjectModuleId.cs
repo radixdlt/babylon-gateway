@@ -114,10 +114,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         Royalty = 3,
 
         /// <summary>
-        /// Enum AccessRules for value: AccessRules
+        /// Enum RoleAssignment for value: RoleAssignment
         /// </summary>
-        [EnumMember(Value = "AccessRules")]
-        AccessRules = 4
+        [EnumMember(Value = "RoleAssignment")]
+        RoleAssignment = 4
 
     }
 

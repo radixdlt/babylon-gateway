@@ -103,7 +103,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<AccountDefaultDepositRuleHistory> AccountDefaultDepositRuleHistory => Set<AccountDefaultDepositRuleHistory>();
 
-    public DbSet<AccountResourceDepositRuleHistory> AccountDepositRuleHistory => Set<AccountResourceDepositRuleHistory>();
+    public DbSet<AccountResourcePreferenceRuleHistory> AccountDepositRuleHistory => Set<AccountResourcePreferenceRuleHistory>();
 
     public DbSet<EntityVaultHistory> EntityVaultHistory => Set<EntityVaultHistory>();
 
@@ -115,19 +115,17 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<NonFungibleIdStoreHistory> NonFungibleIdStoreHistory => Set<NonFungibleIdStoreHistory>();
 
-    public DbSet<EntityStateHistory> EntityStateHistory => Set<EntityStateHistory>();
-
-    public DbSet<ValidatorStateHistory> ValidatorStateHistory => Set<ValidatorStateHistory>();
+    public DbSet<StateHistory> StateHistory => Set<StateHistory>();
 
     public DbSet<ValidatorPublicKeyHistory> ValidatorKeyHistory => Set<ValidatorPublicKeyHistory>();
 
     public DbSet<ValidatorActiveSetHistory> ValidatorActiveSetHistory => Set<ValidatorActiveSetHistory>();
 
-    public DbSet<EntityRoleAssignmentsOwnerRoleHistory> EntityAccessRulesOwnerHistory => Set<EntityRoleAssignmentsOwnerRoleHistory>();
+    public DbSet<EntityRoleAssignmentsOwnerRoleHistory> EntityRoleAssignmentsOwnerHistory => Set<EntityRoleAssignmentsOwnerRoleHistory>();
 
-    public DbSet<EntityRoleAssignmentsEntryHistory> EntityAccessRulesEntryHistory => Set<EntityRoleAssignmentsEntryHistory>();
+    public DbSet<EntityRoleAssignmentsEntryHistory> EntityRoleAssignmentsEntryHistory => Set<EntityRoleAssignmentsEntryHistory>();
 
-    public DbSet<EntityRoleAssignmentsAggregateHistory> EntityAccessRulesAggregateHistory => Set<EntityRoleAssignmentsAggregateHistory>();
+    public DbSet<EntityRoleAssignmentsAggregateHistory> EntityRoleAssignmentsAggregateHistory => Set<EntityRoleAssignmentsAggregateHistory>();
 
     public DbSet<ComponentMethodRoyaltyEntryHistory> ComponentMethodRoyaltyEntryHistory => Set<ComponentMethodRoyaltyEntryHistory>();
 
@@ -155,7 +153,7 @@ internal abstract class CommonDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresEnum<AccountDefaultDepositRule>();
-        modelBuilder.HasPostgresEnum<AccountResourceDepositRule>();
+        modelBuilder.HasPostgresEnum<AccountResourcePreferenceRule>();
         modelBuilder.HasPostgresEnum<EntityType>();
         modelBuilder.HasPostgresEnum<LedgerTransactionStatus>();
         modelBuilder.HasPostgresEnum<LedgerTransactionType>();
@@ -293,7 +291,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<AccountDefaultDepositRuleHistory>()
             .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<AccountResourceDepositRuleHistory>()
+        modelBuilder.Entity<AccountResourcePreferenceRuleHistory>()
             .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityMetadataHistory>()
@@ -361,11 +359,8 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<NonFungibleIdStoreHistory>()
             .HasIndex(e => new { e.NonFungibleResourceEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityStateHistory>()
-            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
-
-        modelBuilder.Entity<ValidatorStateHistory>()
-            .HasIndex(e => new { EntityId = e.ValidatorEntityId, e.FromStateVersion });
+        modelBuilder.Entity<StateHistory>()
+            .HasIndex(e => new { EntityId = e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<PackageBlueprintHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });

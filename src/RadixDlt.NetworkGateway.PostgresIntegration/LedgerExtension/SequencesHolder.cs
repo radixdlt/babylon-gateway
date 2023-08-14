@@ -70,9 +70,7 @@ internal class SequencesHolder
 
     public long AccountResourceDepositRuleHistorySequence { get; set; }
 
-    public long EntityStateHistorySequence { get; set; }
-
-    public long ValidatorStateHistorySequence { get; set; }
+    public long StateHistorySequence { get; set; }
 
     public long EntitySequence { get; set; }
 

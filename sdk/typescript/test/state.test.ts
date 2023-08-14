@@ -110,7 +110,7 @@ describe('State Subapi', () => {
         last_updated_at_state_version: 1,
         value: {
           raw_hex: '',
-          raw_json: {},
+          programmatic_json: undefined,
           typed: undefined,
         },
       })

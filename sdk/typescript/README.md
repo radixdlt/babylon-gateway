@@ -25,7 +25,7 @@ Calling static `intialize` method from `GatewayApiClient` class will instantiate
 import { GatewayApiClient } from '@radixdlt/babylon-gateway-api-sdk'
 
 const gatewayApi = GatewayApiClient.initialize({
-  basePath: 'https://rcnet.radixdlt.com',
+  basePath: 'https://rcnet-v3.radixdlt.com',
 })
 const { status, transaction, stream, state } = gatewayApi
 ```
@@ -54,7 +54,7 @@ You can always opt-out of using aggregated gateway client and instantiate sub-ap
 
 ```typescript
 import { Configuration, StateApi } from '@radixdlt/babylon-gateway-api-sdk'
-const config = new Configuration({ basePath: CURRENT_NETWORK?.url })
+const config = new Configuration({ basePath: 'https://rcnet-v3.radixdlt.com' })
 const stateApi = new StateApi(config)
 const response = await stateApi.nonFungibleData({
     stateNonFungibleDataRequest: {

@@ -13,12 +13,18 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { ComponentEntityRoleAssignmentEntryRoleKey } from './ComponentEntityRoleAssignmentEntryRoleKey';
+import type { ComponentEntityRoleAssignmentEntryAssignment } from './ComponentEntityRoleAssignmentEntryAssignment';
 import {
-    ComponentEntityRoleAssignmentEntryRoleKeyFromJSON,
-    ComponentEntityRoleAssignmentEntryRoleKeyFromJSONTyped,
-    ComponentEntityRoleAssignmentEntryRoleKeyToJSON,
-} from './ComponentEntityRoleAssignmentEntryRoleKey';
+    ComponentEntityRoleAssignmentEntryAssignmentFromJSON,
+    ComponentEntityRoleAssignmentEntryAssignmentFromJSONTyped,
+    ComponentEntityRoleAssignmentEntryAssignmentToJSON,
+} from './ComponentEntityRoleAssignmentEntryAssignment';
+import type { RoleKey } from './RoleKey';
+import {
+    RoleKeyFromJSON,
+    RoleKeyFromJSONTyped,
+    RoleKeyToJSON,
+} from './RoleKey';
 
 /**
  * 
@@ -28,16 +34,22 @@ import {
 export interface ComponentEntityRoleAssignmentEntry {
     /**
      * 
-     * @type {ComponentEntityRoleAssignmentEntryRoleKey}
+     * @type {RoleKey}
      * @memberof ComponentEntityRoleAssignmentEntry
      */
-    role_key: ComponentEntityRoleAssignmentEntryRoleKey;
+    role_key: RoleKey;
     /**
      * 
-     * @type {object}
+     * @type {ComponentEntityRoleAssignmentEntryAssignment}
      * @memberof ComponentEntityRoleAssignmentEntry
      */
-    rule: object;
+    assignment: ComponentEntityRoleAssignmentEntryAssignment;
+    /**
+     * 
+     * @type {Array<RoleKey>}
+     * @memberof ComponentEntityRoleAssignmentEntry
+     */
+    updater_roles?: Array<RoleKey>;
 }
 
 /**
@@ -46,7 +58,7 @@ export interface ComponentEntityRoleAssignmentEntry {
 export function instanceOfComponentEntityRoleAssignmentEntry(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "role_key" in value;
-    isInstance = isInstance && "rule" in value;
+    isInstance = isInstance && "assignment" in value;
 
     return isInstance;
 }
@@ -61,8 +73,9 @@ export function ComponentEntityRoleAssignmentEntryFromJSONTyped(json: any, ignor
     }
     return {
         
-        'role_key': ComponentEntityRoleAssignmentEntryRoleKeyFromJSON(json['role_key']),
-        'rule': json['rule'],
+        'role_key': RoleKeyFromJSON(json['role_key']),
+        'assignment': ComponentEntityRoleAssignmentEntryAssignmentFromJSON(json['assignment']),
+        'updater_roles': !exists(json, 'updater_roles') ? undefined : ((json['updater_roles'] as Array<any>).map(RoleKeyFromJSON)),
     };
 }
 
@@ -75,8 +88,9 @@ export function ComponentEntityRoleAssignmentEntryToJSON(value?: ComponentEntity
     }
     return {
         
-        'role_key': ComponentEntityRoleAssignmentEntryRoleKeyToJSON(value.role_key),
-        'rule': value.rule,
+        'role_key': RoleKeyToJSON(value.role_key),
+        'assignment': ComponentEntityRoleAssignmentEntryAssignmentToJSON(value.assignment),
+        'updater_roles': value.updater_roles === undefined ? undefined : ((value.updater_roles as Array<any>).map(RoleKeyToJSON)),
     };
 }
 

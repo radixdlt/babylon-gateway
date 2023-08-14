@@ -30,7 +30,7 @@ export interface ScryptoSborValue {
      * @type {object}
      * @memberof ScryptoSborValue
      */
-    raw_json: object;
+    programmatic_json: object;
 }
 
 /**
@@ -39,7 +39,7 @@ export interface ScryptoSborValue {
 export function instanceOfScryptoSborValue(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "raw_hex" in value;
-    isInstance = isInstance && "raw_json" in value;
+    isInstance = isInstance && "programmatic_json" in value;
 
     return isInstance;
 }
@@ -55,7 +55,7 @@ export function ScryptoSborValueFromJSONTyped(json: any, ignoreDiscriminator: bo
     return {
         
         'raw_hex': json['raw_hex'],
-        'raw_json': json['raw_json'],
+        'programmatic_json': json['programmatic_json'],
     };
 }
 
@@ -69,7 +69,7 @@ export function ScryptoSborValueToJSON(value?: ScryptoSborValue | null): any {
     return {
         
         'raw_hex': value.raw_hex,
-        'raw_json': value.raw_json,
+        'programmatic_json': value.programmatic_json,
     };
 }
 

@@ -155,9 +155,9 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
-    public async Task<Dictionary<RoleAssignmentEntryLookup, EntityRoleAssignmentsEntryHistory>> MostRecentEntityAccessRulesEntryHistoryFor(ICollection<AccessRulesChangePointer> accessRuleChangePointers, CancellationToken token)
+    public async Task<Dictionary<RoleAssignmentEntryLookup, EntityRoleAssignmentsEntryHistory>> MostRecentEntityRoleAssignmentsEntryHistoryFor(ICollection<RoleAssignmentsChangePointer> roleAssignmentsChangePointers, CancellationToken token)
     {
-        if (!accessRuleChangePointers.Any())
+        if (!roleAssignmentsChangePointers.Any())
         {
             return new Dictionary<RoleAssignmentEntryLookup, EntityRoleAssignmentsEntryHistory>();
         }
@@ -167,11 +167,11 @@ INNER JOIN LATERAL (
         var keyModuleIds = new List<ObjectModuleId>();
         var lookupSet = new HashSet<RoleAssignmentEntryLookup>();
 
-        foreach (var accessRuleChangePointer in accessRuleChangePointers)
+        foreach (var roleAssignmentsChangePointer in roleAssignmentsChangePointers)
         {
-            foreach (var entry in accessRuleChangePointer.Entries)
+            foreach (var entry in roleAssignmentsChangePointer.Entries)
             {
-                lookupSet.Add(new RoleAssignmentEntryLookup(accessRuleChangePointer.ReferencedEntity.DatabaseId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToInternalModel()));
+                lookupSet.Add(new RoleAssignmentEntryLookup(roleAssignmentsChangePointer.ReferencedEntity.DatabaseId, entry.Key.RoleKey, entry.Key.ObjectModuleId.ToModel()));
             }
         }
 
@@ -182,7 +182,7 @@ INNER JOIN LATERAL (
             keyModuleIds.Add(lookup.KeyModule);
         }
 
-        return await _dbContext.EntityAccessRulesEntryHistory
+        return await _dbContext.EntityRoleAssignmentsEntryHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id, key_role, module_id) AS (
     SELECT UNNEST({entityIds}), UNNEST({keyRoles}), UNNEST({keyModuleIds})
@@ -200,16 +200,16 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => new RoleAssignmentEntryLookup(e.EntityId, e.KeyRole, e.KeyModule), token);
     }
 
-    public async Task<Dictionary<long, EntityRoleAssignmentsAggregateHistory>> MostRecentEntityAccessRulesAggregateHistoryFor(List<AccessRulesChangePointerLookup> accessRuleChanges, CancellationToken token)
+    public async Task<Dictionary<long, EntityRoleAssignmentsAggregateHistory>> MostRecentEntityRoleAssignmentsAggregateHistoryFor(List<RoleAssignmentsChangePointerLookup> roleAssignmentChanges, CancellationToken token)
     {
-        if (!accessRuleChanges.Any())
+        if (!roleAssignmentChanges.Any())
         {
             return new Dictionary<long, EntityRoleAssignmentsAggregateHistory>();
         }
 
-        var entityIds = accessRuleChanges.Select(x => x.EntityId).Distinct().ToList();
+        var entityIds = roleAssignmentChanges.Select(x => x.EntityId).Distinct().ToList();
 
-        return await _dbContext.EntityAccessRulesAggregateHistory
+        return await _dbContext.EntityRoleAssignmentsAggregateHistory
             .FromSqlInterpolated(@$"
 WITH variables (entity_id) AS (
     SELECT UNNEST({entityIds})
@@ -560,9 +560,8 @@ INNER JOIN LATERAL (
             commandText: @"
 SELECT
     nextval('account_default_deposit_rule_history_id_seq') AS AccountDefaultDepositRuleHistorySequence,
-    nextval('account_resource_deposit_rule_history_id_seq') AS AccountResourceDepositRuleHistorySequence,
-    nextval('entity_state_history_id_seq') AS EntityStateHistorySequence,
-    nextval('validator_state_history_id_seq') AS ValidatorStateHistorySequence,
+    nextval('account_resource_preference_rule_history_id_seq') AS AccountResourceDepositRuleHistorySequence,
+    nextval('state_history_id_seq') AS StateHistorySequence,
     nextval('entities_id_seq') AS EntitySequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
     nextval('entity_metadata_aggregate_history_id_seq') AS EntityMetadataAggregateHistorySequence,

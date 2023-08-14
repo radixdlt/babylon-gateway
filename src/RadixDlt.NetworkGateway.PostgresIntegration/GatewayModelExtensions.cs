@@ -211,7 +211,7 @@ internal static class GatewayModelExtensions
             ObjectModuleId.Main => GatewayModel.ObjectModuleId.Main,
             ObjectModuleId.Metadata => GatewayModel.ObjectModuleId.Metadata,
             ObjectModuleId.Royalty => GatewayModel.ObjectModuleId.Royalty,
-            ObjectModuleId.AccessRules => GatewayModel.ObjectModuleId.AccessRules,
+            ObjectModuleId.RoleAssignment => GatewayModel.ObjectModuleId.RoleAssignment,
             _ => throw new UnreachableException($"Didn't expect {objectModuleId} value"),
         };
     }

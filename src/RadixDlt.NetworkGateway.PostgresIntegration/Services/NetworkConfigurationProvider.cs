@@ -232,12 +232,13 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 TransactionProcessorPackage: wka.TransactionProcessorPackage,
                 MetadataModulePackage: wka.MetadataModulePackage,
                 RoyaltyModulePackage: wka.RoyaltyModulePackage,
-                AccessRulesPackage: wka.AccessRulesPackage,
+                AccessRulesPackage: wka.RoleAssignmentModulePackage,
                 GenesisHelperPackage: wka.GenesisHelperPackage,
                 FaucetPackage: wka.FaucetPackage,
                 ConsensusManager: wka.ConsensusManager,
                 GenesisHelper: wka.GenesisHelper,
-                Faucet: wka.Faucet
+                Faucet: wka.Faucet,
+                PoolPackage: wka.PoolPackage
                 ),
             AddressTypeDefinitions = at,
             GenesisEpoch = networkStatus.GenesisEpochRound.Epoch,
