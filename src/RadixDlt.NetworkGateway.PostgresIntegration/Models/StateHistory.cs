@@ -67,8 +67,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entity_state_history")]
-internal class EntityStateHistory
+[Table("state_history")]
+internal class StateHistory
 {
     [Key]
     [Column("id")]
@@ -80,6 +80,9 @@ internal class EntityStateHistory
     [Column("entity_id")]
     public long EntityId { get; set; }
 
-    [Column("state", TypeName = "jsonb")]
-    public string State { get; set; }
+    [Column("json_state", TypeName = "jsonb")]
+    public string? JsonState { get; set; }
+
+    [Column("sbor_state")]
+    public byte[]? SborState { get; set; }
 }

@@ -280,7 +280,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         packageAddress: correlatedAddresses[ce.PackageId],
                         blueprintName: ce.BlueprintName,
-                        state: state != null ? new JRaw(state.State) : null,
+                        state: state != null ? new JRaw(state.JsonState) : null,
                         roleAssignments: roleAssignments,
                         royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null
                     );
@@ -745,8 +745,8 @@ INNER JOIN LATERAL (
 ) evh ON TRUE
 INNER JOIN LATERAL (
     SELECT state, from_state_version
-    FROM validator_state_history
-    WHERE validator_entity_id = variables.validator_entity_id AND from_state_version <= @stateVersion
+    FROM state_history
+    WHERE entity_id = variables.validator_entity_id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
     LIMIT 1
 ) esh ON true
@@ -1830,7 +1830,7 @@ INNER JOIN LATERAL (
         return _roleAssignmentsMapper.GetEffectiveRoleAssignments(globalEntities, ownerRoles, entries);
     }
 
-    private async Task<Dictionary<long, EntityStateHistory>> GetStateHistory(ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    private async Task<Dictionary<long, StateHistory>> GetStateHistory(ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var lookup = new HashSet<long>();
 
@@ -1841,19 +1841,19 @@ INNER JOIN LATERAL (
 
         if (!lookup.Any())
         {
-            return new Dictionary<long, EntityStateHistory>();
+            return new Dictionary<long, StateHistory>();
         }
 
         var entityIds = lookup.ToList();
 
-        return await _dbContext.EntityStateHistory
+        return await _dbContext.StateHistory
             .FromSqlInterpolated($@"
 WITH variables (entity_id) AS (SELECT UNNEST({entityIds}))
 SELECT esh.*
 FROM variables v
 INNER JOIN LATERAL (
     SELECT *
-    FROM entity_state_history
+    FROM state_history
     WHERE entity_id = v.entity_id AND from_state_version <= {ledgerState.StateVersion}
     ORDER BY from_state_version DESC
     LIMIT 1

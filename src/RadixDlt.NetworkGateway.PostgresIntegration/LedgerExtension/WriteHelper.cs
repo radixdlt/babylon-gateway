@@ -424,50 +424,28 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyValidatorStateHistory(ICollection<ValidatorStateHistory> stateHistory, CancellationToken token)
+    public async Task<int> CopyStateHistory(ICollection<StateHistory> stateHistory, CancellationToken token)
     {
         if (!stateHistory.Any())
         {
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY validator_state_history (id, from_state_version, validator_entity_id, state) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY state_history (id, from_state_version, entity_id, json_state, sbor_state) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in stateHistory)
         {
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.ValidatorEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.State, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.JsonState, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(e.SborState, NpgsqlDbType.Bytea, token);
         }
 
         await writer.CompleteAsync(token);
 
         return stateHistory.Count;
-    }
-
-    public async Task<int> CopyEntityStateHistory(ICollection<EntityStateHistory> entityStateHistory, CancellationToken token)
-    {
-        if (!entityStateHistory.Any())
-        {
-            return 0;
-        }
-
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY entity_state_history (id, from_state_version, entity_id, state) FROM STDIN (FORMAT BINARY)", token);
-
-        foreach (var e in entityStateHistory)
-        {
-            await writer.StartRowAsync(token);
-            await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.State, NpgsqlDbType.Jsonb, token);
-        }
-
-        await writer.CompleteAsync(token);
-
-        return entityStateHistory.Count;
     }
 
     public async Task<int> CopyValidatorKeyHistory(ICollection<ValidatorPublicKeyHistory> entities, CancellationToken token)
@@ -1004,8 +982,7 @@ internal class WriteHelper
 SELECT
     setval('account_default_deposit_rule_history_id_seq', @accountDefaultDepositRuleHistorySequence),
     setval('account_resource_preference_rule_history_id_seq', @accountResourceDepositRuleHistorySequence),
-    setval('entity_state_history_id_seq', @entityStateHistorySequence),
-    setval('validator_state_history_id_seq', @validatorStateHistorySequence),
+    setval('state_history_id_seq', @stateHistorySequence),
     setval('entities_id_seq', @entitySequence),
     setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
     setval('entity_metadata_aggregate_history_id_seq', @entityMetadataAggregateHistorySequence),
@@ -1035,8 +1012,7 @@ SELECT
             {
                 accountDefaultDepositRuleHistorySequence = sequences.AccountDefaultDepositRuleHistorySequence,
                 accountResourceDepositRuleHistorySequence = sequences.AccountResourceDepositRuleHistorySequence,
-                entityStateHistorySequence = sequences.EntityStateHistorySequence,
-                validatorStateHistorySequence = sequences.ValidatorStateHistorySequence,
+                stateHistorySequence = sequences.StateHistorySequence,
                 entitySequence = sequences.EntitySequence,
                 entityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,
                 entityMetadataAggregateHistorySequence = sequences.EntityMetadataAggregateHistorySequence,

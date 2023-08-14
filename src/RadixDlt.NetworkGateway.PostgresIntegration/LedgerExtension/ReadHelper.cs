@@ -561,8 +561,7 @@ INNER JOIN LATERAL (
 SELECT
     nextval('account_default_deposit_rule_history_id_seq') AS AccountDefaultDepositRuleHistorySequence,
     nextval('account_resource_preference_rule_history_id_seq') AS AccountResourceDepositRuleHistorySequence,
-    nextval('entity_state_history_id_seq') AS EntityStateHistorySequence,
-    nextval('validator_state_history_id_seq') AS ValidatorStateHistorySequence,
+    nextval('state_history_id_seq') AS StateHistorySequence,
     nextval('entities_id_seq') AS EntitySequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
     nextval('entity_metadata_aggregate_history_id_seq') AS EntityMetadataAggregateHistorySequence,

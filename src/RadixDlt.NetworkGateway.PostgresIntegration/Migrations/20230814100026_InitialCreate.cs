@@ -316,21 +316,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "entity_state_history",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    state = table.Column<string>(type: "jsonb", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_entity_state_history", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "entity_vault_history",
                 columns: table => new
                 {
@@ -628,6 +613,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "state_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    json_state = table.Column<string>(type: "jsonb", nullable: true),
+                    sbor_state = table.Column<byte[]>(type: "bytea", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_state_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "validator_emission_statistics",
                 columns: table => new
                 {
@@ -657,21 +658,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_validator_public_key_history", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "validator_state_history",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    validator_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    state = table.Column<string>(type: "jsonb", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_validator_state_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -759,11 +745,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_entity_role_assignments_owner_role_history_entity_id_from_s~",
                 table: "entity_role_assignments_owner_role_history",
-                columns: new[] { "entity_id", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_entity_state_history_entity_id_from_state_version",
-                table: "entity_state_history",
                 columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
@@ -902,6 +883,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "resource_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_state_history_entity_id_from_state_version",
+                table: "state_history",
+                columns: new[] { "entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_validator_active_set_history_epoch",
                 table: "validator_active_set_history",
                 column: "epoch");
@@ -925,11 +911,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_validator_public_key_history_validator_entity_id_key_type_k~",
                 table: "validator_public_key_history",
                 columns: new[] { "validator_entity_id", "key_type", "key" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_validator_state_history_validator_entity_id_from_state_vers~",
-                table: "validator_state_history",
-                columns: new[] { "validator_entity_id", "from_state_version" });
         }
 
         /// <inheritdoc />
@@ -970,9 +951,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "entity_role_assignments_owner_role_history");
-
-            migrationBuilder.DropTable(
-                name: "entity_state_history");
 
             migrationBuilder.DropTable(
                 name: "entity_vault_history");
@@ -1020,13 +998,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "resource_entity_supply_history");
 
             migrationBuilder.DropTable(
+                name: "state_history");
+
+            migrationBuilder.DropTable(
                 name: "validator_active_set_history");
 
             migrationBuilder.DropTable(
                 name: "validator_emission_statistics");
-
-            migrationBuilder.DropTable(
-                name: "validator_state_history");
 
             migrationBuilder.DropTable(
                 name: "validator_public_key_history");
