@@ -744,7 +744,7 @@ INNER JOIN LATERAL (
     LIMIT 1
 ) evh ON TRUE
 INNER JOIN LATERAL (
-    SELECT state, from_state_version
+    SELECT json_state as state, from_state_version
     FROM state_history
     WHERE entity_id = variables.validator_entity_id AND from_state_version <= @stateVersion
     ORDER BY from_state_version DESC
