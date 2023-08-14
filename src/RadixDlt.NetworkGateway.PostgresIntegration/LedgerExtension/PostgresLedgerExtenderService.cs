@@ -915,6 +915,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 AccountEntityId = referencedEntity.DatabaseId,
                                 DefaultDepositRule = accountFieldState.Value.DefaultDepositRule.ToModel(),
                             });
+
+                            stateToAdd.Add(new StateHistory
+                            {
+                                Id = sequences.StateHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                                JsonState = accountFieldState.Value.ToJson(),
+                            });
                         }
 
                         if (substateData is CoreModel.AccountResourcePreferenceEntrySubstate accountDepositRule)
@@ -1090,6 +1098,50 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                     ValueTypeIndex = keyValueStoreSchema.ValueType.Index,
                                 });
                             }
+                        }
+
+                        if (substateData is CoreModel.AccessControllerFieldStateSubstate accessControllerFieldState)
+                        {
+                            stateToAdd.Add(new StateHistory
+                            {
+                                Id = sequences.StateHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                                JsonState = accessControllerFieldState.Value.ToJson(),
+                            });
+                        }
+
+                        if (substateData is CoreModel.OneResourcePoolFieldStateSubstate oneResourcePoolFieldStateSubstate)
+                        {
+                            stateToAdd.Add(new StateHistory
+                            {
+                                Id = sequences.StateHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                                JsonState = oneResourcePoolFieldStateSubstate.Value.ToJson(),
+                            });
+                        }
+
+                        if (substateData is CoreModel.TwoResourcePoolFieldStateSubstate twoResourcePoolFieldStateSubstate)
+                        {
+                            stateToAdd.Add(new StateHistory
+                            {
+                                Id = sequences.StateHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                                JsonState = twoResourcePoolFieldStateSubstate.Value.ToJson(),
+                            });
+                        }
+
+                        if (substateData is CoreModel.MultiResourcePoolFieldStateSubstate multiResourcePoolFieldStateSubstate)
+                        {
+                            stateToAdd.Add(new StateHistory
+                            {
+                                Id = sequences.StateHistorySequence++,
+                                FromStateVersion = stateVersion,
+                                EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
+                                JsonState = multiResourcePoolFieldStateSubstate.Value.ToJson(),
+                            });
                         }
                     }
 
