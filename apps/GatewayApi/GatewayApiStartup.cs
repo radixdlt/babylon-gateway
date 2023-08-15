@@ -73,6 +73,7 @@ using Prometheus;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PrometheusIntegration;
+using System;
 using System.Globalization;
 
 namespace GatewayApi;
@@ -98,9 +99,9 @@ public class GatewayApiStartup
         services
             .AddCors(options =>
             {
-                options.AddDefaultPolicy(corsPolicyBuilder =>
+                options.AddDefaultPolicy(builder =>
                 {
-                    corsPolicyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().SetPreflightMaxAge(TimeSpan.FromDays(20));
                 });
             });
 
