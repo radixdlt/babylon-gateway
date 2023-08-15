@@ -1244,8 +1244,9 @@ components:
           $ref: "#/components/schemas/HexString"
         receipt:
           $ref: "#/components/schemas/TransactionReceipt"
-        message_hex:
-          $ref: "#/components/schemas/HexString"
+        message:
+          type: object
+          description: defined in core api specs.
 
     TransactionStatus:
       type: string

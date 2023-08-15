@@ -125,14 +125,14 @@ internal static class GatewayModelExtensions
         string? payloadHashHex = null;
         string? intentHashHex = null;
         string? rawHex = null;
-        string? messageHex = null;
+        JRaw? message = null;
 
         if (lt is UserLedgerTransaction ult)
         {
             payloadHashHex = ult.PayloadHash.ToHex();
             intentHashHex = ult.IntentHash.ToHex();
             rawHex = optIns.RawHex ? ult.RawPayload.ToHex() : null;
-            messageHex = ult.Message?.ToHex();
+            message = new JRaw(ult.Message);
         }
 
         var receipt = new GatewayModel.TransactionReceipt
@@ -160,7 +160,7 @@ internal static class GatewayModelExtensions
             errorMessage: lt.EngineReceipt.ErrorMessage,
             rawHex: rawHex,
             receipt: receipt,
-            messageHex: messageHex
+            message: message
         );
     }
 

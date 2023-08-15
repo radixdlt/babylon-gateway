@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230814100026_InitialCreate")]
+    [Migration("20230815125818_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -728,10 +728,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<bool>("IsEndOfEpoch")
                         .HasColumnType("boolean")
                         .HasColumnName("is_end_of_epoch");
-
-                    b.Property<byte[]>("Message")
-                        .HasColumnType("bytea")
-                        .HasColumnName("message");
 
                     b.Property<DateTime>("NormalizedRoundTimestamp")
                         .HasColumnType("timestamp with time zone")
@@ -1843,6 +1839,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("intent_hash");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("message");
 
                     b.Property<byte[]>("PayloadHash")
                         .IsRequired()

@@ -83,9 +83,6 @@ internal abstract class LedgerTransaction
     [Column("state_version")]
     public long StateVersion { get; set; }
 
-    [Column("message")]
-    public byte[]? Message { get; set; }
-
     [Column("epoch")]
     public long Epoch { get; set; }
 
@@ -200,6 +197,9 @@ internal class UserLedgerTransaction : LedgerTransaction
     /// </summary>
     [Column("signed_intent_hash")]
     public byte[] SignedIntentHash { get; set; }
+
+    [Column("message", TypeName = "jsonb")]
+    public string? Message { get; set; }
 }
 
 internal class RoundUpdateLedgerTransaction : LedgerTransaction

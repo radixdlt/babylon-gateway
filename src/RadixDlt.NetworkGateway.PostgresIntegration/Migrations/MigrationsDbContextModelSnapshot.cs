@@ -726,10 +726,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_end_of_epoch");
 
-                    b.Property<byte[]>("Message")
-                        .HasColumnType("bytea")
-                        .HasColumnName("message");
-
                     b.Property<DateTime>("NormalizedRoundTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("normalized_round_timestamp");
@@ -1840,6 +1836,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("intent_hash");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("message");
 
                     b.Property<byte[]>("PayloadHash")
                         .IsRequired()
