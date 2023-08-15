@@ -313,7 +313,7 @@ jobs:
       - docker-data-aggregator-private
       - docker-database-migrations-private
       - setup-tags
-    if: github.event_name == 'pull_request' && github.base_ref == 'refs/heads/develop'
+    if: github.event_name == 'pull_request' && github.base_ref == 'develop'
     permissions:
       id-token: write
       contents: read
