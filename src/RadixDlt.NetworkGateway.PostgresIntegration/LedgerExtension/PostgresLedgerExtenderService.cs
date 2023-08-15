@@ -511,8 +511,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         Epoch: epochUpdate ?? lastTransactionSummary.Epoch,
                         RoundInEpoch: roundInEpochUpdate ?? lastTransactionSummary.RoundInEpoch,
                         IndexInEpoch: isStartOfEpoch ? 0 : lastTransactionSummary.IndexInEpoch + 1,
-                        IndexInRound: isStartOfRound ? 0 : lastTransactionSummary.IndexInRound + 1,
-                        IsEndOfEpoch: committedTransaction.Receipt.NextEpoch != null);
+                        IndexInRound: isStartOfRound ? 0 : lastTransactionSummary.IndexInRound + 1);
 
                     LedgerTransaction ledgerTransaction = committedTransaction.LedgerTransaction switch
                     {
@@ -535,7 +534,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     ledgerTransaction.RoundInEpoch = summary.RoundInEpoch;
                     ledgerTransaction.IndexInEpoch = summary.IndexInEpoch;
                     ledgerTransaction.IndexInRound = summary.IndexInRound;
-                    ledgerTransaction.IsEndOfEpoch = summary.IsEndOfEpoch;
                     ledgerTransaction.FeePaid = feeSummary != null
                         ? TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdTotalExecutionCost)
                         : null;
@@ -1950,8 +1948,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 Epoch: lastTransaction.Epoch,
                 RoundInEpoch: lastTransaction.RoundInEpoch,
                 IndexInEpoch: lastTransaction.IndexInEpoch,
-                IndexInRound: lastTransaction.IndexInRound,
-                IsEndOfEpoch: lastTransaction.IsEndOfEpoch
+                IndexInRound: lastTransaction.IndexInRound
             );
     }
 
@@ -1966,8 +1963,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             Epoch: _networkConfigurationProvider.GetGenesisEpoch(),
             RoundInEpoch: _networkConfigurationProvider.GetGenesisRound(),
             IndexInEpoch: 0,
-            IndexInRound: 0,
-            IsEndOfEpoch: false
+            IndexInRound: 0
         );
     }
 }

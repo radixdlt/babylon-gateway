@@ -85,8 +85,7 @@ public sealed record TransactionSummary(
     long Epoch,
     long RoundInEpoch,
     long IndexInEpoch,
-    long IndexInRound,
-    bool IsEndOfEpoch
+    long IndexInRound
 );
 
 public sealed record SyncTargetCarrier(
