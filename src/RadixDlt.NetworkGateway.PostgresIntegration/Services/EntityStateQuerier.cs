@@ -1058,8 +1058,12 @@ ORDER BY metadata_join.ordinality ASC;",
             var value = ScryptoSborUtils.DecodeToGatewayMetadataItemValue(vm.Value, _networkConfigurationProvider.GetNetworkId());
             var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(vm.Value.ToList(), ToolkitModel.SerializationMode.PROGRAMMATIC, _networkConfigurationProvider.GetNetworkId(), null);
             var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(vm.Value.ToHex(), new JRaw(stringRepresentation), value);
+            var items = result[vm.EntityId].Items;
 
-            result[vm.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(vm.Key, entityMetadataItemValue, vm.IsLocked, vm.FromStateVersion));
+            if (items.Count < limit)
+            {
+                items.Add(new GatewayModel.EntityMetadataItem(vm.Key, entityMetadataItemValue, vm.IsLocked, vm.FromStateVersion));
+            }
         }
 
         foreach (var missing in entityIds.Except(result.Keys))
@@ -1125,6 +1129,7 @@ INNER JOIN LATERAL (
             var entityMetadataItemValue = new GatewayModel.EntityMetadataItemValue(mh.Value.ToHex(), new JRaw(stringRepresentation), value);
 
             result[mh.EntityId].Items.Add(new GatewayModel.EntityMetadataItem(mh.Key, entityMetadataItemValue, mh.IsLocked, mh.FromStateVersion));
+            result[mh.EntityId].TotalCount = result[mh.EntityId].TotalCount.HasValue ? result[mh.EntityId].TotalCount + 1 : 1;
         }
 
         foreach (var missing in entityIds.Except(result.Keys))
