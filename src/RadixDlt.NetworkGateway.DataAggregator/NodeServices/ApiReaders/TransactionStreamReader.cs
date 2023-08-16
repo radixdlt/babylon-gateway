@@ -106,12 +106,14 @@ internal class TransactionStreamReader : ITransactionStreamReader
                         RawLedgerTransaction = true,
                         RawNotarizedTransaction = true,
                         RawSystemTransaction = true,
+                        Message = true,
                     },
                     substateFormatOptions: new CoreModel.SubstateFormatOptions
                     {
                         Hash = false,
                         Raw = false,
                         Typed = true,
+                        Previous = false,
                     },
                     sborFormatOptions: new CoreModel.SborFormatOptions
                     {

@@ -522,6 +522,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             PayloadHash = ult.NotarizedTransaction.GetHashBytes(),
                             IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.GetHashBytes(),
                             SignedIntentHash = ult.NotarizedTransaction.SignedIntent.GetHashBytes(),
+                            Message = ult.NotarizedTransaction.SignedIntent.Intent.Message?.ToJson(),
                         },
                         CoreModel.RoundUpdateLedgerTransaction => new RoundUpdateLedgerTransaction(),
                         _ => throw new UnreachableException(),

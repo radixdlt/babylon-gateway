@@ -122,8 +122,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="errorMessage">errorMessage.</param>
         /// <param name="rawHex">Hex-encoded binary blob..</param>
         /// <param name="receipt">receipt.</param>
-        /// <param name="messageHex">Hex-encoded binary blob..</param>
-        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), string feePaid = default(string), List<string> affectedGlobalEntities = default(List<string>), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), string messageHex = default(string))
+        /// <param name="message">defined in core api specs..</param>
+        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), string feePaid = default(string), List<string> affectedGlobalEntities = default(List<string>), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), Object message = default(Object))
         {
             this.StateVersion = stateVersion;
             this.Epoch = epoch;
@@ -143,7 +143,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.ErrorMessage = errorMessage;
             this.RawHex = rawHex;
             this.Receipt = receipt;
-            this.MessageHex = messageHex;
+            this.Message = message;
         }
 
         /// <summary>
@@ -223,11 +223,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public TransactionReceipt Receipt { get; set; }
 
         /// <summary>
-        /// Hex-encoded binary blob.
+        /// defined in core api specs.
         /// </summary>
-        /// <value>Hex-encoded binary blob.</value>
-        [DataMember(Name = "message_hex", EmitDefaultValue = true)]
-        public string MessageHex { get; set; }
+        /// <value>defined in core api specs.</value>
+        [DataMember(Name = "message", EmitDefaultValue = true)]
+        public Object Message { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -250,7 +250,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("  RawHex: ").Append(RawHex).Append("\n");
             sb.Append("  Receipt: ").Append(Receipt).Append("\n");
-            sb.Append("  MessageHex: ").Append(MessageHex).Append("\n");
+            sb.Append("  Message: ").Append(Message).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -349,9 +349,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Receipt.Equals(input.Receipt))
                 ) && 
                 (
-                    this.MessageHex == input.MessageHex ||
-                    (this.MessageHex != null &&
-                    this.MessageHex.Equals(input.MessageHex))
+                    this.Message == input.Message ||
+                    (this.Message != null &&
+                    this.Message.Equals(input.Message))
                 );
         }
 
@@ -404,9 +404,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
                 }
-                if (this.MessageHex != null)
+                if (this.Message != null)
                 {
-                    hashCode = (hashCode * 59) + this.MessageHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Message.GetHashCode();
                 }
                 return hashCode;
             }

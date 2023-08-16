@@ -398,7 +398,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: table => new
                 {
                     state_version = table.Column<long>(type: "bigint", nullable: false),
-                    message = table.Column<byte[]>(type: "bytea", nullable: true),
                     epoch = table.Column<long>(type: "bigint", nullable: false),
                     round_in_epoch = table.Column<long>(type: "bigint", nullable: false),
                     index_in_epoch = table.Column<long>(type: "bigint", nullable: false),
@@ -424,7 +423,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     discriminator = table.Column<LedgerTransactionType>(type: "ledger_transaction_type", nullable: false),
                     payload_hash = table.Column<byte[]>(type: "bytea", nullable: true),
                     intent_hash = table.Column<byte[]>(type: "bytea", nullable: true),
-                    signed_intent_hash = table.Column<byte[]>(type: "bytea", nullable: true)
+                    signed_intent_hash = table.Column<byte[]>(type: "bytea", nullable: true),
+                    message = table.Column<string>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>
                 {
