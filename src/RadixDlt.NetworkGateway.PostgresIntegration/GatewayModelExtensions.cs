@@ -132,7 +132,7 @@ internal static class GatewayModelExtensions
             payloadHashHex = ult.PayloadHash.ToHex();
             intentHashHex = ult.IntentHash.ToHex();
             rawHex = optIns.RawHex ? ult.RawPayload.ToHex() : null;
-            message = new JRaw(ult.Message);
+            message = ult.Message != null ? new JRaw(ult.Message) : null;
         }
 
         var receipt = new GatewayModel.TransactionReceipt
