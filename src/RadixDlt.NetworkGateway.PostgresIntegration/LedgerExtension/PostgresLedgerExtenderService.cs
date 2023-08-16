@@ -880,7 +880,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 Id = sequences.StateHistorySequence++,
                                 FromStateVersion = stateVersion,
                                 EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
-                                JsonState = validator.Value.ToJson(),
+                                JsonState = validator.ToJson(),
                             });
                         }
 
