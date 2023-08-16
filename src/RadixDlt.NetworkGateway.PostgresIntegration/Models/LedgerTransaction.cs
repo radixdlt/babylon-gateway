@@ -95,9 +95,6 @@ internal abstract class LedgerTransaction
     [Column("index_in_round")]
     public long IndexInRound { get; set; }
 
-    [Column("is_end_of_epoch")]
-    public bool IsEndOfEpoch { get; set; }
-
     [Column("fee_paid")]
     public TokenAmount? FeePaid { get; set; }
 
