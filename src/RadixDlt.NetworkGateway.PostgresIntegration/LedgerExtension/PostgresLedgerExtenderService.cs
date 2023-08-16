@@ -1137,7 +1137,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                         ? LedgerTransactionMarkerEventType.Withdrawal
                                         : LedgerTransactionMarkerEventType.Deposit;
 
-                                    if (nonFungibleIds?.Any() != true)
+                                    if (nonFungibleIds == null)
                                     {
                                         throw new InvalidOperationException("Unable to process data_json structure, expected fields[0].elements to be present");
                                     }
