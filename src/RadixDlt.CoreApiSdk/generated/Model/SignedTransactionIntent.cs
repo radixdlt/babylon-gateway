@@ -104,9 +104,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="SignedTransactionIntent" /> class.
         /// </summary>
         /// <param name="hash">The hex-encoded signed intent hash for a user transaction. This hash identifies the transaction intent, plus additional signatures. This hash is signed by the notary, to create the submittable NotarizedTransaction.  (required).</param>
+        /// <param name="hashBech32m">The Bech32m-encoded human readable &#x60;SignedIntentHash&#x60;. (required).</param>
         /// <param name="intent">intent (required).</param>
         /// <param name="intentSignatures">intentSignatures (required).</param>
-        public SignedTransactionIntent(string hash = default(string), TransactionIntent intent = default(TransactionIntent), List<SignatureWithPublicKey> intentSignatures = default(List<SignatureWithPublicKey>))
+        public SignedTransactionIntent(string hash = default(string), string hashBech32m = default(string), TransactionIntent intent = default(TransactionIntent), List<SignatureWithPublicKey> intentSignatures = default(List<SignatureWithPublicKey>))
         {
             // to ensure "hash" is required (not null)
             if (hash == null)
@@ -114,6 +115,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("hash is a required property for SignedTransactionIntent and cannot be null");
             }
             this.Hash = hash;
+            // to ensure "hashBech32m" is required (not null)
+            if (hashBech32m == null)
+            {
+                throw new ArgumentNullException("hashBech32m is a required property for SignedTransactionIntent and cannot be null");
+            }
+            this.HashBech32m = hashBech32m;
             // to ensure "intent" is required (not null)
             if (intent == null)
             {
@@ -136,6 +143,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public string Hash { get; set; }
 
         /// <summary>
+        /// The Bech32m-encoded human readable &#x60;SignedIntentHash&#x60;.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable &#x60;SignedIntentHash&#x60;.</value>
+        [DataMember(Name = "hash_bech32m", IsRequired = true, EmitDefaultValue = true)]
+        public string HashBech32m { get; set; }
+
+        /// <summary>
         /// Gets or Sets Intent
         /// </summary>
         [DataMember(Name = "intent", IsRequired = true, EmitDefaultValue = true)]
@@ -156,6 +170,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class SignedTransactionIntent {\n");
             sb.Append("  Hash: ").Append(Hash).Append("\n");
+            sb.Append("  HashBech32m: ").Append(HashBech32m).Append("\n");
             sb.Append("  Intent: ").Append(Intent).Append("\n");
             sb.Append("  IntentSignatures: ").Append(IntentSignatures).Append("\n");
             sb.Append("}\n");
@@ -199,6 +214,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Hash.Equals(input.Hash))
                 ) && 
                 (
+                    this.HashBech32m == input.HashBech32m ||
+                    (this.HashBech32m != null &&
+                    this.HashBech32m.Equals(input.HashBech32m))
+                ) && 
+                (
                     this.Intent == input.Intent ||
                     (this.Intent != null &&
                     this.Intent.Equals(input.Intent))
@@ -223,6 +243,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Hash != null)
                 {
                     hashCode = (hashCode * 59) + this.Hash.GetHashCode();
+                }
+                if (this.HashBech32m != null)
+                {
+                    hashCode = (hashCode * 59) + this.HashBech32m.GetHashCode();
                 }
                 if (this.Intent != null)
                 {

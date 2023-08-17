@@ -103,14 +103,21 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateConsensusManagerResponse" /> class.
         /// </summary>
+        /// <param name="atLedgerState">atLedgerState (required).</param>
         /// <param name="config">config (required).</param>
         /// <param name="state">state (required).</param>
         /// <param name="currentProposalStatistic">currentProposalStatistic (required).</param>
         /// <param name="currentValidatorSet">currentValidatorSet (required).</param>
         /// <param name="currentTime">currentTime (required).</param>
         /// <param name="currentTimeRoundedToMinutes">currentTimeRoundedToMinutes (required).</param>
-        public StateConsensusManagerResponse(Substate config = default(Substate), Substate state = default(Substate), Substate currentProposalStatistic = default(Substate), Substate currentValidatorSet = default(Substate), Substate currentTime = default(Substate), Substate currentTimeRoundedToMinutes = default(Substate))
+        public StateConsensusManagerResponse(LedgerStateSummary atLedgerState = default(LedgerStateSummary), Substate config = default(Substate), Substate state = default(Substate), Substate currentProposalStatistic = default(Substate), Substate currentValidatorSet = default(Substate), Substate currentTime = default(Substate), Substate currentTimeRoundedToMinutes = default(Substate))
         {
+            // to ensure "atLedgerState" is required (not null)
+            if (atLedgerState == null)
+            {
+                throw new ArgumentNullException("atLedgerState is a required property for StateConsensusManagerResponse and cannot be null");
+            }
+            this.AtLedgerState = atLedgerState;
             // to ensure "config" is required (not null)
             if (config == null)
             {
@@ -148,6 +155,12 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.CurrentTimeRoundedToMinutes = currentTimeRoundedToMinutes;
         }
+
+        /// <summary>
+        /// Gets or Sets AtLedgerState
+        /// </summary>
+        [DataMember(Name = "at_ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerStateSummary AtLedgerState { get; set; }
 
         /// <summary>
         /// Gets or Sets Config
@@ -193,6 +206,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateConsensusManagerResponse {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  Config: ").Append(Config).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
             sb.Append("  CurrentProposalStatistic: ").Append(CurrentProposalStatistic).Append("\n");
@@ -235,6 +249,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
+                (
                     this.Config == input.Config ||
                     (this.Config != null &&
                     this.Config.Equals(input.Config))
@@ -275,6 +294,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
                 if (this.Config != null)
                 {
                     hashCode = (hashCode * 59) + this.Config.GetHashCode();

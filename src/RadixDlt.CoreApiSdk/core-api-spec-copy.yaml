@@ -73,7 +73,7 @@ info:
     [Gateway API](https://docs-babylon.radixdlt.com/).
 
     ## Integration and forward compatibility guarantees
-  
+
     This version of the Core API belongs to the second release candidate of the Radix Babylon network ("RCnet v3").
 
     Integrators (such as exchanges) are recommended to use the `/lts/` endpoints - they have been designed to be clear
@@ -135,7 +135,7 @@ tags:
 
       User transactions are formed of a core "intent", which is then signed by 0+ signatories, before being notarized. The output is called a notarized payload.
       It is this notarized transaction payload which is submitted to the network.
-      
+
       For most users, this construction process will generally happen in their Radix Wallet. If you wish to construct transactions programmatically or offline,
       you will need to integrate the Radix Engine Toolkit into your application for construction and finalization.
 
@@ -159,7 +159,7 @@ tags:
       ## State Model
 
       The Radix Engine State Model can be thought of as a forest of state sub-trees.
-      A state sub-tree consists of "entities". These entities have an ID, and 0 or more "substates" at keys underneath them. 
+      A state sub-tree consists of "entities". These entities have an ID, and 0 or more "substates" at keys underneath them.
       These substates are typed, and can own other entities, forming a tree of ownership.
 
       Each state sub-tree has a root entity, and a single Bech32M Global Address, with a human-readable-prefix (and prefix byte) matching the root entity type.
@@ -169,7 +169,7 @@ tags:
   - name: Construction
     x-displayName: Transaction Construction
     x-traitTag: true # Don't display endpoints under this tag
-    description: |      
+    description: |
       To construct and submit a transaction using the LTS endpoints:
 
       * Query `/lts/transaction/construction` to retrieve the current epoch (according to your node).
@@ -202,9 +202,9 @@ tags:
     x-displayName: Stream Endpoints
     description: To query the transaction stream of the ledger.
 paths:
-##################################################
-# Long Term Support backwards compatible Sub-API #
-##################################################
+  ##################################################
+  # Long Term Support backwards compatible Sub-API #
+  ##################################################
   "/lts/transaction/construction":
     post:
       summary: Get Construction Metadata
@@ -411,9 +411,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
-##################
-# Status Sub-API #
-##################
+  ##################
+  # Status Sub-API #
+  ##################
   "/status/network-configuration":
     post:
       summary: Get Network Configuration
@@ -483,9 +483,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
-###################
-# Mempool Sub-API #
-###################
+  ###################
+  # Mempool Sub-API #
+  ###################
   "/mempool/list":
     post:
       summary: Get Mempool List
@@ -542,9 +542,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
-#######################
-# Transaction Sub-API #
-#######################
+  #######################
+  # Transaction Sub-API #
+  #######################
   "/transaction/parse":
     post:
       summary: Parse Transaction Payload
@@ -753,9 +753,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
-##################
-# Stream Sub-API #
-##################
+  ##################
+  # Stream Sub-API #
+  ##################
   "/stream/transactions":
     post:
       summary: Get Committed Transactions
@@ -788,9 +788,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicErrorResponse"
-#################
-# State Sub-API #
-#################
+  #################
+  # State Sub-API #
+  #################
   "/state/consensus-manager":
     post:
       summary: Get Consensus Manager Details
@@ -1094,9 +1094,9 @@ paths:
 #############################################################################################
 components:
   schemas:
-#############################################
-# GENERAL / SHARED MODELS - Request Options #
-#############################################
+    #############################################
+    # GENERAL / SHARED MODELS - Request Options #
+    #############################################
     NetworkIdentifier:
       description: The logical name of the network
       type: string
@@ -1147,19 +1147,19 @@ components:
           description: Whether to return the typed substate information (default true)
           type: boolean
         previous:
-          description: Whether to return the previous substate value for updates (default false)
+          description: Whether to return the previous substate value for updates and deletes (default false)
           type: boolean
-###########################################################
-# GENERAL / SHARED MODELS - General / Numeric / Utilities #
-###########################################################
+    ###########################################################
+    # GENERAL / SHARED MODELS - General / Numeric / Utilities #
+    ###########################################################
     Decimal:
       type: string
       description: |
         A string-encoded fixed-precision decimal to 18 decimal places.
         A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(256 - 1) <= m < 2^(256 - 1)`.
-##########################################
-# GENERAL / SHARED MODELS - Transactions #
-##########################################
+    ##########################################
+    # GENERAL / SHARED MODELS - Transactions #
+    ##########################################
     TransactionStatus:
       type: string
       enum:
@@ -1199,11 +1199,14 @@ components:
       type: object
       required:
         - hash
+        - hash_bech32m
         - signed_intent
         - notary_signature
       properties:
         hash:
           $ref: "#/components/schemas/NotarizedTransactionHash"
+        hash_bech32m:
+          $ref: "#/components/schemas/NotarizedTransactionHashBech32m"
         payload_hex:
           type: string
           description: The hex-encoded full notarized transaction payload. Returning this can be disabled in TransactionFormatOptions on your request (default true).
@@ -1215,11 +1218,14 @@ components:
       type: object
       required:
         - hash
+        - hash_bech32m
         - intent
         - intent_signatures
       properties:
         hash:
           $ref: "#/components/schemas/SignedIntentHash"
+        hash_bech32m:
+          $ref: "#/components/schemas/SignedIntentHashBech32m"
         intent:
           $ref: "#/components/schemas/TransactionIntent"
         intent_signatures:
@@ -1230,10 +1236,13 @@ components:
       type: object
       required:
         - hash
+        - hash_bech32m
         - header
       properties:
         hash:
           $ref: "#/components/schemas/IntentHash"
+        hash_bech32m:
+          $ref: "#/components/schemas/IntentHashBech32m"
         header:
           $ref: "#/components/schemas/TransactionHeader"
         instructions:
@@ -1427,6 +1436,56 @@ components:
       format: int32
       minimum: 0
       maximum: 255
+    LedgerStateSummary:
+      type: object
+      required:
+        - state_version
+        - header_summary
+      properties:
+        state_version:
+          $ref: "#/components/schemas/StateVersion"
+          description: The version at which the state was read.
+        header_summary:
+          $ref: "#/components/schemas/LedgerHeaderSummary"
+          description: The excerpt from the ledger header committed at the `state_version`.
+    LedgerHeaderSummary:
+      type: object
+      required:
+        - epoch_round
+        - ledger_hashes
+        - proposer_timestamp
+      properties:
+        epoch_round:
+          $ref: "#/components/schemas/EpochRound"
+        ledger_hashes:
+          $ref: "#/components/schemas/LedgerHashes"
+        proposer_timestamp:
+          $ref: '#/components/schemas/Instant'
+    LedgerHashes:
+      type: object
+      required:
+        - state_tree_hash
+        - transaction_tree_hash
+        - receipt_tree_hash
+      properties:
+        state_tree_hash:
+          type: string
+          minLength: 64
+          maxLength: 64
+          description: |
+            The hex-encoded root hash of the state tree. This captures the current state of the state on the ledger.
+        transaction_tree_hash:
+          type: string
+          minLength: 64
+          maxLength: 64
+          description: |
+            The hex-encoded root hash of the transaction tree. This captures the ledger transactions committed to the ledger.
+        receipt_tree_hash:
+          type: string
+          minLength: 64
+          maxLength: 64
+          description: |
+            The hex-encoded root hash of the receipt tree. This captures the consensus-agreed output of each transaction on the ledger.
     StateVersion:
       type: integer
       format: int64
@@ -1436,15 +1495,24 @@ components:
       type: object
       required:
         - intent_hash
+        - intent_hash_bech32m
         - signed_intent_hash
+        - signed_intent_hash_bech32m
         - payload_hash
+        - payload_hash_bech32m
       properties:
         intent_hash:
           $ref: "#/components/schemas/IntentHash"
+        intent_hash_bech32m:
+          $ref: "#/components/schemas/IntentHashBech32m"
         signed_intent_hash:
           $ref: "#/components/schemas/SignedIntentHash"
+        signed_intent_hash_bech32m:
+          $ref: "#/components/schemas/SignedIntentHashBech32m"
         payload_hash:
           $ref: "#/components/schemas/NotarizedTransactionHash"
+        payload_hash_bech32m:
+          $ref: "#/components/schemas/NotarizedTransactionHashBech32m"
     IntentHash:
       type: string
       minLength: 64
@@ -1453,6 +1521,9 @@ components:
         The hex-encoded intent hash for a user transaction, also known as the transaction id.
         This hash identifies the core content "intent" of the transaction. Each intent can only be committed once.
         This hash gets signed by any signatories on the transaction, to create the signed intent.
+    IntentHashBech32m:
+      type: string
+      description: The Bech32m-encoded human readable `IntentHash`.
     SignedIntentHash:
       type: string
       minLength: 64
@@ -1461,6 +1532,9 @@ components:
         The hex-encoded signed intent hash for a user transaction.
         This hash identifies the transaction intent, plus additional signatures.
         This hash is signed by the notary, to create the submittable NotarizedTransaction.
+    SignedIntentHashBech32m:
+      type: string
+      description: The Bech32m-encoded human readable `SignedIntentHash`.
     NotarizedTransactionHash:
       type: string
       minLength: 64
@@ -1468,6 +1542,9 @@ components:
       description: |
         The hex-encoded notarized transaction hash for a user transaction.
         This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature.
+    NotarizedTransactionHashBech32m:
+      type: string
+      description: The Bech32m-encoded human readable `NotarizedTransactionHash`.
     LedgerPayloadHash:
       type: string
       minLength: 64
@@ -1475,6 +1552,30 @@ components:
       description: |
         The hex-encoded ledger payload transaction hash.
         This is a wrapper for both user transactions, and system transactions such as genesis and round changes.
+    LedgerPayloadHashBech32m:
+      type: string
+      description: The Bech32m-encoded human readable `LedgerPayloadHash`.
+    CommittedIntentMetadata:
+      type: object
+      required:
+        - state_version
+        - payload_hash
+        - payload_hash_bech32m
+        - is_same_transaction
+      properties:
+        state_version:
+          $ref: "#/components/schemas/StateVersion"
+          description: State version of a committed transaction which had the same intent.
+        payload_hash:
+          $ref: "#/components/schemas/NotarizedTransactionHash"
+        payload_hash_bech32m:
+          $ref: "#/components/schemas/NotarizedTransactionHashBech32m"
+        is_same_transaction:
+          type: boolean
+          description: |
+            Whether the intent was committed in a transaction with the same payload.
+            This is a convenience field, which can also be computed using `payload_hash` by a client
+            knowing the payload of the submitted transaction.
     ErrorResponseType:
       type: string
       enum:
@@ -1510,9 +1611,9 @@ components:
       allOf:
         - $ref: "#/components/schemas/ErrorResponse"
         - type: object
-######################################
-# GENERAL / SHARED MODELS - Receipts #
-######################################
+    ######################################
+    # GENERAL / SHARED MODELS - Receipts #
+    ######################################
     FeeSummary:
       description: Fees paid
       type: object
@@ -1719,6 +1820,9 @@ components:
       properties:
         substate_id:
           $ref: "#/components/schemas/SubstateId"
+        previous_value:
+          $ref: "#/components/schemas/SubstateValue"
+          description: The previous value of the substate. Only returned if enabled in SubstateFormatOptions on your request (default false).
     EntityReference:
       type: object
       required:
@@ -1982,9 +2086,9 @@ components:
             object_module_id:
               $ref: "#/components/schemas/ObjectModuleId"
 
-#################################################
-# GENERAL / SHARED MODELS - keys and signatures #
-#################################################
+    #################################################
+    # GENERAL / SHARED MODELS - keys and signatures #
+    #################################################
     PublicKeyType:
       type: string
       enum:
@@ -2094,15 +2198,15 @@ components:
           required:
             - public_key
             - signature
-          description: The EdDSA public key and signature 
+          description: The EdDSA public key and signature
           properties:
             public_key:
               $ref: '#/components/schemas/EddsaEd25519PublicKey'
             signature:
               $ref: '#/components/schemas/EddsaEd25519Signature'
-##########################################
-# GENERAL / SHARED MODELS - Access Rules #
-##########################################
+    ##########################################
+    # GENERAL / SHARED MODELS - Access Rules #
+    ##########################################
     AccessRuleType:
       type: string
       enum:
@@ -2324,9 +2428,9 @@ components:
         - None
         - Owner
         - Object
-#######################################
-# GENERAL / SHARED MODELS - Resources #
-#######################################
+    #######################################
+    # GENERAL / SHARED MODELS - Resources #
+    #######################################
     ResourceType:
       type: string
       enum:
@@ -2415,9 +2519,9 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/NonFungibleLocalId'
-##################################
-# GENERAL / SHARED MODELS - SBOR #
-##################################
+    ##################################
+    # GENERAL / SHARED MODELS - SBOR #
+    ##################################
     DataStruct:
       type: object
       required:
@@ -2447,9 +2551,9 @@ components:
           description: The hex-encoded, raw SBOR-encoded data
         programmatic_json:
           description: The (untyped) unannotated programmatic SBOR JSON
-#####################################
-# GENERAL / SHARED MODELS - Royalty #
-#####################################
+    #####################################
+    # GENERAL / SHARED MODELS - Royalty #
+    #####################################
     BlueprintRoyaltyConfig:
       type: object
       required:
@@ -2485,9 +2589,9 @@ components:
           enum:
             - XRD
             - USD
-########################################
-# GENERAL / SHARED MODELS - validators #
-########################################
+    ########################################
+    # GENERAL / SHARED MODELS - validators #
+    ########################################
     ActiveValidator:
       type: object
       required:
@@ -2504,9 +2608,9 @@ components:
           description: |
             A string-encoded decimal representing the validator's voting power for this epoch.
             This is a snapshot of the amount of XRD staked to the validator at the start of the epoch.
-#####################################
-# GENERAL / SHARED MODELS - schemas #
-#####################################
+    #####################################
+    # GENERAL / SHARED MODELS - schemas #
+    #####################################
     ScryptoSchema:
       type: object
       required:
@@ -3110,9 +3214,9 @@ components:
           type: boolean
         direct_access:
           type: boolean
-#####################################################
-# GENERAL / SHARED MODELS - general substate models #
-#####################################################
+    #####################################################
+    # GENERAL / SHARED MODELS - general substate models #
+    #####################################################
     EntityType:
       type: string
       enum:
@@ -3163,7 +3267,7 @@ components:
         mapping:
           # NOTE:
           # There is an important convention to these names, for consistency:
-          # 
+          #
           # For each distinct typed substate, form [SubstateType] = [ModuleSpecifier][SubstateSpecifier][SubstateTypeVersion]
           # - [ModuleSpecifier] is either [ModuleName]Module for non-main modules, or [EntityType] for main modules
           # - [SubstateSpecifier] is either:
@@ -3284,9 +3388,9 @@ components:
         - MultiResourcePoolFieldState
         - TransactionTrackerFieldState
         - TransactionTrackerCollectionEntry
-################################################
-# GENERAL / SHARED MODELS - substate key types #
-################################################
+    ################################################
+    # GENERAL / SHARED MODELS - substate key types #
+    ################################################
     ObjectRoleKey:
       type: object
       required:
@@ -3414,18 +3518,21 @@ components:
       type: object
       required:
         - intent_hash
+        - intent_hash_bech32m
       properties:
         intent_hash:
           $ref: "#/components/schemas/IntentHash"
+        intent_hash_bech32m:
+          $ref: "#/components/schemas/IntentHashBech32m"
     GenericKey:
       type: object
       properties:
         key_data:
           description: If it can be decoded as SBOR, this is the data
           $ref: '#/components/schemas/SborData'
-################################################
-# GENERAL / SHARED MODELS - specific substates #
-################################################
+    ################################################
+    # GENERAL / SHARED MODELS - specific substates #
+    ################################################
     TypeInfoModuleFieldTypeInfoSubstate:
       allOf:
         - $ref: '#/components/schemas/Substate'
@@ -4241,7 +4348,7 @@ components:
         effective_epoch_start:
           description: |
             The effective time the epoch started. A drift-free measure, used to work out when the
-            epoch should ideally end. 
+            epoch should ideally end.
           $ref: '#/components/schemas/Instant'
         actual_epoch_start:
           description: |
@@ -4677,9 +4784,9 @@ components:
           $ref: '#/components/schemas/EntityReference'
         resource_address:
           $ref: '#/components/schemas/ResourceAddress'
-##########################################
-# REQUEST: /lts/transaction/construction #
-##########################################
+    ##########################################
+    # REQUEST: /lts/transaction/construction #
+    ##########################################
     LtsTransactionConstructionRequest:
       type: object
       required:
@@ -4704,9 +4811,9 @@ components:
           description: |
             The latest round proposer's timestamp (rounded down to the current minute).
             This is provided so that the client can detect if the node is synced up or not.
-####################################
-# REQUEST: /lts/transaction/status #
-####################################
+    ####################################
+    # REQUEST: /lts/transaction/status #
+    ####################################
     LtsTransactionStatusRequest:
       type: object
       required:
@@ -4753,10 +4860,18 @@ components:
       type: object
       required:
         - payload_hash
+        - payload_hash_bech32m
         - status
       properties:
         payload_hash:
           $ref: "#/components/schemas/NotarizedTransactionHash"
+        payload_hash_bech32m:
+          $ref: "#/components/schemas/NotarizedTransactionHashBech32m"
+        state_version:
+          $ref: "#/components/schemas/StateVersion"
+          description: |
+            State version of a committed transaction.
+            This field will be present only if the `status` is `Committed*`.
         status:
           $ref: "#/components/schemas/LtsTransactionPayloadStatus"
         error_message:
@@ -4766,7 +4881,7 @@ components:
       type: string
       description: |
         The status of the transaction intent, as determined by the node.
-        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction 
+        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction
       enum:
         - CommittedSuccess
         - CommittedFailure
@@ -4787,9 +4902,9 @@ components:
         - TransientlyRejected
         - InMempool
         - NotInMempool
-####################################
-# REQUEST: /lts/transaction/submit #
-####################################
+    ####################################
+    # REQUEST: /lts/transaction/submit #
+    ####################################
     LtsTransactionSubmitRequest:
       type: object
       required:
@@ -4892,6 +5007,11 @@ components:
               description: |
                 Whether the cached rejection of this intent is due to the intent already having been committed.
                 If so, see the /transaction/receipt endpoint for further information.
+            intent_already_committed_as:
+              $ref: "#/components/schemas/CommittedIntentMetadata"
+              description: |
+                Details of an already-committed transaction that had the same intent.
+                This field is present when `is_rejected_because_intent_already_committed` is true.
             retry_from_timestamp:
               $ref: "#/components/schemas/Instant"
               description: |
@@ -4913,9 +5033,9 @@ components:
               description: |
                 An integer between `0` and `10^10`, marking the epoch from which the transaction will no longer be valid, and be permanently rejected.
                 Only present if the rejection isn't permanent.
-##############################################################
-# REQUEST: /lts/state/account-all-fungible-resource-balances #
-##############################################################
+    ##############################################################
+    # REQUEST: /lts/state/account-all-fungible-resource-balances #
+    ##############################################################
     LtsStateAccountAllFungibleResourceBalancesRequest:
       type: object
       required:
@@ -4931,12 +5051,16 @@ components:
       type: object
       required:
         - state_version
+        - ledger_header_summary
         - account_address
         - fungible_resource_balances
       properties:
         state_version:
           $ref: "#/components/schemas/StateVersion"
           description: The state version at which the query was performed.
+        ledger_header_summary:
+          $ref: "#/components/schemas/LedgerHeaderSummary"
+          description: The excerpt from the ledger header committed at the `state_version`.
         account_address:
           type: string
           description: The Bech32m-encoded human readable version of the account's address
@@ -4958,9 +5082,9 @@ components:
           description: |
             The string-encoded decimal representing the amount of the fungible resource.
             A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(256 - 1) <= m < 2^(256 - 1)`.
-#########################################################
-# REQUEST: /lts/state/account-fungible-resource-balance #
-#########################################################
+    #########################################################
+    # REQUEST: /lts/state/account-fungible-resource-balance #
+    #########################################################
     LtsStateAccountFungibleResourceBalanceRequest:
       type: object
       required:
@@ -4979,20 +5103,24 @@ components:
       type: object
       required:
         - state_version
+        - ledger_header_summary
         - account_address
         - fungible_resource_balance
       properties:
         state_version:
           $ref: "#/components/schemas/StateVersion"
           description: The state version at which the query was performed.
+        ledger_header_summary:
+          $ref: "#/components/schemas/LedgerHeaderSummary"
+          description: The excerpt from the ledger header committed at the `state_version`.
         account_address:
           type: string
           description: The Bech32m-encoded human readable version of the account's address
         fungible_resource_balance:
           $ref: "#/components/schemas/LtsFungibleResourceBalance"
-#############################################
-# REQUEST: /lts/stream/transaction-outcomes #
-#############################################
+    #############################################
+    # REQUEST: /lts/stream/transaction-outcomes #
+    #############################################
     LtsStreamTransactionOutcomesRequest:
       description: |
         A request to retrieve a sublist of committed transactions from the ledger.
@@ -5111,7 +5239,7 @@ components:
           description: |
             If present, this field indicates the entity contributed to the payment of the fee.
             The change in balance will always be negative.
-            NOTE: This property is deprecated but kept for backwards compatibility. This entry is duplicated in 
+            NOTE: This property is deprecated but kept for backwards compatibility. This entry is duplicated in
             `fee_balance_changes`.
         fee_balance_changes:
           type: array
@@ -5199,9 +5327,9 @@ components:
           description: |
             The string-encoded decimal representing the resultant balance of the fungible resource.
             A decimal is formed of some signed integer `m` of attos (`10^(-18)`) units, where `-2^(256 - 1) <= m < 2^(256 - 1)`.
-#####################################################
-# REQUEST: /lts/stream/account-transaction-outcomes #
-#####################################################
+    #####################################################
+    # REQUEST: /lts/stream/account-transaction-outcomes #
+    #####################################################
     LtsStreamAccountTransactionOutcomesRequest:
       description: |
         A request to retrieve a sublist of committed transactions from the ledger.
@@ -5250,9 +5378,9 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LtsCommittedTransactionOutcome"
-##########################################
-# REQUEST: /status/network-configuration #
-##########################################
+    ##########################################
+    # REQUEST: /status/network-configuration #
+    ##########################################
     NetworkConfigurationResponse:
       type: object
       required:
@@ -5390,9 +5518,9 @@ components:
           format: int32
           minimum: 0
           maximum: 255
-###################################
-# REQUEST: /status/network-status #
-###################################
+    ###################################
+    # REQUEST: /status/network-status #
+    ###################################
     NetworkStatusRequest:
       type: object
       required:
@@ -5461,37 +5589,18 @@ components:
           maximum: 10000000000
           description: An integer between `0` and `10^10`, marking the current round in an epoch
     CommittedStateIdentifier:
-      type: object
-      required:
-        - state_version
-        - state_tree_hash
-        - transaction_tree_hash
-        - receipt_tree_hash
-      properties:
-        state_version:
-          $ref: "#/components/schemas/StateVersion"
-          description: The state version, which increments with each transaction, starting at `0` pre-genesis.
-        state_tree_hash:
-          type: string
-          minLength: 64
-          maxLength: 64
-          description: |
-            The hex-encoded root hash of the state tree. This captures the current state of the state on the ledger.
-        transaction_tree_hash:
-          type: string
-          minLength: 64
-          maxLength: 64
-          description: |
-            The hex-encoded root hash of the transaction tree. This captures the ledger transactions committed to the ledger.
-        receipt_tree_hash:
-          type: string
-          minLength: 64
-          maxLength: 64
-          description: |
-            The hex-encoded root hash of the receipt tree. This captures the consensus-agreed output of each transaction on the ledger.
-##############################
-# REQUEST: /status/scenarios #
-##############################
+      allOf:
+        - type: object
+          required:
+            - state_version
+          properties:
+            state_version:
+              $ref: "#/components/schemas/StateVersion"
+              description: The state version, which increments with each transaction, starting at `0` pre-genesis.
+        - $ref: "#/components/schemas/LedgerHashes"
+    ##############################
+    # REQUEST: /status/scenarios #
+    ##############################
     ScenariosRequest:
       type: object
       required:
@@ -5546,6 +5655,7 @@ components:
         - logical_name
         - state_version
         - intent_hash
+        - intent_hash_bech32m
       properties:
         logical_name:
           type: string
@@ -5553,12 +5663,14 @@ components:
           $ref: "#/components/schemas/StateVersion"
         intent_hash:
           $ref: "#/components/schemas/IntentHash"
+        intent_hash_bech32m:
+          $ref: "#/components/schemas/IntentHashBech32m"
     DescribedAddress:
       type: string
       description: An arbitrary Bech32m-encoded human readable address (its type should be inferred from `logical_name`).
-##########################
-# REQUEST: /mempool/list #
-##########################
+    ##########################
+    # REQUEST: /mempool/list #
+    ##########################
     MempoolListRequest:
       type: object
       required:
@@ -5579,15 +5691,21 @@ components:
       type: object
       required:
         - intent_hash
+        - intent_hash_bech32m
         - payload_hash
+        - payload_hash_bech32m
       properties:
         intent_hash:
           $ref: "#/components/schemas/IntentHash"
+        intent_hash_bech32m:
+          $ref: "#/components/schemas/IntentHashBech32m"
         payload_hash:
           $ref: "#/components/schemas/NotarizedTransactionHash"
-#################################
-# REQUEST: /mempool/transaction #
-#################################
+        payload_hash_bech32m:
+          $ref: "#/components/schemas/NotarizedTransactionHashBech32m"
+    #################################
+    # REQUEST: /mempool/transaction #
+    #################################
     MempoolTransactionRequest:
       type: object
       required:
@@ -5606,9 +5724,9 @@ components:
         payload_hex:
           type: string
           description: The hex-encoded full notarized transaction payload.
-###############################
-# REQUEST: /transaction/parse #
-###############################
+    ###############################
+    # REQUEST: /transaction/parse #
+    ###############################
     TransactionParseRequest:
       type: object
       required:
@@ -5720,18 +5838,30 @@ components:
       type: object
       required:
         - intent_hash
+        - intent_hash_bech32m
         - signed_intent_hash
+        - signed_intent_hash_bech32m
         - payload_hash
+        - payload_hash_bech32m
         - ledger_hash
+        - ledger_hash_bech32m
       properties:
         intent_hash:
           $ref: "#/components/schemas/IntentHash"
+        intent_hash_bech32m:
+          $ref: "#/components/schemas/IntentHashBech32m"
         signed_intent_hash:
           $ref: "#/components/schemas/SignedIntentHash"
+        signed_intent_hash_bech32m:
+          $ref: "#/components/schemas/SignedIntentHashBech32m"
         payload_hash:
           $ref: "#/components/schemas/NotarizedTransactionHash"
+        payload_hash_bech32m:
+          $ref: "#/components/schemas/NotarizedTransactionHashBech32m"
         ledger_hash:
           $ref: "#/components/schemas/LedgerPayloadHash"
+        ledger_hash_bech32m:
+          $ref: "#/components/schemas/LedgerPayloadHashBech32m"
     ParsedSignedTransactionIntent:
       allOf:
         - $ref: "#/components/schemas/ParsedTransaction"
@@ -5747,12 +5877,18 @@ components:
       type: object
       required:
         - intent_hash
+        - intent_hash_bech32m
         - signed_intent_hash
+        - signed_intent_hash_bech32m
       properties:
         intent_hash:
           $ref: "#/components/schemas/IntentHash"
+        intent_hash_bech32m:
+          $ref: "#/components/schemas/IntentHashBech32m"
         signed_intent_hash:
           $ref: "#/components/schemas/SignedIntentHash"
+        signed_intent_hash_bech32m:
+          $ref: "#/components/schemas/SignedIntentHashBech32m"
     ParsedTransactionIntent:
       allOf:
         - $ref: "#/components/schemas/ParsedTransaction"
@@ -5768,9 +5904,12 @@ components:
       type: object
       required:
         - intent_hash
+        - intent_hash_bech32m
       properties:
         intent_hash:
           $ref: "#/components/schemas/IntentHash"
+        intent_hash_bech32m:
+          $ref: "#/components/schemas/IntentHashBech32m"
     ParsedLedgerTransaction:
       allOf:
         - $ref: "#/components/schemas/ParsedTransaction"
@@ -5786,18 +5925,27 @@ components:
       type: object
       required:
         - ledger_hash
+        - ledger_hash_bech32m
       properties:
         intent_hash:
           $ref: "#/components/schemas/IntentHash"
+        intent_hash_bech32m:
+          $ref: "#/components/schemas/IntentHashBech32m"
         signed_intent_hash:
           $ref: "#/components/schemas/SignedIntentHash"
+        signed_intent_hash_bech32m:
+          $ref: "#/components/schemas/SignedIntentHashBech32m"
         payload_hash:
           $ref: "#/components/schemas/NotarizedTransactionHash"
+        payload_hash_bech32m:
+          $ref: "#/components/schemas/NotarizedTransactionHashBech32m"
         ledger_hash:
           $ref: "#/components/schemas/LedgerPayloadHash"
-################################
-# REQUEST: /transaction/submit #
-################################
+        ledger_hash_bech32m:
+          $ref: "#/components/schemas/LedgerPayloadHashBech32m"
+    ################################
+    # REQUEST: /transaction/submit #
+    ################################
     TransactionSubmitRequest:
       type: object
       required:
@@ -5900,6 +6048,11 @@ components:
               description: |
                 Whether the cached rejection of this intent is due to the intent already having been committed.
                 If so, see the /transaction/receipt endpoint for further information.
+            intent_already_committed_as:
+              $ref: "#/components/schemas/CommittedIntentMetadata"
+              description: |
+                Details of an already-committed transaction that had the same intent.
+                This field is present when `is_rejected_because_intent_already_committed` is true.
             retry_from_timestamp:
               $ref: "#/components/schemas/Instant"
               description: |
@@ -5921,9 +6074,9 @@ components:
               description: |
                 An integer between `0` and `10^10`, marking the epoch from which the transaction will no longer be valid, and be permanently rejected.
                 Only present if the rejection isn't permanent.
-################################
-# REQUEST: /transaction/status #
-################################
+    ################################
+    # REQUEST: /transaction/status #
+    ################################
     TransactionStatusRequest:
       type: object
       required:
@@ -5958,35 +6111,45 @@ components:
         known_payloads:
           type: array
           items:
-            $ref: "#/components/schemas/TransactionPayloadStatus"
-    TransactionPayloadStatus:
+            $ref: "#/components/schemas/TransactionPayloadDetails"
+    TransactionPayloadDetails:
       type: object
       required:
         - payload_hash
+        - payload_hash_bech32m
         - status
       properties:
         payload_hash:
           $ref: "#/components/schemas/NotarizedTransactionHash"
+        payload_hash_bech32m:
+          $ref: "#/components/schemas/NotarizedTransactionHashBech32m"
+        state_version:
+          $ref: "#/components/schemas/StateVersion"
+          description: |
+            State version of a committed transaction.
+            This field will be present only if the `status` is `Committed*`.
         status:
-          type: string
+          $ref: "#/components/schemas/TransactionPayloadStatus"
           description: |
             The status of the transaction payload, as per this node.
             A NotInMempool status means that it wasn't rejected at last execution attempt, but it's not currently in the mempool either.
-          enum:
-            - CommittedSuccess
-            - CommittedFailure
-            - PermanentlyRejected
-            - TransientlyRejected
-            - InMempool
-            - NotInMempool
         error_message:
           description: An explanation for the error, if failed or rejected
           type: string
+    TransactionPayloadStatus:
+      type: string
+      enum:
+        - CommittedSuccess
+        - CommittedFailure
+        - PermanentlyRejected
+        - TransientlyRejected
+        - InMempool
+        - NotInMempool
     TransactionIntentStatus:
       type: string
       description: |
         The status of the transaction intent, as determined by the node.
-        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction 
+        FateUncertain or FateUncertainButLikelyRejection mean that it's still possible that a payload containing the transaction
       enum:
         - CommittedSuccess
         - CommittedFailure
@@ -5995,9 +6158,9 @@ components:
         - NotSeen
         - FateUncertain
         - FateUncertainButLikelyRejection
-#################################
-# REQUEST: /transaction/receipt #
-#################################
+    #################################
+    # REQUEST: /transaction/receipt #
+    #################################
     TransactionReceiptRequest:
       type: object
       required:
@@ -6015,9 +6178,9 @@ components:
       properties:
         committed:
           $ref: "#/components/schemas/CommittedTransaction"
-#####################################
-# REQUEST: /transaction/callpreview #
-#####################################
+    #####################################
+    # REQUEST: /transaction/callpreview #
+    #####################################
     TransactionCallPreviewRequest:
       type: object
       required:
@@ -6082,8 +6245,12 @@ components:
     TransactionCallPreviewResponse:
       type: object
       required:
+        - at_ledger_state
         - status
       properties:
+        at_ledger_state:
+          $ref: "#/components/schemas/LedgerStateSummary"
+          description: A summarized state of the ledger on top of which the preview was performed.
         status:
           $ref: "#/components/schemas/TransactionStatus"
         output:
@@ -6091,9 +6258,9 @@ components:
         error_message:
           type: string
           description: Error message (only present if status is Failed or Rejected)
-#################################
-# REQUEST: /transaction/preview #
-#################################
+    #################################
+    # REQUEST: /transaction/preview #
+    #################################
     TransactionPreviewRequest:
       type: object
       required:
@@ -6172,11 +6339,15 @@ components:
     TransactionPreviewResponse:
       type: object
       required:
+        - at_ledger_state
         - encoded_receipt
         - receipt
         - instruction_resource_changes
         - logs
       properties:
+        at_ledger_state:
+          $ref: "#/components/schemas/LedgerStateSummary"
+          description: A summarized state of the ledger on top of which the preview was performed.
         encoded_receipt:
           type: string
           description: The hex-sbor-encoded receipt
@@ -6198,9 +6369,9 @@ components:
                 type: string
               message:
                 type: string
-#################################
-# REQUEST: /stream/transactions #
-#################################
+    #################################
+    # REQUEST: /stream/transactions #
+    #################################
     StreamTransactionsRequest:
       description: |
         A request to retrieve a sublist of committed transactions from the ledger.
@@ -6382,9 +6553,9 @@ components:
         payload_hex:
           type: string
           description: The hex-encoded system transaction payload. Only returned if enabled in TransactionFormatOptions on your request.
-#####################################
-# REQUEST: /state/consensus-manager #
-#####################################
+    #####################################
+    # REQUEST: /state/consensus-manager #
+    #####################################
     StateConsensusManagerRequest:
       type: object
       required:
@@ -6395,6 +6566,7 @@ components:
     StateConsensusManagerResponse:
       type: object
       required:
+        - at_ledger_state
         - config
         - state
         - current_proposal_statistic
@@ -6402,6 +6574,9 @@ components:
         - current_time
         - current_time_rounded_to_minutes
       properties:
+        at_ledger_state:
+          $ref: "#/components/schemas/LedgerStateSummary"
+          description: A summarized state of the ledger at which the query was performed.
         config:
           $ref: "#/components/schemas/Substate"
         state:
@@ -6414,9 +6589,9 @@ components:
           $ref: "#/components/schemas/Substate"
         current_time_rounded_to_minutes:
           $ref: "#/components/schemas/Substate"
-###########################
-# REQUEST: /state/account #
-###########################
+    ###########################
+    # REQUEST: /state/account #
+    ###########################
     StateAccountRequest:
       type: object
       required:
@@ -6431,11 +6606,15 @@ components:
     StateAccountResponse:
       type: object
       required:
+        - at_ledger_state
         - info
         - owner_role
         - state
         - vaults
       properties:
+        at_ledger_state:
+          $ref: "#/components/schemas/LedgerStateSummary"
+          description: A summarized state of the ledger at which the query was performed.
         info:
           $ref: "#/components/schemas/Substate"
         owner_role:
@@ -6457,9 +6636,9 @@ components:
           $ref: "#/components/schemas/EntityReference"
         resource_amount:
           $ref: "#/components/schemas/ResourceAmount"
-#############################
-# REQUEST: /state/component #
-#############################
+    #############################
+    # REQUEST: /state/component #
+    #############################
     StateComponentRequest:
       type: object
       required:
@@ -6474,12 +6653,16 @@ components:
     StateComponentResponse:
       type: object
       required:
+        - at_ledger_state
         - info
         - state
         - owner_role
         - vaults
         - descendent_nodes
       properties:
+        at_ledger_state:
+          $ref: "#/components/schemas/LedgerStateSummary"
+          description: A summarized state of the ledger at which the query was performed.
         info:
           $ref: "#/components/schemas/Substate"
         state:
@@ -6529,9 +6712,9 @@ components:
           format: int32
           minimum: 0
           maximum: 100
-#############################
-# REQUEST: /state/validator #
-#############################
+    #############################
+    # REQUEST: /state/validator #
+    #############################
     StateValidatorRequest:
       type: object
       required:
@@ -6545,12 +6728,16 @@ components:
     StateValidatorResponse:
       type: object
       required:
+        - at_ledger_state
         - address
         - state
         - owner_role
         - vaults
         - descendent_nodes
       properties:
+        at_ledger_state:
+          $ref: "#/components/schemas/LedgerStateSummary"
+          description: A summarized state of the ledger at which the query was performed.
         address:
           $ref: '#/components/schemas/ComponentAddress'
         state:
@@ -6567,9 +6754,9 @@ components:
           description: Any descendent nodes owned directly or indirectly by the component
           items:
             $ref: "#/components/schemas/StateComponentDescendentNode"
-#####################################
-# REQUEST: /state/access-controller #
-#####################################
+    #####################################
+    # REQUEST: /state/access-controller #
+    #####################################
     StateAccessControllerRequest:
       type: object
       required:
@@ -6583,11 +6770,15 @@ components:
     StateAccessControllerResponse:
       type: object
       required:
+        - at_ledger_state
         - state
         - owner_role
         - vaults
         - descendent_nodes
       properties:
+        at_ledger_state:
+          $ref: "#/components/schemas/LedgerStateSummary"
+          description: A summarized state of the ledger at which the query was performed.
         state:
           $ref: "#/components/schemas/Substate"
         owner_role:
@@ -6602,9 +6793,9 @@ components:
           description: Any descendent nodes owned directly or indirectly by the component
           items:
             $ref: "#/components/schemas/StateComponentDescendentNode"
-############################
-# REQUEST: /state/resource #
-############################
+    ############################
+    # REQUEST: /state/resource #
+    ############################
     StateResourceRequest:
       type: object
       required:
@@ -6619,9 +6810,13 @@ components:
     StateResourceResponse:
       type: object
       required:
+        - at_ledger_state
         - manager
         - owner_role
       properties:
+        at_ledger_state:
+          $ref: "#/components/schemas/LedgerStateSummary"
+          description: A summarized state of the ledger at which the query was performed.
         manager:
           $ref: "#/components/schemas/StateResourceManager"
         owner_role:
@@ -6664,9 +6859,9 @@ components:
               $ref: "#/components/schemas/Substate"
             mutable_fields:
               $ref: "#/components/schemas/Substate"
-################################
-# REQUEST: /state/non-fungible #
-################################
+    ################################
+    # REQUEST: /state/non-fungible #
+    ################################
     StateNonFungibleRequest:
       type: object
       required:
@@ -6684,13 +6879,17 @@ components:
     StateNonFungibleResponse:
       type: object
       required:
+        - at_ledger_state
         - non_fungible
       properties:
+        at_ledger_state:
+          $ref: "#/components/schemas/LedgerStateSummary"
+          description: A summarized state of the ledger at which the query was performed.
         non_fungible:
           $ref: "#/components/schemas/Substate"
-###########################
-# REQUEST: /state/package #
-###########################
+    ###########################
+    # REQUEST: /state/package #
+    ###########################
     StatePackageRequest:
       type: object
       required:
@@ -6705,8 +6904,12 @@ components:
     StatePackageResponse:
       type: object
       required:
+        - at_ledger_state
         - owner_role
       properties:
+        at_ledger_state:
+          $ref: "#/components/schemas/LedgerStateSummary"
+          description: A summarized state of the ledger at which the query was performed.
         owner_role:
           $ref: "#/components/schemas/Substate"
         royalty:

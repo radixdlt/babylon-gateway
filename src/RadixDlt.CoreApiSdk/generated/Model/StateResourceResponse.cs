@@ -103,10 +103,17 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateResourceResponse" /> class.
         /// </summary>
+        /// <param name="atLedgerState">atLedgerState (required).</param>
         /// <param name="manager">manager (required).</param>
         /// <param name="ownerRole">ownerRole (required).</param>
-        public StateResourceResponse(StateResourceManager manager = default(StateResourceManager), Substate ownerRole = default(Substate))
+        public StateResourceResponse(LedgerStateSummary atLedgerState = default(LedgerStateSummary), StateResourceManager manager = default(StateResourceManager), Substate ownerRole = default(Substate))
         {
+            // to ensure "atLedgerState" is required (not null)
+            if (atLedgerState == null)
+            {
+                throw new ArgumentNullException("atLedgerState is a required property for StateResourceResponse and cannot be null");
+            }
+            this.AtLedgerState = atLedgerState;
             // to ensure "manager" is required (not null)
             if (manager == null)
             {
@@ -120,6 +127,12 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.OwnerRole = ownerRole;
         }
+
+        /// <summary>
+        /// Gets or Sets AtLedgerState
+        /// </summary>
+        [DataMember(Name = "at_ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerStateSummary AtLedgerState { get; set; }
 
         /// <summary>
         /// Gets or Sets Manager
@@ -141,6 +154,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateResourceResponse {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  Manager: ").Append(Manager).Append("\n");
             sb.Append("  OwnerRole: ").Append(OwnerRole).Append("\n");
             sb.Append("}\n");
@@ -179,6 +193,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
+                (
                     this.Manager == input.Manager ||
                     (this.Manager != null &&
                     this.Manager.Equals(input.Manager))
@@ -199,6 +218,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
                 if (this.Manager != null)
                 {
                     hashCode = (hashCode * 59) + this.Manager.GetHashCode();

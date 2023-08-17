@@ -104,8 +104,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="ParsedSignedTransactionIntentIdentifiers" /> class.
         /// </summary>
         /// <param name="intentHash">The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent.  (required).</param>
+        /// <param name="intentHashBech32m">The Bech32m-encoded human readable &#x60;IntentHash&#x60;. (required).</param>
         /// <param name="signedIntentHash">The hex-encoded signed intent hash for a user transaction. This hash identifies the transaction intent, plus additional signatures. This hash is signed by the notary, to create the submittable NotarizedTransaction.  (required).</param>
-        public ParsedSignedTransactionIntentIdentifiers(string intentHash = default(string), string signedIntentHash = default(string))
+        /// <param name="signedIntentHashBech32m">The Bech32m-encoded human readable &#x60;SignedIntentHash&#x60;. (required).</param>
+        public ParsedSignedTransactionIntentIdentifiers(string intentHash = default(string), string intentHashBech32m = default(string), string signedIntentHash = default(string), string signedIntentHashBech32m = default(string))
         {
             // to ensure "intentHash" is required (not null)
             if (intentHash == null)
@@ -113,12 +115,24 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("intentHash is a required property for ParsedSignedTransactionIntentIdentifiers and cannot be null");
             }
             this.IntentHash = intentHash;
+            // to ensure "intentHashBech32m" is required (not null)
+            if (intentHashBech32m == null)
+            {
+                throw new ArgumentNullException("intentHashBech32m is a required property for ParsedSignedTransactionIntentIdentifiers and cannot be null");
+            }
+            this.IntentHashBech32m = intentHashBech32m;
             // to ensure "signedIntentHash" is required (not null)
             if (signedIntentHash == null)
             {
                 throw new ArgumentNullException("signedIntentHash is a required property for ParsedSignedTransactionIntentIdentifiers and cannot be null");
             }
             this.SignedIntentHash = signedIntentHash;
+            // to ensure "signedIntentHashBech32m" is required (not null)
+            if (signedIntentHashBech32m == null)
+            {
+                throw new ArgumentNullException("signedIntentHashBech32m is a required property for ParsedSignedTransactionIntentIdentifiers and cannot be null");
+            }
+            this.SignedIntentHashBech32m = signedIntentHashBech32m;
         }
 
         /// <summary>
@@ -129,11 +143,25 @@ namespace RadixDlt.CoreApiSdk.Model
         public string IntentHash { get; set; }
 
         /// <summary>
+        /// The Bech32m-encoded human readable &#x60;IntentHash&#x60;.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable &#x60;IntentHash&#x60;.</value>
+        [DataMember(Name = "intent_hash_bech32m", IsRequired = true, EmitDefaultValue = true)]
+        public string IntentHashBech32m { get; set; }
+
+        /// <summary>
         /// The hex-encoded signed intent hash for a user transaction. This hash identifies the transaction intent, plus additional signatures. This hash is signed by the notary, to create the submittable NotarizedTransaction. 
         /// </summary>
         /// <value>The hex-encoded signed intent hash for a user transaction. This hash identifies the transaction intent, plus additional signatures. This hash is signed by the notary, to create the submittable NotarizedTransaction. </value>
         [DataMember(Name = "signed_intent_hash", IsRequired = true, EmitDefaultValue = true)]
         public string SignedIntentHash { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable &#x60;SignedIntentHash&#x60;.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable &#x60;SignedIntentHash&#x60;.</value>
+        [DataMember(Name = "signed_intent_hash_bech32m", IsRequired = true, EmitDefaultValue = true)]
+        public string SignedIntentHashBech32m { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,7 +172,9 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ParsedSignedTransactionIntentIdentifiers {\n");
             sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
+            sb.Append("  IntentHashBech32m: ").Append(IntentHashBech32m).Append("\n");
             sb.Append("  SignedIntentHash: ").Append(SignedIntentHash).Append("\n");
+            sb.Append("  SignedIntentHashBech32m: ").Append(SignedIntentHashBech32m).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -186,9 +216,19 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.IntentHash.Equals(input.IntentHash))
                 ) && 
                 (
+                    this.IntentHashBech32m == input.IntentHashBech32m ||
+                    (this.IntentHashBech32m != null &&
+                    this.IntentHashBech32m.Equals(input.IntentHashBech32m))
+                ) && 
+                (
                     this.SignedIntentHash == input.SignedIntentHash ||
                     (this.SignedIntentHash != null &&
                     this.SignedIntentHash.Equals(input.SignedIntentHash))
+                ) && 
+                (
+                    this.SignedIntentHashBech32m == input.SignedIntentHashBech32m ||
+                    (this.SignedIntentHashBech32m != null &&
+                    this.SignedIntentHashBech32m.Equals(input.SignedIntentHashBech32m))
                 );
         }
 
@@ -205,9 +245,17 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
                 }
+                if (this.IntentHashBech32m != null)
+                {
+                    hashCode = (hashCode * 59) + this.IntentHashBech32m.GetHashCode();
+                }
                 if (this.SignedIntentHash != null)
                 {
                     hashCode = (hashCode * 59) + this.SignedIntentHash.GetHashCode();
+                }
+                if (this.SignedIntentHashBech32m != null)
+                {
+                    hashCode = (hashCode * 59) + this.SignedIntentHashBech32m.GetHashCode();
                 }
                 return hashCode;
             }

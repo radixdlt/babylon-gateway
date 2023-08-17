@@ -101,7 +101,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="raw">Whether to return the raw substate value bytes (default false).</param>
         /// <param name="hash">Whether to return the raw substate value bytes hash (default false).</param>
         /// <param name="typed">Whether to return the typed substate information (default true).</param>
-        /// <param name="previous">Whether to return the previous substate value for updates (default false).</param>
+        /// <param name="previous">Whether to return the previous substate value for updates and deletes (default false).</param>
         public SubstateFormatOptions(bool raw = default(bool), bool hash = default(bool), bool typed = default(bool), bool previous = default(bool))
         {
             this.Raw = raw;
@@ -132,9 +132,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool Typed { get; set; }
 
         /// <summary>
-        /// Whether to return the previous substate value for updates (default false)
+        /// Whether to return the previous substate value for updates and deletes (default false)
         /// </summary>
-        /// <value>Whether to return the previous substate value for updates (default false)</value>
+        /// <value>Whether to return the previous substate value for updates and deletes (default false)</value>
         [DataMember(Name = "previous", EmitDefaultValue = true)]
         public bool Previous { get; set; }
 

@@ -103,9 +103,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateNonFungibleResponse" /> class.
         /// </summary>
+        /// <param name="atLedgerState">atLedgerState (required).</param>
         /// <param name="nonFungible">nonFungible (required).</param>
-        public StateNonFungibleResponse(Substate nonFungible = default(Substate))
+        public StateNonFungibleResponse(LedgerStateSummary atLedgerState = default(LedgerStateSummary), Substate nonFungible = default(Substate))
         {
+            // to ensure "atLedgerState" is required (not null)
+            if (atLedgerState == null)
+            {
+                throw new ArgumentNullException("atLedgerState is a required property for StateNonFungibleResponse and cannot be null");
+            }
+            this.AtLedgerState = atLedgerState;
             // to ensure "nonFungible" is required (not null)
             if (nonFungible == null)
             {
@@ -113,6 +120,12 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.NonFungible = nonFungible;
         }
+
+        /// <summary>
+        /// Gets or Sets AtLedgerState
+        /// </summary>
+        [DataMember(Name = "at_ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerStateSummary AtLedgerState { get; set; }
 
         /// <summary>
         /// Gets or Sets NonFungible
@@ -128,6 +141,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateNonFungibleResponse {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  NonFungible: ").Append(NonFungible).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -165,6 +179,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
+                (
                     this.NonFungible == input.NonFungible ||
                     (this.NonFungible != null &&
                     this.NonFungible.Equals(input.NonFungible))
@@ -180,6 +199,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
                 if (this.NonFungible != null)
                 {
                     hashCode = (hashCode * 59) + this.NonFungible.GetHashCode();

@@ -90,78 +90,43 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// MempoolTransactionHashes
+    /// LedgerStateSummary
     /// </summary>
-    [DataContract(Name = "MempoolTransactionHashes")]
-    public partial class MempoolTransactionHashes : IEquatable<MempoolTransactionHashes>
+    [DataContract(Name = "LedgerStateSummary")]
+    public partial class LedgerStateSummary : IEquatable<LedgerStateSummary>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MempoolTransactionHashes" /> class.
+        /// Initializes a new instance of the <see cref="LedgerStateSummary" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MempoolTransactionHashes() { }
+        protected LedgerStateSummary() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MempoolTransactionHashes" /> class.
+        /// Initializes a new instance of the <see cref="LedgerStateSummary" /> class.
         /// </summary>
-        /// <param name="intentHash">The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent.  (required).</param>
-        /// <param name="intentHashBech32m">The Bech32m-encoded human readable &#x60;IntentHash&#x60;. (required).</param>
-        /// <param name="payloadHash">The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature.  (required).</param>
-        /// <param name="payloadHashBech32m">The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;. (required).</param>
-        public MempoolTransactionHashes(string intentHash = default(string), string intentHashBech32m = default(string), string payloadHash = default(string), string payloadHashBech32m = default(string))
+        /// <param name="stateVersion">stateVersion (required).</param>
+        /// <param name="headerSummary">headerSummary (required).</param>
+        public LedgerStateSummary(long stateVersion = default(long), LedgerHeaderSummary headerSummary = default(LedgerHeaderSummary))
         {
-            // to ensure "intentHash" is required (not null)
-            if (intentHash == null)
+            this.StateVersion = stateVersion;
+            // to ensure "headerSummary" is required (not null)
+            if (headerSummary == null)
             {
-                throw new ArgumentNullException("intentHash is a required property for MempoolTransactionHashes and cannot be null");
+                throw new ArgumentNullException("headerSummary is a required property for LedgerStateSummary and cannot be null");
             }
-            this.IntentHash = intentHash;
-            // to ensure "intentHashBech32m" is required (not null)
-            if (intentHashBech32m == null)
-            {
-                throw new ArgumentNullException("intentHashBech32m is a required property for MempoolTransactionHashes and cannot be null");
-            }
-            this.IntentHashBech32m = intentHashBech32m;
-            // to ensure "payloadHash" is required (not null)
-            if (payloadHash == null)
-            {
-                throw new ArgumentNullException("payloadHash is a required property for MempoolTransactionHashes and cannot be null");
-            }
-            this.PayloadHash = payloadHash;
-            // to ensure "payloadHashBech32m" is required (not null)
-            if (payloadHashBech32m == null)
-            {
-                throw new ArgumentNullException("payloadHashBech32m is a required property for MempoolTransactionHashes and cannot be null");
-            }
-            this.PayloadHashBech32m = payloadHashBech32m;
+            this.HeaderSummary = headerSummary;
         }
 
         /// <summary>
-        /// The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. 
+        /// Gets or Sets StateVersion
         /// </summary>
-        /// <value>The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. </value>
-        [DataMember(Name = "intent_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string IntentHash { get; set; }
+        [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long StateVersion { get; set; }
 
         /// <summary>
-        /// The Bech32m-encoded human readable &#x60;IntentHash&#x60;.
+        /// Gets or Sets HeaderSummary
         /// </summary>
-        /// <value>The Bech32m-encoded human readable &#x60;IntentHash&#x60;.</value>
-        [DataMember(Name = "intent_hash_bech32m", IsRequired = true, EmitDefaultValue = true)]
-        public string IntentHashBech32m { get; set; }
-
-        /// <summary>
-        /// The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. 
-        /// </summary>
-        /// <value>The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. </value>
-        [DataMember(Name = "payload_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string PayloadHash { get; set; }
-
-        /// <summary>
-        /// The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;.
-        /// </summary>
-        /// <value>The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;.</value>
-        [DataMember(Name = "payload_hash_bech32m", IsRequired = true, EmitDefaultValue = true)]
-        public string PayloadHashBech32m { get; set; }
+        [DataMember(Name = "header_summary", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerHeaderSummary HeaderSummary { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -170,11 +135,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MempoolTransactionHashes {\n");
-            sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
-            sb.Append("  IntentHashBech32m: ").Append(IntentHashBech32m).Append("\n");
-            sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
-            sb.Append("  PayloadHashBech32m: ").Append(PayloadHashBech32m).Append("\n");
+            sb.Append("class LedgerStateSummary {\n");
+            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
+            sb.Append("  HeaderSummary: ").Append(HeaderSummary).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -195,15 +158,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MempoolTransactionHashes);
+            return this.Equals(input as LedgerStateSummary);
         }
 
         /// <summary>
-        /// Returns true if MempoolTransactionHashes instances are equal
+        /// Returns true if LedgerStateSummary instances are equal
         /// </summary>
-        /// <param name="input">Instance of MempoolTransactionHashes to be compared</param>
+        /// <param name="input">Instance of LedgerStateSummary to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MempoolTransactionHashes input)
+        public bool Equals(LedgerStateSummary input)
         {
             if (input == null)
             {
@@ -211,24 +174,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.IntentHash == input.IntentHash ||
-                    (this.IntentHash != null &&
-                    this.IntentHash.Equals(input.IntentHash))
+                    this.StateVersion == input.StateVersion ||
+                    this.StateVersion.Equals(input.StateVersion)
                 ) && 
                 (
-                    this.IntentHashBech32m == input.IntentHashBech32m ||
-                    (this.IntentHashBech32m != null &&
-                    this.IntentHashBech32m.Equals(input.IntentHashBech32m))
-                ) && 
-                (
-                    this.PayloadHash == input.PayloadHash ||
-                    (this.PayloadHash != null &&
-                    this.PayloadHash.Equals(input.PayloadHash))
-                ) && 
-                (
-                    this.PayloadHashBech32m == input.PayloadHashBech32m ||
-                    (this.PayloadHashBech32m != null &&
-                    this.PayloadHashBech32m.Equals(input.PayloadHashBech32m))
+                    this.HeaderSummary == input.HeaderSummary ||
+                    (this.HeaderSummary != null &&
+                    this.HeaderSummary.Equals(input.HeaderSummary))
                 );
         }
 
@@ -241,21 +193,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.IntentHash != null)
+                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
+                if (this.HeaderSummary != null)
                 {
-                    hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
-                }
-                if (this.IntentHashBech32m != null)
-                {
-                    hashCode = (hashCode * 59) + this.IntentHashBech32m.GetHashCode();
-                }
-                if (this.PayloadHash != null)
-                {
-                    hashCode = (hashCode * 59) + this.PayloadHash.GetHashCode();
-                }
-                if (this.PayloadHashBech32m != null)
-                {
-                    hashCode = (hashCode * 59) + this.PayloadHashBech32m.GetHashCode();
+                    hashCode = (hashCode * 59) + this.HeaderSummary.GetHashCode();
                 }
                 return hashCode;
             }

@@ -104,10 +104,14 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="ParsedLedgerTransactionIdentifiers" /> class.
         /// </summary>
         /// <param name="intentHash">The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. .</param>
+        /// <param name="intentHashBech32m">The Bech32m-encoded human readable &#x60;IntentHash&#x60;..</param>
         /// <param name="signedIntentHash">The hex-encoded signed intent hash for a user transaction. This hash identifies the transaction intent, plus additional signatures. This hash is signed by the notary, to create the submittable NotarizedTransaction. .</param>
+        /// <param name="signedIntentHashBech32m">The Bech32m-encoded human readable &#x60;SignedIntentHash&#x60;..</param>
         /// <param name="payloadHash">The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. .</param>
+        /// <param name="payloadHashBech32m">The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;..</param>
         /// <param name="ledgerHash">The hex-encoded ledger payload transaction hash. This is a wrapper for both user transactions, and system transactions such as genesis and round changes.  (required).</param>
-        public ParsedLedgerTransactionIdentifiers(string intentHash = default(string), string signedIntentHash = default(string), string payloadHash = default(string), string ledgerHash = default(string))
+        /// <param name="ledgerHashBech32m">The Bech32m-encoded human readable &#x60;LedgerPayloadHash&#x60;. (required).</param>
+        public ParsedLedgerTransactionIdentifiers(string intentHash = default(string), string intentHashBech32m = default(string), string signedIntentHash = default(string), string signedIntentHashBech32m = default(string), string payloadHash = default(string), string payloadHashBech32m = default(string), string ledgerHash = default(string), string ledgerHashBech32m = default(string))
         {
             // to ensure "ledgerHash" is required (not null)
             if (ledgerHash == null)
@@ -115,9 +119,18 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("ledgerHash is a required property for ParsedLedgerTransactionIdentifiers and cannot be null");
             }
             this.LedgerHash = ledgerHash;
+            // to ensure "ledgerHashBech32m" is required (not null)
+            if (ledgerHashBech32m == null)
+            {
+                throw new ArgumentNullException("ledgerHashBech32m is a required property for ParsedLedgerTransactionIdentifiers and cannot be null");
+            }
+            this.LedgerHashBech32m = ledgerHashBech32m;
             this.IntentHash = intentHash;
+            this.IntentHashBech32m = intentHashBech32m;
             this.SignedIntentHash = signedIntentHash;
+            this.SignedIntentHashBech32m = signedIntentHashBech32m;
             this.PayloadHash = payloadHash;
+            this.PayloadHashBech32m = payloadHashBech32m;
         }
 
         /// <summary>
@@ -128,11 +141,25 @@ namespace RadixDlt.CoreApiSdk.Model
         public string IntentHash { get; set; }
 
         /// <summary>
+        /// The Bech32m-encoded human readable &#x60;IntentHash&#x60;.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable &#x60;IntentHash&#x60;.</value>
+        [DataMember(Name = "intent_hash_bech32m", EmitDefaultValue = true)]
+        public string IntentHashBech32m { get; set; }
+
+        /// <summary>
         /// The hex-encoded signed intent hash for a user transaction. This hash identifies the transaction intent, plus additional signatures. This hash is signed by the notary, to create the submittable NotarizedTransaction. 
         /// </summary>
         /// <value>The hex-encoded signed intent hash for a user transaction. This hash identifies the transaction intent, plus additional signatures. This hash is signed by the notary, to create the submittable NotarizedTransaction. </value>
         [DataMember(Name = "signed_intent_hash", EmitDefaultValue = true)]
         public string SignedIntentHash { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable &#x60;SignedIntentHash&#x60;.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable &#x60;SignedIntentHash&#x60;.</value>
+        [DataMember(Name = "signed_intent_hash_bech32m", EmitDefaultValue = true)]
+        public string SignedIntentHashBech32m { get; set; }
 
         /// <summary>
         /// The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. 
@@ -142,11 +169,25 @@ namespace RadixDlt.CoreApiSdk.Model
         public string PayloadHash { get; set; }
 
         /// <summary>
+        /// The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;.</value>
+        [DataMember(Name = "payload_hash_bech32m", EmitDefaultValue = true)]
+        public string PayloadHashBech32m { get; set; }
+
+        /// <summary>
         /// The hex-encoded ledger payload transaction hash. This is a wrapper for both user transactions, and system transactions such as genesis and round changes. 
         /// </summary>
         /// <value>The hex-encoded ledger payload transaction hash. This is a wrapper for both user transactions, and system transactions such as genesis and round changes. </value>
         [DataMember(Name = "ledger_hash", IsRequired = true, EmitDefaultValue = true)]
         public string LedgerHash { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable &#x60;LedgerPayloadHash&#x60;.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable &#x60;LedgerPayloadHash&#x60;.</value>
+        [DataMember(Name = "ledger_hash_bech32m", IsRequired = true, EmitDefaultValue = true)]
+        public string LedgerHashBech32m { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,9 +198,13 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ParsedLedgerTransactionIdentifiers {\n");
             sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
+            sb.Append("  IntentHashBech32m: ").Append(IntentHashBech32m).Append("\n");
             sb.Append("  SignedIntentHash: ").Append(SignedIntentHash).Append("\n");
+            sb.Append("  SignedIntentHashBech32m: ").Append(SignedIntentHashBech32m).Append("\n");
             sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
+            sb.Append("  PayloadHashBech32m: ").Append(PayloadHashBech32m).Append("\n");
             sb.Append("  LedgerHash: ").Append(LedgerHash).Append("\n");
+            sb.Append("  LedgerHashBech32m: ").Append(LedgerHashBech32m).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -201,9 +246,19 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.IntentHash.Equals(input.IntentHash))
                 ) && 
                 (
+                    this.IntentHashBech32m == input.IntentHashBech32m ||
+                    (this.IntentHashBech32m != null &&
+                    this.IntentHashBech32m.Equals(input.IntentHashBech32m))
+                ) && 
+                (
                     this.SignedIntentHash == input.SignedIntentHash ||
                     (this.SignedIntentHash != null &&
                     this.SignedIntentHash.Equals(input.SignedIntentHash))
+                ) && 
+                (
+                    this.SignedIntentHashBech32m == input.SignedIntentHashBech32m ||
+                    (this.SignedIntentHashBech32m != null &&
+                    this.SignedIntentHashBech32m.Equals(input.SignedIntentHashBech32m))
                 ) && 
                 (
                     this.PayloadHash == input.PayloadHash ||
@@ -211,9 +266,19 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.PayloadHash.Equals(input.PayloadHash))
                 ) && 
                 (
+                    this.PayloadHashBech32m == input.PayloadHashBech32m ||
+                    (this.PayloadHashBech32m != null &&
+                    this.PayloadHashBech32m.Equals(input.PayloadHashBech32m))
+                ) && 
+                (
                     this.LedgerHash == input.LedgerHash ||
                     (this.LedgerHash != null &&
                     this.LedgerHash.Equals(input.LedgerHash))
+                ) && 
+                (
+                    this.LedgerHashBech32m == input.LedgerHashBech32m ||
+                    (this.LedgerHashBech32m != null &&
+                    this.LedgerHashBech32m.Equals(input.LedgerHashBech32m))
                 );
         }
 
@@ -230,17 +295,33 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
                 }
+                if (this.IntentHashBech32m != null)
+                {
+                    hashCode = (hashCode * 59) + this.IntentHashBech32m.GetHashCode();
+                }
                 if (this.SignedIntentHash != null)
                 {
                     hashCode = (hashCode * 59) + this.SignedIntentHash.GetHashCode();
+                }
+                if (this.SignedIntentHashBech32m != null)
+                {
+                    hashCode = (hashCode * 59) + this.SignedIntentHashBech32m.GetHashCode();
                 }
                 if (this.PayloadHash != null)
                 {
                     hashCode = (hashCode * 59) + this.PayloadHash.GetHashCode();
                 }
+                if (this.PayloadHashBech32m != null)
+                {
+                    hashCode = (hashCode * 59) + this.PayloadHashBech32m.GetHashCode();
+                }
                 if (this.LedgerHash != null)
                 {
                     hashCode = (hashCode * 59) + this.LedgerHash.GetHashCode();
+                }
+                if (this.LedgerHashBech32m != null)
+                {
+                    hashCode = (hashCode * 59) + this.LedgerHashBech32m.GetHashCode();
                 }
                 return hashCode;
             }

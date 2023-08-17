@@ -104,11 +104,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="LtsStateAccountFungibleResourceBalanceResponse" /> class.
         /// </summary>
         /// <param name="stateVersion">stateVersion (required).</param>
+        /// <param name="ledgerHeaderSummary">ledgerHeaderSummary (required).</param>
         /// <param name="accountAddress">The Bech32m-encoded human readable version of the account&#39;s address (required).</param>
         /// <param name="fungibleResourceBalance">fungibleResourceBalance (required).</param>
-        public LtsStateAccountFungibleResourceBalanceResponse(long stateVersion = default(long), string accountAddress = default(string), LtsFungibleResourceBalance fungibleResourceBalance = default(LtsFungibleResourceBalance))
+        public LtsStateAccountFungibleResourceBalanceResponse(long stateVersion = default(long), LedgerHeaderSummary ledgerHeaderSummary = default(LedgerHeaderSummary), string accountAddress = default(string), LtsFungibleResourceBalance fungibleResourceBalance = default(LtsFungibleResourceBalance))
         {
             this.StateVersion = stateVersion;
+            // to ensure "ledgerHeaderSummary" is required (not null)
+            if (ledgerHeaderSummary == null)
+            {
+                throw new ArgumentNullException("ledgerHeaderSummary is a required property for LtsStateAccountFungibleResourceBalanceResponse and cannot be null");
+            }
+            this.LedgerHeaderSummary = ledgerHeaderSummary;
             // to ensure "accountAddress" is required (not null)
             if (accountAddress == null)
             {
@@ -128,6 +135,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
         public long StateVersion { get; set; }
+
+        /// <summary>
+        /// Gets or Sets LedgerHeaderSummary
+        /// </summary>
+        [DataMember(Name = "ledger_header_summary", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerHeaderSummary LedgerHeaderSummary { get; set; }
 
         /// <summary>
         /// The Bech32m-encoded human readable version of the account&#39;s address
@@ -151,6 +164,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class LtsStateAccountFungibleResourceBalanceResponse {\n");
             sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
+            sb.Append("  LedgerHeaderSummary: ").Append(LedgerHeaderSummary).Append("\n");
             sb.Append("  AccountAddress: ").Append(AccountAddress).Append("\n");
             sb.Append("  FungibleResourceBalance: ").Append(FungibleResourceBalance).Append("\n");
             sb.Append("}\n");
@@ -193,6 +207,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.StateVersion.Equals(input.StateVersion)
                 ) && 
                 (
+                    this.LedgerHeaderSummary == input.LedgerHeaderSummary ||
+                    (this.LedgerHeaderSummary != null &&
+                    this.LedgerHeaderSummary.Equals(input.LedgerHeaderSummary))
+                ) && 
+                (
                     this.AccountAddress == input.AccountAddress ||
                     (this.AccountAddress != null &&
                     this.AccountAddress.Equals(input.AccountAddress))
@@ -214,6 +233,10 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
+                if (this.LedgerHeaderSummary != null)
+                {
+                    hashCode = (hashCode * 59) + this.LedgerHeaderSummary.GetHashCode();
+                }
                 if (this.AccountAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.AccountAddress.GetHashCode();

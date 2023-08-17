@@ -103,12 +103,19 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionPreviewResponse" /> class.
         /// </summary>
+        /// <param name="atLedgerState">atLedgerState (required).</param>
         /// <param name="encodedReceipt">The hex-sbor-encoded receipt (required).</param>
         /// <param name="receipt">receipt (required).</param>
         /// <param name="instructionResourceChanges">instructionResourceChanges (required).</param>
         /// <param name="logs">logs (required).</param>
-        public TransactionPreviewResponse(string encodedReceipt = default(string), TransactionReceipt receipt = default(TransactionReceipt), List<InstructionResourceChanges> instructionResourceChanges = default(List<InstructionResourceChanges>), List<TransactionPreviewResponseLogsInner> logs = default(List<TransactionPreviewResponseLogsInner>))
+        public TransactionPreviewResponse(LedgerStateSummary atLedgerState = default(LedgerStateSummary), string encodedReceipt = default(string), TransactionReceipt receipt = default(TransactionReceipt), List<InstructionResourceChanges> instructionResourceChanges = default(List<InstructionResourceChanges>), List<TransactionPreviewResponseLogsInner> logs = default(List<TransactionPreviewResponseLogsInner>))
         {
+            // to ensure "atLedgerState" is required (not null)
+            if (atLedgerState == null)
+            {
+                throw new ArgumentNullException("atLedgerState is a required property for TransactionPreviewResponse and cannot be null");
+            }
+            this.AtLedgerState = atLedgerState;
             // to ensure "encodedReceipt" is required (not null)
             if (encodedReceipt == null)
             {
@@ -134,6 +141,12 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.Logs = logs;
         }
+
+        /// <summary>
+        /// Gets or Sets AtLedgerState
+        /// </summary>
+        [DataMember(Name = "at_ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerStateSummary AtLedgerState { get; set; }
 
         /// <summary>
         /// The hex-sbor-encoded receipt
@@ -168,6 +181,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionPreviewResponse {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  EncodedReceipt: ").Append(EncodedReceipt).Append("\n");
             sb.Append("  Receipt: ").Append(Receipt).Append("\n");
             sb.Append("  InstructionResourceChanges: ").Append(InstructionResourceChanges).Append("\n");
@@ -208,6 +222,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
+                (
                     this.EncodedReceipt == input.EncodedReceipt ||
                     (this.EncodedReceipt != null &&
                     this.EncodedReceipt.Equals(input.EncodedReceipt))
@@ -240,6 +259,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
                 if (this.EncodedReceipt != null)
                 {
                     hashCode = (hashCode * 59) + this.EncodedReceipt.GetHashCode();

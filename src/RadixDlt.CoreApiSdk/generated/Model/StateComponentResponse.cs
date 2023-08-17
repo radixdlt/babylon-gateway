@@ -103,14 +103,21 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateComponentResponse" /> class.
         /// </summary>
+        /// <param name="atLedgerState">atLedgerState (required).</param>
         /// <param name="info">info (required).</param>
         /// <param name="state">state (required).</param>
         /// <param name="royaltyAccumulator">royaltyAccumulator.</param>
         /// <param name="ownerRole">ownerRole (required).</param>
         /// <param name="vaults">Any vaults owned directly or indirectly by the component (required).</param>
         /// <param name="descendentNodes">Any descendent nodes owned directly or indirectly by the component (required).</param>
-        public StateComponentResponse(Substate info = default(Substate), Substate state = default(Substate), Substate royaltyAccumulator = default(Substate), Substate ownerRole = default(Substate), List<VaultBalance> vaults = default(List<VaultBalance>), List<StateComponentDescendentNode> descendentNodes = default(List<StateComponentDescendentNode>))
+        public StateComponentResponse(LedgerStateSummary atLedgerState = default(LedgerStateSummary), Substate info = default(Substate), Substate state = default(Substate), Substate royaltyAccumulator = default(Substate), Substate ownerRole = default(Substate), List<VaultBalance> vaults = default(List<VaultBalance>), List<StateComponentDescendentNode> descendentNodes = default(List<StateComponentDescendentNode>))
         {
+            // to ensure "atLedgerState" is required (not null)
+            if (atLedgerState == null)
+            {
+                throw new ArgumentNullException("atLedgerState is a required property for StateComponentResponse and cannot be null");
+            }
+            this.AtLedgerState = atLedgerState;
             // to ensure "info" is required (not null)
             if (info == null)
             {
@@ -143,6 +150,12 @@ namespace RadixDlt.CoreApiSdk.Model
             this.DescendentNodes = descendentNodes;
             this.RoyaltyAccumulator = royaltyAccumulator;
         }
+
+        /// <summary>
+        /// Gets or Sets AtLedgerState
+        /// </summary>
+        [DataMember(Name = "at_ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerStateSummary AtLedgerState { get; set; }
 
         /// <summary>
         /// Gets or Sets Info
@@ -190,6 +203,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateComponentResponse {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  Info: ").Append(Info).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
             sb.Append("  RoyaltyAccumulator: ").Append(RoyaltyAccumulator).Append("\n");
@@ -231,6 +245,11 @@ namespace RadixDlt.CoreApiSdk.Model
                 return false;
             }
             return 
+                (
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
                 (
                     this.Info == input.Info ||
                     (this.Info != null &&
@@ -274,6 +293,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
                 if (this.Info != null)
                 {
                     hashCode = (hashCode * 59) + this.Info.GetHashCode();

@@ -104,7 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="DeletedSubstate" /> class.
         /// </summary>
         /// <param name="substateId">substateId (required).</param>
-        public DeletedSubstate(SubstateId substateId = default(SubstateId))
+        /// <param name="previousValue">previousValue.</param>
+        public DeletedSubstate(SubstateId substateId = default(SubstateId), SubstateValue previousValue = default(SubstateValue))
         {
             // to ensure "substateId" is required (not null)
             if (substateId == null)
@@ -112,6 +113,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("substateId is a required property for DeletedSubstate and cannot be null");
             }
             this.SubstateId = substateId;
+            this.PreviousValue = previousValue;
         }
 
         /// <summary>
@@ -119,6 +121,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "substate_id", IsRequired = true, EmitDefaultValue = true)]
         public SubstateId SubstateId { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PreviousValue
+        /// </summary>
+        [DataMember(Name = "previous_value", EmitDefaultValue = true)]
+        public SubstateValue PreviousValue { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,6 +137,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class DeletedSubstate {\n");
             sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
+            sb.Append("  PreviousValue: ").Append(PreviousValue).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -168,6 +177,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.SubstateId == input.SubstateId ||
                     (this.SubstateId != null &&
                     this.SubstateId.Equals(input.SubstateId))
+                ) && 
+                (
+                    this.PreviousValue == input.PreviousValue ||
+                    (this.PreviousValue != null &&
+                    this.PreviousValue.Equals(input.PreviousValue))
                 );
         }
 
@@ -183,6 +197,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.SubstateId != null)
                 {
                     hashCode = (hashCode * 59) + this.SubstateId.GetHashCode();
+                }
+                if (this.PreviousValue != null)
+                {
+                    hashCode = (hashCode * 59) + this.PreviousValue.GetHashCode();
                 }
                 return hashCode;
             }

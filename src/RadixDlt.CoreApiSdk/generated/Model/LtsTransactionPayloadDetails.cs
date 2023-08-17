@@ -110,9 +110,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="LtsTransactionPayloadDetails" /> class.
         /// </summary>
         /// <param name="payloadHash">The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature.  (required).</param>
+        /// <param name="payloadHashBech32m">The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;. (required).</param>
+        /// <param name="stateVersion">stateVersion.</param>
         /// <param name="status">status (required).</param>
         /// <param name="errorMessage">An explanation for the error, if failed or rejected.</param>
-        public LtsTransactionPayloadDetails(string payloadHash = default(string), LtsTransactionPayloadStatus status = default(LtsTransactionPayloadStatus), string errorMessage = default(string))
+        public LtsTransactionPayloadDetails(string payloadHash = default(string), string payloadHashBech32m = default(string), long stateVersion = default(long), LtsTransactionPayloadStatus status = default(LtsTransactionPayloadStatus), string errorMessage = default(string))
         {
             // to ensure "payloadHash" is required (not null)
             if (payloadHash == null)
@@ -120,7 +122,14 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("payloadHash is a required property for LtsTransactionPayloadDetails and cannot be null");
             }
             this.PayloadHash = payloadHash;
+            // to ensure "payloadHashBech32m" is required (not null)
+            if (payloadHashBech32m == null)
+            {
+                throw new ArgumentNullException("payloadHashBech32m is a required property for LtsTransactionPayloadDetails and cannot be null");
+            }
+            this.PayloadHashBech32m = payloadHashBech32m;
             this.Status = status;
+            this.StateVersion = stateVersion;
             this.ErrorMessage = errorMessage;
         }
 
@@ -130,6 +139,19 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <value>The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. </value>
         [DataMember(Name = "payload_hash", IsRequired = true, EmitDefaultValue = true)]
         public string PayloadHash { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;.</value>
+        [DataMember(Name = "payload_hash_bech32m", IsRequired = true, EmitDefaultValue = true)]
+        public string PayloadHashBech32m { get; set; }
+
+        /// <summary>
+        /// Gets or Sets StateVersion
+        /// </summary>
+        [DataMember(Name = "state_version", EmitDefaultValue = true)]
+        public long StateVersion { get; set; }
 
         /// <summary>
         /// An explanation for the error, if failed or rejected
@@ -147,6 +169,8 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class LtsTransactionPayloadDetails {\n");
             sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
+            sb.Append("  PayloadHashBech32m: ").Append(PayloadHashBech32m).Append("\n");
+            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("}\n");
@@ -190,6 +214,15 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.PayloadHash.Equals(input.PayloadHash))
                 ) && 
                 (
+                    this.PayloadHashBech32m == input.PayloadHashBech32m ||
+                    (this.PayloadHashBech32m != null &&
+                    this.PayloadHashBech32m.Equals(input.PayloadHashBech32m))
+                ) && 
+                (
+                    this.StateVersion == input.StateVersion ||
+                    this.StateVersion.Equals(input.StateVersion)
+                ) && 
+                (
                     this.Status == input.Status ||
                     this.Status.Equals(input.Status)
                 ) && 
@@ -213,6 +246,11 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.PayloadHash.GetHashCode();
                 }
+                if (this.PayloadHashBech32m != null)
+                {
+                    hashCode = (hashCode * 59) + this.PayloadHashBech32m.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
                 hashCode = (hashCode * 59) + this.Status.GetHashCode();
                 if (this.ErrorMessage != null)
                 {
