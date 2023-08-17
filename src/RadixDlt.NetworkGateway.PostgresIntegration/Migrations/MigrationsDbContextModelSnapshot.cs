@@ -722,10 +722,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("index_in_round");
 
-                    b.Property<bool>("IsEndOfEpoch")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_end_of_epoch");
-
                     b.Property<DateTime>("NormalizedRoundTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("normalized_round_timestamp");
