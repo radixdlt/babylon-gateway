@@ -667,12 +667,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 referencedEntity.Resolve(dbEntity);
                 entitiesToAdd.Add(dbEntity);
-
-                // TODO dirty hack around https://radixdlt.atlassian.net/browse/NG-356
-                if (dbEntity is GlobalFungibleResourceEntity or GlobalNonFungibleResourceEntity)
-                {
-                    missingMintedEvents.Add(new ResourceSupplyChange(dbEntity.Id, dbEntity.FromStateVersion, Minted: TokenAmount.Zero));
-                }
             }
 
             referencedEntities.OnAllEntitiesResolved();
@@ -780,24 +774,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             var value = metadata.Value?.DataStruct.StructData.Hex.ConvertFromHex();
 
                             metadataChanges.Add(new MetadataChange(referencedEntity, key, value, isDeleted, metadata.IsLocked, stateVersion));
-                        }
-
-                        if (substateData is CoreModel.FungibleResourceManagerFieldTotalSupplySubstate fungibleResourceManagerFieldTotalSupplySubstate)
-                        {
-                            resourceSupplyChanges.Add(new ResourceSupplyChange(
-                                referencedEntity.DatabaseId,
-                                stateVersion,
-                                TotalSupply: TokenAmount.FromDecimalString(fungibleResourceManagerFieldTotalSupplySubstate.Value.TotalSupply)
-                            ));
-                        }
-
-                        if (substateData is CoreModel.NonFungibleResourceManagerFieldTotalSupplySubstate nonFungibleResourceManagerFieldTotalSupplySubstate)
-                        {
-                            resourceSupplyChanges.Add(new ResourceSupplyChange(
-                                referencedEntity.DatabaseId,
-                                stateVersion,
-                                TotalSupply: TokenAmount.FromDecimalString(nonFungibleResourceManagerFieldTotalSupplySubstate.Value.TotalSupply)
-                            ));
                         }
 
                         if (substateData is CoreModel.FungibleVaultFieldBalanceSubstate fungibleVaultFieldBalanceSubstate)
@@ -1300,23 +1276,23 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         }
                         else if (EventDecoder.TryGetFungibleResourceMintedEvent(decodedEvent, out var fungibleResourceMintedEvent))
                         {
-                            resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion,
-                                Minted: TokenAmount.FromDecimalString(fungibleResourceMintedEvent.amount.AsStr())));
+                            var mintedAmount = TokenAmount.FromDecimalString(fungibleResourceMintedEvent.amount.AsStr());
+                            resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion, Minted: mintedAmount));
                         }
                         else if (EventDecoder.TryGetFungibleResourceBurnedEvent(decodedEvent, out var fungibleResourceBurnedEvent))
                         {
-                            resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion,
-                                Burned: TokenAmount.FromDecimalString(fungibleResourceBurnedEvent.amount.AsStr())));
+                            var burnedAmount = TokenAmount.FromDecimalString(fungibleResourceBurnedEvent.amount.AsStr());
+                            resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion, Burned: burnedAmount));
                         }
                         else if (EventDecoder.TryGetNonFungibleResourceMintedEvent(decodedEvent, out var nonFungibleResourceMintedEvent))
                         {
-                            resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion,
-                                Minted: TokenAmount.FromDecimalString(nonFungibleResourceMintedEvent.ids.Count.ToString())));
+                            var mintedCount = TokenAmount.FromDecimalString(nonFungibleResourceMintedEvent.ids.Count.ToString());
+                            resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion, Minted: mintedCount));
                         }
                         else if (EventDecoder.TryGetNonFungibleResourceBurnedEvent(decodedEvent, out var nonFungibleResourceBurnedEvent))
                         {
-                            resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion,
-                                Burned: TokenAmount.FromDecimalString(nonFungibleResourceBurnedEvent.ids.Count.ToString())));
+                            var burnedCount = TokenAmount.FromDecimalString(nonFungibleResourceBurnedEvent.ids.Count.ToString());
+                            resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion, Burned:burnedCount));
                         }
                     }
 
@@ -1805,7 +1781,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 aggregate.TotalCount += e.Delta;
             }
 
-            var resourceEntitySupplyHistoryToAdd = missingMintedEvents.Concat(resourceSupplyChanges)
+            var resourceEntitySupplyHistoryToAdd = resourceSupplyChanges
                 .GroupBy(x => new { x.ResourceEntityId, x.StateVersion })
                 .Select(group =>
                 {
@@ -1813,30 +1789,23 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         group.Key.ResourceEntityId,
                         _ => new ResourceEntitySupplyHistory { TotalSupply = TokenAmount.Zero, TotalMinted = TokenAmount.Zero, TotalBurned = TokenAmount.Zero });
 
-                    var totalSupply = group.SingleOrDefault(x => x.TotalSupply.HasValue)?.TotalSupply ?? previous.TotalSupply;
-
-                    var totalMinted = group
+                    var minted = group
                         .Where(x => x.Minted.HasValue)
                         .Select(x => x.Minted)
-                        .Aggregate(previous.TotalMinted, (sum, x) => sum + x!.Value);
+                        .Aggregate(TokenAmount.Zero, (sum, x) => sum + x!.Value);
 
-                    var totalBurned = group
+                    var burned = group
                         .Where(x => x.Burned.HasValue)
                         .Select(x => x.Burned)
-                        .Aggregate(previous.TotalBurned, (sum, x) => sum + x!.Value);
+                        .Aggregate(TokenAmount.Zero, (sum, x) => sum + x!.Value);
 
-                    // TODO:
-                    // If resource was created with initial supply minted event is not published, to properly track TotalMinted value we have to detect that situation.
-                    // Requested that to change, worth revisting later if we can remove that.
-                    var isCreateWithInitialSupply = previous.TotalSupply == TokenAmount.Zero &&
-                                                    previous.TotalMinted == TokenAmount.Zero &&
-                                                    previous.TotalBurned == TokenAmount.Zero &&
-                                                    totalSupply > totalMinted;
+                    var totalSupply = previous.TotalSupply + minted - burned;
+                    var totalMinted = previous.TotalMinted + minted;
+                    var totalBurned = previous.TotalBurned + burned;
 
-                    if (isCreateWithInitialSupply)
-                    {
-                        totalMinted += totalSupply;
-                    }
+                    previous.TotalSupply = totalSupply;
+                    previous.TotalMinted = totalMinted;
+                    previous.TotalBurned = totalBurned;
 
                     return new ResourceEntitySupplyHistory
                     {
