@@ -268,27 +268,14 @@ INNER JOIN LATERAL (
             .ToDictionaryAsync(e => e.EntityId, token);
     }
 
-    public async Task<Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>> MostRecentEntityResourceAggregatedVaultsHistoryFor(List<FungibleVaultChange> fungibleVaultChanges, List<NonFungibleVaultChange> nonFungibleVaultChanges, CancellationToken token)
+    public async Task<Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>> MostRecentEntityResourceAggregatedVaultsHistoryFor(List<EntityFungibleResourceBalanceChangeEvent> fungibleEvents, List<EntityNonFungibleResourceBalanceChangeEvent> nonFungibleEvents, CancellationToken token)
     {
-        if (!fungibleVaultChanges.Any() && !nonFungibleVaultChanges.Any())
+        if (!fungibleEvents.Any() && !nonFungibleEvents.Any())
         {
             return new Dictionary<EntityResourceLookup, EntityResourceAggregatedVaultsHistory>();
         }
 
-        var data = new HashSet<EntityResourceLookup>();
-
-        foreach (var change in fungibleVaultChanges)
-        {
-            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseOwnerAncestorId, change.ReferencedResource.DatabaseId));
-            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseGlobalAncestorId, change.ReferencedResource.DatabaseId));
-        }
-
-        foreach (var change in nonFungibleVaultChanges)
-        {
-            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseOwnerAncestorId, change.ReferencedResource.DatabaseId));
-            data.Add(new EntityResourceLookup(change.ReferencedVault.DatabaseGlobalAncestorId, change.ReferencedResource.DatabaseId));
-        }
-
+        var data = fungibleEvents.Select(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId)).Concat(nonFungibleEvents.Select(e => new EntityResourceLookup(e.EntityId, e.ResourceEntityId))).ToHashSet();
         var entityIds = new List<long>();
         var resourceEntityIds = new List<long>();
 

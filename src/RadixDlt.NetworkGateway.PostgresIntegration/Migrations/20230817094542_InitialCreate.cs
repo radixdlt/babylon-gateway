@@ -240,7 +240,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    tmp_tmp_remove_me_once_tx_events_become_available = table.Column<string>(type: "text", nullable: false),
                     discriminator = table.Column<ResourceType>(type: "resource_type", nullable: false),
                     balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
                     total_count = table.Column<long>(type: "bigint", nullable: true)

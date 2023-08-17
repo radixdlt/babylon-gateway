@@ -81,11 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-<<<<<<<< HEAD:src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/20230815125818_InitialCreate.Designer.cs
-    [Migration("20230815125818_InitialCreate")]
-========
-    [Migration("20230815094509_InitialCreate")]
->>>>>>>> f30591d9 (Dropped LedgerTransaction.IsEndOfEpoch):src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/20230815094509_InitialCreate.Designer.cs
+    [Migration("20230817094542_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -409,11 +405,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("resource_entity_id");
 
-                    b.Property<string>("TmpTmpRemoveMeOnceTxEventsBecomeAvailable")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("tmp_tmp_remove_me_once_tx_events_become_available");
-
                     b.Property<ResourceType>("discriminator")
                         .HasColumnType("resource_type");
 
@@ -728,16 +719,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<long>("IndexInRound")
                         .HasColumnType("bigint")
                         .HasColumnName("index_in_round");
-
-<<<<<<<< HEAD:src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/20230815125818_InitialCreate.Designer.cs
-                    b.Property<bool>("IsEndOfEpoch")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_end_of_epoch");
-========
-                    b.Property<byte[]>("Message")
-                        .HasColumnType("bytea")
-                        .HasColumnName("message");
->>>>>>>> f30591d9 (Dropped LedgerTransaction.IsEndOfEpoch):src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations/20230815094509_InitialCreate.Designer.cs
 
                     b.Property<DateTime>("NormalizedRoundTimestamp")
                         .HasColumnType("timestamp with time zone")

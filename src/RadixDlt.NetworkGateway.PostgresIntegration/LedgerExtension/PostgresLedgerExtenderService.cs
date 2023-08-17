@@ -734,6 +734,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         var fungibleVaultChanges = new List<FungibleVaultChange>();
         var nonFungibleVaultChanges = new List<NonFungibleVaultChange>();
+        var entityFungibleResourceBalanceChangeEvents = new List<EntityFungibleResourceBalanceChangeEvent>();
+        var entityNonFungibleResourceBalanceChangeEvents = new List<EntityNonFungibleResourceBalanceChangeEvent>();
         var nonFungibleIdChanges = new List<NonFungibleIdChange>();
         var metadataChanges = new List<MetadataChange>();
         var resourceSupplyChanges = new List<ResourceSupplyChange>();
@@ -1183,7 +1185,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             continue;
                         }
 
-                        // TODO "deposit" and "withdrawal" events should be used to alter entity_resource_aggregated_vaults_history table (drop tmp_tmp_remove_me_once_tx_events_become_available column)
                         var eventEmitterEntity = referencedEntities.Get((EntityAddress)methodEventEmitter.Entity.EntityAddress);
 
                         using var decodedEvent = EventDecoder.DecodeEvent(@event, _networkConfigurationProvider.GetNetworkId());
@@ -1201,51 +1202,101 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         }
                         else if (EventDecoder.TryGetFungibleVaultWithdrawalEvent(decodedEvent, out var fungibleVaultWithdrawalEvent))
                         {
+                            var value = TokenAmount.FromDecimalString(fungibleVaultWithdrawalEvent.value.AsStr());
+                            var vaultEntity = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>();
+                            var resourceEntityId = vaultEntity.ResourceEntityId;
+
                             ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
                             {
                                 Id = sequences.LedgerTransactionMarkerSequence++,
                                 StateVersion = stateVersion,
                                 EventType = LedgerTransactionMarkerEventType.Withdrawal,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(fungibleVaultWithdrawalEvent.value.AsStr()),
+                                ResourceEntityId = resourceEntityId,
+                                Quantity = value,
                             });
+
+                            if (!vaultEntity.IsRoyaltyVault)
+                            {
+                                entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId, value * TokenAmount.MinusOne, stateVersion));
+
+                                if (eventEmitterEntity.DatabaseGlobalAncestorId != eventEmitterEntity.DatabaseOwnerAncestorId)
+                                {
+                                    entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId, value * TokenAmount.MinusOne, stateVersion));
+                                }
+                            }
                         }
                         else if (EventDecoder.TryGetFungibleVaultDepositEvent(decodedEvent, out var fungibleVaultDepositEvent))
                         {
+                            var value = TokenAmount.FromDecimalString(fungibleVaultDepositEvent.value.AsStr());
+                            var vaultEntity = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>();
+                            var resourceEntityId = vaultEntity.ResourceEntityId;
+
                             ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
                             {
                                 Id = sequences.LedgerTransactionMarkerSequence++,
                                 StateVersion = stateVersion,
                                 EventType = LedgerTransactionMarkerEventType.Deposit,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(fungibleVaultDepositEvent.value.AsStr()),
+                                ResourceEntityId = resourceEntityId,
+                                Quantity = value,
                             });
+
+                            if (!vaultEntity.IsRoyaltyVault)
+                            {
+                                entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId, value, stateVersion));
+
+                                if (eventEmitterEntity.DatabaseGlobalAncestorId != eventEmitterEntity.DatabaseOwnerAncestorId)
+                                {
+                                    entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId, value, stateVersion));
+                                }
+                            }
                         }
                         else if (EventDecoder.TryGetNonFungibleVaultWithdrawalEvent(decodedEvent, out var nonFungibleVaultWithdrawalEvent))
                         {
+                            var value = nonFungibleVaultWithdrawalEvent.value.Count.ToString();
+                            var vaultEntity = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>();
+                            var resourceEntityId = vaultEntity.ResourceEntityId;
+
                             ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
                             {
                                 Id = sequences.LedgerTransactionMarkerSequence++,
                                 StateVersion = stateVersion,
                                 EventType = LedgerTransactionMarkerEventType.Withdrawal,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(nonFungibleVaultWithdrawalEvent.value.Count.ToString()),
+                                ResourceEntityId = resourceEntityId,
+                                Quantity = TokenAmount.FromDecimalString(value),
                             });
+
+                            entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId, long.Parse(value) * -1, stateVersion));
+
+                            if (eventEmitterEntity.DatabaseGlobalAncestorId != eventEmitterEntity.DatabaseOwnerAncestorId)
+                            {
+                                entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId, long.Parse(value) * -1, stateVersion));
+                            }
                         }
                         else if (EventDecoder.TryGetNonFungibleVaultDepositEvent(decodedEvent, out var nonFungibleVaultDepositEvent))
                         {
+                            var value = nonFungibleVaultDepositEvent.value.Count.ToString();
+                            var vaultEntity = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>();
+                            var resourceEntityId = vaultEntity.ResourceEntityId;
+
                             ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
                             {
                                 Id = sequences.LedgerTransactionMarkerSequence++,
                                 StateVersion = stateVersion,
                                 EventType = LedgerTransactionMarkerEventType.Deposit,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(nonFungibleVaultDepositEvent.value.Count.ToString()),
+                                ResourceEntityId = resourceEntityId,
+                                Quantity = TokenAmount.FromDecimalString(value),
                             });
+
+                            entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId, long.Parse(value), stateVersion));
+
+                            if (eventEmitterEntity.DatabaseGlobalAncestorId != eventEmitterEntity.DatabaseOwnerAncestorId)
+                            {
+                                entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId, long.Parse(value), stateVersion));
+                            }
                         }
                         else if (EventDecoder.TryGetFungibleResourceMintedEvent(decodedEvent, out var fungibleResourceMintedEvent))
                         {
@@ -1331,7 +1382,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var mostRecentAccessRulesEntryHistory = await readHelper.MostRecentEntityRoleAssignmentsEntryHistoryFor(roleAssignmentsChangePointers.Values, token);
             var mostRecentAccessRulesAggregateHistory = await readHelper.MostRecentEntityRoleAssignmentsAggregateHistoryFor(roleAssignmentChanges, token);
             var mostRecentEntityResourceAggregateHistory = await readHelper.MostRecentEntityResourceAggregateHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
-            var mostRecentEntityResourceAggregatedVaultsHistory = await readHelper.MostRecentEntityResourceAggregatedVaultsHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
+            var mostRecentEntityResourceAggregatedVaultsHistory = await readHelper.MostRecentEntityResourceAggregatedVaultsHistoryFor(entityFungibleResourceBalanceChangeEvents, entityNonFungibleResourceBalanceChangeEvents, token);
             var mostRecentEntityResourceVaultAggregateHistory = await readHelper.MostRecentEntityResourceVaultAggregateHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
             var mostRecentNonFungibleIdStoreHistory = await readHelper.MostRecentNonFungibleIdStoreHistoryFor(nonFungibleIdChanges, token);
             var mostRecentResourceEntitySupplyHistory = await readHelper.MostRecentResourceEntitySupplyHistoryFor(resourceSupplyChanges, token);
@@ -1545,149 +1596,24 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 }
             }
 
-            void AggregateEntityResource(
+            void AggregateEntityResourceUsingSubstates(
                 ReferencedEntity referencedVault,
                 ReferencedEntity referencedResource,
                 long stateVersion,
-                bool fungibleResource,
-                TokenAmount? tmpFungibleBalance,
-                long? tmpNonFungibleTotalCount)
+                bool fungibleResource)
             {
                 if (referencedVault.GetDatabaseEntity<VaultEntity>() is InternalFungibleVaultEntity { IsRoyaltyVault: true })
                 {
                     return;
                 }
 
-                if (fungibleResource)
-                {
-                    var tmpBalance = tmpFungibleBalance ?? throw new InvalidOperationException("impossible x1"); // TODO improve
-
-                    AggregateEntityFungibleResourceVaultInternal(referencedVault.DatabaseOwnerAncestorId, referencedResource.DatabaseId, tmpBalance, referencedVault.DatabaseId);
-                    AggregateEntityFungibleResourceVaultInternal(referencedVault.DatabaseGlobalAncestorId, referencedResource.DatabaseId, tmpBalance, referencedVault.DatabaseId);
-                }
-                else
-                {
-                    var tmpTotalCount = tmpNonFungibleTotalCount ?? throw new InvalidOperationException("impossible x2"); // TODO improve
-
-                    AggregateEntityNonFungibleResourceVaultInternal(referencedVault.DatabaseOwnerAncestorId, referencedResource.DatabaseId, tmpTotalCount, referencedVault.DatabaseId);
-                    AggregateEntityNonFungibleResourceVaultInternal(referencedVault.DatabaseGlobalAncestorId, referencedResource.DatabaseId, tmpTotalCount, referencedVault.DatabaseId);
-                }
-
-                AggregateEntityResourceInternal(referencedVault.DatabaseOwnerAncestorId, referencedResource.DatabaseId);
                 AggregateEntityResourceInternal(referencedVault.DatabaseGlobalAncestorId, referencedResource.DatabaseId);
-                AggregateEntityResourceVaultInternal(referencedVault.DatabaseOwnerAncestorId, referencedResource.DatabaseId, referencedVault.DatabaseId);
                 AggregateEntityResourceVaultInternal(referencedVault.DatabaseGlobalAncestorId, referencedResource.DatabaseId, referencedVault.DatabaseId);
 
-                // TODO rename tmpBalance->delta and drop tmpResourceVaultEntityId once TX events become available
-                void AggregateEntityFungibleResourceVaultInternal(long entityId, long resourceEntityId, TokenAmount tmpBalance, long tmpResourceVaultEntityId)
+                if (referencedVault.DatabaseGlobalAncestorId != referencedVault.DatabaseOwnerAncestorId)
                 {
-                    var lookup = new EntityResourceLookup(entityId, resourceEntityId);
-
-                    if (!mostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var aggregate) || aggregate.FromStateVersion != stateVersion)
-                    {
-                        var previousTmpTmp = aggregate?.TmpTmpRemoveMeOnceTxEventsBecomeAvailable ?? string.Empty;
-
-                        aggregate = new EntityFungibleResourceAggregatedVaultsHistory
-                        {
-                            Id = sequences.EntityResourceAggregatedVaultsHistorySequence++,
-                            FromStateVersion = stateVersion,
-                            EntityId = entityId,
-                            ResourceEntityId = resourceEntityId,
-                            TmpTmpRemoveMeOnceTxEventsBecomeAvailable = previousTmpTmp,
-                        };
-
-                        entityResourceAggregatedVaultsHistoryToAdd.Add(aggregate);
-                        mostRecentEntityResourceAggregatedVaultsHistory[lookup] = aggregate;
-                    }
-
-                    // TODO replace with simple aggregate.Balance += delta once TX events become available
-                    var tmpSum = TokenAmount.Zero;
-                    var tmpExists = false;
-                    var tmpColl = aggregate.TmpTmpRemoveMeOnceTxEventsBecomeAvailable
-                        .Split(';', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(e =>
-                        {
-                            var parts = e.Split('=');
-                            var vaultId = long.Parse(parts[0]);
-                            var balance = TokenAmount.FromDecimalString(parts[1]);
-
-                            if (vaultId == tmpResourceVaultEntityId)
-                            {
-                                tmpExists = true;
-                                balance = tmpBalance;
-                            }
-
-                            tmpSum += balance;
-
-                            return $"{vaultId}={balance}";
-                        })
-                        .ToList();
-
-                    if (tmpExists == false)
-                    {
-                        tmpColl.Add($"{tmpResourceVaultEntityId}={tmpBalance}");
-                        tmpSum += tmpBalance;
-                    }
-
-                    aggregate.TmpTmpRemoveMeOnceTxEventsBecomeAvailable = string.Join(";", tmpColl);
-
-                    ((EntityFungibleResourceAggregatedVaultsHistory)aggregate).Balance = tmpSum;
-                }
-
-                // TODO rename tmpTotalCount->delta and drop tmpResourceVaultEntityId once TX events become available
-                void AggregateEntityNonFungibleResourceVaultInternal(long entityId, long resourceEntityId, long tmpTotalCount, long tmpResourceVaultEntityId)
-                {
-                    var lookup = new EntityResourceLookup(entityId, resourceEntityId);
-
-                    if (!mostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var aggregate) || aggregate.FromStateVersion != stateVersion)
-                    {
-                        var previousTmpTmp = aggregate?.TmpTmpRemoveMeOnceTxEventsBecomeAvailable ?? string.Empty;
-
-                        aggregate = new EntityNonFungibleResourceAggregatedVaultsHistory
-                        {
-                            Id = sequences.EntityResourceAggregatedVaultsHistorySequence++,
-                            FromStateVersion = stateVersion,
-                            EntityId = entityId,
-                            ResourceEntityId = resourceEntityId,
-                            TmpTmpRemoveMeOnceTxEventsBecomeAvailable = previousTmpTmp,
-                        };
-
-                        entityResourceAggregatedVaultsHistoryToAdd.Add(aggregate);
-                        mostRecentEntityResourceAggregatedVaultsHistory[lookup] = aggregate;
-                    }
-
-                    // TODO replace with simple aggregate.TotalCount += delta once TX events become available
-                    var tmpSum = 0L;
-                    var tmpExists = false;
-                    var tmpColl = aggregate.TmpTmpRemoveMeOnceTxEventsBecomeAvailable
-                        .Split(';', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(e =>
-                        {
-                            var parts = e.Split('=');
-                            var vaultId = long.Parse(parts[0]);
-                            var totalCount = long.Parse(parts[1]);
-
-                            if (vaultId == tmpResourceVaultEntityId)
-                            {
-                                tmpExists = true;
-                                totalCount = tmpTotalCount;
-                            }
-
-                            tmpSum += totalCount;
-
-                            return $"{vaultId}={totalCount}";
-                        })
-                        .ToList();
-
-                    if (tmpExists == false)
-                    {
-                        tmpColl.Add($"{tmpResourceVaultEntityId}={tmpTotalCount}");
-                        tmpSum += tmpTotalCount;
-                    }
-
-                    aggregate.TmpTmpRemoveMeOnceTxEventsBecomeAvailable = string.Join(";", tmpColl);
-
-                    ((EntityNonFungibleResourceAggregatedVaultsHistory)aggregate).TotalCount = tmpSum;
+                    AggregateEntityResourceInternal(referencedVault.DatabaseOwnerAncestorId, referencedResource.DatabaseId);
+                    AggregateEntityResourceVaultInternal(referencedVault.DatabaseOwnerAncestorId, referencedResource.DatabaseId, referencedVault.DatabaseId);
                 }
 
                 void AggregateEntityResourceInternal(long entityId, long resourceEntityId)
@@ -1765,7 +1691,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var entityFungibleVaultHistoryToAdd = fungibleVaultChanges
                 .Select(e =>
                 {
-                    AggregateEntityResource(e.ReferencedVault, e.ReferencedResource, e.StateVersion, true, e.Balance, null);
+                    AggregateEntityResourceUsingSubstates(e.ReferencedVault, e.ReferencedResource, e.StateVersion, true);
 
                     return new EntityFungibleVaultHistory
                     {
@@ -1804,7 +1730,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     nfids.AddRange(uniqueAddedItems);
                     nfids.RemoveAll(x => deletedItems.Contains(x));
 
-                    AggregateEntityResource(e.Key.ReferencedVault, e.Key.ReferencedResource, e.Key.StateVersion, false, null, nfids.Count);
+                    AggregateEntityResourceUsingSubstates(e.Key.ReferencedVault, e.Key.ReferencedResource, e.Key.StateVersion, false);
 
                     return new EntityNonFungibleVaultHistory
                     {
@@ -1818,6 +1744,66 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     };
                 })
                 .ToList();
+
+            foreach (var e in entityFungibleResourceBalanceChangeEvents)
+            {
+                var lookup = new EntityResourceLookup(e.EntityId, e.ResourceEntityId);
+
+                EntityFungibleResourceAggregatedVaultsHistory aggregate;
+
+                if (!mostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var previous) || previous.FromStateVersion != e.StateVersion)
+                {
+                    var previousBalance = (previous as EntityFungibleResourceAggregatedVaultsHistory)?.Balance ?? TokenAmount.Zero;
+
+                    aggregate = new EntityFungibleResourceAggregatedVaultsHistory
+                    {
+                        Id = sequences.EntityResourceAggregatedVaultsHistorySequence++,
+                        FromStateVersion = e.StateVersion,
+                        EntityId = e.EntityId,
+                        ResourceEntityId = e.ResourceEntityId,
+                        Balance = previousBalance,
+                    };
+
+                    entityResourceAggregatedVaultsHistoryToAdd.Add(aggregate);
+                    mostRecentEntityResourceAggregatedVaultsHistory[lookup] = aggregate;
+                }
+                else
+                {
+                    aggregate = (EntityFungibleResourceAggregatedVaultsHistory)previous;
+                }
+
+                aggregate.Balance += e.Delta;
+            }
+
+            foreach (var e in entityNonFungibleResourceBalanceChangeEvents)
+            {
+                var lookup = new EntityResourceLookup(e.EntityId, e.ResourceEntityId);
+
+                EntityNonFungibleResourceAggregatedVaultsHistory aggregate;
+
+                if (!mostRecentEntityResourceAggregatedVaultsHistory.TryGetValue(lookup, out var previous) || previous.FromStateVersion != e.StateVersion)
+                {
+                    var previousTotalCount = (previous as EntityNonFungibleResourceAggregatedVaultsHistory)?.TotalCount ?? 0;
+
+                    aggregate = new EntityNonFungibleResourceAggregatedVaultsHistory
+                    {
+                        Id = sequences.EntityResourceAggregatedVaultsHistorySequence++,
+                        FromStateVersion = e.StateVersion,
+                        EntityId = e.EntityId,
+                        ResourceEntityId = e.ResourceEntityId,
+                        TotalCount = previousTotalCount,
+                    };
+
+                    entityResourceAggregatedVaultsHistoryToAdd.Add(aggregate);
+                    mostRecentEntityResourceAggregatedVaultsHistory[lookup] = aggregate;
+                }
+                else
+                {
+                    aggregate = (EntityNonFungibleResourceAggregatedVaultsHistory)previous;
+                }
+
+                aggregate.TotalCount += e.Delta;
+            }
 
             var resourceEntitySupplyHistoryToAdd = missingMintedEvents.Concat(resourceSupplyChanges)
                 .GroupBy(x => new { x.ResourceEntityId, x.StateVersion })
