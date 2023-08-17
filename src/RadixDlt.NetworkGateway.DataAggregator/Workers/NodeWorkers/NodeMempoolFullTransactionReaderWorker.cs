@@ -158,7 +158,7 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
             cancellationToken);
 
         var hashesInMempool = mempoolListResponse.Contents
-            .Select(ti => new PendingTransactionHashPair(ti.IntentHash, ti.PayloadHash))
+            .Select(ti => new PendingTransactionHashPair(ti.IntentHashBech32m, ti.PayloadHashBech32m))
             .ToList();
 
         if (hashesInMempool.Count == 0)

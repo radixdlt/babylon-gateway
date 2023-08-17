@@ -149,7 +149,7 @@ public class NodeMempoolTransactionHashesReaderWorker : NodeWorker
         await _observers.ForEachAsync(x => x.MempoolSize(_nodeConfig.CoreApiNode.Name, mempoolListResponse.Contents.Count));
 
         var latestMempoolHashes = mempoolListResponse.Contents
-            .Select(th => new PendingTransactionHashPair(th.IntentHash, th.PayloadHash))
+            .Select(th => new PendingTransactionHashPair(th.IntentHashBech32m, th.PayloadHashBech32m))
             .ToHashSet();
 
         var previousMempoolHashes = _latestTransactionHashes;

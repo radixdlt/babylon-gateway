@@ -189,7 +189,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         {
             var ult = ((CoreModel.UserLedgerTransaction)committedTransaction.LedgerTransaction).NotarizedTransaction;
 
-            userTransactionStatusByPayloadHash[ult.Hash] = committedTransaction.Receipt.Status switch
+            userTransactionStatusByPayloadHash[ult.HashBech32m] = committedTransaction.Receipt.Status switch
             {
                 CoreModel.TransactionStatus.Succeeded => PendingTransactionStatus.CommittedSuccess,
                 CoreModel.TransactionStatus.Failed => PendingTransactionStatus.CommittedFailure,
@@ -518,9 +518,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         CoreModel.GenesisLedgerTransaction => new GenesisLedgerTransaction(),
                         CoreModel.UserLedgerTransaction ult => new UserLedgerTransaction
                         {
-                            PayloadHash = ult.NotarizedTransaction.Hash,
-                            IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.Hash,
-                            SignedIntentHash = ult.NotarizedTransaction.SignedIntent.Hash,
+                            PayloadHash = ult.NotarizedTransaction.HashBech32m,
+                            IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.HashBech32m,
+                            SignedIntentHash = ult.NotarizedTransaction.SignedIntent.HashBech32m,
                             Message = ult.NotarizedTransaction.SignedIntent.Intent.Message?.ToJson(),
                         },
                         CoreModel.RoundUpdateLedgerTransaction => new RoundUpdateLedgerTransaction(),
