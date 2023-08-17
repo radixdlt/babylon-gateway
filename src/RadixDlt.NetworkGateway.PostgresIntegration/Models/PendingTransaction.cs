@@ -80,10 +80,10 @@ internal class PendingTransaction
     public long Id { get; set; }
 
     [Column("payload_hash")]
-    public byte[] PayloadHash { get; private set; }
+    public string PayloadHash { get; private set; }
 
     [Column("intent_hash")]
-    public byte[] IntentHash { get; private set; }
+    public string IntentHash { get; private set; }
 
     /// <summary>
     /// The payload of the transaction.
@@ -164,8 +164,8 @@ internal class PendingTransaction
     public uint VersionControl { get; private set; }
 
     public static PendingTransaction NewFirstSeenInMempool(
-        byte[] payloadHash,
-        byte[] intentHash,
+        string payloadHash,
+        string intentHash,
         byte[] notarizedTransaction,
         DateTime firstSeenAt
     )
@@ -183,8 +183,8 @@ internal class PendingTransaction
     }
 
     public static PendingTransaction NewAsSubmittedForFirstTimeByGateway(
-        byte[] payloadHash,
-        byte[] intentHash,
+        string payloadHash,
+        string intentHash,
         byte[] notarizedTransaction,
         string submittedToNodeName,
         DateTime submittedTimestamp

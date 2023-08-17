@@ -181,19 +181,19 @@ internal class UserLedgerTransaction : LedgerTransaction
     /// The intent hash should be used for tracking of user transactions.
     /// </summary>
     [Column("payload_hash")]
-    public byte[] PayloadHash { get; set; }
+    public string PayloadHash { get; set; }
 
     /// <summary>
     /// The transaction intent hash. The engine ensures two transactions with the same intent hash cannot be committed.
     /// </summary>
     [Column("intent_hash")]
-    public byte[] IntentHash { get; set; }
+    public string IntentHash { get; set; }
 
     /// <summary>
     /// The hash of the signed transaction, which is what the notary signs.
     /// </summary>
     [Column("signed_intent_hash")]
-    public byte[] SignedIntentHash { get; set; }
+    public string SignedIntentHash { get; set; }
 
     [Column("message", TypeName = "jsonb")]
     public string? Message { get; set; }

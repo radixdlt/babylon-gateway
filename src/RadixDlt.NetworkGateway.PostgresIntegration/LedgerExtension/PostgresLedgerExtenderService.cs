@@ -183,13 +183,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
          * and then simple foreach loop notifying the observers
          */
 
-        var userTransactionStatusByPayloadHash = new Dictionary<ValueBytes, PendingTransactionStatus>(committedTransactions.Count);
+        var userTransactionStatusByPayloadHash = new Dictionary<string, PendingTransactionStatus>(committedTransactions.Count);
 
         foreach (var committedTransaction in committedTransactions.Where(ct => ct.LedgerTransaction is CoreModel.UserLedgerTransaction))
         {
-            var nt = ((CoreModel.UserLedgerTransaction)committedTransaction.LedgerTransaction).NotarizedTransaction;
+            var ult = ((CoreModel.UserLedgerTransaction)committedTransaction.LedgerTransaction).NotarizedTransaction;
 
-            userTransactionStatusByPayloadHash[nt.GetHashBytes()] = committedTransaction.Receipt.Status switch
+            userTransactionStatusByPayloadHash[ult.Hash] = committedTransaction.Receipt.Status switch
             {
                 CoreModel.TransactionStatus.Succeeded => PendingTransactionStatus.CommittedSuccess,
                 CoreModel.TransactionStatus.Failed => PendingTransactionStatus.CommittedFailure,
@@ -197,7 +197,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             };
         }
 
-        var payloadHashes = userTransactionStatusByPayloadHash.Keys.Select(x => (byte[])x).ToList();
+        var payloadHashes = userTransactionStatusByPayloadHash.Keys.ToList();
 
         var toUpdate = await dbContext.PendingTransactions
             .Where(pt => pt.Status != PendingTransactionStatus.CommittedSuccess && pt.Status != PendingTransactionStatus.CommittedFailure)
@@ -217,7 +217,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 _logger.LogError(
                     "Transaction with payload hash {PayloadHash} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark {FailureTransiency} at {FailureTime} due to \"{FailureReason}\" but has now been marked committed",
-                    pendingTransaction.PayloadHash.ToHex(),
+                    pendingTransaction.PayloadHash,
                     pendingTransaction.FirstSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                     pendingTransaction.LastSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                     pendingTransaction.LastDroppedOutOfMempoolTimestamp?.AsUtcIsoDateToSecondsForLogs(),
@@ -518,9 +518,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         CoreModel.GenesisLedgerTransaction => new GenesisLedgerTransaction(),
                         CoreModel.UserLedgerTransaction ult => new UserLedgerTransaction
                         {
-                            PayloadHash = ult.NotarizedTransaction.GetHashBytes(),
-                            IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.GetHashBytes(),
-                            SignedIntentHash = ult.NotarizedTransaction.SignedIntent.GetHashBytes(),
+                            PayloadHash = ult.NotarizedTransaction.Hash,
+                            IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.Hash,
+                            SignedIntentHash = ult.NotarizedTransaction.SignedIntent.Hash,
                             Message = ult.NotarizedTransaction.SignedIntent.Intent.Message?.ToJson(),
                         },
                         CoreModel.RoundUpdateLedgerTransaction => new RoundUpdateLedgerTransaction(),

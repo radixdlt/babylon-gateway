@@ -112,24 +112,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionNotFoundError" /> class.
         /// </summary>
-        /// <param name="intentHashHex">Hex-encoded SHA-256 hash. (required).</param>
+        /// <param name="intentHash">Bech32m-encoded hash. (required).</param>
         /// <param name="type">The type of error. Each subtype may have its own additional structured fields. (required) (default to &quot;TransactionNotFoundError&quot;).</param>
-        public TransactionNotFoundError(string intentHashHex = default(string), string type = "TransactionNotFoundError") : base(type)
+        public TransactionNotFoundError(string intentHash = default(string), string type = "TransactionNotFoundError") : base(type)
         {
-            // to ensure "intentHashHex" is required (not null)
-            if (intentHashHex == null)
+            // to ensure "intentHash" is required (not null)
+            if (intentHash == null)
             {
-                throw new ArgumentNullException("intentHashHex is a required property for TransactionNotFoundError and cannot be null");
+                throw new ArgumentNullException("intentHash is a required property for TransactionNotFoundError and cannot be null");
             }
-            this.IntentHashHex = intentHashHex;
+            this.IntentHash = intentHash;
         }
 
         /// <summary>
-        /// Hex-encoded SHA-256 hash.
+        /// Bech32m-encoded hash.
         /// </summary>
-        /// <value>Hex-encoded SHA-256 hash.</value>
-        [DataMember(Name = "intent_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string IntentHashHex { get; set; }
+        /// <value>Bech32m-encoded hash.</value>
+        [DataMember(Name = "intent_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string IntentHash { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -140,7 +140,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionNotFoundError {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
+            sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -177,9 +177,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.IntentHashHex == input.IntentHashHex ||
-                    (this.IntentHashHex != null &&
-                    this.IntentHashHex.Equals(input.IntentHashHex))
+                    this.IntentHash == input.IntentHash ||
+                    (this.IntentHash != null &&
+                    this.IntentHash.Equals(input.IntentHash))
                 );
         }
 
@@ -192,9 +192,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.IntentHashHex != null)
+                if (this.IntentHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
                 }
                 return hashCode;
             }

@@ -114,8 +114,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="round">round (required).</param>
         /// <param name="roundTimestamp">roundTimestamp (required).</param>
         /// <param name="transactionStatus">transactionStatus (required).</param>
-        /// <param name="payloadHashHex">Hex-encoded SHA-256 hash..</param>
-        /// <param name="intentHashHex">Hex-encoded SHA-256 hash..</param>
+        /// <param name="payloadHash">Bech32m-encoded hash..</param>
+        /// <param name="intentHash">Bech32m-encoded hash..</param>
         /// <param name="feePaid">String-encoded decimal representing the amount of a related fungible resource..</param>
         /// <param name="affectedGlobalEntities">affectedGlobalEntities.</param>
         /// <param name="confirmedAt">confirmedAt.</param>
@@ -123,7 +123,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="rawHex">Hex-encoded binary blob..</param>
         /// <param name="receipt">receipt.</param>
         /// <param name="message">defined in core api specs..</param>
-        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), string feePaid = default(string), List<string> affectedGlobalEntities = default(List<string>), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), Object message = default(Object))
+        public CommittedTransactionInfo(long stateVersion = default(long), long epoch = default(long), long round = default(long), string roundTimestamp = default(string), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHash = default(string), string intentHash = default(string), string feePaid = default(string), List<string> affectedGlobalEntities = default(List<string>), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string), string rawHex = default(string), TransactionReceipt receipt = default(TransactionReceipt), Object message = default(Object))
         {
             this.StateVersion = stateVersion;
             this.Epoch = epoch;
@@ -135,8 +135,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.RoundTimestamp = roundTimestamp;
             this.TransactionStatus = transactionStatus;
-            this.PayloadHashHex = payloadHashHex;
-            this.IntentHashHex = intentHashHex;
+            this.PayloadHash = payloadHash;
+            this.IntentHash = intentHash;
             this.FeePaid = feePaid;
             this.AffectedGlobalEntities = affectedGlobalEntities;
             this.ConfirmedAt = confirmedAt;
@@ -171,18 +171,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string RoundTimestamp { get; set; }
 
         /// <summary>
-        /// Hex-encoded SHA-256 hash.
+        /// Bech32m-encoded hash.
         /// </summary>
-        /// <value>Hex-encoded SHA-256 hash.</value>
-        [DataMember(Name = "payload_hash_hex", EmitDefaultValue = true)]
-        public string PayloadHashHex { get; set; }
+        /// <value>Bech32m-encoded hash.</value>
+        [DataMember(Name = "payload_hash", EmitDefaultValue = true)]
+        public string PayloadHash { get; set; }
 
         /// <summary>
-        /// Hex-encoded SHA-256 hash.
+        /// Bech32m-encoded hash.
         /// </summary>
-        /// <value>Hex-encoded SHA-256 hash.</value>
-        [DataMember(Name = "intent_hash_hex", EmitDefaultValue = true)]
-        public string IntentHashHex { get; set; }
+        /// <value>Bech32m-encoded hash.</value>
+        [DataMember(Name = "intent_hash", EmitDefaultValue = true)]
+        public string IntentHash { get; set; }
 
         /// <summary>
         /// String-encoded decimal representing the amount of a related fungible resource.
@@ -242,8 +242,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  Round: ").Append(Round).Append("\n");
             sb.Append("  RoundTimestamp: ").Append(RoundTimestamp).Append("\n");
             sb.Append("  TransactionStatus: ").Append(TransactionStatus).Append("\n");
-            sb.Append("  PayloadHashHex: ").Append(PayloadHashHex).Append("\n");
-            sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
+            sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
+            sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
             sb.Append("  FeePaid: ").Append(FeePaid).Append("\n");
             sb.Append("  AffectedGlobalEntities: ").Append(AffectedGlobalEntities).Append("\n");
             sb.Append("  ConfirmedAt: ").Append(ConfirmedAt).Append("\n");
@@ -308,14 +308,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.TransactionStatus.Equals(input.TransactionStatus)
                 ) && 
                 (
-                    this.PayloadHashHex == input.PayloadHashHex ||
-                    (this.PayloadHashHex != null &&
-                    this.PayloadHashHex.Equals(input.PayloadHashHex))
+                    this.PayloadHash == input.PayloadHash ||
+                    (this.PayloadHash != null &&
+                    this.PayloadHash.Equals(input.PayloadHash))
                 ) && 
                 (
-                    this.IntentHashHex == input.IntentHashHex ||
-                    (this.IntentHashHex != null &&
-                    this.IntentHashHex.Equals(input.IntentHashHex))
+                    this.IntentHash == input.IntentHash ||
+                    (this.IntentHash != null &&
+                    this.IntentHash.Equals(input.IntentHash))
                 ) && 
                 (
                     this.FeePaid == input.FeePaid ||
@@ -372,13 +372,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     hashCode = (hashCode * 59) + this.RoundTimestamp.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.TransactionStatus.GetHashCode();
-                if (this.PayloadHashHex != null)
+                if (this.PayloadHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.PayloadHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PayloadHash.GetHashCode();
                 }
-                if (this.IntentHashHex != null)
+                if (this.IntentHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
                 }
                 if (this.FeePaid != null)
                 {

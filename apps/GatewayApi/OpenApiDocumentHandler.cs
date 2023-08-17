@@ -116,7 +116,7 @@ public static class OpenApiDocumentHandler
 
         response = OptionalReplace(response, "<entity-address>", placeholderReplacements.ResourceAddress);
         response = OptionalReplace(response, "<component-entity-address>", placeholderReplacements.ComponentAddress);
-        response = OptionalReplace(response, "<transaction-intent-hash>", placeholderReplacements.CommittedTransactionIntentHex);
+        response = OptionalReplace(response, "<transaction-intent-hash>", placeholderReplacements.CommittedTransactionIntentHash);
         response = OptionalReplace(response, "<network-id>", placeholderReplacements.NetworkId?.ToString());
         response = OptionalReplace(response, "<network-name>", placeholderReplacements.NetworkName);
         await context.Response.WriteAsync(response, Encoding.UTF8, token);
@@ -133,7 +133,7 @@ public static class OpenApiDocumentHandler
 
         public string? ComponentAddress { get; set; }
 
-        public string? CommittedTransactionIntentHex { get; set; }
+        public string? CommittedTransactionIntentHash { get; set; }
 
         public byte? NetworkId { get; set; }
 
@@ -164,7 +164,7 @@ public static class OpenApiDocumentHandler
         try
         {
             var sampleTransaction = (await transactionHandler.StreamTransactions(new StreamTransactionsRequest(limitPerPage: 1), token)).Items.FirstOrDefault();
-            placeholderReplacements.CommittedTransactionIntentHex = sampleTransaction?.IntentHashHex;
+            placeholderReplacements.CommittedTransactionIntentHash = sampleTransaction?.IntentHash;
         }
         catch (Exception)
         {

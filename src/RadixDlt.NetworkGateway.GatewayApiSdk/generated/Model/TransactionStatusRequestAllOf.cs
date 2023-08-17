@@ -103,23 +103,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionStatusRequestAllOf" /> class.
         /// </summary>
-        /// <param name="intentHashHex">Hex-encoded SHA-256 hash. (required).</param>
-        public TransactionStatusRequestAllOf(string intentHashHex = default(string))
+        /// <param name="intentHash">Bech32m-encoded hash. (required).</param>
+        public TransactionStatusRequestAllOf(string intentHash = default(string))
         {
-            // to ensure "intentHashHex" is required (not null)
-            if (intentHashHex == null)
+            // to ensure "intentHash" is required (not null)
+            if (intentHash == null)
             {
-                throw new ArgumentNullException("intentHashHex is a required property for TransactionStatusRequestAllOf and cannot be null");
+                throw new ArgumentNullException("intentHash is a required property for TransactionStatusRequestAllOf and cannot be null");
             }
-            this.IntentHashHex = intentHashHex;
+            this.IntentHash = intentHash;
         }
 
         /// <summary>
-        /// Hex-encoded SHA-256 hash.
+        /// Bech32m-encoded hash.
         /// </summary>
-        /// <value>Hex-encoded SHA-256 hash.</value>
-        [DataMember(Name = "intent_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string IntentHashHex { get; set; }
+        /// <value>Bech32m-encoded hash.</value>
+        [DataMember(Name = "intent_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string IntentHash { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,7 +129,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionStatusRequestAllOf {\n");
-            sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
+            sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,9 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.IntentHashHex == input.IntentHashHex ||
-                    (this.IntentHashHex != null &&
-                    this.IntentHashHex.Equals(input.IntentHashHex))
+                    this.IntentHash == input.IntentHash ||
+                    (this.IntentHash != null &&
+                    this.IntentHash.Equals(input.IntentHash))
                 );
         }
 
@@ -181,9 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.IntentHashHex != null)
+                if (this.IntentHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
                 }
                 return hashCode;
             }

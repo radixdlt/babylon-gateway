@@ -132,7 +132,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
 
         var payloadHashesInMempoolNotRecentlyFetched = payloadHashes
             .Where(h => !_recentFullTransactionsFetched.Contains(h))
-            .Select(h => Tuple.Create((byte[])h.IntentHash, (byte[])h.PayloadHash))
+            .Select(h => Tuple.Create(h.IntentHash, h.PayloadHash))
             .ToList(); // Npgsql optimises ToList calls but not ToHashSet
 
         if (payloadHashesInMempoolNotRecentlyFetched.Count == 0)
@@ -236,7 +236,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var pendingTransactionIds = combinedMempoolWithLastSeen.Keys.Select(h => (byte[])h.PayloadHash).ToList(); // Npgsql optimizes List<> Contains
+        var pendingTransactionIds = combinedMempoolWithLastSeen.Keys.Select(h => h.PayloadHash).ToList(); // Npgsql optimizes List<> Contains
 
         var reappearedTransactions = await dbContext.PendingTransactions
             .Where(mt => pendingTransactionIds.Contains(mt.PayloadHash))
@@ -289,23 +289,25 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
             .ToList();
 
         var transactionIdsWhichMightNeedAdding = transactionsWhichMightNeedAdding
-            .Select(t => (byte[])t.Hashes.PayloadHash)
+            .Select(t => t.Hashes.PayloadHash)
             .ToList(); // Npgsql optimizes List<> Contains
 
         // Now check that these are actually new and need adding, by checking the transaction ids against the database.
         // We check both the PendingTransactions table, and the LedgerTransactions table.
         // If a node mempool gets really far behind, it could include committed transactions we've already pruned
         // from our MempoolTransactions table due to being committed - so let's ensure these don't get re-added.
-        var transactionIdsInANodeMempoolWhichAreAlreadyAMempoolTransactionInTheDb = await dbContext.PendingTransactions
+        var transactionIdsInANodeMempoolWhichAreAlreadyAMempoolTransactionInTheDb = (await dbContext.PendingTransactions
             .Where(pt => transactionIdsWhichMightNeedAdding.Contains(pt.PayloadHash))
             .Select(pt => pt.PayloadHash)
-            .ToValueBytesHashSetAsync(token);
+            .ToListAsync(token))
+            .ToHashSet();
 
-        var transactionIdsInANodeMempoolWhichAreAlreadyCommitted = await dbContext.LedgerTransactions
+        var transactionIdsInANodeMempoolWhichAreAlreadyCommitted = (await dbContext.LedgerTransactions
             .OfType<UserLedgerTransaction>()
             .Where(ult => transactionIdsWhichMightNeedAdding.Contains(ult.PayloadHash))
             .Select(ult => ult.PayloadHash)
-            .ToValueBytesHashSetAsync(token);
+            .ToListAsync(token))
+            .ToHashSet();
 
         var transactionsToAdd = transactionsWhichMightNeedAdding
             .Where(pt =>
@@ -352,7 +354,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
     )
     {
         // NB - this should be a list as Npgsql optimises that case
-        var seenTransactionIds = combinedMempoolWithLastSeen.Keys.Select(h => (byte[])h.PayloadHash).ToList();
+        var seenTransactionIds = combinedMempoolWithLastSeen.Keys.Select(h => h.PayloadHash).ToList();
 
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 

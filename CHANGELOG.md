@@ -3,7 +3,18 @@ Release Date: unreleased
 
 ## RCNet v2 to RCNet v3 Migration Guide
 
-_WORK IN PROGRESS_
+Use Bech32m-encoded transaction hashes in `/transaction/committed-details` and `/transaction/status` endpoints.
+
+TODO TODO TODO TODO
+
+```json
+{"intent_hash_hex": "efbbbfe1d0536d2f6e28cbe8f78f9fe519c4c799a9b0384b8d09e9ecdd66fcbb"}
+{"intent_hash": ""}
+``` 
+
+---
+
+TBD 
 
 ### What’s New?
 
@@ -11,7 +22,8 @@ _WORK IN PROGRESS_
 ### Breaking Changes
 
 - Renamed `access_rules` to `role_assignments`. Included missing `module` to role assignment key.
-- deleted non fungible ids are also returned from `/state/non-fungible/data` with null data, marked as `is_burned` with state version when they got burned.
+- Deleted non fungible ids are also returned from `/state/non-fungible/data` with null data, marked as `is_burned` with state version when they got burned.
+- Transaction hashes are now exposed as Bech32m hashes instead of hex-encoded binary sequences.
 
 ## Full technical changelog by minor release
 ### 0.4.1

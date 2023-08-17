@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -419,9 +419,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     receipt_event_type_indexes = table.Column<int[]>(type: "integer[]", nullable: false),
                     receipt_event_sbor_type_kinds = table.Column<SborTypeKind[]>(type: "sbor_type_kind[]", nullable: false),
                     discriminator = table.Column<LedgerTransactionType>(type: "ledger_transaction_type", nullable: false),
-                    payload_hash = table.Column<byte[]>(type: "bytea", nullable: true),
-                    intent_hash = table.Column<byte[]>(type: "bytea", nullable: true),
-                    signed_intent_hash = table.Column<byte[]>(type: "bytea", nullable: true),
+                    payload_hash = table.Column<string>(type: "text", nullable: true),
+                    intent_hash = table.Column<string>(type: "text", nullable: true),
+                    signed_intent_hash = table.Column<string>(type: "text", nullable: true),
                     message = table.Column<string>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>
@@ -571,8 +571,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    payload_hash = table.Column<byte[]>(type: "bytea", nullable: false),
-                    intent_hash = table.Column<byte[]>(type: "bytea", nullable: false),
+                    payload_hash = table.Column<string>(type: "text", nullable: false),
+                    intent_hash = table.Column<string>(type: "text", nullable: false),
                     notarized_transaction_blob = table.Column<byte[]>(type: "bytea", nullable: false),
                     status = table.Column<PendingTransactionStatus>(type: "pending_transaction_status", nullable: false),
                     submitted_by_this_gateway = table.Column<bool>(type: "boolean", nullable: false),
