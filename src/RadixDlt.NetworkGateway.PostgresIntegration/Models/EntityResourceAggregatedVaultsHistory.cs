@@ -83,10 +83,6 @@ internal abstract class EntityResourceAggregatedVaultsHistory
 
     [Column("resource_entity_id")]
     public long ResourceEntityId { get; set; }
-
-    // TODO remove once TX events get available
-    [Column("tmp_tmp_remove_me_once_tx_events_become_available")]
-    public string TmpTmpRemoveMeOnceTxEventsBecomeAvailable { get; set; }
 }
 
 internal class EntityFungibleResourceAggregatedVaultsHistory : EntityResourceAggregatedVaultsHistory

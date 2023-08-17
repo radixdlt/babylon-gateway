@@ -75,6 +75,10 @@ internal record FungibleVaultChange(ReferencedEntity ReferencedVault, Referenced
 
 internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, string NonFungibleId, bool IsWithdrawal, long StateVersion);
 
+internal record EntityFungibleResourceBalanceChangeEvent(long EntityId, long ResourceEntityId, TokenAmount Delta, long StateVersion);
+
+internal record EntityNonFungibleResourceBalanceChangeEvent(long EntityId, long ResourceEntityId, long Delta, long StateVersion);
+
 internal record NonFungibleIdChange(ReferencedEntity ReferencedResource, string NonFungibleId, bool IsDeleted, bool IsLocked, byte[]? MutableData, long StateVersion);
 
 internal record MetadataChange(ReferencedEntity ReferencedEntity, string Key, byte[]? Value, bool IsDeleted, bool IsLocked, long StateVersion);
