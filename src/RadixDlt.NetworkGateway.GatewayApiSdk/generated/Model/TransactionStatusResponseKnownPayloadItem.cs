@@ -109,27 +109,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionStatusResponseKnownPayloadItem" /> class.
         /// </summary>
-        /// <param name="payloadHashHex">Hex-encoded SHA-256 hash. (required).</param>
+        /// <param name="payloadHash">Bech32m-encoded hash. (required).</param>
         /// <param name="status">status (required).</param>
         /// <param name="errorMessage">errorMessage.</param>
-        public TransactionStatusResponseKnownPayloadItem(string payloadHashHex = default(string), TransactionStatus status = default(TransactionStatus), string errorMessage = default(string))
+        public TransactionStatusResponseKnownPayloadItem(string payloadHash = default(string), TransactionStatus status = default(TransactionStatus), string errorMessage = default(string))
         {
-            // to ensure "payloadHashHex" is required (not null)
-            if (payloadHashHex == null)
+            // to ensure "payloadHash" is required (not null)
+            if (payloadHash == null)
             {
-                throw new ArgumentNullException("payloadHashHex is a required property for TransactionStatusResponseKnownPayloadItem and cannot be null");
+                throw new ArgumentNullException("payloadHash is a required property for TransactionStatusResponseKnownPayloadItem and cannot be null");
             }
-            this.PayloadHashHex = payloadHashHex;
+            this.PayloadHash = payloadHash;
             this.Status = status;
             this.ErrorMessage = errorMessage;
         }
 
         /// <summary>
-        /// Hex-encoded SHA-256 hash.
+        /// Bech32m-encoded hash.
         /// </summary>
-        /// <value>Hex-encoded SHA-256 hash.</value>
-        [DataMember(Name = "payload_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string PayloadHashHex { get; set; }
+        /// <value>Bech32m-encoded hash.</value>
+        [DataMember(Name = "payload_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string PayloadHash { get; set; }
 
         /// <summary>
         /// Gets or Sets ErrorMessage
@@ -145,7 +145,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionStatusResponseKnownPayloadItem {\n");
-            sb.Append("  PayloadHashHex: ").Append(PayloadHashHex).Append("\n");
+            sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("}\n");
@@ -184,9 +184,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.PayloadHashHex == input.PayloadHashHex ||
-                    (this.PayloadHashHex != null &&
-                    this.PayloadHashHex.Equals(input.PayloadHashHex))
+                    this.PayloadHash == input.PayloadHash ||
+                    (this.PayloadHash != null &&
+                    this.PayloadHash.Equals(input.PayloadHash))
                 ) && 
                 (
                     this.Status == input.Status ||
@@ -208,9 +208,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.PayloadHashHex != null)
+                if (this.PayloadHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.PayloadHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PayloadHash.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.Status.GetHashCode();
                 if (this.ErrorMessage != null)

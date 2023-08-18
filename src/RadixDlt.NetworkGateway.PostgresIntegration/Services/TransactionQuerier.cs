@@ -304,7 +304,7 @@ internal class TransactionQuerier : ITransactionQuerier
         return new TransactionPageWithoutTotal(nextCursor, transactions);
     }
 
-    public async Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(byte[] intentHash, GatewayModel.TransactionCommittedDetailsOptIns optIns, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
+    public async Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(string intentHash, GatewayModel.TransactionCommittedDetailsOptIns optIns, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
     {
         var stateVersion = await _dbContext.LedgerTransactions
             .OfType<UserLedgerTransaction>()
@@ -322,13 +322,13 @@ internal class TransactionQuerier : ITransactionQuerier
         return transactions.First();
     }
 
-    public async Task<ICollection<StatusLookupResult>> LookupPendingTransactionsByIntentHash(byte[] intentHash, CancellationToken token = default)
+    public async Task<ICollection<StatusLookupResult>> LookupPendingTransactionsByIntentHash(string intentHash, CancellationToken token = default)
     {
         var pendingTransactions = await _rwDbContext.PendingTransactions
             .Where(pt => pt.IntentHash == intentHash)
             .ToListAsync(token);
 
-        return pendingTransactions.Select(pt => new StatusLookupResult(pt.PayloadHash.ToHex(), pt.Status.ToGatewayModel(), pt.LastFailureReason)).ToArray();
+        return pendingTransactions.Select(pt => new StatusLookupResult(pt.PayloadHash, pt.Status.ToGatewayModel(), pt.LastFailureReason)).ToArray();
     }
 
     private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(

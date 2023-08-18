@@ -90,183 +90,46 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionPayloadStatus
+    /// Defines TransactionPayloadStatus
     /// </summary>
-    [DataContract(Name = "TransactionPayloadStatus")]
-    public partial class TransactionPayloadStatus : IEquatable<TransactionPayloadStatus>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum TransactionPayloadStatus
     {
         /// <summary>
-        /// The status of the transaction payload, as per this node. A NotInMempool status means that it wasn&#39;t rejected at last execution attempt, but it&#39;s not currently in the mempool either. 
+        /// Enum CommittedSuccess for value: CommittedSuccess
         /// </summary>
-        /// <value>The status of the transaction payload, as per this node. A NotInMempool status means that it wasn&#39;t rejected at last execution attempt, but it&#39;s not currently in the mempool either. </value>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum StatusEnum
-        {
-            /// <summary>
-            /// Enum CommittedSuccess for value: CommittedSuccess
-            /// </summary>
-            [EnumMember(Value = "CommittedSuccess")]
-            CommittedSuccess = 1,
-
-            /// <summary>
-            /// Enum CommittedFailure for value: CommittedFailure
-            /// </summary>
-            [EnumMember(Value = "CommittedFailure")]
-            CommittedFailure = 2,
-
-            /// <summary>
-            /// Enum PermanentlyRejected for value: PermanentlyRejected
-            /// </summary>
-            [EnumMember(Value = "PermanentlyRejected")]
-            PermanentlyRejected = 3,
-
-            /// <summary>
-            /// Enum TransientlyRejected for value: TransientlyRejected
-            /// </summary>
-            [EnumMember(Value = "TransientlyRejected")]
-            TransientlyRejected = 4,
-
-            /// <summary>
-            /// Enum InMempool for value: InMempool
-            /// </summary>
-            [EnumMember(Value = "InMempool")]
-            InMempool = 5,
-
-            /// <summary>
-            /// Enum NotInMempool for value: NotInMempool
-            /// </summary>
-            [EnumMember(Value = "NotInMempool")]
-            NotInMempool = 6
-
-        }
-
+        [EnumMember(Value = "CommittedSuccess")]
+        CommittedSuccess = 1,
 
         /// <summary>
-        /// The status of the transaction payload, as per this node. A NotInMempool status means that it wasn&#39;t rejected at last execution attempt, but it&#39;s not currently in the mempool either. 
+        /// Enum CommittedFailure for value: CommittedFailure
         /// </summary>
-        /// <value>The status of the transaction payload, as per this node. A NotInMempool status means that it wasn&#39;t rejected at last execution attempt, but it&#39;s not currently in the mempool either. </value>
-        [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
-        public StatusEnum Status { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionPayloadStatus" /> class.
-        /// </summary>
-        [JsonConstructorAttribute]
-        protected TransactionPayloadStatus() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionPayloadStatus" /> class.
-        /// </summary>
-        /// <param name="payloadHash">The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature.  (required).</param>
-        /// <param name="status">The status of the transaction payload, as per this node. A NotInMempool status means that it wasn&#39;t rejected at last execution attempt, but it&#39;s not currently in the mempool either.  (required).</param>
-        /// <param name="errorMessage">An explanation for the error, if failed or rejected.</param>
-        public TransactionPayloadStatus(string payloadHash = default(string), StatusEnum status = default(StatusEnum), string errorMessage = default(string))
-        {
-            // to ensure "payloadHash" is required (not null)
-            if (payloadHash == null)
-            {
-                throw new ArgumentNullException("payloadHash is a required property for TransactionPayloadStatus and cannot be null");
-            }
-            this.PayloadHash = payloadHash;
-            this.Status = status;
-            this.ErrorMessage = errorMessage;
-        }
+        [EnumMember(Value = "CommittedFailure")]
+        CommittedFailure = 2,
 
         /// <summary>
-        /// The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. 
+        /// Enum PermanentlyRejected for value: PermanentlyRejected
         /// </summary>
-        /// <value>The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. </value>
-        [DataMember(Name = "payload_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string PayloadHash { get; set; }
+        [EnumMember(Value = "PermanentlyRejected")]
+        PermanentlyRejected = 3,
 
         /// <summary>
-        /// An explanation for the error, if failed or rejected
+        /// Enum TransientlyRejected for value: TransientlyRejected
         /// </summary>
-        /// <value>An explanation for the error, if failed or rejected</value>
-        [DataMember(Name = "error_message", EmitDefaultValue = true)]
-        public string ErrorMessage { get; set; }
+        [EnumMember(Value = "TransientlyRejected")]
+        TransientlyRejected = 4,
 
         /// <summary>
-        /// Returns the string presentation of the object
+        /// Enum InMempool for value: InMempool
         /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionPayloadStatus {\n");
-            sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
-            sb.Append("  Status: ").Append(Status).Append("\n");
-            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
+        [EnumMember(Value = "InMempool")]
+        InMempool = 5,
 
         /// <summary>
-        /// Returns the JSON string presentation of the object
+        /// Enum NotInMempool for value: NotInMempool
         /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Returns true if objects are equal
-        /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as TransactionPayloadStatus);
-        }
-
-        /// <summary>
-        /// Returns true if TransactionPayloadStatus instances are equal
-        /// </summary>
-        /// <param name="input">Instance of TransactionPayloadStatus to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(TransactionPayloadStatus input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.PayloadHash == input.PayloadHash ||
-                    (this.PayloadHash != null &&
-                    this.PayloadHash.Equals(input.PayloadHash))
-                ) && 
-                (
-                    this.Status == input.Status ||
-                    this.Status.Equals(input.Status)
-                ) && 
-                (
-                    this.ErrorMessage == input.ErrorMessage ||
-                    (this.ErrorMessage != null &&
-                    this.ErrorMessage.Equals(input.ErrorMessage))
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                if (this.PayloadHash != null)
-                {
-                    hashCode = (hashCode * 59) + this.PayloadHash.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.Status.GetHashCode();
-                if (this.ErrorMessage != null)
-                {
-                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
-                }
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "NotInMempool")]
+        NotInMempool = 6
 
     }
 

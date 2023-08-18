@@ -158,7 +158,7 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
             cancellationToken);
 
         var hashesInMempool = mempoolListResponse.Contents
-            .Select(ti => new PendingTransactionHashPair(ti.GetIntentHashBytes(), ti.GetPayloadHashBytes()))
+            .Select(ti => new PendingTransactionHashPair(ti.IntentHashBech32m, ti.PayloadHashBech32m))
             .ToList();
 
         if (hashesInMempool.Count == 0)
@@ -238,7 +238,7 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
         var result = await CoreApiErrorWrapper.ResultOrError<CoreModel.MempoolTransactionResponse, CoreModel.BasicErrorResponse>(() => coreApiProvider.MempoolApi.MempoolTransactionPostAsync(
             new CoreModel.MempoolTransactionRequest(
                 network: _networkConfigurationProvider.GetNetworkName(),
-                payloadHash: hashes.PayloadHash.ToHex()
+                payloadHash: hashes.PayloadHash
             ),
             token
         ));

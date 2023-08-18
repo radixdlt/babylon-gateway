@@ -245,7 +245,7 @@ internal class SubmissionService : ISubmissionService
 
             await _submissionTrackingService.MarkInitialFailure(
                 isPermanent,
-                parsedTransaction.Hash().Bytes().ToArray(),
+                parsedTransaction.Hash().AsStr(),
                 message + (detailedMessage != null ? " (" + detailedMessage + ")" : string.Empty),
                 token
             );

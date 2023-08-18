@@ -102,7 +102,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         CancellationToken token = default
     )
     {
-        var existingPendingTransaction = await GetPendingTransaction(notarizedTransaction.Hash().Bytes().ToArray(), token);
+        var existingPendingTransaction = await GetPendingTransaction(notarizedTransaction.Hash().AsStr(), token);
 
         if (existingPendingTransaction != null)
         {
@@ -120,8 +120,8 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         }
 
         var pendingTransaction = PendingTransaction.NewAsSubmittedForFirstTimeByGateway(
-            notarizedTransaction.Hash().Bytes().ToArray(),
-            notarizedTransaction.IntentHash().Bytes().ToArray(),
+            notarizedTransaction.Hash().AsStr(),
+            notarizedTransaction.IntentHash().AsStr(),
             notarizedTransaction.Compile().ToArray(),
             submittedToNodeName,
             submittedTimestamp
@@ -146,13 +146,13 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         }
     }
 
-    public async Task MarkInitialFailure(bool permanent, byte[] payloadHash, string failureReason, CancellationToken token = default)
+    public async Task MarkInitialFailure(bool permanent, string payloadHash, string failureReason, CancellationToken token = default)
     {
         var pendingTransaction = await GetPendingTransaction(payloadHash, token);
 
         if (pendingTransaction == null)
         {
-            throw new PendingTransactionNotFoundException($"Could not find mempool transaction {payloadHash.ToHex()} to mark it as failed");
+            throw new PendingTransactionNotFoundException($"Could not find mempool transaction {payloadHash} to mark it as failed");
         }
 
         // TODO this is workaround needed for PendingTransactionResubmissionService to correctly pick up TXs for resubmissions
@@ -167,10 +167,10 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         await _dbContext.SaveChangesAsync(token);
     }
 
-    private async Task<PendingTransaction?> GetPendingTransaction(byte[] payloadHash, CancellationToken token = default)
+    private async Task<PendingTransaction?> GetPendingTransaction(string payloadHash, CancellationToken token = default)
     {
         return await _dbContext.PendingTransactions
-            .Where(t => t.PayloadHash == payloadHash.ToArray())
+            .Where(t => t.PayloadHash == payloadHash)
             .SingleOrDefaultAsync(token);
     }
 }

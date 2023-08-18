@@ -220,9 +220,9 @@ internal class WriteHelper
                     await writer.WriteNullAsync(token);
                     break;
                 case UserLedgerTransaction ult:
-                    await writer.WriteAsync(ult.PayloadHash, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(ult.IntentHash, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(ult.SignedIntentHash, NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(ult.PayloadHash, NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(ult.IntentHash, NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(ult.SignedIntentHash, NpgsqlDbType.Text, token);
                     await writer.WriteAsync(ult.Message, NpgsqlDbType.Jsonb, token);
                     break;
                 case RoundUpdateLedgerTransaction:

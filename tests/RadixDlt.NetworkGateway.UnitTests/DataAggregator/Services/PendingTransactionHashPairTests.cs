@@ -73,8 +73,8 @@ public class PendingTransactionHashPairTests
     [Fact]
     public void GivenSameValues_ShouldBeEqual()
     {
-        var left = new PendingTransactionHashPair(new byte[] { 1, 2, 3 }, new byte[] { 4, 5, 6 });
-        var right = new PendingTransactionHashPair(new byte[] { 1, 2, 3 }, new byte[] { 4, 5, 6 });
+        var left = new PendingTransactionHashPair("ih_1", "ph_1");
+        var right = new PendingTransactionHashPair("ih_1", "ph_1");
 
         left.Should().NotBeSameAs(right);
         left.Should().Be(right);
@@ -85,8 +85,8 @@ public class PendingTransactionHashPairTests
     [Fact]
     public void GivenDifferentValues_ShouldNotBeEqual()
     {
-        var left = new PendingTransactionHashPair(new byte[] { 1, 2, 3 }, new byte[] { 4, 5, 6 });
-        var right = new PendingTransactionHashPair(new byte[] { 1, 2, 3 }, new byte[] { 4, 5, 1 });
+        var left = new PendingTransactionHashPair("ih_1", "ph_1");
+        var right = new PendingTransactionHashPair("ih_1", "ph_2");
 
         left.Should().NotBeSameAs(right);
         left.Should().NotBe(right);

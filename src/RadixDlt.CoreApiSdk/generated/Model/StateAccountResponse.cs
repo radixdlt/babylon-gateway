@@ -103,12 +103,19 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateAccountResponse" /> class.
         /// </summary>
+        /// <param name="atLedgerState">atLedgerState (required).</param>
         /// <param name="info">info (required).</param>
         /// <param name="ownerRole">ownerRole (required).</param>
         /// <param name="state">state (required).</param>
         /// <param name="vaults">All of the account&#39;s vaults (required).</param>
-        public StateAccountResponse(Substate info = default(Substate), Substate ownerRole = default(Substate), Substate state = default(Substate), List<VaultBalance> vaults = default(List<VaultBalance>))
+        public StateAccountResponse(LedgerStateSummary atLedgerState = default(LedgerStateSummary), Substate info = default(Substate), Substate ownerRole = default(Substate), Substate state = default(Substate), List<VaultBalance> vaults = default(List<VaultBalance>))
         {
+            // to ensure "atLedgerState" is required (not null)
+            if (atLedgerState == null)
+            {
+                throw new ArgumentNullException("atLedgerState is a required property for StateAccountResponse and cannot be null");
+            }
+            this.AtLedgerState = atLedgerState;
             // to ensure "info" is required (not null)
             if (info == null)
             {
@@ -134,6 +141,12 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.Vaults = vaults;
         }
+
+        /// <summary>
+        /// Gets or Sets AtLedgerState
+        /// </summary>
+        [DataMember(Name = "at_ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerStateSummary AtLedgerState { get; set; }
 
         /// <summary>
         /// Gets or Sets Info
@@ -168,6 +181,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateAccountResponse {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  Info: ").Append(Info).Append("\n");
             sb.Append("  OwnerRole: ").Append(OwnerRole).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
@@ -208,6 +222,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
+                (
                     this.Info == input.Info ||
                     (this.Info != null &&
                     this.Info.Equals(input.Info))
@@ -239,6 +258,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
                 if (this.Info != null)
                 {
                     hashCode = (hashCode * 59) + this.Info.GetHashCode();

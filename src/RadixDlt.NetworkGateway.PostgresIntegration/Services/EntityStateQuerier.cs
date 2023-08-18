@@ -1680,7 +1680,7 @@ SELECT nfid.non_fungible_id AS NonFungibleId, final.total_count AS NonFungibleId
 FROM (
     SELECT a.val AS non_fungible_id_data_id, cardinality(non_fungible_ids) AS total_count, a.ord AS ord
     FROM entity_vault_history
-    LEFT JOIN LATERAL UNNEST(non_fungible_ids[@offset:@limit]) WITH ORDINALITY a(val,ord) ON true
+    LEFT JOIN LATERAL UNNEST(non_fungible_ids[@startIndex:@endIndex]) WITH ORDINALITY a(val,ord) ON true
     WHERE id = (
         SELECT id
         FROM entity_vault_history
@@ -1698,8 +1698,8 @@ order by ord
                 entityId = entityId,
                 vaultEntityId = vaultEntityId,
                 resourceEntityId = resourceEntityId,
-                offset = offset + 1,
-                limit = offset + limit + 1,
+                startIndex = offset + 1,
+                endIndex = offset + 1 + limit,
             },
             cancellationToken: token);
 
@@ -1718,7 +1718,7 @@ order by ord
             ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
             : null;
 
-        var nextCursor = items.Count > limit
+        var nextCursor = offset + limit < totalCount
             ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
             : null;
 

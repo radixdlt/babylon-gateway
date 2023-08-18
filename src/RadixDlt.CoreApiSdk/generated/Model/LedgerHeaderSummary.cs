@@ -90,78 +90,61 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// MempoolTransactionHashes
+    /// LedgerHeaderSummary
     /// </summary>
-    [DataContract(Name = "MempoolTransactionHashes")]
-    public partial class MempoolTransactionHashes : IEquatable<MempoolTransactionHashes>
+    [DataContract(Name = "LedgerHeaderSummary")]
+    public partial class LedgerHeaderSummary : IEquatable<LedgerHeaderSummary>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MempoolTransactionHashes" /> class.
+        /// Initializes a new instance of the <see cref="LedgerHeaderSummary" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MempoolTransactionHashes() { }
+        protected LedgerHeaderSummary() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MempoolTransactionHashes" /> class.
+        /// Initializes a new instance of the <see cref="LedgerHeaderSummary" /> class.
         /// </summary>
-        /// <param name="intentHash">The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent.  (required).</param>
-        /// <param name="intentHashBech32m">The Bech32m-encoded human readable &#x60;IntentHash&#x60;. (required).</param>
-        /// <param name="payloadHash">The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature.  (required).</param>
-        /// <param name="payloadHashBech32m">The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;. (required).</param>
-        public MempoolTransactionHashes(string intentHash = default(string), string intentHashBech32m = default(string), string payloadHash = default(string), string payloadHashBech32m = default(string))
+        /// <param name="epochRound">epochRound (required).</param>
+        /// <param name="ledgerHashes">ledgerHashes (required).</param>
+        /// <param name="proposerTimestamp">proposerTimestamp (required).</param>
+        public LedgerHeaderSummary(EpochRound epochRound = default(EpochRound), LedgerHashes ledgerHashes = default(LedgerHashes), Instant proposerTimestamp = default(Instant))
         {
-            // to ensure "intentHash" is required (not null)
-            if (intentHash == null)
+            // to ensure "epochRound" is required (not null)
+            if (epochRound == null)
             {
-                throw new ArgumentNullException("intentHash is a required property for MempoolTransactionHashes and cannot be null");
+                throw new ArgumentNullException("epochRound is a required property for LedgerHeaderSummary and cannot be null");
             }
-            this.IntentHash = intentHash;
-            // to ensure "intentHashBech32m" is required (not null)
-            if (intentHashBech32m == null)
+            this.EpochRound = epochRound;
+            // to ensure "ledgerHashes" is required (not null)
+            if (ledgerHashes == null)
             {
-                throw new ArgumentNullException("intentHashBech32m is a required property for MempoolTransactionHashes and cannot be null");
+                throw new ArgumentNullException("ledgerHashes is a required property for LedgerHeaderSummary and cannot be null");
             }
-            this.IntentHashBech32m = intentHashBech32m;
-            // to ensure "payloadHash" is required (not null)
-            if (payloadHash == null)
+            this.LedgerHashes = ledgerHashes;
+            // to ensure "proposerTimestamp" is required (not null)
+            if (proposerTimestamp == null)
             {
-                throw new ArgumentNullException("payloadHash is a required property for MempoolTransactionHashes and cannot be null");
+                throw new ArgumentNullException("proposerTimestamp is a required property for LedgerHeaderSummary and cannot be null");
             }
-            this.PayloadHash = payloadHash;
-            // to ensure "payloadHashBech32m" is required (not null)
-            if (payloadHashBech32m == null)
-            {
-                throw new ArgumentNullException("payloadHashBech32m is a required property for MempoolTransactionHashes and cannot be null");
-            }
-            this.PayloadHashBech32m = payloadHashBech32m;
+            this.ProposerTimestamp = proposerTimestamp;
         }
 
         /// <summary>
-        /// The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. 
+        /// Gets or Sets EpochRound
         /// </summary>
-        /// <value>The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. </value>
-        [DataMember(Name = "intent_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string IntentHash { get; set; }
+        [DataMember(Name = "epoch_round", IsRequired = true, EmitDefaultValue = true)]
+        public EpochRound EpochRound { get; set; }
 
         /// <summary>
-        /// The Bech32m-encoded human readable &#x60;IntentHash&#x60;.
+        /// Gets or Sets LedgerHashes
         /// </summary>
-        /// <value>The Bech32m-encoded human readable &#x60;IntentHash&#x60;.</value>
-        [DataMember(Name = "intent_hash_bech32m", IsRequired = true, EmitDefaultValue = true)]
-        public string IntentHashBech32m { get; set; }
+        [DataMember(Name = "ledger_hashes", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerHashes LedgerHashes { get; set; }
 
         /// <summary>
-        /// The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. 
+        /// Gets or Sets ProposerTimestamp
         /// </summary>
-        /// <value>The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. </value>
-        [DataMember(Name = "payload_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string PayloadHash { get; set; }
-
-        /// <summary>
-        /// The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;.
-        /// </summary>
-        /// <value>The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;.</value>
-        [DataMember(Name = "payload_hash_bech32m", IsRequired = true, EmitDefaultValue = true)]
-        public string PayloadHashBech32m { get; set; }
+        [DataMember(Name = "proposer_timestamp", IsRequired = true, EmitDefaultValue = true)]
+        public Instant ProposerTimestamp { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -170,11 +153,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MempoolTransactionHashes {\n");
-            sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
-            sb.Append("  IntentHashBech32m: ").Append(IntentHashBech32m).Append("\n");
-            sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
-            sb.Append("  PayloadHashBech32m: ").Append(PayloadHashBech32m).Append("\n");
+            sb.Append("class LedgerHeaderSummary {\n");
+            sb.Append("  EpochRound: ").Append(EpochRound).Append("\n");
+            sb.Append("  LedgerHashes: ").Append(LedgerHashes).Append("\n");
+            sb.Append("  ProposerTimestamp: ").Append(ProposerTimestamp).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -195,15 +177,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MempoolTransactionHashes);
+            return this.Equals(input as LedgerHeaderSummary);
         }
 
         /// <summary>
-        /// Returns true if MempoolTransactionHashes instances are equal
+        /// Returns true if LedgerHeaderSummary instances are equal
         /// </summary>
-        /// <param name="input">Instance of MempoolTransactionHashes to be compared</param>
+        /// <param name="input">Instance of LedgerHeaderSummary to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MempoolTransactionHashes input)
+        public bool Equals(LedgerHeaderSummary input)
         {
             if (input == null)
             {
@@ -211,24 +193,19 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.IntentHash == input.IntentHash ||
-                    (this.IntentHash != null &&
-                    this.IntentHash.Equals(input.IntentHash))
+                    this.EpochRound == input.EpochRound ||
+                    (this.EpochRound != null &&
+                    this.EpochRound.Equals(input.EpochRound))
                 ) && 
                 (
-                    this.IntentHashBech32m == input.IntentHashBech32m ||
-                    (this.IntentHashBech32m != null &&
-                    this.IntentHashBech32m.Equals(input.IntentHashBech32m))
+                    this.LedgerHashes == input.LedgerHashes ||
+                    (this.LedgerHashes != null &&
+                    this.LedgerHashes.Equals(input.LedgerHashes))
                 ) && 
                 (
-                    this.PayloadHash == input.PayloadHash ||
-                    (this.PayloadHash != null &&
-                    this.PayloadHash.Equals(input.PayloadHash))
-                ) && 
-                (
-                    this.PayloadHashBech32m == input.PayloadHashBech32m ||
-                    (this.PayloadHashBech32m != null &&
-                    this.PayloadHashBech32m.Equals(input.PayloadHashBech32m))
+                    this.ProposerTimestamp == input.ProposerTimestamp ||
+                    (this.ProposerTimestamp != null &&
+                    this.ProposerTimestamp.Equals(input.ProposerTimestamp))
                 );
         }
 
@@ -241,21 +218,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.IntentHash != null)
+                if (this.EpochRound != null)
                 {
-                    hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EpochRound.GetHashCode();
                 }
-                if (this.IntentHashBech32m != null)
+                if (this.LedgerHashes != null)
                 {
-                    hashCode = (hashCode * 59) + this.IntentHashBech32m.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LedgerHashes.GetHashCode();
                 }
-                if (this.PayloadHash != null)
+                if (this.ProposerTimestamp != null)
                 {
-                    hashCode = (hashCode * 59) + this.PayloadHash.GetHashCode();
-                }
-                if (this.PayloadHashBech32m != null)
-                {
-                    hashCode = (hashCode * 59) + this.PayloadHashBech32m.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ProposerTimestamp.GetHashCode();
                 }
                 return hashCode;
             }

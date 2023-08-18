@@ -103,13 +103,20 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateValidatorResponse" /> class.
         /// </summary>
+        /// <param name="atLedgerState">atLedgerState (required).</param>
         /// <param name="address">The Bech32m-encoded human readable version of the component address (required).</param>
         /// <param name="state">state (required).</param>
         /// <param name="ownerRole">ownerRole (required).</param>
         /// <param name="vaults">Any vaults owned directly or indirectly by the component (required).</param>
         /// <param name="descendentNodes">Any descendent nodes owned directly or indirectly by the component (required).</param>
-        public StateValidatorResponse(string address = default(string), Substate state = default(Substate), Substate ownerRole = default(Substate), List<VaultBalance> vaults = default(List<VaultBalance>), List<StateComponentDescendentNode> descendentNodes = default(List<StateComponentDescendentNode>))
+        public StateValidatorResponse(LedgerStateSummary atLedgerState = default(LedgerStateSummary), string address = default(string), Substate state = default(Substate), Substate ownerRole = default(Substate), List<VaultBalance> vaults = default(List<VaultBalance>), List<StateComponentDescendentNode> descendentNodes = default(List<StateComponentDescendentNode>))
         {
+            // to ensure "atLedgerState" is required (not null)
+            if (atLedgerState == null)
+            {
+                throw new ArgumentNullException("atLedgerState is a required property for StateValidatorResponse and cannot be null");
+            }
+            this.AtLedgerState = atLedgerState;
             // to ensure "address" is required (not null)
             if (address == null)
             {
@@ -141,6 +148,12 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.DescendentNodes = descendentNodes;
         }
+
+        /// <summary>
+        /// Gets or Sets AtLedgerState
+        /// </summary>
+        [DataMember(Name = "at_ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerStateSummary AtLedgerState { get; set; }
 
         /// <summary>
         /// The Bech32m-encoded human readable version of the component address
@@ -183,6 +196,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateValidatorResponse {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
             sb.Append("  OwnerRole: ").Append(OwnerRole).Append("\n");
@@ -224,6 +238,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
+                (
                     this.Address == input.Address ||
                     (this.Address != null &&
                     this.Address.Equals(input.Address))
@@ -261,6 +280,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
                 if (this.Address != null)
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();

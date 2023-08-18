@@ -106,7 +106,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="logicalName">logicalName (required).</param>
         /// <param name="stateVersion">stateVersion (required).</param>
         /// <param name="intentHash">The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent.  (required).</param>
-        public ExecutedScenarioTransaction(string logicalName = default(string), long stateVersion = default(long), string intentHash = default(string))
+        /// <param name="intentHashBech32m">The Bech32m-encoded human readable &#x60;IntentHash&#x60;. (required).</param>
+        public ExecutedScenarioTransaction(string logicalName = default(string), long stateVersion = default(long), string intentHash = default(string), string intentHashBech32m = default(string))
         {
             // to ensure "logicalName" is required (not null)
             if (logicalName == null)
@@ -121,6 +122,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("intentHash is a required property for ExecutedScenarioTransaction and cannot be null");
             }
             this.IntentHash = intentHash;
+            // to ensure "intentHashBech32m" is required (not null)
+            if (intentHashBech32m == null)
+            {
+                throw new ArgumentNullException("intentHashBech32m is a required property for ExecutedScenarioTransaction and cannot be null");
+            }
+            this.IntentHashBech32m = intentHashBech32m;
         }
 
         /// <summary>
@@ -143,6 +150,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public string IntentHash { get; set; }
 
         /// <summary>
+        /// The Bech32m-encoded human readable &#x60;IntentHash&#x60;.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable &#x60;IntentHash&#x60;.</value>
+        [DataMember(Name = "intent_hash_bech32m", IsRequired = true, EmitDefaultValue = true)]
+        public string IntentHashBech32m { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -153,6 +167,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  LogicalName: ").Append(LogicalName).Append("\n");
             sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
             sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
+            sb.Append("  IntentHashBech32m: ").Append(IntentHashBech32m).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -201,6 +216,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.IntentHash == input.IntentHash ||
                     (this.IntentHash != null &&
                     this.IntentHash.Equals(input.IntentHash))
+                ) && 
+                (
+                    this.IntentHashBech32m == input.IntentHashBech32m ||
+                    (this.IntentHashBech32m != null &&
+                    this.IntentHashBech32m.Equals(input.IntentHashBech32m))
                 );
         }
 
@@ -221,6 +241,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.IntentHash != null)
                 {
                     hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
+                }
+                if (this.IntentHashBech32m != null)
+                {
+                    hashCode = (hashCode * 59) + this.IntentHashBech32m.GetHashCode();
                 }
                 return hashCode;
             }

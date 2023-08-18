@@ -109,15 +109,28 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionCallPreviewResponse" /> class.
         /// </summary>
+        /// <param name="atLedgerState">atLedgerState (required).</param>
         /// <param name="status">status (required).</param>
         /// <param name="output">output.</param>
         /// <param name="errorMessage">Error message (only present if status is Failed or Rejected).</param>
-        public TransactionCallPreviewResponse(TransactionStatus status = default(TransactionStatus), SborData output = default(SborData), string errorMessage = default(string))
+        public TransactionCallPreviewResponse(LedgerStateSummary atLedgerState = default(LedgerStateSummary), TransactionStatus status = default(TransactionStatus), SborData output = default(SborData), string errorMessage = default(string))
         {
+            // to ensure "atLedgerState" is required (not null)
+            if (atLedgerState == null)
+            {
+                throw new ArgumentNullException("atLedgerState is a required property for TransactionCallPreviewResponse and cannot be null");
+            }
+            this.AtLedgerState = atLedgerState;
             this.Status = status;
             this.Output = output;
             this.ErrorMessage = errorMessage;
         }
+
+        /// <summary>
+        /// Gets or Sets AtLedgerState
+        /// </summary>
+        [DataMember(Name = "at_ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerStateSummary AtLedgerState { get; set; }
 
         /// <summary>
         /// Gets or Sets Output
@@ -140,6 +153,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionCallPreviewResponse {\n");
+            sb.Append("  AtLedgerState: ").Append(AtLedgerState).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("  Output: ").Append(Output).Append("\n");
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
@@ -179,6 +193,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.AtLedgerState == input.AtLedgerState ||
+                    (this.AtLedgerState != null &&
+                    this.AtLedgerState.Equals(input.AtLedgerState))
+                ) && 
+                (
                     this.Status == input.Status ||
                     this.Status.Equals(input.Status)
                 ) && 
@@ -203,6 +222,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.AtLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtLedgerState.GetHashCode();
+                }
                 hashCode = (hashCode * 59) + this.Status.GetHashCode();
                 if (this.Output != null)
                 {

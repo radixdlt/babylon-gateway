@@ -72,9 +72,9 @@ internal class TransactionCommittedDetailsRequestValidator : AbstractValidator<G
 {
     public TransactionCommittedDetailsRequestValidator(LedgerStateSelectorValidator ledgerStateSelectorValidator)
     {
-        RuleFor(x => x.IntentHashHex)
+        RuleFor(x => x.IntentHash)
             .NotNull()
-            .Hex(NetworkGatewayConstants.Transaction.IdentifierByteLength);
+            .RadixAddress();
 
         RuleFor(x => x.AtLedgerState)
             .SetValidator(ledgerStateSelectorValidator);

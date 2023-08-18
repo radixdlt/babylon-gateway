@@ -104,10 +104,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="NotarizedTransaction" /> class.
         /// </summary>
         /// <param name="hash">The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature.  (required).</param>
+        /// <param name="hashBech32m">The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;. (required).</param>
         /// <param name="payloadHex">The hex-encoded full notarized transaction payload. Returning this can be disabled in TransactionFormatOptions on your request (default true)..</param>
         /// <param name="signedIntent">signedIntent (required).</param>
         /// <param name="notarySignature">notarySignature (required).</param>
-        public NotarizedTransaction(string hash = default(string), string payloadHex = default(string), SignedTransactionIntent signedIntent = default(SignedTransactionIntent), Signature notarySignature = default(Signature))
+        public NotarizedTransaction(string hash = default(string), string hashBech32m = default(string), string payloadHex = default(string), SignedTransactionIntent signedIntent = default(SignedTransactionIntent), Signature notarySignature = default(Signature))
         {
             // to ensure "hash" is required (not null)
             if (hash == null)
@@ -115,6 +116,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("hash is a required property for NotarizedTransaction and cannot be null");
             }
             this.Hash = hash;
+            // to ensure "hashBech32m" is required (not null)
+            if (hashBech32m == null)
+            {
+                throw new ArgumentNullException("hashBech32m is a required property for NotarizedTransaction and cannot be null");
+            }
+            this.HashBech32m = hashBech32m;
             // to ensure "signedIntent" is required (not null)
             if (signedIntent == null)
             {
@@ -136,6 +143,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <value>The hex-encoded notarized transaction hash for a user transaction. This hash identifies the full submittable notarized transaction - ie the signed intent, plus the notary signature. </value>
         [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
         public string Hash { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable &#x60;NotarizedTransactionHash&#x60;.</value>
+        [DataMember(Name = "hash_bech32m", IsRequired = true, EmitDefaultValue = true)]
+        public string HashBech32m { get; set; }
 
         /// <summary>
         /// The hex-encoded full notarized transaction payload. Returning this can be disabled in TransactionFormatOptions on your request (default true).
@@ -165,6 +179,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NotarizedTransaction {\n");
             sb.Append("  Hash: ").Append(Hash).Append("\n");
+            sb.Append("  HashBech32m: ").Append(HashBech32m).Append("\n");
             sb.Append("  PayloadHex: ").Append(PayloadHex).Append("\n");
             sb.Append("  SignedIntent: ").Append(SignedIntent).Append("\n");
             sb.Append("  NotarySignature: ").Append(NotarySignature).Append("\n");
@@ -209,6 +224,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Hash.Equals(input.Hash))
                 ) && 
                 (
+                    this.HashBech32m == input.HashBech32m ||
+                    (this.HashBech32m != null &&
+                    this.HashBech32m.Equals(input.HashBech32m))
+                ) && 
+                (
                     this.PayloadHex == input.PayloadHex ||
                     (this.PayloadHex != null &&
                     this.PayloadHex.Equals(input.PayloadHex))
@@ -237,6 +257,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Hash != null)
                 {
                     hashCode = (hashCode * 59) + this.Hash.GetHashCode();
+                }
+                if (this.HashBech32m != null)
+                {
+                    hashCode = (hashCode * 59) + this.HashBech32m.GetHashCode();
                 }
                 if (this.PayloadHex != null)
                 {

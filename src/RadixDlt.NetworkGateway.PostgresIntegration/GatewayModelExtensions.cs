@@ -122,15 +122,15 @@ internal static class GatewayModelExtensions
     public static GatewayModel.CommittedTransactionInfo ToGatewayModel(
         this LedgerTransaction lt, GatewayModel.TransactionCommittedDetailsOptIns optIns, Dictionary<long, string> entityIdToAddressMap, List<string>? events)
     {
-        string? payloadHashHex = null;
-        string? intentHashHex = null;
+        string? payloadHash = null;
+        string? intentHash = null;
         string? rawHex = null;
         JRaw? message = null;
 
         if (lt is UserLedgerTransaction ult)
         {
-            payloadHashHex = ult.PayloadHash.ToHex();
-            intentHashHex = ult.IntentHash.ToHex();
+            payloadHash = ult.PayloadHash;
+            intentHash = ult.IntentHash;
             rawHex = optIns.RawHex ? ult.RawPayload.ToHex() : null;
             message = ult.Message != null ? new JRaw(ult.Message) : null;
         }
@@ -153,8 +153,8 @@ internal static class GatewayModelExtensions
             roundTimestamp: lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
             transactionStatus: lt.EngineReceipt.Status.ToGatewayModel(),
             affectedGlobalEntities: optIns.AffectedGlobalEntities ? lt.AffectedGlobalEntities.Select(x => entityIdToAddressMap[x]).ToList() : null,
-            payloadHashHex: payloadHashHex,
-            intentHashHex: intentHashHex,
+            payloadHash: payloadHash,
+            intentHash: intentHash,
             feePaid: lt.FeePaid?.ToString(),
             confirmedAt: lt.RoundTimestamp,
             errorMessage: lt.EngineReceipt.ErrorMessage,

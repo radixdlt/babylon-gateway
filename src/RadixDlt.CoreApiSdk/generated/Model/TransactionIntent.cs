@@ -104,11 +104,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionIntent" /> class.
         /// </summary>
         /// <param name="hash">The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent.  (required).</param>
+        /// <param name="hashBech32m">The Bech32m-encoded human readable &#x60;IntentHash&#x60;. (required).</param>
         /// <param name="header">header (required).</param>
         /// <param name="instructions">The decompiled transaction manifest instructions. Only returned if enabled in &#x60;TransactionFormatOptions&#x60; on your request..</param>
         /// <param name="blobsHex">A map of the hex-encoded blob hash, to hex-encoded blob content. Only returned if enabled in &#x60;TransactionFormatOptions&#x60; on your request..</param>
         /// <param name="message">message.</param>
-        public TransactionIntent(string hash = default(string), TransactionHeader header = default(TransactionHeader), string instructions = default(string), Dictionary<string, string> blobsHex = default(Dictionary<string, string>), TransactionMessage message = default(TransactionMessage))
+        public TransactionIntent(string hash = default(string), string hashBech32m = default(string), TransactionHeader header = default(TransactionHeader), string instructions = default(string), Dictionary<string, string> blobsHex = default(Dictionary<string, string>), TransactionMessage message = default(TransactionMessage))
         {
             // to ensure "hash" is required (not null)
             if (hash == null)
@@ -116,6 +117,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("hash is a required property for TransactionIntent and cannot be null");
             }
             this.Hash = hash;
+            // to ensure "hashBech32m" is required (not null)
+            if (hashBech32m == null)
+            {
+                throw new ArgumentNullException("hashBech32m is a required property for TransactionIntent and cannot be null");
+            }
+            this.HashBech32m = hashBech32m;
             // to ensure "header" is required (not null)
             if (header == null)
             {
@@ -133,6 +140,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <value>The hex-encoded intent hash for a user transaction, also known as the transaction id. This hash identifies the core content \&quot;intent\&quot; of the transaction. Each intent can only be committed once. This hash gets signed by any signatories on the transaction, to create the signed intent. </value>
         [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
         public string Hash { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable &#x60;IntentHash&#x60;.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable &#x60;IntentHash&#x60;.</value>
+        [DataMember(Name = "hash_bech32m", IsRequired = true, EmitDefaultValue = true)]
+        public string HashBech32m { get; set; }
 
         /// <summary>
         /// Gets or Sets Header
@@ -169,6 +183,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionIntent {\n");
             sb.Append("  Hash: ").Append(Hash).Append("\n");
+            sb.Append("  HashBech32m: ").Append(HashBech32m).Append("\n");
             sb.Append("  Header: ").Append(Header).Append("\n");
             sb.Append("  Instructions: ").Append(Instructions).Append("\n");
             sb.Append("  BlobsHex: ").Append(BlobsHex).Append("\n");
@@ -214,6 +229,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Hash.Equals(input.Hash))
                 ) && 
                 (
+                    this.HashBech32m == input.HashBech32m ||
+                    (this.HashBech32m != null &&
+                    this.HashBech32m.Equals(input.HashBech32m))
+                ) && 
+                (
                     this.Header == input.Header ||
                     (this.Header != null &&
                     this.Header.Equals(input.Header))
@@ -248,6 +268,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Hash != null)
                 {
                     hashCode = (hashCode * 59) + this.Hash.GetHashCode();
+                }
+                if (this.HashBech32m != null)
+                {
+                    hashCode = (hashCode * 59) + this.HashBech32m.GetHashCode();
                 }
                 if (this.Header != null)
                 {

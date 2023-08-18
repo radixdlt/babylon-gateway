@@ -674,6 +674,9 @@ components:
       description: String-encoded non-fungible ID.
       type: string
 
+    HashBech32mString:
+      description: Bech32m-encoded hash.
+      type: string
     HashHexString:
       description: Hex-encoded SHA-256 hash.
       type: string
@@ -1223,10 +1226,10 @@ components:
           # TODO add format: date-time once OAS generator get fixed support for required value-types
         transaction_status:
           $ref: "#/components/schemas/TransactionStatus"
-        payload_hash_hex:
-          $ref: "#/components/schemas/HashHexString"
-        intent_hash_hex:
-          $ref: "#/components/schemas/HashHexString"
+        payload_hash:
+          $ref: "#/components/schemas/HashBech32mString"
+        intent_hash:
+          $ref: "#/components/schemas/HashBech32mString"
         fee_paid:
           $ref: "#/components/schemas/BigDecimal"
         affected_global_entities:
@@ -1636,10 +1639,10 @@ components:
       allOf:
         - type: object
           required:
-            - intent_hash_hex
+            - intent_hash
           properties:
-            intent_hash_hex:
-              $ref: "#/components/schemas/HashHexString"
+            intent_hash:
+              $ref: "#/components/schemas/HashBech32mString"
       example:
         intent_hash_hex: "<transaction-intent-hash>"
     TransactionStatusResponse:
@@ -1662,11 +1665,11 @@ components:
     TransactionStatusResponseKnownPayloadItem:
       type: object
       required:
-        - payload_hash_hex
+        - payload_hash
         - status
       properties:
-        payload_hash_hex:
-          $ref: "#/components/schemas/HashHexString"
+        payload_hash:
+          $ref: "#/components/schemas/HashBech32mString"
         status:
           $ref: "#/components/schemas/TransactionStatus"
         error_message:
@@ -1678,10 +1681,10 @@ components:
         - $ref: "#/components/schemas/AtLedgerStateMixin"
         - type: object
           required:
-            - intent_hash_hex
+            - intent_hash
           properties:
-            intent_hash_hex:
-              $ref: "#/components/schemas/HashHexString"
+            intent_hash:
+              $ref: "#/components/schemas/HashBech32mString"
             opt_ins:
               $ref: "#/components/schemas/TransactionCommittedDetailsOptIns"
       example:
@@ -2572,10 +2575,10 @@ components:
         - $ref: "#/components/schemas/GatewayError"
         - type: object
           required:
-            - intent_hash_hex
+            - intent_hash
           properties:
-            intent_hash_hex:
-              $ref: "#/components/schemas/HashHexString"
+            intent_hash:
+              $ref: "#/components/schemas/HashBech32mString"
     InternalServerError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"
