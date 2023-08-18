@@ -11,11 +11,11 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./types/index.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/babylon-gateway-api-sdk.mjs"
       },
       "require": {
-        "types": "./types/index.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/babylon-gateway-api-sdk.umd.js"
       }
     }
