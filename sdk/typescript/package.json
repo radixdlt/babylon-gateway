@@ -10,8 +10,14 @@
   "module": "./dist/babylon-gateway-api-sdk.mjs",
   "exports": {
     ".": {
-      "import": "./dist/babylon-gateway-api-sdk.mjs",
-      "require": "./dist/babylon-gateway-api-sdk.umd.js"
+      "import": {
+        "types": "./types/index.d.ts",
+        "default": "./dist/babylon-gateway-api-sdk.mjs"
+      },
+      "require": {
+        "types": "./types/index.d.ts",
+        "default": "./dist/babylon-gateway-api-sdk.umd.js"
+      }
     }
   },
   "types": "./dist/index.d.ts",
