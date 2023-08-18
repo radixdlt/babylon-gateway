@@ -5,16 +5,16 @@ Release Date: unreleased
 
 Use Bech32m-encoded transaction hashes in `/transaction/committed-details` and `/transaction/status` endpoints.
 
-TODO TODO TODO TODO
-
+Previously:
 ```json
 {"intent_hash_hex": "efbbbfe1d0536d2f6e28cbe8f78f9fe519c4c799a9b0384b8d09e9ecdd66fcbb"}
-{"intent_hash": ""}
 ``` 
+Now:
+```json
+{"intent_hash": "txid_loc1lapmrzd6mwfamusjlqjaurmemla2xpx6mqygt74px72vtawjawws5rjtd4"}
+```
 
 ---
-
-TBD 
 
 ### What’s New?
 
