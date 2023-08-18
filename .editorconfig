@@ -1,6 +1,6 @@
+root = true
 # To learn more about .editorconfig see https://aka.ms/editorconfigdocs
 # NB - these have replaced ruleset files, eg https://docs.microsoft.com/en-us/visualstudio/code-quality/analyzers-faq?view=vs-2019#editorconfig-versus-rule-sets
-root = true
 
 ###############################
 # Core EditorConfig Options   #
@@ -15,6 +15,10 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 end_of_line = lf
 
+# generated files.
+[**/generated/**]
+generated_code = true
+
 # Windows scripts
 [*.{bat,cmd}]
 end_of_line = crlf
@@ -27,7 +31,7 @@ trim_trailing_whitespace = false
 # Code files
 [*.{cs,csx,vb,vbx}]
 indent_size = 4
-max_line_length = 180
+max_line_length = 200
 
 # XML project files
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
@@ -198,7 +202,6 @@ csharp_style_pattern_matching_over_as_with_null_check = true:suggestion
 csharp_style_throw_expression = true:suggestion
 csharp_style_conditional_delegate_call = true:suggestion
 # Modifier preferences
-csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async:suggestion
 # Expression-level preferences
 csharp_prefer_braces = true:silent
 csharp_style_deconstructed_variable_declaration = true:suggestion
@@ -298,6 +301,26 @@ dotnet_diagnostic.SX1309.severity = warning # SX1309FieldNamesMustBeginWithUnder
 resharper_inconsistent_naming_highlighting = none # Resharper disagrees with IDE1006 for public static fields
 resharper_redundant_anonymous_type_property_name_highlighting = none # Explicit is useful
 resharper_bitwise_operator_on_enum_without_flags_highlighting = none # BitwiseOperatorOnEnumWithoutFlags - PostgreSQL NpgsqlDbTypes unfortunately don't have the Flags property
+resharper_place_attribute_on_same_line = never
+
+resharper_wrap_chained_method_calls = chop_if_long
+resharper_wrap_after_property_in_chained_method_calls = true
+resharper_wrap_before_first_method_call = true
+
+resharper_place_simple_initializer_on_single_line = true
+resharper_max_initializer_elements_on_line = 3
+
+resharper_keep_existing_initializer_arrangement = true
+resharper_keep_existing_arrangement = true
+resharper_keep_user_linebreaks = true
+
+resharper_wrap_parameters_style = chop_if_long
+resharper_wrap_after_declaration_lpar = true
+resharper_trailing_comma_in_multiline_lists = true
+resharper_arrange_trailing_comma_in_multiline_lists_highlighting = true
+resharper_wrap_list_pattern = wrap_if_long
+resharper_wrap_object_and_collection_initializer_style = chop_if_long
+resharper_csharp_empty_block_style = multiline
 
 # None
 
