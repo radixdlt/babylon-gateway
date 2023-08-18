@@ -95,7 +95,10 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         _logger = logger;
     }
 
-    public async Task SetNetworkConfigurationOrAssertMatching(CoreModel.NetworkConfigurationResponse inputNetworkConfiguration, CoreModel.NetworkStatusResponse inputNetworkStatus, CancellationToken token)
+    public async Task SetNetworkConfigurationOrAssertMatching(
+        CoreModel.NetworkConfigurationResponse inputNetworkConfiguration,
+        CoreModel.NetworkStatusResponse inputNetworkStatus,
+        CancellationToken token)
     {
         var networkConfiguration = Map(inputNetworkConfiguration, inputNetworkStatus);
         var existingNetworkConfiguration = await GetCurrentLedgerNetworkConfigurationFromDb(token);
@@ -213,18 +216,18 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 GlobalAccessController: GetHrpPrefix(at, AddressEntityType.GlobalAccessController)
             ),
             WellKnownAddresses = new WellKnownAddresses(
-                Xrd : wka.Xrd,
+                Xrd: wka.Xrd,
                 Secp256k1SignatureVirtualBadge: wka.Secp256k1SignatureVirtualBadge,
-                Ed25519SignatureVirtualBadge : wka.Ed25519SignatureVirtualBadge,
-                PackageOfDirectCallerVirtualBadge : wka.PackageOfDirectCallerVirtualBadge,
-                GlobalCallerVirtualBadge : wka.GlobalCallerVirtualBadge,
-                SystemTransactionBadge : wka.SystemTransactionBadge,
-                PackageOwnerBadge : wka.PackageOwnerBadge,
-                ValidatorOwnerBadge : wka.ValidatorOwnerBadge,
-                AccountOwnerBadge : wka.AccountOwnerBadge,
-                IdentityOwnerBadge : wka.IdentityOwnerBadge,
-                PackagePackage : wka.PackagePackage,
-                ResourcePackage : wka.ResourcePackage,
+                Ed25519SignatureVirtualBadge: wka.Ed25519SignatureVirtualBadge,
+                PackageOfDirectCallerVirtualBadge: wka.PackageOfDirectCallerVirtualBadge,
+                GlobalCallerVirtualBadge: wka.GlobalCallerVirtualBadge,
+                SystemTransactionBadge: wka.SystemTransactionBadge,
+                PackageOwnerBadge: wka.PackageOwnerBadge,
+                ValidatorOwnerBadge: wka.ValidatorOwnerBadge,
+                AccountOwnerBadge: wka.AccountOwnerBadge,
+                IdentityOwnerBadge: wka.IdentityOwnerBadge,
+                PackagePackage: wka.PackagePackage,
+                ResourcePackage: wka.ResourcePackage,
                 AccountPackage: wka.AccountPackage,
                 IdentityPackage: wka.IdentityPackage,
                 ConsensusManagerPackage: wka.ConsensusManagerPackage,
@@ -239,7 +242,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 GenesisHelper: wka.GenesisHelper,
                 Faucet: wka.Faucet,
                 PoolPackage: wka.PoolPackage
-                ),
+            ),
             AddressTypeDefinitions = at,
             GenesisEpoch = networkStatus.GenesisEpochRound.Epoch,
         };

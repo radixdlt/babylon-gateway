@@ -81,7 +81,11 @@ internal class NetworkStatusReader : INetworkStatusReader
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IEnumerable<INetworkStatusReaderObserver> _observers;
 
-    public NetworkStatusReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, IEnumerable<INetworkStatusReaderObserver> observers)
+    public NetworkStatusReader(
+        INetworkConfigurationProvider networkConfigurationProvider,
+        ICoreApiProvider coreApiProvider,
+        INodeConfigProvider nodeConfigProvider,
+        IEnumerable<INetworkStatusReaderObserver> observers)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _nodeConfigProvider = nodeConfigProvider;

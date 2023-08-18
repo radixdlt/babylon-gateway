@@ -120,7 +120,10 @@ internal static class GatewayModelExtensions
     }
 
     public static GatewayModel.CommittedTransactionInfo ToGatewayModel(
-        this LedgerTransaction lt, GatewayModel.TransactionCommittedDetailsOptIns optIns, Dictionary<long, string> entityIdToAddressMap, List<string>? events)
+        this LedgerTransaction lt,
+        GatewayModel.TransactionCommittedDetailsOptIns optIns,
+        Dictionary<long, string> entityIdToAddressMap,
+        List<string>? events)
     {
         string? payloadHash = null;
         string? intentHash = null;

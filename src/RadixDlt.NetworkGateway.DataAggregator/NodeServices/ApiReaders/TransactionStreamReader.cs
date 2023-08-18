@@ -81,7 +81,11 @@ internal class TransactionStreamReader : ITransactionStreamReader
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IEnumerable<ITransactionStreamReaderObserver> _observers;
 
-    public TransactionStreamReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, IEnumerable<ITransactionStreamReaderObserver> observers)
+    public TransactionStreamReader(
+        INetworkConfigurationProvider networkConfigurationProvider,
+        ICoreApiProvider coreApiProvider,
+        INodeConfigProvider nodeConfigProvider,
+        IEnumerable<ITransactionStreamReaderObserver> observers)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _nodeConfigProvider = nodeConfigProvider;

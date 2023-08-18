@@ -169,7 +169,8 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
 
     private async Task<PendingTransaction?> GetPendingTransaction(string payloadHash, CancellationToken token = default)
     {
-        return await _dbContext.PendingTransactions
+        return await _dbContext
+            .PendingTransactions
             .Where(t => t.PayloadHash == payloadHash)
             .SingleOrDefaultAsync(token);
     }

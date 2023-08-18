@@ -73,5 +73,3 @@ public partial class AccountResourcePreferenceEntrySubstate : IEntityAddressPoin
         yield return Key.ResourceAddress;
     }
 }
-
-

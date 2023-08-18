@@ -151,10 +151,13 @@ internal class DefaultEntityHandler : IEntityHandler
             Limit: request.LimitPerPage ?? _endpointConfiguration.Value.DefaultPageSize
         );
 
-        return await _entityStateQuerier.EntityNonFungibleResourcesPage(pageRequest, aggregatePerVault, request.OptIns ?? GatewayModel.StateEntityNonFungiblesPageRequestOptIns.Default, ledgerState, token);
+        return await _entityStateQuerier.EntityNonFungibleResourcesPage(pageRequest, aggregatePerVault, request.OptIns ?? GatewayModel.StateEntityNonFungiblesPageRequestOptIns.Default, ledgerState,
+            token);
     }
 
-    public async Task<GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse?> NonFungibleVaults(GatewayModel.StateEntityNonFungibleResourceVaultsPageRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse?> NonFungibleVaults(
+        GatewayModel.StateEntityNonFungibleResourceVaultsPageRequest request,
+        CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 
@@ -169,7 +172,8 @@ internal class DefaultEntityHandler : IEntityHandler
     }
 
     public async Task<GatewayModel.StateEntityNonFungibleIdsPageResponse?> NonFungibleIds(
-        GatewayModel.StateEntityNonFungibleIdsPageRequest request, CancellationToken token = default)
+        GatewayModel.StateEntityNonFungibleIdsPageRequest request,
+        CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtLedgerState, token);
 

@@ -196,17 +196,17 @@ public class TokenAmountTests
     }
 
     public static IEnumerable<object[]> IsNaN_Data => new List<object[]>
-        {
-            new object[] { TokenAmount.NaN, true },
-            new object[] { TokenAmount.FromSubUnits(BigInteger.Zero), false },
-            new object[] { TokenAmount.FromSubUnits(BigInteger.One), false },
-            new object[] { TokenAmount.FromSubUnits(BigInteger.MinusOne), false },
-            new object[] { TokenAmount.FromStringParts(false, "1", "234"), false },
-            new object[] { TokenAmount.FromStringParts(false, "-1", "234"), true }, // Invalid call
-            new object[] { TokenAmount.FromStringParts(true, "1", "234"), false },
-            new object[] { TokenAmount.FromStringParts(false, "1", "-234"), true }, // Invalid call
-            new object[] { TokenAmount.FromStringParts(true, "1", "-234"), true }, // Invalid call
-        };
+    {
+        new object[] { TokenAmount.NaN, true },
+        new object[] { TokenAmount.FromSubUnits(BigInteger.Zero), false },
+        new object[] { TokenAmount.FromSubUnits(BigInteger.One), false },
+        new object[] { TokenAmount.FromSubUnits(BigInteger.MinusOne), false },
+        new object[] { TokenAmount.FromStringParts(false, "1", "234"), false },
+        new object[] { TokenAmount.FromStringParts(false, "-1", "234"), true }, // Invalid call
+        new object[] { TokenAmount.FromStringParts(true, "1", "234"), false },
+        new object[] { TokenAmount.FromStringParts(false, "1", "-234"), true }, // Invalid call
+        new object[] { TokenAmount.FromStringParts(true, "1", "-234"), true }, // Invalid call
+    };
 
     [Theory]
     [MemberData(nameof(IsNaN_Data))]

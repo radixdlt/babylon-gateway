@@ -143,8 +143,10 @@ public static class OpenApiDocumentHandler
     }
 
     private static async Task<PlaceholderReplacements> GetPlaceholderReplacements(
-        INetworkConfigurationProvider networkConfigurationProvider, ITransactionHandler transactionHandler,
-        ILedgerStateQuerier ledgerStateQuerier, CancellationToken token)
+        INetworkConfigurationProvider networkConfigurationProvider,
+        ITransactionHandler transactionHandler,
+        ILedgerStateQuerier ledgerStateQuerier,
+        CancellationToken token)
     {
         var placeholderReplacements = new PlaceholderReplacements();
 

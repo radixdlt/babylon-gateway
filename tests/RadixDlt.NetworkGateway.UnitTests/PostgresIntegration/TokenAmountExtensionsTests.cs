@@ -90,7 +90,8 @@ public class TokenAmountExtensionsTests
         var tokenAmount = TokenAmount.FromSubUnits(BigInteger.Pow(10, 995));
         var postgresDecimal = tokenAmount.ToPostgresDecimal();
         var expected = new StringBuilder()
-            .Append('1').Append(Enumerable.Range(0, 977).Select(_ => '0').ToArray()) // 1000000... with 977 digits of 0
+            .Append('1')
+            .Append(Enumerable.Range(0, 977).Select(_ => '0').ToArray()) // 1000000... with 977 digits of 0
             .ToString();
 
         postgresDecimal.Should().Be(expected);

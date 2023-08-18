@@ -114,12 +114,15 @@ public class VirtualEntityMetadataProvider : IVirtualEntityMetadataProvider
         using ToolkitModel.MetadataValue ownedKeysItem = new ToolkitModel.MetadataValue.PublicKeyHashArrayValue(new List<ToolkitModel.PublicKeyHash> { publicKeyHash });
         var ownerKeysBytes = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborEncode(ownedKeysItem);
         var ownerKeysRawHex = Convert.ToHexString(ownerKeysBytes.ToArray());
-        var ownerKeysJson = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerKeysBytes, ToolkitModel.SerializationMode.PROGRAMMATIC, _networkConfigurationProvider.GetNetworkId(), null);
+        var ownerKeysJson = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerKeysBytes, ToolkitModel.SerializationMode.PROGRAMMATIC,
+            _networkConfigurationProvider.GetNetworkId(), null);
 
         using ToolkitModel.MetadataValue ownerBadgeItem = new ToolkitModel.MetadataValue.NonFungibleLocalIdValue(new ToolkitModel.NonFungibleLocalId.Bytes(decodedAddress.Data.ToList()));
         var ownerBadgeBytes = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborEncode(ownerBadgeItem);
         var ownerBadgeRawHex = Convert.ToHexString(ownerBadgeBytes.ToArray());
-        var ownerBadgeJson = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerBadgeBytes, ToolkitModel.SerializationMode.PROGRAMMATIC, _networkConfigurationProvider.GetNetworkId(), null);
+        var ownerBadgeJson =
+            ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborDecodeToStringRepresentation(ownerBadgeBytes, ToolkitModel.SerializationMode.PROGRAMMATIC,
+                _networkConfigurationProvider.GetNetworkId(), null);
 
         return new EntityMetadataCollection(2, null, null,
             new List<EntityMetadataItem>

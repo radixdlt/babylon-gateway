@@ -82,7 +82,8 @@ public static class GatewayApiBuilderExtensions
 
     public static GatewayApiBuilder AddPostgresPersistenceCore(this GatewayApiBuilder builder)
     {
-        builder.Services
+        builder
+            .Services
             .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
             .AddScoped<ITransactionQuerier, TransactionQuerier>()
             .AddScoped<IEntityStateQuerier, EntityStateQuerier>()
@@ -95,7 +96,8 @@ public static class GatewayApiBuilderExtensions
 
         CustomTypes.EnsureConfigured();
 
-        builder.Services
+        builder
+            .Services
             .AddNpgsqlDataSourceHolder<ReadOnlyDbContext>(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName)
             .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
             {
@@ -120,7 +122,8 @@ public static class GatewayApiBuilderExtensions
 
     public static GatewayApiBuilder AddPostgresPersistenceHealthChecks(this GatewayApiBuilder builder)
     {
-        builder.Services
+        builder
+            .Services
             .AddHealthChecks()
             .AddDbContextCheck<ReadOnlyDbContext>("readonly_database_connection_check")
             .AddDbContextCheck<ReadWriteDbContext>("readwrite_database_connection_check");

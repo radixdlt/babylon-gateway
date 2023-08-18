@@ -144,11 +144,11 @@ internal class DefaultTransactionHandler : ITransactionHandler
         var withDetails = true;
 
         var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(
-                request.IntentHash,
-                request.OptIns ?? GatewayModel.TransactionCommittedDetailsOptIns.Default,
-                ledgerState,
-                withDetails,
-                token);
+            request.IntentHash,
+            request.OptIns ?? GatewayModel.TransactionCommittedDetailsOptIns.Default,
+            ledgerState,
+            withDetails,
+            token);
 
         if (committedTransaction != null)
         {

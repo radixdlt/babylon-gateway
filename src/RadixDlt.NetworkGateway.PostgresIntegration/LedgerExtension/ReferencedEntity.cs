@@ -87,9 +87,11 @@ internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Typ
 
     public long? DatabaseParentAncestorId => GetDatabaseEntityInternal().ParentAncestorId;
 
-    public long DatabaseOwnerAncestorId => GetDatabaseEntityInternal().OwnerAncestorId ?? throw new InvalidOperationException("OwnerAncestorId not set, probably global entity or incorrectly configured one.");
+    public long DatabaseOwnerAncestorId =>
+        GetDatabaseEntityInternal().OwnerAncestorId ?? throw new InvalidOperationException("OwnerAncestorId not set, probably global entity or incorrectly configured one.");
 
-    public long DatabaseGlobalAncestorId => GetDatabaseEntityInternal().GlobalAncestorId ?? throw new InvalidOperationException("GlobalAncestorId not set, probably global entity or incorrectly configured one.");
+    public long DatabaseGlobalAncestorId => GetDatabaseEntityInternal().GlobalAncestorId ??
+                                            throw new InvalidOperationException("GlobalAncestorId not set, probably global entity or incorrectly configured one.");
 
     public long AffectedGlobalEntityId => IsGlobal ? DatabaseId : DatabaseGlobalAncestorId;
 
@@ -207,6 +209,7 @@ internal record ReferencedEntity(EntityAddress Address, CoreModel.EntityType Typ
     /// <returns>The string representation of the type for debugging.</returns>
     public override string ToString()
     {
-        return $"{nameof(ReferencedEntity)} {{ {nameof(Address)}: {Address}, {nameof(IsGlobal)}: {IsGlobal}, {nameof(Type)}: {Type}, {nameof(StateVersion)}: {StateVersion}, {nameof(_databaseEntity)}: {_databaseEntity?.ToString() ?? "null"} }}";
+        return
+            $"{nameof(ReferencedEntity)} {{ {nameof(Address)}: {Address}, {nameof(IsGlobal)}: {IsGlobal}, {nameof(Type)}: {Type}, {nameof(StateVersion)}: {StateVersion}, {nameof(_databaseEntity)}: {_databaseEntity?.ToString() ?? "null"} }}";
     }
 }

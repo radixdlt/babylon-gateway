@@ -77,7 +77,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 internal interface IRoleAssignmentsMapper
 {
     Dictionary<long, GatewayApiSdk.Model.ComponentEntityRoleAssignments> GetEffectiveRoleAssignments(
-        ICollection<Entity> componentEntities, ICollection<EntityRoleAssignmentsOwnerRoleHistory> ownerRoles, ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments);
+        ICollection<Entity> componentEntities,
+        ICollection<EntityRoleAssignmentsOwnerRoleHistory> ownerRoles,
+        ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments);
 }
 
 internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
@@ -90,7 +92,9 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
     }
 
     public Dictionary<long, GatewayModel.ComponentEntityRoleAssignments> GetEffectiveRoleAssignments(
-        ICollection<Entity> componentEntities, ICollection<EntityRoleAssignmentsOwnerRoleHistory> ownerRoles, ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments)
+        ICollection<Entity> componentEntities,
+        ICollection<EntityRoleAssignmentsOwnerRoleHistory> ownerRoles,
+        ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments)
     {
         var fungibleResourceKeys = _roleAssignmentsKeyProvider.GetFungibleResourceKeys();
         var nonFungibleResourceKeys = _roleAssignmentsKeyProvider.GetNonFungibleResourceKeys();
@@ -131,21 +135,25 @@ internal class RoleAssignmentsMapper : IRoleAssignmentsMapper
         });
     }
 
-    private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GetEntries(long entityId, List<RoleAssignmentEntry> roleAssignmentKeys,
+    private List<GatewayModel.ComponentEntityRoleAssignmentEntry> GetEntries(
+        long entityId,
+        List<RoleAssignmentEntry> roleAssignmentKeys,
         ICollection<EntityRoleAssignmentsEntryHistory> roleAssignments)
     {
-        return roleAssignmentKeys.Select(role =>
-        {
-            var existingRoleAssignments = roleAssignments
-                .Where(e => e.EntityId == entityId && e.KeyRole == role.Key.Name && e.KeyModule == role.Key.ObjectModuleId)
-                .Select(x => new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Explicit, new JRaw(x.RoleAssignments)))
-                .FirstOrDefault();
+        return roleAssignmentKeys
+            .Select(role =>
+            {
+                var existingRoleAssignments = roleAssignments
+                    .Where(e => e.EntityId == entityId && e.KeyRole == role.Key.Name && e.KeyModule == role.Key.ObjectModuleId)
+                    .Select(x => new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Explicit, new JRaw(x.RoleAssignments)))
+                    .FirstOrDefault();
 
-            return new GatewayModel.ComponentEntityRoleAssignmentEntry(
-                new GatewayModel.RoleKey(role.Key.Name, role.Key.ObjectModuleId.ToGatewayModel()),
-                existingRoleAssignments ?? new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner, null),
-                role.Updaters.Select(x => new GatewayModel.RoleKey(x.Name, x.ObjectModuleId.ToGatewayModel())).ToList()
-            );
-        }).ToList();
+                return new GatewayModel.ComponentEntityRoleAssignmentEntry(
+                    new GatewayModel.RoleKey(role.Key.Name, role.Key.ObjectModuleId.ToGatewayModel()),
+                    existingRoleAssignments ?? new GatewayModel.ComponentEntityRoleAssignmentEntryAssignment(GatewayModel.RoleAssignmentResolution.Owner, null),
+                    role.Updaters.Select(x => new GatewayModel.RoleKey(x.Name, x.ObjectModuleId.ToGatewayModel())).ToList()
+                );
+            })
+            .ToList();
     }
 }

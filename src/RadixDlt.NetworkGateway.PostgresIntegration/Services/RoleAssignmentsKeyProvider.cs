@@ -69,6 +69,7 @@ using System.Linq;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal record RoleAssignmentRuleKey(string Name, ObjectModuleId ObjectModuleId);
+
 internal record RoleAssignmentEntry(RoleAssignmentRuleKey Key, RoleAssignmentRuleKey[] Updaters);
 
 internal interface IRoleAssignmentsKeyProvider

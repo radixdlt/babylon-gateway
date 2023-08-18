@@ -199,7 +199,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         var payloadHashes = userTransactionStatusByPayloadHash.Keys.ToList();
 
-        var toUpdate = await dbContext.PendingTransactions
+        var toUpdate = await dbContext
+            .PendingTransactions
             .Where(pt => pt.Status != PendingTransactionStatus.CommittedSuccess && pt.Status != PendingTransactionStatus.CommittedFailure)
             .Where(pt => payloadHashes.Contains(pt.PayloadHash))
             .ToListAsync(token);
@@ -325,7 +326,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                     foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
                     {
-                        var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)newGlobalEntity.EntityAddress, ea => new ReferencedEntity(ea,  newGlobalEntity.EntityType, stateVersion));
+                        var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)newGlobalEntity.EntityAddress, ea => new ReferencedEntity(ea, newGlobalEntity.EntityType, stateVersion));
 
                         referencedEntity.WithTypeHint(newGlobalEntity.EntityType switch
                         {
@@ -350,7 +351,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         });
                     }
 
-                    foreach (var substate in stateUpdates.CreatedSubstates.Select(x => new { x.SubstateId, x.Value }).Concat(stateUpdates.UpdatedSubstates.Select(x => new { x.SubstateId, Value = x.NewValue })))
+                    foreach (var substate in stateUpdates
+                                 .CreatedSubstates
+                                 .Select(x => new { x.SubstateId, x.Value })
+                                 .Concat(stateUpdates.UpdatedSubstates.Select(x => new { x.SubstateId, Value = x.NewValue })))
                     {
                         var substateId = substate.SubstateId;
                         var substateData = substate.Value.SubstateData;
@@ -375,11 +379,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         if (substateData is CoreModel.IRoyaltyVaultHolder royaltyVaultHolder && royaltyVaultHolder.TryGetRoyaltyVault(out var rv))
                         {
                             referencedEntities
-                                .GetOrAdd((EntityAddress)rv.EntityAddress, _ => new ReferencedEntity((EntityAddress)rv.EntityAddress,  rv.EntityType, stateVersion))
+                                .GetOrAdd((EntityAddress)rv.EntityAddress, _ => new ReferencedEntity((EntityAddress)rv.EntityAddress, rv.EntityType, stateVersion))
                                 .IsImmediateChildOf(referencedEntity);
                             childToParentEntities[(EntityAddress)rv.EntityAddress] = (EntityAddress)substateId.EntityAddress;
 
-                            referencedEntities.Get((EntityAddress)rv.EntityAddress)
+                            referencedEntities
+                                .Get((EntityAddress)rv.EntityAddress)
                                 .PostResolveConfigure((InternalFungibleVaultEntity e) => e.RoyaltyVaultOfEntityId = referencedEntity.DatabaseId);
                         }
 
@@ -398,14 +403,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.NonFungibleResourceManagerFieldIdTypeSubstate nonFungibleResourceManagerFieldIdTypeSubstate)
                         {
-                            referencedEntity.PostResolveConfigure((GlobalNonFungibleResourceEntity e) => e.NonFungibleIdType = nonFungibleResourceManagerFieldIdTypeSubstate.Value.NonFungibleIdType switch
-                            {
-                                CoreModel.NonFungibleIdType.String => NonFungibleIdType.String,
-                                CoreModel.NonFungibleIdType.Integer => NonFungibleIdType.Integer,
-                                CoreModel.NonFungibleIdType.Bytes => NonFungibleIdType.Bytes,
-                                CoreModel.NonFungibleIdType.RUID => NonFungibleIdType.RUID,
-                                _ => throw new ArgumentOutOfRangeException(nameof(e.NonFungibleIdType), e.NonFungibleIdType, "Unexpected value of NonFungibleIdType"),
-                            });
+                            referencedEntity.PostResolveConfigure((GlobalNonFungibleResourceEntity e) => e.NonFungibleIdType =
+                                nonFungibleResourceManagerFieldIdTypeSubstate.Value.NonFungibleIdType switch
+                                {
+                                    CoreModel.NonFungibleIdType.String => NonFungibleIdType.String,
+                                    CoreModel.NonFungibleIdType.Integer => NonFungibleIdType.Integer,
+                                    CoreModel.NonFungibleIdType.Bytes => NonFungibleIdType.Bytes,
+                                    CoreModel.NonFungibleIdType.RUID => NonFungibleIdType.RUID,
+                                    _ => throw new ArgumentOutOfRangeException(nameof(e.NonFungibleIdType), e.NonFungibleIdType, "Unexpected value of NonFungibleIdType"),
+                                });
                         }
 
                         if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate typeInfoSubstate)
@@ -555,13 +561,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         EventsSbors = committedTransaction.Receipt.Events?.Select(x => x.Data.GetDataBytes()).ToArray() ?? Array.Empty<byte[]>(),
                         EventSchemaHashes =
                             committedTransaction.Receipt.Events?.Select(x => ((CoreModel.PackageTypePointer)x.Type.TypePointer).SchemaHash.ConvertFromHex()).ToArray()
-                                            ?? Array.Empty<byte[]>(),
+                            ?? Array.Empty<byte[]>(),
                         EventTypeIndexes =
                             committedTransaction.Receipt.Events?.Select(x => ((CoreModel.PackageTypePointer)x.Type.TypePointer).LocalTypeIndex.Index).ToArray()
-                                           ?? Array.Empty<int>(),
+                            ?? Array.Empty<int>(),
                         EventSborTypeKinds =
                             committedTransaction.Receipt.Events?.Select(x => ((CoreModel.PackageTypePointer)x.Type.TypePointer).LocalTypeIndex.Kind.ToModel()).ToArray().ToArray()
-                                             ?? Array.Empty<SborTypeKind>(),
+                            ?? Array.Empty<SborTypeKind>(),
                     };
 
                     ledgerTransactionsToAdd.Add(ledgerTransaction);
@@ -714,13 +720,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     throw new InvalidOperationException($"Unable to compute ancestors of entity {childAddress}: parentId={parentId}, ownerId={ownerId}, globalId={globalId}.");
                 }
 
-                referencedEntities.Get(childAddress).PostResolveConfigure((Entity dbe) =>
-                {
-                    dbe.AncestorIds = allAncestors;
-                    dbe.ParentAncestorId = parentId.Value;
-                    dbe.OwnerAncestorId = ownerId.Value;
-                    dbe.GlobalAncestorId = globalId.Value;
-                });
+                referencedEntities
+                    .Get(childAddress)
+                    .PostResolveConfigure((Entity dbe) =>
+                    {
+                        dbe.AncestorIds = allAncestors;
+                        dbe.ParentAncestorId = parentId.Value;
+                        dbe.OwnerAncestorId = ownerId.Value;
+                        dbe.GlobalAncestorId = globalId.Value;
+                    });
             }
 
             referencedEntities.InvokePostResolveConfiguration();
@@ -760,7 +768,10 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 try
                 {
-                    foreach (var substate in stateUpdates.CreatedSubstates.Select(x => new { x.SubstateId, x.Value }).Concat(stateUpdates.UpdatedSubstates.Select(x => new { x.SubstateId, Value = x.NewValue })))
+                    foreach (var substate in stateUpdates
+                                 .CreatedSubstates
+                                 .Select(x => new { x.SubstateId, x.Value })
+                                 .Concat(stateUpdates.UpdatedSubstates.Select(x => new { x.SubstateId, Value = x.NewValue })))
                     {
                         var substateId = substate.SubstateId;
                         var substateData = substate.Value.SubstateData;
@@ -961,15 +972,16 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             var lookup = new PackageBlueprintLookup(referencedEntity.DatabaseId, packageBlueprintDependencies.Key.BlueprintName, packageBlueprintDependencies.Key.BlueprintVersion);
 
                             packageBlueprintHistoryToAdd
-                                .GetOrAdd(lookup, _ => new PackageBlueprintHistory
-                                {
-                                    Id = sequences.PackageBlueprintHistorySequence++,
-                                    FromStateVersion = stateVersion,
-                                    PackageEntityId = referencedEntity.DatabaseId,
-                                    Name = lookup.Name,
-                                    Version = lookup.BlueprintVersion,
-                                })
-                                .DependantEntityIds = packageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
+                                    .GetOrAdd(lookup, _ => new PackageBlueprintHistory
+                                    {
+                                        Id = sequences.PackageBlueprintHistorySequence++,
+                                        FromStateVersion = stateVersion,
+                                        PackageEntityId = referencedEntity.DatabaseId,
+                                        Name = lookup.Name,
+                                        Version = lookup.BlueprintVersion,
+                                    })
+                                    .DependantEntityIds =
+                                packageBlueprintDependencies.Value.Dependencies.Dependencies.Select(address => referencedEntities.Get((EntityAddress)address).DatabaseId).ToList();
                         }
 
                         if (substateData is CoreModel.PackageBlueprintRoyaltyEntrySubstate packageBlueprintRoyalty)
@@ -1194,11 +1206,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                             if (!vaultEntity.IsRoyaltyVault)
                             {
-                                entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId, value * TokenAmount.MinusOne, stateVersion));
+                                entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId,
+                                    value * TokenAmount.MinusOne, stateVersion));
 
                                 if (eventEmitterEntity.DatabaseGlobalAncestorId != eventEmitterEntity.DatabaseOwnerAncestorId)
                                 {
-                                    entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId, value * TokenAmount.MinusOne, stateVersion));
+                                    entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId,
+                                        value * TokenAmount.MinusOne, stateVersion));
                                 }
                             }
                         }
@@ -1220,11 +1234,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                             if (!vaultEntity.IsRoyaltyVault)
                             {
-                                entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId, value, stateVersion));
+                                entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId, value,
+                                    stateVersion));
 
                                 if (eventEmitterEntity.DatabaseGlobalAncestorId != eventEmitterEntity.DatabaseOwnerAncestorId)
                                 {
-                                    entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId, value, stateVersion));
+                                    entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId, value,
+                                        stateVersion));
                                 }
                             }
                         }
@@ -1244,11 +1260,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 Quantity = TokenAmount.FromDecimalString(value),
                             });
 
-                            entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId, long.Parse(value) * -1, stateVersion));
+                            entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId,
+                                long.Parse(value) * -1, stateVersion));
 
                             if (eventEmitterEntity.DatabaseGlobalAncestorId != eventEmitterEntity.DatabaseOwnerAncestorId)
                             {
-                                entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId, long.Parse(value) * -1, stateVersion));
+                                entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId,
+                                    long.Parse(value) * -1, stateVersion));
                             }
                         }
                         else if (EventDecoder.TryGetNonFungibleVaultDepositEvent(decodedEvent, out var nonFungibleVaultDepositEvent))
@@ -1267,11 +1285,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 Quantity = TokenAmount.FromDecimalString(value),
                             });
 
-                            entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId, long.Parse(value), stateVersion));
+                            entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId,
+                                long.Parse(value), stateVersion));
 
                             if (eventEmitterEntity.DatabaseGlobalAncestorId != eventEmitterEntity.DatabaseOwnerAncestorId)
                             {
-                                entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId, long.Parse(value), stateVersion));
+                                entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId,
+                                    long.Parse(value), stateVersion));
                             }
                         }
                         else if (EventDecoder.TryGetFungibleResourceMintedEvent(decodedEvent, out var fungibleResourceMintedEvent))
@@ -1292,7 +1312,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         else if (EventDecoder.TryGetNonFungibleResourceBurnedEvent(decodedEvent, out var nonFungibleResourceBurnedEvent))
                         {
                             var burnedCount = TokenAmount.FromDecimalString(nonFungibleResourceBurnedEvent.ids.Count.ToString());
-                            resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion, Burned:burnedCount));
+                            resourceSupplyChanges.Add(new ResourceSupplyChange(eventEmitterEntity.DatabaseId, stateVersion, Burned: burnedCount));
                         }
                     }
 
@@ -1358,7 +1378,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             var mostRecentAccessRulesEntryHistory = await readHelper.MostRecentEntityRoleAssignmentsEntryHistoryFor(roleAssignmentsChangePointers.Values, token);
             var mostRecentAccessRulesAggregateHistory = await readHelper.MostRecentEntityRoleAssignmentsAggregateHistoryFor(roleAssignmentChanges, token);
             var mostRecentEntityResourceAggregateHistory = await readHelper.MostRecentEntityResourceAggregateHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
-            var mostRecentEntityResourceAggregatedVaultsHistory = await readHelper.MostRecentEntityResourceAggregatedVaultsHistoryFor(entityFungibleResourceBalanceChangeEvents, entityNonFungibleResourceBalanceChangeEvents, token);
+            var mostRecentEntityResourceAggregatedVaultsHistory =
+                await readHelper.MostRecentEntityResourceAggregatedVaultsHistoryFor(entityFungibleResourceBalanceChangeEvents, entityNonFungibleResourceBalanceChangeEvents, token);
             var mostRecentEntityResourceVaultAggregateHistory = await readHelper.MostRecentEntityResourceVaultAggregateHistoryFor(fungibleVaultChanges, nonFungibleVaultChanges, token);
             var mostRecentNonFungibleIdStoreHistory = await readHelper.MostRecentNonFungibleIdStoreHistoryFor(nonFungibleIdChanges, token);
             var mostRecentResourceEntitySupplyHistory = await readHelper.MostRecentResourceEntitySupplyHistoryFor(resourceSupplyChanges, token);
@@ -1398,7 +1419,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 EntityMetadataAggregateHistory aggregate;
 
-                if (!mostRecentAggregatedMetadataHistory.TryGetValue(metadataChange.ReferencedEntity.DatabaseId, out var previousAggregate) || previousAggregate.FromStateVersion != metadataChange.StateVersion)
+                if (!mostRecentAggregatedMetadataHistory.TryGetValue(metadataChange.ReferencedEntity.DatabaseId, out var previousAggregate) ||
+                    previousAggregate.FromStateVersion != metadataChange.StateVersion)
                 {
                     aggregate = new EntityMetadataAggregateHistory
                     {
@@ -1690,11 +1712,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     var vaultExists = mostRecentEntityNonFungibleVaultHistory.TryGetValue(e.Key.ReferencedVault.DatabaseId, out var existingVaultHistory);
 
                     var nfids = vaultExists ? existingVaultHistory!.NonFungibleIds : new List<long>();
-                    var addedItems = e.Where(x => !x.IsWithdrawal)
+                    var addedItems = e
+                        .Where(x => !x.IsWithdrawal)
                         .Select(x => existingNonFungibleIdData[new NonFungibleIdLookup(e.Key.ReferencedResource.DatabaseId, x.NonFungibleId)].Id)
                         .ToList();
 
-                    var deletedItems = e.Where(x => x.IsWithdrawal)
+                    var deletedItems = e
+                        .Where(x => x.IsWithdrawal)
                         .Select(x => existingNonFungibleIdData[new NonFungibleIdLookup(e.Key.ReferencedResource.DatabaseId, x.NonFungibleId)].Id)
                         .ToList();
 

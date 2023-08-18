@@ -73,40 +73,40 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class ScryptoSborUtils
 {
-     public static string GetNonFungibleId(string input)
-     {
-         var decodedNfid = ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdSborDecode(Convert.FromHexString(input).ToList());
-         var stringNfid = ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(decodedNfid);
-         return stringNfid;
-     }
+    public static string GetNonFungibleId(string input)
+    {
+        var decodedNfid = ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdSborDecode(Convert.FromHexString(input).ToList());
+        var stringNfid = ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(decodedNfid);
+        return stringNfid;
+    }
 
-     public static string DataToProgrammaticJson(byte[] data, byte[] schemaBytes, SborTypeKind keyTypeKind, int schemaIndex, byte networkId)
-     {
-         ToolkitModel.LocalTypeIndex typeIndex = keyTypeKind switch
-         {
-             SborTypeKind.SchemaLocal => new ToolkitModel.LocalTypeIndex.SchemaLocalIndex((ulong)schemaIndex),
-             SborTypeKind.WellKnown => new ToolkitModel.LocalTypeIndex.WellKnown((byte)schemaIndex),
-             _ => throw new ArgumentOutOfRangeException(nameof(keyTypeKind), keyTypeKind, null),
-         };
+    public static string DataToProgrammaticJson(byte[] data, byte[] schemaBytes, SborTypeKind keyTypeKind, int schemaIndex, byte networkId)
+    {
+        ToolkitModel.LocalTypeIndex typeIndex = keyTypeKind switch
+        {
+            SborTypeKind.SchemaLocal => new ToolkitModel.LocalTypeIndex.SchemaLocalIndex((ulong)schemaIndex),
+            SborTypeKind.WellKnown => new ToolkitModel.LocalTypeIndex.WellKnown((byte)schemaIndex),
+            _ => throw new ArgumentOutOfRangeException(nameof(keyTypeKind), keyTypeKind, null),
+        };
 
-         var schema = new ToolkitModel.Schema(typeIndex, schemaBytes.ToList());
+        var schema = new ToolkitModel.Schema(typeIndex, schemaBytes.ToList());
 
-         var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.SborDecodeToStringRepresentation(
-             data.ToList(),
-             ToolkitModel.SerializationMode.PROGRAMMATIC,
-             networkId,
-             schema);
+        var stringRepresentation = ToolkitModel.RadixEngineToolkitUniffiMethods.SborDecodeToStringRepresentation(
+            data.ToList(),
+            ToolkitModel.SerializationMode.PROGRAMMATIC,
+            networkId,
+            schema);
 
-         return stringRepresentation;
-     }
+        return stringRepresentation;
+    }
 
-     public static GatewayModel.MetadataTypedValue DecodeToGatewayMetadataItemValue(byte[] rawScryptoSbor, byte networkId)
-     {
-         using var metadataValue = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborDecode(rawScryptoSbor.ToList(), networkId);
-         return ConvertToolkitMetadataToGateway(metadataValue);
-     }
+    public static GatewayModel.MetadataTypedValue DecodeToGatewayMetadataItemValue(byte[] rawScryptoSbor, byte networkId)
+    {
+        using var metadataValue = ToolkitModel.RadixEngineToolkitUniffiMethods.MetadataSborDecode(rawScryptoSbor.ToList(), networkId);
+        return ConvertToolkitMetadataToGateway(metadataValue);
+    }
 
-     public static GatewayModel.MetadataTypedValue ConvertToolkitMetadataToGateway(ToolkitModel.MetadataValue metadataValue)
+    public static GatewayModel.MetadataTypedValue ConvertToolkitMetadataToGateway(ToolkitModel.MetadataValue metadataValue)
     {
         switch (metadataValue)
         {
@@ -135,9 +135,16 @@ internal static class ScryptoSborUtils
             case ToolkitModel.MetadataValue.InstantValue instantValue:
                 return new GatewayModel.MetadataInstantValue(DateTimeOffset.FromUnixTimeSeconds(instantValue.value).AsUtcIsoDateAtSecondsPrecisionString());
             case ToolkitModel.MetadataValue.NonFungibleGlobalIdArrayValue nonFungibleGlobalIdArrayValue:
-                return new GatewayModel.MetadataNonFungibleGlobalIdArrayValue(nonFungibleGlobalIdArrayValue.value.Select(x => new GatewayModel.MetadataNonFungibleGlobalIdValueAllOf(x.ResourceAddress().AddressString(), ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(x.LocalId()))).ToList());
+                return new GatewayModel.MetadataNonFungibleGlobalIdArrayValue(nonFungibleGlobalIdArrayValue
+                    .value
+                    .Select(x => new GatewayModel.MetadataNonFungibleGlobalIdValueAllOf(
+                        x.ResourceAddress().AddressString(),
+                        ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(x.LocalId())))
+                    .ToList());
             case ToolkitModel.MetadataValue.NonFungibleGlobalIdValue nonFungibleGlobalIdValue:
-                return new GatewayModel.MetadataNonFungibleGlobalIdValue(nonFungibleGlobalIdValue.value.ResourceAddress().AddressString(), ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(nonFungibleGlobalIdValue.value.LocalId()));
+                return new GatewayModel.MetadataNonFungibleGlobalIdValue(
+                    nonFungibleGlobalIdValue.value.ResourceAddress().AddressString(),
+                    ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr(nonFungibleGlobalIdValue.value.LocalId()));
             case ToolkitModel.MetadataValue.NonFungibleLocalIdArrayValue nonFungibleLocalIdArrayValue:
                 return new GatewayModel.MetadataNonFungibleLocalIdArrayValue(nonFungibleLocalIdArrayValue.value.Select(ToolkitModel.RadixEngineToolkitUniffiMethods.NonFungibleLocalIdAsStr).ToList());
             case ToolkitModel.MetadataValue.NonFungibleLocalIdValue nonFungibleLocalIdValue:

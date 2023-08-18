@@ -97,8 +97,8 @@ public static class ExceptionExtensions
     public static string GetNameForMetricsOrLogging(this Exception exception)
     {
         return exception is AggregateException aggregateException
-                ? aggregateException.GetArrayOfExceptionNamesForMetricsOrLogging()
-                : exception.GetType().Name;
+            ? aggregateException.GetArrayOfExceptionNamesForMetricsOrLogging()
+            : exception.GetType().Name;
     }
 
     private static string GetArrayOfExceptionNamesForMetricsOrLogging(this AggregateException exception)
