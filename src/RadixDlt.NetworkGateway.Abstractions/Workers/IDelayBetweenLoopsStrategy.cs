@@ -69,7 +69,8 @@ namespace RadixDlt.NetworkGateway.Abstractions.Workers;
 public interface IDelayBetweenLoopsStrategy
 {
     public static IDelayBetweenLoopsStrategy ConstantDelayStrategy(
-        TimeSpan delayBetweenLoopTriggersIfSuccessful, TimeSpan delayBetweenLoopTriggersIfError)
+        TimeSpan delayBetweenLoopTriggersIfSuccessful,
+        TimeSpan delayBetweenLoopTriggersIfError)
     {
         // Reusing exponential backoff strategy with a rate of 1
         return ExponentialDelayStrategy(

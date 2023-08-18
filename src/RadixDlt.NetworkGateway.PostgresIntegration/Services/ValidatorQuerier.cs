@@ -77,7 +77,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class ValidatorQuerier : IValidatorQuerier
 {
-    private record ValidatorUptimeViewModel(long ValidatorId,  EntityAddress ValidatorAddress, long? ProposalsMadeSum, long? ProposalsMissedSum, long EpochsActiveIn);
+    private record ValidatorUptimeViewModel(long ValidatorId, EntityAddress ValidatorAddress, long? ProposalsMadeSum, long? ProposalsMissedSum, long EpochsActiveIn);
 
     private readonly ReadOnlyDbContext _dbContext;
 
@@ -86,8 +86,11 @@ internal class ValidatorQuerier : IValidatorQuerier
         _dbContext = dbContext;
     }
 
-    public async Task<GatewayModel.ValidatorsUptimeResponse> ValidatorsUptimeStatistics(IList<EntityAddress> validatorAddresses, GatewayModel.LedgerState ledgerState,
-        GatewayModel.LedgerState? fromLedgerState, CancellationToken token = default)
+    public async Task<GatewayModel.ValidatorsUptimeResponse> ValidatorsUptimeStatistics(
+        IList<EntityAddress> validatorAddresses,
+        GatewayModel.LedgerState ledgerState,
+        GatewayModel.LedgerState? fromLedgerState,
+        CancellationToken token = default)
     {
         var cd = new CommandDefinition(
             commandText: @"

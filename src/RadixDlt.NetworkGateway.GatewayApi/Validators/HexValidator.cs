@@ -100,7 +100,8 @@ public sealed class HexValidator<T> : PropertyValidator<T, string?>
 
             if (actual.Length != _expectedLength)
             {
-                context.MessageFormatter
+                context
+                    .MessageFormatter
                     .AppendArgument("ExpectedBytes", _expectedLength)
                     .AppendArgument("ActualBytes", actual.Length);
 

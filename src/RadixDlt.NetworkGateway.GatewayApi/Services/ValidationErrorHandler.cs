@@ -90,7 +90,8 @@ internal class ValidationErrorHandler : IValidationErrorHandler
         var errors = new List<GatewayModel.ValidationErrorsAtPath>();
         foreach (var (path, modelValue) in actionContext.ModelState)
         {
-            var errorMessagesToShow = modelValue.Errors
+            var errorMessagesToShow = modelValue
+                .Errors
                 .Select(e => e.ErrorMessage)
                 .Where(e => e != "The request field is required.")
                 .ToList();

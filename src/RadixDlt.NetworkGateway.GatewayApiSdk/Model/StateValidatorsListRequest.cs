@@ -64,4 +64,6 @@
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public partial class StateValidatorsListRequest : IPaginableRequest { }
+public partial class StateValidatorsListRequest : IPaginableRequest
+{
+}

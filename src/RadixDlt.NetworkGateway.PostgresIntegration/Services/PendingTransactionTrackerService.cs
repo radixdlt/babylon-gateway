@@ -140,7 +140,8 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
             return new HashSet<PendingTransactionHashPair>();
         }
 
-        var unfetchedTransactionsAlreadyInDatabase = await dbContext.PendingTransactions
+        var unfetchedTransactionsAlreadyInDatabase = await dbContext
+            .PendingTransactions
             .Where(pt => payloadHashesInMempoolNotRecentlyFetched.Contains(Tuple.Create(pt.IntentHash, pt.PayloadHash)))
             .Select(pt => Tuple.Create(pt.IntentHash, pt.PayloadHash))
             .ToListAsync(cancellationToken);
@@ -238,7 +239,8 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
 
         var pendingTransactionIds = combinedMempoolWithLastSeen.Keys.Select(h => h.PayloadHash).ToList(); // Npgsql optimizes List<> Contains
 
-        var reappearedTransactions = await dbContext.PendingTransactions
+        var reappearedTransactions = await dbContext
+            .PendingTransactions
             .Where(mt => pendingTransactionIds.Contains(mt.PayloadHash))
             .Where(mt => mt.Status == PendingTransactionStatus.Missing)
             .ToListAsync(token);
@@ -284,7 +286,8 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
         // If we don't have the transaction contents, either these transactions are already in our MempoolTransactions
         // table, or they've yet to be fetched by a node. Either way, we filter them out and don't consider them further
         // for the time being.
-        var transactionsWhichMightNeedAdding = combinedMempoolWithLastSeen.Keys
+        var transactionsWhichMightNeedAdding = combinedMempoolWithLastSeen
+            .Keys
             .SelectNonNull(transactionId => _recentFullTransactionsFetched.GetOrDefault(transactionId))
             .ToList();
 
@@ -296,17 +299,19 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
         // We check both the PendingTransactions table, and the LedgerTransactions table.
         // If a node mempool gets really far behind, it could include committed transactions we've already pruned
         // from our MempoolTransactions table due to being committed - so let's ensure these don't get re-added.
-        var transactionIdsInANodeMempoolWhichAreAlreadyAMempoolTransactionInTheDb = (await dbContext.PendingTransactions
-            .Where(pt => transactionIdsWhichMightNeedAdding.Contains(pt.PayloadHash))
-            .Select(pt => pt.PayloadHash)
-            .ToListAsync(token))
+        var transactionIdsInANodeMempoolWhichAreAlreadyAMempoolTransactionInTheDb = (await dbContext
+                .PendingTransactions
+                .Where(pt => transactionIdsWhichMightNeedAdding.Contains(pt.PayloadHash))
+                .Select(pt => pt.PayloadHash)
+                .ToListAsync(token))
             .ToHashSet();
 
-        var transactionIdsInANodeMempoolWhichAreAlreadyCommitted = (await dbContext.LedgerTransactions
-            .OfType<UserLedgerTransaction>()
-            .Where(ult => transactionIdsWhichMightNeedAdding.Contains(ult.PayloadHash))
-            .Select(ult => ult.PayloadHash)
-            .ToListAsync(token))
+        var transactionIdsInANodeMempoolWhichAreAlreadyCommitted = (await dbContext
+                .LedgerTransactions
+                .OfType<UserLedgerTransaction>()
+                .Where(ult => transactionIdsWhichMightNeedAdding.Contains(ult.PayloadHash))
+                .Select(ult => ult.PayloadHash)
+                .ToListAsync(token))
             .ToHashSet();
 
         var transactionsToAdd = transactionsWhichMightNeedAdding
@@ -360,7 +365,8 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
 
         var submissionGracePeriodCutOff = currentTimestamp - mempoolOptions.PostSubmissionGracePeriodBeforeCanBeMarkedMissing;
 
-        var previouslyTrackedTransactionsNowMissingFromNodeMempools = await dbContext.PendingTransactions
+        var previouslyTrackedTransactionsNowMissingFromNodeMempools = await dbContext
+            .PendingTransactions
             .Where(pt => pt.Status == PendingTransactionStatus.SubmittedOrKnownInNodeMempool)
             .Where(pt =>
                 !pt.SubmittedByThisGateway

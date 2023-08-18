@@ -157,7 +157,8 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
             new CoreModel.MempoolListRequest(network: _networkConfigurationProvider.GetNetworkName()),
             cancellationToken);
 
-        var hashesInMempool = mempoolListResponse.Contents
+        var hashesInMempool = mempoolListResponse
+            .Contents
             .Select(ti => new PendingTransactionHashPair(ti.IntentHashBech32m, ti.PayloadHashBech32m))
             .ToList();
 

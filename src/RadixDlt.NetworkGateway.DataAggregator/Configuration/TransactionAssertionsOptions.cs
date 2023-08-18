@@ -102,7 +102,8 @@ public sealed record TransactionAssertionsOptions
 
     private IReadOnlyList<string> SplitCommaSeparatedList(string list)
     {
-        return list.Split(",")
+        return list
+            .Split(",")
             .Select(s => s.Trim())
             .Where(s => !string.IsNullOrEmpty(s))
             .ToImmutableList();

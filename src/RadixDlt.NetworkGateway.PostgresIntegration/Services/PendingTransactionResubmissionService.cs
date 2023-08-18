@@ -246,7 +246,6 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
                 && (
                     /* Transactions get marked Missing way by the MempoolTrackerService */
                     mt.Status == PendingTransactionStatus.Missing
-
                     /* Transactions get marked RejectedTemporarily by PendingTransactionResubmissionService */
                     || mt.Status == PendingTransactionStatus.RejectedTemporarily
                 )
@@ -374,7 +373,9 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
     private CoreApiNode GetRandomCoreApi()
     {
-        return _networkOptionsMonitor.CurrentValue.CoreApiNodes
+        return _networkOptionsMonitor
+            .CurrentValue
+            .CoreApiNodes
             .Where(n => n.Enabled && !n.DisabledForConstruction)
             .GetRandomBy(n => (double)n.RequestWeighting);
     }

@@ -106,16 +106,23 @@ internal static class ManifestAddressesExtractor
         var identitiesRequiringAuth = manifest.IdentitiesRequiringAuth().Select(x => (EntityAddress)x.AddressString()).ToList();
 
         var packageAddresses = allAddresses.Where(x => x.Key == ToolkitModel.EntityType.GLOBAL_PACKAGE).SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
-        var componentAddresses = allAddresses.Where(x => x.Key is ToolkitModel.EntityType.GLOBAL_GENERIC_COMPONENT or ToolkitModel.EntityType.INTERNAL_GENERIC_COMPONENT)
-            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
-        var resourceAddresses = allAddresses.Where(x => x.Key is ToolkitModel.EntityType.GLOBAL_FUNGIBLE_RESOURCE_MANAGER or ToolkitModel.EntityType.GLOBAL_NON_FUNGIBLE_RESOURCE_MANAGER)
-            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
+        var componentAddresses = allAddresses
+            .Where(x => x.Key is ToolkitModel.EntityType.GLOBAL_GENERIC_COMPONENT or ToolkitModel.EntityType.INTERNAL_GENERIC_COMPONENT)
+            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
+            .ToList();
+        var resourceAddresses = allAddresses
+            .Where(x => x.Key is ToolkitModel.EntityType.GLOBAL_FUNGIBLE_RESOURCE_MANAGER or ToolkitModel.EntityType.GLOBAL_NON_FUNGIBLE_RESOURCE_MANAGER)
+            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
+            .ToList();
         var accountAddresses = allAddresses
             .Where(x => x.Key is ToolkitModel.EntityType.GLOBAL_ACCOUNT or ToolkitModel.EntityType.INTERNAL_ACCOUNT or ToolkitModel.EntityType.GLOBAL_VIRTUAL_ED25519_ACCOUNT
-                or ToolkitModel.EntityType.GLOBAL_VIRTUAL_SECP256K1_ACCOUNT).SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
+                or ToolkitModel.EntityType.GLOBAL_VIRTUAL_SECP256K1_ACCOUNT)
+            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
+            .ToList();
         var identityAddresses = allAddresses
             .Where(x => x.Key is ToolkitModel.EntityType.GLOBAL_IDENTITY or ToolkitModel.EntityType.GLOBAL_VIRTUAL_ED25519_IDENTITY or ToolkitModel.EntityType.GLOBAL_VIRTUAL_SECP256K1_IDENTITY)
-            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString())).ToList();
+            .SelectMany(x => x.Value.Select(y => (EntityAddress)y.AddressString()))
+            .ToList();
 
         return new ManifestAddresses(
             packageAddresses,

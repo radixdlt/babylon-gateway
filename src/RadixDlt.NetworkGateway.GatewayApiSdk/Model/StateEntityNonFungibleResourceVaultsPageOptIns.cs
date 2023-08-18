@@ -62,9 +62,9 @@
  * permissions under this License.
  */
 
-﻿namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 public partial class StateEntityNonFungibleResourceVaultsPageOptIns
 {
-    public static StateEntityNonFungibleResourceVaultsPageOptIns Default => new ();
+    public static StateEntityNonFungibleResourceVaultsPageOptIns Default => new();
 }

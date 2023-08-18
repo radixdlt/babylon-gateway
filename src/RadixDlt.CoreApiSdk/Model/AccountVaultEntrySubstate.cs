@@ -78,4 +78,3 @@ public partial class AccountVaultEntrySubstate : IEntityAddressPointer, IEntityO
         yield return Value.Vault;
     }
 }
-

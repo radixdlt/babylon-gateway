@@ -182,27 +182,32 @@ internal abstract class CommonDbContext : DbContext
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        configurationBuilder.Properties<TokenAmount>()
+        configurationBuilder
+            .Properties<TokenAmount>()
             .HaveConversion<TokenAmountToBigIntegerConverter>()
             .HaveColumnType("numeric")
             .HavePrecision(1000, 0);
 
-        configurationBuilder.Properties<RadixAddress>()
+        configurationBuilder
+            .Properties<RadixAddress>()
             .HaveConversion<RadixAddressToByteArrayConverter>();
 
-        configurationBuilder.Properties<EntityAddress>()
+        configurationBuilder
+            .Properties<EntityAddress>()
             .HaveConversion<EntityAddressToStringConverter>();
     }
 
     private static void HookupTransactions(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<LedgerTransaction>()
+        modelBuilder
+            .Entity<LedgerTransaction>()
             .HasDiscriminator<LedgerTransactionType>(DiscriminatorColumnName)
             .HasValue<UserLedgerTransaction>(LedgerTransactionType.User)
             .HasValue<RoundUpdateLedgerTransaction>(LedgerTransactionType.RoundUpdate)
             .HasValue<GenesisLedgerTransaction>(LedgerTransactionType.Genesis);
 
-        modelBuilder.Entity<UserLedgerTransaction>()
+        modelBuilder
+            .Entity<UserLedgerTransaction>()
             .HasIndex(lt => lt.IntentHash)
             .HasMethod("hash")
             .HasFilter("intent_hash IS NOT NULL");
@@ -213,58 +218,70 @@ internal abstract class CommonDbContext : DbContext
         // See also https://www.postgresql.org/docs/current/indexes-types.html
 
         // This index lets you quickly translate Time => StateVersion
-        modelBuilder.Entity<LedgerTransaction>()
+        modelBuilder
+            .Entity<LedgerTransaction>()
             .HasIndex(lt => lt.RoundTimestamp);
 
         // This index lets you quickly translate Epoch/Round => StateVersion
-        modelBuilder.Entity<LedgerTransaction>()
+        modelBuilder
+            .Entity<LedgerTransaction>()
             .HasIndex(lt => new { lt.Epoch, lt.RoundInEpoch })
             .IsUnique()
             .HasFilter("index_in_round = 0");
 
-        modelBuilder.Entity<LedgerTransactionMarker>()
+        modelBuilder
+            .Entity<LedgerTransactionMarker>()
             .HasDiscriminator<LedgerTransactionMarkerType>(DiscriminatorColumnName)
             .HasValue<EventLedgerTransactionMarker>(LedgerTransactionMarkerType.Event)
             .HasValue<OriginLedgerTransactionMarker>(LedgerTransactionMarkerType.Origin)
             .HasValue<ManifestAddressLedgerTransactionMarker>(LedgerTransactionMarkerType.ManifestAddress)
             .HasValue<AffectedGlobalEntityTransactionMarker>(LedgerTransactionMarkerType.AffectedGlobalEntity);
 
-        modelBuilder.Entity<EventLedgerTransactionMarker>()
+        modelBuilder
+            .Entity<EventLedgerTransactionMarker>()
             .HasIndex(e => new { e.EventType, e.EntityId, e.StateVersion })
             .HasFilter("discriminator = 'event'");
 
-        modelBuilder.Entity<OriginLedgerTransactionMarker>()
+        modelBuilder
+            .Entity<OriginLedgerTransactionMarker>()
             .HasIndex(e => new { e.OriginType, e.StateVersion })
             .HasFilter("discriminator = 'origin'");
 
-        modelBuilder.Entity<ManifestAddressLedgerTransactionMarker>()
+        modelBuilder
+            .Entity<ManifestAddressLedgerTransactionMarker>()
             .HasIndex(e => new { e.OperationType, e.EntityId, e.StateVersion })
             .HasFilter("discriminator = 'manifest_address'");
 
-        modelBuilder.Entity<AffectedGlobalEntityTransactionMarker>()
+        modelBuilder
+            .Entity<AffectedGlobalEntityTransactionMarker>()
             .HasIndex(e => new { e.EntityId, e.StateVersion })
             .HasFilter("discriminator = 'affected_global_entity'");
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<PendingTransaction>()
+        modelBuilder
+            .Entity<PendingTransaction>()
             .HasIndex(pt => pt.Status);
 
-        modelBuilder.Entity<PendingTransaction>()
+        modelBuilder
+            .Entity<PendingTransaction>()
             .HasIndex(pt => pt.PayloadHash)
             .IsUnique();
 
-        modelBuilder.Entity<PendingTransaction>()
+        modelBuilder
+            .Entity<PendingTransaction>()
             .HasIndex(pt => pt.IntentHash);
     }
 
     private static void HookupEntities(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Entity>()
+        modelBuilder
+            .Entity<Entity>()
             .HasIndex(e => e.Address);
 
-        modelBuilder.Entity<Entity>()
+        modelBuilder
+            .Entity<Entity>()
             .HasDiscriminator<EntityType>(DiscriminatorColumnName)
             .HasValue<GlobalConsensusManager>(EntityType.GlobalConsensusManager)
             .HasValue<GlobalFungibleResourceEntity>(EntityType.GlobalFungibleResource)
@@ -288,117 +305,152 @@ internal abstract class CommonDbContext : DbContext
 
     private static void HookupHistory(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AccountDefaultDepositRuleHistory>()
+        modelBuilder
+            .Entity<AccountDefaultDepositRuleHistory>()
             .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<AccountResourcePreferenceRuleHistory>()
+        modelBuilder
+            .Entity<AccountResourcePreferenceRuleHistory>()
             .HasIndex(e => new { e.AccountEntityId, e.ResourceEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityMetadataHistory>()
+        modelBuilder
+            .Entity<EntityMetadataHistory>()
             .HasIndex(e => new { e.EntityId, e.Key, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityMetadataAggregateHistory>()
+        modelBuilder
+            .Entity<EntityMetadataAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityResourceAggregateHistory>()
+        modelBuilder
+            .Entity<EntityResourceAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityResourceAggregatedVaultsHistory>()
+        modelBuilder
+            .Entity<EntityResourceAggregatedVaultsHistory>()
             .HasDiscriminator<ResourceType>(DiscriminatorColumnName)
             .HasValue<EntityFungibleResourceAggregatedVaultsHistory>(ResourceType.Fungible)
             .HasValue<EntityNonFungibleResourceAggregatedVaultsHistory>(ResourceType.NonFungible);
 
-        modelBuilder.Entity<EntityResourceAggregatedVaultsHistory>()
+        modelBuilder
+            .Entity<EntityResourceAggregatedVaultsHistory>()
             .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityResourceVaultAggregateHistory>()
+        modelBuilder
+            .Entity<EntityResourceVaultAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityVaultHistory>()
+        modelBuilder
+            .Entity<EntityVaultHistory>()
             .HasDiscriminator<ResourceType>(DiscriminatorColumnName)
             .HasValue<EntityFungibleVaultHistory>(ResourceType.Fungible)
             .HasValue<EntityNonFungibleVaultHistory>(ResourceType.NonFungible);
 
-        modelBuilder.Entity<EntityVaultHistory>()
+        modelBuilder
+            .Entity<EntityVaultHistory>()
             .HasIndex(e => new { e.OwnerEntityId, e.VaultEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityVaultHistory>()
+        modelBuilder
+            .Entity<EntityVaultHistory>()
             .HasIndex(e => new { e.GlobalEntityId, e.VaultEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityVaultHistory>()
+        modelBuilder
+            .Entity<EntityVaultHistory>()
             .HasIndex(e => new { e.Id, e.ResourceEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityRoleAssignmentsOwnerRoleHistory>()
+        modelBuilder
+            .Entity<EntityRoleAssignmentsOwnerRoleHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityRoleAssignmentsEntryHistory>()
+        modelBuilder
+            .Entity<EntityRoleAssignmentsEntryHistory>()
             .HasIndex(e => new { e.EntityId, e.KeyRole, e.KeyModule, e.FromStateVersion });
 
-        modelBuilder.Entity<EntityRoleAssignmentsAggregateHistory>()
+        modelBuilder
+            .Entity<EntityRoleAssignmentsAggregateHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<ComponentMethodRoyaltyEntryHistory>()
+        modelBuilder
+            .Entity<ComponentMethodRoyaltyEntryHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<ComponentMethodRoyaltyEntryHistory>()
+        modelBuilder
+            .Entity<ComponentMethodRoyaltyEntryHistory>()
             .HasIndex(e => new { e.EntityId, e.MethodName, e.FromStateVersion });
 
-        modelBuilder.Entity<ResourceEntitySupplyHistory>()
+        modelBuilder
+            .Entity<ResourceEntitySupplyHistory>()
             .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<NonFungibleIdData>()
+        modelBuilder
+            .Entity<NonFungibleIdData>()
             .HasIndex(e => new { e.NonFungibleResourceEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<NonFungibleIdData>()
+        modelBuilder
+            .Entity<NonFungibleIdData>()
             .HasIndex(e => new { e.NonFungibleResourceEntityId, e.NonFungibleId, e.FromStateVersion })
             .IsUnique();
 
-        modelBuilder.Entity<NonFungibleIdDataHistory>()
+        modelBuilder
+            .Entity<NonFungibleIdDataHistory>()
             .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
 
-        modelBuilder.Entity<NonFungibleIdStoreHistory>()
+        modelBuilder
+            .Entity<NonFungibleIdStoreHistory>()
             .HasIndex(e => new { e.NonFungibleResourceEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<StateHistory>()
+        modelBuilder
+            .Entity<StateHistory>()
             .HasIndex(e => new { EntityId = e.EntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<PackageBlueprintHistory>()
+        modelBuilder
+            .Entity<PackageBlueprintHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<PackageCodeHistory>()
+        modelBuilder
+            .Entity<PackageCodeHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<PackageSchemaHistory>()
+        modelBuilder
+            .Entity<PackageSchemaHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<PackageSchemaHistory>()
+        modelBuilder
+            .Entity<PackageSchemaHistory>()
             .HasIndex(e => new { e.SchemaHash, e.FromStateVersion });
 
-        modelBuilder.Entity<ValidatorPublicKeyHistory>()
+        modelBuilder
+            .Entity<ValidatorPublicKeyHistory>()
             .HasIndex(e => new { e.ValidatorEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<ValidatorPublicKeyHistory>()
+        modelBuilder
+            .Entity<ValidatorPublicKeyHistory>()
             .HasIndex(e => new { e.ValidatorEntityId, e.KeyType, e.Key });
 
-        modelBuilder.Entity<ValidatorActiveSetHistory>()
+        modelBuilder
+            .Entity<ValidatorActiveSetHistory>()
             .HasIndex(e => e.FromStateVersion);
 
-        modelBuilder.Entity<ValidatorActiveSetHistory>()
+        modelBuilder
+            .Entity<ValidatorActiveSetHistory>()
             .HasIndex(e => e.Epoch);
 
-        modelBuilder.Entity<KeyValueStoreEntryHistory>()
+        modelBuilder
+            .Entity<KeyValueStoreEntryHistory>()
             .HasIndex(e => new { e.KeyValueStoreEntityId, e.Key, e.FromStateVersion });
 
-        modelBuilder.Entity<KeyValueStoreSchemaHistory>()
+        modelBuilder
+            .Entity<KeyValueStoreSchemaHistory>()
             .HasIndex(e => new { EntityId = e.KeyValueStoreEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<NonFungibleSchemaHistory>()
+        modelBuilder
+            .Entity<NonFungibleSchemaHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
     }
 
     private static void HookupStatistics(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<ValidatorEmissionStatistics>()
+        modelBuilder
+            .Entity<ValidatorEmissionStatistics>()
             .HasIndex(e => new { e.ValidatorEntityId, e.EpochNumber });
     }
 }

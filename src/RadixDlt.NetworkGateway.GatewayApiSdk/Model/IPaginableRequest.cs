@@ -67,5 +67,5 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 public interface IPaginableRequest
 {
     public LedgerStateSelector AtLedgerState { get; }
-    public string Cursor { get;  }
+    public string Cursor { get; }
 }

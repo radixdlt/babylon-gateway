@@ -94,7 +94,9 @@ internal class TransactionQuerier : ITransactionQuerier
 
     public async Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default)
     {
-        var referencedAddresses = request.SearchCriteria.ManifestAccountsDepositedInto
+        var referencedAddresses = request
+            .SearchCriteria
+            .ManifestAccountsDepositedInto
             .Concat(request.SearchCriteria.ManifestAccountsWithdrawnFrom)
             .Concat(request.SearchCriteria.ManifestResources)
             .Concat(request.SearchCriteria.AffectedGlobalEntities)
@@ -127,7 +129,8 @@ internal class TransactionQuerier : ITransactionQuerier
             ? request.Cursor?.StateVersionBoundary ?? request.FromStateVersion
             : request.FromStateVersion;
 
-        var searchQuery = _dbContext.LedgerTransactionMarkers
+        var searchQuery = _dbContext
+            .LedgerTransactionMarkers
             .Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion >= (lowerStateVersion ?? lt.StateVersion))
             .Select(lt => lt.StateVersion);
 
@@ -304,9 +307,15 @@ internal class TransactionQuerier : ITransactionQuerier
         return new TransactionPageWithoutTotal(nextCursor, transactions);
     }
 
-    public async Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(string intentHash, GatewayModel.TransactionCommittedDetailsOptIns optIns, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
+    public async Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(
+        string intentHash,
+        GatewayModel.TransactionCommittedDetailsOptIns optIns,
+        GatewayModel.LedgerState ledgerState,
+        bool withDetails,
+        CancellationToken token = default)
     {
-        var stateVersion = await _dbContext.LedgerTransactions
+        var stateVersion = await _dbContext
+            .LedgerTransactions
             .OfType<UserLedgerTransaction>()
             .Where(ult => ult.StateVersion <= ledgerState.StateVersion && ult.IntentHash == intentHash)
             .Select(ult => ult.StateVersion)
@@ -324,7 +333,8 @@ internal class TransactionQuerier : ITransactionQuerier
 
     public async Task<ICollection<StatusLookupResult>> LookupPendingTransactionsByIntentHash(string intentHash, CancellationToken token = default)
     {
-        var pendingTransactions = await _rwDbContext.PendingTransactions
+        var pendingTransactions = await _rwDbContext
+            .PendingTransactions
             .Where(pt => pt.IntentHash == intentHash)
             .ToListAsync(token);
 
@@ -332,9 +342,12 @@ internal class TransactionQuerier : ITransactionQuerier
     }
 
     private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(
-        List<long> transactionStateVersions, GatewayModel.TransactionCommittedDetailsOptIns optIns, CancellationToken token)
+        List<long> transactionStateVersions,
+        GatewayModel.TransactionCommittedDetailsOptIns optIns,
+        CancellationToken token)
     {
-        var transactions = await _dbContext.LedgerTransactions
+        var transactions = await _dbContext
+            .LedgerTransactions
             .Where(ult => transactionStateVersions.Contains(ult.StateVersion))
             .ToListAsync(token);
 
@@ -349,7 +362,8 @@ internal class TransactionQuerier : ITransactionQuerier
 
         if (optIns.ReceiptEvents && schemaHashes.Any())
         {
-            schemas = await _dbContext.PackageSchemaHistory
+            schemas = await _dbContext
+                .PackageSchemaHistory
                 .Where(x => schemaHashes.Contains(x.SchemaHash))
                 .ToDictionaryAsync(x => (ValueBytes)x.SchemaHash, x => x.Schema, token);
         }
@@ -393,7 +407,8 @@ internal class TransactionQuerier : ITransactionQuerier
             return new Dictionary<string, long>();
         }
 
-        return await _dbContext.Entities
+        return await _dbContext
+            .Entities
             .Where(e => addresses.Contains(e.Address))
             .Select(e => new { e.Id, e.Address })
             .ToDictionaryAsync(e => e.Address.ToString(), e => e.Id, token);
@@ -406,7 +421,8 @@ internal class TransactionQuerier : ITransactionQuerier
             return new Dictionary<long, string>();
         }
 
-        return await _dbContext.Entities
+        return await _dbContext
+            .Entities
             .Where(e => entityIds.Contains(e.Id))
             .Select(e => new { e.Id, e.Address })
             .ToDictionaryAsync(e => e.Id, e => e.Address.ToString(), token);

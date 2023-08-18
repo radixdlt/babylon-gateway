@@ -80,7 +80,8 @@ public static class GatewayApiBuilderExtensions
 
     public static GatewayApiBuilder AddPrometheusObserverMetrics(this GatewayApiBuilder builder)
     {
-        builder.Services
+        builder
+            .Services
             .AddSingleton<GatewayApiMetricObserver>()
             .AddSingleton<IExceptionObserver>(provider => provider.GetRequiredService<GatewayApiMetricObserver>())
             .AddSingleton<ICoreNodeHealthCheckerObserver>(provider => provider.GetRequiredService<GatewayApiMetricObserver>())
