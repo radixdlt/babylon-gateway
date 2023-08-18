@@ -967,7 +967,7 @@ INNER JOIN LATERAL (
             : null;
 
         var nextCursor = vaultsTotalCount > offset + limit
-            ? new GatewayModel.OffsetCursor(limit).ToCursorString()
+            ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
             : null;
 
         return new GatewayModel.StateEntityNonFungibleResourceVaultsPageResponse(ledgerState, vaultsTotalCount, previousCursor, nextCursor, mapped, entityGlobalAddress,
@@ -1552,8 +1552,7 @@ ORDER BY vah.resource_order, vah.vault_order;
         return (await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleAggregatedPerVaultViewModel>(cd)).ToList();
     }
 
-    private async Task<List<NonFungibleResourceVaultsViewModel>> GetNonFungibleResourceVaults(long entityId, long resourceEntityId, int vaultOffset, int vaultLimit,
-        GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<List<NonFungibleResourceVaultsViewModel>> GetNonFungibleResourceVaults(long entityId, long resourceEntityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         var cd = new CommandDefinition(
             commandText: @"
@@ -1578,7 +1577,7 @@ most_recent_entity_resource_vault_aggregate_history_nested AS (
 most_recent_entity_resource_vault_aggregate_history AS (
     SELECT a.val AS vault_entity_id, cardinality(vault_entity_ids) AS vault_total_count, a.ord AS ord
     FROM most_recent_entity_resource_vault_aggregate_history_nested ahn
-    LEFT JOIN LATERAL UNNEST(vault_entity_ids[@vaultOffset:@vaultLimit]) WITH ORDINALITY a(val,ord) ON true
+    LEFT JOIN LATERAL UNNEST(vault_entity_ids[@startIndex:@endIndex]) WITH ORDINALITY a(val,ord) ON true
 )
 SELECT
     er.address AS ResourceEntityAddress,
@@ -1604,8 +1603,8 @@ ORDER BY vah.ord;
                 stateVersion = ledgerState.StateVersion,
                 entityId = entityId,
                 resourceEntityId = resourceEntityId,
-                vaultOffset = vaultOffset + 1,
-                vaultLimit = vaultOffset + vaultLimit,
+                startIndex = offset + 1,
+                endIndex = offset + 1 + limit,
             },
             cancellationToken: token);
 
