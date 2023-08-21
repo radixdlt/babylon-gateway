@@ -63,36 +63,11 @@
  */
 
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public interface IEntityOwner
+public partial class StateUpdates
 {
-    public IEnumerable<EntityReference> GetOwnedEntities();
-}
-
-public interface IRoyaltyVaultHolder
-{
-    public bool TryGetRoyaltyVault([NotNullWhen(true)] out EntityReference royaltyVault);
-}
-
-public interface IEntityAddressPointer
-{
-    public IEnumerable<string> GetEntityAddresses();
-}
-
-public interface IUpsertedSubstate
-{
-    public SubstateId SubstateId { get; }
-
-    public SubstateValue Value { get; }
-
-    public SubstateValue PreviousValue { get; }
-
-    [MemberNotNullWhen(true, nameof(Value))]
-    public bool HasValue => Value != null;
-
-    [MemberNotNullWhen(true, nameof(PreviousValue))]
-    public bool HasPreviousValue => PreviousValue != null;
+    public List<IUpsertedSubstate> UpsertedSubstates => CreatedSubstates.ToList<IUpsertedSubstate>().Concat(UpdatedSubstates.ToList<IUpsertedSubstate>()).ToList();
 }

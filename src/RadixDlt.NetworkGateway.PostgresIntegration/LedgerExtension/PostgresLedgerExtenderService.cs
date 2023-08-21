@@ -351,7 +351,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         });
                     }
 
-                    foreach (var substate in stateUpdates.MyCreated.Concat(stateUpdates.MyUpdate))
+                    foreach (var substate in stateUpdates.UpsertedSubstates)
                     {
                         var substateId = substate.SubstateId;
                         var substateData = substate.Value.SubstateData;
@@ -765,7 +765,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 try
                 {
-                    foreach (var substate in stateUpdates.MyCreated.Concat(stateUpdates.MyUpdate))
+                    foreach (var substate in stateUpdates.UpsertedSubstates)
                     {
                         var substateId = substate.SubstateId;
                         var substateData = substate.Value.SubstateData;
