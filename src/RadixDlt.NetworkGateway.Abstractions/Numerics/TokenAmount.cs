@@ -79,7 +79,6 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
     public static readonly TokenAmount Zero;
     public static readonly TokenAmount NaN;
     public static readonly TokenAmount OneFullUnit;
-    public static readonly TokenAmount MinusOne;
 
     static TokenAmount()
     {
@@ -88,7 +87,6 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
         Zero = new TokenAmount(0);
         NaN = new TokenAmount(true);
         OneFullUnit = new TokenAmount(_divisor);
-        MinusOne = new TokenAmount(-1);
     }
 
     private readonly BigInteger _subUnits;

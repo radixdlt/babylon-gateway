@@ -351,10 +351,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         });
                     }
 
-                    foreach (var substate in stateUpdates
-                                 .CreatedSubstates
-                                 .Select(x => new { x.SubstateId, x.Value })
-                                 .Concat(stateUpdates.UpdatedSubstates.Select(x => new { x.SubstateId, Value = x.NewValue })))
+                    foreach (var substate in stateUpdates.MyCreated.Concat(stateUpdates.MyUpdate))
                     {
                         var substateId = substate.SubstateId;
                         var substateData = substate.Value.SubstateData;
@@ -768,10 +765,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                 try
                 {
-                    foreach (var substate in stateUpdates
-                                 .CreatedSubstates
-                                 .Select(x => new { x.SubstateId, x.Value })
-                                 .Concat(stateUpdates.UpdatedSubstates.Select(x => new { x.SubstateId, Value = x.NewValue })))
+                    foreach (var substate in stateUpdates.MyCreated.Concat(stateUpdates.MyUpdate))
                     {
                         var substateId = substate.SubstateId;
                         var substateData = substate.Value.SubstateData;
@@ -789,15 +783,51 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.FungibleVaultFieldBalanceSubstate fungibleVaultFieldBalanceSubstate)
                         {
+                            var vaultEntity = referencedEntity.GetDatabaseEntity<InternalFungibleVaultEntity>();
+                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.ResourceEntityId);
                             var amount = TokenAmount.FromDecimalString(fungibleVaultFieldBalanceSubstate.Value.Amount);
-                            var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId);
 
                             fungibleVaultChanges.Add(new FungibleVaultChange(referencedEntity, resourceEntity, amount, stateVersion));
+
+                            if (!vaultEntity.IsRoyaltyVault)
+                            {
+                                var previousAmountRaw = (substate.PreviousValue?.SubstateData as CoreModel.FungibleVaultFieldBalanceSubstate)?.Value.Amount;
+                                var previousAmount = previousAmountRaw == null ? TokenAmount.Zero : TokenAmount.FromDecimalString(previousAmountRaw);
+                                var delta = amount - previousAmount;
+
+                                entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(referencedEntity.DatabaseGlobalAncestorId, referencedEntity.DatabaseId,
+                                    delta, stateVersion));
+
+                                if (referencedEntity.DatabaseGlobalAncestorId != referencedEntity.DatabaseOwnerAncestorId)
+                                {
+                                    entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(referencedEntity.DatabaseOwnerAncestorId, referencedEntity.DatabaseId,
+                                        delta, stateVersion));
+                                }
+                            }
+                        }
+
+                        if (substateData is CoreModel.NonFungibleVaultFieldBalanceSubstate nonFungibleVaultFieldBalanceSubstate)
+                        {
+                            var amount = long.Parse(nonFungibleVaultFieldBalanceSubstate.Value.Amount);
+
+                            var previousAmountRaw = (substate.PreviousValue?.SubstateData as CoreModel.NonFungibleVaultFieldBalanceSubstate)?.Value.Amount;
+                            var previousAmount = previousAmountRaw == null ? 0 : long.Parse(previousAmountRaw);
+                            var delta = amount - previousAmount;
+
+                            entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(referencedEntity.DatabaseGlobalAncestorId, referencedEntity.DatabaseId,
+                                delta, stateVersion));
+
+                            if (referencedEntity.DatabaseGlobalAncestorId != referencedEntity.DatabaseOwnerAncestorId)
+                            {
+                                entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(referencedEntity.DatabaseOwnerAncestorId, referencedEntity.DatabaseId,
+                                    delta, stateVersion));
+                            }
                         }
 
                         if (substateData is CoreModel.NonFungibleVaultContentsIndexEntrySubstate nonFungibleVaultContentsIndexEntrySubstate)
                         {
-                            var resourceEntity = referencedEntities.GetByDatabaseId(referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId);
+                            var vaultEntity = referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>();
+                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.ResourceEntityId);
 
                             nonFungibleVaultChanges.Add(new NonFungibleVaultChange(
                                 referencedEntity,
@@ -1190,109 +1220,51 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         }
                         else if (EventDecoder.TryGetFungibleVaultWithdrawalEvent(decodedEvent, out var fungibleVaultWithdrawalEvent))
                         {
-                            var value = TokenAmount.FromDecimalString(fungibleVaultWithdrawalEvent.value.AsStr());
-                            var vaultEntity = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>();
-                            var resourceEntityId = vaultEntity.ResourceEntityId;
-
                             ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
                             {
                                 Id = sequences.LedgerTransactionMarkerSequence++,
                                 StateVersion = stateVersion,
                                 EventType = LedgerTransactionMarkerEventType.Withdrawal,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = resourceEntityId,
-                                Quantity = value,
+                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId,
+                                Quantity = TokenAmount.FromDecimalString(fungibleVaultWithdrawalEvent.value.AsStr()),
                             });
-
-                            if (!vaultEntity.IsRoyaltyVault)
-                            {
-                                entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId,
-                                    value * TokenAmount.MinusOne, stateVersion));
-
-                                if (eventEmitterEntity.DatabaseGlobalAncestorId != eventEmitterEntity.DatabaseOwnerAncestorId)
-                                {
-                                    entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId,
-                                        value * TokenAmount.MinusOne, stateVersion));
-                                }
-                            }
                         }
                         else if (EventDecoder.TryGetFungibleVaultDepositEvent(decodedEvent, out var fungibleVaultDepositEvent))
                         {
-                            var value = TokenAmount.FromDecimalString(fungibleVaultDepositEvent.value.AsStr());
-                            var vaultEntity = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>();
-                            var resourceEntityId = vaultEntity.ResourceEntityId;
-
                             ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
                             {
                                 Id = sequences.LedgerTransactionMarkerSequence++,
                                 StateVersion = stateVersion,
                                 EventType = LedgerTransactionMarkerEventType.Deposit,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = resourceEntityId,
-                                Quantity = value,
+                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId,
+                                Quantity = TokenAmount.FromDecimalString(fungibleVaultDepositEvent.value.AsStr()),
                             });
-
-                            if (!vaultEntity.IsRoyaltyVault)
-                            {
-                                entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId, value,
-                                    stateVersion));
-
-                                if (eventEmitterEntity.DatabaseGlobalAncestorId != eventEmitterEntity.DatabaseOwnerAncestorId)
-                                {
-                                    entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId, value,
-                                        stateVersion));
-                                }
-                            }
                         }
                         else if (EventDecoder.TryGetNonFungibleVaultWithdrawalEvent(decodedEvent, out var nonFungibleVaultWithdrawalEvent))
                         {
-                            var value = nonFungibleVaultWithdrawalEvent.value.Count.ToString();
-                            var vaultEntity = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>();
-                            var resourceEntityId = vaultEntity.ResourceEntityId;
-
                             ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
                             {
                                 Id = sequences.LedgerTransactionMarkerSequence++,
                                 StateVersion = stateVersion,
                                 EventType = LedgerTransactionMarkerEventType.Withdrawal,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = resourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(value),
+                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId,
+                                Quantity = TokenAmount.FromDecimalString(nonFungibleVaultWithdrawalEvent.value.Count.ToString()),
                             });
-
-                            entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId,
-                                long.Parse(value) * -1, stateVersion));
-
-                            if (eventEmitterEntity.DatabaseGlobalAncestorId != eventEmitterEntity.DatabaseOwnerAncestorId)
-                            {
-                                entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId,
-                                    long.Parse(value) * -1, stateVersion));
-                            }
                         }
                         else if (EventDecoder.TryGetNonFungibleVaultDepositEvent(decodedEvent, out var nonFungibleVaultDepositEvent))
                         {
-                            var value = nonFungibleVaultDepositEvent.value.Count.ToString();
-                            var vaultEntity = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>();
-                            var resourceEntityId = vaultEntity.ResourceEntityId;
-
                             ledgerTransactionMarkersToAdd.Add(new EventLedgerTransactionMarker
                             {
                                 Id = sequences.LedgerTransactionMarkerSequence++,
                                 StateVersion = stateVersion,
                                 EventType = LedgerTransactionMarkerEventType.Deposit,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
-                                ResourceEntityId = resourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(value),
+                                ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId,
+                                Quantity = TokenAmount.FromDecimalString(nonFungibleVaultDepositEvent.value.Count.ToString()),
                             });
-
-                            entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseGlobalAncestorId, resourceEntityId,
-                                long.Parse(value), stateVersion));
-
-                            if (eventEmitterEntity.DatabaseGlobalAncestorId != eventEmitterEntity.DatabaseOwnerAncestorId)
-                            {
-                                entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(eventEmitterEntity.DatabaseOwnerAncestorId, resourceEntityId,
-                                    long.Parse(value), stateVersion));
-                            }
                         }
                         else if (EventDecoder.TryGetFungibleResourceMintedEvent(decodedEvent, out var fungibleResourceMintedEvent))
                         {
