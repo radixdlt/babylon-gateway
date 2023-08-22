@@ -67,7 +67,6 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
@@ -77,8 +76,6 @@ using System.Threading.Tasks;
 using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
-
-internal record SchemaHashLookup(string SchemaHash, long SchemaId);
 
 internal class ReadHelper
 {
