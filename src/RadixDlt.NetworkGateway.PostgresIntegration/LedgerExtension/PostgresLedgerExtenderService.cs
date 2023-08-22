@@ -795,12 +795,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 var previousAmount = previousAmountRaw == null ? TokenAmount.Zero : TokenAmount.FromDecimalString(previousAmountRaw);
                                 var delta = amount - previousAmount;
 
-                                entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(referencedEntity.DatabaseGlobalAncestorId, referencedEntity.DatabaseId,
+                                entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(referencedEntity.DatabaseGlobalAncestorId, resourceEntity.DatabaseId,
                                     delta, stateVersion));
 
                                 if (referencedEntity.DatabaseGlobalAncestorId != referencedEntity.DatabaseOwnerAncestorId)
                                 {
-                                    entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(referencedEntity.DatabaseOwnerAncestorId, referencedEntity.DatabaseId,
+                                    entityFungibleResourceBalanceChangeEvents.Add(new EntityFungibleResourceBalanceChangeEvent(referencedEntity.DatabaseOwnerAncestorId, resourceEntity.DatabaseId,
                                         delta, stateVersion));
                                 }
                             }
@@ -808,18 +808,20 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.NonFungibleVaultFieldBalanceSubstate nonFungibleVaultFieldBalanceSubstate)
                         {
+                            var vaultEntity = referencedEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>();
+                            var resourceEntity = referencedEntities.GetByDatabaseId(vaultEntity.ResourceEntityId);
                             var amount = long.Parse(nonFungibleVaultFieldBalanceSubstate.Value.Amount);
 
                             var previousAmountRaw = (substate.PreviousValue?.SubstateData as CoreModel.NonFungibleVaultFieldBalanceSubstate)?.Value.Amount;
                             var previousAmount = previousAmountRaw == null ? 0 : long.Parse(previousAmountRaw);
                             var delta = amount - previousAmount;
 
-                            entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(referencedEntity.DatabaseGlobalAncestorId, referencedEntity.DatabaseId,
+                            entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(referencedEntity.DatabaseGlobalAncestorId, resourceEntity.DatabaseId,
                                 delta, stateVersion));
 
                             if (referencedEntity.DatabaseGlobalAncestorId != referencedEntity.DatabaseOwnerAncestorId)
                             {
-                                entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(referencedEntity.DatabaseOwnerAncestorId, referencedEntity.DatabaseId,
+                                entityNonFungibleResourceBalanceChangeEvents.Add(new EntityNonFungibleResourceBalanceChangeEvent(referencedEntity.DatabaseOwnerAncestorId, resourceEntity.DatabaseId,
                                     delta, stateVersion));
                             }
                         }
