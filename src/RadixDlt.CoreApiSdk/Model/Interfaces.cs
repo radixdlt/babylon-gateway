@@ -81,3 +81,18 @@ public interface IEntityAddressPointer
 {
     public IEnumerable<string> GetEntityAddresses();
 }
+
+public interface IUpsertedSubstate
+{
+    public SubstateId SubstateId { get; }
+
+    public SubstateValue Value { get; }
+
+    public SubstateValue PreviousValue { get; }
+
+    [MemberNotNullWhen(true, nameof(Value))]
+    public bool HasValue => Value != null;
+
+    [MemberNotNullWhen(true, nameof(PreviousValue))]
+    public bool HasPreviousValue => PreviousValue != null;
+}

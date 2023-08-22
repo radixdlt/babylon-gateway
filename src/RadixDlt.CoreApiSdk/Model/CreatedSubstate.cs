@@ -62,76 +62,11 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using CoreApi = RadixDlt.CoreApiSdk.Api;
-using CoreClient = RadixDlt.CoreApiSdk.Client;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
+using System.Diagnostics.CodeAnalysis;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
+namespace RadixDlt.CoreApiSdk.Model;
 
-internal class TransactionStreamReader : ITransactionStreamReader
+public partial class CreatedSubstate : IUpsertedSubstate
 {
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly CoreApi.StreamApi _streamApi;
-    private readonly INodeConfigProvider _nodeConfigProvider;
-    private readonly IEnumerable<ITransactionStreamReaderObserver> _observers;
-
-    public TransactionStreamReader(
-        INetworkConfigurationProvider networkConfigurationProvider,
-        ICoreApiProvider coreApiProvider,
-        INodeConfigProvider nodeConfigProvider,
-        IEnumerable<ITransactionStreamReaderObserver> observers)
-    {
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _nodeConfigProvider = nodeConfigProvider;
-        _observers = observers;
-        _streamApi = coreApiProvider.StreamApi;
-    }
-
-    public async Task<CoreClient.ApiResponse<CoreModel.StreamTransactionsResponse>> GetTransactionStream(long fromStateVersion, int count, CancellationToken token)
-    {
-        try
-        {
-            return await _streamApi.StreamTransactionsPostWithHttpInfoAsync(
-                new CoreModel.StreamTransactionsRequest(
-                    network: _networkConfigurationProvider.GetNetworkName(),
-                    fromStateVersion: fromStateVersion,
-                    limit: count,
-                    transactionFormatOptions: new CoreModel.TransactionFormatOptions
-                    {
-                        Blobs = true,
-                        Manifest = true,
-                        RawLedgerTransaction = true,
-                        RawNotarizedTransaction = true,
-                        RawSystemTransaction = true,
-                        Message = true,
-                    },
-                    substateFormatOptions: new CoreModel.SubstateFormatOptions
-                    {
-                        Hash = false,
-                        Raw = false,
-                        Typed = true,
-                        Previous = true,
-                    },
-                    sborFormatOptions: new CoreModel.SborFormatOptions
-                    {
-                        Raw = true,
-                        ProgrammaticJson = true,
-                    }
-                ),
-                token
-            );
-        }
-        catch (Exception ex)
-        {
-            await _observers.ForEachAsync(x => x.GetTransactionsFailed(_nodeConfigProvider.CoreApiNode.Name, ex));
-
-            throw;
-        }
-    }
+    public SubstateValue PreviousValue => null;
 }
