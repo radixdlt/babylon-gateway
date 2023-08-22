@@ -1652,7 +1652,7 @@ components:
             intent_hash:
               $ref: "#/components/schemas/HashBech32mString"
       example:
-        intent_hash_hex: "<transaction-intent-hash>"
+        intent_hash: "<transaction-intent-hash>"
     TransactionStatusResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1696,7 +1696,7 @@ components:
             opt_ins:
               $ref: "#/components/schemas/TransactionDetailsOptIns"
       example:
-        intent_hash_hex: "<transaction-intent-hash>"
+        intent_hash: "<transaction-intent-hash>"
     TransactionDetailsOptIns:
       type: object
       properties:
