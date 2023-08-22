@@ -67,6 +67,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
@@ -76,6 +77,8 @@ using System.Threading.Tasks;
 using PublicKeyType = RadixDlt.NetworkGateway.Abstractions.Model.PublicKeyType;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+
+internal record SchemaHashLookup(string SchemaHash, long SchemaId);
 
 internal class ReadHelper
 {
@@ -601,7 +604,7 @@ SELECT
     nextval('ledger_transaction_markers_id_seq') AS LedgerTransactionMarkerSequence,
     nextval('package_blueprint_history_id_seq') AS PackageBlueprintHistorySequence,
     nextval('package_code_history_id_seq') AS PackageCodeHistorySequence,
-    nextval('package_schema_history_id_seq') AS PackageSchemaHistorySequence,
+    nextval('schema_history_id_seq') AS SchemaHistorySequence,
     nextval('key_value_store_entry_history_id_seq') AS KeyValueStoreEntryHistorySequence,
     nextval('validator_emission_statistics_id_seq') AS ValidatorEmissionStatisticsSequence,
     nextval('non_fungible_schema_history_id_seq') AS NonFungibleSchemaHistorySequence,

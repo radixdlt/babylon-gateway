@@ -90,35 +90,71 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// PackageSchemaEntryValue
+    /// ObjectInstanceTypeReferenceAllOf
     /// </summary>
-    [DataContract(Name = "PackageSchemaEntryValue")]
-    public partial class PackageSchemaEntryValue : IEquatable<PackageSchemaEntryValue>
+    [DataContract(Name = "ObjectInstanceTypeReference_allOf")]
+    public partial class ObjectInstanceTypeReferenceAllOf : IEquatable<ObjectInstanceTypeReferenceAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PackageSchemaEntryValue" /> class.
+        /// Initializes a new instance of the <see cref="ObjectInstanceTypeReferenceAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected PackageSchemaEntryValue() { }
+        protected ObjectInstanceTypeReferenceAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="PackageSchemaEntryValue" /> class.
+        /// Initializes a new instance of the <see cref="ObjectInstanceTypeReferenceAllOf" /> class.
         /// </summary>
-        /// <param name="schema">schema (required).</param>
-        public PackageSchemaEntryValue(ScryptoSchema schema = default(ScryptoSchema))
+        /// <param name="entityAddress">Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id) (required).</param>
+        /// <param name="schemaHash">The hex-encoded schema hash, capturing the identity of an SBOR schema. (required).</param>
+        /// <param name="instanceTypeIndex">instanceTypeIndex (required).</param>
+        /// <param name="localTypeIndex">localTypeIndex (required).</param>
+        public ObjectInstanceTypeReferenceAllOf(string entityAddress = default(string), string schemaHash = default(string), int instanceTypeIndex = default(int), LocalTypeIndex localTypeIndex = default(LocalTypeIndex))
         {
-            // to ensure "schema" is required (not null)
-            if (schema == null)
+            // to ensure "entityAddress" is required (not null)
+            if (entityAddress == null)
             {
-                throw new ArgumentNullException("schema is a required property for PackageSchemaEntryValue and cannot be null");
+                throw new ArgumentNullException("entityAddress is a required property for ObjectInstanceTypeReferenceAllOf and cannot be null");
             }
-            this.Schema = schema;
+            this.EntityAddress = entityAddress;
+            // to ensure "schemaHash" is required (not null)
+            if (schemaHash == null)
+            {
+                throw new ArgumentNullException("schemaHash is a required property for ObjectInstanceTypeReferenceAllOf and cannot be null");
+            }
+            this.SchemaHash = schemaHash;
+            this.InstanceTypeIndex = instanceTypeIndex;
+            // to ensure "localTypeIndex" is required (not null)
+            if (localTypeIndex == null)
+            {
+                throw new ArgumentNullException("localTypeIndex is a required property for ObjectInstanceTypeReferenceAllOf and cannot be null");
+            }
+            this.LocalTypeIndex = localTypeIndex;
         }
 
         /// <summary>
-        /// Gets or Sets Schema
+        /// Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)
         /// </summary>
-        [DataMember(Name = "schema", IsRequired = true, EmitDefaultValue = true)]
-        public ScryptoSchema Schema { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)</value>
+        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddress { get; set; }
+
+        /// <summary>
+        /// The hex-encoded schema hash, capturing the identity of an SBOR schema.
+        /// </summary>
+        /// <value>The hex-encoded schema hash, capturing the identity of an SBOR schema.</value>
+        [DataMember(Name = "schema_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string SchemaHash { get; set; }
+
+        /// <summary>
+        /// Gets or Sets InstanceTypeIndex
+        /// </summary>
+        [DataMember(Name = "instance_type_index", IsRequired = true, EmitDefaultValue = true)]
+        public int InstanceTypeIndex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets LocalTypeIndex
+        /// </summary>
+        [DataMember(Name = "local_type_index", IsRequired = true, EmitDefaultValue = true)]
+        public LocalTypeIndex LocalTypeIndex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,8 +163,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PackageSchemaEntryValue {\n");
-            sb.Append("  Schema: ").Append(Schema).Append("\n");
+            sb.Append("class ObjectInstanceTypeReferenceAllOf {\n");
+            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
+            sb.Append("  SchemaHash: ").Append(SchemaHash).Append("\n");
+            sb.Append("  InstanceTypeIndex: ").Append(InstanceTypeIndex).Append("\n");
+            sb.Append("  LocalTypeIndex: ").Append(LocalTypeIndex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +188,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PackageSchemaEntryValue);
+            return this.Equals(input as ObjectInstanceTypeReferenceAllOf);
         }
 
         /// <summary>
-        /// Returns true if PackageSchemaEntryValue instances are equal
+        /// Returns true if ObjectInstanceTypeReferenceAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of PackageSchemaEntryValue to be compared</param>
+        /// <param name="input">Instance of ObjectInstanceTypeReferenceAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PackageSchemaEntryValue input)
+        public bool Equals(ObjectInstanceTypeReferenceAllOf input)
         {
             if (input == null)
             {
@@ -165,9 +204,23 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Schema == input.Schema ||
-                    (this.Schema != null &&
-                    this.Schema.Equals(input.Schema))
+                    this.EntityAddress == input.EntityAddress ||
+                    (this.EntityAddress != null &&
+                    this.EntityAddress.Equals(input.EntityAddress))
+                ) && 
+                (
+                    this.SchemaHash == input.SchemaHash ||
+                    (this.SchemaHash != null &&
+                    this.SchemaHash.Equals(input.SchemaHash))
+                ) && 
+                (
+                    this.InstanceTypeIndex == input.InstanceTypeIndex ||
+                    this.InstanceTypeIndex.Equals(input.InstanceTypeIndex)
+                ) && 
+                (
+                    this.LocalTypeIndex == input.LocalTypeIndex ||
+                    (this.LocalTypeIndex != null &&
+                    this.LocalTypeIndex.Equals(input.LocalTypeIndex))
                 );
         }
 
@@ -180,9 +233,18 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Schema != null)
+                if (this.EntityAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Schema.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
+                }
+                if (this.SchemaHash != null)
+                {
+                    hashCode = (hashCode * 59) + this.SchemaHash.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.InstanceTypeIndex.GetHashCode();
+                if (this.LocalTypeIndex != null)
+                {
+                    hashCode = (hashCode * 59) + this.LocalTypeIndex.GetHashCode();
                 }
                 return hashCode;
             }

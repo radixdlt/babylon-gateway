@@ -96,9 +96,9 @@ namespace RadixDlt.CoreApiSdk.Model
     public partial class LocalTypeIndex : IEquatable<LocalTypeIndex>
     {
         /// <summary>
-        /// The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema. 
+        /// The location against which to resolve this type reference.
         /// </summary>
-        /// <value>The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema. </value>
+        /// <value>The location against which to resolve this type reference.</value>
         [JsonConverter(typeof(StringEnumConverter))]
         public enum KindEnum
         {
@@ -118,9 +118,9 @@ namespace RadixDlt.CoreApiSdk.Model
 
 
         /// <summary>
-        /// The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema. 
+        /// The location against which to resolve this type reference.
         /// </summary>
-        /// <value>The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema. </value>
+        /// <value>The location against which to resolve this type reference.</value>
         [DataMember(Name = "kind", IsRequired = true, EmitDefaultValue = true)]
         public KindEnum Kind { get; set; }
         /// <summary>
@@ -131,10 +131,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalTypeIndex" /> class.
         /// </summary>
-        /// <param name="kind">The location against which to resolve this type reference against a given schema. WellKnown indicates the index is a pointer to a well known scrypto type with that id. SchemaLocal indicates the index is a pointer into the given schema.  (required).</param>
-        /// <param name="index">Either the well known identifier, of the schema-local index, depending on the kind.  (required).</param>
+        /// <param name="kind">The location against which to resolve this type reference. (required).</param>
+        /// <param name="index">A reference to a type, interpreted according to &#x60;kind&#x60;: - if &#x60;WellKnown&#x60;, then it is a pointer to a well known scrypto type with that ID, - if &#x60;SchemaLocal&#x60;, then it is a pointer into the given schema.  (required).</param>
         /// <param name="asSbor">asSbor (required).</param>
-        public LocalTypeIndex(KindEnum kind = default(KindEnum), int index = default(int), SborData asSbor = default(SborData))
+        public LocalTypeIndex(KindEnum kind = default(KindEnum), long index = default(long), SborData asSbor = default(SborData))
         {
             this.Kind = kind;
             this.Index = index;
@@ -147,11 +147,11 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// Either the well known identifier, of the schema-local index, depending on the kind. 
+        /// A reference to a type, interpreted according to &#x60;kind&#x60;: - if &#x60;WellKnown&#x60;, then it is a pointer to a well known scrypto type with that ID, - if &#x60;SchemaLocal&#x60;, then it is a pointer into the given schema. 
         /// </summary>
-        /// <value>Either the well known identifier, of the schema-local index, depending on the kind. </value>
+        /// <value>A reference to a type, interpreted according to &#x60;kind&#x60;: - if &#x60;WellKnown&#x60;, then it is a pointer to a well known scrypto type with that ID, - if &#x60;SchemaLocal&#x60;, then it is a pointer into the given schema. </value>
         [DataMember(Name = "index", IsRequired = true, EmitDefaultValue = true)]
-        public int Index { get; set; }
+        public long Index { get; set; }
 
         /// <summary>
         /// Gets or Sets AsSbor

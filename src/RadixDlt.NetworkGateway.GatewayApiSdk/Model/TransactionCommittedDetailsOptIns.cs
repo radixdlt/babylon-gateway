@@ -64,7 +64,7 @@
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public partial class TransactionCommittedDetailsOptIns
+public partial class TransactionDetailsOptIns
 {
-    public static TransactionCommittedDetailsOptIns Default => new();
+    public static TransactionDetailsOptIns Default => new();
 }

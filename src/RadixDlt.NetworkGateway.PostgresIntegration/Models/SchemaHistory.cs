@@ -62,10 +62,27 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Model;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public static class NativeBlueprintNames
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+
+[Table("schema_history")]
+internal class SchemaHistory
 {
-    public const string FungibleVault = "FungibleVault";
-    public const string NonFungibleVault = "NonFungibleVault";
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
+
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
+
+    [Column("package_entity_id")]
+    public long PackageEntityId { get; set; }
+
+    [Column("schema_hash")]
+    public byte[] SchemaHash { get; set; }
+
+    [Column("schema")]
+    public byte[] Schema { get; set; }
 }

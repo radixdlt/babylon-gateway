@@ -91,34 +91,45 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// InstanceTypePointer
+    /// SubstateSystemStructure
     /// </summary>
-    [DataContract(Name = "InstanceTypePointer")]
-    [JsonConverter(typeof(JsonSubtypes), "pointer_type")]
-    [JsonSubtypes.KnownSubType(typeof(InstanceTypePointer), "Instance")]
-    [JsonSubtypes.KnownSubType(typeof(PackageTypePointer), "Package")]
-    public partial class InstanceTypePointer : TypePointer, IEquatable<InstanceTypePointer>
+    [DataContract(Name = "SubstateSystemStructure")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntryStructure), "KeyValueStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntryStructure), "KeyValueStoreEntryStructure")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectFieldStructure), "ObjectField")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectFieldStructure), "ObjectFieldStructure")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectIndexPartitionEntryStructure), "ObjectIndexPartitionEntry")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectIndexPartitionEntryStructure), "ObjectIndexPartitionEntryStructure")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectKeyValuePartitionEntryStructure), "ObjectKeyValuePartitionEntry")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectKeyValuePartitionEntryStructure), "ObjectKeyValuePartitionEntryStructure")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectSortedIndexPartitionEntryStructure), "ObjectSortedIndexPartitionEntry")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectSortedIndexPartitionEntryStructure), "ObjectSortedIndexPartitionEntryStructure")]
+    [JsonSubtypes.KnownSubType(typeof(SystemFieldStructure), "SystemField")]
+    [JsonSubtypes.KnownSubType(typeof(SystemFieldStructure), "SystemFieldStructure")]
+    [JsonSubtypes.KnownSubType(typeof(SystemSchemaStructure), "SystemSchema")]
+    [JsonSubtypes.KnownSubType(typeof(SystemSchemaStructure), "SystemSchemaStructure")]
+    public partial class SubstateSystemStructure : IEquatable<SubstateSystemStructure>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InstanceTypePointer" /> class.
-        /// </summary>
-        [JsonConstructorAttribute]
-        protected InstanceTypePointer() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InstanceTypePointer" /> class.
-        /// </summary>
-        /// <param name="index">index (required).</param>
-        /// <param name="pointerType">pointerType (required) (default to TypePointerType.Instance).</param>
-        public InstanceTypePointer(int index = default(int), TypePointerType pointerType = TypePointerType.Instance) : base(pointerType)
-        {
-            this.Index = index;
-        }
 
         /// <summary>
-        /// Gets or Sets Index
+        /// Gets or Sets Type
         /// </summary>
-        [DataMember(Name = "index", IsRequired = true, EmitDefaultValue = true)]
-        public int Index { get; set; }
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateSystemStructureType Type { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SubstateSystemStructure" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected SubstateSystemStructure() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SubstateSystemStructure" /> class.
+        /// </summary>
+        /// <param name="type">type (required).</param>
+        public SubstateSystemStructure(SubstateSystemStructureType type = default(SubstateSystemStructureType))
+        {
+            this.Type = type;
+        }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -127,9 +138,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class InstanceTypePointer {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  Index: ").Append(Index).Append("\n");
+            sb.Append("class SubstateSystemStructure {\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -138,7 +148,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -150,24 +160,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as InstanceTypePointer);
+            return this.Equals(input as SubstateSystemStructure);
         }
 
         /// <summary>
-        /// Returns true if InstanceTypePointer instances are equal
+        /// Returns true if SubstateSystemStructure instances are equal
         /// </summary>
-        /// <param name="input">Instance of InstanceTypePointer to be compared</param>
+        /// <param name="input">Instance of SubstateSystemStructure to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(InstanceTypePointer input)
+        public bool Equals(SubstateSystemStructure input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.Index == input.Index ||
-                    this.Index.Equals(input.Index)
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
                 );
         }
 
@@ -179,8 +189,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 59) + this.Index.GetHashCode();
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
                 return hashCode;
             }
         }

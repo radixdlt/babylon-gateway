@@ -147,6 +147,15 @@ internal class TransactionReceipt
     [Column("receipt_state_updates", TypeName = "jsonb")]
     public string StateUpdates { get; set; }
 
+    [Column("receipt_costing_parameters", TypeName = "jsonb")]
+    public string CostingParameters { get; set; }
+
+    [Column("receipt_fee_source", TypeName = "jsonb")]
+    public string? FeeSource { get; set; }
+
+    [Column("receipt_fee_destination", TypeName = "jsonb")]
+    public string? FeeDestination { get; set; }
+
     [Column("receipt_next_epoch", TypeName = "jsonb")]
     public string? NextEpoch { get; set; }
 
@@ -163,7 +172,7 @@ internal class TransactionReceipt
     public byte[][] EventSchemaHashes { get; set; }
 
     [Column("receipt_event_type_indexes")]
-    public int[] EventTypeIndexes { get; set; }
+    public long[] EventTypeIndexes { get; set; }
 
     [Column("receipt_event_sbor_type_kinds")]
     public SborTypeKind[] EventSborTypeKinds { get; set; }

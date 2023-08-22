@@ -102,10 +102,10 @@ namespace RadixDlt.CoreApiSdk.Model
         AllowAll = 1,
 
         /// <summary>
-        /// Enum StaticRoles for value: StaticRoles
+        /// Enum StaticRoleDefinition for value: StaticRoleDefinition
         /// </summary>
-        [EnumMember(Value = "StaticRoles")]
-        StaticRoles = 2
+        [EnumMember(Value = "StaticRoleDefinition")]
+        StaticRoleDefinition = 2
 
     }
 

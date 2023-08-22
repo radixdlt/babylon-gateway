@@ -90,22 +90,103 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines TypePointerType
+    /// StaticBlueprintPayloadDefAllOf
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum TypePointerType
+    [DataContract(Name = "StaticBlueprintPayloadDef_allOf")]
+    public partial class StaticBlueprintPayloadDefAllOf : IEquatable<StaticBlueprintPayloadDefAllOf>
     {
         /// <summary>
-        /// Enum Package for value: Package
+        /// Initializes a new instance of the <see cref="StaticBlueprintPayloadDefAllOf" /> class.
         /// </summary>
-        [EnumMember(Value = "Package")]
-        Package = 1,
+        [JsonConstructorAttribute]
+        protected StaticBlueprintPayloadDefAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StaticBlueprintPayloadDefAllOf" /> class.
+        /// </summary>
+        /// <param name="typeId">typeId (required).</param>
+        public StaticBlueprintPayloadDefAllOf(TypeIdentifier typeId = default(TypeIdentifier))
+        {
+            // to ensure "typeId" is required (not null)
+            if (typeId == null)
+            {
+                throw new ArgumentNullException("typeId is a required property for StaticBlueprintPayloadDefAllOf and cannot be null");
+            }
+            this.TypeId = typeId;
+        }
 
         /// <summary>
-        /// Enum Instance for value: Instance
+        /// Gets or Sets TypeId
         /// </summary>
-        [EnumMember(Value = "Instance")]
-        Instance = 2
+        [DataMember(Name = "type_id", IsRequired = true, EmitDefaultValue = true)]
+        public TypeIdentifier TypeId { get; set; }
+
+        /// <summary>
+        /// Returns the string presentation of the object
+        /// </summary>
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class StaticBlueprintPayloadDefAllOf {\n");
+            sb.Append("  TypeId: ").Append(TypeId).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns the JSON string presentation of the object
+        /// </summary>
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Returns true if objects are equal
+        /// </summary>
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as StaticBlueprintPayloadDefAllOf);
+        }
+
+        /// <summary>
+        /// Returns true if StaticBlueprintPayloadDefAllOf instances are equal
+        /// </summary>
+        /// <param name="input">Instance of StaticBlueprintPayloadDefAllOf to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(StaticBlueprintPayloadDefAllOf input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.TypeId == input.TypeId ||
+                    (this.TypeId != null &&
+                    this.TypeId.Equals(input.TypeId))
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                if (this.TypeId != null)
+                {
+                    hashCode = (hashCode * 59) + this.TypeId.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
 
     }
 

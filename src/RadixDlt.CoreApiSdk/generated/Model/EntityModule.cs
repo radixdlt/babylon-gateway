@@ -123,7 +123,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum Main for value: Main
         /// </summary>
         [EnumMember(Value = "Main")]
-        Main = 5
+        Main = 5,
+
+        /// <summary>
+        /// Enum Schema for value: Schema
+        /// </summary>
+        [EnumMember(Value = "Schema")]
+        Schema = 6
 
     }
 

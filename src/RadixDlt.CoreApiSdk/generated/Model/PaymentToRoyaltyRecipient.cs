@@ -90,63 +90,49 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// InstanceSchema
+    /// PaymentToRoyaltyRecipient
     /// </summary>
-    [DataContract(Name = "InstanceSchema")]
-    public partial class InstanceSchema : IEquatable<InstanceSchema>
+    [DataContract(Name = "PaymentToRoyaltyRecipient")]
+    public partial class PaymentToRoyaltyRecipient : IEquatable<PaymentToRoyaltyRecipient>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="InstanceSchema" /> class.
+        /// Initializes a new instance of the <see cref="PaymentToRoyaltyRecipient" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected InstanceSchema() { }
+        protected PaymentToRoyaltyRecipient() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="InstanceSchema" /> class.
+        /// Initializes a new instance of the <see cref="PaymentToRoyaltyRecipient" /> class.
         /// </summary>
-        /// <param name="schema">schema (required).</param>
-        /// <param name="schemaHash">The hex-encoded schema hash, capturing the identity of an SBOR schema. (required).</param>
-        /// <param name="instanceTypeLookup">This is a vector which is a lookup of the \&quot;instance type index\&quot; to the local type index which can be used to resolve the instance type in the instance schema.  (required).</param>
-        public InstanceSchema(ScryptoSchema schema = default(ScryptoSchema), string schemaHash = default(string), List<LocalTypeIndex> instanceTypeLookup = default(List<LocalTypeIndex>))
+        /// <param name="royaltyRecipient">royaltyRecipient (required).</param>
+        /// <param name="xrdAmount">The string-encoded decimal representing the amount of fee in XRD paid as royalty to this recipient. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
+        public PaymentToRoyaltyRecipient(EntityReference royaltyRecipient = default(EntityReference), string xrdAmount = default(string))
         {
-            // to ensure "schema" is required (not null)
-            if (schema == null)
+            // to ensure "royaltyRecipient" is required (not null)
+            if (royaltyRecipient == null)
             {
-                throw new ArgumentNullException("schema is a required property for InstanceSchema and cannot be null");
+                throw new ArgumentNullException("royaltyRecipient is a required property for PaymentToRoyaltyRecipient and cannot be null");
             }
-            this.Schema = schema;
-            // to ensure "schemaHash" is required (not null)
-            if (schemaHash == null)
+            this.RoyaltyRecipient = royaltyRecipient;
+            // to ensure "xrdAmount" is required (not null)
+            if (xrdAmount == null)
             {
-                throw new ArgumentNullException("schemaHash is a required property for InstanceSchema and cannot be null");
+                throw new ArgumentNullException("xrdAmount is a required property for PaymentToRoyaltyRecipient and cannot be null");
             }
-            this.SchemaHash = schemaHash;
-            // to ensure "instanceTypeLookup" is required (not null)
-            if (instanceTypeLookup == null)
-            {
-                throw new ArgumentNullException("instanceTypeLookup is a required property for InstanceSchema and cannot be null");
-            }
-            this.InstanceTypeLookup = instanceTypeLookup;
+            this.XrdAmount = xrdAmount;
         }
 
         /// <summary>
-        /// Gets or Sets Schema
+        /// Gets or Sets RoyaltyRecipient
         /// </summary>
-        [DataMember(Name = "schema", IsRequired = true, EmitDefaultValue = true)]
-        public ScryptoSchema Schema { get; set; }
+        [DataMember(Name = "royalty_recipient", IsRequired = true, EmitDefaultValue = true)]
+        public EntityReference RoyaltyRecipient { get; set; }
 
         /// <summary>
-        /// The hex-encoded schema hash, capturing the identity of an SBOR schema.
+        /// The string-encoded decimal representing the amount of fee in XRD paid as royalty to this recipient. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. 
         /// </summary>
-        /// <value>The hex-encoded schema hash, capturing the identity of an SBOR schema.</value>
-        [DataMember(Name = "schema_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string SchemaHash { get; set; }
-
-        /// <summary>
-        /// This is a vector which is a lookup of the \&quot;instance type index\&quot; to the local type index which can be used to resolve the instance type in the instance schema. 
-        /// </summary>
-        /// <value>This is a vector which is a lookup of the \&quot;instance type index\&quot; to the local type index which can be used to resolve the instance type in the instance schema. </value>
-        [DataMember(Name = "instance_type_lookup", IsRequired = true, EmitDefaultValue = true)]
-        public List<LocalTypeIndex> InstanceTypeLookup { get; set; }
+        /// <value>The string-encoded decimal representing the amount of fee in XRD paid as royalty to this recipient. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. </value>
+        [DataMember(Name = "xrd_amount", IsRequired = true, EmitDefaultValue = true)]
+        public string XrdAmount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -155,10 +141,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class InstanceSchema {\n");
-            sb.Append("  Schema: ").Append(Schema).Append("\n");
-            sb.Append("  SchemaHash: ").Append(SchemaHash).Append("\n");
-            sb.Append("  InstanceTypeLookup: ").Append(InstanceTypeLookup).Append("\n");
+            sb.Append("class PaymentToRoyaltyRecipient {\n");
+            sb.Append("  RoyaltyRecipient: ").Append(RoyaltyRecipient).Append("\n");
+            sb.Append("  XrdAmount: ").Append(XrdAmount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,15 +164,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as InstanceSchema);
+            return this.Equals(input as PaymentToRoyaltyRecipient);
         }
 
         /// <summary>
-        /// Returns true if InstanceSchema instances are equal
+        /// Returns true if PaymentToRoyaltyRecipient instances are equal
         /// </summary>
-        /// <param name="input">Instance of InstanceSchema to be compared</param>
+        /// <param name="input">Instance of PaymentToRoyaltyRecipient to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(InstanceSchema input)
+        public bool Equals(PaymentToRoyaltyRecipient input)
         {
             if (input == null)
             {
@@ -195,20 +180,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Schema == input.Schema ||
-                    (this.Schema != null &&
-                    this.Schema.Equals(input.Schema))
+                    this.RoyaltyRecipient == input.RoyaltyRecipient ||
+                    (this.RoyaltyRecipient != null &&
+                    this.RoyaltyRecipient.Equals(input.RoyaltyRecipient))
                 ) && 
                 (
-                    this.SchemaHash == input.SchemaHash ||
-                    (this.SchemaHash != null &&
-                    this.SchemaHash.Equals(input.SchemaHash))
-                ) && 
-                (
-                    this.InstanceTypeLookup == input.InstanceTypeLookup ||
-                    this.InstanceTypeLookup != null &&
-                    input.InstanceTypeLookup != null &&
-                    this.InstanceTypeLookup.SequenceEqual(input.InstanceTypeLookup)
+                    this.XrdAmount == input.XrdAmount ||
+                    (this.XrdAmount != null &&
+                    this.XrdAmount.Equals(input.XrdAmount))
                 );
         }
 
@@ -221,17 +200,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Schema != null)
+                if (this.RoyaltyRecipient != null)
                 {
-                    hashCode = (hashCode * 59) + this.Schema.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RoyaltyRecipient.GetHashCode();
                 }
-                if (this.SchemaHash != null)
+                if (this.XrdAmount != null)
                 {
-                    hashCode = (hashCode * 59) + this.SchemaHash.GetHashCode();
-                }
-                if (this.InstanceTypeLookup != null)
-                {
-                    hashCode = (hashCode * 59) + this.InstanceTypeLookup.GetHashCode();
+                    hashCode = (hashCode * 59) + this.XrdAmount.GetHashCode();
                 }
                 return hashCode;
             }

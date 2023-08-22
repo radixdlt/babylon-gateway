@@ -90,30 +90,31 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// InstanceTypePointerAllOf
+    /// GenericBlueprintPayloadDefAllOf
     /// </summary>
-    [DataContract(Name = "InstanceTypePointer_allOf")]
-    public partial class InstanceTypePointerAllOf : IEquatable<InstanceTypePointerAllOf>
+    [DataContract(Name = "GenericBlueprintPayloadDef_allOf")]
+    public partial class GenericBlueprintPayloadDefAllOf : IEquatable<GenericBlueprintPayloadDefAllOf>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="InstanceTypePointerAllOf" /> class.
+        /// Initializes a new instance of the <see cref="GenericBlueprintPayloadDefAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected InstanceTypePointerAllOf() { }
+        protected GenericBlueprintPayloadDefAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="InstanceTypePointerAllOf" /> class.
+        /// Initializes a new instance of the <see cref="GenericBlueprintPayloadDefAllOf" /> class.
         /// </summary>
-        /// <param name="index">index (required).</param>
-        public InstanceTypePointerAllOf(int index = default(int))
+        /// <param name="genericIndex">An index within the list of generic type substitutions. (required).</param>
+        public GenericBlueprintPayloadDefAllOf(long genericIndex = default(long))
         {
-            this.Index = index;
+            this.GenericIndex = genericIndex;
         }
 
         /// <summary>
-        /// Gets or Sets Index
+        /// An index within the list of generic type substitutions.
         /// </summary>
-        [DataMember(Name = "index", IsRequired = true, EmitDefaultValue = true)]
-        public int Index { get; set; }
+        /// <value>An index within the list of generic type substitutions.</value>
+        [DataMember(Name = "generic_index", IsRequired = true, EmitDefaultValue = true)]
+        public long GenericIndex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -122,8 +123,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class InstanceTypePointerAllOf {\n");
-            sb.Append("  Index: ").Append(Index).Append("\n");
+            sb.Append("class GenericBlueprintPayloadDefAllOf {\n");
+            sb.Append("  GenericIndex: ").Append(GenericIndex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -144,15 +145,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as InstanceTypePointerAllOf);
+            return this.Equals(input as GenericBlueprintPayloadDefAllOf);
         }
 
         /// <summary>
-        /// Returns true if InstanceTypePointerAllOf instances are equal
+        /// Returns true if GenericBlueprintPayloadDefAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of InstanceTypePointerAllOf to be compared</param>
+        /// <param name="input">Instance of GenericBlueprintPayloadDefAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(InstanceTypePointerAllOf input)
+        public bool Equals(GenericBlueprintPayloadDefAllOf input)
         {
             if (input == null)
             {
@@ -160,8 +161,8 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Index == input.Index ||
-                    this.Index.Equals(input.Index)
+                    this.GenericIndex == input.GenericIndex ||
+                    this.GenericIndex.Equals(input.GenericIndex)
                 );
         }
 
@@ -174,7 +175,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Index.GetHashCode();
+                hashCode = (hashCode * 59) + this.GenericIndex.GetHashCode();
                 return hashCode;
             }
         }

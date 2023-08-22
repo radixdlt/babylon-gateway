@@ -106,9 +106,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
         /// <param name="blueprintName">blueprintName (required).</param>
         /// <param name="outerObject">The Bech32m-encoded human readable version of any global address.</param>
-        /// <param name="instanceSchema">instanceSchema.</param>
         /// <param name="features">features (required).</param>
-        public BlueprintInfo(string packageAddress = default(string), string blueprintName = default(string), string outerObject = default(string), InstanceSchema instanceSchema = default(InstanceSchema), List<string> features = default(List<string>))
+        /// <param name="genericSubstitutions">genericSubstitutions (required).</param>
+        public BlueprintInfo(string packageAddress = default(string), string blueprintName = default(string), string outerObject = default(string), List<string> features = default(List<string>), List<TypeIdentifier> genericSubstitutions = default(List<TypeIdentifier>))
         {
             // to ensure "packageAddress" is required (not null)
             if (packageAddress == null)
@@ -128,8 +128,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("features is a required property for BlueprintInfo and cannot be null");
             }
             this.Features = features;
+            // to ensure "genericSubstitutions" is required (not null)
+            if (genericSubstitutions == null)
+            {
+                throw new ArgumentNullException("genericSubstitutions is a required property for BlueprintInfo and cannot be null");
+            }
+            this.GenericSubstitutions = genericSubstitutions;
             this.OuterObject = outerObject;
-            this.InstanceSchema = instanceSchema;
         }
 
         /// <summary>
@@ -153,16 +158,16 @@ namespace RadixDlt.CoreApiSdk.Model
         public string OuterObject { get; set; }
 
         /// <summary>
-        /// Gets or Sets InstanceSchema
-        /// </summary>
-        [DataMember(Name = "instance_schema", EmitDefaultValue = true)]
-        public InstanceSchema InstanceSchema { get; set; }
-
-        /// <summary>
         /// Gets or Sets Features
         /// </summary>
         [DataMember(Name = "features", IsRequired = true, EmitDefaultValue = true)]
         public List<string> Features { get; set; }
+
+        /// <summary>
+        /// Gets or Sets GenericSubstitutions
+        /// </summary>
+        [DataMember(Name = "generic_substitutions", IsRequired = true, EmitDefaultValue = true)]
+        public List<TypeIdentifier> GenericSubstitutions { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -175,8 +180,8 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
             sb.Append("  OuterObject: ").Append(OuterObject).Append("\n");
-            sb.Append("  InstanceSchema: ").Append(InstanceSchema).Append("\n");
             sb.Append("  Features: ").Append(Features).Append("\n");
+            sb.Append("  GenericSubstitutions: ").Append(GenericSubstitutions).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -228,15 +233,16 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.OuterObject.Equals(input.OuterObject))
                 ) && 
                 (
-                    this.InstanceSchema == input.InstanceSchema ||
-                    (this.InstanceSchema != null &&
-                    this.InstanceSchema.Equals(input.InstanceSchema))
-                ) && 
-                (
                     this.Features == input.Features ||
                     this.Features != null &&
                     input.Features != null &&
                     this.Features.SequenceEqual(input.Features)
+                ) && 
+                (
+                    this.GenericSubstitutions == input.GenericSubstitutions ||
+                    this.GenericSubstitutions != null &&
+                    input.GenericSubstitutions != null &&
+                    this.GenericSubstitutions.SequenceEqual(input.GenericSubstitutions)
                 );
         }
 
@@ -261,13 +267,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.OuterObject.GetHashCode();
                 }
-                if (this.InstanceSchema != null)
-                {
-                    hashCode = (hashCode * 59) + this.InstanceSchema.GetHashCode();
-                }
                 if (this.Features != null)
                 {
                     hashCode = (hashCode * 59) + this.Features.GetHashCode();
+                }
+                if (this.GenericSubstitutions != null)
+                {
+                    hashCode = (hashCode * 59) + this.GenericSubstitutions.GetHashCode();
                 }
                 return hashCode;
             }

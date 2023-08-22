@@ -105,7 +105,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="substateId">substateId (required).</param>
         /// <param name="value">value (required).</param>
-        public CreatedSubstate(SubstateId substateId = default(SubstateId), SubstateValue value = default(SubstateValue))
+        /// <param name="systemStructure">systemStructure (required).</param>
+        public CreatedSubstate(SubstateId substateId = default(SubstateId), SubstateValue value = default(SubstateValue), SubstateSystemStructure systemStructure = default(SubstateSystemStructure))
         {
             // to ensure "substateId" is required (not null)
             if (substateId == null)
@@ -119,6 +120,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("value is a required property for CreatedSubstate and cannot be null");
             }
             this.Value = value;
+            // to ensure "systemStructure" is required (not null)
+            if (systemStructure == null)
+            {
+                throw new ArgumentNullException("systemStructure is a required property for CreatedSubstate and cannot be null");
+            }
+            this.SystemStructure = systemStructure;
         }
 
         /// <summary>
@@ -134,6 +141,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public SubstateValue Value { get; set; }
 
         /// <summary>
+        /// Gets or Sets SystemStructure
+        /// </summary>
+        [DataMember(Name = "system_structure", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateSystemStructure SystemStructure { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -143,6 +156,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class CreatedSubstate {\n");
             sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
             sb.Append("  Value: ").Append(Value).Append("\n");
+            sb.Append("  SystemStructure: ").Append(SystemStructure).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -187,6 +201,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Value == input.Value ||
                     (this.Value != null &&
                     this.Value.Equals(input.Value))
+                ) && 
+                (
+                    this.SystemStructure == input.SystemStructure ||
+                    (this.SystemStructure != null &&
+                    this.SystemStructure.Equals(input.SystemStructure))
                 );
         }
 
@@ -206,6 +225,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Value != null)
                 {
                     hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                }
+                if (this.SystemStructure != null)
+                {
+                    hashCode = (hashCode * 59) + this.SystemStructure.GetHashCode();
                 }
                 return hashCode;
             }

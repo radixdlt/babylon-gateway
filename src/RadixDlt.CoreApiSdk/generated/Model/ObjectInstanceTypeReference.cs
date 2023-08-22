@@ -84,54 +84,82 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// PackageSchemaEntrySubstateAllOf
+    /// ObjectInstanceTypeReference
     /// </summary>
-    [DataContract(Name = "PackageSchemaEntrySubstate_allOf")]
-    public partial class PackageSchemaEntrySubstateAllOf : IEquatable<PackageSchemaEntrySubstateAllOf>
+    [DataContract(Name = "ObjectInstanceTypeReference")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectInstanceTypeReference), "ObjectInstance")]
+    [JsonSubtypes.KnownSubType(typeof(PackageObjectSubstateTypeReference), "Package")]
+    public partial class ObjectInstanceTypeReference : ObjectSubstateTypeReference, IEquatable<ObjectInstanceTypeReference>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PackageSchemaEntrySubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ObjectInstanceTypeReference" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected PackageSchemaEntrySubstateAllOf() { }
+        protected ObjectInstanceTypeReference() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="PackageSchemaEntrySubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="ObjectInstanceTypeReference" /> class.
         /// </summary>
-        /// <param name="key">key (required).</param>
-        /// <param name="value">value (required).</param>
-        public PackageSchemaEntrySubstateAllOf(SchemaKey key = default(SchemaKey), PackageSchemaEntryValue value = default(PackageSchemaEntryValue))
+        /// <param name="entityAddress">Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id) (required).</param>
+        /// <param name="schemaHash">The hex-encoded schema hash, capturing the identity of an SBOR schema. (required).</param>
+        /// <param name="instanceTypeIndex">instanceTypeIndex (required).</param>
+        /// <param name="localTypeIndex">localTypeIndex (required).</param>
+        /// <param name="type">type (required) (default to ObjectSubstateTypeReferenceType.ObjectInstance).</param>
+        public ObjectInstanceTypeReference(string entityAddress = default(string), string schemaHash = default(string), int instanceTypeIndex = default(int), LocalTypeIndex localTypeIndex = default(LocalTypeIndex), ObjectSubstateTypeReferenceType type = ObjectSubstateTypeReferenceType.ObjectInstance) : base(type)
         {
-            // to ensure "key" is required (not null)
-            if (key == null)
+            // to ensure "entityAddress" is required (not null)
+            if (entityAddress == null)
             {
-                throw new ArgumentNullException("key is a required property for PackageSchemaEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("entityAddress is a required property for ObjectInstanceTypeReference and cannot be null");
             }
-            this.Key = key;
-            // to ensure "value" is required (not null)
-            if (value == null)
+            this.EntityAddress = entityAddress;
+            // to ensure "schemaHash" is required (not null)
+            if (schemaHash == null)
             {
-                throw new ArgumentNullException("value is a required property for PackageSchemaEntrySubstateAllOf and cannot be null");
+                throw new ArgumentNullException("schemaHash is a required property for ObjectInstanceTypeReference and cannot be null");
             }
-            this.Value = value;
+            this.SchemaHash = schemaHash;
+            this.InstanceTypeIndex = instanceTypeIndex;
+            // to ensure "localTypeIndex" is required (not null)
+            if (localTypeIndex == null)
+            {
+                throw new ArgumentNullException("localTypeIndex is a required property for ObjectInstanceTypeReference and cannot be null");
+            }
+            this.LocalTypeIndex = localTypeIndex;
         }
 
         /// <summary>
-        /// Gets or Sets Key
+        /// Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)
         /// </summary>
-        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
-        public SchemaKey Key { get; set; }
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)</value>
+        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets Value
+        /// The hex-encoded schema hash, capturing the identity of an SBOR schema.
         /// </summary>
-        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public PackageSchemaEntryValue Value { get; set; }
+        /// <value>The hex-encoded schema hash, capturing the identity of an SBOR schema.</value>
+        [DataMember(Name = "schema_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string SchemaHash { get; set; }
+
+        /// <summary>
+        /// Gets or Sets InstanceTypeIndex
+        /// </summary>
+        [DataMember(Name = "instance_type_index", IsRequired = true, EmitDefaultValue = true)]
+        public int InstanceTypeIndex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets LocalTypeIndex
+        /// </summary>
+        [DataMember(Name = "local_type_index", IsRequired = true, EmitDefaultValue = true)]
+        public LocalTypeIndex LocalTypeIndex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -140,9 +168,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PackageSchemaEntrySubstateAllOf {\n");
-            sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  Value: ").Append(Value).Append("\n");
+            sb.Append("class ObjectInstanceTypeReference {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
+            sb.Append("  SchemaHash: ").Append(SchemaHash).Append("\n");
+            sb.Append("  InstanceTypeIndex: ").Append(InstanceTypeIndex).Append("\n");
+            sb.Append("  LocalTypeIndex: ").Append(LocalTypeIndex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -151,7 +182,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -163,30 +194,39 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PackageSchemaEntrySubstateAllOf);
+            return this.Equals(input as ObjectInstanceTypeReference);
         }
 
         /// <summary>
-        /// Returns true if PackageSchemaEntrySubstateAllOf instances are equal
+        /// Returns true if ObjectInstanceTypeReference instances are equal
         /// </summary>
-        /// <param name="input">Instance of PackageSchemaEntrySubstateAllOf to be compared</param>
+        /// <param name="input">Instance of ObjectInstanceTypeReference to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PackageSchemaEntrySubstateAllOf input)
+        public bool Equals(ObjectInstanceTypeReference input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
                 (
-                    this.Key == input.Key ||
-                    (this.Key != null &&
-                    this.Key.Equals(input.Key))
-                ) && 
+                    this.EntityAddress == input.EntityAddress ||
+                    (this.EntityAddress != null &&
+                    this.EntityAddress.Equals(input.EntityAddress))
+                ) && base.Equals(input) && 
                 (
-                    this.Value == input.Value ||
-                    (this.Value != null &&
-                    this.Value.Equals(input.Value))
+                    this.SchemaHash == input.SchemaHash ||
+                    (this.SchemaHash != null &&
+                    this.SchemaHash.Equals(input.SchemaHash))
+                ) && base.Equals(input) && 
+                (
+                    this.InstanceTypeIndex == input.InstanceTypeIndex ||
+                    this.InstanceTypeIndex.Equals(input.InstanceTypeIndex)
+                ) && base.Equals(input) && 
+                (
+                    this.LocalTypeIndex == input.LocalTypeIndex ||
+                    (this.LocalTypeIndex != null &&
+                    this.LocalTypeIndex.Equals(input.LocalTypeIndex))
                 );
         }
 
@@ -198,14 +238,19 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
-                if (this.Key != null)
+                int hashCode = base.GetHashCode();
+                if (this.EntityAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
                 }
-                if (this.Value != null)
+                if (this.SchemaHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SchemaHash.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.InstanceTypeIndex.GetHashCode();
+                if (this.LocalTypeIndex != null)
+                {
+                    hashCode = (hashCode * 59) + this.LocalTypeIndex.GetHashCode();
                 }
                 return hashCode;
             }

@@ -309,7 +309,7 @@ internal class TransactionQuerier : ITransactionQuerier
 
     public async Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(
         string intentHash,
-        GatewayModel.TransactionCommittedDetailsOptIns optIns,
+        GatewayModel.TransactionDetailsOptIns optIns,
         GatewayModel.LedgerState ledgerState,
         bool withDetails,
         CancellationToken token = default)
@@ -343,7 +343,7 @@ internal class TransactionQuerier : ITransactionQuerier
 
     private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(
         List<long> transactionStateVersions,
-        GatewayModel.TransactionCommittedDetailsOptIns optIns,
+        GatewayModel.TransactionDetailsOptIns optIns,
         CancellationToken token)
     {
         var transactions = await _dbContext
@@ -363,7 +363,7 @@ internal class TransactionQuerier : ITransactionQuerier
         if (optIns.ReceiptEvents && schemaHashes.Any())
         {
             schemas = await _dbContext
-                .PackageSchemaHistory
+                .SchemaHistory
                 .Where(x => schemaHashes.Contains(x.SchemaHash))
                 .ToDictionaryAsync(x => (ValueBytes)x.SchemaHash, x => x.Schema, token);
         }

@@ -90,84 +90,49 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// KeyValueStoreSchema
+    /// PaymentFromVault
     /// </summary>
-    [DataContract(Name = "KeyValueStoreSchema")]
-    public partial class KeyValueStoreSchema : IEquatable<KeyValueStoreSchema>
+    [DataContract(Name = "PaymentFromVault")]
+    public partial class PaymentFromVault : IEquatable<PaymentFromVault>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="KeyValueStoreSchema" /> class.
+        /// Initializes a new instance of the <see cref="PaymentFromVault" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected KeyValueStoreSchema() { }
+        protected PaymentFromVault() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="KeyValueStoreSchema" /> class.
+        /// Initializes a new instance of the <see cref="PaymentFromVault" /> class.
         /// </summary>
-        /// <param name="schema">schema (required).</param>
-        /// <param name="schemaHash">The hex-encoded schema hash, capturing the identity of an SBOR schema. (required).</param>
-        /// <param name="keyType">keyType (required).</param>
-        /// <param name="valueType">valueType (required).</param>
-        /// <param name="canOwn">Whether the key value store can own any children. (required).</param>
-        public KeyValueStoreSchema(ScryptoSchema schema = default(ScryptoSchema), string schemaHash = default(string), LocalTypeIndex keyType = default(LocalTypeIndex), LocalTypeIndex valueType = default(LocalTypeIndex), bool canOwn = default(bool))
+        /// <param name="vaultEntity">vaultEntity (required).</param>
+        /// <param name="xrdAmount">The string-encoded decimal representing the amount of fee in XRD paid by this vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
+        public PaymentFromVault(EntityReference vaultEntity = default(EntityReference), string xrdAmount = default(string))
         {
-            // to ensure "schema" is required (not null)
-            if (schema == null)
+            // to ensure "vaultEntity" is required (not null)
+            if (vaultEntity == null)
             {
-                throw new ArgumentNullException("schema is a required property for KeyValueStoreSchema and cannot be null");
+                throw new ArgumentNullException("vaultEntity is a required property for PaymentFromVault and cannot be null");
             }
-            this.Schema = schema;
-            // to ensure "schemaHash" is required (not null)
-            if (schemaHash == null)
+            this.VaultEntity = vaultEntity;
+            // to ensure "xrdAmount" is required (not null)
+            if (xrdAmount == null)
             {
-                throw new ArgumentNullException("schemaHash is a required property for KeyValueStoreSchema and cannot be null");
+                throw new ArgumentNullException("xrdAmount is a required property for PaymentFromVault and cannot be null");
             }
-            this.SchemaHash = schemaHash;
-            // to ensure "keyType" is required (not null)
-            if (keyType == null)
-            {
-                throw new ArgumentNullException("keyType is a required property for KeyValueStoreSchema and cannot be null");
-            }
-            this.KeyType = keyType;
-            // to ensure "valueType" is required (not null)
-            if (valueType == null)
-            {
-                throw new ArgumentNullException("valueType is a required property for KeyValueStoreSchema and cannot be null");
-            }
-            this.ValueType = valueType;
-            this.CanOwn = canOwn;
+            this.XrdAmount = xrdAmount;
         }
 
         /// <summary>
-        /// Gets or Sets Schema
+        /// Gets or Sets VaultEntity
         /// </summary>
-        [DataMember(Name = "schema", IsRequired = true, EmitDefaultValue = true)]
-        public ScryptoSchema Schema { get; set; }
+        [DataMember(Name = "vault_entity", IsRequired = true, EmitDefaultValue = true)]
+        public EntityReference VaultEntity { get; set; }
 
         /// <summary>
-        /// The hex-encoded schema hash, capturing the identity of an SBOR schema.
+        /// The string-encoded decimal representing the amount of fee in XRD paid by this vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. 
         /// </summary>
-        /// <value>The hex-encoded schema hash, capturing the identity of an SBOR schema.</value>
-        [DataMember(Name = "schema_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string SchemaHash { get; set; }
-
-        /// <summary>
-        /// Gets or Sets KeyType
-        /// </summary>
-        [DataMember(Name = "key_type", IsRequired = true, EmitDefaultValue = true)]
-        public LocalTypeIndex KeyType { get; set; }
-
-        /// <summary>
-        /// Gets or Sets ValueType
-        /// </summary>
-        [DataMember(Name = "value_type", IsRequired = true, EmitDefaultValue = true)]
-        public LocalTypeIndex ValueType { get; set; }
-
-        /// <summary>
-        /// Whether the key value store can own any children.
-        /// </summary>
-        /// <value>Whether the key value store can own any children.</value>
-        [DataMember(Name = "can_own", IsRequired = true, EmitDefaultValue = true)]
-        public bool CanOwn { get; set; }
+        /// <value>The string-encoded decimal representing the amount of fee in XRD paid by this vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. </value>
+        [DataMember(Name = "xrd_amount", IsRequired = true, EmitDefaultValue = true)]
+        public string XrdAmount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -176,12 +141,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class KeyValueStoreSchema {\n");
-            sb.Append("  Schema: ").Append(Schema).Append("\n");
-            sb.Append("  SchemaHash: ").Append(SchemaHash).Append("\n");
-            sb.Append("  KeyType: ").Append(KeyType).Append("\n");
-            sb.Append("  ValueType: ").Append(ValueType).Append("\n");
-            sb.Append("  CanOwn: ").Append(CanOwn).Append("\n");
+            sb.Append("class PaymentFromVault {\n");
+            sb.Append("  VaultEntity: ").Append(VaultEntity).Append("\n");
+            sb.Append("  XrdAmount: ").Append(XrdAmount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -202,15 +164,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as KeyValueStoreSchema);
+            return this.Equals(input as PaymentFromVault);
         }
 
         /// <summary>
-        /// Returns true if KeyValueStoreSchema instances are equal
+        /// Returns true if PaymentFromVault instances are equal
         /// </summary>
-        /// <param name="input">Instance of KeyValueStoreSchema to be compared</param>
+        /// <param name="input">Instance of PaymentFromVault to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(KeyValueStoreSchema input)
+        public bool Equals(PaymentFromVault input)
         {
             if (input == null)
             {
@@ -218,28 +180,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Schema == input.Schema ||
-                    (this.Schema != null &&
-                    this.Schema.Equals(input.Schema))
+                    this.VaultEntity == input.VaultEntity ||
+                    (this.VaultEntity != null &&
+                    this.VaultEntity.Equals(input.VaultEntity))
                 ) && 
                 (
-                    this.SchemaHash == input.SchemaHash ||
-                    (this.SchemaHash != null &&
-                    this.SchemaHash.Equals(input.SchemaHash))
-                ) && 
-                (
-                    this.KeyType == input.KeyType ||
-                    (this.KeyType != null &&
-                    this.KeyType.Equals(input.KeyType))
-                ) && 
-                (
-                    this.ValueType == input.ValueType ||
-                    (this.ValueType != null &&
-                    this.ValueType.Equals(input.ValueType))
-                ) && 
-                (
-                    this.CanOwn == input.CanOwn ||
-                    this.CanOwn.Equals(input.CanOwn)
+                    this.XrdAmount == input.XrdAmount ||
+                    (this.XrdAmount != null &&
+                    this.XrdAmount.Equals(input.XrdAmount))
                 );
         }
 
@@ -252,23 +200,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Schema != null)
+                if (this.VaultEntity != null)
                 {
-                    hashCode = (hashCode * 59) + this.Schema.GetHashCode();
+                    hashCode = (hashCode * 59) + this.VaultEntity.GetHashCode();
                 }
-                if (this.SchemaHash != null)
+                if (this.XrdAmount != null)
                 {
-                    hashCode = (hashCode * 59) + this.SchemaHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.XrdAmount.GetHashCode();
                 }
-                if (this.KeyType != null)
-                {
-                    hashCode = (hashCode * 59) + this.KeyType.GetHashCode();
-                }
-                if (this.ValueType != null)
-                {
-                    hashCode = (hashCode * 59) + this.ValueType.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.CanOwn.GetHashCode();
                 return hashCode;
             }
         }

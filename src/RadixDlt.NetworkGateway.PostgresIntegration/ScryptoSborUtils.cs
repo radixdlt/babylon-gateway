@@ -80,7 +80,7 @@ internal static class ScryptoSborUtils
         return stringNfid;
     }
 
-    public static string DataToProgrammaticJson(byte[] data, byte[] schemaBytes, SborTypeKind keyTypeKind, int schemaIndex, byte networkId)
+    public static string DataToProgrammaticJson(byte[] data, byte[] schemaBytes, SborTypeKind keyTypeKind, long schemaIndex, byte networkId)
     {
         ToolkitModel.LocalTypeIndex typeIndex = keyTypeKind switch
         {

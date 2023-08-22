@@ -111,7 +111,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="type">type (required).</param>
         /// <param name="resourceAddress">The Bech32m-encoded human readable version of the fungible resource&#39;s address  (required).</param>
-        /// <param name="balanceChange">The string-encoded decimal representing the amount of change for the fungible resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        /// <param name="balanceChange">The string-encoded decimal representing the amount of change for the fungible resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
         public LtsFeeFungibleResourceBalanceChange(LtsFeeFungibleResourceBalanceChangeType type = default(LtsFeeFungibleResourceBalanceChangeType), string resourceAddress = default(string), string balanceChange = default(string))
         {
             this.Type = type;
@@ -137,9 +137,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// The string-encoded decimal representing the amount of change for the fungible resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// The string-encoded decimal representing the amount of change for the fungible resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. 
         /// </summary>
-        /// <value>The string-encoded decimal representing the amount of change for the fungible resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        /// <value>The string-encoded decimal representing the amount of change for the fungible resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. </value>
         [DataMember(Name = "balance_change", IsRequired = true, EmitDefaultValue = true)]
         public string BalanceChange { get; set; }
 

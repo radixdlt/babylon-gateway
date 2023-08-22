@@ -78,15 +78,15 @@ internal class NonFungibleSchemaHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("entity_id")]
-    public long EntityId { get; set; }
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
 
-    [Column("schema")]
-    public byte[] Schema { get; set; }
+    [Column("schema_hash")]
+    public byte[] SchemaHash { get; set; }
 
     [Column("sbor_type_kind")]
     public SborTypeKind SborTypeKind { get; set; }
 
     [Column("type_index")]
-    public int TypeIndex { get; set; }
+    public long TypeIndex { get; set; }
 }

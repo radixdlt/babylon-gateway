@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="ProposerReward" /> class.
         /// </summary>
         /// <param name="validatorIndex">validatorIndex (required).</param>
-        /// <param name="xrdAmount">The string-encoded decimal representing the amount of reward in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        /// <param name="xrdAmount">The string-encoded decimal representing the amount of reward in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
         public ProposerReward(ActiveValidatorIndex validatorIndex = default(ActiveValidatorIndex), string xrdAmount = default(string))
         {
             // to ensure "validatorIndex" is required (not null)
@@ -128,9 +128,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public ActiveValidatorIndex ValidatorIndex { get; set; }
 
         /// <summary>
-        /// The string-encoded decimal representing the amount of reward in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// The string-encoded decimal representing the amount of reward in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. 
         /// </summary>
-        /// <value>The string-encoded decimal representing the amount of reward in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        /// <value>The string-encoded decimal representing the amount of reward in XRD. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. </value>
         [DataMember(Name = "xrd_amount", IsRequired = true, EmitDefaultValue = true)]
         public string XrdAmount { get; set; }
 

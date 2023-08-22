@@ -90,24 +90,30 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionCommittedDetailsOptIns
+    /// TransactionDetailsOptIns
     /// </summary>
-    [DataContract(Name = "TransactionCommittedDetailsOptIns")]
-    public partial class TransactionCommittedDetailsOptIns : IEquatable<TransactionCommittedDetailsOptIns>
+    [DataContract(Name = "TransactionDetailsOptIns")]
+    public partial class TransactionDetailsOptIns : IEquatable<TransactionDetailsOptIns>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsOptIns" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetailsOptIns" /> class.
         /// </summary>
         /// <param name="rawHex">rawHex.</param>
         /// <param name="receiptStateChanges">receiptStateChanges.</param>
         /// <param name="receiptFeeSummary">receiptFeeSummary.</param>
+        /// <param name="receiptFeeSource">receiptFeeSource.</param>
+        /// <param name="receiptFeeDestination">receiptFeeDestination.</param>
+        /// <param name="receiptCostingParameters">receiptCostingParameters.</param>
         /// <param name="receiptEvents">receiptEvents.</param>
         /// <param name="affectedGlobalEntities">affectedGlobalEntities.</param>
-        public TransactionCommittedDetailsOptIns(bool rawHex = default(bool), bool receiptStateChanges = default(bool), bool receiptFeeSummary = default(bool), bool receiptEvents = default(bool), bool affectedGlobalEntities = default(bool))
+        public TransactionDetailsOptIns(bool rawHex = default(bool), bool receiptStateChanges = default(bool), bool receiptFeeSummary = default(bool), bool receiptFeeSource = default(bool), bool receiptFeeDestination = default(bool), bool receiptCostingParameters = default(bool), bool receiptEvents = default(bool), bool affectedGlobalEntities = default(bool))
         {
             this.RawHex = rawHex;
             this.ReceiptStateChanges = receiptStateChanges;
             this.ReceiptFeeSummary = receiptFeeSummary;
+            this.ReceiptFeeSource = receiptFeeSource;
+            this.ReceiptFeeDestination = receiptFeeDestination;
+            this.ReceiptCostingParameters = receiptCostingParameters;
             this.ReceiptEvents = receiptEvents;
             this.AffectedGlobalEntities = affectedGlobalEntities;
         }
@@ -131,6 +137,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public bool ReceiptFeeSummary { get; set; }
 
         /// <summary>
+        /// Gets or Sets ReceiptFeeSource
+        /// </summary>
+        [DataMember(Name = "receipt_fee_source", EmitDefaultValue = true)]
+        public bool ReceiptFeeSource { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ReceiptFeeDestination
+        /// </summary>
+        [DataMember(Name = "receipt_fee_destination", EmitDefaultValue = true)]
+        public bool ReceiptFeeDestination { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ReceiptCostingParameters
+        /// </summary>
+        [DataMember(Name = "receipt_costing_parameters", EmitDefaultValue = true)]
+        public bool ReceiptCostingParameters { get; set; }
+
+        /// <summary>
         /// Gets or Sets ReceiptEvents
         /// </summary>
         [DataMember(Name = "receipt_events", EmitDefaultValue = true)]
@@ -149,10 +173,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionCommittedDetailsOptIns {\n");
+            sb.Append("class TransactionDetailsOptIns {\n");
             sb.Append("  RawHex: ").Append(RawHex).Append("\n");
             sb.Append("  ReceiptStateChanges: ").Append(ReceiptStateChanges).Append("\n");
             sb.Append("  ReceiptFeeSummary: ").Append(ReceiptFeeSummary).Append("\n");
+            sb.Append("  ReceiptFeeSource: ").Append(ReceiptFeeSource).Append("\n");
+            sb.Append("  ReceiptFeeDestination: ").Append(ReceiptFeeDestination).Append("\n");
+            sb.Append("  ReceiptCostingParameters: ").Append(ReceiptCostingParameters).Append("\n");
             sb.Append("  ReceiptEvents: ").Append(ReceiptEvents).Append("\n");
             sb.Append("  AffectedGlobalEntities: ").Append(AffectedGlobalEntities).Append("\n");
             sb.Append("}\n");
@@ -175,15 +202,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionCommittedDetailsOptIns);
+            return this.Equals(input as TransactionDetailsOptIns);
         }
 
         /// <summary>
-        /// Returns true if TransactionCommittedDetailsOptIns instances are equal
+        /// Returns true if TransactionDetailsOptIns instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionCommittedDetailsOptIns to be compared</param>
+        /// <param name="input">Instance of TransactionDetailsOptIns to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionCommittedDetailsOptIns input)
+        public bool Equals(TransactionDetailsOptIns input)
         {
             if (input == null)
             {
@@ -201,6 +228,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 (
                     this.ReceiptFeeSummary == input.ReceiptFeeSummary ||
                     this.ReceiptFeeSummary.Equals(input.ReceiptFeeSummary)
+                ) && 
+                (
+                    this.ReceiptFeeSource == input.ReceiptFeeSource ||
+                    this.ReceiptFeeSource.Equals(input.ReceiptFeeSource)
+                ) && 
+                (
+                    this.ReceiptFeeDestination == input.ReceiptFeeDestination ||
+                    this.ReceiptFeeDestination.Equals(input.ReceiptFeeDestination)
+                ) && 
+                (
+                    this.ReceiptCostingParameters == input.ReceiptCostingParameters ||
+                    this.ReceiptCostingParameters.Equals(input.ReceiptCostingParameters)
                 ) && 
                 (
                     this.ReceiptEvents == input.ReceiptEvents ||
@@ -224,6 +263,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
                 hashCode = (hashCode * 59) + this.ReceiptStateChanges.GetHashCode();
                 hashCode = (hashCode * 59) + this.ReceiptFeeSummary.GetHashCode();
+                hashCode = (hashCode * 59) + this.ReceiptFeeSource.GetHashCode();
+                hashCode = (hashCode * 59) + this.ReceiptFeeDestination.GetHashCode();
+                hashCode = (hashCode * 59) + this.ReceiptCostingParameters.GetHashCode();
                 hashCode = (hashCode * 59) + this.ReceiptEvents.GetHashCode();
                 hashCode = (hashCode * 59) + this.AffectedGlobalEntities.GetHashCode();
                 return hashCode;

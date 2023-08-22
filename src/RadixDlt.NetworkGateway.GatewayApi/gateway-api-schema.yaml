@@ -1269,6 +1269,14 @@ components:
         fee_summary:
           description: Fees paid, Only present if the `status` is not `Rejected`.
           type: object
+        costing_parameters:
+          type: object
+        fee_destination:
+          description: Only present if the `status` is not `Rejected`.
+          type: object
+        fee_source:
+          description: Only present if the `status` is not `Rejected`.
+          type: object
         state_updates:
           description: Transaction state updates (only present if status is Succeeded or Failed).
           type: object
@@ -1686,10 +1694,10 @@ components:
             intent_hash:
               $ref: "#/components/schemas/HashBech32mString"
             opt_ins:
-              $ref: "#/components/schemas/TransactionCommittedDetailsOptIns"
+              $ref: "#/components/schemas/TransactionDetailsOptIns"
       example:
         intent_hash_hex: "<transaction-intent-hash>"
-    TransactionCommittedDetailsOptIns:
+    TransactionDetailsOptIns:
       type: object
       properties:
         raw_hex:
@@ -1697,6 +1705,12 @@ components:
         receipt_state_changes:
           type: boolean
         receipt_fee_summary:
+          type: boolean
+        receipt_fee_source:
+          type: boolean
+        receipt_fee_destination:
+          type: boolean
+        receipt_costing_parameters:
           type: boolean
         receipt_events:
           type: boolean
@@ -1758,7 +1772,7 @@ components:
                 - Asc
                 - Desc
             opt_ins:
-              $ref: "#/components/schemas/TransactionCommittedDetailsOptIns"
+              $ref: "#/components/schemas/TransactionDetailsOptIns"
       example:
         limit_per_page: 5
     StreamTransactionsRequestEventFilterItem:

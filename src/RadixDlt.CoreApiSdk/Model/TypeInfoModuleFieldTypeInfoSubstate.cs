@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -80,26 +81,31 @@ public partial class TypeInfoModuleFieldTypeInfoSubstate : IEntityAddressPointer
         return Enumerable.Empty<string>();
     }
 
-    public bool TryGetObjectInstanceSchema([NotNullWhen(true)] out InstanceSchema instanceSchema)
+    public bool TryGetObjectInstanceGenericSubstitutions([NotNullWhen(true)] out List<TypeIdentifier> genericSubstitutions)
     {
-        instanceSchema = null;
+        genericSubstitutions = null;
 
-        if (Value.Details is ObjectTypeInfoDetails objectTypeInfoDetails && objectTypeInfoDetails.BlueprintInfo.InstanceSchema != null)
+        if (Value.Details is ObjectTypeInfoDetails objectTypeInfoDetails && objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions != null)
         {
-            instanceSchema = objectTypeInfoDetails.BlueprintInfo.InstanceSchema;
+            genericSubstitutions = objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions;
             return true;
         }
 
         return false;
     }
 
-    public bool TryGetKeyValueStoreSchema([NotNullWhen(true)] out KeyValueStoreSchema keyValueStoreSchema)
+    public bool TryGetNonFungibleDataSchemaDetails([NotNullWhen(true)] out TypeIdentifier schemaDetails)
     {
-        keyValueStoreSchema = null;
+        schemaDetails = null;
 
-        if (Value.Details is KeyValueStoreTypeInfoDetails keyValueStoreTypeInfoDetails && keyValueStoreTypeInfoDetails.KeyValueStoreInfo.KvStoreSchema != null)
+        if (Value.Details is ObjectTypeInfoDetails objectTypeInfoDetails && objectTypeInfoDetails.BlueprintInfo.BlueprintName == NativeBlueprintNames.NonFungibleResourceManager)
         {
-            keyValueStoreSchema = keyValueStoreTypeInfoDetails.KeyValueStoreInfo.KvStoreSchema;
+            if (objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions.Count != 1)
+            {
+                throw new NotSupportedException("Expected non fungible data with one data type entry.");
+            }
+
+            schemaDetails = objectTypeInfoDetails.BlueprintInfo.GenericSubstitutions.First();
             return true;
         }
 

@@ -103,24 +103,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="FieldSchema" /> class.
         /// </summary>
-        /// <param name="fieldTypePointer">fieldTypePointer (required).</param>
+        /// <param name="fieldTypeRef">fieldTypeRef (required).</param>
         /// <param name="condition">condition.</param>
-        public FieldSchema(TypePointer fieldTypePointer = default(TypePointer), FieldSchemaFeatureCondition condition = default(FieldSchemaFeatureCondition))
+        public FieldSchema(BlueprintPayloadDef fieldTypeRef = default(BlueprintPayloadDef), FieldSchemaFeatureCondition condition = default(FieldSchemaFeatureCondition))
         {
-            // to ensure "fieldTypePointer" is required (not null)
-            if (fieldTypePointer == null)
+            // to ensure "fieldTypeRef" is required (not null)
+            if (fieldTypeRef == null)
             {
-                throw new ArgumentNullException("fieldTypePointer is a required property for FieldSchema and cannot be null");
+                throw new ArgumentNullException("fieldTypeRef is a required property for FieldSchema and cannot be null");
             }
-            this.FieldTypePointer = fieldTypePointer;
+            this.FieldTypeRef = fieldTypeRef;
             this.Condition = condition;
         }
 
         /// <summary>
-        /// Gets or Sets FieldTypePointer
+        /// Gets or Sets FieldTypeRef
         /// </summary>
-        [DataMember(Name = "field_type_pointer", IsRequired = true, EmitDefaultValue = true)]
-        public TypePointer FieldTypePointer { get; set; }
+        [DataMember(Name = "field_type_ref", IsRequired = true, EmitDefaultValue = true)]
+        public BlueprintPayloadDef FieldTypeRef { get; set; }
 
         /// <summary>
         /// Gets or Sets Condition
@@ -136,7 +136,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class FieldSchema {\n");
-            sb.Append("  FieldTypePointer: ").Append(FieldTypePointer).Append("\n");
+            sb.Append("  FieldTypeRef: ").Append(FieldTypeRef).Append("\n");
             sb.Append("  Condition: ").Append(Condition).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -174,9 +174,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.FieldTypePointer == input.FieldTypePointer ||
-                    (this.FieldTypePointer != null &&
-                    this.FieldTypePointer.Equals(input.FieldTypePointer))
+                    this.FieldTypeRef == input.FieldTypeRef ||
+                    (this.FieldTypeRef != null &&
+                    this.FieldTypeRef.Equals(input.FieldTypeRef))
                 ) && 
                 (
                     this.Condition == input.Condition ||
@@ -194,9 +194,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.FieldTypePointer != null)
+                if (this.FieldTypeRef != null)
                 {
-                    hashCode = (hashCode * 59) + this.FieldTypePointer.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FieldTypeRef.GetHashCode();
                 }
                 if (this.Condition != null)
                 {

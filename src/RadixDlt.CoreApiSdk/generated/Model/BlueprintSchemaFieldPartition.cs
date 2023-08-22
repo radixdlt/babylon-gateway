@@ -103,11 +103,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="BlueprintSchemaFieldPartition" /> class.
         /// </summary>
-        /// <param name="partitionOffset">The partition&#39;s offset from the Main module base (64) (required).</param>
+        /// <param name="partitionDescription">partitionDescription (required).</param>
         /// <param name="fields">The field substates for this blueprint. (required).</param>
-        public BlueprintSchemaFieldPartition(int partitionOffset = default(int), List<FieldSchema> fields = default(List<FieldSchema>))
+        public BlueprintSchemaFieldPartition(PartitionDescription partitionDescription = default(PartitionDescription), List<FieldSchema> fields = default(List<FieldSchema>))
         {
-            this.PartitionOffset = partitionOffset;
+            // to ensure "partitionDescription" is required (not null)
+            if (partitionDescription == null)
+            {
+                throw new ArgumentNullException("partitionDescription is a required property for BlueprintSchemaFieldPartition and cannot be null");
+            }
+            this.PartitionDescription = partitionDescription;
             // to ensure "fields" is required (not null)
             if (fields == null)
             {
@@ -117,11 +122,10 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The partition&#39;s offset from the Main module base (64)
+        /// Gets or Sets PartitionDescription
         /// </summary>
-        /// <value>The partition&#39;s offset from the Main module base (64)</value>
-        [DataMember(Name = "partition_offset", IsRequired = true, EmitDefaultValue = true)]
-        public int PartitionOffset { get; set; }
+        [DataMember(Name = "partition_description", IsRequired = true, EmitDefaultValue = true)]
+        public PartitionDescription PartitionDescription { get; set; }
 
         /// <summary>
         /// The field substates for this blueprint.
@@ -138,7 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class BlueprintSchemaFieldPartition {\n");
-            sb.Append("  PartitionOffset: ").Append(PartitionOffset).Append("\n");
+            sb.Append("  PartitionDescription: ").Append(PartitionDescription).Append("\n");
             sb.Append("  Fields: ").Append(Fields).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -176,8 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.PartitionOffset == input.PartitionOffset ||
-                    this.PartitionOffset.Equals(input.PartitionOffset)
+                    this.PartitionDescription == input.PartitionDescription ||
+                    (this.PartitionDescription != null &&
+                    this.PartitionDescription.Equals(input.PartitionDescription))
                 ) && 
                 (
                     this.Fields == input.Fields ||
@@ -196,7 +201,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.PartitionOffset.GetHashCode();
+                if (this.PartitionDescription != null)
+                {
+                    hashCode = (hashCode * 59) + this.PartitionDescription.GetHashCode();
+                }
                 if (this.Fields != null)
                 {
                     hashCode = (hashCode * 59) + this.Fields.GetHashCode();

@@ -91,53 +91,99 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// PackageTypePointer
+    /// KeyValueStoreEntryStructure
     /// </summary>
-    [DataContract(Name = "PackageTypePointer")]
-    [JsonConverter(typeof(JsonSubtypes), "pointer_type")]
-    [JsonSubtypes.KnownSubType(typeof(InstanceTypePointer), "Instance")]
-    [JsonSubtypes.KnownSubType(typeof(PackageTypePointer), "Package")]
-    public partial class PackageTypePointer : TypePointer, IEquatable<PackageTypePointer>
+    [DataContract(Name = "KeyValueStoreEntryStructure")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(KeyValueStoreEntryStructure), "KeyValueStoreEntry")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectFieldStructure), "ObjectField")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectIndexPartitionEntryStructure), "ObjectIndexPartitionEntry")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectKeyValuePartitionEntryStructure), "ObjectKeyValuePartitionEntry")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectSortedIndexPartitionEntryStructure), "ObjectSortedIndexPartitionEntry")]
+    [JsonSubtypes.KnownSubType(typeof(SystemFieldStructure), "SystemField")]
+    [JsonSubtypes.KnownSubType(typeof(SystemSchemaStructure), "SystemSchema")]
+    public partial class KeyValueStoreEntryStructure : SubstateSystemStructure, IEquatable<KeyValueStoreEntryStructure>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PackageTypePointer" /> class.
+        /// Initializes a new instance of the <see cref="KeyValueStoreEntryStructure" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected PackageTypePointer() { }
+        protected KeyValueStoreEntryStructure() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="PackageTypePointer" /> class.
+        /// Initializes a new instance of the <see cref="KeyValueStoreEntryStructure" /> class.
         /// </summary>
-        /// <param name="schemaHash">The hex-encoded schema hash, capturing the identity of an SBOR schema. (required).</param>
-        /// <param name="localTypeIndex">localTypeIndex (required).</param>
-        /// <param name="pointerType">pointerType (required) (default to TypePointerType.Package).</param>
-        public PackageTypePointer(string schemaHash = default(string), LocalTypeIndex localTypeIndex = default(LocalTypeIndex), TypePointerType pointerType = TypePointerType.Package) : base(pointerType)
+        /// <param name="keyValueStoreAddress">Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id) (required).</param>
+        /// <param name="keySchemaHash">The hex-encoded schema hash, capturing the identity of an SBOR schema. (required).</param>
+        /// <param name="keyLocalTypeIndex">keyLocalTypeIndex (required).</param>
+        /// <param name="valueSchemaHash">The hex-encoded schema hash, capturing the identity of an SBOR schema. (required).</param>
+        /// <param name="valueLocalTypeIndex">valueLocalTypeIndex (required).</param>
+        /// <param name="type">type (required) (default to SubstateSystemStructureType.KeyValueStoreEntry).</param>
+        public KeyValueStoreEntryStructure(string keyValueStoreAddress = default(string), string keySchemaHash = default(string), LocalTypeIndex keyLocalTypeIndex = default(LocalTypeIndex), string valueSchemaHash = default(string), LocalTypeIndex valueLocalTypeIndex = default(LocalTypeIndex), SubstateSystemStructureType type = SubstateSystemStructureType.KeyValueStoreEntry) : base(type)
         {
-            // to ensure "schemaHash" is required (not null)
-            if (schemaHash == null)
+            // to ensure "keyValueStoreAddress" is required (not null)
+            if (keyValueStoreAddress == null)
             {
-                throw new ArgumentNullException("schemaHash is a required property for PackageTypePointer and cannot be null");
+                throw new ArgumentNullException("keyValueStoreAddress is a required property for KeyValueStoreEntryStructure and cannot be null");
             }
-            this.SchemaHash = schemaHash;
-            // to ensure "localTypeIndex" is required (not null)
-            if (localTypeIndex == null)
+            this.KeyValueStoreAddress = keyValueStoreAddress;
+            // to ensure "keySchemaHash" is required (not null)
+            if (keySchemaHash == null)
             {
-                throw new ArgumentNullException("localTypeIndex is a required property for PackageTypePointer and cannot be null");
+                throw new ArgumentNullException("keySchemaHash is a required property for KeyValueStoreEntryStructure and cannot be null");
             }
-            this.LocalTypeIndex = localTypeIndex;
+            this.KeySchemaHash = keySchemaHash;
+            // to ensure "keyLocalTypeIndex" is required (not null)
+            if (keyLocalTypeIndex == null)
+            {
+                throw new ArgumentNullException("keyLocalTypeIndex is a required property for KeyValueStoreEntryStructure and cannot be null");
+            }
+            this.KeyLocalTypeIndex = keyLocalTypeIndex;
+            // to ensure "valueSchemaHash" is required (not null)
+            if (valueSchemaHash == null)
+            {
+                throw new ArgumentNullException("valueSchemaHash is a required property for KeyValueStoreEntryStructure and cannot be null");
+            }
+            this.ValueSchemaHash = valueSchemaHash;
+            // to ensure "valueLocalTypeIndex" is required (not null)
+            if (valueLocalTypeIndex == null)
+            {
+                throw new ArgumentNullException("valueLocalTypeIndex is a required property for KeyValueStoreEntryStructure and cannot be null");
+            }
+            this.ValueLocalTypeIndex = valueLocalTypeIndex;
         }
+
+        /// <summary>
+        /// Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)
+        /// </summary>
+        /// <value>Bech32m-encoded human readable version of the entity&#39;s address (ie the entity&#39;s node id)</value>
+        [DataMember(Name = "key_value_store_address", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyValueStoreAddress { get; set; }
 
         /// <summary>
         /// The hex-encoded schema hash, capturing the identity of an SBOR schema.
         /// </summary>
         /// <value>The hex-encoded schema hash, capturing the identity of an SBOR schema.</value>
-        [DataMember(Name = "schema_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string SchemaHash { get; set; }
+        [DataMember(Name = "key_schema_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string KeySchemaHash { get; set; }
 
         /// <summary>
-        /// Gets or Sets LocalTypeIndex
+        /// Gets or Sets KeyLocalTypeIndex
         /// </summary>
-        [DataMember(Name = "local_type_index", IsRequired = true, EmitDefaultValue = true)]
-        public LocalTypeIndex LocalTypeIndex { get; set; }
+        [DataMember(Name = "key_local_type_index", IsRequired = true, EmitDefaultValue = true)]
+        public LocalTypeIndex KeyLocalTypeIndex { get; set; }
+
+        /// <summary>
+        /// The hex-encoded schema hash, capturing the identity of an SBOR schema.
+        /// </summary>
+        /// <value>The hex-encoded schema hash, capturing the identity of an SBOR schema.</value>
+        [DataMember(Name = "value_schema_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string ValueSchemaHash { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ValueLocalTypeIndex
+        /// </summary>
+        [DataMember(Name = "value_local_type_index", IsRequired = true, EmitDefaultValue = true)]
+        public LocalTypeIndex ValueLocalTypeIndex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -146,10 +192,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PackageTypePointer {\n");
+            sb.Append("class KeyValueStoreEntryStructure {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  SchemaHash: ").Append(SchemaHash).Append("\n");
-            sb.Append("  LocalTypeIndex: ").Append(LocalTypeIndex).Append("\n");
+            sb.Append("  KeyValueStoreAddress: ").Append(KeyValueStoreAddress).Append("\n");
+            sb.Append("  KeySchemaHash: ").Append(KeySchemaHash).Append("\n");
+            sb.Append("  KeyLocalTypeIndex: ").Append(KeyLocalTypeIndex).Append("\n");
+            sb.Append("  ValueSchemaHash: ").Append(ValueSchemaHash).Append("\n");
+            sb.Append("  ValueLocalTypeIndex: ").Append(ValueLocalTypeIndex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -170,15 +219,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PackageTypePointer);
+            return this.Equals(input as KeyValueStoreEntryStructure);
         }
 
         /// <summary>
-        /// Returns true if PackageTypePointer instances are equal
+        /// Returns true if KeyValueStoreEntryStructure instances are equal
         /// </summary>
-        /// <param name="input">Instance of PackageTypePointer to be compared</param>
+        /// <param name="input">Instance of KeyValueStoreEntryStructure to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PackageTypePointer input)
+        public bool Equals(KeyValueStoreEntryStructure input)
         {
             if (input == null)
             {
@@ -186,14 +235,29 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.SchemaHash == input.SchemaHash ||
-                    (this.SchemaHash != null &&
-                    this.SchemaHash.Equals(input.SchemaHash))
+                    this.KeyValueStoreAddress == input.KeyValueStoreAddress ||
+                    (this.KeyValueStoreAddress != null &&
+                    this.KeyValueStoreAddress.Equals(input.KeyValueStoreAddress))
                 ) && base.Equals(input) && 
                 (
-                    this.LocalTypeIndex == input.LocalTypeIndex ||
-                    (this.LocalTypeIndex != null &&
-                    this.LocalTypeIndex.Equals(input.LocalTypeIndex))
+                    this.KeySchemaHash == input.KeySchemaHash ||
+                    (this.KeySchemaHash != null &&
+                    this.KeySchemaHash.Equals(input.KeySchemaHash))
+                ) && base.Equals(input) && 
+                (
+                    this.KeyLocalTypeIndex == input.KeyLocalTypeIndex ||
+                    (this.KeyLocalTypeIndex != null &&
+                    this.KeyLocalTypeIndex.Equals(input.KeyLocalTypeIndex))
+                ) && base.Equals(input) && 
+                (
+                    this.ValueSchemaHash == input.ValueSchemaHash ||
+                    (this.ValueSchemaHash != null &&
+                    this.ValueSchemaHash.Equals(input.ValueSchemaHash))
+                ) && base.Equals(input) && 
+                (
+                    this.ValueLocalTypeIndex == input.ValueLocalTypeIndex ||
+                    (this.ValueLocalTypeIndex != null &&
+                    this.ValueLocalTypeIndex.Equals(input.ValueLocalTypeIndex))
                 );
         }
 
@@ -206,13 +270,25 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.SchemaHash != null)
+                if (this.KeyValueStoreAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.SchemaHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyValueStoreAddress.GetHashCode();
                 }
-                if (this.LocalTypeIndex != null)
+                if (this.KeySchemaHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.LocalTypeIndex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeySchemaHash.GetHashCode();
+                }
+                if (this.KeyLocalTypeIndex != null)
+                {
+                    hashCode = (hashCode * 59) + this.KeyLocalTypeIndex.GetHashCode();
+                }
+                if (this.ValueSchemaHash != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValueSchemaHash.GetHashCode();
+                }
+                if (this.ValueLocalTypeIndex != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValueLocalTypeIndex.GetHashCode();
                 }
                 return hashCode;
             }

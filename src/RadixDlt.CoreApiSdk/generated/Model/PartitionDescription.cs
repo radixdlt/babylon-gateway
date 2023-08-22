@@ -90,53 +90,39 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// StaticRolesAuthTemplate
+    /// PartitionDescription
     /// </summary>
-    [DataContract(Name = "StaticRolesAuthTemplate")]
-    public partial class StaticRolesAuthTemplate : IEquatable<StaticRolesAuthTemplate>
+    [DataContract(Name = "PartitionDescription")]
+    public partial class PartitionDescription : IEquatable<PartitionDescription>
     {
 
         /// <summary>
-        /// Gets or Sets RoleSpecification
+        /// Gets or Sets Type
         /// </summary>
-        [DataMember(Name = "role_specification", IsRequired = true, EmitDefaultValue = true)]
-        public RoleSpecification RoleSpecification { get; set; }
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public PartitionDescriptionType Type { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StaticRolesAuthTemplate" /> class.
+        /// Initializes a new instance of the <see cref="PartitionDescription" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StaticRolesAuthTemplate() { }
+        protected PartitionDescription() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StaticRolesAuthTemplate" /> class.
+        /// Initializes a new instance of the <see cref="PartitionDescription" /> class.
         /// </summary>
-        /// <param name="roleSpecification">roleSpecification (required).</param>
-        /// <param name="roles">A map from role name to role details.</param>
-        /// <param name="methodAccessibilityMap">A map from a method identifier to MethodAccessibility (required).</param>
-        public StaticRolesAuthTemplate(RoleSpecification roleSpecification = default(RoleSpecification), Dictionary<string, RoleDetails> roles = default(Dictionary<string, RoleDetails>), Dictionary<string, MethodAccessibility> methodAccessibilityMap = default(Dictionary<string, MethodAccessibility>))
+        /// <param name="type">type (required).</param>
+        /// <param name="value">An absolute or relative partition description, depending on the &#x60;type&#x60;: - if &#x60;Physical&#x60;, then this is a partition number, - if &#x60;Logical&#x60;, then this is a partition offset.  (required).</param>
+        public PartitionDescription(PartitionDescriptionType type = default(PartitionDescriptionType), int value = default(int))
         {
-            this.RoleSpecification = roleSpecification;
-            // to ensure "methodAccessibilityMap" is required (not null)
-            if (methodAccessibilityMap == null)
-            {
-                throw new ArgumentNullException("methodAccessibilityMap is a required property for StaticRolesAuthTemplate and cannot be null");
-            }
-            this.MethodAccessibilityMap = methodAccessibilityMap;
-            this.Roles = roles;
+            this.Type = type;
+            this.Value = value;
         }
 
         /// <summary>
-        /// A map from role name to role details
+        /// An absolute or relative partition description, depending on the &#x60;type&#x60;: - if &#x60;Physical&#x60;, then this is a partition number, - if &#x60;Logical&#x60;, then this is a partition offset. 
         /// </summary>
-        /// <value>A map from role name to role details</value>
-        [DataMember(Name = "roles", EmitDefaultValue = true)]
-        public Dictionary<string, RoleDetails> Roles { get; set; }
-
-        /// <summary>
-        /// A map from a method identifier to MethodAccessibility
-        /// </summary>
-        /// <value>A map from a method identifier to MethodAccessibility</value>
-        [DataMember(Name = "method_accessibility_map", IsRequired = true, EmitDefaultValue = true)]
-        public Dictionary<string, MethodAccessibility> MethodAccessibilityMap { get; set; }
+        /// <value>An absolute or relative partition description, depending on the &#x60;type&#x60;: - if &#x60;Physical&#x60;, then this is a partition number, - if &#x60;Logical&#x60;, then this is a partition offset. </value>
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public int Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,10 +131,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StaticRolesAuthTemplate {\n");
-            sb.Append("  RoleSpecification: ").Append(RoleSpecification).Append("\n");
-            sb.Append("  Roles: ").Append(Roles).Append("\n");
-            sb.Append("  MethodAccessibilityMap: ").Append(MethodAccessibilityMap).Append("\n");
+            sb.Append("class PartitionDescription {\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,15 +154,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StaticRolesAuthTemplate);
+            return this.Equals(input as PartitionDescription);
         }
 
         /// <summary>
-        /// Returns true if StaticRolesAuthTemplate instances are equal
+        /// Returns true if PartitionDescription instances are equal
         /// </summary>
-        /// <param name="input">Instance of StaticRolesAuthTemplate to be compared</param>
+        /// <param name="input">Instance of PartitionDescription to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StaticRolesAuthTemplate input)
+        public bool Equals(PartitionDescription input)
         {
             if (input == null)
             {
@@ -185,20 +170,12 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.RoleSpecification == input.RoleSpecification ||
-                    this.RoleSpecification.Equals(input.RoleSpecification)
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
                 ) && 
                 (
-                    this.Roles == input.Roles ||
-                    this.Roles != null &&
-                    input.Roles != null &&
-                    this.Roles.SequenceEqual(input.Roles)
-                ) && 
-                (
-                    this.MethodAccessibilityMap == input.MethodAccessibilityMap ||
-                    this.MethodAccessibilityMap != null &&
-                    input.MethodAccessibilityMap != null &&
-                    this.MethodAccessibilityMap.SequenceEqual(input.MethodAccessibilityMap)
+                    this.Value == input.Value ||
+                    this.Value.Equals(input.Value)
                 );
         }
 
@@ -211,15 +188,8 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.RoleSpecification.GetHashCode();
-                if (this.Roles != null)
-                {
-                    hashCode = (hashCode * 59) + this.Roles.GetHashCode();
-                }
-                if (this.MethodAccessibilityMap != null)
-                {
-                    hashCode = (hashCode * 59) + this.MethodAccessibilityMap.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 return hashCode;
             }
         }

@@ -182,7 +182,7 @@ internal class WriteHelper
         }
 
         await using var writer = await _connection.BeginBinaryImportAsync(
-            "COPY ledger_transactions (state_version, epoch, round_in_epoch, index_in_epoch, index_in_round, fee_paid, tip_paid, affected_global_entities, round_timestamp, created_timestamp, normalized_round_timestamp, raw_payload, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_error_message, receipt_output, receipt_next_epoch, receipt_event_sbors, receipt_event_schema_hashes, receipt_event_type_indexes, receipt_event_sbor_type_kinds, discriminator, payload_hash, intent_hash, signed_intent_hash, message) FROM STDIN (FORMAT BINARY)",
+            "COPY ledger_transactions (state_version, epoch, round_in_epoch, index_in_epoch, index_in_round, fee_paid, tip_paid, affected_global_entities, round_timestamp, created_timestamp, normalized_round_timestamp, raw_payload, receipt_state_updates, receipt_status, receipt_fee_summary, receipt_fee_source, receipt_fee_destination, receipt_costing_parameters, receipt_error_message, receipt_output, receipt_next_epoch, receipt_event_sbors, receipt_event_schema_hashes, receipt_event_type_indexes, receipt_event_sbor_type_kinds, discriminator, payload_hash, intent_hash, signed_intent_hash, message) FROM STDIN (FORMAT BINARY)",
             token);
 
         foreach (var lt in entities)
@@ -206,12 +206,15 @@ internal class WriteHelper
             await writer.WriteAsync(lt.EngineReceipt.StateUpdates, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(lt.EngineReceipt.Status, "ledger_transaction_status", token);
             await writer.WriteAsync(lt.EngineReceipt.FeeSummary, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(lt.EngineReceipt.FeeSource, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(lt.EngineReceipt.FeeDestination, NpgsqlDbType.Jsonb, token);
+            await writer.WriteAsync(lt.EngineReceipt.CostingParameters, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(lt.EngineReceipt.ErrorMessage, NpgsqlDbType.Text, token);
             await writer.WriteAsync(lt.EngineReceipt.Output, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(lt.EngineReceipt.NextEpoch, NpgsqlDbType.Jsonb, token);
             await writer.WriteAsync(lt.EngineReceipt.EventsSbors, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(lt.EngineReceipt.EventSchemaHashes, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
-            await writer.WriteAsync(lt.EngineReceipt.EventTypeIndexes, NpgsqlDbType.Array | NpgsqlDbType.Integer, token);
+            await writer.WriteAsync(lt.EngineReceipt.EventTypeIndexes, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(lt.EngineReceipt.EventSborTypeKinds, "sbor_type_kind[]", token);
             await writer.WriteAsync(discriminator, "ledger_transaction_type", token);
 
@@ -915,7 +918,7 @@ internal class WriteHelper
         return entities.Count;
     }
 
-    public async Task<int> CopyPackageSchemaHistory(ICollection<PackageSchemaHistory> entities, CancellationToken token)
+    public async Task<int> CopySchemaHistory(ICollection<SchemaHistory> entities, CancellationToken token)
     {
         if (!entities.Any())
         {
@@ -923,7 +926,7 @@ internal class WriteHelper
         }
 
         await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY package_schema_history (id, from_state_version, package_entity_id, schema_hash, schema) FROM STDIN (FORMAT BINARY)", token);
+            await _connection.BeginBinaryImportAsync("COPY schema_history (id, from_state_version, package_entity_id, schema_hash, schema) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
@@ -976,17 +979,17 @@ internal class WriteHelper
         }
 
         await using var writer =
-            await _connection.BeginBinaryImportAsync("COPY non_fungible_schema_history (id, from_state_version, entity_id, schema, sbor_type_kind, type_index) FROM STDIN (FORMAT BINARY)", token);
+            await _connection.BeginBinaryImportAsync("COPY non_fungible_schema_history (id, from_state_version, resource_entity_id, schema_hash, sbor_type_kind, type_index) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in entities)
         {
             await writer.StartRowAsync(token);
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.Schema, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.ResourceEntityId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.SchemaHash, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.SborTypeKind, "sbor_type_kind", token);
-            await writer.WriteAsync(e.TypeIndex, NpgsqlDbType.Integer, token);
+            await writer.WriteAsync(e.TypeIndex, NpgsqlDbType.Bigint, token);
         }
 
         await writer.CompleteAsync(token);
@@ -1003,7 +1006,7 @@ internal class WriteHelper
 
         await using var writer =
             await _connection.BeginBinaryImportAsync(
-                "COPY key_value_store_schema_history (id, from_state_version, key_value_store_entity_id, schema, key_sbor_type_kind, key_type_index, value_sbor_type_kind, value_type_index) FROM STDIN (FORMAT BINARY)",
+                "COPY key_value_store_schema_history (id, from_state_version, key_value_store_entity_id, key_schema_hash, key_sbor_type_kind, key_type_index, value_schema_hash, value_sbor_type_kind, value_type_index) FROM STDIN (FORMAT BINARY)",
                 token);
 
         foreach (var e in entities)
@@ -1012,11 +1015,12 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.KeyValueStoreEntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.Schema, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(e.KeySchemaHash, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.KeySborTypeKind, "sbor_type_kind", token);
-            await writer.WriteAsync(e.KeyTypeIndex, NpgsqlDbType.Integer, token);
+            await writer.WriteAsync(e.KeyTypeIndex, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.ValueSchemaHash, NpgsqlDbType.Bytea, token);
             await writer.WriteAsync(e.ValueSborTypeKind, "sbor_type_kind", token);
-            await writer.WriteAsync(e.ValueTypeIndex, NpgsqlDbType.Integer, token);
+            await writer.WriteAsync(e.ValueTypeIndex, NpgsqlDbType.Bigint, token);
         }
 
         await writer.CompleteAsync(token);
@@ -1052,7 +1056,7 @@ SELECT
     setval('ledger_transaction_markers_id_seq', @ledgerTransactionMarkerSequence),
     setval('package_blueprint_history_id_seq', @packageBlueprintHistorySequence),
     setval('package_code_history_id_seq', @packageCodeHistorySequence),
-    setval('package_schema_history_id_seq', @packageSchemaHistorySequence),
+    setval('schema_history_id_seq', @schemaHistorySequence),
     setval('key_value_store_entry_history_id_seq', @keyValueStoreEntryHistorySequence),
     setval('validator_emission_statistics_id_seq', @validatorEmissionStatisticsSequence),
     setval('non_fungible_schema_history_id_seq', @NonFungibleSchemaHistorySequence),
@@ -1082,7 +1086,7 @@ SELECT
                 ledgerTransactionMarkerSequence = sequences.LedgerTransactionMarkerSequence,
                 packageBlueprintHistorySequence = sequences.PackageBlueprintHistorySequence,
                 packageCodeHistorySequence = sequences.PackageCodeHistorySequence,
-                packageSchemaHistorySequence = sequences.PackageSchemaHistorySequence,
+                schemaHistorySequence = sequences.SchemaHistorySequence,
                 keyValueStoreEntryHistorySequence = sequences.KeyValueStoreEntryHistorySequence,
                 validatorEmissionStatisticsSequence = sequences.ValidatorEmissionStatisticsSequence,
                 nonFungibleSchemaHistorySequence = sequences.NonFungibleSchemaHistorySequence,

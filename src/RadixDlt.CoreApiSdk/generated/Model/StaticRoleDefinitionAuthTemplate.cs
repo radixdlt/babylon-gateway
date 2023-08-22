@@ -90,49 +90,53 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// VaultPayment
+    /// StaticRoleDefinitionAuthTemplate
     /// </summary>
-    [DataContract(Name = "VaultPayment")]
-    public partial class VaultPayment : IEquatable<VaultPayment>
+    [DataContract(Name = "StaticRoleDefinitionAuthTemplate")]
+    public partial class StaticRoleDefinitionAuthTemplate : IEquatable<StaticRoleDefinitionAuthTemplate>
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="VaultPayment" /> class.
+        /// Gets or Sets RoleSpecification
+        /// </summary>
+        [DataMember(Name = "role_specification", IsRequired = true, EmitDefaultValue = true)]
+        public RoleSpecification RoleSpecification { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StaticRoleDefinitionAuthTemplate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected VaultPayment() { }
+        protected StaticRoleDefinitionAuthTemplate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="VaultPayment" /> class.
+        /// Initializes a new instance of the <see cref="StaticRoleDefinitionAuthTemplate" /> class.
         /// </summary>
-        /// <param name="vaultEntity">vaultEntity (required).</param>
-        /// <param name="xrdAmount">The string-encoded decimal representing the amount of fee in XRD paid by this vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
-        public VaultPayment(EntityReference vaultEntity = default(EntityReference), string xrdAmount = default(string))
+        /// <param name="roleSpecification">roleSpecification (required).</param>
+        /// <param name="roles">A map from role name to role details.</param>
+        /// <param name="methodAccessibilityMap">A map from a method identifier to MethodAccessibility (required).</param>
+        public StaticRoleDefinitionAuthTemplate(RoleSpecification roleSpecification = default(RoleSpecification), Dictionary<string, RoleDetails> roles = default(Dictionary<string, RoleDetails>), Dictionary<string, MethodAccessibility> methodAccessibilityMap = default(Dictionary<string, MethodAccessibility>))
         {
-            // to ensure "vaultEntity" is required (not null)
-            if (vaultEntity == null)
+            this.RoleSpecification = roleSpecification;
+            // to ensure "methodAccessibilityMap" is required (not null)
+            if (methodAccessibilityMap == null)
             {
-                throw new ArgumentNullException("vaultEntity is a required property for VaultPayment and cannot be null");
+                throw new ArgumentNullException("methodAccessibilityMap is a required property for StaticRoleDefinitionAuthTemplate and cannot be null");
             }
-            this.VaultEntity = vaultEntity;
-            // to ensure "xrdAmount" is required (not null)
-            if (xrdAmount == null)
-            {
-                throw new ArgumentNullException("xrdAmount is a required property for VaultPayment and cannot be null");
-            }
-            this.XrdAmount = xrdAmount;
+            this.MethodAccessibilityMap = methodAccessibilityMap;
+            this.Roles = roles;
         }
 
         /// <summary>
-        /// Gets or Sets VaultEntity
+        /// A map from role name to role details
         /// </summary>
-        [DataMember(Name = "vault_entity", IsRequired = true, EmitDefaultValue = true)]
-        public EntityReference VaultEntity { get; set; }
+        /// <value>A map from role name to role details</value>
+        [DataMember(Name = "roles", EmitDefaultValue = true)]
+        public Dictionary<string, RoleDetails> Roles { get; set; }
 
         /// <summary>
-        /// The string-encoded decimal representing the amount of fee in XRD paid by this vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// A map from a method identifier to MethodAccessibility
         /// </summary>
-        /// <value>The string-encoded decimal representing the amount of fee in XRD paid by this vault. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
-        [DataMember(Name = "xrd_amount", IsRequired = true, EmitDefaultValue = true)]
-        public string XrdAmount { get; set; }
+        /// <value>A map from a method identifier to MethodAccessibility</value>
+        [DataMember(Name = "method_accessibility_map", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, MethodAccessibility> MethodAccessibilityMap { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,9 +145,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class VaultPayment {\n");
-            sb.Append("  VaultEntity: ").Append(VaultEntity).Append("\n");
-            sb.Append("  XrdAmount: ").Append(XrdAmount).Append("\n");
+            sb.Append("class StaticRoleDefinitionAuthTemplate {\n");
+            sb.Append("  RoleSpecification: ").Append(RoleSpecification).Append("\n");
+            sb.Append("  Roles: ").Append(Roles).Append("\n");
+            sb.Append("  MethodAccessibilityMap: ").Append(MethodAccessibilityMap).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,15 +169,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as VaultPayment);
+            return this.Equals(input as StaticRoleDefinitionAuthTemplate);
         }
 
         /// <summary>
-        /// Returns true if VaultPayment instances are equal
+        /// Returns true if StaticRoleDefinitionAuthTemplate instances are equal
         /// </summary>
-        /// <param name="input">Instance of VaultPayment to be compared</param>
+        /// <param name="input">Instance of StaticRoleDefinitionAuthTemplate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(VaultPayment input)
+        public bool Equals(StaticRoleDefinitionAuthTemplate input)
         {
             if (input == null)
             {
@@ -180,14 +185,20 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.VaultEntity == input.VaultEntity ||
-                    (this.VaultEntity != null &&
-                    this.VaultEntity.Equals(input.VaultEntity))
+                    this.RoleSpecification == input.RoleSpecification ||
+                    this.RoleSpecification.Equals(input.RoleSpecification)
                 ) && 
                 (
-                    this.XrdAmount == input.XrdAmount ||
-                    (this.XrdAmount != null &&
-                    this.XrdAmount.Equals(input.XrdAmount))
+                    this.Roles == input.Roles ||
+                    this.Roles != null &&
+                    input.Roles != null &&
+                    this.Roles.SequenceEqual(input.Roles)
+                ) && 
+                (
+                    this.MethodAccessibilityMap == input.MethodAccessibilityMap ||
+                    this.MethodAccessibilityMap != null &&
+                    input.MethodAccessibilityMap != null &&
+                    this.MethodAccessibilityMap.SequenceEqual(input.MethodAccessibilityMap)
                 );
         }
 
@@ -200,13 +211,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.VaultEntity != null)
+                hashCode = (hashCode * 59) + this.RoleSpecification.GetHashCode();
+                if (this.Roles != null)
                 {
-                    hashCode = (hashCode * 59) + this.VaultEntity.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Roles.GetHashCode();
                 }
-                if (this.XrdAmount != null)
+                if (this.MethodAccessibilityMap != null)
                 {
-                    hashCode = (hashCode * 59) + this.XrdAmount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.MethodAccessibilityMap.GetHashCode();
                 }
                 return hashCode;
             }

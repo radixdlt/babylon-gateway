@@ -84,23 +84,106 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// The constraints on the concrete type provided to fill the generic type parameter. Note: currently, we only support the wildcard (i.e. &#x60;Any&#x60;) generic type. 
+    /// ObjectSubstateTypeReference
     /// </summary>
-    /// <value>The constraints on the concrete type provided to fill the generic type parameter. Note: currently, we only support the wildcard (i.e. &#x60;Any&#x60;) generic type. </value>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum GenericTypeParameterContraints
+    [DataContract(Name = "ObjectSubstateTypeReference")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectInstanceTypeReference), "ObjectInstance")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectInstanceTypeReference), "ObjectInstanceTypeReference")]
+    [JsonSubtypes.KnownSubType(typeof(PackageObjectSubstateTypeReference), "Package")]
+    [JsonSubtypes.KnownSubType(typeof(PackageObjectSubstateTypeReference), "PackageObjectSubstateTypeReference")]
+    public partial class ObjectSubstateTypeReference : IEquatable<ObjectSubstateTypeReference>
     {
+
         /// <summary>
-        /// Enum Any for value: Any
+        /// Gets or Sets Type
         /// </summary>
-        [EnumMember(Value = "Any")]
-        Any = 1
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public ObjectSubstateTypeReferenceType Type { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObjectSubstateTypeReference" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected ObjectSubstateTypeReference() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObjectSubstateTypeReference" /> class.
+        /// </summary>
+        /// <param name="type">type (required).</param>
+        public ObjectSubstateTypeReference(ObjectSubstateTypeReferenceType type = default(ObjectSubstateTypeReferenceType))
+        {
+            this.Type = type;
+        }
+
+        /// <summary>
+        /// Returns the string presentation of the object
+        /// </summary>
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class ObjectSubstateTypeReference {\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns the JSON string presentation of the object
+        /// </summary>
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Returns true if objects are equal
+        /// </summary>
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as ObjectSubstateTypeReference);
+        }
+
+        /// <summary>
+        /// Returns true if ObjectSubstateTypeReference instances are equal
+        /// </summary>
+        /// <param name="input">Instance of ObjectSubstateTypeReference to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(ObjectSubstateTypeReference input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                return hashCode;
+            }
+        }
 
     }
 

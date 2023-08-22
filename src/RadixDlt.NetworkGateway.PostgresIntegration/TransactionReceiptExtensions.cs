@@ -68,7 +68,7 @@ using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-internal record TransactionReceiptEventData(byte[] Data, byte[] SchemaHash, int TypeIndex, SborTypeKind KeyTypeKind);
+internal record TransactionReceiptEventData(byte[] Data, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
 
 internal static class TransactionReceiptExtensions
 {

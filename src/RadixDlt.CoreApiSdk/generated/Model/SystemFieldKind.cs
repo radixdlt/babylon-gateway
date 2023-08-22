@@ -90,127 +90,16 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// RoyaltyPayment
+    /// Defines SystemFieldKind
     /// </summary>
-    [DataContract(Name = "RoyaltyPayment")]
-    public partial class RoyaltyPayment : IEquatable<RoyaltyPayment>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum SystemFieldKind
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RoyaltyPayment" /> class.
+        /// Enum TypeInfo for value: TypeInfo
         /// </summary>
-        [JsonConstructorAttribute]
-        protected RoyaltyPayment() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RoyaltyPayment" /> class.
-        /// </summary>
-        /// <param name="royaltyReceiver">royaltyReceiver (required).</param>
-        /// <param name="xrdAmount">The string-encoded decimal representing the amount of fee in XRD paid as royalty to this receiver. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
-        public RoyaltyPayment(EntityReference royaltyReceiver = default(EntityReference), string xrdAmount = default(string))
-        {
-            // to ensure "royaltyReceiver" is required (not null)
-            if (royaltyReceiver == null)
-            {
-                throw new ArgumentNullException("royaltyReceiver is a required property for RoyaltyPayment and cannot be null");
-            }
-            this.RoyaltyReceiver = royaltyReceiver;
-            // to ensure "xrdAmount" is required (not null)
-            if (xrdAmount == null)
-            {
-                throw new ArgumentNullException("xrdAmount is a required property for RoyaltyPayment and cannot be null");
-            }
-            this.XrdAmount = xrdAmount;
-        }
-
-        /// <summary>
-        /// Gets or Sets RoyaltyReceiver
-        /// </summary>
-        [DataMember(Name = "royalty_receiver", IsRequired = true, EmitDefaultValue = true)]
-        public EntityReference RoyaltyReceiver { get; set; }
-
-        /// <summary>
-        /// The string-encoded decimal representing the amount of fee in XRD paid as royalty to this receiver. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
-        /// </summary>
-        /// <value>The string-encoded decimal representing the amount of fee in XRD paid as royalty to this receiver. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
-        [DataMember(Name = "xrd_amount", IsRequired = true, EmitDefaultValue = true)]
-        public string XrdAmount { get; set; }
-
-        /// <summary>
-        /// Returns the string presentation of the object
-        /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class RoyaltyPayment {\n");
-            sb.Append("  RoyaltyReceiver: ").Append(RoyaltyReceiver).Append("\n");
-            sb.Append("  XrdAmount: ").Append(XrdAmount).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Returns the JSON string presentation of the object
-        /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Returns true if objects are equal
-        /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as RoyaltyPayment);
-        }
-
-        /// <summary>
-        /// Returns true if RoyaltyPayment instances are equal
-        /// </summary>
-        /// <param name="input">Instance of RoyaltyPayment to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(RoyaltyPayment input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.RoyaltyReceiver == input.RoyaltyReceiver ||
-                    (this.RoyaltyReceiver != null &&
-                    this.RoyaltyReceiver.Equals(input.RoyaltyReceiver))
-                ) && 
-                (
-                    this.XrdAmount == input.XrdAmount ||
-                    (this.XrdAmount != null &&
-                    this.XrdAmount.Equals(input.XrdAmount))
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                if (this.RoyaltyReceiver != null)
-                {
-                    hashCode = (hashCode * 59) + this.RoyaltyReceiver.GetHashCode();
-                }
-                if (this.XrdAmount != null)
-                {
-                    hashCode = (hashCode * 59) + this.XrdAmount.GetHashCode();
-                }
-                return hashCode;
-            }
-        }
+        [EnumMember(Value = "TypeInfo")]
+        TypeInfo = 1
 
     }
 

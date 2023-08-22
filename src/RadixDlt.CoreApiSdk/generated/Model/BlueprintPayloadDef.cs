@@ -91,34 +91,34 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TypePointer
+    /// BlueprintPayloadDef
     /// </summary>
-    [DataContract(Name = "TypePointer")]
-    [JsonConverter(typeof(JsonSubtypes), "pointer_type")]
-    [JsonSubtypes.KnownSubType(typeof(InstanceTypePointer), "Instance")]
-    [JsonSubtypes.KnownSubType(typeof(InstanceTypePointer), "InstanceTypePointer")]
-    [JsonSubtypes.KnownSubType(typeof(PackageTypePointer), "Package")]
-    [JsonSubtypes.KnownSubType(typeof(PackageTypePointer), "PackageTypePointer")]
-    public partial class TypePointer : IEquatable<TypePointer>
+    [DataContract(Name = "BlueprintPayloadDef")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(GenericBlueprintPayloadDef), "Generic")]
+    [JsonSubtypes.KnownSubType(typeof(GenericBlueprintPayloadDef), "GenericBlueprintPayloadDef")]
+    [JsonSubtypes.KnownSubType(typeof(StaticBlueprintPayloadDef), "Static")]
+    [JsonSubtypes.KnownSubType(typeof(StaticBlueprintPayloadDef), "StaticBlueprintPayloadDef")]
+    public partial class BlueprintPayloadDef : IEquatable<BlueprintPayloadDef>
     {
 
         /// <summary>
-        /// Gets or Sets PointerType
+        /// Gets or Sets Type
         /// </summary>
-        [DataMember(Name = "pointer_type", IsRequired = true, EmitDefaultValue = true)]
-        public TypePointerType PointerType { get; set; }
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public BlueprintPayloadDefType Type { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypePointer" /> class.
+        /// Initializes a new instance of the <see cref="BlueprintPayloadDef" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TypePointer() { }
+        protected BlueprintPayloadDef() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypePointer" /> class.
+        /// Initializes a new instance of the <see cref="BlueprintPayloadDef" /> class.
         /// </summary>
-        /// <param name="pointerType">pointerType (required).</param>
-        public TypePointer(TypePointerType pointerType = default(TypePointerType))
+        /// <param name="type">type (required).</param>
+        public BlueprintPayloadDef(BlueprintPayloadDefType type = default(BlueprintPayloadDefType))
         {
-            this.PointerType = pointerType;
+            this.Type = type;
         }
 
         /// <summary>
@@ -128,8 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TypePointer {\n");
-            sb.Append("  PointerType: ").Append(PointerType).Append("\n");
+            sb.Append("class BlueprintPayloadDef {\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +150,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TypePointer);
+            return this.Equals(input as BlueprintPayloadDef);
         }
 
         /// <summary>
-        /// Returns true if TypePointer instances are equal
+        /// Returns true if BlueprintPayloadDef instances are equal
         /// </summary>
-        /// <param name="input">Instance of TypePointer to be compared</param>
+        /// <param name="input">Instance of BlueprintPayloadDef to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TypePointer input)
+        public bool Equals(BlueprintPayloadDef input)
         {
             if (input == null)
             {
@@ -166,8 +166,8 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.PointerType == input.PointerType ||
-                    this.PointerType.Equals(input.PointerType)
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
                 );
         }
 
@@ -180,7 +180,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.PointerType.GetHashCode();
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
                 return hashCode;
             }
         }

@@ -77,7 +77,7 @@ public interface ITransactionQuerier
 
     Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(
         string intentHash,
-        GatewayModel.TransactionCommittedDetailsOptIns optIns,
+        GatewayModel.TransactionDetailsOptIns optIns,
         GatewayModel.LedgerState ledgerState,
         bool withDetails,
         CancellationToken token = default);
@@ -98,7 +98,7 @@ public sealed record TransactionStreamPageRequest(
     int PageSize,
     bool AscendingOrder,
     TransactionStreamPageRequestSearchCriteria SearchCriteria,
-    GatewayModel.TransactionCommittedDetailsOptIns OptIns);
+    GatewayModel.TransactionDetailsOptIns OptIns);
 
 public class TransactionStreamPageRequestSearchCriteria
 {

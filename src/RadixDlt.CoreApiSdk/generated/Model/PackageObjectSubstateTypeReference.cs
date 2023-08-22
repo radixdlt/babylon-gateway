@@ -84,42 +84,61 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using JsonSubTypes;
 using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// PackageTypePointerAllOf
+    /// PackageObjectSubstateTypeReference
     /// </summary>
-    [DataContract(Name = "PackageTypePointer_allOf")]
-    public partial class PackageTypePointerAllOf : IEquatable<PackageTypePointerAllOf>
+    [DataContract(Name = "PackageObjectSubstateTypeReference")]
+    [JsonConverter(typeof(JsonSubtypes), "type")]
+    [JsonSubtypes.KnownSubType(typeof(ObjectInstanceTypeReference), "ObjectInstance")]
+    [JsonSubtypes.KnownSubType(typeof(PackageObjectSubstateTypeReference), "Package")]
+    public partial class PackageObjectSubstateTypeReference : ObjectSubstateTypeReference, IEquatable<PackageObjectSubstateTypeReference>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PackageTypePointerAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageObjectSubstateTypeReference" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected PackageTypePointerAllOf() { }
+        protected PackageObjectSubstateTypeReference() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="PackageTypePointerAllOf" /> class.
+        /// Initializes a new instance of the <see cref="PackageObjectSubstateTypeReference" /> class.
         /// </summary>
+        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
         /// <param name="schemaHash">The hex-encoded schema hash, capturing the identity of an SBOR schema. (required).</param>
         /// <param name="localTypeIndex">localTypeIndex (required).</param>
-        public PackageTypePointerAllOf(string schemaHash = default(string), LocalTypeIndex localTypeIndex = default(LocalTypeIndex))
+        /// <param name="type">type (required) (default to ObjectSubstateTypeReferenceType.Package).</param>
+        public PackageObjectSubstateTypeReference(string packageAddress = default(string), string schemaHash = default(string), LocalTypeIndex localTypeIndex = default(LocalTypeIndex), ObjectSubstateTypeReferenceType type = ObjectSubstateTypeReferenceType.Package) : base(type)
         {
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
+            {
+                throw new ArgumentNullException("packageAddress is a required property for PackageObjectSubstateTypeReference and cannot be null");
+            }
+            this.PackageAddress = packageAddress;
             // to ensure "schemaHash" is required (not null)
             if (schemaHash == null)
             {
-                throw new ArgumentNullException("schemaHash is a required property for PackageTypePointerAllOf and cannot be null");
+                throw new ArgumentNullException("schemaHash is a required property for PackageObjectSubstateTypeReference and cannot be null");
             }
             this.SchemaHash = schemaHash;
             // to ensure "localTypeIndex" is required (not null)
             if (localTypeIndex == null)
             {
-                throw new ArgumentNullException("localTypeIndex is a required property for PackageTypePointerAllOf and cannot be null");
+                throw new ArgumentNullException("localTypeIndex is a required property for PackageObjectSubstateTypeReference and cannot be null");
             }
             this.LocalTypeIndex = localTypeIndex;
         }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the package address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the package address</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
 
         /// <summary>
         /// The hex-encoded schema hash, capturing the identity of an SBOR schema.
@@ -141,7 +160,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PackageTypePointerAllOf {\n");
+            sb.Append("class PackageObjectSubstateTypeReference {\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("  SchemaHash: ").Append(SchemaHash).Append("\n");
             sb.Append("  LocalTypeIndex: ").Append(LocalTypeIndex).Append("\n");
             sb.Append("}\n");
@@ -152,7 +173,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
+        public override string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -164,26 +185,31 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PackageTypePointerAllOf);
+            return this.Equals(input as PackageObjectSubstateTypeReference);
         }
 
         /// <summary>
-        /// Returns true if PackageTypePointerAllOf instances are equal
+        /// Returns true if PackageObjectSubstateTypeReference instances are equal
         /// </summary>
-        /// <param name="input">Instance of PackageTypePointerAllOf to be compared</param>
+        /// <param name="input">Instance of PackageObjectSubstateTypeReference to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PackageTypePointerAllOf input)
+        public bool Equals(PackageObjectSubstateTypeReference input)
         {
             if (input == null)
             {
                 return false;
             }
-            return 
+            return base.Equals(input) && 
+                (
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
+                ) && base.Equals(input) && 
                 (
                     this.SchemaHash == input.SchemaHash ||
                     (this.SchemaHash != null &&
                     this.SchemaHash.Equals(input.SchemaHash))
-                ) && 
+                ) && base.Equals(input) && 
                 (
                     this.LocalTypeIndex == input.LocalTypeIndex ||
                     (this.LocalTypeIndex != null &&
@@ -199,7 +225,11 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = 41;
+                int hashCode = base.GetHashCode();
+                if (this.PackageAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
+                }
                 if (this.SchemaHash != null)
                 {
                     hashCode = (hashCode * 59) + this.SchemaHash.GetHashCode();

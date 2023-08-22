@@ -108,45 +108,45 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="IndexBlueprintCollectionSchema" /> class.
         /// </summary>
-        /// <param name="keyTypePointer">keyTypePointer (required).</param>
-        /// <param name="valueTypePointer">valueTypePointer (required).</param>
-        /// <param name="canOwn">Whether the entries of the index partition are allowed to own child nodes. (required).</param>
+        /// <param name="keyTypeRef">keyTypeRef (required).</param>
+        /// <param name="valueTypeRef">valueTypeRef (required).</param>
+        /// <param name="allowOwnership">Whether the entries of the index partition are allowed to own child nodes. (required).</param>
         /// <param name="type">type (required) (default to BlueprintCollectionSchemaType.Index).</param>
-        public IndexBlueprintCollectionSchema(TypePointer keyTypePointer = default(TypePointer), TypePointer valueTypePointer = default(TypePointer), bool canOwn = default(bool), BlueprintCollectionSchemaType type = BlueprintCollectionSchemaType.Index) : base(type)
+        public IndexBlueprintCollectionSchema(BlueprintPayloadDef keyTypeRef = default(BlueprintPayloadDef), BlueprintPayloadDef valueTypeRef = default(BlueprintPayloadDef), bool allowOwnership = default(bool), BlueprintCollectionSchemaType type = BlueprintCollectionSchemaType.Index) : base(type)
         {
-            // to ensure "keyTypePointer" is required (not null)
-            if (keyTypePointer == null)
+            // to ensure "keyTypeRef" is required (not null)
+            if (keyTypeRef == null)
             {
-                throw new ArgumentNullException("keyTypePointer is a required property for IndexBlueprintCollectionSchema and cannot be null");
+                throw new ArgumentNullException("keyTypeRef is a required property for IndexBlueprintCollectionSchema and cannot be null");
             }
-            this.KeyTypePointer = keyTypePointer;
-            // to ensure "valueTypePointer" is required (not null)
-            if (valueTypePointer == null)
+            this.KeyTypeRef = keyTypeRef;
+            // to ensure "valueTypeRef" is required (not null)
+            if (valueTypeRef == null)
             {
-                throw new ArgumentNullException("valueTypePointer is a required property for IndexBlueprintCollectionSchema and cannot be null");
+                throw new ArgumentNullException("valueTypeRef is a required property for IndexBlueprintCollectionSchema and cannot be null");
             }
-            this.ValueTypePointer = valueTypePointer;
-            this.CanOwn = canOwn;
+            this.ValueTypeRef = valueTypeRef;
+            this.AllowOwnership = allowOwnership;
         }
 
         /// <summary>
-        /// Gets or Sets KeyTypePointer
+        /// Gets or Sets KeyTypeRef
         /// </summary>
-        [DataMember(Name = "key_type_pointer", IsRequired = true, EmitDefaultValue = true)]
-        public TypePointer KeyTypePointer { get; set; }
+        [DataMember(Name = "key_type_ref", IsRequired = true, EmitDefaultValue = true)]
+        public BlueprintPayloadDef KeyTypeRef { get; set; }
 
         /// <summary>
-        /// Gets or Sets ValueTypePointer
+        /// Gets or Sets ValueTypeRef
         /// </summary>
-        [DataMember(Name = "value_type_pointer", IsRequired = true, EmitDefaultValue = true)]
-        public TypePointer ValueTypePointer { get; set; }
+        [DataMember(Name = "value_type_ref", IsRequired = true, EmitDefaultValue = true)]
+        public BlueprintPayloadDef ValueTypeRef { get; set; }
 
         /// <summary>
         /// Whether the entries of the index partition are allowed to own child nodes.
         /// </summary>
         /// <value>Whether the entries of the index partition are allowed to own child nodes.</value>
-        [DataMember(Name = "can_own", IsRequired = true, EmitDefaultValue = true)]
-        public bool CanOwn { get; set; }
+        [DataMember(Name = "allow_ownership", IsRequired = true, EmitDefaultValue = true)]
+        public bool AllowOwnership { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,9 +157,9 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class IndexBlueprintCollectionSchema {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  KeyTypePointer: ").Append(KeyTypePointer).Append("\n");
-            sb.Append("  ValueTypePointer: ").Append(ValueTypePointer).Append("\n");
-            sb.Append("  CanOwn: ").Append(CanOwn).Append("\n");
+            sb.Append("  KeyTypeRef: ").Append(KeyTypeRef).Append("\n");
+            sb.Append("  ValueTypeRef: ").Append(ValueTypeRef).Append("\n");
+            sb.Append("  AllowOwnership: ").Append(AllowOwnership).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -196,18 +196,18 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return base.Equals(input) && 
                 (
-                    this.KeyTypePointer == input.KeyTypePointer ||
-                    (this.KeyTypePointer != null &&
-                    this.KeyTypePointer.Equals(input.KeyTypePointer))
+                    this.KeyTypeRef == input.KeyTypeRef ||
+                    (this.KeyTypeRef != null &&
+                    this.KeyTypeRef.Equals(input.KeyTypeRef))
                 ) && base.Equals(input) && 
                 (
-                    this.ValueTypePointer == input.ValueTypePointer ||
-                    (this.ValueTypePointer != null &&
-                    this.ValueTypePointer.Equals(input.ValueTypePointer))
+                    this.ValueTypeRef == input.ValueTypeRef ||
+                    (this.ValueTypeRef != null &&
+                    this.ValueTypeRef.Equals(input.ValueTypeRef))
                 ) && base.Equals(input) && 
                 (
-                    this.CanOwn == input.CanOwn ||
-                    this.CanOwn.Equals(input.CanOwn)
+                    this.AllowOwnership == input.AllowOwnership ||
+                    this.AllowOwnership.Equals(input.AllowOwnership)
                 );
         }
 
@@ -220,15 +220,15 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.KeyTypePointer != null)
+                if (this.KeyTypeRef != null)
                 {
-                    hashCode = (hashCode * 59) + this.KeyTypePointer.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyTypeRef.GetHashCode();
                 }
-                if (this.ValueTypePointer != null)
+                if (this.ValueTypeRef != null)
                 {
-                    hashCode = (hashCode * 59) + this.ValueTypePointer.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ValueTypeRef.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.CanOwn.GetHashCode();
+                hashCode = (hashCode * 59) + this.AllowOwnership.GetHashCode();
                 return hashCode;
             }
         }
