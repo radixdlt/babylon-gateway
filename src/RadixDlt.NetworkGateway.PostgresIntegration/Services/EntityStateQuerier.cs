@@ -1370,6 +1370,11 @@ INNER JOIN LATERAL(
 ) resh ON true")
             .ToDictionaryAsync(e => e.ResourceEntityId, token);
 
+        foreach (var missing in entityIds.Except(result.Keys))
+        {
+            result[missing] = ResourceEntitySupplyHistory.Empty;
+        }
+
         return result;
     }
 
