@@ -106,7 +106,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="receiverInfo">receiverInfo.</param>
         /// <param name="input">input (required).</param>
         /// <param name="output">output (required).</param>
-        public FunctionSchema(ReceiverInfo receiverInfo = default(ReceiverInfo), TypePointer input = default(TypePointer), TypePointer output = default(TypePointer))
+        public FunctionSchema(ReceiverInfo receiverInfo = default(ReceiverInfo), BlueprintPayloadDef input = default(BlueprintPayloadDef), BlueprintPayloadDef output = default(BlueprintPayloadDef))
         {
             // to ensure "input" is required (not null)
             if (input == null)
@@ -133,13 +133,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Input
         /// </summary>
         [DataMember(Name = "input", IsRequired = true, EmitDefaultValue = true)]
-        public TypePointer Input { get; set; }
+        public BlueprintPayloadDef Input { get; set; }
 
         /// <summary>
         /// Gets or Sets Output
         /// </summary>
         [DataMember(Name = "output", IsRequired = true, EmitDefaultValue = true)]
-        public TypePointer Output { get; set; }
+        public BlueprintPayloadDef Output { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

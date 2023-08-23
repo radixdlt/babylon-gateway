@@ -112,7 +112,7 @@ internal class SequencesHolder
 
     public long PackageCodeHistorySequence { get; set; }
 
-    public long PackageSchemaHistorySequence { get; set; }
+    public long SchemaHistorySequence { get; set; }
 
     public long KeyValueStoreEntryHistorySequence { get; set; }
 

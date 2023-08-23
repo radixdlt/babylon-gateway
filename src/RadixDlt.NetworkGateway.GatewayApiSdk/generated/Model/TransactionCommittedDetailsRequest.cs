@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="atLedgerState">atLedgerState.</param>
         /// <param name="intentHash">Bech32m-encoded hash. (required).</param>
         /// <param name="optIns">optIns.</param>
-        public TransactionCommittedDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string intentHash = default(string), TransactionCommittedDetailsOptIns optIns = default(TransactionCommittedDetailsOptIns))
+        public TransactionCommittedDetailsRequest(LedgerStateSelector atLedgerState = default(LedgerStateSelector), string intentHash = default(string), TransactionDetailsOptIns optIns = default(TransactionDetailsOptIns))
         {
             // to ensure "intentHash" is required (not null)
             if (intentHash == null)
@@ -135,7 +135,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets OptIns
         /// </summary>
         [DataMember(Name = "opt_ins", EmitDefaultValue = true)]
-        public TransactionCommittedDetailsOptIns OptIns { get; set; }
+        public TransactionDetailsOptIns OptIns { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

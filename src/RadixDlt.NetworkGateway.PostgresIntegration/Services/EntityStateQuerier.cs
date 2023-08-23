@@ -70,6 +70,7 @@ using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
@@ -141,6 +142,10 @@ internal class EntityStateQuerier : IEntityStateQuerier
     private record NonFungibleIdViewModel(string NonFungibleId, int NonFungibleIdsTotalCount);
 
     private record NonFungibleIdWithOwnerDataViewModel(string NonFungibleId, long EntityId, long ResourceEntityId, long VaultEntityId);
+
+    private record NonFungibleDataSchemaModel(byte[] Schema, long TypeIndex, SborTypeKind SborTypeKind);
+
+    private record KeyValueStoreSchemaModel(byte[] KeySchema, long KeyTypeIndex, SborTypeKind KeySborTypeKind, byte[] ValueSchema, long ValueTypeIndex, SborTypeKind ValueSborTypeKind);
 
     private record NonFungibleIdDataViewModel(string NonFungibleId, bool IsDeleted, byte[] Data, long DataLastUpdatedAtStateVersion);
 
@@ -659,11 +664,24 @@ ORDER BY array_position(hs.non_fungible_id_data_ids, nfid.id);
     {
         var entity = await GetEntity<GlobalNonFungibleResourceEntity>(resourceAddress, ledgerState, token);
 
-        var nonFungibleDataSchema = await _dbContext
-            .NonFungibleDataSchemaHistory
-            .Where(x => x.EntityId == entity.Id && x.FromStateVersion <= ledgerState.StateVersion)
-            .OrderByDescending(x => x.FromStateVersion)
-            .FirstOrDefaultAsync(token);
+        var nonFungibleDataSchemaQuery = new CommandDefinition(
+            commandText: @"
+SELECT
+    sh.schema,
+    nfsh.type_index AS TypeIndex,
+    nfsh.sbor_type_kind AS SborTypeKind
+FROM non_fungible_schema_history nfsh
+INNER JOIN schema_history sh ON sh.schema_hash = nfsh.schema_hash
+WHERE nfsh.resource_entity_id = @entityId AND nfsh.from_state_version <= @stateVersion
+ORDER BY nfsh.from_state_version DESC",
+            parameters: new
+            {
+                stateVersion = ledgerState.StateVersion,
+                entityId = entity.Id,
+            },
+            cancellationToken: token);
+
+        var nonFungibleDataSchema = await _dbContext.Database.GetDbConnection().QueryFirstOrDefaultAsync<NonFungibleDataSchemaModel>(nonFungibleDataSchemaQuery);
 
         if (nonFungibleDataSchema == null)
         {
@@ -950,11 +968,30 @@ INNER JOIN LATERAL (
         CancellationToken token = default)
     {
         var keyValueStore = await GetEntity<InternalKeyValueStoreEntity>(keyValueStoreAddress, ledgerState, token);
-        var keyValueStoreSchema = await _dbContext
-            .KeyValueStoreSchemaHistory
-            .Where(x => x.KeyValueStoreEntityId == keyValueStore.Id && x.FromStateVersion <= ledgerState.StateVersion)
-            .OrderByDescending(x => x.FromStateVersion)
-            .FirstOrDefaultAsync(token);
+
+        var keyValueStoreSchemaQuery = new CommandDefinition(
+            commandText: @"
+SELECT
+    ksh.schema AS KeySchema,
+    kvssh.key_type_index AS KeyTypeIndex,
+    kvssh.key_sbor_type_kind AS KeySborTypeKind,
+    vsh.schema AS ValueSchema,
+    kvssh.value_type_index AS ValueTypeIndex,
+    kvssh.value_sbor_type_kind AS ValueSborTypeKind
+FROM key_value_store_schema_history kvssh
+INNER JOIN schema_history ksh ON ksh.schema_hash = kvssh.key_schema_hash
+INNER JOIN schema_history vsh ON vsh.schema_hash = kvssh.value_schema_hash
+WHERE kvssh.key_value_store_entity_id = @entityId AND kvssh.from_state_version <= @stateVersion
+ORDER BY kvssh.from_state_version DESC
+",
+            parameters: new
+            {
+                stateVersion = ledgerState.StateVersion,
+                entityId = keyValueStore.Id,
+            },
+            cancellationToken: token);
+
+        var keyValueStoreSchema = await _dbContext.Database.GetDbConnection().QueryFirstOrDefaultAsync<KeyValueStoreSchemaModel>(keyValueStoreSchemaQuery);
 
         if (keyValueStoreSchema == null)
         {
@@ -989,10 +1026,10 @@ INNER JOIN LATERAL (
                 continue;
             }
 
-            var keyJson = ScryptoSborUtils.DataToProgrammaticJson(e.Key, keyValueStoreSchema.Schema, keyValueStoreSchema.KeySborTypeKind,
+            var keyJson = ScryptoSborUtils.DataToProgrammaticJson(e.Key, keyValueStoreSchema.KeySchema, keyValueStoreSchema.KeySborTypeKind,
                 keyValueStoreSchema.KeyTypeIndex, _networkConfigurationProvider.GetNetworkId());
 
-            var valueJson = ScryptoSborUtils.DataToProgrammaticJson(e.Value, keyValueStoreSchema.Schema, keyValueStoreSchema.ValueSborTypeKind,
+            var valueJson = ScryptoSborUtils.DataToProgrammaticJson(e.Value, keyValueStoreSchema.ValueSchema, keyValueStoreSchema.ValueSborTypeKind,
                 keyValueStoreSchema.ValueTypeIndex, _networkConfigurationProvider.GetNetworkId());
 
             items.Add(new GatewayModel.StateKeyValueStoreDataResponseItem(
@@ -1369,6 +1406,11 @@ INNER JOIN LATERAL(
     LIMIT 1
 ) resh ON true")
             .ToDictionaryAsync(e => e.ResourceEntityId, token);
+
+        foreach (var missing in entityIds.Except(result.Keys))
+        {
+            result[missing] = ResourceEntitySupplyHistory.Empty;
+        }
 
         return result;
     }
@@ -2103,22 +2145,22 @@ INNER JOIN LATERAL(
             .ToDictionaryAsync(e => e.PackageEntityId, token);
     }
 
-    private async Task<Dictionary<long, PackageSchemaHistory[]>> GetPackageSchemaHistory(long[] packageEntityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    private async Task<Dictionary<long, SchemaHistory[]>> GetPackageSchemaHistory(long[] packageEntityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         if (!packageEntityIds.Any())
         {
-            return new Dictionary<long, PackageSchemaHistory[]>();
+            return new Dictionary<long, SchemaHistory[]>();
         }
 
         return (await _dbContext
-                .PackageSchemaHistory
+                .SchemaHistory
                 .FromSqlInterpolated($@"
 WITH variables (entity_id) AS (SELECT UNNEST({packageEntityIds}))
 SELECT psh.*
 FROM variables
 INNER JOIN LATERAL(
     SELECT *
-    FROM package_schema_history
+    FROM schema_history
     WHERE package_entity_id = variables.entity_id AND from_state_version <= {ledgerState.StateVersion}
 ) psh ON true")
                 .ToListAsync(token))

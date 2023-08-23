@@ -121,7 +121,7 @@ internal static class GatewayModelExtensions
 
     public static GatewayModel.CommittedTransactionInfo ToGatewayModel(
         this LedgerTransaction lt,
-        GatewayModel.TransactionCommittedDetailsOptIns optIns,
+        GatewayModel.TransactionDetailsOptIns optIns,
         Dictionary<long, string> entityIdToAddressMap,
         List<string>? events)
     {
@@ -144,6 +144,9 @@ internal static class GatewayModelExtensions
             Status = ToGatewayModel(lt.EngineReceipt.Status),
             Output = lt.EngineReceipt.Output != null ? new JRaw(lt.EngineReceipt.Output) : null,
             FeeSummary = optIns.ReceiptFeeSummary ? new JRaw(lt.EngineReceipt.FeeSummary) : null,
+            FeeDestination = optIns.ReceiptFeeDestination && lt.EngineReceipt.FeeDestination != null ? new JRaw(lt.EngineReceipt.FeeDestination) : null,
+            FeeSource = optIns.ReceiptFeeSource && lt.EngineReceipt.FeeSource != null ? new JRaw(lt.EngineReceipt.FeeSource) : null,
+            CostingParameters = optIns.ReceiptCostingParameters ? new JRaw(lt.EngineReceipt.CostingParameters) : null,
             NextEpoch = lt.EngineReceipt.NextEpoch != null ? new JRaw(lt.EngineReceipt.NextEpoch) : null,
             StateUpdates = optIns.ReceiptStateChanges ? new JRaw(lt.EngineReceipt.StateUpdates) : null,
             Events = events?.Select(x => new JRaw(x)).ToList(),

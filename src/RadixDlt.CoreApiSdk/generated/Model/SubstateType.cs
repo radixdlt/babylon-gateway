@@ -162,10 +162,10 @@ namespace RadixDlt.CoreApiSdk.Model
         PackageCodeInstrumentedCodeEntry = 11,
 
         /// <summary>
-        /// Enum PackageSchemaEntry for value: PackageSchemaEntry
+        /// Enum SchemaEntry for value: SchemaEntry
         /// </summary>
-        [EnumMember(Value = "PackageSchemaEntry")]
-        PackageSchemaEntry = 12,
+        [EnumMember(Value = "SchemaEntry")]
+        SchemaEntry = 12,
 
         /// <summary>
         /// Enum PackageBlueprintDefinitionEntry for value: PackageBlueprintDefinitionEntry

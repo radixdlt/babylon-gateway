@@ -107,7 +107,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
     public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(null, token);
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.IntentHash, GatewayModel.TransactionCommittedDetailsOptIns.Default, ledgerState, false, token);
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.IntentHash, GatewayModel.TransactionDetailsOptIns.Default, ledgerState, false, token);
         var pendingTransactions = await _transactionQuerier.LookupPendingTransactionsByIntentHash(request.IntentHash, token);
         var remainingPendingTransactions = pendingTransactions.Where(pt => pt.PayloadHash != committedTransaction?.PayloadHash).ToList();
 
@@ -145,7 +145,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
 
         var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(
             request.IntentHash,
-            request.OptIns ?? GatewayModel.TransactionCommittedDetailsOptIns.Default,
+            request.OptIns ?? GatewayModel.TransactionDetailsOptIns.Default,
             ledgerState,
             withDetails,
             token);
@@ -215,7 +215,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
             PageSize: request.LimitPerPage ?? DefaultPageLimit,
             AscendingOrder: request.Order == GatewayModel.StreamTransactionsRequest.OrderEnum.Asc,
             SearchCriteria: searchCriteria,
-            OptIns: request.OptIns ?? GatewayModel.TransactionCommittedDetailsOptIns.Default
+            OptIns: request.OptIns ?? GatewayModel.TransactionDetailsOptIns.Default
         );
 
         var results = await _transactionQuerier.GetTransactionStream(transactionsPageRequest, atLedgerState, token);

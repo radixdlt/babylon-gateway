@@ -63,6 +63,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -80,34 +81,34 @@ public static class EventDecoder
         return unwrappedEvent != null;
     }
 
-    public static bool TryGetFungibleVaultWithdrawalEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out ToolkitModel.WithdrawResourceEvent.Amount? unwrappedEvent)
+    public static bool TryGetFungibleVaultWithdrawalEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out ToolkitModel.Decimal? unwrappedEvent)
     {
         unwrappedEvent = (((typedNativeEvent as ToolkitModel.TypedNativeEvent.Resource)?.value as ToolkitModel.TypedResourcePackageEvent.FungibleVault)?.value as
-            ToolkitModel.TypedFungibleVaultBlueprintEvent.WithdrawResourceEventValue)?.value as ToolkitModel.WithdrawResourceEvent.Amount;
+            ToolkitModel.TypedFungibleVaultBlueprintEvent.FungibleVaultWithdrawEventValue)?.value.amount;
 
         return unwrappedEvent != null;
     }
 
-    public static bool TryGetFungibleVaultDepositEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out ToolkitModel.DepositResourceEvent.Amount? unwrappedEvent)
+    public static bool TryGetFungibleVaultDepositEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out ToolkitModel.Decimal? unwrappedEvent)
     {
         unwrappedEvent = (((typedNativeEvent as ToolkitModel.TypedNativeEvent.Resource)?.value as ToolkitModel.TypedResourcePackageEvent.FungibleVault)?.value as
-            ToolkitModel.TypedFungibleVaultBlueprintEvent.DepositResourceEventValue)?.value as ToolkitModel.DepositResourceEvent.Amount;
+            ToolkitModel.TypedFungibleVaultBlueprintEvent.FungibleVaultDepositEventValue)?.value.amount;
 
         return unwrappedEvent != null;
     }
 
-    public static bool TryGetNonFungibleVaultWithdrawalEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out ToolkitModel.WithdrawResourceEvent.Ids? unwrappedEvent)
+    public static bool TryGetNonFungibleVaultWithdrawalEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out List<ToolkitModel.NonFungibleLocalId>? unwrappedEvent)
     {
         unwrappedEvent = (((typedNativeEvent as ToolkitModel.TypedNativeEvent.Resource)?.value as ToolkitModel.TypedResourcePackageEvent.NonFungibleVault)?.value as
-            ToolkitModel.TypedNonFungibleVaultBlueprintEvent.WithdrawResourceEventValue)?.value as ToolkitModel.WithdrawResourceEvent.Ids;
+            ToolkitModel.TypedNonFungibleVaultBlueprintEvent.NonFungibleVaultWithdrawEventValue)?.value.ids;
 
         return unwrappedEvent != null;
     }
 
-    public static bool TryGetNonFungibleVaultDepositEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out ToolkitModel.DepositResourceEvent.Ids? unwrappedEvent)
+    public static bool TryGetNonFungibleVaultDepositEvent(ToolkitModel.TypedNativeEvent typedNativeEvent, [NotNullWhen(true)] out List<ToolkitModel.NonFungibleLocalId>? unwrappedEvent)
     {
         unwrappedEvent = (((typedNativeEvent as ToolkitModel.TypedNativeEvent.Resource)?.value as ToolkitModel.TypedResourcePackageEvent.NonFungibleVault)?.value as
-            ToolkitModel.TypedNonFungibleVaultBlueprintEvent.DepositResourceEventValue)?.value as ToolkitModel.DepositResourceEvent.Ids;
+            ToolkitModel.TypedNonFungibleVaultBlueprintEvent.NonFungibleVaultDepositEventValue)?.value.ids;
 
         return unwrappedEvent != null;
     }
@@ -151,16 +152,10 @@ public static class EventDecoder
             throw new NotSupportedException("Only method event emitter is currently supported.");
         }
 
-        if (@event.Type.TypePointer is not CoreModel.PackageTypePointer packageTypePointer)
-        {
-            throw new NotSupportedException("Only package type pointer is currently supported.");
-        }
-
         using var address = new ToolkitModel.Address(methodEventEmitter.Entity.EntityAddress);
         using var emitter = new ToolkitModel.Emitter.Method(address, MapModuleId(methodEventEmitter.ObjectModuleId));
-        using var hash = new ToolkitModel.Hash(Convert.FromHexString(packageTypePointer.SchemaHash).ToList());
-        var localTypeIndex = new ToolkitModel.LocalTypeIndex.SchemaLocalIndex((ulong)packageTypePointer.LocalTypeIndex.Index);
-        using var eventIdentifier = new ToolkitModel.EventTypeIdentifier(emitter, hash, localTypeIndex);
+        using var hash = new ToolkitModel.Hash(Convert.FromHexString(@event.Type.TypeReference.SchemaHash).ToList());
+        using var eventIdentifier = new ToolkitModel.EventTypeIdentifier(emitter, @event.Type.Name);
         return ToolkitModel.RadixEngineToolkitUniffiMethods.SborDecodeToTypedNativeEvent(eventIdentifier, @event.Data.GetDataBytes().ToList(), networkId);
     }
 

@@ -81,18 +81,21 @@ internal class KeyValueStoreSchemaHistory
     [Column("key_value_store_entity_id")]
     public long KeyValueStoreEntityId { get; set; }
 
-    [Column("schema")]
-    public byte[] Schema { get; set; }
+    [Column("key_schema_hash")]
+    public byte[] KeySchemaHash { get; set; }
 
     [Column("key_sbor_type_kind")]
     public SborTypeKind KeySborTypeKind { get; set; }
 
     [Column("key_type_index")]
-    public int KeyTypeIndex { get; set; }
+    public long KeyTypeIndex { get; set; }
+
+    [Column("value_schema_hash")]
+    public byte[] ValueSchemaHash { get; set; }
 
     [Column("value_sbor_type_kind")]
     public SborTypeKind ValueSborTypeKind { get; set; }
 
     [Column("value_type_index")]
-    public int ValueTypeIndex { get; set; }
+    public long ValueTypeIndex { get; set; }
 }

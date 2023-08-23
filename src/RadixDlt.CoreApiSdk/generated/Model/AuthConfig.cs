@@ -119,7 +119,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="functionAccessRules">A map from a function name to AccessRule. Only exists if &#x60;function_auth_type&#x60; is set to &#x60;FunctionAccessRules&#x60;. .</param>
         /// <param name="methodAuthType">methodAuthType (required).</param>
         /// <param name="methodRoles">methodRoles.</param>
-        public AuthConfig(FunctionAuthType functionAuthType = default(FunctionAuthType), Dictionary<string, AccessRule> functionAccessRules = default(Dictionary<string, AccessRule>), MethodAuthType methodAuthType = default(MethodAuthType), StaticRolesAuthTemplate methodRoles = default(StaticRolesAuthTemplate))
+        public AuthConfig(FunctionAuthType functionAuthType = default(FunctionAuthType), Dictionary<string, AccessRule> functionAccessRules = default(Dictionary<string, AccessRule>), MethodAuthType methodAuthType = default(MethodAuthType), StaticRoleDefinitionAuthTemplate methodRoles = default(StaticRoleDefinitionAuthTemplate))
         {
             this.FunctionAuthType = functionAuthType;
             this.MethodAuthType = methodAuthType;
@@ -138,7 +138,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets MethodRoles
         /// </summary>
         [DataMember(Name = "method_roles", EmitDefaultValue = true)]
-        public StaticRolesAuthTemplate MethodRoles { get; set; }
+        public StaticRoleDefinitionAuthTemplate MethodRoles { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

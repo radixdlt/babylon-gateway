@@ -104,8 +104,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="EventTypeIdentifier" /> class.
         /// </summary>
         /// <param name="emitter">emitter (required).</param>
-        /// <param name="typePointer">typePointer (required).</param>
-        public EventTypeIdentifier(EventEmitterIdentifier emitter = default(EventEmitterIdentifier), TypePointer typePointer = default(TypePointer))
+        /// <param name="typeReference">typeReference (required).</param>
+        /// <param name="name">name (required).</param>
+        public EventTypeIdentifier(EventEmitterIdentifier emitter = default(EventEmitterIdentifier), PackageTypeReference typeReference = default(PackageTypeReference), string name = default(string))
         {
             // to ensure "emitter" is required (not null)
             if (emitter == null)
@@ -113,12 +114,18 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("emitter is a required property for EventTypeIdentifier and cannot be null");
             }
             this.Emitter = emitter;
-            // to ensure "typePointer" is required (not null)
-            if (typePointer == null)
+            // to ensure "typeReference" is required (not null)
+            if (typeReference == null)
             {
-                throw new ArgumentNullException("typePointer is a required property for EventTypeIdentifier and cannot be null");
+                throw new ArgumentNullException("typeReference is a required property for EventTypeIdentifier and cannot be null");
             }
-            this.TypePointer = typePointer;
+            this.TypeReference = typeReference;
+            // to ensure "name" is required (not null)
+            if (name == null)
+            {
+                throw new ArgumentNullException("name is a required property for EventTypeIdentifier and cannot be null");
+            }
+            this.Name = name;
         }
 
         /// <summary>
@@ -128,10 +135,16 @@ namespace RadixDlt.CoreApiSdk.Model
         public EventEmitterIdentifier Emitter { get; set; }
 
         /// <summary>
-        /// Gets or Sets TypePointer
+        /// Gets or Sets TypeReference
         /// </summary>
-        [DataMember(Name = "type_pointer", IsRequired = true, EmitDefaultValue = true)]
-        public TypePointer TypePointer { get; set; }
+        [DataMember(Name = "type_reference", IsRequired = true, EmitDefaultValue = true)]
+        public PackageTypeReference TypeReference { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Name
+        /// </summary>
+        [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
+        public string Name { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,7 +155,8 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EventTypeIdentifier {\n");
             sb.Append("  Emitter: ").Append(Emitter).Append("\n");
-            sb.Append("  TypePointer: ").Append(TypePointer).Append("\n");
+            sb.Append("  TypeReference: ").Append(TypeReference).Append("\n");
+            sb.Append("  Name: ").Append(Name).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -184,9 +198,14 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Emitter.Equals(input.Emitter))
                 ) && 
                 (
-                    this.TypePointer == input.TypePointer ||
-                    (this.TypePointer != null &&
-                    this.TypePointer.Equals(input.TypePointer))
+                    this.TypeReference == input.TypeReference ||
+                    (this.TypeReference != null &&
+                    this.TypeReference.Equals(input.TypeReference))
+                ) && 
+                (
+                    this.Name == input.Name ||
+                    (this.Name != null &&
+                    this.Name.Equals(input.Name))
                 );
         }
 
@@ -203,9 +222,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Emitter.GetHashCode();
                 }
-                if (this.TypePointer != null)
+                if (this.TypeReference != null)
                 {
-                    hashCode = (hashCode * 59) + this.TypePointer.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TypeReference.GetHashCode();
+                }
+                if (this.Name != null)
+                {
+                    hashCode = (hashCode * 59) + this.Name.GetHashCode();
                 }
                 return hashCode;
             }

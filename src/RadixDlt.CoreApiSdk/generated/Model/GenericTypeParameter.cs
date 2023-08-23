@@ -100,7 +100,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Constraints
         /// </summary>
         [DataMember(Name = "constraints", IsRequired = true, EmitDefaultValue = true)]
-        public GenericTypeParameterContraints Constraints { get; set; }
+        public GenericTypeParameterConstraints Constraints { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="GenericTypeParameter" /> class.
         /// </summary>
@@ -110,7 +110,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="GenericTypeParameter" /> class.
         /// </summary>
         /// <param name="constraints">constraints (required).</param>
-        public GenericTypeParameter(GenericTypeParameterContraints constraints = default(GenericTypeParameterContraints))
+        public GenericTypeParameter(GenericTypeParameterConstraints constraints = default(GenericTypeParameterConstraints))
         {
             this.Constraints = constraints;
         }

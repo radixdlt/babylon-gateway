@@ -110,22 +110,38 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
         /// </summary>
         /// <param name="status">status (required).</param>
-        /// <param name="feeSummary">feeSummary.</param>
+        /// <param name="feeSummary">feeSummary (required).</param>
+        /// <param name="costingParameters">costingParameters (required).</param>
+        /// <param name="feeSource">feeSource.</param>
+        /// <param name="feeDestination">feeDestination.</param>
         /// <param name="stateUpdates">stateUpdates (required).</param>
         /// <param name="events">events.</param>
         /// <param name="nextEpoch">nextEpoch.</param>
         /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;).</param>
         /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
-        public TransactionReceipt(TransactionStatus status = default(TransactionStatus), FeeSummary feeSummary = default(FeeSummary), StateUpdates stateUpdates = default(StateUpdates), List<Event> events = default(List<Event>), NextEpoch nextEpoch = default(NextEpoch), List<SborData> output = default(List<SborData>), string errorMessage = default(string))
+        public TransactionReceipt(TransactionStatus status = default(TransactionStatus), FeeSummary feeSummary = default(FeeSummary), CostingParameters costingParameters = default(CostingParameters), FeeSource feeSource = default(FeeSource), FeeDestination feeDestination = default(FeeDestination), StateUpdates stateUpdates = default(StateUpdates), List<Event> events = default(List<Event>), NextEpoch nextEpoch = default(NextEpoch), List<SborData> output = default(List<SborData>), string errorMessage = default(string))
         {
             this.Status = status;
+            // to ensure "feeSummary" is required (not null)
+            if (feeSummary == null)
+            {
+                throw new ArgumentNullException("feeSummary is a required property for TransactionReceipt and cannot be null");
+            }
+            this.FeeSummary = feeSummary;
+            // to ensure "costingParameters" is required (not null)
+            if (costingParameters == null)
+            {
+                throw new ArgumentNullException("costingParameters is a required property for TransactionReceipt and cannot be null");
+            }
+            this.CostingParameters = costingParameters;
             // to ensure "stateUpdates" is required (not null)
             if (stateUpdates == null)
             {
                 throw new ArgumentNullException("stateUpdates is a required property for TransactionReceipt and cannot be null");
             }
             this.StateUpdates = stateUpdates;
-            this.FeeSummary = feeSummary;
+            this.FeeSource = feeSource;
+            this.FeeDestination = feeDestination;
             this.Events = events;
             this.NextEpoch = nextEpoch;
             this.Output = output;
@@ -135,8 +151,26 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Gets or Sets FeeSummary
         /// </summary>
-        [DataMember(Name = "fee_summary", EmitDefaultValue = true)]
+        [DataMember(Name = "fee_summary", IsRequired = true, EmitDefaultValue = true)]
         public FeeSummary FeeSummary { get; set; }
+
+        /// <summary>
+        /// Gets or Sets CostingParameters
+        /// </summary>
+        [DataMember(Name = "costing_parameters", IsRequired = true, EmitDefaultValue = true)]
+        public CostingParameters CostingParameters { get; set; }
+
+        /// <summary>
+        /// Gets or Sets FeeSource
+        /// </summary>
+        [DataMember(Name = "fee_source", EmitDefaultValue = true)]
+        public FeeSource FeeSource { get; set; }
+
+        /// <summary>
+        /// Gets or Sets FeeDestination
+        /// </summary>
+        [DataMember(Name = "fee_destination", EmitDefaultValue = true)]
+        public FeeDestination FeeDestination { get; set; }
 
         /// <summary>
         /// Gets or Sets StateUpdates
@@ -180,6 +214,9 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class TransactionReceipt {\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("  FeeSummary: ").Append(FeeSummary).Append("\n");
+            sb.Append("  CostingParameters: ").Append(CostingParameters).Append("\n");
+            sb.Append("  FeeSource: ").Append(FeeSource).Append("\n");
+            sb.Append("  FeeDestination: ").Append(FeeDestination).Append("\n");
             sb.Append("  StateUpdates: ").Append(StateUpdates).Append("\n");
             sb.Append("  Events: ").Append(Events).Append("\n");
             sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
@@ -230,6 +267,21 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.FeeSummary.Equals(input.FeeSummary))
                 ) && 
                 (
+                    this.CostingParameters == input.CostingParameters ||
+                    (this.CostingParameters != null &&
+                    this.CostingParameters.Equals(input.CostingParameters))
+                ) && 
+                (
+                    this.FeeSource == input.FeeSource ||
+                    (this.FeeSource != null &&
+                    this.FeeSource.Equals(input.FeeSource))
+                ) && 
+                (
+                    this.FeeDestination == input.FeeDestination ||
+                    (this.FeeDestination != null &&
+                    this.FeeDestination.Equals(input.FeeDestination))
+                ) && 
+                (
                     this.StateUpdates == input.StateUpdates ||
                     (this.StateUpdates != null &&
                     this.StateUpdates.Equals(input.StateUpdates))
@@ -271,6 +323,18 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.FeeSummary != null)
                 {
                     hashCode = (hashCode * 59) + this.FeeSummary.GetHashCode();
+                }
+                if (this.CostingParameters != null)
+                {
+                    hashCode = (hashCode * 59) + this.CostingParameters.GetHashCode();
+                }
+                if (this.FeeSource != null)
+                {
+                    hashCode = (hashCode * 59) + this.FeeSource.GetHashCode();
+                }
+                if (this.FeeDestination != null)
+                {
+                    hashCode = (hashCode * 59) + this.FeeDestination.GetHashCode();
                 }
                 if (this.StateUpdates != null)
                 {

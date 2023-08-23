@@ -103,11 +103,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="BlueprintSchemaCollectionPartition" /> class.
         /// </summary>
-        /// <param name="partitionOffset">The partition&#39;s offset from the Main module base (64) (required).</param>
+        /// <param name="partitionDescription">partitionDescription (required).</param>
         /// <param name="collectionSchema">collectionSchema (required).</param>
-        public BlueprintSchemaCollectionPartition(int partitionOffset = default(int), BlueprintCollectionSchema collectionSchema = default(BlueprintCollectionSchema))
+        public BlueprintSchemaCollectionPartition(PartitionDescription partitionDescription = default(PartitionDescription), BlueprintCollectionSchema collectionSchema = default(BlueprintCollectionSchema))
         {
-            this.PartitionOffset = partitionOffset;
+            // to ensure "partitionDescription" is required (not null)
+            if (partitionDescription == null)
+            {
+                throw new ArgumentNullException("partitionDescription is a required property for BlueprintSchemaCollectionPartition and cannot be null");
+            }
+            this.PartitionDescription = partitionDescription;
             // to ensure "collectionSchema" is required (not null)
             if (collectionSchema == null)
             {
@@ -117,11 +122,10 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The partition&#39;s offset from the Main module base (64)
+        /// Gets or Sets PartitionDescription
         /// </summary>
-        /// <value>The partition&#39;s offset from the Main module base (64)</value>
-        [DataMember(Name = "partition_offset", IsRequired = true, EmitDefaultValue = true)]
-        public int PartitionOffset { get; set; }
+        [DataMember(Name = "partition_description", IsRequired = true, EmitDefaultValue = true)]
+        public PartitionDescription PartitionDescription { get; set; }
 
         /// <summary>
         /// Gets or Sets CollectionSchema
@@ -137,7 +141,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class BlueprintSchemaCollectionPartition {\n");
-            sb.Append("  PartitionOffset: ").Append(PartitionOffset).Append("\n");
+            sb.Append("  PartitionDescription: ").Append(PartitionDescription).Append("\n");
             sb.Append("  CollectionSchema: ").Append(CollectionSchema).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -175,8 +179,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.PartitionOffset == input.PartitionOffset ||
-                    this.PartitionOffset.Equals(input.PartitionOffset)
+                    this.PartitionDescription == input.PartitionDescription ||
+                    (this.PartitionDescription != null &&
+                    this.PartitionDescription.Equals(input.PartitionDescription))
                 ) && 
                 (
                     this.CollectionSchema == input.CollectionSchema ||
@@ -194,7 +199,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.PartitionOffset.GetHashCode();
+                if (this.PartitionDescription != null)
+                {
+                    hashCode = (hashCode * 59) + this.PartitionDescription.GetHashCode();
+                }
                 if (this.CollectionSchema != null)
                 {
                     hashCode = (hashCode * 59) + this.CollectionSchema.GetHashCode();

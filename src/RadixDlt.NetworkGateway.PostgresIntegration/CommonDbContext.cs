@@ -133,13 +133,13 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<PackageCodeHistory> PackageCodeHistory => Set<PackageCodeHistory>();
 
-    public DbSet<PackageSchemaHistory> PackageSchemaHistory => Set<PackageSchemaHistory>();
+    public DbSet<SchemaHistory> SchemaHistory => Set<SchemaHistory>();
 
     public DbSet<KeyValueStoreEntryHistory> KeyValueStoreEntryHistory => Set<KeyValueStoreEntryHistory>();
 
     public DbSet<ValidatorEmissionStatistics> ValidatorEmissionStatistics => Set<ValidatorEmissionStatistics>();
 
-    public DbSet<NonFungibleSchemaHistory> NonFungibleDataSchemaHistory => Set<NonFungibleSchemaHistory>();
+    public DbSet<NonFungibleSchemaHistory> NonFungibleSchemaHistory => Set<NonFungibleSchemaHistory>();
 
     public DbSet<KeyValueStoreSchemaHistory> KeyValueStoreSchemaHistory => Set<KeyValueStoreSchemaHistory>();
 
@@ -411,11 +411,11 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<PackageSchemaHistory>()
+            .Entity<SchemaHistory>()
             .HasIndex(e => new { e.PackageEntityId, e.FromStateVersion });
 
         modelBuilder
-            .Entity<PackageSchemaHistory>()
+            .Entity<SchemaHistory>()
             .HasIndex(e => new { e.SchemaHash, e.FromStateVersion });
 
         modelBuilder
@@ -444,7 +444,7 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder
             .Entity<NonFungibleSchemaHistory>()
-            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+            .HasIndex(e => new { EntityId = e.ResourceEntityId, e.FromStateVersion });
     }
 
     private static void HookupStatistics(ModelBuilder modelBuilder)

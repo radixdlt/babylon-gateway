@@ -100,15 +100,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="status">The status of the transaction..</param>
         /// <param name="feeSummary">Fees paid, Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;..</param>
+        /// <param name="costingParameters">costingParameters.</param>
+        /// <param name="feeDestination">Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;..</param>
+        /// <param name="feeSource">Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;..</param>
         /// <param name="stateUpdates">Transaction state updates (only present if status is Succeeded or Failed)..</param>
         /// <param name="nextEpoch">Information (number and active validator list) about new epoch if occured..</param>
         /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;Succeeded&#x60;)..</param>
         /// <param name="events">Events emitted by a transaction..</param>
         /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
-        public TransactionReceipt(Object status = default(Object), Object feeSummary = default(Object), Object stateUpdates = default(Object), Object nextEpoch = default(Object), Object output = default(Object), Object events = default(Object), string errorMessage = default(string))
+        public TransactionReceipt(Object status = default(Object), Object feeSummary = default(Object), Object costingParameters = default(Object), Object feeDestination = default(Object), Object feeSource = default(Object), Object stateUpdates = default(Object), Object nextEpoch = default(Object), Object output = default(Object), Object events = default(Object), string errorMessage = default(string))
         {
             this.Status = status;
             this.FeeSummary = feeSummary;
+            this.CostingParameters = costingParameters;
+            this.FeeDestination = feeDestination;
+            this.FeeSource = feeSource;
             this.StateUpdates = stateUpdates;
             this.NextEpoch = nextEpoch;
             this.Output = output;
@@ -129,6 +135,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <value>Fees paid, Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;.</value>
         [DataMember(Name = "fee_summary", EmitDefaultValue = true)]
         public Object FeeSummary { get; set; }
+
+        /// <summary>
+        /// Gets or Sets CostingParameters
+        /// </summary>
+        [DataMember(Name = "costing_parameters", EmitDefaultValue = true)]
+        public Object CostingParameters { get; set; }
+
+        /// <summary>
+        /// Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;.
+        /// </summary>
+        /// <value>Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;.</value>
+        [DataMember(Name = "fee_destination", EmitDefaultValue = true)]
+        public Object FeeDestination { get; set; }
+
+        /// <summary>
+        /// Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;.
+        /// </summary>
+        /// <value>Only present if the &#x60;status&#x60; is not &#x60;Rejected&#x60;.</value>
+        [DataMember(Name = "fee_source", EmitDefaultValue = true)]
+        public Object FeeSource { get; set; }
 
         /// <summary>
         /// Transaction state updates (only present if status is Succeeded or Failed).
@@ -175,6 +201,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class TransactionReceipt {\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("  FeeSummary: ").Append(FeeSummary).Append("\n");
+            sb.Append("  CostingParameters: ").Append(CostingParameters).Append("\n");
+            sb.Append("  FeeDestination: ").Append(FeeDestination).Append("\n");
+            sb.Append("  FeeSource: ").Append(FeeSource).Append("\n");
             sb.Append("  StateUpdates: ").Append(StateUpdates).Append("\n");
             sb.Append("  NextEpoch: ").Append(NextEpoch).Append("\n");
             sb.Append("  Output: ").Append(Output).Append("\n");
@@ -226,6 +255,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.FeeSummary.Equals(input.FeeSummary))
                 ) && 
                 (
+                    this.CostingParameters == input.CostingParameters ||
+                    (this.CostingParameters != null &&
+                    this.CostingParameters.Equals(input.CostingParameters))
+                ) && 
+                (
+                    this.FeeDestination == input.FeeDestination ||
+                    (this.FeeDestination != null &&
+                    this.FeeDestination.Equals(input.FeeDestination))
+                ) && 
+                (
+                    this.FeeSource == input.FeeSource ||
+                    (this.FeeSource != null &&
+                    this.FeeSource.Equals(input.FeeSource))
+                ) && 
+                (
                     this.StateUpdates == input.StateUpdates ||
                     (this.StateUpdates != null &&
                     this.StateUpdates.Equals(input.StateUpdates))
@@ -268,6 +312,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.FeeSummary != null)
                 {
                     hashCode = (hashCode * 59) + this.FeeSummary.GetHashCode();
+                }
+                if (this.CostingParameters != null)
+                {
+                    hashCode = (hashCode * 59) + this.CostingParameters.GetHashCode();
+                }
+                if (this.FeeDestination != null)
+                {
+                    hashCode = (hashCode * 59) + this.FeeDestination.GetHashCode();
+                }
+                if (this.FeeSource != null)
+                {
+                    hashCode = (hashCode * 59) + this.FeeSource.GetHashCode();
                 }
                 if (this.StateUpdates != null)
                 {

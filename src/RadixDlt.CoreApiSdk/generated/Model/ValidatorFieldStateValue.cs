@@ -107,17 +107,17 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="publicKey">publicKey (required).</param>
         /// <param name="isRegistered">isRegistered (required).</param>
         /// <param name="acceptsDelegatedStake">acceptsDelegatedStake (required).</param>
-        /// <param name="validatorFeeFactor">A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        /// <param name="validatorFeeFactor">A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
         /// <param name="validatorFeeChangeRequest">validatorFeeChangeRequest.</param>
         /// <param name="stakeUnitResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
         /// <param name="stakeXrdVault">stakeXrdVault (required).</param>
-        /// <param name="unstakeClaimTokenResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        /// <param name="claimTokenResourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
         /// <param name="pendingXrdWithdrawVault">pendingXrdWithdrawVault (required).</param>
         /// <param name="lockedOwnerStakeUnitVault">lockedOwnerStakeUnitVault (required).</param>
         /// <param name="pendingOwnerStakeUnitUnlockVault">pendingOwnerStakeUnitUnlockVault (required).</param>
         /// <param name="pendingOwnerStakeUnitWithdrawals">pendingOwnerStakeUnitWithdrawals (required).</param>
-        /// <param name="alreadyUnlockedOwnerStakeUnitAmount">A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
-        public ValidatorFieldStateValue(SubstateKey sortedKey = default(SubstateKey), EcdsaSecp256k1PublicKey publicKey = default(EcdsaSecp256k1PublicKey), bool isRegistered = default(bool), bool acceptsDelegatedStake = default(bool), string validatorFeeFactor = default(string), ValidatorFeeChangeRequest validatorFeeChangeRequest = default(ValidatorFeeChangeRequest), string stakeUnitResourceAddress = default(string), EntityReference stakeXrdVault = default(EntityReference), string unstakeClaimTokenResourceAddress = default(string), EntityReference pendingXrdWithdrawVault = default(EntityReference), EntityReference lockedOwnerStakeUnitVault = default(EntityReference), EntityReference pendingOwnerStakeUnitUnlockVault = default(EntityReference), List<PendingOwnerStakeWithdrawal> pendingOwnerStakeUnitWithdrawals = default(List<PendingOwnerStakeWithdrawal>), string alreadyUnlockedOwnerStakeUnitAmount = default(string))
+        /// <param name="alreadyUnlockedOwnerStakeUnitAmount">A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;.  (required).</param>
+        public ValidatorFieldStateValue(SubstateKey sortedKey = default(SubstateKey), EcdsaSecp256k1PublicKey publicKey = default(EcdsaSecp256k1PublicKey), bool isRegistered = default(bool), bool acceptsDelegatedStake = default(bool), string validatorFeeFactor = default(string), ValidatorFeeChangeRequest validatorFeeChangeRequest = default(ValidatorFeeChangeRequest), string stakeUnitResourceAddress = default(string), EntityReference stakeXrdVault = default(EntityReference), string claimTokenResourceAddress = default(string), EntityReference pendingXrdWithdrawVault = default(EntityReference), EntityReference lockedOwnerStakeUnitVault = default(EntityReference), EntityReference pendingOwnerStakeUnitUnlockVault = default(EntityReference), List<PendingOwnerStakeWithdrawal> pendingOwnerStakeUnitWithdrawals = default(List<PendingOwnerStakeWithdrawal>), string alreadyUnlockedOwnerStakeUnitAmount = default(string))
         {
             // to ensure "publicKey" is required (not null)
             if (publicKey == null)
@@ -145,12 +145,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("stakeXrdVault is a required property for ValidatorFieldStateValue and cannot be null");
             }
             this.StakeXrdVault = stakeXrdVault;
-            // to ensure "unstakeClaimTokenResourceAddress" is required (not null)
-            if (unstakeClaimTokenResourceAddress == null)
+            // to ensure "claimTokenResourceAddress" is required (not null)
+            if (claimTokenResourceAddress == null)
             {
-                throw new ArgumentNullException("unstakeClaimTokenResourceAddress is a required property for ValidatorFieldStateValue and cannot be null");
+                throw new ArgumentNullException("claimTokenResourceAddress is a required property for ValidatorFieldStateValue and cannot be null");
             }
-            this.UnstakeClaimTokenResourceAddress = unstakeClaimTokenResourceAddress;
+            this.ClaimTokenResourceAddress = claimTokenResourceAddress;
             // to ensure "pendingXrdWithdrawVault" is required (not null)
             if (pendingXrdWithdrawVault == null)
             {
@@ -210,9 +210,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool AcceptsDelegatedStake { get; set; }
 
         /// <summary>
-        /// A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. 
         /// </summary>
-        /// <value>A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        /// <value>A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. </value>
         [DataMember(Name = "validator_fee_factor", IsRequired = true, EmitDefaultValue = true)]
         public string ValidatorFeeFactor { get; set; }
 
@@ -239,8 +239,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// The Bech32m-encoded human readable version of the resource address
         /// </summary>
         /// <value>The Bech32m-encoded human readable version of the resource address</value>
-        [DataMember(Name = "unstake_claim_token_resource_address", IsRequired = true, EmitDefaultValue = true)]
-        public string UnstakeClaimTokenResourceAddress { get; set; }
+        [DataMember(Name = "claim_token_resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ClaimTokenResourceAddress { get; set; }
 
         /// <summary>
         /// Gets or Sets PendingXrdWithdrawVault
@@ -267,9 +267,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public List<PendingOwnerStakeWithdrawal> PendingOwnerStakeUnitWithdrawals { get; set; }
 
         /// <summary>
-        /// A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
+        /// A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. 
         /// </summary>
-        /// <value>A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        /// <value>A string-encoded fixed-precision decimal to 18 decimal places. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(192 - 1) &lt;&#x3D; m &lt; 2^(192 - 1)&#x60;. </value>
         [DataMember(Name = "already_unlocked_owner_stake_unit_amount", IsRequired = true, EmitDefaultValue = true)]
         public string AlreadyUnlockedOwnerStakeUnitAmount { get; set; }
 
@@ -289,7 +289,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  ValidatorFeeChangeRequest: ").Append(ValidatorFeeChangeRequest).Append("\n");
             sb.Append("  StakeUnitResourceAddress: ").Append(StakeUnitResourceAddress).Append("\n");
             sb.Append("  StakeXrdVault: ").Append(StakeXrdVault).Append("\n");
-            sb.Append("  UnstakeClaimTokenResourceAddress: ").Append(UnstakeClaimTokenResourceAddress).Append("\n");
+            sb.Append("  ClaimTokenResourceAddress: ").Append(ClaimTokenResourceAddress).Append("\n");
             sb.Append("  PendingXrdWithdrawVault: ").Append(PendingXrdWithdrawVault).Append("\n");
             sb.Append("  LockedOwnerStakeUnitVault: ").Append(LockedOwnerStakeUnitVault).Append("\n");
             sb.Append("  PendingOwnerStakeUnitUnlockVault: ").Append(PendingOwnerStakeUnitUnlockVault).Append("\n");
@@ -369,9 +369,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.StakeXrdVault.Equals(input.StakeXrdVault))
                 ) && 
                 (
-                    this.UnstakeClaimTokenResourceAddress == input.UnstakeClaimTokenResourceAddress ||
-                    (this.UnstakeClaimTokenResourceAddress != null &&
-                    this.UnstakeClaimTokenResourceAddress.Equals(input.UnstakeClaimTokenResourceAddress))
+                    this.ClaimTokenResourceAddress == input.ClaimTokenResourceAddress ||
+                    (this.ClaimTokenResourceAddress != null &&
+                    this.ClaimTokenResourceAddress.Equals(input.ClaimTokenResourceAddress))
                 ) && 
                 (
                     this.PendingXrdWithdrawVault == input.PendingXrdWithdrawVault ||
@@ -436,9 +436,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.StakeXrdVault.GetHashCode();
                 }
-                if (this.UnstakeClaimTokenResourceAddress != null)
+                if (this.ClaimTokenResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.UnstakeClaimTokenResourceAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ClaimTokenResourceAddress.GetHashCode();
                 }
                 if (this.PendingXrdWithdrawVault != null)
                 {

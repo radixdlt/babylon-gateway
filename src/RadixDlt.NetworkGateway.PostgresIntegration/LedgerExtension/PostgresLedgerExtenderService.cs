@@ -422,7 +422,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                         e.BlueprintName = objectDetails.BlueprintInfo.BlueprintName;
                                     });
 
-                                    if (objectDetails.BlueprintInfo.BlueprintName is NativeBlueprintNames.FungibleVault or NativeBlueprintNames.NonFungibleVault)
+                                    if (objectDetails.BlueprintInfo.BlueprintName is CoreModel.NativeBlueprintNames.FungibleVault or CoreModel.NativeBlueprintNames.NonFungibleVault)
                                     {
                                         referencedEntity.PostResolveConfigure((VaultEntity e) =>
                                         {
@@ -431,8 +431,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                     }
 
                                     break;
-                                case CoreModel.KeyValueStoreTypeInfoDetails:
-                                    // TODO not supported yet
+                                case CoreModel.KeyValueStoreTypeInfoDetails keyValueStoreTypeInfoDetails:
                                     break;
                                 default:
                                     throw new UnreachableException($"Didn't expect '{typeInfoSubstate.Value.Details.Type}' value");
@@ -541,7 +540,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         ? TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdTotalExecutionCost)
                         : null;
                     ledgerTransaction.TipPaid = feeSummary != null
-                        ? TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdTotalTipped)
+                        ? TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdTotalTippingCost)
                         : null;
                     ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
                     ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
@@ -556,15 +555,12 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                         Output = committedTransaction.Receipt.Output != null ? JsonConvert.SerializeObject(committedTransaction.Receipt.Output) : null,
                         NextEpoch = committedTransaction.Receipt.NextEpoch?.ToJson(),
                         EventsSbors = committedTransaction.Receipt.Events?.Select(x => x.Data.GetDataBytes()).ToArray() ?? Array.Empty<byte[]>(),
-                        EventSchemaHashes =
-                            committedTransaction.Receipt.Events?.Select(x => ((CoreModel.PackageTypePointer)x.Type.TypePointer).SchemaHash.ConvertFromHex()).ToArray()
-                            ?? Array.Empty<byte[]>(),
-                        EventTypeIndexes =
-                            committedTransaction.Receipt.Events?.Select(x => ((CoreModel.PackageTypePointer)x.Type.TypePointer).LocalTypeIndex.Index).ToArray()
-                            ?? Array.Empty<int>(),
-                        EventSborTypeKinds =
-                            committedTransaction.Receipt.Events?.Select(x => ((CoreModel.PackageTypePointer)x.Type.TypePointer).LocalTypeIndex.Kind.ToModel()).ToArray().ToArray()
-                            ?? Array.Empty<SborTypeKind>(),
+                        CostingParameters = committedTransaction.Receipt.CostingParameters.ToJson(),
+                        FeeDestination = committedTransaction.Receipt.FeeDestination?.ToJson(),
+                        FeeSource = committedTransaction.Receipt.FeeSource?.ToJson(),
+                        EventSchemaHashes = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.SchemaHash.ConvertFromHex()).ToArray() ?? Array.Empty<byte[]>(),
+                        EventTypeIndexes = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.LocalTypeIndex.Index).ToArray() ?? Array.Empty<long>(),
+                        EventSborTypeKinds = committedTransaction.Receipt.Events?.Select(x => x.Type.TypeReference.LocalTypeIndex.Kind.ToModel()).ToArray().ToArray() ?? Array.Empty<SborTypeKind>(),
                     };
 
                     ledgerTransactionsToAdd.Add(ledgerTransaction);
@@ -588,9 +584,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                 }
             }
         }
-
-        // TODO dirty hack around https://radixdlt.atlassian.net/browse/NG-356
-        var missingMintedEvents = new List<ResourceSupplyChange>();
 
         // step: resolve known types & optionally create missing entities
         {
@@ -744,9 +737,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         var componentMethodRoyaltiesToAdd = new List<ComponentMethodRoyaltyEntryHistory>();
         var packageBlueprintHistoryToAdd = new Dictionary<PackageBlueprintLookup, PackageBlueprintHistory>();
         var packageCodeHistoryToAdd = new List<PackageCodeHistory>();
-        var packageSchemaHistoryToAdd = new List<PackageSchemaHistory>();
+        var schemaHistoryToAdd = new List<SchemaHistory>();
         var nonFungibleSchemaHistoryToAdd = new List<NonFungibleSchemaHistory>();
-        var keyVaulueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
+        var keyValueStoreSchemaHistoryToAdd = new List<KeyValueStoreSchemaHistory>();
         var validatorKeyHistoryToAdd = new Dictionary<ValidatorKeyLookup, ValidatorPublicKeyHistory>(); // TODO follow Pointer+ordered List pattern to ensure proper order of ingestion
         var accountDefaultDepositRuleHistoryToAdd = new List<AccountDefaultDepositRuleHistory>();
         var accountResourcePreferenceRuleHistoryToAdd = new List<AccountResourcePreferenceRuleHistory>();
@@ -1060,15 +1053,15 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                             });
                         }
 
-                        if (substateData is CoreModel.PackageSchemaEntrySubstate packageSchema)
+                        if (substateData is CoreModel.SchemaEntrySubstate schema)
                         {
-                            packageSchemaHistoryToAdd.Add(new PackageSchemaHistory
+                            schemaHistoryToAdd.Add(new SchemaHistory
                             {
-                                Id = sequences.PackageSchemaHistorySequence++,
+                                Id = sequences.SchemaHistorySequence++,
                                 FromStateVersion = stateVersion,
                                 PackageEntityId = referencedEntity.DatabaseId,
-                                SchemaHash = packageSchema.Key.SchemaHash.ConvertFromHex(),
-                                Schema = packageSchema.Value.Schema.SborData.Hex.ConvertFromHex(),
+                                SchemaHash = schema.Key.SchemaHash.ConvertFromHex(),
+                                Schema = schema.Value.Schema.SborData.Hex.ConvertFromHex(),
                             });
                         }
 
@@ -1087,36 +1080,35 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.TypeInfoModuleFieldTypeInfoSubstate typeInfoSubstate)
                         {
-                            if (typeInfoSubstate.TryGetObjectInstanceSchema(out var instanceSchema))
+                            if (typeInfoSubstate.TryGetNonFungibleDataSchemaDetails(out var nonFungibleDataSchemaDetails))
                             {
-                                if (instanceSchema.InstanceTypeLookup.Count != 1)
-                                {
-                                    throw new NotSupportedException("Expected non fungible data with only one data type entry.");
-                                }
-
                                 nonFungibleSchemaHistoryToAdd.Add(new NonFungibleSchemaHistory
                                 {
                                     Id = sequences.NonFungibleSchemaHistorySequence++,
+                                    ResourceEntityId = referencedEntity.DatabaseId,
+                                    SchemaHash = nonFungibleDataSchemaDetails.SchemaHash.ConvertFromHex(),
+                                    SborTypeKind = nonFungibleDataSchemaDetails.LocalTypeIndex.Kind.ToModel(),
+                                    TypeIndex = nonFungibleDataSchemaDetails.LocalTypeIndex.Index,
                                     FromStateVersion = stateVersion,
-                                    EntityId = referencedEntity.DatabaseId,
-                                    Schema = instanceSchema.Schema.SborData.Hex.ConvertFromHex(),
-                                    SborTypeKind = instanceSchema.InstanceTypeLookup[0].Kind.ToModel(),
-                                    TypeIndex = instanceSchema.InstanceTypeLookup[0].Index,
                                 });
                             }
 
-                            if (typeInfoSubstate.TryGetKeyValueStoreSchema(out var keyValueStoreSchema))
+                            if (typeInfoSubstate.Value.Details is CoreModel.KeyValueStoreTypeInfoDetails keyValueStoreTypeInfoDetails)
                             {
-                                keyVaulueStoreSchemaHistoryToAdd.Add(new KeyValueStoreSchemaHistory
+                                var keySchemaDetails = keyValueStoreTypeInfoDetails.KeyValueStoreInfo.KeyGenericSubstitution;
+                                var valueSchemaDetails = keyValueStoreTypeInfoDetails.KeyValueStoreInfo.ValueGenericSubstitution;
+
+                                keyValueStoreSchemaHistoryToAdd.Add(new KeyValueStoreSchemaHistory
                                 {
                                     Id = sequences.KeyValueSchemaHistorySequence++,
-                                    FromStateVersion = stateVersion,
                                     KeyValueStoreEntityId = referencedEntity.DatabaseId,
-                                    Schema = keyValueStoreSchema.Schema.SborData.Hex.ConvertFromHex(),
-                                    KeySborTypeKind = keyValueStoreSchema.KeyType.Kind.ToModel(),
-                                    KeyTypeIndex = keyValueStoreSchema.KeyType.Index,
-                                    ValueSborTypeKind = keyValueStoreSchema.ValueType.Kind.ToModel(),
-                                    ValueTypeIndex = keyValueStoreSchema.ValueType.Index,
+                                    KeySchemaHash = keySchemaDetails.SchemaHash.ConvertFromHex(),
+                                    KeySborTypeKind = keySchemaDetails.LocalTypeIndex.Kind.ToModel(),
+                                    KeyTypeIndex = keySchemaDetails.LocalTypeIndex.Index,
+                                    ValueSchemaHash = valueSchemaDetails.SchemaHash.ConvertFromHex(),
+                                    ValueSborTypeKind = valueSchemaDetails.LocalTypeIndex.Kind.ToModel(),
+                                    ValueTypeIndex = valueSchemaDetails.LocalTypeIndex.Index,
+                                    FromStateVersion = stateVersion,
                                 });
                             }
                         }
@@ -1199,7 +1191,6 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                     foreach (var @event in committedTransaction.Receipt.Events)
                     {
                         if (@event.Type.Emitter is not CoreModel.MethodEventEmitterIdentifier methodEventEmitter
-                            || @event.Type.TypePointer is not CoreModel.PackageTypePointer
                             || methodEventEmitter.ObjectModuleId != CoreModel.ObjectModuleId.Main)
                         {
                             continue;
@@ -1229,7 +1220,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 EventType = LedgerTransactionMarkerEventType.Withdrawal,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
                                 ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(fungibleVaultWithdrawalEvent.value.AsStr()),
+                                Quantity = TokenAmount.FromDecimalString(fungibleVaultWithdrawalEvent.AsStr()),
                             });
                         }
                         else if (EventDecoder.TryGetFungibleVaultDepositEvent(decodedEvent, out var fungibleVaultDepositEvent))
@@ -1241,7 +1232,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 EventType = LedgerTransactionMarkerEventType.Deposit,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
                                 ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(fungibleVaultDepositEvent.value.AsStr()),
+                                Quantity = TokenAmount.FromDecimalString(fungibleVaultDepositEvent.AsStr()),
                             });
                         }
                         else if (EventDecoder.TryGetNonFungibleVaultWithdrawalEvent(decodedEvent, out var nonFungibleVaultWithdrawalEvent))
@@ -1253,7 +1244,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 EventType = LedgerTransactionMarkerEventType.Withdrawal,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
                                 ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(nonFungibleVaultWithdrawalEvent.value.Count.ToString()),
+                                Quantity = TokenAmount.FromDecimalString(nonFungibleVaultWithdrawalEvent.Count.ToString()),
                             });
                         }
                         else if (EventDecoder.TryGetNonFungibleVaultDepositEvent(decodedEvent, out var nonFungibleVaultDepositEvent))
@@ -1265,7 +1256,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 EventType = LedgerTransactionMarkerEventType.Deposit,
                                 EntityId = eventEmitterEntity.DatabaseGlobalAncestorId,
                                 ResourceEntityId = eventEmitterEntity.GetDatabaseEntity<InternalNonFungibleVaultEntity>().ResourceEntityId,
-                                Quantity = TokenAmount.FromDecimalString(nonFungibleVaultDepositEvent.value.Count.ToString()),
+                                Quantity = TokenAmount.FromDecimalString(nonFungibleVaultDepositEvent.Count.ToString()),
                             });
                         }
                         else if (EventDecoder.TryGetFungibleResourceMintedEvent(decodedEvent, out var fungibleResourceMintedEvent))
@@ -1857,13 +1848,13 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
             rowsInserted += await writeHelper.CopyValidatorActiveSetHistory(validatorActiveSetHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyPackageBlueprintHistory(packageBlueprintHistoryToAdd.Values, token);
             rowsInserted += await writeHelper.CopyPackageCodeHistory(packageCodeHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyPackageSchemaHistory(packageSchemaHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopySchemaHistory(schemaHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyKeyValueStoreEntryHistory(keyValueStoreEntryHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountDefaultDepositRuleHistory(accountDefaultDepositRuleHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyAccountResourcePreferenceRuleHistory(accountResourcePreferenceRuleHistoryToAdd, token);
             rowsInserted += await writeHelper.CopyValidatorEmissionStatistics(validatorEmissionStatisticsToAdd, token);
             rowsInserted += await writeHelper.CopyNonFungibleDataSchemaHistory(nonFungibleSchemaHistoryToAdd, token);
-            rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyVaulueStoreSchemaHistoryToAdd, token);
+            rowsInserted += await writeHelper.CopyKeyValueStoreSchemaHistory(keyValueStoreSchemaHistoryToAdd, token);
             await writeHelper.UpdateSequences(sequences, token);
 
             dbWriteDuration += sw.Elapsed;

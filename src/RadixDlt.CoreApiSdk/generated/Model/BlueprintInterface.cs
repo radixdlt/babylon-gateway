@@ -105,11 +105,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="outerBlueprint">outerBlueprint.</param>
         /// <param name="genericTypeParameters">Generic (SBOR) type parameters which need to be filled by a concrete instance of this blueprint.  (required).</param>
+        /// <param name="isTransient">If true, an instantiation of this blueprint cannot be persisted. EG buckets and proofs are transient. (required).</param>
         /// <param name="features">features (required).</param>
         /// <param name="state">state (required).</param>
         /// <param name="functions">A map from the function name to the FunctionSchema (required).</param>
-        /// <param name="events">A map from the event name to the local type index for the event payload under the blueprint schema. (required).</param>
-        public BlueprintInterface(string outerBlueprint = default(string), List<GenericTypeParameter> genericTypeParameters = default(List<GenericTypeParameter>), List<string> features = default(List<string>), IndexedStateSchema state = default(IndexedStateSchema), Dictionary<string, FunctionSchema> functions = default(Dictionary<string, FunctionSchema>), Dictionary<string, TypePointer> events = default(Dictionary<string, TypePointer>))
+        /// <param name="events">A map from the event name to the event payload type reference. (required).</param>
+        public BlueprintInterface(string outerBlueprint = default(string), List<GenericTypeParameter> genericTypeParameters = default(List<GenericTypeParameter>), bool isTransient = default(bool), List<string> features = default(List<string>), IndexedStateSchema state = default(IndexedStateSchema), Dictionary<string, FunctionSchema> functions = default(Dictionary<string, FunctionSchema>), Dictionary<string, BlueprintPayloadDef> events = default(Dictionary<string, BlueprintPayloadDef>))
         {
             // to ensure "genericTypeParameters" is required (not null)
             if (genericTypeParameters == null)
@@ -117,6 +118,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("genericTypeParameters is a required property for BlueprintInterface and cannot be null");
             }
             this.GenericTypeParameters = genericTypeParameters;
+            this.IsTransient = isTransient;
             // to ensure "features" is required (not null)
             if (features == null)
             {
@@ -158,6 +160,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public List<GenericTypeParameter> GenericTypeParameters { get; set; }
 
         /// <summary>
+        /// If true, an instantiation of this blueprint cannot be persisted. EG buckets and proofs are transient.
+        /// </summary>
+        /// <value>If true, an instantiation of this blueprint cannot be persisted. EG buckets and proofs are transient.</value>
+        [DataMember(Name = "is_transient", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsTransient { get; set; }
+
+        /// <summary>
         /// Gets or Sets Features
         /// </summary>
         [DataMember(Name = "features", IsRequired = true, EmitDefaultValue = true)]
@@ -177,11 +186,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public Dictionary<string, FunctionSchema> Functions { get; set; }
 
         /// <summary>
-        /// A map from the event name to the local type index for the event payload under the blueprint schema.
+        /// A map from the event name to the event payload type reference.
         /// </summary>
-        /// <value>A map from the event name to the local type index for the event payload under the blueprint schema.</value>
+        /// <value>A map from the event name to the event payload type reference.</value>
         [DataMember(Name = "events", IsRequired = true, EmitDefaultValue = true)]
-        public Dictionary<string, TypePointer> Events { get; set; }
+        public Dictionary<string, BlueprintPayloadDef> Events { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -193,6 +202,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class BlueprintInterface {\n");
             sb.Append("  OuterBlueprint: ").Append(OuterBlueprint).Append("\n");
             sb.Append("  GenericTypeParameters: ").Append(GenericTypeParameters).Append("\n");
+            sb.Append("  IsTransient: ").Append(IsTransient).Append("\n");
             sb.Append("  Features: ").Append(Features).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
             sb.Append("  Functions: ").Append(Functions).Append("\n");
@@ -244,6 +254,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.GenericTypeParameters.SequenceEqual(input.GenericTypeParameters)
                 ) && 
                 (
+                    this.IsTransient == input.IsTransient ||
+                    this.IsTransient.Equals(input.IsTransient)
+                ) && 
+                (
                     this.Features == input.Features ||
                     this.Features != null &&
                     input.Features != null &&
@@ -285,6 +299,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.GenericTypeParameters.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.IsTransient.GetHashCode();
                 if (this.Features != null)
                 {
                     hashCode = (hashCode * 59) + this.Features.GetHashCode();

@@ -235,12 +235,12 @@ models/StreamTransactionsRequestAllOf.ts
 models/StreamTransactionsRequestEventFilterItem.ts
 models/StreamTransactionsResponse.ts
 models/StreamTransactionsResponseAllOf.ts
-models/TransactionCommittedDetailsOptIns.ts
 models/TransactionCommittedDetailsRequest.ts
 models/TransactionCommittedDetailsRequestAllOf.ts
 models/TransactionCommittedDetailsResponse.ts
 models/TransactionCommittedDetailsResponseAllOf.ts
 models/TransactionConstructionResponse.ts
+models/TransactionDetailsOptIns.ts
 models/TransactionNotFoundError.ts
 models/TransactionNotFoundErrorAllOf.ts
 models/TransactionPreviewRequest.ts

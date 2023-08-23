@@ -103,22 +103,44 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyValueStoreInfo" /> class.
         /// </summary>
-        /// <param name="kvStoreSchema">kvStoreSchema (required).</param>
-        public KeyValueStoreInfo(KeyValueStoreSchema kvStoreSchema = default(KeyValueStoreSchema))
+        /// <param name="keyGenericSubstitution">keyGenericSubstitution (required).</param>
+        /// <param name="valueGenericSubstitution">valueGenericSubstitution (required).</param>
+        /// <param name="allowOwnership">Whether the entries of the key-value partition are allowed to own child nodes. (required).</param>
+        public KeyValueStoreInfo(TypeIdentifier keyGenericSubstitution = default(TypeIdentifier), TypeIdentifier valueGenericSubstitution = default(TypeIdentifier), bool allowOwnership = default(bool))
         {
-            // to ensure "kvStoreSchema" is required (not null)
-            if (kvStoreSchema == null)
+            // to ensure "keyGenericSubstitution" is required (not null)
+            if (keyGenericSubstitution == null)
             {
-                throw new ArgumentNullException("kvStoreSchema is a required property for KeyValueStoreInfo and cannot be null");
+                throw new ArgumentNullException("keyGenericSubstitution is a required property for KeyValueStoreInfo and cannot be null");
             }
-            this.KvStoreSchema = kvStoreSchema;
+            this.KeyGenericSubstitution = keyGenericSubstitution;
+            // to ensure "valueGenericSubstitution" is required (not null)
+            if (valueGenericSubstitution == null)
+            {
+                throw new ArgumentNullException("valueGenericSubstitution is a required property for KeyValueStoreInfo and cannot be null");
+            }
+            this.ValueGenericSubstitution = valueGenericSubstitution;
+            this.AllowOwnership = allowOwnership;
         }
 
         /// <summary>
-        /// Gets or Sets KvStoreSchema
+        /// Gets or Sets KeyGenericSubstitution
         /// </summary>
-        [DataMember(Name = "kv_store_schema", IsRequired = true, EmitDefaultValue = true)]
-        public KeyValueStoreSchema KvStoreSchema { get; set; }
+        [DataMember(Name = "key_generic_substitution", IsRequired = true, EmitDefaultValue = true)]
+        public TypeIdentifier KeyGenericSubstitution { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ValueGenericSubstitution
+        /// </summary>
+        [DataMember(Name = "value_generic_substitution", IsRequired = true, EmitDefaultValue = true)]
+        public TypeIdentifier ValueGenericSubstitution { get; set; }
+
+        /// <summary>
+        /// Whether the entries of the key-value partition are allowed to own child nodes.
+        /// </summary>
+        /// <value>Whether the entries of the key-value partition are allowed to own child nodes.</value>
+        [DataMember(Name = "allow_ownership", IsRequired = true, EmitDefaultValue = true)]
+        public bool AllowOwnership { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +150,9 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class KeyValueStoreInfo {\n");
-            sb.Append("  KvStoreSchema: ").Append(KvStoreSchema).Append("\n");
+            sb.Append("  KeyGenericSubstitution: ").Append(KeyGenericSubstitution).Append("\n");
+            sb.Append("  ValueGenericSubstitution: ").Append(ValueGenericSubstitution).Append("\n");
+            sb.Append("  AllowOwnership: ").Append(AllowOwnership).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,9 +189,18 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.KvStoreSchema == input.KvStoreSchema ||
-                    (this.KvStoreSchema != null &&
-                    this.KvStoreSchema.Equals(input.KvStoreSchema))
+                    this.KeyGenericSubstitution == input.KeyGenericSubstitution ||
+                    (this.KeyGenericSubstitution != null &&
+                    this.KeyGenericSubstitution.Equals(input.KeyGenericSubstitution))
+                ) && 
+                (
+                    this.ValueGenericSubstitution == input.ValueGenericSubstitution ||
+                    (this.ValueGenericSubstitution != null &&
+                    this.ValueGenericSubstitution.Equals(input.ValueGenericSubstitution))
+                ) && 
+                (
+                    this.AllowOwnership == input.AllowOwnership ||
+                    this.AllowOwnership.Equals(input.AllowOwnership)
                 );
         }
 
@@ -180,10 +213,15 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.KvStoreSchema != null)
+                if (this.KeyGenericSubstitution != null)
                 {
-                    hashCode = (hashCode * 59) + this.KvStoreSchema.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyGenericSubstitution.GetHashCode();
                 }
+                if (this.ValueGenericSubstitution != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValueGenericSubstitution.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.AllowOwnership.GetHashCode();
                 return hashCode;
             }
         }

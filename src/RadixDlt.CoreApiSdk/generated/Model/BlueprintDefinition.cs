@@ -104,10 +104,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="BlueprintDefinition" /> class.
         /// </summary>
         /// <param name="_interface">_interface (required).</param>
-        /// <param name="isTransient">If true, an instantiation of this blueprint cannot be persisted. EG buckets and proofs are transient. (required).</param>
         /// <param name="functionExports">A map from the function name to its export (required).</param>
         /// <param name="hookExports">A map from certain object lifecycle hooks to a callback \&quot;package export\&quot;. There is at most one callback registered for each &#x60;ObjectHook&#x60;.  (required).</param>
-        public BlueprintDefinition(BlueprintInterface _interface = default(BlueprintInterface), bool isTransient = default(bool), Dictionary<string, PackageExport> functionExports = default(Dictionary<string, PackageExport>), List<HookExport> hookExports = default(List<HookExport>))
+        public BlueprintDefinition(BlueprintInterface _interface = default(BlueprintInterface), Dictionary<string, PackageExport> functionExports = default(Dictionary<string, PackageExport>), List<HookExport> hookExports = default(List<HookExport>))
         {
             // to ensure "_interface" is required (not null)
             if (_interface == null)
@@ -115,7 +114,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("_interface is a required property for BlueprintDefinition and cannot be null");
             }
             this.Interface = _interface;
-            this.IsTransient = isTransient;
             // to ensure "functionExports" is required (not null)
             if (functionExports == null)
             {
@@ -135,13 +133,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "interface", IsRequired = true, EmitDefaultValue = true)]
         public BlueprintInterface Interface { get; set; }
-
-        /// <summary>
-        /// If true, an instantiation of this blueprint cannot be persisted. EG buckets and proofs are transient.
-        /// </summary>
-        /// <value>If true, an instantiation of this blueprint cannot be persisted. EG buckets and proofs are transient.</value>
-        [DataMember(Name = "is_transient", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsTransient { get; set; }
 
         /// <summary>
         /// A map from the function name to its export
@@ -166,7 +157,6 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class BlueprintDefinition {\n");
             sb.Append("  Interface: ").Append(Interface).Append("\n");
-            sb.Append("  IsTransient: ").Append(IsTransient).Append("\n");
             sb.Append("  FunctionExports: ").Append(FunctionExports).Append("\n");
             sb.Append("  HookExports: ").Append(HookExports).Append("\n");
             sb.Append("}\n");
@@ -210,10 +200,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Interface.Equals(input.Interface))
                 ) && 
                 (
-                    this.IsTransient == input.IsTransient ||
-                    this.IsTransient.Equals(input.IsTransient)
-                ) && 
-                (
                     this.FunctionExports == input.FunctionExports ||
                     this.FunctionExports != null &&
                     input.FunctionExports != null &&
@@ -240,7 +226,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Interface.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.IsTransient.GetHashCode();
                 if (this.FunctionExports != null)
                 {
                     hashCode = (hashCode * 59) + this.FunctionExports.GetHashCode();
