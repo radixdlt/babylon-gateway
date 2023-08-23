@@ -71,6 +71,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 [Table("resource_entity_supply_history")]
 internal class ResourceEntitySupplyHistory
 {
+    public static readonly ResourceEntitySupplyHistory Empty = new();
+
     [Key]
     [Column("id")]
     public long Id { get; set; }
