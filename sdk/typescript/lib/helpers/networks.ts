@@ -11,11 +11,13 @@ export const RadixNetwork = {
   Nergalnet: 0x23,
   Mardunet: 0x24,
   LocalNet: 0xf0,
+  Zabanet: 0x0e,
   InternalTestNet: 0xf1,
   Simulator: 0xf2,
 
   RCnetV1: 0x0c,
   RCnetV2: 0x0d,
+  RCnetV3: 0x0e,
 } as const
 
 export type NetworkConfig = {
@@ -56,6 +58,12 @@ export const RadixNetworkConfig: Record<string, NetworkConfig> = {
     gatewayUrl: 'https://hammunet-gateway.radixdlt.com:443',
     dashboardUrl: 'https://hammunet-dashboard.rdx-works-main.extratools.works',
   },
+  Zabanet: {
+    networkName: 'Zabanet',
+    networkId: RadixNetwork.RCnetV3,
+    gatewayUrl: 'https://zabanet-gateway.radixdlt.com',
+    dashboardUrl: 'https://rcnet-v3-dashboard.radixdlt.com',
+  },
   RCnetV1: {
     networkName: 'RCnetV1',
     networkId: RadixNetwork.RCnetV1,
@@ -68,6 +76,12 @@ export const RadixNetworkConfig: Record<string, NetworkConfig> = {
     gatewayUrl: 'https://ansharnet-gateway.radixdlt.com',
     dashboardUrl: 'https://rcnet-v2-dashboard.radixdlt.com',
   },
+  RCnetV3: {
+    networkName: 'RCNetV3',
+    networkId: RadixNetwork.RCnetV3,
+    gatewayUrl: 'https://zabanet-gateway.radixdlt.com',
+    dashboardUrl: 'https://rcnet-v3-dashboard.radixdlt.com',
+  }
 }
 
 export const RadixNetworkConfigById = Object.values(RadixNetworkConfig).reduce(
