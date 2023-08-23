@@ -32,6 +32,24 @@ export interface TransactionReceipt {
      */
     fee_summary?: object;
     /**
+     * 
+     * @type {object}
+     * @memberof TransactionReceipt
+     */
+    costing_parameters?: object;
+    /**
+     * Only present if the `status` is not `Rejected`.
+     * @type {object}
+     * @memberof TransactionReceipt
+     */
+    fee_destination?: object;
+    /**
+     * Only present if the `status` is not `Rejected`.
+     * @type {object}
+     * @memberof TransactionReceipt
+     */
+    fee_source?: object;
+    /**
      * Transaction state updates (only present if status is Succeeded or Failed).
      * @type {object}
      * @memberof TransactionReceipt
@@ -84,6 +102,9 @@ export function TransactionReceiptFromJSONTyped(json: any, ignoreDiscriminator: 
         
         'status': !exists(json, 'status') ? undefined : json['status'],
         'fee_summary': !exists(json, 'fee_summary') ? undefined : json['fee_summary'],
+        'costing_parameters': !exists(json, 'costing_parameters') ? undefined : json['costing_parameters'],
+        'fee_destination': !exists(json, 'fee_destination') ? undefined : json['fee_destination'],
+        'fee_source': !exists(json, 'fee_source') ? undefined : json['fee_source'],
         'state_updates': !exists(json, 'state_updates') ? undefined : json['state_updates'],
         'next_epoch': !exists(json, 'next_epoch') ? undefined : json['next_epoch'],
         'output': !exists(json, 'output') ? undefined : json['output'],
@@ -103,6 +124,9 @@ export function TransactionReceiptToJSON(value?: TransactionReceipt | null): any
         
         'status': value.status,
         'fee_summary': value.fee_summary,
+        'costing_parameters': value.costing_parameters,
+        'fee_destination': value.fee_destination,
+        'fee_source': value.fee_source,
         'state_updates': value.state_updates,
         'next_epoch': value.next_epoch,
         'output': value.output,

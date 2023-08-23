@@ -37,15 +37,15 @@ Low level APIs are generated automatically based on OpenAPI spec. You can get a 
 ### Using generated APIs through `innerClient`
 
 ```typescript
-async function getTransactionStatus(transactionIntentHashHex: string) {
+async function getTransactionStatus(transactionIntentHash: string) {
   let response = await gatewayApi.transaction.innerClient.transactionStatus({
     transactionStatusRequest: {
-      intent_hash_hex: transactionIntentHashHex,
+      intent_hash: transactionIntentHash,
     },
   })
   return response.status
 }
-console.log(await getTransactionStatus('266cdfe0a28a761909d04761cdbfe33555ee5fdcf1db37fcf71c9a644b53e60b'))
+console.log(await getTransactionStatus('txid_tdx_21_18g0pfaxkprvz3c5tee8aydhujmm74yeul7v824fvaye2n7fvlzfqvpn2kz'))
 ```
 
 ### Using generated APIs manually
@@ -76,7 +76,7 @@ High Level APIs will grow over time as we start encountering repeating patterns 
 - `getEntityMetadata(entity: string, cursor?: string)` - get paged metadata about given entity
 - `getValidators(cursor?: string)` - get paged validators
 - `getAllValidators()` - get all validators
-- `getNonFungibleIds(address:string, cursor?: string)` - get paged non fungible ids for given address
+- `getNonFungibleIds(address:string, ledgerState, cursor?: string)` - get paged non fungible ids for given address
 - `getAllNonFungibleIds(address: string)` - get all non fungible ids for given address
 - `getNonFungibleData(address: string, ids: string | string[])` - get non fungible data
 

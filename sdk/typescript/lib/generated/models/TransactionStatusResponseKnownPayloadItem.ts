@@ -27,11 +27,11 @@ import {
  */
 export interface TransactionStatusResponseKnownPayloadItem {
     /**
-     * Hex-encoded SHA-256 hash.
+     * Bech32m-encoded hash.
      * @type {string}
      * @memberof TransactionStatusResponseKnownPayloadItem
      */
-    payload_hash_hex: string;
+    payload_hash: string;
     /**
      * 
      * @type {TransactionStatus}
@@ -51,7 +51,7 @@ export interface TransactionStatusResponseKnownPayloadItem {
  */
 export function instanceOfTransactionStatusResponseKnownPayloadItem(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "payload_hash_hex" in value;
+    isInstance = isInstance && "payload_hash" in value;
     isInstance = isInstance && "status" in value;
 
     return isInstance;
@@ -67,7 +67,7 @@ export function TransactionStatusResponseKnownPayloadItemFromJSONTyped(json: any
     }
     return {
         
-        'payload_hash_hex': json['payload_hash_hex'],
+        'payload_hash': json['payload_hash'],
         'status': TransactionStatusFromJSON(json['status']),
         'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
     };
@@ -82,7 +82,7 @@ export function TransactionStatusResponseKnownPayloadItemToJSON(value?: Transact
     }
     return {
         
-        'payload_hash_hex': value.payload_hash_hex,
+        'payload_hash': value.payload_hash,
         'status': TransactionStatusToJSON(value.status),
         'error_message': value.error_message,
     };

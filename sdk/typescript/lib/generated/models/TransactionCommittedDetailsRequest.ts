@@ -19,12 +19,12 @@ import {
     LedgerStateSelectorFromJSONTyped,
     LedgerStateSelectorToJSON,
 } from './LedgerStateSelector';
-import type { TransactionCommittedDetailsOptIns } from './TransactionCommittedDetailsOptIns';
+import type { TransactionDetailsOptIns } from './TransactionDetailsOptIns';
 import {
-    TransactionCommittedDetailsOptInsFromJSON,
-    TransactionCommittedDetailsOptInsFromJSONTyped,
-    TransactionCommittedDetailsOptInsToJSON,
-} from './TransactionCommittedDetailsOptIns';
+    TransactionDetailsOptInsFromJSON,
+    TransactionDetailsOptInsFromJSONTyped,
+    TransactionDetailsOptInsToJSON,
+} from './TransactionDetailsOptIns';
 
 /**
  * 
@@ -39,17 +39,17 @@ export interface TransactionCommittedDetailsRequest {
      */
     at_ledger_state?: LedgerStateSelector | null;
     /**
-     * Hex-encoded SHA-256 hash.
+     * Bech32m-encoded hash.
      * @type {string}
      * @memberof TransactionCommittedDetailsRequest
      */
-    intent_hash_hex: string;
+    intent_hash: string;
     /**
      * 
-     * @type {TransactionCommittedDetailsOptIns}
+     * @type {TransactionDetailsOptIns}
      * @memberof TransactionCommittedDetailsRequest
      */
-    opt_ins?: TransactionCommittedDetailsOptIns;
+    opt_ins?: TransactionDetailsOptIns;
 }
 
 /**
@@ -57,7 +57,7 @@ export interface TransactionCommittedDetailsRequest {
  */
 export function instanceOfTransactionCommittedDetailsRequest(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "intent_hash_hex" in value;
+    isInstance = isInstance && "intent_hash" in value;
 
     return isInstance;
 }
@@ -73,8 +73,8 @@ export function TransactionCommittedDetailsRequestFromJSONTyped(json: any, ignor
     return {
         
         'at_ledger_state': !exists(json, 'at_ledger_state') ? undefined : LedgerStateSelectorFromJSON(json['at_ledger_state']),
-        'intent_hash_hex': json['intent_hash_hex'],
-        'opt_ins': !exists(json, 'opt_ins') ? undefined : TransactionCommittedDetailsOptInsFromJSON(json['opt_ins']),
+        'intent_hash': json['intent_hash'],
+        'opt_ins': !exists(json, 'opt_ins') ? undefined : TransactionDetailsOptInsFromJSON(json['opt_ins']),
     };
 }
 
@@ -88,8 +88,8 @@ export function TransactionCommittedDetailsRequestToJSON(value?: TransactionComm
     return {
         
         'at_ledger_state': LedgerStateSelectorToJSON(value.at_ledger_state),
-        'intent_hash_hex': value.intent_hash_hex,
-        'opt_ins': TransactionCommittedDetailsOptInsToJSON(value.opt_ins),
+        'intent_hash': value.intent_hash,
+        'opt_ins': TransactionDetailsOptInsToJSON(value.opt_ins),
     };
 }
 

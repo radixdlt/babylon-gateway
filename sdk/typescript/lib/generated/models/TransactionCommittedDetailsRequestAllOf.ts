@@ -13,12 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { TransactionCommittedDetailsOptIns } from './TransactionCommittedDetailsOptIns';
+import type { TransactionDetailsOptIns } from './TransactionDetailsOptIns';
 import {
-    TransactionCommittedDetailsOptInsFromJSON,
-    TransactionCommittedDetailsOptInsFromJSONTyped,
-    TransactionCommittedDetailsOptInsToJSON,
-} from './TransactionCommittedDetailsOptIns';
+    TransactionDetailsOptInsFromJSON,
+    TransactionDetailsOptInsFromJSONTyped,
+    TransactionDetailsOptInsToJSON,
+} from './TransactionDetailsOptIns';
 
 /**
  * 
@@ -27,17 +27,17 @@ import {
  */
 export interface TransactionCommittedDetailsRequestAllOf {
     /**
-     * Hex-encoded SHA-256 hash.
+     * Bech32m-encoded hash.
      * @type {string}
      * @memberof TransactionCommittedDetailsRequestAllOf
      */
-    intent_hash_hex: string;
+    intent_hash: string;
     /**
      * 
-     * @type {TransactionCommittedDetailsOptIns}
+     * @type {TransactionDetailsOptIns}
      * @memberof TransactionCommittedDetailsRequestAllOf
      */
-    opt_ins?: TransactionCommittedDetailsOptIns;
+    opt_ins?: TransactionDetailsOptIns;
 }
 
 /**
@@ -45,7 +45,7 @@ export interface TransactionCommittedDetailsRequestAllOf {
  */
 export function instanceOfTransactionCommittedDetailsRequestAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "intent_hash_hex" in value;
+    isInstance = isInstance && "intent_hash" in value;
 
     return isInstance;
 }
@@ -60,8 +60,8 @@ export function TransactionCommittedDetailsRequestAllOfFromJSONTyped(json: any, 
     }
     return {
         
-        'intent_hash_hex': json['intent_hash_hex'],
-        'opt_ins': !exists(json, 'opt_ins') ? undefined : TransactionCommittedDetailsOptInsFromJSON(json['opt_ins']),
+        'intent_hash': json['intent_hash'],
+        'opt_ins': !exists(json, 'opt_ins') ? undefined : TransactionDetailsOptInsFromJSON(json['opt_ins']),
     };
 }
 
@@ -74,8 +74,8 @@ export function TransactionCommittedDetailsRequestAllOfToJSON(value?: Transactio
     }
     return {
         
-        'intent_hash_hex': value.intent_hash_hex,
-        'opt_ins': TransactionCommittedDetailsOptInsToJSON(value.opt_ins),
+        'intent_hash': value.intent_hash,
+        'opt_ins': TransactionDetailsOptInsToJSON(value.opt_ins),
     };
 }
 
