@@ -20,11 +20,11 @@ import { exists, mapValues } from '../runtime';
  */
 export interface TransactionNotFoundErrorAllOf {
     /**
-     * Hex-encoded SHA-256 hash.
+     * Bech32m-encoded hash.
      * @type {string}
      * @memberof TransactionNotFoundErrorAllOf
      */
-    intent_hash_hex: string;
+    intent_hash: string;
     /**
      * 
      * @type {string}
@@ -48,7 +48,7 @@ export type TransactionNotFoundErrorAllOfTypeEnum = typeof TransactionNotFoundEr
  */
 export function instanceOfTransactionNotFoundErrorAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "intent_hash_hex" in value;
+    isInstance = isInstance && "intent_hash" in value;
 
     return isInstance;
 }
@@ -63,7 +63,7 @@ export function TransactionNotFoundErrorAllOfFromJSONTyped(json: any, ignoreDisc
     }
     return {
         
-        'intent_hash_hex': json['intent_hash_hex'],
+        'intent_hash': json['intent_hash'],
         'type': !exists(json, 'type') ? undefined : json['type'],
     };
 }
@@ -77,7 +77,7 @@ export function TransactionNotFoundErrorAllOfToJSON(value?: TransactionNotFoundE
     }
     return {
         
-        'intent_hash_hex': value.intent_hash_hex,
+        'intent_hash': value.intent_hash,
         'type': value.type,
     };
 }

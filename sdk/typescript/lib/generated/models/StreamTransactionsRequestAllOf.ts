@@ -25,12 +25,12 @@ import {
     StreamTransactionsRequestEventFilterItemFromJSONTyped,
     StreamTransactionsRequestEventFilterItemToJSON,
 } from './StreamTransactionsRequestEventFilterItem';
-import type { TransactionCommittedDetailsOptIns } from './TransactionCommittedDetailsOptIns';
+import type { TransactionDetailsOptIns } from './TransactionDetailsOptIns';
 import {
-    TransactionCommittedDetailsOptInsFromJSON,
-    TransactionCommittedDetailsOptInsFromJSONTyped,
-    TransactionCommittedDetailsOptInsToJSON,
-} from './TransactionCommittedDetailsOptIns';
+    TransactionDetailsOptInsFromJSON,
+    TransactionDetailsOptInsFromJSONTyped,
+    TransactionDetailsOptInsToJSON,
+} from './TransactionDetailsOptIns';
 
 /**
  * 
@@ -88,10 +88,10 @@ export interface StreamTransactionsRequestAllOf {
     order?: StreamTransactionsRequestAllOfOrderEnum;
     /**
      * 
-     * @type {TransactionCommittedDetailsOptIns}
+     * @type {TransactionDetailsOptIns}
      * @memberof StreamTransactionsRequestAllOf
      */
-    opt_ins?: TransactionCommittedDetailsOptIns;
+    opt_ins?: TransactionDetailsOptIns;
 }
 
 
@@ -142,7 +142,7 @@ export function StreamTransactionsRequestAllOfFromJSONTyped(json: any, ignoreDis
         'affected_global_entities_filter': !exists(json, 'affected_global_entities_filter') ? undefined : json['affected_global_entities_filter'],
         'events_filter': !exists(json, 'events_filter') ? undefined : ((json['events_filter'] as Array<any>).map(StreamTransactionsRequestEventFilterItemFromJSON)),
         'order': !exists(json, 'order') ? undefined : json['order'],
-        'opt_ins': !exists(json, 'opt_ins') ? undefined : TransactionCommittedDetailsOptInsFromJSON(json['opt_ins']),
+        'opt_ins': !exists(json, 'opt_ins') ? undefined : TransactionDetailsOptInsFromJSON(json['opt_ins']),
     };
 }
 
@@ -163,7 +163,7 @@ export function StreamTransactionsRequestAllOfToJSON(value?: StreamTransactionsR
         'affected_global_entities_filter': value.affected_global_entities_filter,
         'events_filter': value.events_filter === undefined ? undefined : ((value.events_filter as Array<any>).map(StreamTransactionsRequestEventFilterItemToJSON)),
         'order': value.order,
-        'opt_ins': TransactionCommittedDetailsOptInsToJSON(value.opt_ins),
+        'opt_ins': TransactionDetailsOptInsToJSON(value.opt_ins),
     };
 }
 

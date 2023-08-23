@@ -20,11 +20,11 @@ import { exists, mapValues } from '../runtime';
  */
 export interface TransactionStatusRequest {
     /**
-     * Hex-encoded SHA-256 hash.
+     * Bech32m-encoded hash.
      * @type {string}
      * @memberof TransactionStatusRequest
      */
-    intent_hash_hex: string;
+    intent_hash: string;
 }
 
 /**
@@ -32,7 +32,7 @@ export interface TransactionStatusRequest {
  */
 export function instanceOfTransactionStatusRequest(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "intent_hash_hex" in value;
+    isInstance = isInstance && "intent_hash" in value;
 
     return isInstance;
 }
@@ -47,7 +47,7 @@ export function TransactionStatusRequestFromJSONTyped(json: any, ignoreDiscrimin
     }
     return {
         
-        'intent_hash_hex': json['intent_hash_hex'],
+        'intent_hash': json['intent_hash'],
     };
 }
 
@@ -60,7 +60,7 @@ export function TransactionStatusRequestToJSON(value?: TransactionStatusRequest 
     }
     return {
         
-        'intent_hash_hex': value.intent_hash_hex,
+        'intent_hash': value.intent_hash,
     };
 }
 

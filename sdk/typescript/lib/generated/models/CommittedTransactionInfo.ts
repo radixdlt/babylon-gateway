@@ -63,17 +63,17 @@ export interface CommittedTransactionInfo {
      */
     transaction_status: TransactionStatus;
     /**
-     * Hex-encoded SHA-256 hash.
+     * Bech32m-encoded hash.
      * @type {string}
      * @memberof CommittedTransactionInfo
      */
-    payload_hash_hex?: string;
+    payload_hash?: string;
     /**
-     * Hex-encoded SHA-256 hash.
+     * Bech32m-encoded hash.
      * @type {string}
      * @memberof CommittedTransactionInfo
      */
-    intent_hash_hex?: string;
+    intent_hash?: string;
     /**
      * String-encoded decimal representing the amount of a related fungible resource.
      * @type {string}
@@ -111,11 +111,11 @@ export interface CommittedTransactionInfo {
      */
     receipt?: TransactionReceipt;
     /**
-     * Hex-encoded binary blob.
-     * @type {string}
+     * defined in core api specs.
+     * @type {object}
      * @memberof CommittedTransactionInfo
      */
-    message_hex?: string;
+    message?: object;
 }
 
 /**
@@ -147,15 +147,15 @@ export function CommittedTransactionInfoFromJSONTyped(json: any, ignoreDiscrimin
         'round': json['round'],
         'round_timestamp': json['round_timestamp'],
         'transaction_status': TransactionStatusFromJSON(json['transaction_status']),
-        'payload_hash_hex': !exists(json, 'payload_hash_hex') ? undefined : json['payload_hash_hex'],
-        'intent_hash_hex': !exists(json, 'intent_hash_hex') ? undefined : json['intent_hash_hex'],
+        'payload_hash': !exists(json, 'payload_hash') ? undefined : json['payload_hash'],
+        'intent_hash': !exists(json, 'intent_hash') ? undefined : json['intent_hash'],
         'fee_paid': !exists(json, 'fee_paid') ? undefined : json['fee_paid'],
         'affected_global_entities': !exists(json, 'affected_global_entities') ? undefined : json['affected_global_entities'],
         'confirmed_at': !exists(json, 'confirmed_at') ? undefined : (json['confirmed_at'] === null ? null : new Date(json['confirmed_at'])),
         'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
         'raw_hex': !exists(json, 'raw_hex') ? undefined : json['raw_hex'],
         'receipt': !exists(json, 'receipt') ? undefined : TransactionReceiptFromJSON(json['receipt']),
-        'message_hex': !exists(json, 'message_hex') ? undefined : json['message_hex'],
+        'message': !exists(json, 'message') ? undefined : json['message'],
     };
 }
 
@@ -173,15 +173,15 @@ export function CommittedTransactionInfoToJSON(value?: CommittedTransactionInfo 
         'round': value.round,
         'round_timestamp': value.round_timestamp,
         'transaction_status': TransactionStatusToJSON(value.transaction_status),
-        'payload_hash_hex': value.payload_hash_hex,
-        'intent_hash_hex': value.intent_hash_hex,
+        'payload_hash': value.payload_hash,
+        'intent_hash': value.intent_hash,
         'fee_paid': value.fee_paid,
         'affected_global_entities': value.affected_global_entities,
         'confirmed_at': value.confirmed_at === undefined ? undefined : (value.confirmed_at === null ? null : value.confirmed_at.toISOString()),
         'error_message': value.error_message,
         'raw_hex': value.raw_hex,
         'receipt': TransactionReceiptToJSON(value.receipt),
-        'message_hex': value.message_hex,
+        'message': value.message,
     };
 }
 

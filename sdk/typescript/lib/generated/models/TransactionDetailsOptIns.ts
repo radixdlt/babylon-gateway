@@ -16,55 +16,73 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface TransactionCommittedDetailsOptIns
+ * @interface TransactionDetailsOptIns
  */
-export interface TransactionCommittedDetailsOptIns {
+export interface TransactionDetailsOptIns {
     /**
      * 
      * @type {boolean}
-     * @memberof TransactionCommittedDetailsOptIns
+     * @memberof TransactionDetailsOptIns
      */
     raw_hex?: boolean;
     /**
      * 
      * @type {boolean}
-     * @memberof TransactionCommittedDetailsOptIns
+     * @memberof TransactionDetailsOptIns
      */
     receipt_state_changes?: boolean;
     /**
      * 
      * @type {boolean}
-     * @memberof TransactionCommittedDetailsOptIns
+     * @memberof TransactionDetailsOptIns
      */
     receipt_fee_summary?: boolean;
     /**
      * 
      * @type {boolean}
-     * @memberof TransactionCommittedDetailsOptIns
+     * @memberof TransactionDetailsOptIns
+     */
+    receipt_fee_source?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof TransactionDetailsOptIns
+     */
+    receipt_fee_destination?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof TransactionDetailsOptIns
+     */
+    receipt_costing_parameters?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof TransactionDetailsOptIns
      */
     receipt_events?: boolean;
     /**
      * 
      * @type {boolean}
-     * @memberof TransactionCommittedDetailsOptIns
+     * @memberof TransactionDetailsOptIns
      */
     affected_global_entities?: boolean;
 }
 
 /**
- * Check if a given object implements the TransactionCommittedDetailsOptIns interface.
+ * Check if a given object implements the TransactionDetailsOptIns interface.
  */
-export function instanceOfTransactionCommittedDetailsOptIns(value: object): boolean {
+export function instanceOfTransactionDetailsOptIns(value: object): boolean {
     let isInstance = true;
 
     return isInstance;
 }
 
-export function TransactionCommittedDetailsOptInsFromJSON(json: any): TransactionCommittedDetailsOptIns {
-    return TransactionCommittedDetailsOptInsFromJSONTyped(json, false);
+export function TransactionDetailsOptInsFromJSON(json: any): TransactionDetailsOptIns {
+    return TransactionDetailsOptInsFromJSONTyped(json, false);
 }
 
-export function TransactionCommittedDetailsOptInsFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionCommittedDetailsOptIns {
+export function TransactionDetailsOptInsFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionDetailsOptIns {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -73,12 +91,15 @@ export function TransactionCommittedDetailsOptInsFromJSONTyped(json: any, ignore
         'raw_hex': !exists(json, 'raw_hex') ? undefined : json['raw_hex'],
         'receipt_state_changes': !exists(json, 'receipt_state_changes') ? undefined : json['receipt_state_changes'],
         'receipt_fee_summary': !exists(json, 'receipt_fee_summary') ? undefined : json['receipt_fee_summary'],
+        'receipt_fee_source': !exists(json, 'receipt_fee_source') ? undefined : json['receipt_fee_source'],
+        'receipt_fee_destination': !exists(json, 'receipt_fee_destination') ? undefined : json['receipt_fee_destination'],
+        'receipt_costing_parameters': !exists(json, 'receipt_costing_parameters') ? undefined : json['receipt_costing_parameters'],
         'receipt_events': !exists(json, 'receipt_events') ? undefined : json['receipt_events'],
         'affected_global_entities': !exists(json, 'affected_global_entities') ? undefined : json['affected_global_entities'],
     };
 }
 
-export function TransactionCommittedDetailsOptInsToJSON(value?: TransactionCommittedDetailsOptIns | null): any {
+export function TransactionDetailsOptInsToJSON(value?: TransactionDetailsOptIns | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -90,6 +111,9 @@ export function TransactionCommittedDetailsOptInsToJSON(value?: TransactionCommi
         'raw_hex': value.raw_hex,
         'receipt_state_changes': value.receipt_state_changes,
         'receipt_fee_summary': value.receipt_fee_summary,
+        'receipt_fee_source': value.receipt_fee_source,
+        'receipt_fee_destination': value.receipt_fee_destination,
+        'receipt_costing_parameters': value.receipt_costing_parameters,
         'receipt_events': value.receipt_events,
         'affected_global_entities': value.affected_global_entities,
     };

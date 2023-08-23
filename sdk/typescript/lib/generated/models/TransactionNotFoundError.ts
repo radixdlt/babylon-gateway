@@ -26,11 +26,11 @@ export interface TransactionNotFoundError {
      */
     type: TransactionNotFoundErrorTypeEnum;
     /**
-     * Hex-encoded SHA-256 hash.
+     * Bech32m-encoded hash.
      * @type {string}
      * @memberof TransactionNotFoundError
      */
-    intent_hash_hex: string;
+    intent_hash: string;
 }
 
 
@@ -49,7 +49,7 @@ export type TransactionNotFoundErrorTypeEnum = typeof TransactionNotFoundErrorTy
 export function instanceOfTransactionNotFoundError(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "type" in value;
-    isInstance = isInstance && "intent_hash_hex" in value;
+    isInstance = isInstance && "intent_hash" in value;
 
     return isInstance;
 }
@@ -65,7 +65,7 @@ export function TransactionNotFoundErrorFromJSONTyped(json: any, ignoreDiscrimin
     return {
         
         'type': json['type'],
-        'intent_hash_hex': json['intent_hash_hex'],
+        'intent_hash': json['intent_hash'],
     };
 }
 
@@ -79,7 +79,7 @@ export function TransactionNotFoundErrorToJSON(value?: TransactionNotFoundError 
     return {
         
         'type': value.type,
-        'intent_hash_hex': value.intent_hash_hex,
+        'intent_hash': value.intent_hash,
     };
 }
 
