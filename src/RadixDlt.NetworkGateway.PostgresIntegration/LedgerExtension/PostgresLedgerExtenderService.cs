@@ -850,12 +850,22 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.GenericScryptoComponentFieldStateSubstate componentState)
                         {
-                            stateToAdd.Add(new StateHistory
+                            if (substate.SystemStructure is not CoreModel.ObjectFieldStructure objectFieldStructure)
+                            {
+                                throw new UnreachableException($"Generic Scrypto components are expected to have ObjectFieldStructure. Got: {substate.SystemStructure.GetType()}");
+                            }
+
+                            var schemaDetails = objectFieldStructure.ValueSchema.GetSchemaDetails();
+
+                            stateToAdd.Add(new SborStateHistory
                             {
                                 Id = sequences.StateHistorySequence++,
                                 FromStateVersion = stateVersion,
                                 EntityId = referencedEntities.Get((EntityAddress)substateId.EntityAddress).DatabaseId,
-                                JsonState = componentState.Value.DataStruct.StructData.ToJson(),
+                                SborState = componentState.Value.DataStruct.StructData.GetDataBytes(),
+                                SchemaHash = schemaDetails.SchemaHash.ConvertFromHex(),
+                                SborTypeKind = schemaDetails.SborTypeKind.ToModel(),
+                                TypeIndex = schemaDetails.TypeIndex,
                             });
                         }
 
@@ -887,7 +897,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 Key = lookup.PublicKey,
                             };
 
-                            stateToAdd.Add(new StateHistory
+                            stateToAdd.Add(new JsonStateHistory
                             {
                                 Id = sequences.StateHistorySequence++,
                                 FromStateVersion = stateVersion,
@@ -929,7 +939,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                 DefaultDepositRule = accountFieldState.Value.DefaultDepositRule.ToModel(),
                             });
 
-                            stateToAdd.Add(new StateHistory
+                            stateToAdd.Add(new JsonStateHistory
                             {
                                 Id = sequences.StateHistorySequence++,
                                 FromStateVersion = stateVersion,
@@ -1115,7 +1125,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.AccessControllerFieldStateSubstate accessControllerFieldState)
                         {
-                            stateToAdd.Add(new StateHistory
+                            stateToAdd.Add(new JsonStateHistory
                             {
                                 Id = sequences.StateHistorySequence++,
                                 FromStateVersion = stateVersion,
@@ -1126,7 +1136,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.OneResourcePoolFieldStateSubstate oneResourcePoolFieldStateSubstate)
                         {
-                            stateToAdd.Add(new StateHistory
+                            stateToAdd.Add(new JsonStateHistory
                             {
                                 Id = sequences.StateHistorySequence++,
                                 FromStateVersion = stateVersion,
@@ -1137,7 +1147,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.TwoResourcePoolFieldStateSubstate twoResourcePoolFieldStateSubstate)
                         {
-                            stateToAdd.Add(new StateHistory
+                            stateToAdd.Add(new JsonStateHistory
                             {
                                 Id = sequences.StateHistorySequence++,
                                 FromStateVersion = stateVersion,
@@ -1148,7 +1158,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
                         if (substateData is CoreModel.MultiResourcePoolFieldStateSubstate multiResourcePoolFieldStateSubstate)
                         {
-                            stateToAdd.Add(new StateHistory
+                            stateToAdd.Add(new JsonStateHistory
                             {
                                 Id = sequences.StateHistorySequence++,
                                 FromStateVersion = stateVersion,

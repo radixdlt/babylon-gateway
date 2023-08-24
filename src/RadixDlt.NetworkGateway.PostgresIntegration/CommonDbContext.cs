@@ -168,6 +168,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<ResourceType>();
         modelBuilder.HasPostgresEnum<ObjectModuleId>();
         modelBuilder.HasPostgresEnum<SborTypeKind>();
+        modelBuilder.HasPostgresEnum<StateType>();
 
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
@@ -305,6 +306,12 @@ internal abstract class CommonDbContext : DbContext
 
     private static void HookupHistory(ModelBuilder modelBuilder)
     {
+        modelBuilder
+            .Entity<StateHistory>()
+            .HasDiscriminator<StateType>(DiscriminatorColumnName)
+            .HasValue<JsonStateHistory>(StateType.Json)
+            .HasValue<SborStateHistory>(StateType.Sbor);
+
         modelBuilder
             .Entity<AccountDefaultDepositRuleHistory>()
             .HasIndex(e => new { e.AccountEntityId, e.FromStateVersion });

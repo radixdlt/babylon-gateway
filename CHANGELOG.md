@@ -1,5 +1,6 @@
 # 0.5.0 - RCNet v3
 Release Date: unreleased
+- Return programmatic json with type names for custom component state in `/state/entity/details` endpoint.
 
 ## RCNet v2 to RCNet v3 Migration Guide
 

@@ -327,7 +327,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     details = new GatewayModel.StateEntityDetailsResponseComponentDetails(
                         packageAddress: correlatedAddresses[ce.PackageId],
                         blueprintName: ce.BlueprintName,
-                        state: state != null ? new JRaw(state.JsonState) : null,
+                        state: state != null ? new JRaw(state) : null,
                         roleAssignments: roleAssignments,
                         royaltyVaultBalance: componentRoyaltyVaultBalance != null ? TokenAmount.FromSubUnitsString(componentRoyaltyVaultBalance).ToString() : null
                     );
@@ -2067,7 +2067,7 @@ INNER JOIN LATERAL (
         return _roleAssignmentsMapper.GetEffectiveRoleAssignments(globalEntities, ownerRoles, entries);
     }
 
-    private async Task<Dictionary<long, StateHistory>> GetStateHistory(ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    private async Task<Dictionary<long, string>> GetStateHistory(ICollection<ComponentEntity> componentEntities, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var lookup = new HashSet<long>();
 
@@ -2076,14 +2076,16 @@ INNER JOIN LATERAL (
             lookup.Add(componentEntity.Id);
         }
 
+        var result = new Dictionary<long, string>();
+
         if (!lookup.Any())
         {
-            return new Dictionary<long, StateHistory>();
+            return result;
         }
 
         var entityIds = lookup.ToList();
 
-        return await _dbContext
+        var states = await _dbContext
             .StateHistory
             .FromSqlInterpolated($@"
 WITH variables (entity_id) AS (SELECT UNNEST({entityIds}))
@@ -2096,7 +2098,44 @@ INNER JOIN LATERAL (
     ORDER BY from_state_version DESC
     LIMIT 1
 ) esh ON TRUE;")
-            .ToDictionaryAsync(e => e.EntityId, token);
+            .ToListAsync(token);
+
+        var schemasToLoad = states.OfType<SborStateHistory>().Select(x => x.SchemaHash).Distinct().ToArray();
+        var schemas = new Dictionary<ValueBytes, byte[]>();
+
+        if (schemasToLoad.Any())
+        {
+            schemas = await _dbContext
+                .SchemaHistory
+                .Where(x => schemasToLoad.Contains(x.SchemaHash))
+                .ToDictionaryAsync(x => (ValueBytes)x.SchemaHash, x => x.Schema, token);
+        }
+
+        foreach (var state in states)
+        {
+            switch (state)
+            {
+                case JsonStateHistory jsonStateHistory:
+                    result.Add(state.EntityId, jsonStateHistory.JsonState);
+                    break;
+                case SborStateHistory sborStateHistory:
+                {
+                    var schemaBytes = schemas[(ValueBytes)sborStateHistory.SchemaHash];
+
+                    var jsonState = ScryptoSborUtils.DataToProgrammaticJson(
+                        sborStateHistory.SborState,
+                        schemaBytes,
+                        sborStateHistory.SborTypeKind,
+                        sborStateHistory.TypeIndex,
+                        _networkConfigurationProvider.GetNetworkId());
+
+                    result.Add(state.EntityId, jsonState);
+                    break;
+                }
+            }
+        }
+
+        return result;
     }
 
     private async Task<Dictionary<long, PackageBlueprintHistory[]>> GetPackageBlueprintHistory(long[] packageEntityIds, GatewayModel.LedgerState ledgerState, CancellationToken token)

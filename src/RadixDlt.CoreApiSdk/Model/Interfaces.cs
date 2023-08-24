@@ -90,6 +90,8 @@ public interface IUpsertedSubstate
 
     public SubstateValue PreviousValue { get; }
 
+    public SubstateSystemStructure SystemStructure { get; }
+
     [MemberNotNullWhen(true, nameof(Value))]
     public bool HasValue => Value != null;
 

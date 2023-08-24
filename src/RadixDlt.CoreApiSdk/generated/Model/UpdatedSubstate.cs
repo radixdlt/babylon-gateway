@@ -106,7 +106,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="substateId">substateId (required).</param>
         /// <param name="newValue">newValue (required).</param>
         /// <param name="previousValue">previousValue.</param>
-        public UpdatedSubstate(SubstateId substateId = default(SubstateId), SubstateValue newValue = default(SubstateValue), SubstateValue previousValue = default(SubstateValue))
+        /// <param name="systemStructure">systemStructure (required).</param>
+        public UpdatedSubstate(SubstateId substateId = default(SubstateId), SubstateValue newValue = default(SubstateValue), SubstateValue previousValue = default(SubstateValue), SubstateSystemStructure systemStructure = default(SubstateSystemStructure))
         {
             // to ensure "substateId" is required (not null)
             if (substateId == null)
@@ -120,6 +121,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("newValue is a required property for UpdatedSubstate and cannot be null");
             }
             this.NewValue = newValue;
+            // to ensure "systemStructure" is required (not null)
+            if (systemStructure == null)
+            {
+                throw new ArgumentNullException("systemStructure is a required property for UpdatedSubstate and cannot be null");
+            }
+            this.SystemStructure = systemStructure;
             this.PreviousValue = previousValue;
         }
 
@@ -142,6 +149,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public SubstateValue PreviousValue { get; set; }
 
         /// <summary>
+        /// Gets or Sets SystemStructure
+        /// </summary>
+        [DataMember(Name = "system_structure", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateSystemStructure SystemStructure { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -152,6 +165,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
             sb.Append("  NewValue: ").Append(NewValue).Append("\n");
             sb.Append("  PreviousValue: ").Append(PreviousValue).Append("\n");
+            sb.Append("  SystemStructure: ").Append(SystemStructure).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -201,6 +215,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.PreviousValue == input.PreviousValue ||
                     (this.PreviousValue != null &&
                     this.PreviousValue.Equals(input.PreviousValue))
+                ) && 
+                (
+                    this.SystemStructure == input.SystemStructure ||
+                    (this.SystemStructure != null &&
+                    this.SystemStructure.Equals(input.SystemStructure))
                 );
         }
 
@@ -224,6 +243,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.PreviousValue != null)
                 {
                     hashCode = (hashCode * 59) + this.PreviousValue.GetHashCode();
+                }
+                if (this.SystemStructure != null)
+                {
+                    hashCode = (hashCode * 59) + this.SystemStructure.GetHashCode();
                 }
                 return hashCode;
             }

@@ -447,7 +447,7 @@ internal class WriteHelper
             return 0;
         }
 
-        await using var writer = await _connection.BeginBinaryImportAsync("COPY state_history (id, from_state_version, entity_id, json_state, sbor_state) FROM STDIN (FORMAT BINARY)", token);
+        await using var writer = await _connection.BeginBinaryImportAsync("COPY state_history (id, from_state_version, entity_id, discriminator, json_state, sbor_state, type_index, schema_hash, sbor_type_kind) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var e in stateHistory)
         {
@@ -455,8 +455,25 @@ internal class WriteHelper
             await writer.WriteAsync(e.Id, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.FromStateVersion, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.EntityId, NpgsqlDbType.Bigint, token);
-            await writer.WriteAsync(e.JsonState, NpgsqlDbType.Jsonb, token);
-            await writer.WriteAsync(e.SborState, NpgsqlDbType.Bytea, token);
+            await writer.WriteAsync(GetDiscriminator<StateType>(e.GetType()), "state_type", token);
+
+            switch (e)
+            {
+                case JsonStateHistory jsonStateHistory:
+                    await writer.WriteAsync(jsonStateHistory.JsonState, NpgsqlDbType.Jsonb, token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteNullAsync(token);
+                    break;
+                case SborStateHistory sborStateHistory:
+                    await writer.WriteNullAsync(token);
+                    await writer.WriteAsync(sborStateHistory.SborState, NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(sborStateHistory.TypeIndex, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(sborStateHistory.SchemaHash, NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(sborStateHistory.SborTypeKind, "sbor_type_kind", token);
+                    break;
+            }
         }
 
         await writer.CompleteAsync(token);
