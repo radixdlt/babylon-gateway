@@ -62,13 +62,14 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("state_history")]
-internal class StateHistory
+internal abstract class StateHistory
 {
     [Key]
     [Column("id")]
@@ -79,10 +80,31 @@ internal class StateHistory
 
     [Column("entity_id")]
     public long EntityId { get; set; }
+}
 
+internal class JsonStateHistory : StateHistory
+{
     [Column("json_state", TypeName = "jsonb")]
-    public string? JsonState { get; set; }
+    public string JsonState { get; set; }
+}
 
+internal class SborStateHistory : StateHistory
+{
     [Column("sbor_state")]
-    public byte[]? SborState { get; set; }
+    public byte[] SborState { get; set; }
+
+    [Column("schema_hash")]
+    public byte[] SchemaHash { get; set; }
+
+    [Column("sbor_type_kind")]
+    public SborTypeKind SborTypeKind { get; set; }
+
+    [Column("type_index")]
+    public long TypeIndex { get; set; }
+}
+
+public enum StateType
+{
+    Json,
+    Sbor,
 }

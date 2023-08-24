@@ -109,6 +109,7 @@ internal static class CustomTypes
         NpgsqlConnection.GlobalTypeMapper.MapEnum<ResourceType>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<ObjectModuleId>();
         NpgsqlConnection.GlobalTypeMapper.MapEnum<SborTypeKind>();
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<StateType>();
 #pragma warning restore CS0618
 
         _configured = true;

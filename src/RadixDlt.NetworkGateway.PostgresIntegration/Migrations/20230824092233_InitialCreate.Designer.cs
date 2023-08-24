@@ -81,7 +81,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20230822075217_InitialCreate")]
+    [Migration("20230824092233_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -108,6 +108,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public_key_type", new[] { "ecdsa_secp256k1", "eddsa_ed25519" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "resource_type", new[] { "fungible", "non_fungible" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "sbor_type_kind", new[] { "well_known", "schema_local" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "state_type", new[] { "json", "sbor" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountDefaultDepositRuleHistory", b =>
@@ -1242,19 +1243,18 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
 
-                    b.Property<string>("JsonState")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("json_state");
-
-                    b.Property<byte[]>("SborState")
-                        .HasColumnType("bytea")
-                        .HasColumnName("sbor_state");
+                    b.Property<StateType>("discriminator")
+                        .HasColumnType("state_type");
 
                     b.HasKey("Id");
 
                     b.HasIndex("EntityId", "FromStateVersion");
 
                     b.ToTable("state_history");
+
+                    b.HasDiscriminator<StateType>("discriminator");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorActiveSetHistory", b =>
@@ -1942,6 +1942,47 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("ledger_transaction_markers");
 
                     b.HasDiscriminator().HasValue(LedgerTransactionMarkerType.Origin);
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.JsonStateHistory", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.StateHistory");
+
+                    b.Property<string>("JsonState")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("json_state");
+
+                    b.ToTable("state_history");
+
+                    b.HasDiscriminator().HasValue(StateType.Json);
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.SborStateHistory", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.StateHistory");
+
+                    b.Property<byte[]>("SborState")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("sbor_state");
+
+                    b.Property<SborTypeKind>("SborTypeKind")
+                        .HasColumnType("sbor_type_kind")
+                        .HasColumnName("sbor_type_kind");
+
+                    b.Property<byte[]>("SchemaHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("schema_hash");
+
+                    b.Property<long>("TypeIndex")
+                        .HasColumnType("bigint")
+                        .HasColumnName("type_index");
+
+                    b.ToTable("state_history");
+
+                    b.HasDiscriminator().HasValue(StateType.Sbor);
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", b =>

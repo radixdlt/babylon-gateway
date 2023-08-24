@@ -97,7 +97,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:Enum:pending_transaction_status", "submitted_or_known_in_node_mempool,missing,rejected_temporarily,rejected_permanently,committed_success,committed_failure")
                 .Annotation("Npgsql:Enum:public_key_type", "ecdsa_secp256k1,eddsa_ed25519")
                 .Annotation("Npgsql:Enum:resource_type", "fungible,non_fungible")
-                .Annotation("Npgsql:Enum:sbor_type_kind", "well_known,schema_local");
+                .Annotation("Npgsql:Enum:sbor_type_kind", "well_known,schema_local")
+                .Annotation("Npgsql:Enum:state_type", "json,sbor");
 
             migrationBuilder.CreateTable(
                 name: "account_default_deposit_rule_history",
@@ -622,8 +623,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    discriminator = table.Column<StateType>(type: "state_type", nullable: false),
                     json_state = table.Column<string>(type: "jsonb", nullable: true),
-                    sbor_state = table.Column<byte[]>(type: "bytea", nullable: true)
+                    sbor_state = table.Column<byte[]>(type: "bytea", nullable: true),
+                    schema_hash = table.Column<byte[]>(type: "bytea", nullable: true),
+                    sbor_type_kind = table.Column<SborTypeKind>(type: "sbor_type_kind", nullable: true),
+                    type_index = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
