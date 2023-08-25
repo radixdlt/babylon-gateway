@@ -1059,8 +1059,8 @@ INNER JOIN LATERAL (
 
             if (!resources.TryGetValue(vm.ResourceEntityAddress, out var existingRecord))
             {
-                var vaultNextCursor = vm.VaultTotalCount > vaultLimit
-                    ? new GatewayApiSdk.Model.OffsetCursor(vaultLimit).ToCursorString()
+                var vaultNextCursor = vm.VaultTotalCount > vaultOffset + vaultLimit
+                    ? new GatewayApiSdk.Model.OffsetCursor(vaultOffset + vaultLimit).ToCursorString()
                     : null;
 
                 existingRecord = new GatewayApiSdk.Model.NonFungibleResourcesCollectionItemVaultAggregated(
@@ -1091,7 +1091,7 @@ INNER JOIN LATERAL (
             : null;
 
         var nextCursor = resourcesTotalCount > resourceLimit + resourceOffset
-            ? new GatewayApiSdk.Model.OffsetCursor(resourceLimit).ToCursorString()
+            ? new GatewayApiSdk.Model.OffsetCursor(resourceLimit + resourceOffset).ToCursorString()
             : null;
 
         return new GatewayApiSdk.Model.NonFungibleResourcesCollection(resourcesTotalCount, previousCursor, nextCursor,
@@ -1215,7 +1215,7 @@ ORDER BY metadata_join.ordinality ASC;",
                     ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
                     : null;
 
-                var nextCursor = vm.TotalCount > limit
+                var nextCursor = vm.TotalCount > offset + limit
                     ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
                     : null;
 
@@ -1484,9 +1484,9 @@ ORDER BY vah.resource_order, vah.vault_order;
                 stateVersion = ledgerState.StateVersion,
                 entityId = entityId,
                 resourceOffset = resourceOffset + 1,
-                resourceLimit = resourceLimit + resourceOffset,
+                resourceLimit = resourceOffset + 1 + resourceLimit,
                 vaultOffset = vaultOffset + 1,
-                vaultLimit = vaultLimit + vaultOffset,
+                vaultLimit = vaultOffset + 1 + vaultLimit,
             },
             cancellationToken: token);
 
@@ -1500,8 +1500,8 @@ ORDER BY vah.resource_order, vah.vault_order;
 
             if (!resources.TryGetValue(vm.ResourceEntityAddress, out var existingRecord))
             {
-                var vaultNextCursor = vm.VaultTotalCount > vaultLimit
-                    ? new GatewayModel.OffsetCursor(vaultLimit).ToCursorString()
+                var vaultNextCursor = vm.VaultTotalCount > vaultOffset + vaultLimit
+                    ? new GatewayModel.OffsetCursor(vaultOffset + vaultLimit).ToCursorString()
                     : null;
 
                 existingRecord = new GatewayModel.FungibleResourcesCollectionItemVaultAggregated(
@@ -1525,7 +1525,7 @@ ORDER BY vah.resource_order, vah.vault_order;
             : null;
 
         var nextCursor = resourcesTotalCount > resourceLimit + resourceOffset
-            ? new GatewayModel.OffsetCursor(resourceLimit).ToCursorString()
+            ? new GatewayModel.OffsetCursor(resourceLimit + resourceOffset).ToCursorString()
             : null;
 
         return new GatewayModel.FungibleResourcesCollection(resourcesTotalCount, previousCursor, nextCursor, resources.Values.Cast<GatewayModel.FungibleResourcesCollectionItem>().ToList());
@@ -1583,7 +1583,7 @@ ORDER BY vah.ord;
                 entityId = entityId,
                 resourceEntityId = resourceEntityId,
                 vaultOffset = vaultOffset + 1,
-                vaultLimit = vaultLimit + vaultOffset,
+                vaultLimit = vaultOffset + 1 + vaultLimit,
             },
             cancellationToken: token);
 
@@ -1602,7 +1602,7 @@ ORDER BY vah.ord;
             : null;
 
         var nextCursor = vaultsTotalCount > vaultOffset + vaultLimit
-            ? new GatewayModel.OffsetCursor(vaultLimit).ToCursorString()
+            ? new GatewayModel.OffsetCursor(vaultOffset + vaultLimit).ToCursorString()
             : null;
 
         return new GatewayModel.FungibleResourcesCollectionItemVaultAggregatedVault(vaultsTotalCount, previousCursor, nextCursor, castedResult);
@@ -1762,8 +1762,8 @@ ORDER BY vah.resource_order, vah.vault_order;
     private async Task<List<NonFungibleResourceVaultsViewModel>> GetNonFungibleResourceVaults(
         long entityId,
         long resourceEntityId,
-        int offset,
-        int limit,
+        int vaultOffset,
+        int vaultLimit,
         GatewayModel.LedgerState ledgerState,
         CancellationToken token)
     {
@@ -1790,7 +1790,7 @@ most_recent_entity_resource_vault_aggregate_history_nested AS (
 most_recent_entity_resource_vault_aggregate_history AS (
     SELECT a.val AS vault_entity_id, cardinality(vault_entity_ids) AS vault_total_count, a.ord AS ord
     FROM most_recent_entity_resource_vault_aggregate_history_nested ahn
-    LEFT JOIN LATERAL UNNEST(vault_entity_ids[@startIndex:@endIndex]) WITH ORDINALITY a(val,ord) ON true
+    LEFT JOIN LATERAL UNNEST(vault_entity_ids[@vaultOffset:@vaultLimit]) WITH ORDINALITY a(val,ord) ON true
 )
 SELECT
     er.address AS ResourceEntityAddress,
@@ -1816,8 +1816,8 @@ ORDER BY vah.ord;
                 stateVersion = ledgerState.StateVersion,
                 entityId = entityId,
                 resourceEntityId = resourceEntityId,
-                startIndex = offset + 1,
-                endIndex = offset + 1 + limit,
+                vaultOffset = vaultOffset + 1,
+                vaultLimit = vaultOffset + 1 + vaultLimit,
             },
             cancellationToken: token);
 
@@ -1943,7 +1943,7 @@ order by ord
             ? new GatewayModel.OffsetCursor(Math.Max(offset - limit, 0)).ToCursorString()
             : null;
 
-        var nextCursor = offset + limit < totalCount
+        var nextCursor = totalCount > limit
             ? new GatewayModel.OffsetCursor(offset + limit).ToCursorString()
             : null;
 
