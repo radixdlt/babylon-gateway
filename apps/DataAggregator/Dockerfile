@@ -1,4 +1,4 @@
-﻿# This dockerfile should be build with the context at the root of the repo, eg, from the repo root:
+# This dockerfile should be build with the context at the root of the repo, eg, from the repo root:
 # docker build -f apps/DataAggregator/Dockerfile .
 
 # We use 7.0-bookworm-slim for Debian 12 with glibc 2.36+, to get at least glibc 2.33 for the engine toolkit
@@ -20,6 +20,12 @@ RUN dotnet publish "apps/DataAggregator/DataAggregator.csproj" -c Release -o /ap
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+RUN groupadd --gid 1000 data-aggregator && \
+    useradd --uid 1000 --gid 1000 -m data-aggregator
+
+USER 1000
+
 ENTRYPOINT ["dotnet", "DataAggregator.dll"]
 
 # TODO use local paths and adjust context for CI/CD
