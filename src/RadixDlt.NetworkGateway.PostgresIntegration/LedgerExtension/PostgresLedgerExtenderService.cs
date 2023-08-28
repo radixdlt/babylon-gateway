@@ -431,7 +431,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
                                     }
 
                                     break;
-                                case CoreModel.KeyValueStoreTypeInfoDetails keyValueStoreTypeInfoDetails:
+                                case CoreModel.KeyValueStoreTypeInfoDetails:
                                     break;
                                 default:
                                     throw new UnreachableException($"Didn't expect '{typeInfoSubstate.Value.Details.Type}' value");
